@@ -90,7 +90,7 @@ body{
 
     max-width:92%;
 
-    min-height:650px;
+    min-height:560px;
 
     display:flex;
 
@@ -126,7 +126,7 @@ body{
 
     color:#FFFFFF;
 
-    padding:28px;
+    padding:34px;
 
     position:relative;
 
@@ -150,7 +150,7 @@ body{
 
     justify-content:center;
 
-    padding:48px 56px;
+    padding:34px;
 }
 
 /* ==========================================================
