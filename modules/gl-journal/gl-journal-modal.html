@@ -1,0 +1,329 @@
+<!--
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+GL JOURNAL MODAL
+Version : 1.0.0
+==========================================================
+-->
+
+<div
+    class="modal fade"
+    id="glJournalModal"
+    tabindex="-1"
+    data-bs-backdrop="static"
+    data-bs-keyboard="false">
+
+    <div class="modal-dialog modal-xl">
+
+        <div class="modal-content">
+
+            <!-- HEADER -->
+
+            <div class="modal-header">
+
+                <h5
+                    id="glJournalModalTitle"
+                    class="modal-title">
+
+                    New Journal
+
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <!-- BODY -->
+
+            <div class="modal-body">
+
+                <form id="glJournalForm">
+
+                    <input
+                        type="hidden"
+                        id="journal-id">
+
+                    <div class="row g-3">
+
+                        <!-- Journal Number -->
+
+                        <div class="col-md-3">
+
+                            <label class="form-label">
+
+                                Journal No
+
+                            </label>
+
+                            <input
+                                id="journal-no"
+                                class="form-control"
+                                readonly>
+
+                        </div>
+
+                        <!-- Date -->
+
+                        <div class="col-md-3">
+
+                            <label class="form-label">
+
+                                Journal Date
+
+                            </label>
+
+                            <input
+                                type="date"
+                                id="journal-date"
+                                class="form-control"
+                                required>
+
+                        </div>
+
+                        <!-- Reference -->
+
+                        <div class="col-md-3">
+
+                            <label class="form-label">
+
+                                Reference No
+
+                            </label>
+
+                            <input
+                                id="reference-no"
+                                class="form-control">
+
+                        </div>
+
+                        <!-- Status -->
+
+                        <div class="col-md-3">
+
+                            <label class="form-label">
+
+                                Status
+
+                            </label>
+
+                            <input
+                                id="journal-posting-status"
+                                class="form-control"
+                                value="Draft"
+                                readonly>
+
+                        </div>
+
+                        <!-- Description -->
+
+                        <div class="col-md-12">
+
+                            <label class="form-label">
+
+                                Description
+
+                            </label>
+
+                            <textarea
+                                id="journal-description"
+                                class="form-control"
+                                rows="2"></textarea>
+
+                        </div>
+
+                    </div>
+
+                    <hr>
+
+                    <!-- DETAIL -->
+
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+
+                        <h6 class="mb-0">
+
+                            Journal Detail
+
+                        </h6>
+
+                        <button
+                            type="button"
+                            id="btn-add-line"
+                            class="btn btn-sm btn-primary">
+
+                            <i class="fa-solid fa-plus me-1"></i>
+
+                            Add Line
+
+                        </button>
+
+                    </div>
+
+                    <div class="table-responsive">
+
+                        <table
+                            class="table table-bordered align-middle">
+
+                            <thead class="table-light">
+
+                                <tr>
+
+                                    <th width="60">
+
+                                        #
+
+                                    </th>
+
+                                    <th width="170">
+
+                                        Account
+
+                                    </th>
+
+                                    <th width="170">
+
+                                        Business Partner
+
+                                    </th>
+
+                                    <th>
+
+                                        Description
+
+                                    </th>
+
+                                    <th width="140">
+
+                                        Debit
+
+                                    </th>
+
+                                    <th width="140">
+
+                                        Credit
+
+                                    </th>
+
+                                    <th width="70">
+
+                                        Action
+
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="journal-detail-body">
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+                    <div class="row mt-3">
+
+    <div class="col-md-4 offset-md-8">
+
+        <table class="table table-bordered">
+
+            <tr>
+
+                <th>Total Debit</th>
+
+                <td id="total-debit" class="text-end">
+
+                    0.00
+
+                </td>
+
+            </tr>
+
+            <tr>
+
+                <th>Total Credit</th>
+
+                <td id="total-credit" class="text-end">
+
+                    0.00
+
+                </td>
+
+            </tr>
+
+            <tr>
+
+                <th>Difference</th>
+
+                <td
+    id="total-difference"
+    class="text-end fw-bold">
+
+    0.00
+
+</td>
+            </tr>
+                    </table>
+<div class="text-end mt-2">
+
+    <span
+        id="journal-balance-status"
+        class="badge bg-danger">
+
+        NOT BALANCED
+
+    </span>
+
+</div>
+    </div>
+
+</div>
+
+
+                        
+                </form>
+
+            </div>
+
+            <!-- FOOTER -->
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+
+                    Cancel
+
+                </button>
+                <button
+    id="btn-save-draft"
+    class="btn btn-primary">
+
+    <i class="fa-solid fa-floppy-disk me-1"></i>
+
+    Save Draft
+
+</button>
+
+<button
+    id="btn-post-journal"
+    class="btn btn-success">
+
+    <i class="fa-solid fa-check me-1"></i>
+
+    Post Journal
+
+</button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,76 @@
+/* ==========================================================
+   FINOVA ACCOUNTING SYSTEM
+   GLOBAL EMPTY COMPONENT
+========================================================== */
+
+/* ==========================================================
+   EMPTY STATE
+========================================================== */
+
+.finova-empty{
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    justify-content:center;
+
+    padding:60px 24px;
+
+    text-align:center;
+
+}
+
+.finova-empty i{
+
+    font-size:48px;
+
+    color:#CBD5E1;
+
+    margin-bottom:18px;
+
+}
+
+.finova-empty h5{
+
+    margin:0 0 8px;
+
+    font-size:18px;
+
+    font-weight:600;
+
+    color:var(--text-primary);
+
+}
+
+.finova-empty p{
+
+    margin:0;
+
+    max-width:420px;
+
+    font-size:14px;
+
+    line-height:1.6;
+
+    color:var(--text-secondary);
+
+}
+
+/* ==========================================================
+   EMPTY SIZE
+========================================================== */
+
+.finova-empty-sm{
+
+    padding:40px 20px;
+
+}
+
+.finova-empty-lg{
+
+    padding:80px 30px;
+
+}

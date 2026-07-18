@@ -1,0 +1,128 @@
+/*
+===========================================
+FINOVA ACCOUNTING SYSTEM
+Global Reset
+Version : 1.0.0
+===========================================
+*/
+
+/* ===========================================
+   RESET
+=========================================== */
+
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* ===========================================
+   HTML & BODY
+=========================================== */
+
+html {
+    font-size: 14px;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-family);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-normal);
+
+    background: var(--body-bg);
+    color: var(--text-primary);
+
+    min-height: 100vh;
+    overflow-x: hidden;
+
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===========================================
+   MEDIA
+=========================================== */
+
+img {
+    display: block;
+    max-width: 100%;
+}
+
+svg {
+    display: block;
+}
+
+/* ===========================================
+   LINK
+=========================================== */
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* ===========================================
+   LIST
+=========================================== */
+
+ul,
+ol {
+    list-style: none;
+}
+
+/* ===========================================
+   BUTTON
+=========================================== */
+
+button {
+    font: inherit;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    outline: none;
+}
+
+/* ===========================================
+   INPUT
+=========================================== */
+
+input,
+textarea,
+select {
+    font: inherit;
+    outline: none;
+}
+
+/* ===========================================
+   TABLE
+=========================================== */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* ===========================================
+   HEADING
+=========================================== */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: inherit;
+}
+
+/* ===========================================
+   ROOT APP
+=========================================== */
+
+#finova-app {
+    width: 100%;
+    min-height: 100vh;
+}

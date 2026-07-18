@@ -1,0 +1,663 @@
+/*
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+Preview Service
+Version : 2.0.0 (LOCK)
+==========================================================
+*/
+
+export class PreviewService {
+
+    /*
+    ==========================================================
+    OPEN PREVIEW
+    ==========================================================
+    */
+
+    static open({
+
+        title = "Report",
+
+        subtitle = "",
+
+        columns = [],
+
+        rows = [],
+
+        orientation = "landscape",
+
+        paperSize = "A4",
+
+        showPrintDate = true,
+
+        showTotalRecord = true
+
+    }) {
+
+        const previewWindow = this.createWindow();
+
+if (!previewWindow) {
+
+    alert("Popup blocked.");
+
+    return;
+
+
+}
+
+const html = this.buildTemplate({
+
+    title,
+
+    subtitle,
+
+    columns,
+
+    rows,
+
+    orientation,
+
+    paperSize,
+
+    showPrintDate,
+
+    showTotalRecord
+
+});
+
+        previewWindow.document.open();
+
+        previewWindow.document.write(html);
+
+        previewWindow.document.close();
+        
+
+    }
+
+    /*
+    ==========================================================
+    CREATE WINDOW
+    ==========================================================
+    */
+
+    static createWindow() {
+
+        return window.open(
+
+            "",
+
+            "_blank",
+
+            "width=1280,height=900"
+
+        );
+
+    }
+/*
+==========================================================
+BUILD HEADER
+==========================================================
+*/
+
+static buildHeader({
+
+    title,
+
+    subtitle,
+
+    printDate,
+
+    showPrintDate
+    
+
+}) {
+    
+    
+
+    return `
+
+<header class="report-header">
+
+    <div class="report-logo">
+
+        <div class="logo-placeholder">
+
+            FINOVA
+
+        </div>
+
+    </div>
+
+    <div class="report-information">
+
+        <h1>FINOVA ACCOUNTING SYSTEM</h1>
+
+        <h2>${title}</h2>
+
+        ${subtitle
+            ? `<div class="report-subtitle">${subtitle}</div>`
+            : ""}
+
+        ${showPrintDate
+            ? `<div class="report-date">Print Date : ${printDate}</div>`
+            : ""}
+
+    </div>
+
+</header>
+
+`;
+
+}
+    /*
+    ==========================================================
+    BUILD TEMPLATE
+    ==========================================================
+    */
+
+    static buildTemplate({
+
+        title,
+
+        subtitle,
+
+        columns,
+
+        rows,
+
+        orientation,
+
+        paperSize,
+
+        showPrintDate,
+
+        showTotalRecord
+
+    }) {
+
+       const printDate = new Date().toLocaleString("id-ID");
+
+return `
+
+<!DOCTYPE html>
+
+<html lang="id">
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>${title}</title>
+
+${this.buildStyle({
+
+    orientation,
+
+    paperSize
+
+})}
+
+</head>
+
+<body>
+
+<div id="finova-preview">
+
+    ${this.buildToolbar()}
+
+    ${this.buildHeader({
+
+        title,
+
+        subtitle,
+
+        printDate,
+
+        showPrintDate
+
+    })}
+
+    ${this.buildTable({
+
+        columns,
+
+        rows
+
+    })}
+
+    ${this.buildFooter({
+
+        rows,
+
+        showTotalRecord
+
+    })}
+
+</div>
+
+</body>
+
+</html>`; 
+
+
+    }
+    /*
+==========================================================
+BUILD TOOLBAR
+==========================================================
+*/
+
+static buildToolbar() {
+
+    return `
+
+<div class="report-toolbar">
+
+    <div class="toolbar-left">
+
+        <button
+            type="button"
+            onclick="window.print()">
+
+            🖨 Print
+
+        </button>
+
+        <button
+            type="button"
+            disabled>
+
+            📄 PDF (Coming Soon)
+
+        </button>
+
+    </div>
+
+    <div class="toolbar-right">
+
+        <button
+            type="button"
+            onclick="window.close()">
+
+            ✖ Close
+
+        </button>
+
+    </div>
+
+</div>
+
+`;
+
+}
+/*
+==========================================================
+BUILD TABLE
+==========================================================
+*/
+
+static buildTable({
+
+    columns,
+
+    rows
+
+}) {
+
+    return `
+
+<table class="report-table">
+
+    <thead>
+
+        <tr>
+
+            ${columns
+                .map(column => `<th>${column}</th>`)
+                .join("")}
+
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        ${rows.length
+
+            ? rows.join("")
+
+            : `
+
+<tr>
+
+<td colspan="${columns.length}"
+
+style="text-align:center;">
+
+No Data Available
+
+</td>
+
+</tr>
+
+`
+
+        }
+
+    </tbody>
+
+</table>
+
+`;
+
+}
+/*
+==========================================================
+BUILD FOOTER
+==========================================================
+*/
+
+static buildFooter({
+
+    rows,
+
+    showTotalRecord
+
+}) {
+
+    return `
+
+<footer class="report-footer">
+
+    <div class="footer-left">
+
+        ${showTotalRecord
+
+            ? `Total Record : ${rows.length}`
+
+            : ""}
+
+    </div>
+
+    <div class="footer-right">
+
+        Generated by FINOVA Accounting System
+
+    </div>
+
+</footer>
+
+`;
+
+}
+/*
+==========================================================
+BUILD STYLE
+==========================================================
+*/
+
+static buildStyle({
+
+    orientation,
+
+    paperSize
+
+}) {
+
+    return `
+
+<style>
+
+@page{
+
+    size:${paperSize} ${orientation};
+
+    margin:12mm;
+
+}
+
+*{
+
+    box-sizing:border-box;
+
+    font-family:Arial,sans-serif;
+
+}
+
+body{
+
+    margin:0;
+
+    background:#F4F6F9;
+
+    color:#333;
+
+}
+
+#finova-preview{
+
+    background:#FFF;
+
+    max-width:1200px;
+
+    margin:24px auto;
+
+    padding:32px;
+
+    box-shadow:0 2px 10px rgba(0,0,0,.10);
+
+}
+
+.report-toolbar{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    margin-bottom:24px;
+
+}
+
+.toolbar-left,
+
+.toolbar-right{
+
+    display:flex;
+
+    gap:10px;
+
+}
+
+.report-toolbar button{
+
+    padding:8px 16px;
+
+    border:none;
+
+    border-radius:6px;
+
+    cursor:pointer;
+
+    background:#1E3A8A;
+
+    color:#FFF;
+
+    font-size:14px;
+
+}
+
+.report-toolbar button:disabled{
+
+    opacity:.5;
+
+    cursor:not-allowed;
+
+}
+
+.report-header{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:20px;
+
+    border-bottom:2px solid #1E3A8A;
+
+    padding-bottom:20px;
+
+    margin-bottom:24px;
+
+}
+    .report-logo{
+
+    width:100px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+}
+
+.logo-placeholder{
+
+    width:80px;
+
+    height:80px;
+
+    border:2px solid #1E3A8A;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-weight:bold;
+
+    color:#1E3A8A;
+
+}
+
+.report-information{
+
+    flex:1;
+
+}
+
+.report-information h1{
+
+    margin:0;
+
+    font-size:22px;
+
+}
+
+.report-information h2{
+
+    margin:8px 0;
+
+    font-size:18px;
+
+}
+
+.report-subtitle{
+
+    color:#666;
+
+}
+
+.report-date{
+
+    margin-top:6px;
+
+    font-size:13px;
+
+    color:#777;
+
+}
+
+.report-table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+.report-table th{
+
+    background:#1E3A8A;
+
+    color:#FFF;
+
+    border:1px solid #D1D5DB;
+
+    padding:10px;
+
+}
+
+.report-table td{
+
+    border:1px solid #D1D5DB;
+
+    padding:8px;
+
+}
+
+.report-table tbody tr:nth-child(even){
+
+    background:#F8FAFC;
+
+}
+
+.report-footer{
+
+    margin-top:24px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    font-size:13px;
+
+    color:#666;
+
+}
+
+@media print{
+
+    body{
+
+        background:#FFF;
+
+    }
+
+    #finova-preview{
+
+        margin:0;
+
+        max-width:100%;
+
+        box-shadow:none;
+
+        padding:0;
+
+    }
+
+    .report-toolbar{
+
+        display:none;
+
+    }
+
+}
+
+</style>
+
+`;
+
+}
+}

@@ -1,0 +1,327 @@
+<!--
+===========================================
+FINOVA ACCOUNTING SYSTEM
+Business Partner Module
+Version : 2.0.0
+===========================================
+-->
+
+<div class="finova-page">
+
+    <!-- ==========================================
+         PAGE HEADER
+    =========================================== -->
+
+   <div class="finova-page-header">
+
+    <div class="finova-page-header-left">
+
+        <h1 class="finova-page-title">
+            Business Partner
+        </h1>
+
+        <p class="finova-page-subtitle">
+            Master Data / Business Partner
+        </p>
+
+    </div>
+
+    <div class="finova-page-header-right">
+        </div>
+        </div>
+
+    <button
+        id="btn-add"
+        class="btn btn-primary finova-btn">
+
+        <i class="fas fa-plus"></i>
+        New Business Partner
+
+    </button>
+
+    <button
+        id="btn-export-excel"
+        class="btn btn-outline-success finova-btn">
+
+        <i class="fas fa-file-excel"></i>
+        Download Excel
+
+    </button>
+
+    <button
+        id="btn-preview"
+        class="btn btn-outline-primary finova-btn">
+
+        <i class="fas fa-print"></i>
+        Preview HTML
+
+    </button>
+
+    <button
+        id="btn-refresh"
+        class="btn btn-outline-secondary finova-btn">
+
+        <i class="fas fa-rotate-right"></i>
+        Refresh
+
+    </button>
+
+</div>
+
+    <!-- ==========================================
+         TOOLBAR
+    =========================================== -->
+
+    <div class="finova-card mb-1">
+
+        <div class="finova-card-body">
+
+            <div class="row align-items-end g-3">
+
+                <!-- Search -->
+
+                <div class="col-lg-5">
+
+                    <label class="form-label">
+                        Search
+                    </label>
+
+                    <input
+                      id="bp-search"
+                      type="text"
+                      class="form-control finova-control"
+                      placeholder="Search Code, Business Partner">
+
+                </div>
+
+                <!-- Type -->
+
+                <div class="col-lg-2">
+
+                    <label class="form-label">
+                        Type
+                    </label>
+
+                    <select
+                        id="bp-type"
+                       class="form-select finova-control">
+
+                        <option value="">
+                            All Type
+                        </option>
+
+                        <option value="Customer">
+                            Customer
+                        </option>
+
+                        <option value="Vendor">
+                            Vendor
+                        </option>
+
+                        <option value="Employee">
+                            Employee
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <!-- Status -->
+
+                <div class="col-lg-2">
+
+                    <label class="form-label">
+                        Status
+                    </label>
+
+                    <select
+                        id="bp-status"
+                        class="form-select finova-control">
+
+                        <option value="">
+                            All Status
+                        </option>
+
+                        <option value="true">
+                            Active
+                        </option>
+
+                        <option value="false">
+                            Inactive
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <!-- Search Button -->
+
+                <div class="col-lg-3">
+
+                    <label class="form-label">
+                        &nbsp;
+                    </label>
+
+                    <button
+                        id="btn-search"
+                        class="btn btn-primary finova-btn finova-btn-block">
+
+                        <i class="fas fa-search me-1"></i>
+
+                        Search
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ==========================================
+         DATA TABLE
+    =========================================== -->
+
+    <div class="finova-card">
+
+        <div class="finova-card-body">
+
+            <div class="table-responsive">
+
+               <table class="table finova-table table-hover">
+
+                    <thead class="finova-table-header">
+
+    <tr>
+
+        <th class="text-center" style="width:60px">
+            No
+        </th>
+
+        <th style="width:120px">
+            Code
+        </th>
+
+        <th>
+            Business Partner
+        </th>
+
+        <th style="width:140px">
+            Type
+        </th>
+
+        <th style="width:150px">
+            Phone
+        </th>
+
+        <th style="width:220px">
+            Email
+        </th>
+
+        <th class="text-center" style="width:110px">
+            Status
+        </th>
+
+        <th class="text-center" style="width:110px">
+            Action
+        </th>
+
+    </tr>
+
+</thead>
+
+                    <tbody id="business-partner-table">
+
+    <tr>
+
+        <td colspan="8">
+
+            <div class="finova-empty">
+
+                <i class="fas fa-folder-open"></i>
+
+                <h5>
+                    No Business Partner Found
+                </h5>
+
+                <p>
+                    Click <strong>New Business Partner</strong> to create your first Business Partner.
+                </p>
+
+            </div>
+
+        </td>
+
+    </tr>
+
+</tbody>
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ==========================================
+         PAGINATION
+    =========================================== -->
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+
+        <div
+            id="bp-pagination-info"
+            class="text-muted">
+
+            Showing 0 of 0 records
+
+        </div>
+
+        <nav>
+
+            <ul class="pagination finova-pagination">
+                <li class="page-item disabled">
+
+                    <button
+                        class="page-link"
+                        type="button">
+
+                        Previous
+
+                    </button>
+
+                </li>
+
+                <li class="page-item active">
+
+                    <button
+                        class="page-link"
+                        type="button">
+
+                        1
+
+                    </button>
+
+                </li>
+
+                <li class="page-item disabled">
+
+                    <button
+                        class="page-link"
+                        type="button">
+
+                        Next
+
+                    </button>
+
+                </li>
+
+            </ul>
+
+        </nav>
+
+    </div>
+
+</div>

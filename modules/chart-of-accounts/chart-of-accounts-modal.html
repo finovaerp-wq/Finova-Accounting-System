@@ -1,0 +1,498 @@
+<!--
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+Chart Of Accounts Modal
+Version : 2.1 Enterprise
+==========================================================
+-->
+
+<div
+    class="modal fade"
+    id="coa-modal"
+    tabindex="-1"
+    aria-hidden="true">
+
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+
+        <div class="modal-content">
+
+            <!-- ==========================================
+                 MODAL HEADER
+            =========================================== -->
+
+            <div class="modal-header">
+
+                <div>
+
+                    <h5
+                        class="modal-title"
+                        id="coa-modal-title">
+
+                        Add Chart Of Account
+
+                    </h5>
+
+                    <small class="text-muted">
+
+                        Create or update Chart Of Account.
+
+                    </small>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <!-- ==========================================
+                 MODAL BODY
+            =========================================== -->
+
+            <div class="modal-body">
+
+                <form id="coa-form">
+
+                    <input
+                        type="hidden"
+                        id="coa-id">
+
+                    <div class="row g-4">
+
+                        <!-- ======================================
+                             PARENT ACCOUNT
+                        ======================================= -->
+
+                        <div class="col-12">
+
+                            <label class="form-label fw-semibold">
+
+                                Parent Account
+
+                                <span class="text-danger">*</span>
+
+                            </label>
+
+                            <select
+                                id="parent-id"
+                                class="form-select">
+
+                                <option value="">
+
+                                    -- Select Parent Account --
+
+                                </option>
+
+                            </select>
+
+                            <div
+                                id="parent-information"
+                                class="alert alert-light border mt-3 mb-0">
+
+                                <div class="row">
+
+                                    <div class="col-md-4">
+
+                                        <strong>Parent</strong>
+
+                                        <div id="parent-name">
+
+                                            -
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-md-4">
+
+                                        <strong>Level</strong>
+
+                                        <div id="parent-level">
+
+                                            -
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-md-4">
+
+                                        <strong>Total Child</strong>
+
+                                        <div id="parent-child-count">
+
+                                            -
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        
+
+                        <!-- ======================================
+                             ACCOUNT CODE
+                        ======================================= -->
+
+                        <div class="col-md-6">
+
+                            <label class="form-label fw-semibold">
+
+                                Account Code
+
+                                <span class="text-danger">*</span>
+
+                            </label>
+
+                            <input
+                                type="text"
+                                id="account-code"
+                                class="form-control"
+                                autocomplete="off">
+
+                        </div>
+
+                        <!-- ======================================
+                             ACCOUNT NAME
+                        ======================================= -->
+
+                        <div class="col-md-6">
+
+                            <label class="form-label fw-semibold">
+
+                                Account Name
+
+                                <span class="text-danger">*</span>
+
+                            </label>
+
+                            <input
+                                type="text"
+                                id="account-name"
+                                class="form-control"
+                                autocomplete="off">
+
+                        </div>
+
+                        <!-- ======================================
+                             CURRENCY
+                        ======================================= -->
+
+                        <div class="col-md-6">
+
+                            <label class="form-label fw-semibold">
+
+                                Currency
+
+                                <span class="text-danger">*</span>
+
+                            </label>
+
+                            <select
+                                id="currency"
+                                class="form-select">
+
+                                <option value="IDR">
+
+                                    IDR
+
+                                </option>
+
+                                <option value="USD">
+
+                                    USD
+
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                        <!-- ======================================
+                             POSTING TYPE
+                        ======================================= -->
+
+                        <div class="col-md-6">
+
+                            <label class="form-label fw-semibold">
+
+                                Posting Type
+
+                                <span class="text-danger">*</span>
+
+                            </label>
+
+                            <select
+                                id="posting-type"
+                                class="form-select">
+
+                                <option value="Manual">
+
+                                    Manual
+
+                                </option>
+
+                                <option value="Automatic">
+
+                                    Automatic
+
+                                </option>
+
+                                <option
+                                    value="Manual & Auto"
+                                    selected>
+
+                                    Manual & Auto
+
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                        <!-- ======================================
+                             NORMAL BALANCE
+                        ======================================= -->
+
+                        <div class="col-12">
+
+                            <label class="form-label fw-semibold">
+
+                                Normal Balance
+
+                                <span class="text-danger">*</span>
+
+                            </label>
+
+                            <div class="d-flex gap-5">
+
+                                <div class="form-check">
+
+                                    <input
+                                        class="form-check-input"
+                                        type="radio"
+                                        name="normal-balance"
+                                        id="normal-debit"
+                                        value="Debit"
+                                        checked>
+
+                                    <label
+                                        class="form-check-label"
+                                        for="normal-debit">
+
+                                        Debit
+
+                                    </label>
+
+                                </div>
+
+                                <div class="form-check">
+
+                                    <input
+                                        class="form-check-input"
+                                        type="radio"
+                                        name="normal-balance"
+                                        id="normal-credit"
+                                        value="Credit">
+
+                                    <label
+                                        class="form-check-label"
+                                        for="normal-credit">
+
+                                        Credit
+
+                                    </label>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                                                <!-- ======================================
+                             OPTIONS
+                        ======================================= -->
+
+                        <div class="col-12">
+
+                            <div class="card border">
+
+                                <div class="card-header bg-light">
+
+                                    <strong>
+
+                                        Account Settings
+
+                                    </strong>
+
+                                </div>
+
+                                <div class="card-body">
+
+                                    <div class="row">
+
+                                        <!-- Header Account -->
+
+                                        <div class="col-md-4">
+
+                                            <div class="form-check form-switch">
+
+                                                <input
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    id="is-header">
+
+                                                <label
+                                                    class="form-check-label fw-semibold"
+                                                    for="is-header">
+
+                                                    Header Account
+
+                                                </label>
+
+                                            </div>
+
+                                            <small class="text-muted">
+
+                                                Parent account only. Cannot receive journal transaction.
+
+                                            </small>
+
+                                        </div>
+
+                                        <!-- Allow Transaction -->
+
+                                        <div class="col-md-4">
+
+                                            <div class="form-check form-switch">
+
+                                                <input
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    id="allow-transaction"
+                                                    checked>
+
+                                                <label
+                                                    class="form-check-label fw-semibold"
+                                                    for="allow-transaction">
+
+                                                    Allow Transaction
+
+                                                </label>
+
+                                            </div>
+
+                                            <small class="text-muted">
+
+                                                Allow this account to be used in journal entries.
+
+                                            </small>
+
+                                        </div>
+
+                                        <!-- Active -->
+
+                                        <div class="col-md-4">
+
+                                            <div class="form-check form-switch">
+
+                                                <input
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    id="status"
+                                                    checked>
+
+                                                <label
+                                                    class="form-check-label fw-semibold"
+                                                    for="status">
+
+                                                    Active
+
+                                                </label>
+
+                                            </div>
+
+                                            <small class="text-muted">
+
+                                                Inactive accounts will be hidden from transaction selection.
+
+                                            </small>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <!-- ======================================
+                             DESCRIPTION
+                        ======================================= -->
+
+                        <div class="col-12">
+
+                            <label class="form-label fw-semibold">
+
+                                Description
+
+                            </label>
+
+                            <textarea
+                                id="description"
+                                class="form-control"
+                                rows="4"
+                                placeholder="Additional information about this account..."></textarea>
+
+                        </div>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+            <!-- ==========================================
+                 MODAL FOOTER
+            =========================================== -->
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-light"
+                    data-bs-dismiss="modal">
+
+                    <i class="fa-solid fa-xmark me-2"></i>
+
+                    Cancel
+
+                </button>
+
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    id="btn-save-chart-of-accounts">
+
+                    <i class="fa-solid fa-floppy-disk me-2"></i>
+
+                    Save Chart Of Account
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

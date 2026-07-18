@@ -1,0 +1,109 @@
+/*
+===========================================
+FINOVA ACCOUNTING SYSTEM
+Footer
+Version : 1.0.0
+===========================================
+*/
+
+/* ===========================================
+   FOOTER
+=========================================== */
+
+.finova-footer {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    width: 100%;
+
+    min-height: 50px;
+
+    padding: 0 var(--space-lg);
+
+    background: var(--topbar-bg);
+
+    border-top: 1px solid var(--border-color);
+
+}
+
+/* ===========================================
+   LEFT
+=========================================== */
+
+.finova-footer-left {
+
+    display: flex;
+
+    align-items: center;
+
+    color: var(--text-secondary);
+
+    font-size: var(--font-size-sm);
+
+}
+
+/* ===========================================
+   RIGHT
+=========================================== */
+
+.finova-footer-right {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: var(--space-md);
+
+    color: var(--text-secondary);
+
+    font-size: var(--font-size-sm);
+
+}
+
+/* ===========================================
+   VERSION
+=========================================== */
+
+.finova-version {
+
+    font-weight: var(--font-weight-medium);
+
+}
+
+/* ===========================================
+   COPYRIGHT
+=========================================== */
+
+.finova-copyright {
+
+    color: var(--text-muted);
+
+}
+
+/* ===========================================
+   RESPONSIVE
+=========================================== */
+
+@media (max-width: 768px) {
+
+    .finova-footer {
+
+        flex-direction: column;
+
+        justify-content: center;
+
+        align-items: center;
+
+        gap: var(--space-xs);
+
+        padding: var(--space-md);
+
+        text-align: center;
+
+    }
+
+}

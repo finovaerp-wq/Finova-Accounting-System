@@ -1,0 +1,65 @@
+/* ==========================================================
+   FINOVA ACCOUNTING SYSTEM
+   GLOBAL SEARCH COMPONENT
+   Version : 1.0.0
+========================================================== */
+
+/* ==========================================================
+   SEARCH
+========================================================== */
+
+.finova-search{
+
+    position:relative;
+
+    width:320px;
+
+}
+
+.finova-search input{
+
+    width:100%;
+
+    height:40px;
+
+    padding:0 16px 0 42px;
+
+    border:1px solid var(--border-color);
+
+    border-radius:8px;
+
+    background:#FFFFFF;
+
+    color:var(--text-primary);
+
+    font-size:14px;
+
+    transition:all .2s ease;
+
+}
+
+.finova-search input:focus{
+
+    outline:none;
+
+    border-color:var(--primary);
+
+    box-shadow:0 0 0 3px rgba(13,110,253,.10);
+
+}
+
+.finova-search i{
+
+    position:absolute;
+
+    top:50%;
+
+    left:14px;
+
+    transform:translateY(-50%);
+
+    color:#94A3B8;
+
+    font-size:14px;
+
+}

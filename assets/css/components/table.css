@@ -1,0 +1,93 @@
+/* ==========================================================
+   FINOVA ACCOUNTING SYSTEM
+   GLOBAL TABLE COMPONENT
+   Version : 1.0.0
+========================================================== */
+
+/* ==========================================================
+   TABLE
+========================================================== */
+
+.finova-table{
+
+    width:100%;
+
+    margin-bottom:0;
+
+    vertical-align:middle;
+
+}
+
+/* ==========================================================
+   TABLE HEADER
+========================================================== */
+
+.finova-table thead{
+
+    background:#F8FAFC;
+
+}
+
+.finova-table thead th{
+
+    padding:14px 16px;
+
+    border-bottom:1px solid var(--border-color);
+
+    font-size:13px;
+
+    font-weight:600;
+
+    color:var(--text-primary);
+
+    white-space:nowrap;
+
+    vertical-align:middle;
+
+}
+
+/* ==========================================================
+   TABLE BODY
+========================================================== */
+
+.finova-table tbody td{
+
+    padding:14px 16px;
+
+    height:56px;
+
+    vertical-align:middle;
+
+    border-bottom:1px solid #EEF2F7;
+
+    font-size:13px;
+
+    color:var(--text-secondary);
+
+}
+
+/* ==========================================================
+   STRIPED
+========================================================== */
+
+.finova-table tbody tr:nth-child(even){
+
+    background:#FCFCFD;
+
+}
+
+/* ==========================================================
+   HOVER
+========================================================== */
+
+.finova-table.table-hover tbody tr{
+
+    transition:background .20s ease;
+
+}
+
+.finova-table.table-hover tbody tr:hover{
+
+    background:#F5F9FF;
+
+}

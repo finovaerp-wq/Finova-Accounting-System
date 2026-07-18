@@ -1,0 +1,302 @@
+<!--
+===========================================
+FINOVA ACCOUNTING SYSTEM
+Chart Of Account Module
+Version : 2.0.0
+===========================================
+-->
+
+<div class="finova-page">
+
+    <!-- ==========================================
+         PAGE HEADER
+    =========================================== -->
+
+   <div class="finova-page-header">
+
+    <div class="finova-page-header-left">
+
+        <h1 class="finova-page-title">
+    Chart Of Accounts
+</h1>
+
+<p class="finova-page-subtitle">
+    Master Data / Chart Of Accounts
+</p>
+
+    </div>
+
+    <div class="finova-page-header-right">
+        </div>
+
+        </div>
+
+    <button
+    id="btn-add-account"
+    class="btn btn-primary finova-btn">
+
+    <i class="fas fa-plus"></i>
+    Add Account
+
+</button>
+
+    <button
+        id="btn-export"
+        class="btn btn-outline-success finova-btn">
+
+        <i class="fas fa-file-excel"></i>
+        Download Excel
+
+    </button>
+
+    <button
+        id="btn-preview"
+        class="btn btn-outline-primary finova-btn">
+
+        <i class="fas fa-print"></i>
+        Preview HTML
+
+    </button>
+
+    <button
+        id="btn-refresh"
+        class="btn btn-outline-secondary finova-btn">
+
+        <i class="fas fa-rotate-right"></i>
+        Refresh
+
+    </button>
+
+</div>
+
+    <!-- ==========================================
+         TOOLBAR
+    =========================================== -->
+
+    <div class="finova-card mb-1">
+
+        <div class="finova-card-body">
+
+            <div class="row align-items-end g-3">
+
+                <!-- Search -->
+
+                <div class="col-lg-7">
+
+                    <label class="form-label">
+                        Search
+                    </label>
+
+                    <input
+                    id="coa-search"
+                    type="text"
+                    class="form-control finova-control"
+                    placeholder="Search Account Code or Account Name">
+
+                </div>
+
+                
+                <!-- Status -->
+
+                <div class="col-lg-2">
+
+                    <label class="form-label">
+                        Status
+                    </label>
+
+                    <select
+                        id="coa-status-filter"
+                        class="form-select finova-control">
+
+                        <option value="">
+                            All Status
+                        </option>
+
+                        <option value="true">
+                            Active
+                        </option>
+
+                        <option value="false">
+                            Inactive
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <!-- Search Button -->
+
+                <div class="col-lg-3">
+
+                    <label class="form-label">
+                        &nbsp;
+                    </label>
+
+                    <button
+                        id="btn-search"
+                        class="btn btn-primary finova-btn finova-btn-block">
+
+                        <i class="fas fa-search me-1"></i>
+
+                        Search
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ==========================================
+         DATA TABLE
+    =========================================== -->
+
+    <div class="finova-card">
+
+        <div class="finova-card-body">
+
+            <div class="table-responsive">
+
+               <table class="table finova-table table-hover">
+
+<thead class="finova-table-header">
+
+    <tr>
+
+    <th style="width:130px">
+        Account Code
+    </th>
+
+    <th>
+        Account Name
+    </th>
+
+    <th>
+        Parent Account
+    </th>
+     <th>
+        Currency
+    </th>
+
+    <th style="width:130px">
+        Normal Balance
+    </th>
+
+    <th style="width:140px">
+        Posting Type
+    </th>
+
+    <th class="text-center" style="width:90px">
+        Header
+    </th>
+
+    <th class="text-center" style="width:100px">
+        Status
+    </th>
+
+    <th class="text-center" style="width:110px">
+        Action
+    </th>
+
+    </tr>
+
+</thead>
+
+<tbody id="coa-table-body">
+
+    <tr>
+
+        <td colspan="9">
+
+            <div class="finova-empty">
+
+                <i class="fas fa-folder-open"></i>
+
+                <h5>
+                    No Chart Of Accounts
+                </h5>
+
+                <p>
+                    Click <strong>Add Account</strong> to create your first account.
+                </p>
+
+            </div>
+
+        </td>
+
+    </tr>
+
+</tbody>
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ==========================================
+         PAGINATION
+    =========================================== -->
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+
+        <div
+            id="pagination-info"
+            class="text-muted">
+
+            Showing 0 of 0 records
+
+        </div>
+
+        <nav>
+
+            <ul
+                id="pagination"
+                class="pagination finova-pagination">
+                <li class="page-item disabled">
+
+                    <button
+                        class="page-link"
+                        type="button">
+
+                        Previous
+
+                    </button>
+
+                </li>
+
+                <li class="page-item active">
+
+                    <button
+                        class="page-link"
+                        type="button">
+
+                        1
+
+                    </button>
+
+                </li>
+
+                <li class="page-item disabled">
+
+                    <button
+                        class="page-link"
+                        type="button">
+
+                        Next
+
+                    </button>
+
+                </li>
+
+            </ul>
+
+        </nav>
+
+    </div>
+
+</div>

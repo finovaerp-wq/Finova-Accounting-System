@@ -1,0 +1,476 @@
+/*
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+Login Page
+Version : 2.0 Enterprise
+==========================================================
+*/
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+
+    font-family:"Poppins",sans-serif;
+
+    background:linear-gradient(
+        135deg,
+        #0c1b52 0%,
+        #1e3a8a 100%
+    );
+
+    min-height:100vh;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    padding:40px;
+
+}
+
+/* ==========================================================
+LOGIN PAGE
+========================================================== */
+
+.login-page{
+
+    width:100%;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+}
+
+/* ==========================================================
+WRAPPER
+========================================================== */
+
+.login-wrapper{
+
+    width:1200px;
+
+    max-width:100%;
+
+    min-height:760px;
+
+    background:#ffffff;
+
+    border-radius:30px;
+
+    overflow:hidden;
+
+    box-shadow:
+        0 30px 80px rgba(0,0,0,.25);
+
+    display:flex;
+
+}
+
+/* ==========================================================
+LEFT PANEL
+========================================================== */
+
+.login-left{
+
+    width:45%;
+
+    background:linear-gradient(
+        180deg,
+        #081a52,
+        #152d73
+    );
+
+    color:#ffffff;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    padding:60px;
+
+}
+
+.left-content{
+
+    width:100%;
+
+}
+
+.left-content h1{
+
+    font-size:60px;
+
+    font-weight:700;
+
+    margin-bottom:5px;
+
+    letter-spacing:2px;
+
+}
+
+.left-content h2{
+
+    font-size:42px;
+
+    font-weight:600;
+
+    margin-bottom:30px;
+
+}
+
+.left-content p{
+
+    font-size:18px;
+
+    line-height:1.8;
+
+    opacity:.95;
+
+    margin-bottom:50px;
+
+}
+
+/* ==========================================================
+FEATURE LIST
+========================================================== */
+
+.feature-list{
+
+    list-style:none;
+
+    padding:0;
+
+    margin:0;
+
+}
+
+.feature-list li{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:15px;
+
+    margin-bottom:22px;
+
+    font-size:19px;
+
+    font-weight:500;
+
+}
+
+.feature-list i{
+
+    color:#ffffff;
+
+    font-size:18px;
+
+}
+
+/* ==========================================================
+RIGHT PANEL
+========================================================== */
+
+.login-right{
+
+    width:55%;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    background:#ffffff;
+
+    padding:60px;
+
+}
+
+/* ==========================================================
+CARD
+========================================================== */
+
+.login-card{
+
+    width:100%;
+
+    max-width:520px;
+
+}
+
+.login-header{
+
+    text-align:center;
+
+    margin-bottom:40px;
+
+}
+
+.login-header h2{
+
+    font-size:52px;
+
+    font-weight:700;
+
+    color:#18203d;
+
+    margin-bottom:10px;
+
+}
+
+.login-header p{
+
+    color:#777;
+
+    font-size:18px;
+
+}
+
+/* ==========================================================
+FORM
+========================================================== */
+
+.form-label{
+
+    font-weight:600;
+
+    margin-bottom:8px;
+
+    color:#333;
+
+}
+
+.input-group{
+
+    margin-bottom:8px;
+
+}
+
+.input-group-text{
+
+    background:#fff;
+
+    border-right:none;
+
+}
+
+.form-control{
+
+    height:56px;
+
+    border-left:none;
+
+    font-size:16px;
+
+    box-shadow:none!important;
+
+}
+
+.form-control:focus{
+
+    border-color:#ced4da;
+
+}
+
+/* ==========================================================
+PASSWORD BUTTON
+========================================================== */
+
+#btn-toggle-password{
+
+    border-left:none;
+
+    background:#fff;
+
+}
+
+/* ==========================================================
+OPTION
+========================================================== */
+
+.login-option{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:30px;
+
+    font-size:15px;
+
+}
+
+.login-option a{
+
+    text-decoration:none;
+
+    font-weight:600;
+
+}
+
+/* ==========================================================
+BUTTON
+========================================================== */
+
+.btn-primary{
+
+    height:58px;
+
+    border-radius:14px;
+
+    background:#2d63e2;
+
+    border:none;
+
+    font-size:20px;
+
+    font-weight:600;
+
+    transition:.25s;
+
+}
+
+.btn-primary:hover{
+
+    background:#1b4fc8;
+
+}
+
+/* ==========================================================
+FOOTER
+========================================================== */
+
+.login-footer{
+
+    text-align:center;
+
+    margin-top:30px;
+
+    color:#888;
+
+    font-size:14px;
+
+    line-height:1.8;
+
+}
+
+/* ==========================================================
+HR
+========================================================== */
+
+hr{
+
+    margin-top:35px;
+
+    margin-bottom:25px;
+
+}
+
+/* ==========================================================
+LOADING
+========================================================== */
+
+#login-loading{
+
+    position:fixed;
+
+    inset:0;
+
+    background:rgba(0,0,0,.45);
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    z-index:9999;
+
+}
+
+/* ==========================================================
+RESPONSIVE
+========================================================== */
+
+@media(max-width:992px){
+
+    body{
+
+        padding:20px;
+
+    }
+
+    .login-wrapper{
+
+        flex-direction:column;
+
+        min-height:auto;
+
+    }
+
+    .login-left{
+
+        width:100%;
+
+        padding:40px;
+
+    }
+
+    .login-right{
+
+        width:100%;
+
+        padding:40px;
+
+    }
+
+    .left-content{
+
+        text-align:center;
+
+    }
+
+}
+
+@media(max-width:576px){
+
+    .left-content h1{
+
+        font-size:42px;
+
+    }
+
+    .left-content h2{
+
+        font-size:28px;
+
+    }
+
+    .login-header h2{
+
+        font-size:40px;
+
+    }
+
+    .feature-list li{
+
+        font-size:16px;
+
+    }
+
+}

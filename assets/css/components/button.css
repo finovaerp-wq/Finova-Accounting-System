@@ -1,0 +1,182 @@
+/* ==========================================================
+   FINOVA ACCOUNTING SYSTEM
+   GLOBAL BUTTON COMPONENT
+========================================================== */
+
+/* ==========================================================
+   BASE BUTTON
+========================================================== */
+
+.btn-finova{
+
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+
+    border:none;
+    border-radius:8px;
+
+    padding:8px 16px;
+
+    font-size:14px;
+    font-weight:500;
+
+    cursor:pointer;
+
+    transition:all .2s ease;
+
+}
+
+.btn-finova i{
+
+    font-size:13px;
+
+}
+
+.btn-finova:hover{
+
+    transform:translateY(-1px);
+
+}
+
+/* ==========================================================
+   PRIMARY
+========================================================== */
+
+.btn-primary{
+
+    background:#0D6EFD;
+    color:#FFFFFF;
+
+}
+
+.btn-primary:hover{
+
+    background:#0B5ED7;
+
+}
+
+/* ==========================================================
+   SUCCESS
+========================================================== */
+
+.btn-success{
+
+    background:#198754;
+    color:#FFFFFF;
+
+}
+
+.btn-success:hover{
+
+    background:#157347;
+
+}
+
+/* ==========================================================
+   DANGER
+========================================================== */
+
+.btn-danger{
+
+    background:#DC3545;
+    color:#FFFFFF;
+
+}
+
+.btn-danger:hover{
+
+    background:#BB2D3B;
+
+}
+
+/* ==========================================================
+   SECONDARY
+========================================================== */
+
+.btn-secondary{
+
+    background:#6C757D;
+    color:#FFFFFF;
+
+}
+
+.btn-secondary:hover{
+
+    background:#5C636A;
+
+}
+
+/* ==========================================================
+   ACTION BUTTON
+========================================================== */
+
+.btn-action{
+
+    width:34px;
+    height:34px;
+
+    padding:0;
+
+    border:none;
+
+    border-radius:8px;
+
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+
+    cursor:pointer;
+
+    transition:all .2s ease;
+
+}
+
+.btn-action i{
+
+    font-size:13px;
+
+}
+
+.btn-action:hover{
+
+    transform:translateY(-1px);
+
+}
+
+/* ==========================================================
+   EDIT
+========================================================== */
+
+.btn-action-edit{
+
+    background:#E8F2FF;
+
+    color:#0D6EFD;
+
+}
+
+/* ==========================================================
+   DELETE
+========================================================== */
+
+.btn-action-delete{
+
+    background:#FDECEC;
+
+    color:#DC3545;
+
+}
+
+/* ==========================================================
+   VIEW
+========================================================== */
+
+.btn-action-view{
+
+    background:#EAF7EF;
+
+    color:#198754;
+
+}

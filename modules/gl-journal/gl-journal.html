@@ -1,0 +1,242 @@
+<!--
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+General Ledger Journal
+Version : 1.0.0
+==========================================================
+-->
+
+<div class="container-fluid">
+
+    <!-- PAGE HEADER -->
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <div>
+
+            <h3 class="mb-0">
+
+                GL Journal
+
+            </h3>
+
+            <small class="text-muted">
+
+                Manage General Ledger Journal
+
+            </small>
+
+        </div>
+
+        <button
+            id="btn-add-journal"
+            class="btn btn-primary">
+
+            <i class="fa-solid fa-plus me-1"></i>
+
+            New Journal
+
+        </button>
+
+    </div>
+
+    <!-- FILTER -->
+
+    <div class="card mb-3">
+
+        <div class="card-body">
+
+            <div class="row g-3">
+
+                <!-- Search -->
+
+                <div class="col-md-4">
+
+                    <label class="form-label">
+
+                        Search
+
+                    </label>
+
+                    <input
+                        type="text"
+                        id="journal-search"
+                        class="form-control"
+                        placeholder="Journal No / Description">
+
+                </div>
+
+                <!-- Status -->
+
+                <div class="col-md-2">
+
+                    <label class="form-label">
+
+                        Status
+
+                    </label>
+
+                    <select
+                        id="journal-status-filter"
+                        class="form-select">
+
+                        <option value="">
+
+                            All
+
+                        </option>
+
+                        <option value="Draft">
+
+                            Draft
+
+                        </option>
+
+                        <option value="Posted">
+
+                            Posted
+
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <!-- Date From -->
+
+                <div class="col-md-2">
+
+                    <label class="form-label">
+
+                        Date From
+
+                    </label>
+
+                    <input
+                        type="date"
+                        id="journal-date-from"
+                        class="form-control">
+
+                </div>
+
+                <!-- Date To -->
+
+                <div class="col-md-2">
+
+                    <label class="form-label">
+
+                        Date To
+
+                    </label>
+
+                    <input
+                        type="date"
+                        id="journal-date-to"
+                        class="form-control">
+
+                </div>
+
+                <!-- Reset -->
+
+                <div class="col-md-2 d-flex align-items-end">
+
+                    <button
+                        id="btn-reset-filter"
+                        class="btn btn-outline-secondary w-100">
+
+                        Reset
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- GRID -->
+
+    <div class="card">
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table
+                    class="table table-hover table-bordered align-middle mb-0">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th width="140">
+
+                                Journal No
+
+                            </th>
+
+                            <th width="120">
+
+                                Date
+
+                            </th>
+
+                            <th width="150">
+
+                                Reference
+
+                            </th>
+
+                            <th>
+
+                                Description
+
+                            </th>
+
+                            <th width="120">
+
+                                Status
+
+                            </th>
+
+                            <th width="130" class="text-end">
+
+                                Debit
+
+                            </th>
+
+                            <th width="130" class="text-end">
+
+                                Credit
+
+                            </th>
+
+                            <th width="160">
+
+                                Action
+
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="journal-table-body">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- MODAL -->
+
+<div id="journal-modal-container"></div>

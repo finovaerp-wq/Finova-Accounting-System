@@ -1,0 +1,257 @@
+/*
+===========================================
+FINOVA ACCOUNTING SYSTEM
+Dashboard
+Version : 1.0.0
+===========================================
+*/
+
+/* ===========================================
+   DASHBOARD
+=========================================== */
+
+.finova-dashboard {
+
+    width: 100%;
+
+}
+
+/* ===========================================
+   WELCOME CARD
+=========================================== */
+
+.finova-dashboard-welcome {
+
+    margin-top: var(--space-md);
+
+    margin-bottom: var(--space-lg);
+
+    padding: var(--space-xl);
+
+    background: linear-gradient(
+        135deg,
+        var(--primary),
+        #1D4ED8
+    );
+
+    border-radius: var(--radius-lg);
+
+    color: #FFFFFF;
+
+    box-shadow: var(--shadow-md);
+
+}
+
+.finova-dashboard-welcome-content h3 {
+
+    margin-bottom: var(--space-sm);
+
+    color: #FFFFFF;
+
+    font-size: var(--font-size-xxl);
+
+    font-weight: var(--font-weight-bold);
+
+}
+
+.finova-dashboard-welcome-content p {
+
+    margin: 0;
+
+    color: rgba(255,255,255,.90);
+
+    font-size: var(--font-size-md);
+
+}
+
+/* ===========================================
+   SUMMARY CARD
+=========================================== */
+
+.finova-summary-card {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: var(--space-md);
+
+    padding: var(--space-lg);
+
+    background: var(--card-bg);
+
+    border-radius: var(--radius-lg);
+
+    box-shadow: var(--shadow-sm);
+
+    transition: all var(--transition-fast);
+
+    cursor: default;
+
+}
+
+.finova-summary-card:hover {
+
+    transform: translateY(-4px);
+
+    box-shadow: var(--shadow-md);
+
+}
+
+.finova-summary-icon {
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    width: 60px;
+
+    height: 60px;
+
+    border-radius: 50%;
+
+    background: rgba(37,99,235,.10);
+
+    color: var(--primary);
+
+    font-size: 24px;
+
+}
+
+.finova-summary-content {
+
+    flex: 1;
+
+}
+
+.finova-summary-content span {
+
+    display: block;
+
+    color: var(--text-secondary);
+
+    font-size: var(--font-size-sm);
+
+    margin-bottom: 4px;
+
+}
+
+.finova-summary-content h3 {
+
+    margin: 0;
+
+    color: var(--text-primary);
+
+    font-size: 28px;
+
+    font-weight: var(--font-weight-bold);
+
+}
+
+/* ===========================================
+   CARD
+=========================================== */
+
+.finova-card {
+
+    background: var(--card-bg);
+
+    border-radius: var(--radius-lg);
+
+    box-shadow: var(--shadow-sm);
+
+    overflow: hidden;
+
+}
+
+.finova-card-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: var(--space-lg);
+
+    border-bottom: 1px solid var(--border-color);
+
+}
+
+.finova-card-header h5 {
+
+    margin: 0;
+
+    font-size: var(--font-size-lg);
+
+    font-weight: var(--font-weight-semibold);
+
+}
+
+.finova-card-body {
+
+    padding: var(--space-lg);
+
+}
+
+/* ===========================================
+   QUICK ACCESS
+=========================================== */
+
+.finova-card-body .btn {
+
+    height: 42px;
+
+    border-radius: var(--radius-md);
+
+    font-size: var(--font-size-md);
+
+    font-weight: var(--font-weight-medium);
+
+}
+
+/* ===========================================
+   RESPONSIVE
+=========================================== */
+
+@media (max-width: 992px) {
+
+    .finova-dashboard-welcome {
+
+        padding: var(--space-lg);
+
+    }
+
+    .finova-dashboard-welcome-content h3 {
+
+        font-size: var(--font-size-xl);
+
+    }
+
+    .finova-summary-card {
+
+        margin-bottom: var(--space-md);
+
+    }
+
+}
+
+@media (max-width: 768px) {
+
+    .finova-summary-card {
+
+        flex-direction: column;
+
+        text-align: center;
+
+    }
+
+    .finova-summary-content {
+
+        text-align: center;
+
+    }
+
+}

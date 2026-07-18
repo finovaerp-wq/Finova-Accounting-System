@@ -1,0 +1,282 @@
+/*
+===========================================
+FINOVA ACCOUNTING SYSTEM
+Layout
+Version : 1.0.0
+===========================================
+*/
+
+/* ===========================================
+   APPLICATION
+=========================================== */
+
+.finova-layout {
+
+    display: flex;
+
+    width: 100%;
+
+    min-height: 100vh;
+
+    background: var(--body-bg);
+
+}
+
+/* ===========================================
+   SIDEBAR CONTAINER
+=========================================== */
+
+#finova-sidebar {
+
+    width: var(--sidebar-width);
+
+    min-width: var(--sidebar-width);
+
+    height: 100vh;
+
+    position: fixed;
+
+    top: 0;
+
+    left: 0;
+
+    z-index: var(--z-sidebar);
+
+}
+
+/* ===========================================
+   MAIN CONTAINER
+=========================================== */
+
+.finova-main {
+
+    display: flex;
+
+    flex-direction: column;
+
+    width: calc(100% - var(--sidebar-width));
+
+    min-height: 100vh;
+
+    margin-left: var(--sidebar-width);
+
+    background: var(--content-bg);
+
+}
+
+/* ===========================================
+   TOPBAR
+=========================================== */
+
+#finova-topbar {
+
+    width: 100%;
+
+    height: var(--topbar-height);
+
+    position: sticky;
+
+    top: 0;
+
+    z-index: var(--z-topbar);
+
+}
+
+/* ===========================================
+   CONTENT
+=========================================== */
+
+#finova-content {
+
+    flex: 1;
+
+    padding: var(--space-lg);
+
+    overflow-x: auto;
+
+}
+
+/* ===========================================
+   FOOTER
+=========================================== */
+
+#finova-footer {
+
+    width: 100%;
+
+}
+/* ===========================================
+   PAGE CONTAINER
+=========================================== */
+
+.finova-page{
+
+    width:100%;
+
+}
+
+.finova-page-content{
+
+    width:100%;
+
+}
+/* ===========================================================
+   FINOVA DESIGN SYSTEM
+   Version : 1.0.0
+=========================================================== */
+
+
+/* ===========================================================
+   PAGE HEADER
+=========================================================== */
+
+.finova-page-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-start;
+
+    gap:24px;
+
+    margin-bottom:24px;
+
+}
+
+.finova-page-header-left{
+
+    flex:1;
+
+}
+
+.finova-page-title{
+
+    margin:0;
+
+    font-size:22px;
+
+    font-weight:700;
+
+    line-height:1.2;
+
+    letter-spacing:-0.3px;
+
+    color:var(--text-primary);
+
+}
+
+.finova-page-subtitle{
+
+    margin-top:4px;
+
+    margin-bottom:0;
+
+    font-size:13px;
+
+    line-height:1.4;
+
+    color:var(--text-secondary);
+
+}
+
+.finova-page-header-right{
+
+    display:flex;
+
+    flex-wrap:wrap;
+
+    justify-content:flex-end;
+
+    gap:10px;
+
+}
+
+
+/* ===========================================================
+   GLOBAL BUTTON
+=========================================================== */
+
+.finova-btn{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:6px;
+
+    height:38px;
+
+    min-height:38px;
+
+    padding:0 16px;
+
+    border-radius:6px;
+
+    font-size:13px;
+
+    font-weight:600;
+
+    line-height:1;
+
+    white-space:nowrap;
+
+}
+
+
+/* Full Width */
+
+.finova-btn-block{
+
+    width:100%;
+
+}
+
+
+/* ===========================================================
+   GLOBAL FORM CONTROL
+=========================================================== */
+
+.finova-control{
+
+    height:38px;
+
+    min-height:38px;
+
+    border-radius:6px;
+
+    font-size:13px;
+
+    box-sizing:border-box;
+
+}
+
+
+/* Focus */
+
+.finova-control:focus{
+
+    border-color:var(--primary);
+
+    box-shadow:none;
+
+}
+
+
+/* ===========================================================
+   FORM LABEL
+=========================================================== */
+
+.finova-label{
+
+    margin-bottom:6px;
+
+    font-size:13px;
+
+    font-weight:600;
+
+    color:var(--text-primary);
+
+}

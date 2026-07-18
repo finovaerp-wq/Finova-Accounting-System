@@ -1,0 +1,273 @@
+/*
+===========================================
+FINOVA ACCOUNTING SYSTEM
+Sidebar
+Version : 1.0.0
+===========================================
+*/
+
+/* ===========================================
+   SIDEBAR
+=========================================== */
+
+.finova-sidebar {
+
+    display: flex;
+    flex-direction: column;
+
+    width: 100%;
+    height: 100vh;
+
+    background: var(--sidebar-bg);
+
+    color: var(--sidebar-text);
+
+    overflow: hidden;
+
+}
+
+/* ===========================================
+   LOGO
+=========================================== */
+
+.finova-sidebar-logo {
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    height: 70px;
+
+    padding: 0 var(--space-lg);
+
+    border-bottom: 1px solid rgba(255,255,255,.08);
+
+}
+
+.finova-sidebar-logo h2 {
+
+    margin: 0;
+
+    color: #FFFFFF;
+
+    font-size: 22px;
+
+    font-weight: var(--font-weight-bold);
+
+    letter-spacing: 1px;
+
+}
+
+.finova-sidebar-logo span {
+
+    margin-top: 2px;
+
+    color: var(--sidebar-header);
+
+    font-size: var(--font-size-xs);
+
+}
+
+/* ===========================================
+   MENU
+=========================================== */
+
+.finova-sidebar-menu {
+
+    flex: 1;
+
+    overflow-y: auto;
+
+    padding: var(--space-md) 0;
+
+}
+
+/* Scrollbar */
+
+.finova-sidebar-menu::-webkit-scrollbar {
+
+    width: 6px;
+
+}
+
+.finova-sidebar-menu::-webkit-scrollbar-thumb {
+
+    background: rgba(255,255,255,.12);
+
+    border-radius: 10px;
+
+}
+
+/* ===========================================
+   MENU HEADER
+=========================================== */
+
+.finova-menu-header {
+
+    padding:
+
+        var(--space-md)
+
+        var(--space-lg)
+
+        var(--space-sm);
+
+    color: var(--sidebar-header);
+
+    font-size: 11px;
+
+    font-weight: var(--font-weight-semibold);
+
+    text-transform: uppercase;
+
+    letter-spacing: 1px;
+
+}
+
+/* ===========================================
+   MENU ITEM
+=========================================== */
+
+.finova-menu-item {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+    height: 46px;
+
+    padding: 0 var(--space-lg);
+
+    cursor: pointer;
+
+    color: var(--sidebar-text);
+
+    transition: all var(--transition-fast);
+
+    user-select: none;
+
+}
+
+/* Icon */
+
+.finova-menu-item i {
+
+    width: 20px;
+
+    text-align: center;
+
+    font-size: 15px;
+
+}
+
+/* Text */
+
+.finova-menu-item span {
+
+    flex: 1;
+
+    font-size: var(--font-size-md);
+
+}
+
+/* Hover */
+
+.finova-menu-item:hover {
+
+    background: var(--sidebar-hover);
+
+    color: var(--sidebar-text-active);
+
+}
+
+/* Active */
+
+.finova-menu-item.active {
+
+    background: var(--sidebar-active);
+
+    color: var(--sidebar-text-active);
+
+    border-right: 4px solid #FFFFFF;
+
+}
+
+/* ===========================================
+   FOOTER
+=========================================== */
+
+.finova-sidebar-footer {
+
+    padding: var(--space-md);
+
+    border-top: 1px solid rgba(255,255,255,.08);
+
+}
+
+.finova-sidebar-version {
+
+    text-align: center;
+
+    color: var(--sidebar-header);
+
+    font-size: var(--font-size-xs);
+
+}
+
+/* ===========================================
+   COLLAPSE
+=========================================== */
+
+.finova-sidebar.collapsed {
+
+    width: var(--sidebar-collapse-width);
+
+}
+
+.finova-sidebar.collapsed .finova-sidebar-logo span,
+.finova-sidebar.collapsed .finova-menu-header,
+.finova-sidebar.collapsed .finova-menu-item span {
+
+    display: none;
+
+}
+
+.finova-sidebar.collapsed .finova-menu-item {
+
+    justify-content: center;
+
+    padding: 0;
+
+}
+
+.finova-sidebar.collapsed .finova-sidebar-logo {
+
+    align-items: center;
+
+    padding: 0;
+
+}
+
+/* ===========================================
+   RESPONSIVE
+=========================================== */
+
+@media (max-width: 992px) {
+
+    #finova-sidebar {
+
+        left: -100%;
+
+        transition: left var(--transition-normal);
+
+    }
+
+    #finova-sidebar.show {
+
+        left: 0;
+
+    }
+
+}

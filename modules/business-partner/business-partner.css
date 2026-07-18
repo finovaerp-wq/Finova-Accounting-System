@@ -1,0 +1,136 @@
+/*
+===========================================
+FINOVA ACCOUNTING SYSTEM
+Business Partner
+Version : 2.0.0
+===========================================
+*/
+
+/* ==========================================
+   BUSINESS PARTNER
+========================================== */
+
+.finova-business-partner{
+    width:100%;
+}
+
+
+/* ==========================================
+   TOOLBAR
+========================================== */
+
+.finova-card{
+    border-radius:8px;
+}
+
+.finova-card-body{
+
+    padding:20px;
+
+}
+
+/* ==========================================
+   TABLE
+========================================== */
+
+.finova-card-header{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:18px 20px;
+
+    border-bottom:1px solid var(--border-color);
+
+    background:#FFFFFF;
+
+}
+
+.finova-card-header h5{
+
+    margin:0;
+
+    font-size:16px;
+
+    font-weight:600;
+
+    color:var(--text-primary);
+
+}
+
+.finova-card-header small{
+
+    color:var(--text-secondary);
+
+    font-size:13px;
+
+}
+
+#bp-total-record{
+
+    display:inline-flex;
+
+    align-items:center;
+    justify-content:center;
+
+    min-width:90px;
+
+    height:34px;
+
+    padding:0 14px;
+
+    border-radius:20px;
+
+    font-size:13px;
+
+    font-weight:600;
+
+}
+
+/* ==========================================
+   ACTION BUTTON
+========================================== */
+
+.finova-action{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:8px;
+
+}
+/* ==========================================
+   RESPONSIVE
+========================================== */
+
+@media (max-width:768px){
+
+    .finova-card-header{
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+        gap:10px;
+
+    }
+
+    .finova-table{
+
+        font-size:13px;
+
+    }
+
+    .finova-table thead th,
+
+    .finova-table tbody td{
+
+        padding:10px;
+
+    }
+
+}

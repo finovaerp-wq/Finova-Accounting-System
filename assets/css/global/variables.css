@@ -1,0 +1,165 @@
+/*
+===========================================
+FINOVA ACCOUNTING SYSTEM
+Global Variables
+Version : 1.0.0
+===========================================
+*/
+
+:root {
+
+    /* ===========================================
+       FONT
+    =========================================== */
+
+    --font-family: 'Poppins', sans-serif;
+
+    --font-size-xs: 12px;
+    --font-size-sm: 13px;
+    --font-size-md: 14px;
+    --font-size-lg: 16px;
+    --font-size-xl: 20px;
+    --font-size-xxl: 24px;
+
+    --font-weight-light: 300;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    /* ===========================================
+       SIDEBAR
+    =========================================== */
+
+    --sidebar-width: 260px;
+    --sidebar-collapse-width: 80px;
+
+    --sidebar-bg: #111827;
+    --sidebar-hover: #1F2937;
+    --sidebar-active: #2563EB;
+
+    --sidebar-text: #D1D5DB;
+    --sidebar-text-active: #FFFFFF;
+
+    --sidebar-header: #9CA3AF;
+
+    /* ===========================================
+       TOPBAR
+    =========================================== */
+
+    --topbar-height: 70px;
+
+    --topbar-bg: #FFFFFF;
+
+    --topbar-border: #E5E7EB;
+
+    /* ===========================================
+       BACKGROUND
+    =========================================== */
+
+    --body-bg: #F3F4F6;
+
+    --content-bg: #F3F4F6;
+
+    --card-bg: #FFFFFF;
+
+    /* ===========================================
+       TEXT
+    =========================================== */
+
+    --text-primary: #111827;
+
+    --text-secondary: #6B7280;
+
+    --text-muted: #9CA3AF;
+
+    /* ===========================================
+       BRAND
+    =========================================== */
+
+    --primary: #2563EB;
+
+    --primary-hover: #1D4ED8;
+
+    /* ===========================================
+       STATUS
+    =========================================== */
+
+    --success: #22C55E;
+
+    --warning: #F59E0B;
+
+    --danger: #EF4444;
+
+    --info: #0EA5E9;
+
+    /* ===========================================
+       BORDER
+    =========================================== */
+
+    --border-color: #E5E7EB;
+
+    /* ===========================================
+       BORDER RADIUS
+    =========================================== */
+
+    --radius-sm: 6px;
+
+    --radius-md: 10px;
+
+    --radius-lg: 14px;
+
+    --radius-xl: 18px;
+
+    /* ===========================================
+       SHADOW
+    =========================================== */
+
+    --shadow-sm:
+        0 1px 3px rgba(0,0,0,.08);
+
+    --shadow-md:
+        0 3px 8px rgba(0,0,0,.10);
+
+    --shadow-lg:
+        0 8px 20px rgba(0,0,0,.12);
+
+    /* ===========================================
+       SPACING
+    =========================================== */
+
+    --space-xs: 4px;
+
+    --space-sm: 8px;
+
+    --space-md: 16px;
+
+    --space-lg: 24px;
+
+    --space-xl: 32px;
+
+    /* ===========================================
+       TRANSITION
+    =========================================== */
+
+    --transition-fast: .2s;
+
+    --transition-normal: .3s;
+
+    --transition-slow: .5s;
+
+    /* ===========================================
+       Z-INDEX
+    =========================================== */
+
+    --z-sidebar: 1000;
+
+    --z-topbar: 900;
+
+    --z-dropdown: 1100;
+
+    --z-modal: 1200;
+
+    --z-toast: 1300;
+
+}
