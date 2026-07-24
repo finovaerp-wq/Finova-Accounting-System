@@ -1,924 +1,423 @@
 /*
 ==========================================================
 FINOVA ACCOUNTING SYSTEM
-Module : GL Journal
-Version : 1.0.0
+Module  : General Journal
+Version : Enterprise 3.0
+Author  : FINOVA Development Team
 ==========================================================
 */
 
 import {
-    ChartOfAccountsService
-} from "../../service/chart-of-accounts.service.js";
+    supabase,
+    TABLE
+} from "../../assets/js/core/supabase.js";
+
 import {
-    JournalService
+    GeneralJournalService
 } from "../../service/journal.service.js";
 
-import {
-    BusinessPartnerService
-} from "../../service/business-partner.service.js";
-export class GLJournal {
-
-
-
+export class GeneralJournal {
 
     /*
-    ==========================================================
-    CONSTRUCTOR
-    ==========================================================
+==========================================================
+CONSTRUCTOR
+==========================================================
+*/
+
+constructor() {
+
+    /*
+    ======================================================
+    SERVICE
+    ======================================================
     */
 
-    constructor() {
+    this.service =
+        new GeneralJournalService();
+
+    /*
+    ======================================================
+    JOURNAL STATE
+    ======================================================
+    */
+
+    this.journals = [];
+
+    this.currentJournal = null;
+
+    this.currentMode = "add";
+
+    /*
+    ======================================================
+    PAGINATION
+    ======================================================
+    */
+
+    this.currentPage = 1;
+
+    this.pageSize = 20;
+
+    this.totalRows = 0;
+
+    this.totalPages = 1;
+
+    /*
+    ======================================================
+    MODAL
+    ======================================================
+    */
 
     this.modal = null;
 
-    this.detailRows = [];
+    this.modalElement = null;
 
-    this.chartOfAccounts = [];
+    this.modalContainer = null;
 
-    this.businessPartners = [];
+    this.modalLoaded = false;
 
-    this.initialize();
+    /*
+    ======================================================
+    MASTER DATA
+    ======================================================
+    */
+
+    this.coaList = [];
+
+    this.businessPartnerList = [];
+
+    /*
+    ======================================================
+    DETAIL
+    ======================================================
+    */
+
+    this.detailLines = [];
 
 }
+
+    /*
+==========================================================
+CACHE DOM
+==========================================================
+*/
+
+cacheDom() {
+
+    /*
+    ======================================================
+    HEADER
+    ======================================================
+    */
+
+    this.btnAddJournal =
+        document.getElementById("btn-add-journal");
+
+    this.btnRefreshJournal =
+        document.getElementById("btn-refresh-journal");
+
+    this.btnDownloadJournal =
+        document.getElementById("btn-download-journal");
+
+    /*
+    ======================================================
+    FILTER
+    ======================================================
+    */
+
+    this.filterDateFrom =
+        document.getElementById("filter-date-from");
+
+    this.filterDateTo =
+        document.getElementById("filter-date-to");
+
+    this.filterStatus =
+        document.getElementById("filter-status");
+
+    this.filterFindBy =
+        document.getElementById("filter-find-by");
+
+    this.filterKeyword =
+        document.getElementById("filter-keyword");
+
+    this.btnFindJournal =
+        document.getElementById("btn-find-journal");
+
+    /*
+    ======================================================
+    TABLE
+    ======================================================
+    */
+
+    this.tableWrapper =
+        document.getElementById(
+            "gl-journal-table-wrapper"
+        );
+
+    this.table =
+        document.getElementById(
+            "gl-journal-table"
+        );
+
+    this.tableBody =
+        document.getElementById(
+            "gl-journal-tbody"
+        );
+
+    /*
+    ======================================================
+    PAGINATION
+    ======================================================
+    */
+
+    this.btnFirstPage =
+        document.getElementById("btn-first-page");
+
+    this.btnPreviousPage =
+        document.getElementById("btn-prev-page");
+
+    this.btnNextPage =
+        document.getElementById("btn-next-page");
+
+    this.btnLastPage =
+        document.getElementById("btn-last-page");
+
+    this.currentPageInput =
+        document.getElementById("current-page");
+
+    this.totalPageLabel =
+        document.getElementById("total-pages");
+
+    this.displayRecord =
+        document.getElementById("display-record");
+
+    /*
+    ======================================================
+    MODAL CONTAINER
+    ======================================================
+    */
+
+    this.modalContainer =
+        document.getElementById(
+            "gl-journal-modal-container"
+        );
+
+}
+
     /*
     ==========================================================
     INITIALIZE
     ==========================================================
     */
 
-    async initialize() {
+    async init() {
 
-        console.log("GL Journal Initialized");
+        console.log(
+            "FINOVA General Journal Enterprise v3 Loaded"
+        );
 
-        await this.loadModal();
-        await this.loadChartOfAccounts();
-        await this.loadBusinessPartners();
-
-        this.cacheElement();
-        await this.loadJournalList();
+        this.cacheDom();
 
         this.bindEvents();
 
+        await this.loadData();
+
     }
-
-    /*
-==========================================================
-LOAD MODAL
-==========================================================
-*/
-
-async loadModal() {
-
-    /*
-    ==========================================
-    LOAD HTML
-    ==========================================
-    */
-
-    const response = await fetch(
-
-        "modules/gl-journal/gl-journal-modal.html"
-
-    );
-
-    const html = await response.text();
-
-    /*
-    ==========================================
-    RENDER
-    ==========================================
-    */
-
-    document.getElementById(
-
-        "journal-modal-container"
-
-    ).innerHTML = html;
-
-    /*
-    ==========================================
-    INIT MODAL
-    ==========================================
-    */
-
-    this.modal =
-
-        new bootstrap.Modal(
-
-            document.getElementById(
-
-                "glJournalModal"
-
-            )
-
-        );
-
-}
-
-    /*
+        /*
     ==========================================================
-    CACHE ELEMENT
+    BIND ALL EVENTS
     ==========================================================
     */
 
-    cacheElement() {
+    bindEvents() {
 
-    this.tableBody =
-        document.getElementById(
-            "journal-table-body"
-        );
-
-    this.detailBody =
-        document.getElementById(
-            "journal-detail-body"
-        );
-
-}
-
-    /*
+        /*
 ==========================================================
-BIND EVENTS
+HEADER
 ==========================================================
 */
 
-bindEvents() {
+this.btnAddJournal?.addEventListener(
+    "click",
+    async () => {
 
-    this.bindHeaderEvents();
+        console.log("BTN ADD JOURNAL CLICKED");
 
-    this.bindDetailEvents();
+        await this.openAddJournal();
 
-    this.bindFooterEvents();
+    }
+);
 
+        /*
+        ======================================================
+        SUB EVENTS
+        ======================================================
+        */
 
-}
-/*
-==========================================================
-BIND HEADER EVENTS
-==========================================================
-*/
+        this.bindFilterEvents();
 
-bindHeaderEvents() {
+        this.bindPaginationEvents();
 
-    document
-
-        .getElementById("btn-add-journal")
-
-        ?.addEventListener(
-
-            "click",
-
-            () => this.openAddModal()
-
-        );
-
-}
-/*
-==========================================================
-BIND DETAIL EVENTS
-==========================================================
-*/
-
-bindDetailEvents() {
-
-    document
-
-        .getElementById("btn-add-line")
-
-        ?.addEventListener(
-
-            "click",
-
-            () => this.addDetailRow()
-
-        );
-
-}
-/*
-==========================================================
-BIND FOOTER EVENTS
-==========================================================
-*/
-
-bindFooterEvents() {
-
-    console.log("bindFooterEvents()");
-    const btnSaveDraft = document.getElementById("btn-save-draft");
-
-console.log("btnSaveDraft =", btnSaveDraft);
-
-btnSaveDraft?.addEventListener("click", () => {
-
-    console.log("CLICK SAVE DRAFT");
-
-    const valid = this.validateJournal();
-
-    console.log("validateJournal =", valid);
-
-    if (!valid) {
-
-        return;
+        this.bindTableEvents();
 
     }
 
-    this.saveDraft();
+    /*
+    ==========================================================
+    FILTER EVENTS
+    ==========================================================
+    */
 
-});
+    bindFilterEvents() {
 
-    document
-
-        .getElementById("btn-post-journal")
-
-        ?.addEventListener(
-
+        this.btnFindJournal?.addEventListener(
             "click",
+            () => this.search()
+        );
 
-            () => {
+        this.filterKeyword?.addEventListener(
+            "keydown",
+            (event) => {
 
-                this.postJournal();
+                if (event.key === "Enter") {
+
+                    this.search();
+
+                }
 
             }
-
         );
 
-}
-
-/*
-==========================================================
-LOAD CHART OF ACCOUNTS
-==========================================================
-*/
-
-async loadChartOfAccounts() {
-
-    try {
-
-        const accounts =
-
-            await ChartOfAccountsService.getAll();
-
-        this.chartOfAccounts =
-
-            accounts.filter(
-
-                account =>
-
-                    account.status === true &&
-
-                    account.is_header === false &&
-
-                    account.allow_transaction === true
-
-            );
-
-    }
-
-    catch (error) {
-
-        console.error(
-
-            "Failed to load Chart Of Accounts",
-
-            error
-
+        this.filterStatus?.addEventListener(
+            "change",
+            () => this.search()
         );
 
-        this.chartOfAccounts = [];
-
-    }
-
-}
-/*
-==========================================================
-GET COA OPTIONS
-==========================================================
-*/
-
-getChartOfAccountsOptions() {
-
-    let options = `
-
-        <option value="">
-
-            -- Select Account --
-
-        </option>
-
-    `;
-
-    this.chartOfAccounts.forEach(account => {
-
-        options += `
-
-            <option value="${account.id}">
-
-                ${account.account_code} - ${account.account_name}
-
-            </option>
-
-        `;
-
-    });
-
-    return options;
-
-}
-/*
-==========================================================
-LOAD BUSINESS PARTNERS
-==========================================================
-*/
-
-async loadBusinessPartners() {
-
-    try {
-
-        this.businessPartners =
-
-            await BusinessPartnerService.getAll();
-
-    }
-
-    catch (error) {
-
-        console.error(
-
-            "Failed to load Business Partner",
-
-            error
-
+        this.filterFindBy?.addEventListener(
+            "change",
+            () => this.search()
         );
 
-        this.businessPartners = [];
-
-    }
-
-}
-
-/*
-==========================================================
-GET BUSINESS PARTNER OPTIONS
-==========================================================
-*/
-
-getBusinessPartnerOptions() {
-
-    let options = `
-
-        <option value="">
-
-            -- None --
-
-        </option>
-
-    `;
-
-    this.businessPartners.forEach(bp => {
-
-        options += `
-
-            <option value="${bp.id}">
-
-                ${bp.bp_code} - ${bp.bp_name}
-
-            </option>
-
-        `;
-
-    });
-
-    return options;
-
-}
-/*
-==========================================================
-ADD DETAIL ROW
-==========================================================
-*/
-
-addDetailRow() {
-
-    const tbody = this.detailBody;
-
-    if (!tbody) {
-
-        console.error("journal-detail-body tidak ditemukan.");
-
-        return;
-
-    }
-
-    const index = tbody.rows.length + 1;
-
-    const row = document.createElement("tr");
-
-    row.innerHTML = `
-
-        <td class="text-center">
-
-            ${index}
-
-        </td>
-
-        <td>
-
-            <select class="form-select coa-select">
-
-                ${this.getChartOfAccountsOptions()}
-
-            </select>
-
-        </td>
-
-        <td>
-
-            <select class="form-select bp-select">
-
-                ${this.getBusinessPartnerOptions()}
-
-            </select>
-
-        </td>
-
-        <td>
-
-            <input
-                type="text"
-                class="form-control description">
-
-        </td>
-
-        <td>
-
-            <input
-                type="number"
-                class="form-control debit text-end"
-                value="0">
-
-        </td>
-
-        <td>
-
-            <input
-                type="number"
-                class="form-control credit text-end"
-                value="0">
-
-        </td>
-
-        <td class="text-center">
-
-            <button
-                type="button"
-                class="btn btn-sm btn-danger btn-remove-line">
-
-                <i class="fa-solid fa-trash"></i>
-
-            </button>
-
-        </td>
-
-    `;
-
-    tbody.appendChild(row);
-    row
-
-    .querySelector(
-
-        ".btn-remove-line"
-
-    )
-
-    .addEventListener(
-
-        "click",
-
-        (event) =>
-
-            this.removeDetailRow(
-
-                event.currentTarget
-
-            )
-
-    );
-    /*
-==========================================
-AUTO DEBIT
-==========================================
-*/
-
-const debit =
-
-    row.querySelector(
-
-        ".debit"
-
-    );
-
-const credit =
-
-    row.querySelector(
-
-        ".credit"
-
-    );
-
-debit.addEventListener(
-
-    "input",
-
-    () => {
-
-        if (
-
-            Number(debit.value) > 0
-
-        ) {
-
-            credit.value = 0;
-
-        }
-
-        this.calculateTotal();
-
-    }
-
-);
-/*
-==========================================
-AUTO CREDIT
-==========================================
-*/
-
-credit.addEventListener(
-
-    "input",
-
-    () => {
-
-        if (
-
-            Number(credit.value) > 0
-
-        ) {
-
-            debit.value = 0;
-
-        }
-
-        this.calculateTotal();
-
-    }
-
-);
-}
-
-/*
-==========================================================
-REMOVE DETAIL ROW
-==========================================================
-*/
-
-removeDetailRow(button) {
-
-    /*
-    ==========================================
-    REMOVE ROW
-    ==========================================
-    */
-
-    button
-
-        .closest("tr")
-
-        .remove();
-
-    /*
-    ==========================================
-    RENUMBER
-    ==========================================
-    */
-
-    this.renumberRows();
-    this.calculateTotal();
-
-}
-/*
-==========================================================
-CALCULATE TOTAL
-==========================================================
-*/
-
-calculateTotal() {
-
-    let totalDebit = 0;
-
-    let totalCredit = 0;
-
-    this.detailBody
-
-        .querySelectorAll("tr")
-
-        .forEach(row => {
-
-            const debit = Number(
-
-                row.querySelector(".debit")?.value || 0
-
-            );
-
-            const credit = Number(
-
-                row.querySelector(".credit")?.value || 0
-
-            );
-
-            totalDebit += debit;
-
-            totalCredit += credit;
-
-        });
-        /*
-==========================================
-BALANCE
-==========================================
-*/
-
-const difference =
-
-    totalDebit - totalCredit;
-
-const balanced =
-
-    difference === 0;
-    /*
-==========================================
-SAVE STATUS
-==========================================
-*/
-
-this.isBalanced = balanced;
-
-    /*
-    ==========================================
-    DISPLAY
-    ==========================================
-    */
-
-    document.getElementById(
-
-        "total-debit"
-
-    ).textContent =
-
-        totalDebit.toLocaleString();
-
-    document.getElementById(
-
-        "total-credit"
-
-    ).textContent =
-
-        totalCredit.toLocaleString();
-
-    document.getElementById(
-
-    "total-difference"
-
-).textContent =
-
-    difference.toLocaleString();
-
-/*
-==========================================
-STATUS
-==========================================
-*/
-
-const status =
-
-    document.getElementById(
-
-        "journal-balance-status"
-
-    );
-
-if (!status) return;
-
-status.textContent =
-
-    balanced
-
-        ? "BALANCED"
-
-        : "NOT BALANCED";
-
-status.className =
-
-    balanced
-
-        ? "badge bg-success"
-
-        : "badge bg-danger";
-
-}
-/*
-==========================================================
-OPEN ADD MODAL
-==========================================================
-*/
-
-async openAddModal() {
-
-    /*
-    ==========================================
-    RESET GRID
-    ==========================================
-    */
-
-    this.detailBody.innerHTML = "";
-
-    /*
-    ==========================================
-    FIRST LINE
-    ==========================================
-    */
-
-    this.addDetailRow();
-    this.calculateTotal();
-
-    /*
-==========================================
-DEFAULT DATE
-==========================================
-*/
-
-document.getElementById(
-    "journal-date"
-).value = new Date()
-    .toISOString()
-    .split("T")[0];
-    /*
-    ==========================================
-    SHOW MODAL
-    ==========================================
-    */
-
-    this.modal.show();
-
-}
-/*
-==========================================================
-RENUMBER ROW
-==========================================================
-*/
-
-renumberRows() {
-
-    const rows =
-
-        this.detailBody.querySelectorAll("tr");
-
-    rows.forEach(
-
-        (row, index) => {
-
-            row.cells[0].textContent =
-
-                index + 1;
-
-        }
-
-    );
-
-}
-/*
-==========================================================
-VALIDATE JOURNAL
-==========================================================
-*/
-
-validateJournal() {
-
-    /*
-    ==========================================
-    NO DETAIL
-    ==========================================
-    */
-
-    if (
-
-        this.detailBody.rows.length === 0
-
-    ) {
-
-        alert(
-
-            "Journal detail is empty."
-
+        this.filterDateFrom?.addEventListener(
+            "change",
+            () => this.search()
         );
 
-        return false;
+        this.filterDateTo?.addEventListener(
+            "change",
+            () => this.search()
+        );
 
     }
 
     /*
-    ==========================================
-    BALANCE
-    ==========================================
+    ==========================================================
+    PAGINATION EVENTS
+    ==========================================================
     */
 
-    if (
+    bindPaginationEvents() {
 
-        !this.isBalanced
-
-    ) {
-
-        alert(
-
-            "Journal is not balanced."
-
+        this.btnFirstPage?.addEventListener(
+            "click",
+            () => this.firstPage()
         );
 
-        return false;
+        this.btnPreviousPage?.addEventListener(
+            "click",
+            () => this.previousPage()
+        );
+
+        this.btnNextPage?.addEventListener(
+            "click",
+            () => this.nextPage()
+        );
+
+        this.btnLastPage?.addEventListener(
+            "click",
+            () => this.lastPage()
+        );
+
+        this.currentPageInput?.addEventListener(
+            "change",
+            () => this.goToPage()
+        );
 
     }
 
-    return true;
-    
+    /*
+    ==========================================================
+    TABLE EVENTS
+    ==========================================================
+    */
 
-}
-/*
-/*
+    bindTableEvents() {
+
+        this.tableBody?.addEventListener(
+            "click",
+            (event) => this.handleTableAction(event)
+        );
+
+    }
+    /*
 ==========================================================
-SAVE DRAFT
+LOAD GENERAL JOURNAL
 ==========================================================
 */
 
-async saveDraft() {
+async loadData() {
 
     try {
 
         /*
-        ==========================================
-        COLLECT DATA
-        ==========================================
+        ======================================================
+        SHOW LOADING
+        ======================================================
         */
 
-        const header =
-            this.collectJournalHeader();
-
-        const details =
-            this.collectJournalDetail();
+        window.App?.showLoading?.();
 
         /*
-        ==========================================
-        CHECK MODE
-        ==========================================
+        ======================================================
+        GET DATA
+        ======================================================
         */
 
-        const journalId =
-            document.getElementById("journal-id").value;
+        this.journals =
+            await this.service.getAll();
 
-        if (journalId) {
+        if (!Array.isArray(this.journals)) {
 
-            await JournalService.update(
-
-                journalId,
-
-                header,
-
-                details
-
-            );
-
-            alert("Journal Updated.");
-
-        }
-
-        else {
-
-            await JournalService.insert(
-
-                header,
-
-                details
-
-            );
-
-            alert("Journal Saved.");
+            this.journals = [];
 
         }
 
         /*
-        ==========================================
-        REFRESH
-        ==========================================
+        ======================================================
+        PAGINATION
+        ======================================================
         */
 
-        this.modal.hide();
+        this.totalRows =
+            this.journals.length;
 
-        await this.loadJournalList();
+        this.totalPages =
+            Math.max(
+                1,
+                Math.ceil(
+                    this.totalRows /
+                    this.pageSize
+                )
+            );
+
+        this.currentPage = 1;
+
+        /*
+        ======================================================
+        RENDER
+        ======================================================
+        */
+
+        this.refreshView();
 
     }
 
@@ -926,50 +425,184 @@ async saveDraft() {
 
         console.error(error);
 
-        alert(error.message);
+        this.showError(error);
+
+    }
+
+    finally {
+
+        window.App?.hideLoading?.();
 
     }
 
 }
+
 /*
 ==========================================================
-LOAD JOURNAL LIST
+REFRESH
 ==========================================================
 */
 
-async loadJournalList() {
+async refresh() {
+
+    this.resetFilter();
+
+    await this.loadData();
+
+}
+
+/*
+==========================================================
+SEARCH
+==========================================================
+*/
+
+async search() {
 
     try {
 
-        this.journals =
-            await JournalService.getAll();
+        const filter = {
 
-        this.renderJournalTable();
+            dateFrom:
+                this.filterDateFrom?.value ?? "",
+
+            dateTo:
+                this.filterDateTo?.value ?? "",
+
+            status:
+                this.filterStatus?.value ?? "all",
+
+            findBy:
+                this.filterFindBy?.value ?? "journal_no",
+
+            keyword:
+                this.filterKeyword?.value.trim() ?? ""
+
+        };
+
+        this.journals =
+            await this.service.search(filter);
+
+        if (!Array.isArray(this.journals)) {
+
+            this.journals = [];
+
+        }
+
+        this.totalRows =
+            this.journals.length;
+
+        this.totalPages =
+            Math.max(
+                1,
+                Math.ceil(
+                    this.totalRows /
+                    this.pageSize
+                )
+            );
+
+        this.currentPage = 1;
+
+        this.refreshView();
 
     }
 
     catch (error) {
 
-        console.error(
-            "Failed Load Journal",
-            error
-        );
+        console.error(error);
+
+        this.showError(error);
 
     }
 
 }
-/*
+
 /*
 ==========================================================
-RENDER JOURNAL TABLE
+REFRESH VIEW
 ==========================================================
 */
 
-renderJournalTable() {
+refreshView() {
+
+    this.renderTable();
+
+    this.renderPagination();
+
+    this.updateRecordInformation();
+
+}
+
+/*
+==========================================================
+RESET FILTER
+==========================================================
+*/
+
+resetFilter() {
+
+    if (this.filterDateFrom)
+        this.filterDateFrom.value = "";
+
+    if (this.filterDateTo)
+        this.filterDateTo.value = "";
+
+    if (this.filterStatus)
+        this.filterStatus.value = "all";
+
+    if (this.filterFindBy)
+        this.filterFindBy.value = "journal_no";
+
+    if (this.filterKeyword)
+        this.filterKeyword.value = "";
+
+}
+
+/*
+==========================================================
+UPDATE RECORD INFORMATION
+==========================================================
+*/
+
+updateRecordInformation() {
+
+    if (!this.displayRecord) {
+
+        return;
+
+    }
+
+    if (this.totalRows === 0) {
+
+        this.displayRecord.textContent =
+            "Records 0 - 0 of 0";
+
+        return;
+
+    }
+
+    const start =
+        ((this.currentPage - 1) * this.pageSize) + 1;
+
+    const end =
+        Math.min(
+            this.currentPage * this.pageSize,
+            this.totalRows
+        );
+
+    this.displayRecord.textContent =
+        `Records ${start} - ${end} of ${this.totalRows}`;
+
+}
+/*
+==========================================================
+RENDER TABLE
+==========================================================
+*/
+
+renderTable() {
 
     if (!this.tableBody) {
-
-        console.error("journal-table-body tidak ditemukan.");
 
         return;
 
@@ -977,17 +610,22 @@ renderJournalTable() {
 
     this.tableBody.innerHTML = "";
 
-    if (!this.journals || this.journals.length === 0) {
+    /*
+    ======================================================
+    NO DATA
+    ======================================================
+    */
+
+    if (this.journals.length === 0) {
 
         this.tableBody.innerHTML = `
 
             <tr>
 
-                <td
-                    colspan="8"
-                    class="text-center text-muted">
+                <td colspan="8"
+                    class="text-center py-5 text-muted">
 
-                    No Journal Found
+                    No General Journal Found
 
                 </td>
 
@@ -999,326 +637,1893 @@ renderJournalTable() {
 
     }
 
-    this.journals.forEach((journal) => {
+    /*
+    ======================================================
+    PAGINATION
+    ======================================================
+    */
 
-        const row = document.createElement("tr");
+    const startIndex =
+        (this.currentPage - 1) *
+        this.pageSize;
 
-        row.innerHTML = `
+    const endIndex =
+        startIndex +
+        this.pageSize;
 
-            <td>
+    const rows =
+        this.journals.slice(
+            startIndex,
+            endIndex
+        );
 
-                ${journal.journal_no ?? "-"}
+    /*
+    ======================================================
+    RENDER ROW
+    ======================================================
+    */
 
-            </td>
+    rows.forEach((journal, index) => {
 
-            <td>
+        this.tableBody.insertAdjacentHTML(
 
-                ${journal.journal_date ?? "-"}
+            "beforeend",
 
-            </td>
+            this.createTableRow(
 
-            <td>
+                journal,
 
-                ${journal.reference_no ?? "-"}
+                startIndex + index + 1
 
-            </td>
+            )
 
-            <td>
+        );
 
-                ${journal.description ?? "-"}
-
-            </td>
-
-            <td class="text-center">
-
-                <span class="badge ${journal.status === "Posted"
-                    ? "bg-success"
-                    : "bg-secondary"}">
-
-                    ${journal.status ?? "Draft"}
-
-                </span>
-
-            </td>
-
-            <td class="text-end">
-
-                ${Number(
-                    journal.total_debit ?? 0
-                ).toLocaleString()}
-
-            </td>
-
-            <td class="text-end">
-
-                ${Number(
-                    journal.total_credit ?? 0
-                ).toLocaleString()}
-
-            </td>
-
-            <td class="text-center">
-
-                <button
-                    type="button"
-                    class="btn btn-sm btn-warning btn-edit">
-
-                    <i class="fa-solid fa-pen"></i>
-
-                </button>
-
-            </td>
-
-        `;
-
-        this.tableBody.appendChild(row);
-
-        /*
-        ==========================================
-        EDIT
-        ==========================================
-        */
-
-       row.querySelector(".btn-edit").onclick = () => {
-
-    this.openEditModal(journal.id);
-
-};
     });
+
+}
+
+/*
+==========================================================
+CREATE TABLE ROW
+==========================================================
+*/
+
+createTableRow(journal, no) {
+
+    const isDraft =
+        journal.status === "Draft";
+
+    const isPosted =
+        journal.status === "Posted";
+
+    const isVoid =
+        journal.status === "Void";
+
+    return `
+
+<tr>
+
+    <td>${no}</td>
+
+    <td>${journal.journal_date ?? "-"}</td>
+
+    <td>${journal.journal_no ?? "-"}</td>
+
+    <td>${journal.description ?? "-"}</td>
+
+    <td class="text-end">
+
+        ${this.formatCurrency(journal.total_debit)}
+
+    </td>
+
+    <td class="text-end">
+
+        ${this.formatCurrency(journal.total_credit)}
+
+    </td>
+
+    <td class="text-center">
+
+        ${this.renderStatus(journal.status)}
+
+    </td>
+
+    <td class="text-center">
+
+        <div class="btn-group btn-group-sm">
+
+            ${
+                isDraft
+                    ? `
+                        <button
+                            class="btn btn-outline-primary btn-edit-journal"
+                            data-id="${journal.id}"
+                            title="Edit">
+
+                            <i class="fa-solid fa-pen"></i>
+
+                        </button>
+
+                        <button
+                            class="btn btn-outline-danger btn-delete-journal"
+                            data-id="${journal.id}"
+                            title="Delete">
+
+                            <i class="fa-solid fa-trash"></i>
+
+                        </button>
+
+                        <button
+                            class="btn btn-outline-success btn-duplicate-journal"
+                            data-id="${journal.id}"
+                            title="Duplicate">
+
+                            <i class="fa-regular fa-copy"></i>
+
+                        </button>
+
+                        <button
+                            class="btn btn-outline-dark btn-post-journal"
+                            data-id="${journal.id}"
+                            title="Post">
+
+                            <i class="fa-solid fa-check"></i>
+
+                        </button>
+                    `
+                    : ""
+            }
+
+            ${
+                isPosted
+                    ? `
+                        <button
+                            class="btn btn-outline-secondary btn-view-journal"
+                            data-id="${journal.id}"
+                            title="View">
+
+                            <i class="fa-solid fa-eye"></i>
+
+                        </button>
+
+                        <button
+                            class="btn btn-outline-success btn-duplicate-journal"
+                            data-id="${journal.id}"
+                            title="Duplicate">
+
+                            <i class="fa-regular fa-copy"></i>
+
+                        </button>
+
+                        <button
+                            class="btn btn-outline-warning btn-void-journal"
+                            data-id="${journal.id}"
+                            title="Void">
+
+                            <i class="fa-solid fa-ban"></i>
+
+                        </button>
+                    `
+                    : ""
+            }
+
+            ${
+                isVoid
+                    ? `
+                        <button
+                            class="btn btn-outline-secondary btn-view-journal"
+                            data-id="${journal.id}"
+                            title="View">
+
+                            <i class="fa-solid fa-eye"></i>
+
+                        </button>
+                    `
+                    : ""
+            }
+
+        </div>
+
+    </td>
+
+</tr>
+
+`;
+
+}
+
+handleTableAction(event) {
+
+    const button = event.target.closest("button");
+
+    if (!button) return;
+
+    const id = button.dataset.id;
+
+    if (!id) return;
+
+    if (button.classList.contains("btn-edit-journal")) {
+
+        return this.openEditJournal(id);
+
+    }
+
+    if (button.classList.contains("btn-delete-journal")) {
+
+        return this.deleteJournal(id);
+
+    }
+
+    if (button.classList.contains("btn-duplicate-journal")) {
+
+        return this.duplicateJournal(id);
+
+    }
+
+    if (button.classList.contains("btn-post-journal")) {
+
+        return this.postJournal(id);
+
+    }
+
+    if (button.classList.contains("btn-void-journal")) {
+
+        return this.voidJournal(id);
+
+    }
+
+    if (button.classList.contains("btn-view-journal")) {
+
+        return this.viewJournal(id);
+
+    }
 
 }
 /*
 ==========================================================
-OPEN EDIT MODAL
+RENDER STATUS
 ==========================================================
 */
 
-async openEditModal(id) {
+renderStatus(status) {
 
-    console.log("STEP 1");
+    switch (status) {
+
+        case "Draft":
+
+            return `
+                <span class="badge bg-warning text-dark">
+                    Draft
+                </span>
+            `;
+
+        case "Posted":
+
+            return `
+                <span class="badge bg-success">
+                    Posted
+                </span>
+            `;
+        case "Void":
+
+    return `
+
+        <span class="badge bg-danger">
+
+            Void
+
+        </span>
+
+    `;
+
+        case "Cancelled":
+
+            return `
+                <span class="badge bg-danger">
+                    Cancelled
+                </span>
+            `;
+
+        case "Reversed":
+
+            return `
+                <span class="badge bg-info text-dark">
+                    Reversed
+                </span>
+            `;
+
+        case "Locked":
+
+            return `
+                <span class="badge bg-dark">
+                    Locked
+                </span>
+            `;
+
+        default:
+
+            return `
+                <span class="badge bg-secondary">
+                    Unknown
+                </span>
+            `;
+
+    }
+
+}
+
+/*
+==========================================================
+FORMAT CURRENCY
+==========================================================
+*/
+
+formatCurrency(value) {
+
+    return Number(
+        value ?? 0
+    ).toLocaleString(
+
+        "id-ID",
+
+        {
+
+            minimumFractionDigits: 2,
+
+            maximumFractionDigits: 2
+
+        }
+
+    );
+
+}
+/*
+==========================================================
+OPEN ADD JOURNAL
+==========================================================
+*/
+
+async openAddJournal() {
+
+    console.log("========== OPEN ADD ==========");
+
+    this.currentMode = "add";
+
+    this.currentJournal = null;
+
+    console.log("Current Journal :", this.currentJournal);
+    this.setReadOnly(false);
+
+    await this.loadJournalModal();
+
+    this.clearJournalForm();
+
+    console.log("Form Cleared");
+
+    await this.loadMasterData();
+
+    await this.initializeJournalHeader();
+
+    await this.addDetailLine();
+
+    console.log("Detail Row :", this.detailBody.children.length);
+
+    this.modal.show();
+
+}
+/*
+==========================================================
+OPEN EDIT JOURNAL
+==========================================================
+*/
+
+async openEditJournal(id) {
 
     try {
 
-        console.log("STEP 2");
+        this.currentMode = "edit";
 
-        const result = await JournalService.getById(id);
+        this.currentJournal =
+            await this.service.getById(id);
 
-        console.log("STEP 3", result);
+        if (!this.currentJournal) {
 
-        const header = result.header;
+            this.showMessage(
+                "Journal not found.",
+                "warning"
+            );
 
-        console.log("STEP 4");
+            return;
 
-        document.getElementById("journal-id").value =
-            header.id;
+        }
 
-        document.getElementById("journal-no").value =
-            header.journal_no;
+        await this.loadJournalModal();
 
-        document.getElementById("journal-date").value =
-            header.journal_date;
+this.clearJournalForm();
 
-        document.getElementById("reference-no").value =
-            header.reference_no ?? "";
+await this.loadMasterData();
 
-        document.getElementById("journal-description").value =
-            header.description ?? "";
+await this.initializeJournalHeader();
 
-        document.getElementById("journal-posting-status").value =
-            header.status;
+await this.loadJournalData();
+this.setReadOnly(false);
 
-        console.log("STEP 5");
-        this.loadJournalDetail(result.details);
+this.modal.show();
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        this.showError(error);
+
+    }
+
+}
+/*
+==========================================================
+VIEW JOURNAL (READ ONLY)
+==========================================================
+*/
+
+async viewJournal(id) {
+
+    try {
+
+        this.currentMode = "view";
+
+        this.currentJournal =
+            await this.service.getById(id);
+
+        if (!this.currentJournal) {
+
+            this.showMessage(
+                "Journal not found.",
+                "warning"
+            );
+
+            return;
+
+        }
+
+        await this.loadJournalModal();
+
+        this.clearJournalForm();
+
+        await this.loadMasterData();
+
+        await this.initializeJournalHeader();
+
+        await this.loadJournalData();
+
+        this.setReadOnly(true);
 
         this.modal.show();
-
-        console.log("STEP 6");
 
     }
 
     catch (error) {
 
-        console.error("OPEN EDIT ERROR", error);
+        console.error(error);
+
+        this.showError(error);
 
     }
 
 }
 /*
 ==========================================================
-LOAD JOURNAL DETAIL
+LOAD JOURNAL MODAL
 ==========================================================
 */
 
-loadJournalDetail(details) {
+async loadJournalModal() {
+
+    if (this.modalLoaded) {
+
+        return;
+
+    }
+
+    const response =
+        await fetch(
+            "modules/gl-journal/gl-journal-modal.html"
+        );
+
+    if (!response.ok) {
+
+        throw new Error(
+            "Cannot load Journal Modal."
+        );
+
+    }
+
+    const html =
+        await response.text();
+
+    this.modalContainer.innerHTML =
+        html;
+
+    this.modalElement =
+        document.getElementById(
+            "glJournalModal"
+        );
+
+    this.modal =
+        new bootstrap.Modal(
+            this.modalElement
+        );
+
+    this.cacheModalDom();
+
+    this.bindModalEvents();
+
+    this.modalLoaded = true;
+
+}
+/*
+==========================================================
+CACHE MODAL DOM
+==========================================================
+*/
+
+cacheModalDom() {
+
+    this.txtAccountingDate =
+        document.getElementById(
+            "journal-accounting-date"
+        );
+
+    this.txtJournalNo =
+        document.getElementById(
+            "journal-journal-no"
+        );
+
+    this.txtDescription =
+        document.getElementById(
+            "journal-description"
+        );
+
+    this.cboStatus =
+        document.getElementById(
+            "journal-status"
+        );
+
+    this.detailBody =
+        document.getElementById(
+            "journal-detail-body"
+        );
+
+    this.detailTemplate =
+        document.getElementById(
+            "journal-detail-template"
+        );
+
+    this.btnAddDetail =
+        document.getElementById(
+            "btn-add-detail"
+        );
+
+    this.btnDeleteDetail =
+        document.getElementById(
+            "btn-delete-detail"
+        );
+
+    this.btnSaveJournal =
+        document.getElementById(
+            "btn-save-journal"
+        );
+
+    this.btnPostJournal =
+        document.getElementById(
+            "btn-post-journal"
+        );
+
+}
+
+/*
+==========================================================
+BIND MODAL EVENTS
+==========================================================
+*/
+
+bindModalEvents() {
+
+    /*
+    ======================================================
+    ADD DETAIL
+    ======================================================
+    */
+
+    this.btnAddDetail?.addEventListener(
+
+        "click",
+
+        () => {
+
+            this.addDetailLine();
+
+        }
+
+    );
+
+    /*
+    ======================================================
+    DELETE SELECTED DETAIL
+    ======================================================
+    */
+
+    this.btnDeleteDetail?.addEventListener(
+
+        "click",
+
+        () => {
+
+            this.deleteSelectedLines();
+
+        }
+
+    );
+
+
+    /*
+    ======================================================
+    SAVE
+    ======================================================
+    */
+
+    this.btnSaveJournal?.addEventListener(
+
+    "click",
+
+    () => {
+
+        console.log("========== SAVE BUTTON ==========");
+
+        console.log("Mode :", this.currentMode);
+
+        console.log("Journal :", this.currentJournal);
+
+        this.saveJournal("Draft");
+
+    }
+
+);
+
+    /*
+    ======================================================
+    POST
+    ======================================================
+    */
+
+    this.btnPostJournal?.addEventListener(
+
+    "click",
+
+    () => {
+
+        console.log("========== POST BUTTON ==========");
+
+        console.log("Mode :", this.currentMode);
+
+        console.log("Journal :", this.currentJournal);
+
+        this.saveJournal("Posted");
+
+    }
+
+);
+
+}
+/*
+==========================================================
+BIND DETAIL ROW EVENTS
+==========================================================
+*/
+
+bindDetailRowEvents(row) {
+
+    if (!row) return;
+
+    /*
+    ======================================================
+    RECALCULATE
+    ======================================================
+    */
+
+    row.querySelectorAll(
+
+    ".detail-debit-account, " +
+    ".detail-credit-account"
+
+).forEach(element => {
+
+    element.addEventListener(
+
+        "change",
+
+        () => {
+
+            const debitAccount =
+                row.querySelector(
+                    ".detail-debit-account"
+                )?.value;
+
+            const creditAccount =
+                row.querySelector(
+                    ".detail-credit-account"
+                )?.value;
+
+            /*
+            ==========================================
+            DEBIT & CREDIT CANNOT BE SAME
+            ==========================================
+            */
+
+            if (
+
+                debitAccount &&
+                creditAccount &&
+                debitAccount === creditAccount
+
+            ) {
+
+                this.showMessage(
+
+                    "Debit Account dan Credit Account tidak boleh sama.",
+
+                    "warning"
+
+                );
+
+                element.value = "";
+
+            }
+
+            this.calculateSummary();
+
+        }
+
+    );
+
+});
+
+/*
+======================================================
+AMOUNT INPUT
+======================================================
+*/
+
+const amountInput =
+
+    row.querySelector(
+
+        ".detail-amount"
+
+    );
+
+amountInput?.addEventListener(
+
+    "input",
+
+    () => {
+
+        /*
+        ==========================================
+        POSITIVE NUMBER ONLY
+        ==========================================
+        */
+
+        if (
+
+            Number(amountInput.value) < 0
+
+        ) {
+
+            amountInput.value = 0;
+
+        }
+
+        this.calculateSummary();
+
+    }
+
+);
+    /*
+    ======================================================
+    DESCRIPTION
+    ======================================================
+    */
+
+    row.querySelector(
+
+        ".detail-description"
+
+    )?.addEventListener(
+
+        "input",
+
+        () => {
+
+            // reserved
+
+        }
+
+    );
+    /*
+======================================================
+DELETE CURRENT LINE
+======================================================
+*/
+
+row.querySelector(
+
+    ".btn-delete-detail"
+
+)?.addEventListener(
+
+    "click",
+
+    () => {
+
+        row.remove();
+
+        /*
+        ==========================================
+        MINIMUM 1 ROW
+        ==========================================
+        */
+
+        if (
+
+            this.detailBody.querySelectorAll(
+
+                ".journal-detail-row"
+
+            ).length === 0
+
+        ) {
+
+            this.addDetailLine();
+
+        }
+
+        this.renumberDetailLines();
+
+        this.calculateSummary();
+
+    }
+
+);
+
+}
+
+/*
+==========================================================
+INITIALIZE JOURNAL HEADER
+==========================================================
+*/
+
+async initializeJournalHeader() {
 
     /*
     ==========================================
-    CLEAR GRID
+    DOCUMENT NUMBER
     ==========================================
+    */
+
+    if (this.currentMode === "add") {
+
+        this.txtJournalNo.value =
+            await this.service.generateDocumentNumber();
+
+    }
+    else {
+
+        this.txtJournalNo.value =
+    this.currentJournal.journal_no;
+    }
+
+    /*
+    ==========================================
+    ACCOUNTING DATE
+    ==========================================
+    */
+
+    if (this.currentMode === "add") {
+
+        this.txtAccountingDate.value =
+            new Date()
+            .toISOString()
+            .substring(0,10);
+
+    }
+    else {
+
+        this.txtAccountingDate.value =
+    this.currentJournal.journal_date;
+
+    }
+
+    /*
+    ==========================================
+    STATUS
+    ==========================================
+    */
+
+    this.cboStatus.value =
+        this.currentMode === "add"
+        ? "Draft"
+        : this.currentJournal.status;
+
+}
+/*
+==========================================================
+LOAD JOURNAL DATA
+==========================================================
+*/
+
+async loadJournalData() {
+
+    if (!this.currentJournal) {
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    HEADER
+    ======================================================
+    */
+
+    this.txtDescription.value =
+        this.currentJournal.description ?? "";
+
+    this.cboStatus.value =
+        this.currentJournal.status ?? "Draft";
+
+    /*
+    ======================================================
+    DETAIL
+    ======================================================
     */
 
     this.detailBody.innerHTML = "";
 
-    /*
-    ==========================================
-    LOOP DETAIL
-    ==========================================
-    */
+    if (!Array.isArray(this.currentJournal.details)) {
 
-    details.forEach((detail, index) => {
+        return;
 
-        const row = document.createElement("tr");
+    }
 
-        row.innerHTML = `
+    const details =
+    this.currentJournal.details;
 
-            <td class="text-center">
+const debitDetails =
+    details.filter(
+        detail =>
+            Number(
+                detail.debit
+            ) > 0
+    );
 
-                ${index + 1}
+const creditDetails =
+    details.filter(
+        detail =>
+            Number(
+                detail.credit
+            ) > 0
+    );
 
-            </td>
+for (
+    let i = 0;
+    i < debitDetails.length;
+    i++
+) {
 
-            <td>
+    const debit =
+        debitDetails[i];
 
-                <select class="form-select coa-select">
+    const credit =
+        creditDetails[i];
 
-                    ${this.getChartOfAccountsOptions()}
+    await this.addDetailLine({
 
-                </select>
+        description:
+            debit.description
+            ??
+            credit?.description
+            ??
+            "",
 
-            </td>
+        debit_account_id:
+            debit.account_id,
 
-            <td>
+        credit_account_id:
+            credit?.account_id
+            ?? "",
 
-                <select class="form-select bp-select">
+        amount:
+            Number(
+                debit.debit
+            ),
 
-                    ${this.getBusinessPartnerOptions()}
-
-                </select>
-
-            </td>
-
-            <td>
-
-                <input
-                    type="text"
-                    class="form-control description">
-
-            </td>
-
-            <td>
-
-                <input
-                    type="number"
-                    class="form-control debit text-end">
-
-            </td>
-
-            <td>
-
-                <input
-                    type="number"
-                    class="form-control credit text-end">
-
-            </td>
-
-            <td class="text-center">
-
-                <button
-                    type="button"
-                    class="btn btn-sm btn-danger btn-remove-line">
-
-                    <i class="fa-solid fa-trash"></i>
-
-                </button>
-
-            </td>
-
-        `;
-
-        /*
-        ==========================================
-        SET VALUE
-        ==========================================
-        */
-
-        row.querySelector(".coa-select").value =
-            detail.account_id;
-
-        row.querySelector(".bp-select").value =
-            detail.business_partner_id ?? "";
-
-        row.querySelector(".description").value =
-            detail.description ?? "";
-
-        row.querySelector(".debit").value =
-            detail.debit;
-
-        row.querySelector(".credit").value =
-            detail.credit;
-
-        /*
-        ==========================================
-        REMOVE
-        ==========================================
-        */
-
-        row.querySelector(".btn-remove-line")
-
-            .addEventListener(
-
-                "click",
-
-                () => this.removeDetailRow(
-
-                    row.querySelector(".btn-remove-line")
-
-                )
-
-            );
-
-        /*
-        ==========================================
-        AUTO DEBIT
-        ==========================================
-        */
-
-        row.querySelector(".debit")
-
-            .addEventListener(
-
-                "input",
-
-                () => this.calculateTotal()
-
-            );
-
-        /*
-        ==========================================
-        AUTO CREDIT
-        ==========================================
-        */
-
-        row.querySelector(".credit")
-
-            .addEventListener(
-
-                "input",
-
-                () => this.calculateTotal()
-
-            );
-
-        this.detailBody.appendChild(row);
+        business_partner_id:
+            debit.business_partner_id
+            ??
+            credit?.business_partner_id
+            ??
+            null
 
     });
 
+}
+
+    this.calculateSummary();
+
+}
+/*
+==========================================================
+ADD DETAIL LINE
+==========================================================
+*/
+
+async addDetailLine(data = {}) {
+
+    const template =
+        this.detailTemplate;
+
+    if (!template) {
+
+        console.error(
+            "Template journal-detail-template tidak ditemukan"
+        );
+
+        return;
+
+    }
+
+    if (!this.detailBody) {
+
+        console.error(
+            "journal-detail-body tidak ditemukan"
+        );
+
+        return;
+
+    }
+
     /*
-    ==========================================
-    RECALCULATE
-    ==========================================
+    ======================================================
+    CLONE TEMPLATE
+    ======================================================
     */
 
-    this.calculateTotal();
+    const clone =
+        template.content.cloneNode(true);
+
+    /*
+    ======================================================
+    APPEND ROW
+    ======================================================
+    */
+
+    this.detailBody.appendChild(
+        clone
+    );
+
+    const addedRow =
+        this.detailBody.lastElementChild;
+
+    if (!addedRow) {
+
+        console.error(
+            "Detail row gagal dibuat."
+        );
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    GET ELEMENT
+    ======================================================
+    */
+
+    const debitAccount =
+        addedRow.querySelector(
+            ".detail-debit-account"
+        );
+
+    const creditAccount =
+        addedRow.querySelector(
+            ".detail-credit-account"
+        );
+
+    const businessPartner =
+        addedRow.querySelector(
+            ".detail-business-partner"
+        );
+
+    const description =
+        addedRow.querySelector(
+            ".detail-description"
+        );
+
+    const amount =
+        addedRow.querySelector(
+            ".detail-amount"
+        );
+
+    /*
+    ======================================================
+    LOAD COA
+    ======================================================
+    */
+
+    this.loadCOA(
+        debitAccount
+    );
+
+    this.loadCOA(
+        creditAccount
+    );
+
+    /*
+    ======================================================
+    LOAD BUSINESS PARTNER
+    ======================================================
+    */
+
+    this.loadBusinessPartner(
+        businessPartner
+    );
+
+    /*
+    ======================================================
+    SET VALUE
+    ======================================================
+    */
+
+    if (description) {
+
+        description.value =
+            data.description ?? "";
+
+    }
+
+    if (debitAccount) {
+
+        debitAccount.value =
+            data.debit_account_id ?? "";
+
+    }
+
+    if (creditAccount) {
+
+        creditAccount.value =
+            data.credit_account_id ?? "";
+
+    }
+
+    if (amount) {
+
+        amount.value =
+            data.amount ?? 0;
+
+    }
+
+    if (businessPartner) {
+
+        businessPartner.value =
+            data.business_partner_id ?? "";
+
+    }
+
+    /*
+    ======================================================
+    BIND ROW EVENTS
+    ======================================================
+    */
+
+    this.bindDetailRowEvents(
+        addedRow
+    );
+
+    /*
+    ======================================================
+    RENUMBER
+    ======================================================
+    */
+
+    this.renumberDetailLines();
+
+    /*
+    ======================================================
+    CALCULATE
+    ======================================================
+    */
+
+    this.calculateSummary();
+
+}
+/*
+==========================================================
+LOAD COA
+==========================================================
+*/
+
+loadCOA(selectElement) {
+
+    if (!selectElement) {
+
+        console.error(
+            "COA select tidak ditemukan."
+        );
+
+        return;
+
+    }
+
+    selectElement.innerHTML = "";
+
+    const defaultOption =
+        document.createElement(
+            "option"
+        );
+
+    defaultOption.value = "";
+
+    defaultOption.textContent =
+        "-- Select Account --";
+
+    selectElement.appendChild(
+        defaultOption
+    );
+
+    if (
+        !Array.isArray(
+            this.coaList
+        )
+    ) {
+
+        console.warn(
+            "COA list kosong."
+        );
+
+        return;
+
+    }
+
+    this.coaList.forEach(
+        account => {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+            option.value =
+                account.id;
+
+            option.textContent =
+                `${account.account_code} - ${account.account_name}`;
+
+            selectElement.appendChild(
+                option
+            );
+
+        }
+    );
+
+}
+/*
+==========================================================
+LOAD MASTER DATA
+==========================================================
+*/
+
+async loadMasterData() {
+
+    try {
+
+        /*
+        ==================================================
+        LOAD COA
+        ==================================================
+        */
+
+        this.coaList =
+            await this.service.getCOA();
+
+        /*
+        ==================================================
+        LOAD BUSINESS PARTNER
+        ==================================================
+        */
+
+        this.businessPartnerList =
+            await this.service.getBusinessPartner();
+
+        /*
+        ==================================================
+        VALIDATE COA
+        ==================================================
+        */
+
+        if (
+            !Array.isArray(
+                this.coaList
+            )
+        ) {
+
+            this.coaList = [];
+
+        }
+
+        /*
+        ==================================================
+        VALIDATE BUSINESS PARTNER
+        ==================================================
+        */
+
+        if (
+            !Array.isArray(
+                this.businessPartnerList
+            )
+        ) {
+
+            this.businessPartnerList = [];
+
+        }
+
+        console.log(
+            "COA loaded:",
+            this.coaList.length
+        );
+
+        console.log(
+            "Business Partner loaded:",
+            this.businessPartnerList.length
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Failed to load master data:",
+            error
+        );
+
+        this.coaList = [];
+
+        this.businessPartnerList = [];
+
+        throw error;
+
+    }
+
+}
+
+/*
+==========================================================
+LOAD BUSINESS PARTNER
+==========================================================
+*/
+
+/*
+==========================================================
+LOAD BUSINESS PARTNER
+==========================================================
+*/
+
+loadBusinessPartner(selectElement) {
+
+    if (!selectElement) {
+
+        console.error(
+            "Business Partner select tidak ditemukan."
+        );
+
+        return;
+
+    }
+
+    selectElement.innerHTML = "";
+
+    const defaultOption =
+        document.createElement(
+            "option"
+        );
+
+    defaultOption.value = "";
+
+    defaultOption.textContent =
+        "-- Optional --";
+
+    selectElement.appendChild(
+        defaultOption
+    );
+
+    if (
+        !Array.isArray(
+            this.businessPartnerList
+        )
+    ) {
+
+        console.warn(
+            "Business Partner list kosong."
+        );
+
+        return;
+
+    }
+
+    this.businessPartnerList.forEach(
+        partner => {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+            option.value =
+                partner.id;
+
+            option.textContent =
+`${partner.bp_code} - ${partner.bp_name}`;
+
+            selectElement.appendChild(
+                option
+            );
+
+        }
+    );
+
+}
+/*
+==========================================================
+CALCULATE SUMMARY
+==========================================================
+*/
+
+calculateSummary() {
+
+    let totalDebit = 0;
+
+    let totalCredit = 0;
+
+    const rows =
+        this.detailBody.querySelectorAll(
+            ".journal-detail-row"
+        );
+
+    rows.forEach(row => {
+
+        const debitAccount =
+            row.querySelector(
+                ".detail-debit-account"
+            )?.value;
+
+        const creditAccount =
+            row.querySelector(
+                ".detail-credit-account"
+            )?.value;
+
+        const amount =
+            Number(
+                row.querySelector(
+                    ".detail-amount"
+                )?.value || 0
+            );
+
+        if (
+            debitAccount &&
+            amount > 0
+        ) {
+
+            totalDebit += amount;
+
+        }
+
+        if (
+            creditAccount &&
+            amount > 0
+        ) {
+
+            totalCredit += amount;
+
+        }
+
+    });
+
+    const difference =
+        Math.abs(
+            totalDebit -
+            totalCredit
+        );
+
+    const debitElement =
+        document.getElementById(
+            "summary-total-debit"
+        );
+
+    const creditElement =
+        document.getElementById(
+            "summary-total-credit"
+        );
+
+    const differenceElement =
+        document.getElementById(
+            "summary-difference"
+        );
+
+    if (debitElement) {
+
+        debitElement.value =
+            this.formatCurrency(
+                totalDebit
+            );
+
+    }
+
+    if (creditElement) {
+
+        creditElement.value =
+            this.formatCurrency(
+                totalCredit
+            );
+
+    }
+
+    if (differenceElement) {
+
+        differenceElement.value =
+            this.formatCurrency(
+                difference
+            );
+
+    }
+
+    const statusElement =
+        document.getElementById(
+            "summary-balance-status"
+        );
+
+    if (!statusElement) return;
+
+    if (
+        totalDebit === totalCredit &&
+        totalDebit > 0
+    ) {
+
+        statusElement.textContent =
+            "BALANCED";
+
+        statusElement.className =
+            "badge bg-success";
+
+    } else {
+
+        statusElement.textContent =
+            "NOT BALANCED";
+
+        statusElement.className =
+            "badge bg-danger";
+
+    }
+
+}
+/*
+==========================================================
+DELETE SELECTED DETAIL LINE
+==========================================================
+*/
+
+deleteSelectedLines() {
+
+    const selectedRows =
+        this.detailBody.querySelectorAll(
+            ".detail-check:checked"
+        );
+
+    if (
+        selectedRows.length === 0
+    ) {
+
+        this.showMessage(
+            "Pilih detail jurnal yang akan dihapus.",
+            "warning"
+        );
+
+        return;
+
+    }
+
+    selectedRows.forEach(
+        checkbox => {
+
+            const row =
+                checkbox.closest(
+                    ".journal-detail-row"
+                );
+
+            row?.remove();
+
+        }
+    );
+
+    this.renumberDetailLines();
+
+    this.calculateSummary();
+
+}
+
+/*
+==========================================================
+RENUMBER DETAIL LINE
+==========================================================
+*/
+
+renumberDetailLines() {
+
+    const rows =
+        this.detailBody.querySelectorAll(
+            ".journal-detail-row"
+        );
+
+    rows.forEach(
+        (row, index) => {
+
+            const number =
+                row.querySelector(
+                    ".detail-line-number"
+                );
+
+            if (number) {
+
+                number.textContent =
+                    index + 1;
+
+            }
+
+        }
+    );
+
+}
+
+/*
+==========================================================
+COLLECT DETAIL DATA
+==========================================================
+*/
+
+collectDetailData() {
+
+    const details = [];
+
+    const rows =
+        this.detailBody.querySelectorAll(
+            ".journal-detail-row"
+        );
+
+    rows.forEach(row => {
+
+        const description =
+            row.querySelector(
+                ".detail-description"
+            )?.value.trim() ?? "";
+
+        const debitAccount =
+            row.querySelector(
+                ".detail-debit-account"
+            )?.value ?? "";
+
+        const creditAccount =
+            row.querySelector(
+                ".detail-credit-account"
+            )?.value ?? "";
+
+        const amount =
+            Number(
+                row.querySelector(
+                    ".detail-amount"
+                )?.value || 0
+            );
+
+        const businessPartner =
+            row.querySelector(
+                ".detail-business-partner"
+            )?.value || null;
+
+        if (
+            !debitAccount &&
+            !creditAccount &&
+            amount === 0
+        ) {
+
+            return;
+
+        }
+
+        details.push({
+
+            debit_account_id:
+                debitAccount,
+
+            credit_account_id:
+                creditAccount,
+
+            amount,
+
+            business_partner_id:
+                businessPartner,
+
+            description
+
+        });
+
+    });
+
+    return details;
+
+}
+
+/*
+==========================================================
+SAVE JOURNAL
+==========================================================
+*/
+
+async saveJournal(
+    status = "Draft"
+) {
+
+    try {
+
+        const header = {
+
+    journal_date:
+        this.txtAccountingDate.value,
+
+    journal_no:
+        this.txtJournalNo.value,
+
+    description:
+        this.txtDescription.value.trim(),
+
+    status
+
+};
+
+        const details =
+            this.collectDetailData();
+
+        if (
+            details.length === 0
+        ) {
+
+            this.showMessage(
+                "Journal detail belum diisi.",
+                "warning"
+            );
+
+            return;
+
+        }
+
+        const journalDetails =
+            this.service.buildJournalDetail(
+                details
+            );
+
+        const total =
+            this.service.calculateTotal(
+                journalDetails
+            );
+
+        if (
+            Number(
+                total.totalDebit.toFixed(2)
+            ) !==
+            Number(
+                total.totalCredit.toFixed(2)
+            )
+        ) {
+
+            this.showMessage(
+                "Journal belum balance.",
+                "warning"
+            );
+
+            return;
+
+        }
+
+        if (
+            this.currentMode === "add"
+        ) {
+
+            await this.service.create(
+                header,
+                details
+            );
+
+        } else {
+
+            await this.service.update(
+                this.currentJournal.id,
+                header,
+                details
+            );
+
+        }
+
+        this.showMessage(
+            status === "Posted"
+                ? "Journal berhasil diposting."
+                : "Journal berhasil disimpan."
+        );
+
+        this.modal.hide();
+
+        await this.loadData();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "saveJournal error:",
+            error
+        );
+
+        this.showError(
+            error
+        );
+
+    }
+
+}
+/*
+==========================================================
+RENDER PAGINATION
+==========================================================
+*/
+
+renderPagination() {
+
+    if (!this.currentPageInput) return;
+
+    this.currentPageInput.value = this.currentPage;
+
+    if (this.totalPageLabel) {
+
+        this.totalPageLabel.textContent =
+            `of ${this.totalPages}`;
+
+    }
+
+    if (this.btnFirstPage)
+        this.btnFirstPage.disabled =
+            this.currentPage === 1;
+
+    if (this.btnPreviousPage)
+        this.btnPreviousPage.disabled =
+            this.currentPage === 1;
+
+    if (this.btnNextPage)
+        this.btnNextPage.disabled =
+            this.currentPage >= this.totalPages;
+
+    if (this.btnLastPage)
+        this.btnLastPage.disabled =
+            this.currentPage >= this.totalPages;
 
 }
 /*
@@ -1327,103 +2532,181 @@ POST JOURNAL
 ==========================================================
 */
 
-postJournal() {
+async postJournal(id) {
 
-    console.log("Post Journal");
+    try {
+
+        const confirmPost = confirm(
+            "Post jurnal ini?"
+        );
+
+        if (!confirmPost) {
+
+            return;
+
+        }
+
+        await this.service.post(id);
+
+        this.showMessage(
+            "Journal berhasil diposting."
+        );
+
+        await this.loadData();
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        this.showError(error);
+
+    }
 
 }
 /*
 ==========================================================
-COLLECT JOURNAL HEADER
+VOID JOURNAL
 ==========================================================
 */
 
-collectJournalHeader() {
+async voidJournal(id) {
 
-    return {
+    try {
 
-        journal_no:
-            document.getElementById(
-                "journal-no"
-            ).value.trim(),
+        const confirmVoid = confirm(
+            "Void journal ini?"
+        );
 
-        journal_date:
-            document.getElementById(
-                "journal-date"
-            ).value,
+        if (!confirmVoid) {
 
-        reference_no:
-            document.getElementById(
-                "reference-no"
-            ).value.trim(),
+            return;
 
-        description:
-            document.getElementById(
-                "journal-description"
-            ).value.trim(),
+        }
 
-        status:
-    document.getElementById(
-        "journal-posting-status"
-    ).value
+        await this.service.void(id);
 
-    };
+        this.showMessage(
+            "Journal berhasil di-void."
+        );
+
+        await this.loadData();
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        this.showError(error);
+
+    }
 
 }
 /*
-/*
 ==========================================================
-COLLECT JOURNAL DETAIL
+SHOW ERROR
 ==========================================================
 */
 
-collectJournalDetail() {
+showError(error){
 
-    const rows = document.querySelectorAll(
-        "#journal-detail-body tr"
-    );
+    console.error(error);
 
-    const details = [];
+    if(window.Toast){
 
-    rows.forEach(row => {
+        window.Toast.show(
 
-        console.log(
-            "COA VALUE =",
-            row.querySelector(".coa-select")?.value
+            error.message ||
+
+            "Unexpected Error",
+
+            "danger"
+
         );
 
-        console.log(
-            row.querySelector(".coa-select")
+    }else{
+
+        alert(
+
+            error.message ||
+
+            "Unexpected Error"
+
         );
 
-        details.push({
+    }
 
-            account_id:
-                row.querySelector(".coa-select")?.value || null,
+}
+/*
+==========================================================
+CLEAR JOURNAL FORM
+==========================================================
+*/
 
-            business_partner_id:
-                row.querySelector(".bp-select")?.value || null,
+clearJournalForm(){
 
-            description:
-                row.querySelector(".description")?.value.trim() || "",
+    const form =
 
-            debit:
-                parseFloat(
-                    row.querySelector(".debit")?.value || 0
-                ),
+        document.getElementById("glJournalForm");
 
-            credit:
-                parseFloat(
-                    row.querySelector(".credit")?.value || 0
-                )
+    if(form){
+
+        form.reset();
+
+    }
+
+    if(this.detailBody){
+
+        this.detailBody.innerHTML = "";
+
+    }
+
+}
+/*
+==========================================================
+SET READ ONLY
+==========================================================
+*/
+
+setReadOnly(readOnly = true) {
+
+    this.txtAccountingDate.disabled = readOnly;
+
+    this.txtDescription.disabled = readOnly;
+
+    this.cboStatus.disabled = readOnly;
+
+    this.detailBody
+        .querySelectorAll("input, select, textarea, button")
+        .forEach(element => {
+
+            if (
+                element.classList.contains("btn-delete-detail")
+            ) {
+                element.style.display =
+                    readOnly ? "none" : "";
+                return;
+            }
+
+            element.disabled = readOnly;
 
         });
 
-    });
+    this.btnAddDetail.style.display =
+        readOnly ? "none" : "";
 
-    console.log("DETAIL =", details);
+    this.btnDeleteDetail.style.display =
+        readOnly ? "none" : "";
 
-    return details;
+    this.btnSaveJournal.style.display =
+        readOnly ? "none" : "";
+
+    this.btnPostJournal.style.display =
+        readOnly ? "none" : "";
 
 }
+
+
 }

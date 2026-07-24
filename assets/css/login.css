@@ -930,38 +930,39 @@ body::before{
 
 }
 
+/* ==========================================================
+   REMEMBER ME
+========================================================== */
+
 .form-check-input{
 
     width:18px;
 
     height:18px;
 
-    margin:0;
+    margin-top:0;
 
     cursor:pointer;
 
-    border:2px solid var(--border);
+    border:1px solid #CBD5E1;
+
+    background-color:#FFFFFF;
 
 }
 
 .form-check-input:checked{
 
-    background:var(--primary);
+    background-color:var(--primary);
 
     border-color:var(--primary);
 
 }
 
-.form-check-label{
+.form-check-input:focus{
 
-    font-size:14px;
-
-    color:var(--text-light);
-
-    cursor:pointer;
+    box-shadow:none;
 
 }
-
 
 /* ==========================================================
    FORGOT PASSWORD

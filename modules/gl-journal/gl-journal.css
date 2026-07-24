@@ -1,0 +1,451 @@
+/*
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+General Journal
+Version : 2.0 Enterprise
+==========================================================
+*/
+
+/* ==========================================================
+   GENERAL JOURNAL PAGE
+========================================================== */
+
+.gl-journal-page{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:20px;
+
+    width:100%;
+
+}
+
+/* ==========================================================
+   PAGE HEADER
+========================================================== */
+
+.gl-journal-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:flex-start;
+
+    gap:20px;
+
+}
+
+/* ==========================================================
+   HEADER LEFT
+========================================================== */
+
+.gl-journal-header-left{
+
+    flex:1;
+
+}
+
+/* ==========================================================
+   TITLE
+========================================================== */
+
+.gl-journal-title{
+
+    margin:0;
+
+    font-size:24px;
+
+    font-weight:700;
+
+    line-height:1.2;
+
+    color:#212529;
+
+}
+
+/* ==========================================================
+   BREADCRUMB
+========================================================== */
+
+.gl-journal-breadcrumb{
+
+    margin-top:4px;
+
+    font-size:14px;
+
+    font-weight:400;
+
+    color:#6C757D;
+
+}
+
+/* ==========================================================
+   HEADER RIGHT
+========================================================== */
+
+.gl-journal-header-right{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    flex-wrap:wrap;
+
+}
+
+/* ==========================================================
+   HEADER BUTTON
+========================================================== */
+
+.gl-journal-header-right .btn{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:8px;
+
+    height:40px;
+
+    padding:0 16px;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    border-radius:8px;
+
+}
+
+/* ==========================================================
+   HEADER BUTTON ICON
+========================================================== */
+
+.gl-journal-header-right .btn i{
+
+    font-size:14px;
+
+}
+
+/* ==========================================================
+   BUTTON COLOR ADJUSTMENT
+========================================================== */
+
+#btn-add-journal{
+
+    min-width:140px;
+
+}
+
+#btn-download-journal{
+
+    min-width:165px;
+
+}
+
+#btn-refresh-journal{
+
+    min-width:120px;
+
+}
+/* ==========================================================
+   FILTER CARD
+========================================================== */
+
+.gl-journal-filter-card{
+
+    border:1px solid #DEE2E6;
+
+    border-radius:8px;
+
+    box-shadow:none;
+
+    overflow:hidden;
+
+}
+
+/* ==========================================================
+   FILTER CARD BODY
+========================================================== */
+
+.gl-journal-filter-card .card-body{
+
+    padding:20px;
+
+}
+
+/* ==========================================================
+   FILTER LABEL
+========================================================== */
+
+.gl-journal-filter-card .form-label{
+
+    display:block;
+
+    margin-bottom:8px;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    color:#212529;
+
+}
+
+/* ==========================================================
+   FILTER INPUT
+========================================================== */
+
+.gl-journal-filter-card .form-control{
+
+    height:40px;
+
+    font-size:14px;
+
+    border-radius:6px;
+
+}
+
+/* ==========================================================
+   FILTER SELECT
+========================================================== */
+
+.gl-journal-filter-card .form-select{
+
+    height:40px;
+
+    font-size:14px;
+
+    border-radius:6px;
+
+}
+
+/* ==========================================================
+   INPUT GROUP
+========================================================== */
+
+.gl-journal-filter-card .input-group{
+
+    display:flex;
+
+    align-items:stretch;
+
+}
+
+/* ==========================================================
+   KEYWORD INPUT
+========================================================== */
+
+#filter-keyword{
+
+    border-top-right-radius:0;
+
+    border-bottom-right-radius:0;
+
+}
+
+/* ==========================================================
+   FIND BUTTON
+========================================================== */
+
+#btn-find-journal{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:6px;
+
+    min-width:90px;
+
+    height:40px;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    border-top-left-radius:0;
+
+    border-bottom-left-radius:0;
+
+}
+
+/* ==========================================================
+   FILTER SPACING
+========================================================== */
+
+.gl-journal-filter-card .row{
+
+    --bs-gutter-x:20px;
+
+    --bs-gutter-y:16px;
+
+}
+/* ==========================================================
+   TABLE CARD
+========================================================== */
+
+.gl-journal-table-card{
+
+    border:1px solid #DEE2E6;
+
+    border-radius:8px;
+
+    box-shadow:none;
+
+    overflow:hidden;
+
+}
+
+/* ==========================================================
+   TABLE CARD BODY
+========================================================== */
+
+.gl-journal-table-card .card-body{
+
+    padding:0;
+
+    position:relative;
+
+}
+
+/* ==========================================================
+   TABLE RESPONSIVE
+========================================================== */
+
+.gl-journal-table-card .table-responsive{
+
+    overflow-x:auto;
+
+    overflow-y:auto;
+
+    max-height:650px;
+
+}
+
+/* ==========================================================
+   TABLE
+========================================================== */
+
+#gl-journal-table{
+
+    width:100%;
+
+    margin-bottom:0;
+
+    border-collapse:separate;
+
+    border-spacing:0;
+
+}
+
+/* ==========================================================
+   TABLE HEADER
+========================================================== */
+
+#gl-journal-table thead th{
+
+    position:sticky;
+
+    top:0;
+
+    z-index:10;
+
+    background:#F8F9FA;
+
+    color:#212529;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    white-space:nowrap;
+
+    vertical-align:middle;
+
+    padding:12px 16px;
+
+    border-bottom:1px solid #DEE2E6;
+
+}
+
+/* ==========================================================
+   TABLE BODY
+========================================================== */
+
+#gl-journal-table tbody td{
+
+    padding:12px 16px;
+
+    font-size:14px;
+
+    color:#212529;
+
+    vertical-align:middle;
+
+    border-bottom:1px solid #F1F3F5;
+
+}
+
+/* ==========================================================
+   TABLE ROW
+========================================================== */
+
+#gl-journal-table tbody tr{
+
+    background:#FFFFFF;
+
+    transition:background-color .2s ease;
+
+}
+
+/* ==========================================================
+   TABLE ROW HOVER
+========================================================== */
+
+#gl-journal-table tbody tr:hover{
+
+    background:#F8FAFC;
+
+}
+
+/* ==========================================================
+   TABLE ALIGNMENT
+========================================================== */
+
+#gl-journal-table th.text-end,
+#gl-journal-table td.text-end{
+
+    text-align:right;
+
+}
+
+#gl-journal-table th.text-center,
+#gl-journal-table td.text-center{
+
+    text-align:center;
+
+}
+
+/* ==========================================================
+   EMPTY TBODY
+========================================================== */
+
+#gl-journal-tbody:empty::after{
+
+    content:"";
+
+    display:block;
+
+    height:1px;
+
+}

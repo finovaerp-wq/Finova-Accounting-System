@@ -1,191 +1,278 @@
 <!--
 ==========================================================
 FINOVA ACCOUNTING SYSTEM
-General Ledger Journal
-Version : 1.0.0
+General Journal
+Version : 2.0 Enterprise
 ==========================================================
 -->
 
-<div class="container-fluid">
+<div class="gl-journal-page">
 
-    <!-- PAGE HEADER -->
+    <!-- ==========================================================
+     PAGE HEADER
+========================================================== -->
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
+<div class="finova-page-header">
 
-        <div>
+    <!-- LEFT -->
 
-            <h3 class="mb-0">
+    <div class="finova-page-header-left">
 
-                GL Journal
+        <h1 class="finova-page-title">
 
-            </h3>
+            General Journal
 
-            <small class="text-muted">
+        </h1>
 
-                Manage General Ledger Journal
+        <p class="finova-page-subtitle">
 
-            </small>
+            Accounting / General Journal
 
-        </div>
+        </p>
+
+    </div>
+
+    <!-- RIGHT -->
+
+    <div class="finova-page-header-right">
 
         <button
             id="btn-add-journal"
-            class="btn btn-primary">
+            class="btn btn-primary finova-btn">
 
-            <i class="fa-solid fa-plus me-1"></i>
+            <i class="fas fa-plus"></i>
 
-            New Journal
+            Add Journal
+
+        </button>
+
+        <button
+            id="btn-download-journal"
+            class="btn btn-outline-success finova-btn">
+
+            <i class="fas fa-file-excel"></i>
+
+            Download Excel
+
+        </button>
+
+        <button
+            id="btn-refresh-journal"
+            class="btn btn-outline-secondary finova-btn">
+
+            <i class="fas fa-rotate-right"></i>
+
+            Refresh
 
         </button>
 
     </div>
 
-    <!-- FILTER -->
+</div>
 
-    <div class="card mb-3">
+    <!-- ==========================================================
+         FILTER CARD
+    =========================================================== -->
+
+    <div class="card gl-journal-filter-card">
 
         <div class="card-body">
 
-            <div class="row g-3">
+            <div class="row g-3 align-items-end">
 
-                <!-- Search -->
+                <!-- ==========================================
+                     ACCOUNTING DATE FROM
+                =========================================== -->
 
-                <div class="col-md-4">
+                <div class="col-xl-2 col-lg-3 col-md-6">
 
-                    <label class="form-label">
+                    <label
+                        for="filter-date-from"
+                        class="form-label">
 
-                        Search
+                        Accounting Date From
 
                     </label>
 
                     <input
-                        type="text"
-                        id="journal-search"
-                        class="form-control"
-                        placeholder="Journal No / Description">
+                        id="filter-date-from"
+                        type="date"
+                        class="form-control">
 
                 </div>
 
-                <!-- Status -->
+                <!-- ==========================================
+                     ACCOUNTING DATE TO
+                =========================================== -->
 
-                <div class="col-md-2">
+                <div class="col-xl-2 col-lg-3 col-md-6">
 
-                    <label class="form-label">
+                    <label
+                        for="filter-date-to"
+                        class="form-label">
 
-                        Status
+                        Accounting Date To
+
+                    </label>
+
+                    <input
+                        id="filter-date-to"
+                        type="date"
+                        class="form-control">
+
+                </div>
+
+                
+
+                <!-- ==========================================
+                     JOURNAL STATUS
+                =========================================== -->
+
+                <div class="col-xl-2 col-lg-3 col-md-6">
+
+                    <label
+                        for="filter-status"
+                        class="form-label">
+
+                        Journal Status
 
                     </label>
 
                     <select
-                        id="journal-status-filter"
+                        id="filter-status"
                         class="form-select">
 
-                        <option value="">
+                        <option value="all">
 
-                            All
+                            Show All Data
 
                         </option>
 
                         <option value="Draft">
 
-                            Draft
+                            Show Draft Only
 
                         </option>
 
                         <option value="Posted">
 
-                            Posted
+                            Show Posted Only
 
                         </option>
 
                     </select>
 
                 </div>
+                                <!-- ==========================================
+                     FIND BY
+                =========================================== -->
 
-                <!-- Date From -->
+                <div class="col-xl-2 col-lg-3 col-md-6">
 
-                <div class="col-md-2">
+                    <label
+                        for="filter-find-by"
+                        class="form-label">
 
-                    <label class="form-label">
-
-                        Date From
-
-                    </label>
-
-                    <input
-                        type="date"
-                        id="journal-date-from"
-                        class="form-control">
-
-                </div>
-
-                <!-- Date To -->
-
-                <div class="col-md-2">
-
-                    <label class="form-label">
-
-                        Date To
+                        Find By
 
                     </label>
 
-                    <input
-                        type="date"
-                        id="journal-date-to"
-                        class="form-control">
+                    <select
+                        id="filter-find-by"
+                        class="form-select">
+
+                        <option value="journal_no">
+
+                            Journal No
+
+                        </option>
+
+                        <option value="description">
+
+                            Description
+
+                        </option>
+
+
+                    </select>
 
                 </div>
 
-                <!-- Reset -->
+                <!-- ==========================================
+                     KEYWORD
+                =========================================== -->
 
-                <div class="col-md-2 d-flex align-items-end">
+                <div class="col-xl-4 col-lg-6 col-md-12">
 
-                    <button
-                        id="btn-reset-filter"
-                        class="btn btn-outline-secondary w-100">
+    <label
+        for="filter-keyword"
+        class="form-label">
 
-                        Reset
+        Keyword
 
-                    </button>
+    </label>
 
-                </div>
+    <div class="input-group">
 
-            </div>
+        <input
+            id="filter-keyword"
+            type="text"
+            class="form-control"
+            placeholder="Search Journal No or Description...">
 
-        </div>
+        <button
+            id="btn-find-journal"
+            type="button"
+            class="btn btn-primary">
+
+            <i class="fa-solid fa-magnifying-glass"></i>
+
+            Find
+
+        </button>
 
     </div>
 
-    <!-- GRID -->
+</div>
+</div> <!-- End Row -->
 
-    <div class="card">
+</div> <!-- End Card Body -->
 
-        <div class="card-body p-0">
+</div> <!-- End Filter Card -->
 
-            <div class="table-responsive">
+    <!-- ==========================================================
+         TABLE CARD
+    =========================================================== -->
+
+    <div class="card gl-journal-table-card">
+
+        <div
+            id="gl-journal-table-wrapper"
+            class="table-responsive">
 
                 <table
-                    class="table table-hover table-bordered align-middle mb-0">
+                    id="gl-journal-table"
+                    class="table table-hover align-middle">
 
-                    <thead class="table-light">
+                    <thead>
 
                         <tr>
 
-                            <th width="140">
+                            <th style="width:70px;">
+
+                                No
+
+                            </th>
+
+                            <th style="width:150px;">
+
+                                Accounting Date
+
+                            </th>
+
+                            <th style="width:180px;">
 
                                 Journal No
-
-                            </th>
-
-                            <th width="120">
-
-                                Date
-
-                            </th>
-
-                            <th width="150">
-
-                                Reference
 
                             </th>
 
@@ -195,25 +282,33 @@ Version : 1.0.0
 
                             </th>
 
-                            <th width="120">
+                            <th
+                                class="text-end"
+                                style="width:170px;">
+
+                                Total Debit
+
+                            </th>
+
+                            <th
+                                class="text-end"
+                                style="width:170px;">
+
+                                Total Credit
+
+                            </th>
+
+                            <th
+                                class="text-center"
+                                style="width:130px;">
 
                                 Status
 
                             </th>
 
-                            <th width="130" class="text-end">
-
-                                Debit
-
-                            </th>
-
-                            <th width="130" class="text-end">
-
-                                Credit
-
-                            </th>
-
-                            <th width="160">
+                            <th
+                                class="text-center"
+                                style="width:90px;">
 
                                 Action
 
@@ -223,20 +318,131 @@ Version : 1.0.0
 
                     </thead>
 
-                    <tbody id="journal-table-body">
+                    <tbody id="gl-journal-tbody">
+
+                        <!-- Render By JavaScript -->
 
                     </tbody>
 
                 </table>
 
             </div>
+                
+<!-- ==========================================================
+     PAGINATION
+========================================================== -->
 
-        </div>
+<div class="d-flex justify-content-between align-items-center px-3 py-3">
+
+    <!-- LEFT -->
+
+    <nav aria-label="General Journal Pagination">
+
+        <ul class="pagination finova-pagination mb-0">
+
+            <li class="page-item disabled">
+
+                <button
+                    id="btn-first-page"
+                    class="page-link">
+
+                    <i class="fa-solid fa-backward-step"></i>
+
+                </button>
+
+            </li>
+
+            <li class="page-item disabled">
+
+                <button
+                    id="btn-prev-page"
+                    class="page-link">
+
+                    <i class="fa-solid fa-chevron-left"></i>
+
+                </button>
+
+            </li>
+
+            <li class="page-item">
+
+                <span class="finova-page-text">
+
+                    Page
+
+                </span>
+
+            </li>
+
+            <li class="page-item">
+
+                <input
+                    id="current-page"
+                    type="number"
+                    value="1"
+                    min="1"
+                    class="form-control form-control-sm finova-page-input">
+
+            </li>
+
+            <li class="page-item">
+
+                <span
+                    id="total-pages"
+                    class="finova-page-text">
+
+                    of 1
+
+                </span>
+
+            </li>
+
+            <li class="page-item">
+
+                <button
+                    id="btn-next-page"
+                    class="page-link">
+
+                    <i class="fa-solid fa-chevron-right"></i>
+
+                </button>
+
+            </li>
+
+            <li class="page-item">
+
+                <button
+                    id="btn-last-page"
+                    class="page-link">
+
+                    <i class="fa-solid fa-forward-step"></i>
+
+                </button>
+
+            </li>
+
+        </ul>
+
+    </nav>
+
+    <!-- RIGHT -->
+
+    <div
+        id="display-record"
+        class="finova-record-info">
+
+        Records 0 - 0 of 0
 
     </div>
 
 </div>
+</div> <!-- End Card Body -->
+</div> <!-- End Table Card -->
 
-<!-- MODAL -->
+    <!-- ==========================================================
+         MODAL CONTAINER
+    =========================================================== -->
 
-<div id="journal-modal-container"></div>
+    <div id="gl-journal-modal-container"></div>
+
+</div>

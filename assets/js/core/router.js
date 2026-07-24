@@ -72,7 +72,8 @@ export class FinovaRouter {
                 title: "GL Journal",
                 html: "modules/gl-journal/gl-journal.html",
                 js: "modules/gl-journal/gl-journal.js",
-                className: "GLJournal"
+                className: "GeneralJournal"
+
             },
 
             "ap-payment": {
@@ -184,42 +185,35 @@ export class FinovaRouter {
 
     }
 
- async loadModule(route) {
+async loadModule(route) {
 
     try {
 
-        console.log("Loading Module :", route.js);
+        const url = new URL(`../../../${route.js}`, import.meta.url);
 
-        const module = await import(`../../../${route.js}`);
+        const module = await import(url.href);
 
-        console.log("Module Loaded :", module);
+        const page = new module[route.className]();
 
-        if (!module[route.className]) {
-
-            throw new Error(
-
-                `Class ${route.className} tidak ditemukan.`
-
-            );
-
+        if (typeof page.init === "function") {
+            await page.init();
         }
 
-        new module[route.className]();
+    } catch (e) {
 
-    }
+        console.group("MODULE LOAD ERROR");
 
-    catch (error) {
+        console.log("Module :", route.js);
 
-        console.error("================================");
-        console.error("MODULE LOAD ERROR");
-        console.error("File :", route.js);
-        console.error(error);
-        console.error("================================");
+        console.log("Class  :", route.className);
+
+        console.error(e);
+
+        console.groupEnd();
 
     }
 
 }
-
     updateTopbar(title) {
 
         if (window.finovaTopbar) {

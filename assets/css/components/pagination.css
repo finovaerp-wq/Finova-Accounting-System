@@ -22,9 +22,11 @@
 
 .finova-pagination .page-link{
 
-    min-width:38px;
+    width:38px;
 
     height:38px;
+
+    padding:0;
 
     display:flex;
 
@@ -93,5 +95,75 @@
         gap:6px;
 
     }
+    /* ==========================================================
+   PAGE INPUT
+========================================================== */
+
+.finova-pagination #current-page{
+
+    width:60px;
+
+    min-width:60px;
+
+    max-width:60px;
+
+    text-align:center;
+
+    margin:0 6px;
+
+    padding:0;
+
+}
+
+/* ==========================================================
+   RECORD INFORMATION
+========================================================== */
+
+#display-record{
+
+    font-size:14px;
+
+    font-weight:500;
+
+    color:var(--text-secondary);
+
+    white-space:nowrap;
+
+}
+/* ==========================================================
+   PAGE INPUT
+========================================================== */
+
+.finova-page-input{
+
+    width:60px;
+
+    min-width:60px;
+
+    max-width:60px;
+
+    height:38px;
+
+    padding:0;
+
+    text-align:center;
+
+}
+
+/* ==========================================================
+   RECORD INFO
+========================================================== */
+
+.finova-record-info{
+
+    font-size:14px;
+
+    font-weight:500;
+
+    color:var(--text-secondary);
+
+    white-space:nowrap;
+
+}
 
 }
