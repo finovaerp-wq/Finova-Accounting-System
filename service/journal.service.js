@@ -40,55 +40,20 @@ export class GeneralJournalService {
 
     get STATUS() {
 
-        return {
+    return {
 
-            DRAFT: "Draft",
+        DRAFT: "Draft",
 
-            POSTED: "Posted",
+        POSTED: "Posted",
 
-            CANCELLED: "Cancelled",
+        CANCELLED: "Cancelled",
 
-            REVERSED: "Reversed"
+        REVERSED: "Reversed"
 
-        };
-
-    }
-    /*
-==========================================================
-RENDER PAGINATION
-==========================================================
-*/
-
-renderPagination() {
-
-    if (!this.currentPageInput) return;
-
-    this.currentPageInput.value = this.currentPage;
-
-    if (this.totalPageLabel) {
-
-        this.totalPageLabel.textContent =
-            `of ${this.totalPages}`;
-
-    }
-
-    if (this.btnFirstPage)
-        this.btnFirstPage.disabled =
-            this.currentPage === 1;
-
-    if (this.btnPreviousPage)
-        this.btnPreviousPage.disabled =
-            this.currentPage === 1;
-
-    if (this.btnNextPage)
-        this.btnNextPage.disabled =
-            this.currentPage >= this.totalPages;
-
-    if (this.btnLastPage)
-        this.btnLastPage.disabled =
-            this.currentPage >= this.totalPages;
+    };
 
 }
+    
     /*
 ==========================================================
 GET ALL GENERAL JOURNAL
@@ -247,37 +212,23 @@ async search(filter = {}) {
         ======================================================
         */
 
-        if (
+        if (filter.dateFrom) {
 
-            filter.dateFrom
+    query = query.gte(
+        "journal_date",
+        filter.dateFrom
+    );
 
-        ) {
+}
 
-            query = query.gte(
+if (filter.dateTo) {
 
-                "accounting_date",
+    query = query.lte(
+        "journal_date",
+        filter.dateTo
+    );
 
-                filter.dateFrom
-
-            );
-
-        }
-
-        if (
-
-            filter.dateTo
-
-        ) {
-
-            query = query.lte(
-
-                "accounting_date",
-
-                filter.dateTo
-
-            );
-
-        }
+}
 
         /*
         ======================================================
@@ -335,25 +286,19 @@ async search(filter = {}) {
 
         query = query
 
-            .order(
+    .order(
+        "journal_date",
+        {
+            ascending: false
+        }
+    )
 
-                "accounting_date",
-
-                {
-
-                    ascending: false
-
-                }
-
-            )
-
-            .order(
-    "journal_no",
-    {
-        ascending: false
-    }
-);
-
+    .order(
+        "journal_no",
+        {
+            ascending: false
+        }
+    );
         /*
         ======================================================
         EXECUTE
@@ -888,17 +833,17 @@ async duplicate(id){
 
         const {
 
-            details,
+    details,
 
-            id:journalId,
+    id: _,
 
-            created_at,
+    created_at,
 
-            updated_at,
+    updated_at,
 
-            ...header
+    ...header
 
-        }=original;
+} = original;
 
         header.journal_no =
 
@@ -907,13 +852,13 @@ async duplicate(id){
         header.status=
             this.STATUS.DRAFT;
 
-        header.accounting_date=
+        header.journal_date =
 
-            new Date()
+    new Date()
 
-            .toISOString()
+        .toISOString()
 
-            .substring(0,10);
+        .substring(0, 10);
 
         /*
         ======================================================
@@ -1590,42 +1535,7 @@ checkBalance(details = []) {
     );
 
 }
-/*
-==========================================================
-SHOW ERROR
-==========================================================
-*/
 
-showError(error){
-
-    console.error(error);
-
-    if(window.Toast){
-
-        window.Toast.show(
-
-            error.message ||
-
-            "Unexpected Error",
-
-            "danger"
-
-        );
-
-    }else{
-
-        alert(
-
-            error.message ||
-
-            "Unexpected Error"
-
-        );
-
-    }
-    
-
-}
 /*
 ==========================================================
 POST JOURNAL
@@ -1634,25 +1544,76 @@ POST JOURNAL
 
 async post(id) {
 
+    const journal = await this.getById(id);
+
+    if (!journal) {
+
+        throw new Error("Journal not found.");
+
+    }
+
+    if (journal.status !== this.STATUS.DRAFT) {
+
+        throw new Error(
+            "Only Draft Journal can be posted."
+        );
+
+    }
+
+    const { error } = await supabase
+
+        .from(TABLE.GL_JOURNAL)
+
+        .update({
+
+            status: this.STATUS.POSTED,
+
+            Posted_at: new Date().toISOString()
+
+        })
+
+        .eq("id", id);
+
+    if (error) throw error;
+
+    return true;
+
+}
+/*
+==========================================================
+VOID JOURNAL
+==========================================================
+*/
+
+async voidJournal(id, reason = "") {
+
     try {
 
-        /*
-        ======================================================
-        UPDATE STATUS
-        ======================================================
-        */
+        const journal = await this.getById(id);
 
-        const {
+        if (!journal) {
 
-            error
+            throw new Error("Journal not found.");
 
-        } = await supabase
+        }
+
+        if (journal.status !== this.STATUS.POSTED) {
+
+            throw new Error("Only Posted Journal can be void.");
+
+        }
+
+        const { error } = await supabase
 
             .from(TABLE.GL_JOURNAL)
 
             .update({
 
-                status: this.STATUS.POSTED
+                status: this.STATUS.DRAFT,
+
+                void_reason: reason,
+
+                void_at: new Date().toISOString()
 
             })
 
@@ -1671,36 +1632,9 @@ async post(id) {
     catch (error) {
 
         console.error(
-
-            "GeneralJournalService.post",
-
+            "GeneralJournalService.voidJournal",
             error
-
         );
-
-        throw error;
-
-    }
-
-}
-
-async void(id) {
-
-    const { error } = await supabase
-
-        .from(TABLE.GL_JOURNAL)
-
-        .update({
-
-            status: "Void",
-
-            updated_at: new Date().toISOString()
-
-        })
-
-        .eq("id", id);
-
-    if (error) {
 
         throw error;
 

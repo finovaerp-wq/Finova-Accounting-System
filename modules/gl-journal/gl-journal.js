@@ -117,6 +117,7 @@ cacheDom() {
 
     this.btnDownloadJournal =
         document.getElementById("btn-download-journal");
+        
 
     /*
     ======================================================
@@ -692,13 +693,14 @@ CREATE TABLE ROW
 createTableRow(journal, no) {
 
     const isDraft =
-        journal.status === "Draft";
+    journal.status === "Draft";
 
-    const isPosted =
-        journal.status === "Posted";
+const isPosted =
+    journal.status === "Posted";
 
-    const isVoid =
-        journal.status === "Void";
+const isVoid =
+    journal.status === "Void";
+console.log("Journal", journal.journal_no, "Status =", journal.status);
 
     return `
 
@@ -735,95 +737,99 @@ createTableRow(journal, no) {
         <div class="btn-group btn-group-sm">
 
             ${
-                isDraft
-                    ? `
-                        <button
-                            class="btn btn-outline-primary btn-edit-journal"
-                            data-id="${journal.id}"
-                            title="Edit">
+isDraft
+? `
+<button
+class="btn btn-outline-primary btn-edit-journal"
+data-id="${journal.id}"
+title="Edit">
+<i class="fa-solid fa-pen"></i>
+</button>
 
-                            <i class="fa-solid fa-pen"></i>
+<button
+class="btn btn-outline-danger btn-delete-journal"
+data-id="${journal.id}"
+title="Delete">
+<i class="fa-solid fa-trash"></i>
+</button>
 
-                        </button>
+<button
+class="btn btn-outline-dark btn-post-journal"
+data-id="${journal.id}"
+title="Post This Journal">
+<i class="fa-solid fa-check"></i>
+</button>
 
-                        <button
-                            class="btn btn-outline-danger btn-delete-journal"
-                            data-id="${journal.id}"
-                            title="Delete">
+<button
+class="btn btn-outline-success btn-duplicate-journal"
+data-id="${journal.id}"
+title="Duplicate">
+<i class="fa-regular fa-copy"></i>
+</button>
+`
+: ""
+}
+           ${
+isPosted
+? `
+<button
+class="btn btn-outline-secondary btn-view-journal"
+data-id="${journal.id}"
+title="View This Entry">
+<i class="fa-solid fa-eye"></i>
+</button>
 
-                            <i class="fa-solid fa-trash"></i>
+<button
+class="btn btn-outline-info btn-voucher-journal"
+data-id="${journal.id}"
+title="Voucher">
+<i class="fa-solid fa-file-invoice"></i>
+</button>
 
-                        </button>
+<button
+class="btn btn-outline-warning btn-void-journal"
+data-id="${journal.id}"
+title="Void">
+<i class="fa-solid fa-ban"></i>
+</button>
 
-                        <button
-                            class="btn btn-outline-success btn-duplicate-journal"
-                            data-id="${journal.id}"
-                            title="Duplicate">
+<button
+class="btn btn-outline-success btn-duplicate-journal"
+data-id="${journal.id}"
+title="Duplicate">
+<i class="fa-regular fa-copy"></i>
+</button>
+`
+: ""
+}
+${
+isVoid
+? `
+<button
+class="btn btn-outline-secondary btn-view-journal"
+data-id="${journal.id}"
+title="View This Entry">
+<i class="fa-solid fa-eye"></i>
+</button>
 
-                            <i class="fa-regular fa-copy"></i>
+<button
+class="btn btn-outline-info btn-voucher-journal"
+data-id="${journal.id}"
+title="Voucher">
+<i class="fa-solid fa-file-invoice"></i>
+</button>
 
-                        </button>
+<button
+class="btn btn-outline-success btn-duplicate-journal"
+data-id="${journal.id}"
+title="Duplicate">
+<i class="fa-regular fa-copy"></i>
+</button>
+`
+: ""
+}
 
-                        <button
-                            class="btn btn-outline-dark btn-post-journal"
-                            data-id="${journal.id}"
-                            title="Post">
-
-                            <i class="fa-solid fa-check"></i>
-
-                        </button>
-                    `
-                    : ""
-            }
-
-            ${
-                isPosted
-                    ? `
-                        <button
-                            class="btn btn-outline-secondary btn-view-journal"
-                            data-id="${journal.id}"
-                            title="View">
-
-                            <i class="fa-solid fa-eye"></i>
-
-                        </button>
-
-                        <button
-                            class="btn btn-outline-success btn-duplicate-journal"
-                            data-id="${journal.id}"
-                            title="Duplicate">
-
-                            <i class="fa-regular fa-copy"></i>
-
-                        </button>
-
-                        <button
-                            class="btn btn-outline-warning btn-void-journal"
-                            data-id="${journal.id}"
-                            title="Void">
-
-                            <i class="fa-solid fa-ban"></i>
-
-                        </button>
-                    `
-                    : ""
-            }
-
-            ${
-                isVoid
-                    ? `
-                        <button
-                            class="btn btn-outline-secondary btn-view-journal"
-                            data-id="${journal.id}"
-                            title="View">
-
-                            <i class="fa-solid fa-eye"></i>
-
-                        </button>
-                    `
-                    : ""
-            }
-
+            
         </div>
 
     </td>
@@ -844,41 +850,47 @@ handleTableAction(event) {
 
     if (!id) return;
 
-    if (button.classList.contains("btn-edit-journal")) {
-
-        return this.openEditJournal(id);
-
-    }
-
-    if (button.classList.contains("btn-delete-journal")) {
-
-        return this.deleteJournal(id);
-
-    }
-
-    if (button.classList.contains("btn-duplicate-journal")) {
-
-        return this.duplicateJournal(id);
-
-    }
-
-    if (button.classList.contains("btn-post-journal")) {
-
-        return this.postJournal(id);
-
-    }
-
-    if (button.classList.contains("btn-void-journal")) {
-
-        return this.voidJournal(id);
-
-    }
-
     if (button.classList.contains("btn-view-journal")) {
 
-        return this.viewJournal(id);
+    return this.viewJournal(id);
 
-    }
+}
+
+if (button.classList.contains("btn-voucher-journal")) {
+
+    return this.printVoucher(id);
+
+}
+
+if (button.classList.contains("btn-edit-journal")) {
+
+    return this.openEditJournal(id);
+
+}
+
+if (button.classList.contains("btn-delete-journal")) {
+
+    return this.deleteJournal(id);
+
+}
+
+if (button.classList.contains("btn-post-journal")) {
+
+    return this.postJournal(id);
+
+}
+
+if (button.classList.contains("btn-void-journal")) {
+
+    return this.voidJournal(id);
+
+}
+
+if (button.classList.contains("btn-duplicate-journal")) {
+
+    return this.duplicateJournal(id);
+
+}
 
 }
 /*
@@ -889,69 +901,49 @@ RENDER STATUS
 
 renderStatus(status) {
 
-    switch (status) {
+    switch (String(status).trim().toLowerCase()) {
 
-        case "Draft":
+    case "draft":
 
-            return `
-                <span class="badge bg-warning text-dark">
-                    Draft
-                </span>
-            `;
+        return `
+            <span class="badge bg-warning text-dark">
+                Draft
+            </span>
+        `;
 
-        case "Posted":
+    case "posted":
 
-            return `
-                <span class="badge bg-success">
-                    Posted
-                </span>
-            `;
-        case "Void":
+        return `
+            <span class="badge bg-success">
+                Posted
+            </span>
+        `;
 
-    return `
+    case "cancelled":
 
-        <span class="badge bg-danger">
+        return `
+            <span class="badge bg-danger">
+                Cancelled
+            </span>
+        `;
 
-            Void
+    case "reversed":
 
-        </span>
+        return `
+            <span class="badge bg-info text-dark">
+                Reversed
+            </span>
+        `;
 
-    `;
+    default:
 
-        case "Cancelled":
+        return `
+            <span class="badge bg-secondary">
+                ${status}
+            </span>
+        `;
 
-            return `
-                <span class="badge bg-danger">
-                    Cancelled
-                </span>
-            `;
-
-        case "Reversed":
-
-            return `
-                <span class="badge bg-info text-dark">
-                    Reversed
-                </span>
-            `;
-
-        case "Locked":
-
-            return `
-                <span class="badge bg-dark">
-                    Locked
-                </span>
-            `;
-
-        default:
-
-            return `
-                <span class="badge bg-secondary">
-                    Unknown
-                </span>
-            `;
-
-    }
-
+}
 }
 
 /*
@@ -994,7 +986,6 @@ async openAddJournal() {
     this.currentJournal = null;
 
     console.log("Current Journal :", this.currentJournal);
-    this.setReadOnly(false);
 
     await this.loadJournalModal();
 
@@ -1048,7 +1039,6 @@ await this.loadMasterData();
 await this.initializeJournalHeader();
 
 await this.loadJournalData();
-this.setReadOnly(false);
 
 this.modal.show();
     }
@@ -1111,6 +1101,22 @@ async viewJournal(id) {
         this.showError(error);
 
     }
+
+}
+/*
+==========================================================
+PRINT VOUCHER
+==========================================================
+*/
+
+async printVoucher(id) {
+
+    console.log("Voucher :", id);
+
+    /*
+    nanti kita arahkan
+    ke PDF Voucher
+    */
 
 }
 /*
@@ -2585,7 +2591,7 @@ async voidJournal(id) {
 
         }
 
-        await this.service.void(id);
+        await this.service.voidJournal(id, "");
 
         this.showMessage(
             "Journal berhasil di-void."
@@ -2606,37 +2612,130 @@ async voidJournal(id) {
 }
 /*
 ==========================================================
+DELETE JOURNAL
+==========================================================
+*/
+
+async deleteJournal(id) {
+
+    try {
+
+        const confirmDelete = confirm(
+            "Apakah Anda yakin ingin menghapus journal ini?"
+        );
+
+        if (!confirmDelete) {
+
+            return;
+
+        }
+
+        await this.service.delete(id);
+
+        this.showMessage(
+            "Journal berhasil dihapus.",
+            "success"
+        );
+
+        await this.loadData();
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        this.showError(error);
+
+    }
+
+}
+/*
+==========================================================
+DUPLICATE JOURNAL
+==========================================================
+*/
+
+async duplicateJournal(id) {
+
+    try {
+
+        const confirmDuplicate = confirm(
+            "Apakah Anda yakin ingin menduplikasi journal ini?"
+        );
+
+        if (!confirmDuplicate) {
+
+            return;
+
+        }
+
+        await this.service.duplicate(id);
+
+        this.showMessage(
+            "Journal berhasil diduplikasi.",
+            "success"
+        );
+
+        await this.loadData();
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        this.showError(error);
+
+    }
+
+}
+/*
+==========================================================
+SHOW MESSAGE
+==========================================================
+*/
+
+showMessage(
+    message,
+    type = "success"
+) {
+
+    console.log(`[${type.toUpperCase()}]`, message);
+
+    if (window.Toast) {
+
+        window.Toast.show(
+            message,
+            type
+        );
+
+        return;
+
+    }
+
+    alert(message);
+
+}
+
+/*
+==========================================================
 SHOW ERROR
 ==========================================================
 */
 
-showError(error){
+showError(error) {
 
     console.error(error);
 
-    if(window.Toast){
+    const message =
+        error?.message ??
+        "Unexpected Error";
 
-        window.Toast.show(
-
-            error.message ||
-
-            "Unexpected Error",
-
-            "danger"
-
-        );
-
-    }else{
-
-        alert(
-
-            error.message ||
-
-            "Unexpected Error"
-
-        );
-
-    }
+    this.showMessage(
+        message,
+        "danger"
+    );
 
 }
 /*
@@ -2664,49 +2763,7 @@ clearJournalForm(){
     }
 
 }
-/*
-==========================================================
-SET READ ONLY
-==========================================================
-*/
 
-setReadOnly(readOnly = true) {
-
-    this.txtAccountingDate.disabled = readOnly;
-
-    this.txtDescription.disabled = readOnly;
-
-    this.cboStatus.disabled = readOnly;
-
-    this.detailBody
-        .querySelectorAll("input, select, textarea, button")
-        .forEach(element => {
-
-            if (
-                element.classList.contains("btn-delete-detail")
-            ) {
-                element.style.display =
-                    readOnly ? "none" : "";
-                return;
-            }
-
-            element.disabled = readOnly;
-
-        });
-
-    this.btnAddDetail.style.display =
-        readOnly ? "none" : "";
-
-    this.btnDeleteDetail.style.display =
-        readOnly ? "none" : "";
-
-    this.btnSaveJournal.style.display =
-        readOnly ? "none" : "";
-
-    this.btnPostJournal.style.display =
-        readOnly ? "none" : "";
-
-}
 
 
 }
