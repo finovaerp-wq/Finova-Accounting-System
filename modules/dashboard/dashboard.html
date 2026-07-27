@@ -60,35 +60,41 @@ Version : 1.0.0
 
         <!-- AP -->
 
-        <div class="col-xl-3 col-lg-6">
+<div class="col-xl-3 col-lg-6">
 
-            <div class="finova-summary-card">
+    <div class="finova-summary-card">
 
-                <div class="finova-summary-icon">
+        <div class="finova-summary-top">
 
-                    <i class="fa-solid fa-file-invoice-dollar"></i>
+            <div class="finova-summary-icon">
 
-                </div>
+                <i class="fa-solid fa-file-invoice-dollar"></i>
 
-                <div class="finova-summary-content">
+            </div>
 
-                    <span>
+            <div class="finova-summary-title">
 
-                        Account Payable
-
-                    </span>
-
-                    <h3>
-
-                        0
-
-                    </h3>
-
-                </div>
+                Account Payable
 
             </div>
 
         </div>
+
+        <div class="finova-summary-number">
+
+            0
+
+        </div>
+
+        <div class="finova-summary-status">
+
+            Outstanding Invoice
+
+        </div>
+
+    </div>
+
+</div>
 
         <!-- AR -->
 
@@ -224,7 +230,9 @@ Version : 1.0.0
 
         </div>
 
-        <!-- Quick Menu -->
+                <!-- ==========================================
+             SYSTEM INFORMATION
+        =========================================== -->
 
         <div class="col-lg-4">
 
@@ -234,7 +242,7 @@ Version : 1.0.0
 
                     <h5>
 
-                        Quick Access
+                        System Information
 
                     </h5>
 
@@ -242,25 +250,92 @@ Version : 1.0.0
 
                 <div class="finova-card-body">
 
-                    <div class="d-grid gap-2">
+                    <div class="finova-system-info">
 
-                        <button class="btn btn-primary">
+                        <!-- TODAY -->
 
-                            Business Partner
+                        <div class="finova-system-item">
 
-                        </button>
+                            <div class="finova-system-label">
 
-                        <button class="btn btn-primary">
+                                🕒 Today
 
-                            Chart Of Accounts
+                            </div>
 
-                        </button>
+                            <div
+                                id="dashboard-current-time"
+                                class="finova-system-value">
 
-                        <button class="btn btn-primary">
+                                Loading...
 
-                            GL Journal
+                            </div>
 
-                        </button>
+                        </div>
+
+                        <hr>
+
+                        <!-- FINANCIAL PERIOD -->
+
+                        <div class="finova-system-item">
+
+                            <div class="finova-system-label">
+
+                                📅 Active Financial Period
+
+                            </div>
+
+                            <div
+                                class="finova-system-value"
+                                id="dashboard-period">
+
+                                Loading...
+
+                            </div>
+
+                        </div>
+
+                        <hr>
+
+                        <!-- BRANCH -->
+
+                        <div class="finova-system-item">
+
+                            <div class="finova-system-label">
+
+                                🏢 Branch
+
+                            </div>
+
+                            <div
+                                class="finova-system-value"
+                                id="dashboard-branch">
+
+                                Loading...
+
+                            </div>
+
+                        </div>
+
+                        <hr>
+
+                        <!-- CURRENCY -->
+
+                        <div class="finova-system-item">
+
+                            <div class="finova-system-label">
+
+                                💰 Default Currency
+
+                            </div>
+
+                            <div
+                                class="finova-system-value"
+                                id="dashboard-currency">
+
+                                Loading...
+
+                            </div>
+                        </div>
 
                     </div>
 
@@ -269,7 +344,3 @@ Version : 1.0.0
             </div>
 
         </div>
-
-    </div>
-
-</div>

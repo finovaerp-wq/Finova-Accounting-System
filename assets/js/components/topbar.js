@@ -49,24 +49,6 @@ export class FinovaTopbar {
 
                 <div class="finova-topbar-right">
 
-                    <div class="finova-search-box">
-
-                        <i class="fa-solid fa-magnifying-glass"></i>
-
-                        <input
-                            type="text"
-                            placeholder="Search..."
-                            disabled>
-
-                    </div>
-
-                    <button
-                        class="finova-icon-button"
-                        id="finova-notification">
-
-                        <i class="fa-regular fa-bell"></i>
-
-                    </button>
 
                     <button
                         class="finova-icon-button"
@@ -85,6 +67,7 @@ export class FinovaTopbar {
     FA
 
 </div>
+<div class="finova-user-info">
 
 <div
     id="topbar-user-name"

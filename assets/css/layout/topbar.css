@@ -49,7 +49,7 @@ Version : 1.0.0
 
     display: flex;
     align-items: center;
-    gap: var(--space-md);
+    gap: var(--space-sm);
 
 }
 
@@ -97,55 +97,6 @@ Version : 1.0.0
 }
 
 /* ===========================================
-   SEARCH BOX
-=========================================== */
-
-.finova-search-box {
-
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-
-    width: 260px;
-    height: 40px;
-
-    padding: 0 var(--space-md);
-
-    background: var(--body-bg);
-
-    border: 1px solid var(--border-color);
-
-    border-radius: var(--radius-md);
-
-}
-
-.finova-search-box i {
-
-    color: var(--text-muted);
-
-}
-
-.finova-search-box input {
-
-    width: 100%;
-
-    border: none;
-
-    background: transparent;
-
-    color: var(--text-primary);
-
-    font-size: var(--font-size-md);
-
-}
-
-.finova-search-box input::placeholder {
-
-    color: var(--text-muted);
-
-}
-
-/* ===========================================
    USER PROFILE
 =========================================== */
 
@@ -153,7 +104,11 @@ Version : 1.0.0
 
     display: flex;
     align-items: center;
-    gap: var(--space-md);
+    gap: var(--space-sm);
+
+    padding-left: var(--space-sm);
+
+    border-left: 1px solid var(--border-color);
 
     cursor: pointer;
 
@@ -214,12 +169,6 @@ Version : 1.0.0
 =========================================== */
 
 @media (max-width: 992px) {
-
-    .finova-search-box {
-
-        display: none;
-
-    }
 
     .finova-user-info {
 
