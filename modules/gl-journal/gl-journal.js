@@ -46,6 +46,14 @@ constructor() {
     this.currentJournal = null;
 
     this.currentMode = "add";
+    this.modalEventsBound = false;
+    /*
+    ==========================================================
+    SAVE LOCK
+    ==========================================================
+    */
+
+    this.isSaving = false;
 
     /*
     ======================================================
@@ -903,47 +911,39 @@ renderStatus(status) {
 
     switch (String(status).trim().toLowerCase()) {
 
-    case "draft":
+        case "draft":
 
-        return `
-            <span class="badge bg-warning text-dark">
-                Draft
-            </span>
-        `;
+            return `
+                <span class="badge bg-warning text-dark">
+                    Draft
+                </span>
+            `;
 
-    case "posted":
+        case "posted":
 
-        return `
-            <span class="badge bg-success">
-                Posted
-            </span>
-        `;
+            return `
+                <span class="badge bg-success">
+                    Posted
+                </span>
+            `;
 
-    case "cancelled":
+        case "void":
 
-        return `
-            <span class="badge bg-danger">
-                Cancelled
-            </span>
-        `;
+            return `
+                <span class="badge bg-danger">
+                    Void
+                </span>
+            `;
 
-    case "reversed":
+        default:
 
-        return `
-            <span class="badge bg-info text-dark">
-                Reversed
-            </span>
-        `;
+            return `
+                <span class="badge bg-secondary">
+                    ${status}
+                </span>
+            `;
+    }
 
-    default:
-
-        return `
-            <span class="badge bg-secondary">
-                ${status}
-            </span>
-        `;
-
-}
 }
 
 /*
@@ -1226,7 +1226,25 @@ cacheModalDom() {
         document.getElementById(
             "btn-post-journal"
         );
+        this.summaryDebit =
+document.getElementById(
+    "summary-total-debit"
+);
 
+this.summaryCredit =
+document.getElementById(
+    "summary-total-credit"
+);
+
+this.summaryDifference =
+document.getElementById(
+    "summary-difference"
+);
+
+this.summaryStatus =
+document.getElementById(
+    "summary-balance-status"
+);
 }
 
 /*
@@ -1236,6 +1254,20 @@ BIND MODAL EVENTS
 */
 
 bindModalEvents() {
+
+    /*
+    ======================================================
+    PREVENT DOUBLE BINDING
+    ======================================================
+    */
+
+    if (this.modalEventsBound) {
+
+        return;
+
+    }
+
+    this.modalEventsBound = true;
 
     /*
     ======================================================
@@ -1273,7 +1305,6 @@ bindModalEvents() {
 
     );
 
-
     /*
     ======================================================
     SAVE
@@ -1282,21 +1313,21 @@ bindModalEvents() {
 
     this.btnSaveJournal?.addEventListener(
 
-    "click",
+        "click",
 
-    () => {
+        () => {
 
-        console.log("========== SAVE BUTTON ==========");
+            console.log("========== SAVE BUTTON ==========");
 
-        console.log("Mode :", this.currentMode);
+            console.log("Mode :", this.currentMode);
 
-        console.log("Journal :", this.currentJournal);
+            console.log("Journal :", this.currentJournal);
 
-        this.saveJournal("Draft");
+            this.saveJournal("Draft");
 
-    }
+        }
 
-);
+    );
 
     /*
     ======================================================
@@ -1306,21 +1337,21 @@ bindModalEvents() {
 
     this.btnPostJournal?.addEventListener(
 
-    "click",
+        "click",
 
-    () => {
+        () => {
 
-        console.log("========== POST BUTTON ==========");
+            console.log("========== POST BUTTON ==========");
 
-        console.log("Mode :", this.currentMode);
+            console.log("Mode :", this.currentMode);
 
-        console.log("Journal :", this.currentJournal);
+            console.log("Journal :", this.currentJournal);
 
-        this.saveJournal("Posted");
+            this.saveJournal("Posted");
 
-    }
+        }
 
-);
+    );
 
 }
 /*
@@ -2155,19 +2186,16 @@ calculateSummary() {
         );
 
     const debitElement =
-        document.getElementById(
-            "summary-total-debit"
-        );
+this.summaryDebit;
 
-    const creditElement =
-        document.getElementById(
-            "summary-total-credit"
-        );
+const creditElement =
+this.summaryCredit;
 
-    const differenceElement =
-        document.getElementById(
-            "summary-difference"
-        );
+const differenceElement =
+this.summaryDifference;
+
+const statusElement =
+this.summaryStatus;
 
     if (debitElement) {
 
@@ -2196,34 +2224,37 @@ calculateSummary() {
 
     }
 
-    const statusElement =
-        document.getElementById(
-            "summary-balance-status"
+    // =====================================================
+// Validation
+// =====================================================
+
+const requiredElements = {
+
+    txtAccountingDate : this.txtAccountingDate,
+    txtJournalNo      : this.txtJournalNo,
+    cboStatus         : this.cboStatus,
+    txtDescription    : this.txtDescription,
+    detailBody        : this.detailBody,
+    summaryDebit      : this.summaryDebit,
+    summaryCredit     : this.summaryCredit,
+    summaryDifference : this.summaryDifference,
+    summaryStatus     : this.summaryStatus
+
+};
+
+for (const [name, element] of Object.entries(requiredElements)) {
+
+    if (!element) {
+
+        console.error(
+
+            `[GL Journal] Missing element : ${name}`
+
         );
-
-    if (!statusElement) return;
-
-    if (
-        totalDebit === totalCredit &&
-        totalDebit > 0
-    ) {
-
-        statusElement.textContent =
-            "BALANCED";
-
-        statusElement.className =
-            "badge bg-success";
-
-    } else {
-
-        statusElement.textContent =
-            "NOT BALANCED";
-
-        statusElement.className =
-            "badge bg-danger";
 
     }
 
+}
 }
 /*
 ==========================================================
@@ -2318,7 +2349,7 @@ collectDetailData() {
             ".journal-detail-row"
         );
 
-    rows.forEach(row => {
+    for (const row of rows) {
 
         const description =
             row.querySelector(
@@ -2347,13 +2378,85 @@ collectDetailData() {
                 ".detail-business-partner"
             )?.value || null;
 
+        /*
+        ==================================================
+        SKIP EMPTY ROW
+        ==================================================
+        */
+
         if (
             !debitAccount &&
             !creditAccount &&
-            amount === 0
+            amount === 0 &&
+            description === ""
         ) {
 
-            return;
+            continue;
+
+        }
+
+        /*
+        ==================================================
+        VALIDATE ACCOUNT
+        ==================================================
+        */
+
+        if (
+            !debitAccount &&
+            !creditAccount
+        ) {
+
+            this.showMessage(
+                "Account wajib dipilih.",
+                "warning"
+            );
+
+            row.querySelector(
+                ".detail-debit-account"
+            )?.focus();
+
+            return [];
+
+        }
+
+        /*
+        ==================================================
+        VALIDATE DOUBLE ACCOUNT
+        ==================================================
+        */
+
+        if (
+            debitAccount &&
+            creditAccount
+        ) {
+
+            this.showMessage(
+                "Satu baris hanya boleh memiliki Debit atau Credit.",
+                "warning"
+            );
+
+            return [];
+
+        }
+
+        /*
+        ==================================================
+        VALIDATE AMOUNT
+        ==================================================
+        */
+
+        if (amount <= 0) {
+
+            this.showMessage(
+                "Amount harus lebih besar dari nol.",
+                "warning"
+            );
+
+            row.querySelector(
+                ".detail-amount"
+            )?.focus();
+
+            return [];
 
         }
 
@@ -2374,12 +2477,11 @@ collectDetailData() {
 
         });
 
-    });
+    }
 
     return details;
 
 }
-
 /*
 ==========================================================
 SAVE JOURNAL
@@ -2389,16 +2491,62 @@ SAVE JOURNAL
 async saveJournal(
     status = "Draft"
 ) {
+/*
+==========================================================
+PREVENT DOUBLE SAVE
+==========================================================
+*/
 
-    try {
+if (this.isSaving) {
 
-        const header = {
+    console.warn(
+        "Journal is being saved..."
+    );
+
+    return;
+
+}
+
+this.isSaving = true;
+
+/*
+==========================================================
+TRANSACTION SNAPSHOT
+==========================================================
+*/
+
+const transactionMode =
+    this.currentMode;
+
+const transactionJournal =
+    this.currentJournal;
+
+try {
+
+    this.btnSaveJournal.disabled = true;
+    this.btnPostJournal.disabled = true;
+
+    /*
+    ==========================================
+    SHOW LOADING
+    ==========================================
+    */
+
+    window.App?.showLoading?.();
+
+    /*
+==========================================================
+HEADER
+==========================================================
+*/
+
+const header = {
 
     journal_date:
-        this.txtAccountingDate.value,
+        this.txtAccountingDate.value.trim(),
 
     journal_no:
-        this.txtJournalNo.value,
+        this.txtJournalNo.value.trim(),
 
     description:
         this.txtDescription.value.trim(),
@@ -2406,6 +2554,60 @@ async saveJournal(
     status
 
 };
+
+/*
+==========================================================
+VALIDATE HEADER
+==========================================================
+*/
+
+if (!header.journal_date) {
+
+    this.showMessage(
+
+        "Accounting Date wajib diisi.",
+
+        "warning"
+
+    );
+
+    this.txtAccountingDate?.focus();
+
+    return;
+
+}
+
+if (!header.journal_no) {
+
+    this.showMessage(
+
+        "Journal No wajib diisi.",
+
+        "warning"
+
+    );
+
+    this.txtJournalNo?.focus();
+
+    return;
+
+}
+
+if (!header.description) {
+
+    this.showMessage(
+
+        "Description wajib diisi.",
+
+        "warning"
+
+    );
+
+    this.txtDescription?.focus();
+
+    return;
+
+}
 
         const details =
             this.collectDetailData();
@@ -2451,24 +2653,32 @@ async saveJournal(
 
         }
 
-        if (
-            this.currentMode === "add"
-        ) {
+       if (
+    transactionMode === "add"
+) {
 
-            await this.service.create(
-                header,
-                details
-            );
+    await this.service.create(
+        header,
+        details
+    );
 
-        } else {
+} else {
 
-            await this.service.update(
-                this.currentJournal.id,
-                header,
-                details
-            );
+    const success =
+    await this.service.create(
+        header,
+        details
+    );
 
-        }
+if (!success) {
+
+    throw new Error(
+        "Create journal failed."
+    );
+
+}
+
+}
 
         this.showMessage(
             status === "Posted"
@@ -2482,19 +2692,41 @@ async saveJournal(
 
     }
 
-    catch (error) {
+   catch (error) {
 
-        console.error(
-            "saveJournal error:",
-            error
-        );
+    console.error(
+        "saveJournal error:",
+        error
+    );
 
-        this.showError(
-            error
-        );
+    this.showError(
+        error
+    );
 
-    }
+}
 
+finally {
+
+    this.isSaving = false;
+
+    /*
+    ==========================================
+    HIDE LOADING
+    ==========================================
+    */
+
+    window.App?.hideLoading?.();
+
+    /*
+    ==========================================
+    ENABLE BUTTON
+    ==========================================
+    */
+
+    this.btnSaveJournal.disabled = false;
+    this.btnPostJournal.disabled = false;
+
+}
 }
 /*
 ==========================================================
@@ -2744,21 +2976,74 @@ CLEAR JOURNAL FORM
 ==========================================================
 */
 
-clearJournalForm(){
+clearJournalForm() {
 
-    const form =
+    // =====================================================
+    // Journal Header
+    // =====================================================
 
-        document.getElementById("glJournalForm");
+    if (this.txtAccountingDate) {
 
-    if(form){
-
-        form.reset();
+        this.txtAccountingDate.value = "";
 
     }
 
-    if(this.detailBody){
+    if (this.txtJournalNo) {
+
+        this.txtJournalNo.value = "";
+
+    }
+
+    if (this.txtDescription) {
+
+        this.txtDescription.value = "";
+
+    }
+
+    if (this.cboStatus) {
+
+        this.cboStatus.value = "Draft";
+
+    }
+
+    // =====================================================
+    // Detail Journal
+    // =====================================================
+
+    if (this.detailBody) {
 
         this.detailBody.innerHTML = "";
+
+    }
+
+    // =====================================================
+    // Summary
+    // =====================================================
+
+    if (this.summaryDebit) {
+
+        this.summaryDebit.value = "0.00";
+
+    }
+
+    if (this.summaryCredit) {
+
+        this.summaryCredit.value = "0.00";
+
+    }
+
+    if (this.summaryDifference) {
+
+        this.summaryDifference.value = "0.00";
+
+    }
+
+    if (this.summaryStatus) {
+
+        this.summaryStatus.textContent = "NOT BALANCED";
+
+        this.summaryStatus.className =
+            "badge bg-danger fs-6 px-3 py-2";
 
     }
 

@@ -46,9 +46,7 @@ export class GeneralJournalService {
 
         POSTED: "Posted",
 
-        CANCELLED: "Cancelled",
-
-        REVERSED: "Reversed"
+        VOID: "Void"
 
     };
 
@@ -1609,13 +1607,13 @@ async voidJournal(id, reason = "") {
 
             .update({
 
-                status: this.STATUS.DRAFT,
+    status: this.STATUS.VOID,
 
-                void_reason: reason,
+    void_reason: reason,
 
-                void_at: new Date().toISOString()
+    void_at: new Date().toISOString()
 
-            })
+})
 
             .eq("id", id);
 
