@@ -124,29 +124,32 @@ Version : 1.0.0
 
 }
 
-/* ===========================================
-   MENU ITEM
-=========================================== */
+.finova-menu-item{
 
-.finova-menu-item {
+    display:flex;
 
-    display: flex;
+    align-items:center;
 
-    align-items: center;
+    gap:12px;
 
-    gap: 14px;
+    min-height:40px;
 
-    height: 46px;
+    padding:0 18px;
 
-    padding: 0 var(--space-lg);
+    border-radius:10px;
 
-    cursor: pointer;
+    margin:2px 8px;
 
-    color: var(--sidebar-text);
+    cursor:pointer;
 
-    transition: all var(--transition-fast);
+    color:var(--sidebar-text);
 
-    user-select: none;
+    transition:
+        background .20s ease,
+        color .20s ease,
+        transform .18s ease;
+
+    user-select:none;
 
 }
 
@@ -191,6 +194,208 @@ Version : 1.0.0
     color: var(--sidebar-text-active);
 
     border-right: 4px solid #FFFFFF;
+
+}
+/* ===========================================
+   MENU GROUP
+=========================================== */
+
+.finova-menu-group{
+
+    width:100%;
+
+}
+
+/* ===========================================
+   GROUP HEADER
+=========================================== */
+
+.finova-menu-group-header{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    min-height:40px;
+
+    padding:0 18px;
+
+    margin:2px 8px;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+    user-select:none;
+
+    color:var(--sidebar-text);
+
+    transition:
+        background .20s ease,
+        color .20s ease,
+        transform .18s ease;
+
+}
+
+.finova-menu-group-header:hover{
+
+    background:var(--sidebar-hover);
+
+    color:var(--sidebar-text-active);
+
+}
+/* ===========================================
+   GROUP ACTIVE
+=========================================== */
+
+.finova-menu-group.active
+.finova-menu-group-header{
+
+    background:var(--sidebar-active);
+
+    color:var(--sidebar-text-active);
+
+}
+
+/* ===========================================
+   GROUP LEFT
+=========================================== */
+
+.finova-menu-group-left{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+}
+
+.finova-menu-group-left i{
+
+    width:20px;
+
+    text-align:center;
+
+    font-size:15px;
+
+}
+
+.finova-menu-group-left span{
+
+    font-size:var(--font-size-md);
+
+}
+
+/* ===========================================
+   GROUP ARROW
+=========================================== */
+
+.finova-menu-arrow{
+
+    font-size:12px;
+
+    transition:transform .25s ease;
+
+}
+
+/* ===========================================
+   GROUP OPEN
+=========================================== */
+
+.finova-menu-group.open
+.finova-menu-arrow{
+
+    transform:rotate(90deg);
+
+}
+
+/* ===========================================
+   SUBMENU
+=========================================== */
+
+.finova-submenu{
+
+    max-height:0;
+
+    opacity:0;
+
+    overflow:hidden;
+
+    transition:
+        max-height .30s ease,
+        opacity .25s ease;
+
+}
+
+/* ===========================================
+   SUBMENU OPEN
+=========================================== */
+
+.finova-submenu.open{
+
+    max-height:500px;
+
+    opacity:1;
+
+}
+
+/* ===========================================
+   SUBMENU ITEM
+=========================================== */
+
+.finova-submenu-item{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    min-height:38px;
+
+    padding:0 18px 0 50px;
+
+    margin:2px 8px;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    color:var(--sidebar-text);
+
+    transition:
+        background .20s ease,
+        color .20s ease,
+        transform .18s ease;
+
+}
+
+.finova-submenu-item i{
+
+    width:20px;
+
+    text-align:center;
+
+    font-size:14px;
+
+}
+
+.finova-submenu-item span{
+
+    flex:1;
+
+    font-size:var(--font-size-sm);
+
+}
+
+.finova-submenu-item:hover{
+
+    background:var(--sidebar-hover);
+
+    color:var(--sidebar-text-active);
 
 }
 

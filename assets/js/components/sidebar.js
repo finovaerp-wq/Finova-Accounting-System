@@ -13,12 +13,13 @@ export class FinovaSidebar {
 
     constructor() {
 
-        this.changePassword = null;
-        this.render();
+    this.changePassword = null;
 
-        this.bindEvents();
+    this.render();
 
-    }
+    this.bindEvents();
+
+}
 
     render() {
 
@@ -62,50 +63,175 @@ export class FinovaSidebar {
 
     generateMenu() {
 
-        return `
+    return `
 
-            ${this.menuHeader("Dashboard")}
+        ${this.menuItem(
+            "Dashboard",
+            "fa-solid fa-gauge-high",
+            "dashboard"
+        )}
 
-            ${this.menuItem("Dashboard", "fa-solid fa-gauge-high", "dashboard")}
+        ${this.menuGroup(
+            "Master Data",
+            "fa-solid fa-database",
+            [
 
-            ${this.menuHeader("Master Data")}
+                this.menuItem(
+                    "User Management",
+                    "fa-solid fa-user-shield",
+                    "user-management",
+                    true
+                ),
 
-            ${this.menuItem("User Management", "fa-solid fa-user-shield", "user-management")}
-            ${this.menuItem("Business Partner", "fa-solid fa-users", "business-partner")}
-            ${this.menuItem("Chart Of Accounts", "fa-solid fa-book", "chart-of-accounts")}
+                this.menuItem(
+                    "Business Partner",
+                    "fa-solid fa-users",
+                    "business-partner",
+                    true
+                ),
 
-            ${this.menuHeader("Finance")}
+                this.menuItem(
+                    "Chart Of Accounts",
+                    "fa-solid fa-book",
+                    "chart-of-accounts",
+                    true
+                )
 
-            ${this.menuItem("Account Payable", "fa-solid fa-file-invoice-dollar", "account-payable")}
-            ${this.menuItem("Account Receivable", "fa-solid fa-money-check-dollar", "account-receivable")}
-            ${this.menuItem("Aging Payable", "fa-solid fa-hourglass-half", "aging-payable")}
-            ${this.menuItem("Aging Receivable", "fa-solid fa-clock", "aging-receivable")}
+            ]
+        )}
 
-            ${this.menuHeader("Accounting")}
+       ${this.menuGroup(
+    "Finance",
+    "fa-solid fa-coins",
+    [
 
-            ${this.menuItem("GL Journal", "fa-solid fa-book-open", "gl-journal")}
+        this.menuItem(
+            "Account Payable",
+            "fa-solid fa-file-invoice-dollar",
+            "account-payable",
+            true
+        ),
 
-            ${this.menuHeader("Payment")}
+        this.menuItem(
+            "Account Receivable",
+            "fa-solid fa-money-check-dollar",
+            "account-receivable",
+            true
+        ),
 
-            ${this.menuItem("AP Payment", "fa-solid fa-credit-card", "ap-payment")}
-            ${this.menuItem("AR Payment", "fa-solid fa-wallet", "ar-payment")}
+        this.menuItem(
+            "Aging Payable",
+            "fa-solid fa-hourglass-half",
+            "aging-payable",
+            true
+        ),
 
-            ${this.menuHeader("Report")}
+        this.menuItem(
+            "Aging Receivable",
+            "fa-solid fa-clock",
+            "aging-receivable",
+            true
+        )
 
-            ${this.menuItem("General Ledger", "fa-solid fa-book", "general-ledger")}
-            ${this.menuItem("Trial Balance Year", "fa-solid fa-scale-balanced", "trial-balance-year")}
-            ${this.menuItem("Income Statement", "fa-solid fa-chart-line", "income-statement")}
-            ${this.menuItem("Balance Sheet", "fa-solid fa-table", "balance-sheet")}
-            ${this.menuItem("Profit & Loss", "fa-solid fa-chart-pie", "profit-loss")}
+    ]
+)}
 
-            ${this.menuHeader("Settings")}
+        ${this.menuGroup(
+    "Accounting",
+    "fa-solid fa-book-open",
+    [
 
-            ${this.menuItem("Change Password", "fa-solid fa-key", "change-password")}
-            ${this.menuItem("Logout", "fa-solid fa-right-from-bracket", "logout")}
+        this.menuItem(
+            "GL Journal",
+            "fa-solid fa-book-open",
+            "gl-journal",
+            true
+        )
 
-        `;
+    ]
+)}
+        ${this.menuGroup(
+    "Payment",
+    "fa-solid fa-credit-card",
+    [
 
-    }
+        this.menuItem(
+            "AP Payment",
+            "fa-solid fa-credit-card",
+            "ap-payment",
+            true
+        ),
+
+        this.menuItem(
+            "AR Payment",
+            "fa-solid fa-wallet",
+            "ar-payment",
+            true
+        )
+
+    ]
+)}
+
+        ${this.menuGroup(
+    "Report",
+    "fa-solid fa-chart-column",
+    [
+
+        this.menuItem(
+            "General Ledger",
+            "fa-solid fa-book",
+            "general-ledger",
+            true
+        ),
+
+        this.menuItem(
+            "Trial Balance Year",
+            "fa-solid fa-scale-balanced",
+            "trial-balance-year",
+            true
+        ),
+
+        this.menuItem(
+            "Income Statement",
+            "fa-solid fa-chart-line",
+            "income-statement",
+            true
+        ),
+
+        this.menuItem(
+            "Balance Sheet",
+            "fa-solid fa-table",
+            "balance-sheet",
+            true
+        ),
+
+        this.menuItem(
+            "Profit & Loss",
+            "fa-solid fa-chart-pie",
+            "profit-loss",
+            true
+        )
+
+    ]
+)}
+
+        ${this.menuHeader("Settings")}
+
+        ${this.menuItem(
+            "Change Password",
+            "fa-solid fa-key",
+            "change-password"
+        )}
+
+        ${this.menuItem(
+            "Logout",
+            "fa-solid fa-right-from-bracket",
+            "logout"
+        )}
+
+    `;
+
+}
 
     menuHeader(title) {
 
@@ -121,75 +247,239 @@ export class FinovaSidebar {
 
     }
 
-    menuItem(title, icon, module) {
+    menuItem(title, icon, module, isSubmenu = false) {
 
-        return `
+    return `
 
-            <div
-                class="finova-menu-item"
-                data-module="${module}">
+        <div
+            class="${isSubmenu ? "finova-submenu-item" : "finova-menu-item"}"
+            data-module="${module}">
 
-                <i class="${icon}"></i>
+            <i class="${icon}"></i>
 
-                <span>${title}</span>
+            <span>${title}</span>
+
+        </div>
+
+    `;
+
+}
+menuGroup(title, icon, children) {
+
+    return `
+
+        <div class="finova-menu-group">
+
+            <div class="finova-menu-group-header">
+
+                <div class="finova-menu-group-left">
+
+                    <i class="${icon}"></i>
+
+                    <span>${title}</span>
+
+                </div>
+
+                <i class="fa-solid fa-chevron-right finova-menu-arrow"></i>
 
             </div>
 
-        `;
+            <div class="finova-submenu">
 
-    }
+                ${children.join("")}
+
+            </div>
+
+        </div>
+
+    `;
+
+}
 
     bindEvents() {
 
-        const menus = document.querySelectorAll(".finova-menu-item");
+    const sidebar = document.querySelector(".finova-sidebar");
 
-        menus.forEach(menu => {
+    if (!sidebar) {
 
-            menu.addEventListener("click", () => {
+        return;
 
-                const module = menu.dataset.module;
+    }
+    
 
-                
-                
-/*
-=========================================
-CHANGE PASSWORD
-=========================================
-*/
+    sidebar.addEventListener("click", (event) => {
 
-if (module === "change-password") {
+        /*
+        ==========================================
+        GROUP HEADER
+        ==========================================
+        */
 
-    this.openChangePasswordModal();
+        const groupHeader = event.target.closest(
+            ".finova-menu-group-header"
+        );
 
-    return;
+        if (groupHeader) {
+const submenu = groupHeader.nextElementSibling;
 
-}
+if (submenu) {
 
-/*
-=========================================
-LOGOUT
-=========================================
-*/
+    const group = groupHeader.parentElement;
 
-if (module === "logout") {
+    const isOpen = submenu.classList.contains("open");
 
-    this.logout();
+    /*
+    ==========================================
+    CLOSE ALL GROUP
+    ==========================================
+    */
 
-    return;
+    sidebar
+        .querySelectorAll(".finova-menu-group")
+        .forEach(item => {
 
-}
-
-                if (window.finovaRouter) {
-
-                    window.finovaRouter.navigate(module);
-
-                }
-
-            });
+            item.classList.remove("open");
 
         });
 
+    sidebar
+        .querySelectorAll(".finova-submenu")
+        .forEach(item => {
+
+            item.classList.remove("open");
+
+        });
+
+    /*
+    ==========================================
+    OPEN CURRENT GROUP
+    ==========================================
+    */
+
+    if (!isOpen) {
+
+        group.classList.add("open");
+
+        submenu.classList.add("open");
+
     }
+
+}
+
+            return;
+
+        }
+
+        /*
+        ==========================================
+        MENU / SUBMENU
+        ==========================================
+        */
+
+        const menu = event.target.closest(
+            ".finova-menu-item, .finova-submenu-item"
+        );
+
+        if (!menu) {
+
+            return;
+
+        }
+
+        const module = menu.dataset.module;
+
+        if (!module) {
+
+            return;
+
+        }
+
+        /*
+        ==========================================
+        CHANGE PASSWORD
+        ==========================================
+        */
+
+        if (module === "change-password") {
+
+            this.openChangePasswordModal();
+
+            return;
+
+        }
+        
+
+        /*
+        ==========================================
+        LOGOUT
+        ==========================================
+        */
+
+        if (module === "logout") {
+
+            this.logout();
+
+            return;
+
+        }
+        
+
+        /*
+==========================================
+ACTIVE MENU
+==========================================
+*/
+
+sidebar
+    .querySelectorAll(
+        ".finova-menu-item, .finova-submenu-item"
+    )
+    .forEach(item => {
+
+        item.classList.remove("active");
+
+    });
+
+sidebar
+    .querySelectorAll(".finova-menu-group")
+    .forEach(group => {
+
+        group.classList.remove("active");
+
+    });
+
+menu.classList.add("active");
+
+/*
+==========================================
+ACTIVE PARENT
+==========================================
+*/
+
+const parentGroup =
+    menu.closest(".finova-menu-group");
+
+if (parentGroup) {
+
+    parentGroup.classList.add("active");
+
+}
+
+        /*
+        ==========================================
+        ROUTER
+        ==========================================
+        */
+
+        if (window.finovaRouter) {
+
+            window.finovaRouter.navigate(module);
+
+        }
+
+    });
+
+}
     /*
 ==========================================================
 LOGOUT
