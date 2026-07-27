@@ -328,41 +328,9 @@ if (submenu) {
 
     const isOpen = submenu.classList.contains("open");
 
-    /*
-    ==========================================
-    CLOSE ALL GROUP
-    ==========================================
-    */
+group.classList.toggle("open");
 
-    sidebar
-        .querySelectorAll(".finova-menu-group")
-        .forEach(item => {
-
-            item.classList.remove("open");
-
-        });
-
-    sidebar
-        .querySelectorAll(".finova-submenu")
-        .forEach(item => {
-
-            item.classList.remove("open");
-
-        });
-
-    /*
-    ==========================================
-    OPEN CURRENT GROUP
-    ==========================================
-    */
-
-    if (!isOpen) {
-
-        group.classList.add("open");
-
-        submenu.classList.add("open");
-
-    }
+submenu.classList.toggle("open");
 
 }
 
@@ -461,7 +429,7 @@ const parentGroup =
 
 if (parentGroup) {
 
-    parentGroup.classList.add("active");
+    parentGroup.classList.add("open");
 
 }
 

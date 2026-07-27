@@ -187,13 +187,35 @@ Version : 1.0.0
 
 /* Active */
 
-.finova-menu-item.active {
+.finova-menu-item.active{
 
-    background: var(--sidebar-active);
+    position:relative;
 
-    color: var(--sidebar-text-active);
+    background:var(--sidebar-active);
 
-    border-right: 4px solid #FFFFFF;
+    color:var(--sidebar-text-active);
+
+    font-weight:600;
+
+}
+
+.finova-menu-item.active::before{
+
+    content:"";
+
+    position:absolute;
+
+    left:0;
+
+    top:7px;
+
+    bottom:7px;
+
+    width:4px;
+
+    border-radius:0 6px 6px 0;
+
+    background:#4DA3FF;
 
 }
 /* ===========================================
@@ -250,12 +272,9 @@ Version : 1.0.0
    GROUP ACTIVE
 =========================================== */
 
-.finova-menu-group.active
-.finova-menu-group-header{
+.finova-menu-group.open .finova-menu-group-header{
 
-    background:var(--sidebar-active);
-
-    color:var(--sidebar-text-active);
+    color: var(--sidebar-text-active);
 
 }
 
@@ -318,15 +337,43 @@ Version : 1.0.0
 
 .finova-submenu{
 
+    position:relative;
+
     max-height:0;
 
     opacity:0;
 
     overflow:hidden;
 
+    margin-left:18px;
+
     transition:
         max-height .30s ease,
         opacity .25s ease;
+
+}
+
+/* ===========================================
+   SUBMENU GUIDE LINE
+=========================================== */
+
+.finova-submenu::before{
+
+    content:"";
+
+    position:absolute;
+
+    left:24px;
+
+    top:8px;
+
+    bottom:8px;
+
+    width:1px;
+
+    background:rgba(255,255,255,.12);
+
+    border-radius:999px;
 
 }
 
@@ -348,6 +395,8 @@ Version : 1.0.0
 
 .finova-submenu-item{
 
+    position:relative;
+
     display:flex;
 
     align-items:center;
@@ -356,7 +405,7 @@ Version : 1.0.0
 
     min-height:38px;
 
-    padding:0 18px 0 50px;
+    padding:0 18px 0 42px;
 
     margin:2px 8px;
 
@@ -375,11 +424,11 @@ Version : 1.0.0
 
 .finova-submenu-item i{
 
-    width:20px;
+    width:16px;
 
-    text-align:center;
+    font-size:13px;
 
-    font-size:14px;
+    flex-shrink:0;
 
 }
 
@@ -387,7 +436,13 @@ Version : 1.0.0
 
     flex:1;
 
-    font-size:var(--font-size-sm);
+    font-size:13px;
+
+    white-space:nowrap;
+
+    overflow:hidden;
+
+    text-overflow:ellipsis;
 
 }
 
@@ -397,8 +452,44 @@ Version : 1.0.0
 
     color:var(--sidebar-text-active);
 
+    transform:translateX(4px);
+
+}
+/* ===========================================
+   SUBMENU ACTIVE
+=========================================== */
+
+.finova-submenu-item.active{
+
+    position:relative;
+
+    background:var(--sidebar-active);
+
+    color:var(--sidebar-text-active);
+
+    font-weight:600;
+
 }
 
+.finova-submenu-item.active::before{
+
+    content:"";
+
+    position:absolute;
+
+    left:0;
+
+    top:6px;
+
+    bottom:6px;
+
+    width:4px;
+
+    border-radius:0 6px 6px 0;
+
+    background:#4DA3FF;
+
+}
 /* ===========================================
    FOOTER
 =========================================== */
