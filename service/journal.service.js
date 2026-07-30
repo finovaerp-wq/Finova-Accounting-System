@@ -120,41 +120,50 @@ async getById(id) {
 
         const {
 
-            data: details,
+        data: details,
 
-            error: detailError
+        error: detailError
 
-        } = await supabase
+    } = await supabase
 
-            .from(TABLE.GL_JOURNAL_DETAIL)
+        .from(TABLE.GL_JOURNAL_DETAIL)
 
-            .select("*")
-
-            .eq(
-
-                "journal_id",
-
-                id
-
+        .select(`
+            *,
+            mst_chart_of_accounts (
+                id,
+                account_code,
+                account_name
+            ),
+            mst_business_partner (
+                id,
+                bp_code,
+                bp_name
             )
+        `)
 
-            .order(
+        .eq(
+            "journal_id",
+            id
+        )
 
-                "line_no",
-
-                {
-
-                    ascending: true
-
-                }
-
-            );
+        .order(
+            "line_no",
+            {
+                ascending: true
+            }
+        );
 
         if (detailError) {
 
             throw detailError;
 
         }
+        console.log("HEADER :", header);
+
+        console.log("DETAIL :", details);
+
+        console.log("DETAIL COUNT :", details?.length);
 
         /*
         ======================================================
@@ -344,45 +353,53 @@ CREATE GENERAL JOURNAL
 
 async create(header, details = []) {
 
+    console.log("===== SERVICE CREATE =====");
+    console.log("HEADER :", header);
+    console.table(details);
+
     try {
 
         /*
         ======================================================
-        GENERATE DOCUMENT NUMBER
+        GENERATE JOURNAL NUMBER
         ======================================================
         */
 
-        if (
-            !header.journal_no ||
-            header.journal_no === ""
-        ) {
+        if (!header.journal_no?.trim()) {
+
             header.journal_no =
                 await this.generateDocumentNumber();
+
         }
 
         /*
         ======================================================
-        VALIDATE HEADER
+        DEFAULT STATUS
+        ======================================================
+        */
+
+        header.status ??= this.STATUS.DRAFT;
+
+        header.source_module ??= "GENERAL";
+
+        /*
+        ======================================================
+        VALIDATE
         ======================================================
         */
 
         this.validateHeader(header);
 
-        /*
-        ======================================================
-        VALIDATE DETAIL
-        ======================================================
-        */
-
         this.validateDetail(details);
 
         /*
         ======================================================
-        CONVERT UI DETAIL
+        BUILD GL DETAIL
         ======================================================
         */
 
         const journalDetails =
+
             this.buildJournalDetail(details);
 
         /*
@@ -392,30 +409,20 @@ async create(header, details = []) {
         */
 
         const total =
-            this.calculateTotal(journalDetails);
+
+            this.calculateTotal(
+
+                journalDetails
+
+            );
 
         header.total_debit =
+
             total.totalDebit;
 
         header.total_credit =
+
             total.totalCredit;
-        /*
-        ======================================================
-        DEFAULT STATUS
-        ======================================================
-        */
-
-        if (
-
-            !header.status
-
-        ) {
-
-            header.status =
-
-                this.STATUS.DRAFT;
-
-        }
 
         /*
         ======================================================
@@ -438,6 +445,9 @@ async create(header, details = []) {
             .select()
 
             .single();
+            console.log("HEADER INSERT RESULT");
+            console.log(journal);
+            console.log(headerError);
 
         if (headerError) {
 
@@ -447,80 +457,89 @@ async create(header, details = []) {
 
         /*
         ======================================================
+        PREPARE DETAIL
+        ======================================================
+        */
+
+        const insertDetails =
+
+            journalDetails.map(item => ({
+
+                journal_id:
+
+                    journal.id,
+
+                line_no:
+
+                    item.line_no,
+
+                account_id:
+
+                    item.account_id,
+
+                business_partner_id:
+
+                    item.business_partner_id,
+
+                description:
+
+                    item.description,
+
+                debit:
+
+                    item.debit,
+
+                credit:
+
+                    item.credit
+
+            }));
+
+        /*
+        ======================================================
         INSERT DETAIL
         ======================================================
         */
 
-        /*
-======================================================
-PREPARE DETAIL
-======================================================
-*/
+        if (insertDetails.length) {
 
-const insertDetail = journalDetails.map(item => ({
+            const {
 
-    journal_id: journal.id,
+                error: detailError
 
-    line_no: item.line_no,
+            } = await supabase
 
-    account_id: item.account_id,
+                .from(TABLE.GL_JOURNAL_DETAIL)
 
-    business_partner_id:
-        item.business_partner_id,
+                .insert(insertDetails);
 
-    description:
-        item.description,
+            if (detailError) {
 
-    debit:
-        item.debit,
+                /*
+                ==============================================
+                ROLLBACK HEADER
+                ==============================================
+                */
 
-    credit:
-        item.credit
+                await supabase
 
-}));
+                    .from(TABLE.GL_JOURNAL)
 
-/*
-======================================================
-INSERT DETAIL
-======================================================
-*/
+                    .delete()
 
-if (insertDetail.length > 0) {
+                    .eq(
 
-    const {
+                        "id",
 
-        error: detailError
+                        journal.id
 
-    } = await supabase
+                    );
 
-        .from(TABLE.GL_JOURNAL_DETAIL)
+                throw detailError;
 
-        .insert(insertDetail);
+            }
 
-    if (detailError) {
-
-        /*
-        ==============================================
-        ROLLBACK HEADER
-        ==============================================
-        */
-
-        await supabase
-
-            .from(TABLE.GL_JOURNAL)
-
-            .delete()
-
-            .eq(
-                "id",
-                journal.id
-            );
-
-        throw detailError;
-
-    }
-
-}
+        }
 
         /*
         ======================================================
@@ -547,6 +566,7 @@ if (insertDetail.length > 0) {
     }
 
 }
+
 async update(id, header, details = []) {
 
     try {
@@ -644,7 +664,8 @@ async update(id, header, details = []) {
         PREPARE DETAIL
         ======================================================
         */
-
+        console.log("JOURNAL DETAIL");
+        console.table(journalDetails);
         const insertDetail =
             journalDetails.map(item => ({
 
@@ -681,6 +702,7 @@ async update(id, header, details = []) {
                 error: detailError
 
             } = await supabase
+            
 
                 .from(TABLE.GL_JOURNAL_DETAIL)
 
@@ -1393,88 +1415,171 @@ validateDetail(details = []) {
 
 /*
 ==========================================================
-CONVERT DETAIL
-1 Amount
+BUILD JOURNAL DETAIL
+UI
 ↓↓↓
-Debit & Credit
+DATABASE
 ==========================================================
 */
 
 buildJournalDetail(details = []) {
 
-    const result = [];
+    return details.flatMap((item, index) => {
 
-    details.forEach((item, index) => {
+        const amount =
+            Number(item.amount || 0);
 
-        /*
-        ==========================================
-        DEBIT
-        ==========================================
-        */
+        return [
 
-        result.push({
+            /*
+            ==================================================
+            DEBIT
+            ==================================================
+            */
 
-            line_no:
+            {
 
-                result.length + 1,
+                line_no:
 
-            account_id:
+                    (index * 2) + 1,
 
-                item.debit_account_id,
+                account_id:
 
-            business_partner_id:
+                    Number(item.debit_account_id),
 
-                item.business_partner_id ?? null,
+                business_partner_id:
 
-            description:
+                    item.business_partner_id || null,
 
-                item.description ?? "",
+                description:
 
-            debit:
+                    item.description || "",
 
-                Number(item.amount),
+                debit:
 
-            credit:
+                    amount,
 
-                0
+                credit:
 
-        });
+                    0
 
-        /*
-        ==========================================
-        CREDIT
-        ==========================================
-        */
+            },
 
-        result.push({
+            /*
+            ==================================================
+            CREDIT
+            ==================================================
+            */
 
-            line_no:
+            {
 
-                result.length + 1,
+                line_no:
 
-            account_id:
+                    (index * 2) + 2,
 
-                item.credit_account_id,
+                account_id:
 
-            business_partner_id:
+                    Number(item.credit_account_id),
 
-                item.business_partner_id ?? null,
+                business_partner_id:
 
-            description:
+                    item.business_partner_id || null,
 
-                item.description ?? "",
+                description:
 
-            debit:
+                    item.description || "",
 
-                0,
+                debit:
 
-            credit:
+                    0,
 
-                Number(item.amount)
+                credit:
 
-        });
+                    amount
+
+            }
+
+        ];
 
     });
+
+}
+/*
+==========================================================
+MERGE JOURNAL DETAIL
+DATABASE
+↓↓↓
+UI
+==========================================================
+*/
+
+mergeJournalDetail(details = []) {
+
+    const result = [];
+
+    for (let i = 0; i < details.length; i += 2) {
+
+        const debitLine =
+            details[i];
+
+        const creditLine =
+            details[i + 1];
+
+        if (!debitLine || !creditLine) {
+
+            continue;
+
+        }
+
+        result.push({
+
+            description:
+
+                debitLine.description || "",
+
+            debit_account_id:
+
+                debitLine.account_id,
+
+            debit_account_code:
+
+                debitLine.mst_chart_of_accounts?.account_code || "",
+
+            debit_account_name:
+
+                debitLine.mst_chart_of_accounts?.account_name || "",
+
+            credit_account_id:
+
+                creditLine.account_id,
+
+            credit_account_code:
+
+                creditLine.mst_chart_of_accounts?.account_code || "",
+
+            credit_account_name:
+
+                creditLine.mst_chart_of_accounts?.account_name || "",
+
+            business_partner_id:
+
+                debitLine.business_partner_id,
+
+            business_partner_name:
+
+                debitLine.mst_business_partner?.bp_name || "",
+
+            amount:
+
+                Number(
+
+                    debitLine.debit || creditLine.credit || 0
+
+                )
+
+        });
+
+    }
 
     return result;
 

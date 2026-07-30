@@ -32,9 +32,20 @@ Version : 2.0 Enterprise
 
     justify-content:space-between;
 
-    align-items:flex-start;
+    align-items:center;
 
-    gap:20px;
+    gap:24px;
+
+    padding:24px 28px;
+
+    background:#FFFFFF;
+
+    border:1px solid #E9EEF5;
+
+    border-radius:18px;
+
+    box-shadow:
+        0 6px 20px rgba(15,23,42,.05);
 
 }
 
@@ -56,13 +67,15 @@ Version : 2.0 Enterprise
 
     margin:0;
 
-    font-size:24px;
+    font-size:30px;
 
     font-weight:700;
 
-    line-height:1.2;
+    line-height:1.15;
 
-    color:#212529;
+    letter-spacing:-0.6px;
+
+    color:#0F172A;
 
 }
 
@@ -72,13 +85,23 @@ Version : 2.0 Enterprise
 
 .gl-journal-breadcrumb{
 
-    margin-top:4px;
+    display:flex;
 
-    font-size:14px;
+    align-items:center;
 
-    font-weight:400;
+    flex-wrap:wrap;
 
-    color:#6C757D;
+    gap:6px;
+
+    margin-top:8px;
+
+    font-size:13px;
+
+    font-weight:500;
+
+    line-height:1.5;
+
+    color:#64748B;
 
 }
 
@@ -92,9 +115,19 @@ Version : 2.0 Enterprise
 
     align-items:center;
 
-    gap:8px;
+    justify-content:flex-end;
+
+    gap:12px;
 
     flex-wrap:wrap;
+
+}
+.gl-journal-header-right .btn:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:
+        0 8px 20px rgba(15,23,42,.12);
 
 }
 
@@ -449,3 +482,195 @@ Version : 2.0 Enterprise
     height:1px;
 
 }
+/* ==========================================================
+   GL JOURNAL MODAL
+========================================================== */
+
+#glJournalModal .modal-content{
+
+    border:none;
+
+    border-radius:14px;
+
+    overflow:hidden;
+
+}
+
+#glJournalModal .modal-header{
+
+    padding:16px 24px;
+
+}
+
+#glJournalModal .modal-body{
+
+    padding:24px;
+
+    background:#F8FAFC;
+
+}
+
+#glJournalModal .modal-footer{
+
+    padding:16px 24px;
+
+    background:#FFFFFF;
+
+    border-top:1px solid #E5E7EB;
+
+}
+/* ==========================================================
+   MODAL CARD
+========================================================== */
+
+#glJournalModal .card{
+
+    border:none;
+
+    border-radius:12px;
+
+    overflow:hidden;
+
+    box-shadow:0 2px 10px rgba(15,23,42,.06);
+
+}
+
+#glJournalModal .card-header{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    min-height:56px;
+
+    padding:0 20px;
+
+    background:#FFFFFF;
+
+    border-bottom:1px solid #EEF2F7;
+
+}
+
+#glJournalModal .card-body{
+
+    padding:20px;
+
+}
+/* ==========================================================
+   FORM CONTROL
+========================================================== */
+
+#glJournalModal .form-control,
+#glJournalModal .form-select{
+
+    height:42px;
+
+    border-radius:8px;
+
+    border:1px solid #D1D5DB;
+
+    font-size:14px;
+
+    transition:
+        border-color .20s ease,
+        box-shadow .20s ease;
+
+}
+
+#glJournalModal textarea.form-control{
+
+    height:auto;
+
+}
+
+#glJournalModal .form-control:focus,
+#glJournalModal .form-select:focus{
+
+    border-color:#2563EB;
+
+    box-shadow:0 0 0 3px rgba(37,99,235,.12);
+
+}
+/* ==========================================================
+   READ ONLY
+========================================================== */
+
+#glJournalModal input[readonly]{
+
+    background:#F9FAFB;
+
+    color:#4B5563;
+
+    cursor:not-allowed;
+
+}
+/* ==========================================================
+   STATUS BADGE
+========================================================== */
+
+#journal-header-status{
+
+    min-width:90px;
+
+    text-align:center;
+
+    font-size:12px;
+
+    font-weight:600;
+
+    letter-spacing:.5px;
+
+}
+/* ==========================================================
+   JOURNAL SUMMARY
+========================================================== */
+
+#glJournalModal .card:last-child{
+
+    border-radius:12px;
+
+    overflow:hidden;
+
+}
+
+#glJournalModal #summary-total-debit,
+#glJournalModal #summary-total-credit,
+#glJournalModal #summary-difference{
+
+    background:#F8FAFC;
+
+    border:1px solid #E5E7EB;
+
+    font-size:15px;
+
+    font-weight:700;
+
+}
+/* ==========================================================
+   BALANCE STATUS
+========================================================== */
+
+#summary-balance-status{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    min-width:170px;
+
+    height:42px;
+
+    border-radius:8px;
+
+    font-size:13px;
+
+    font-weight:700;
+
+    letter-spacing:.5px;
+
+}
+

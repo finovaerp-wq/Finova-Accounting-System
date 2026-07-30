@@ -7,18 +7,36 @@ Author  : FINOVA Development Team
 ==========================================================
 */
 
+/*
+==========================================================
+CORE
+==========================================================
+*/
+
 import {
     supabase,
     TABLE
 } from "../../assets/js/core/supabase.js";
 
+/*
+==========================================================
+SERVICES
+==========================================================
+*/
+
 import {
     GeneralJournalService
 } from "../../service/journal.service.js";
 
-export class GeneralJournal {
+/*
+==========================================================
+GENERAL JOURNAL
+==========================================================
+*/
 
-    /*
+
+export class GeneralJournal {
+/*
 ==========================================================
 CONSTRUCTOR
 ==========================================================
@@ -37,57 +55,28 @@ constructor() {
 
     /*
     ======================================================
-    JOURNAL STATE
+    DATA SOURCE
     ======================================================
     */
 
     this.journals = [];
 
-    this.currentJournal = null;
+    this.filteredJournals = [];
 
-    this.currentMode = "add";
-    this.modalEventsBound = false;
-    /*
-    ==========================================================
-    SAVE LOCK
-    ==========================================================
-    */
+    this.detailLines = [];
 
-    this.isSaving = false;
+    this.summary = {
 
-    /*
-    ======================================================
-    PAGINATION
-    ======================================================
-    */
+    totalDebit : 0,
 
-    this.currentPage = 1;
+    totalCredit : 0,
 
-    this.pageSize = 20;
+    difference : 0,
 
-    this.totalRows = 0;
+    isBalanced : true
 
-    this.totalPages = 1;
+};
 
-    /*
-    ======================================================
-    MODAL
-    ======================================================
-    */
-
-    this.modal = null;
-
-    this.modalElement = null;
-
-    this.modalContainer = null;
-
-    this.modalLoaded = false;
-
-    /*
-    ======================================================
-    MASTER DATA
-    ======================================================
-    */
 
     this.coaList = [];
 
@@ -95,15 +84,147 @@ constructor() {
 
     /*
     ======================================================
-    DETAIL
+    CURRENT STATE
     ======================================================
     */
 
-    this.detailLines = [];
+    this.currentMode = "add";
 
-}
+    this.currentJournal = null;
+
+    this.selectedDetailIndex = -1;
 
     /*
+    ======================================================
+    PAGINATION
+    ======================================================
+    */
+
+    this.pageSize = 10;
+
+    this.currentPage = 1;
+
+    this.totalPages = 1;
+
+    this.totalRows = 0;
+
+    /*
+    ======================================================
+    JOURNAL MODAL
+    ======================================================
+    */
+
+    this.modal = null;
+
+    this.modalElement = null;
+
+    this.modalLoaded = false;
+
+    /*
+    ======================================================
+    DETAIL MODAL
+    ======================================================
+    */
+
+    this.detailModal = null;
+
+    this.detailModalElement = null;
+
+    this.detailModalLoaded = false;
+
+    /*
+    ======================================================
+    EVENT FLAG
+    ======================================================
+    */
+
+    this.modalEventsBound = false;
+
+    this.detailModalEventsBound = false;
+    this.editDetailIndex = -1;
+
+}
+/*
+==========================================================
+INITIALIZE MODULE
+==========================================================
+*/
+
+async init() {
+
+    try {
+
+        /*
+        ======================================================
+        SHOW LOADING
+        ======================================================
+        */
+
+        window.App?.showLoading?.();
+
+        console.group(
+            "GL Journal Initialization"
+        );
+
+        /*
+        ======================================================
+        CACHE MAIN PAGE DOM
+        ======================================================
+        */
+
+        this.cacheDom();
+
+        /*
+        ======================================================
+        LOAD JOURNAL MODAL
+        ======================================================
+        */
+
+        await this.loadJournalModal();
+
+        /*
+        ======================================================
+        BIND ALL EVENTS
+        ======================================================
+        */
+
+        this.bindEvents();
+
+        /*
+        ======================================================
+        LOAD JOURNAL DATA
+        ======================================================
+        */
+
+        await this.loadData();
+
+        console.log(
+            "GL Journal initialized successfully."
+        );
+
+        console.groupEnd();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "GL Journal initialization failed.",
+            error
+        );
+
+        throw error;
+
+    }
+
+    finally {
+
+        window.App?.hideLoading?.();
+
+    }
+
+}
+/*
 ==========================================================
 CACHE DOM
 ==========================================================
@@ -118,14 +239,19 @@ cacheDom() {
     */
 
     this.btnAddJournal =
-        document.getElementById("btn-add-journal");
+        document.getElementById(
+            "btn-add-journal"
+        );
 
     this.btnRefreshJournal =
-        document.getElementById("btn-refresh-journal");
+        document.getElementById(
+            "btn-refresh-journal"
+        );
 
     this.btnDownloadJournal =
-        document.getElementById("btn-download-journal");
-        
+        document.getElementById(
+            "btn-download-journal"
+        );
 
     /*
     ======================================================
@@ -134,22 +260,34 @@ cacheDom() {
     */
 
     this.filterDateFrom =
-        document.getElementById("filter-date-from");
+        document.getElementById(
+            "filter-date-from"
+        );
 
     this.filterDateTo =
-        document.getElementById("filter-date-to");
+        document.getElementById(
+            "filter-date-to"
+        );
 
     this.filterStatus =
-        document.getElementById("filter-status");
+        document.getElementById(
+            "filter-status"
+        );
 
     this.filterFindBy =
-        document.getElementById("filter-find-by");
+        document.getElementById(
+            "filter-find-by"
+        );
 
     this.filterKeyword =
-        document.getElementById("filter-keyword");
+        document.getElementById(
+            "filter-keyword"
+        );
 
     this.btnFindJournal =
-        document.getElementById("btn-find-journal");
+        document.getElementById(
+            "btn-find-journal"
+        );
 
     /*
     ======================================================
@@ -179,25 +317,39 @@ cacheDom() {
     */
 
     this.btnFirstPage =
-        document.getElementById("btn-first-page");
+        document.getElementById(
+            "btn-first-page"
+        );
 
     this.btnPreviousPage =
-        document.getElementById("btn-prev-page");
+        document.getElementById(
+            "btn-prev-page"
+        );
 
     this.btnNextPage =
-        document.getElementById("btn-next-page");
+        document.getElementById(
+            "btn-next-page"
+        );
 
     this.btnLastPage =
-        document.getElementById("btn-last-page");
+        document.getElementById(
+            "btn-last-page"
+        );
 
     this.currentPageInput =
-        document.getElementById("current-page");
+        document.getElementById(
+            "current-page"
+        );
 
     this.totalPageLabel =
-        document.getElementById("total-pages");
+        document.getElementById(
+            "total-pages"
+        );
 
     this.displayRecord =
-        document.getElementById("display-record");
+        document.getElementById(
+            "display-record"
+        );
 
     /*
     ======================================================
@@ -210,972 +362,291 @@ cacheDom() {
             "gl-journal-modal-container"
         );
 
-}
-
-    /*
-    ==========================================================
-    INITIALIZE
-    ==========================================================
-    */
-
-    async init() {
-
-        console.log(
-            "FINOVA General Journal Enterprise v3 Loaded"
-        );
-
-        this.cacheDom();
-
-        this.bindEvents();
-
-        await this.loadData();
-
-    }
-        /*
-    ==========================================================
-    BIND ALL EVENTS
-    ==========================================================
-    */
-
-    bindEvents() {
-
-        /*
-==========================================================
-HEADER
-==========================================================
-*/
-
-this.btnAddJournal?.addEventListener(
-    "click",
-    async () => {
-
-        console.log("BTN ADD JOURNAL CLICKED");
-
-        await this.openAddJournal();
-
-    }
-);
-
-        /*
-        ======================================================
-        SUB EVENTS
-        ======================================================
-        */
-
-        this.bindFilterEvents();
-
-        this.bindPaginationEvents();
-
-        this.bindTableEvents();
-
-    }
-
-    /*
-    ==========================================================
-    FILTER EVENTS
-    ==========================================================
-    */
-
-    bindFilterEvents() {
-
-        this.btnFindJournal?.addEventListener(
-            "click",
-            () => this.search()
-        );
-
-        this.filterKeyword?.addEventListener(
-            "keydown",
-            (event) => {
-
-                if (event.key === "Enter") {
-
-                    this.search();
-
-                }
-
-            }
-        );
-
-        this.filterStatus?.addEventListener(
-            "change",
-            () => this.search()
-        );
-
-        this.filterFindBy?.addEventListener(
-            "change",
-            () => this.search()
-        );
-
-        this.filterDateFrom?.addEventListener(
-            "change",
-            () => this.search()
-        );
-
-        this.filterDateTo?.addEventListener(
-            "change",
-            () => this.search()
-        );
-
-    }
-
-    /*
-    ==========================================================
-    PAGINATION EVENTS
-    ==========================================================
-    */
-
-    bindPaginationEvents() {
-
-        this.btnFirstPage?.addEventListener(
-            "click",
-            () => this.firstPage()
-        );
-
-        this.btnPreviousPage?.addEventListener(
-            "click",
-            () => this.previousPage()
-        );
-
-        this.btnNextPage?.addEventListener(
-            "click",
-            () => this.nextPage()
-        );
-
-        this.btnLastPage?.addEventListener(
-            "click",
-            () => this.lastPage()
-        );
-
-        this.currentPageInput?.addEventListener(
-            "change",
-            () => this.goToPage()
-        );
-
-    }
-
-    /*
-    ==========================================================
-    TABLE EVENTS
-    ==========================================================
-    */
-
-    bindTableEvents() {
-
-        this.tableBody?.addEventListener(
-            "click",
-            (event) => this.handleTableAction(event)
-        );
-
-    }
-    /*
-==========================================================
-LOAD GENERAL JOURNAL
-==========================================================
-*/
-
-async loadData() {
-
-    try {
-
-        /*
-        ======================================================
-        SHOW LOADING
-        ======================================================
-        */
-
-        window.App?.showLoading?.();
-
-        /*
-        ======================================================
-        GET DATA
-        ======================================================
-        */
-
-        this.journals =
-            await this.service.getAll();
-
-        if (!Array.isArray(this.journals)) {
-
-            this.journals = [];
-
-        }
-
-        /*
-        ======================================================
-        PAGINATION
-        ======================================================
-        */
-
-        this.totalRows =
-            this.journals.length;
-
-        this.totalPages =
-            Math.max(
-                1,
-                Math.ceil(
-                    this.totalRows /
-                    this.pageSize
-                )
-            );
-
-        this.currentPage = 1;
-
-        /*
-        ======================================================
-        RENDER
-        ======================================================
-        */
-
-        this.refreshView();
-
-    }
-
-    catch (error) {
-
-        console.error(error);
-
-        this.showError(error);
-
-    }
-
-    finally {
-
-        window.App?.hideLoading?.();
-
-    }
-
-}
-
-/*
-==========================================================
-REFRESH
-==========================================================
-*/
-
-async refresh() {
-
-    this.resetFilter();
-
-    await this.loadData();
-
-}
-
-/*
-==========================================================
-SEARCH
-==========================================================
-*/
-
-async search() {
-
-    try {
-
-        const filter = {
-
-            dateFrom:
-                this.filterDateFrom?.value ?? "",
-
-            dateTo:
-                this.filterDateTo?.value ?? "",
-
-            status:
-                this.filterStatus?.value ?? "all",
-
-            findBy:
-                this.filterFindBy?.value ?? "journal_no",
-
-            keyword:
-                this.filterKeyword?.value.trim() ?? ""
-
-        };
-
-        this.journals =
-            await this.service.search(filter);
-
-        if (!Array.isArray(this.journals)) {
-
-            this.journals = [];
-
-        }
-
-        this.totalRows =
-            this.journals.length;
-
-        this.totalPages =
-            Math.max(
-                1,
-                Math.ceil(
-                    this.totalRows /
-                    this.pageSize
-                )
-            );
-
-        this.currentPage = 1;
-
-        this.refreshView();
-
-    }
-
-    catch (error) {
-
-        console.error(error);
-
-        this.showError(error);
-
-    }
-
-}
-
-/*
-==========================================================
-REFRESH VIEW
-==========================================================
-*/
-
-refreshView() {
-
-    this.renderTable();
-
-    this.renderPagination();
-
-    this.updateRecordInformation();
-
-}
-
-/*
-==========================================================
-RESET FILTER
-==========================================================
-*/
-
-resetFilter() {
-
-    if (this.filterDateFrom)
-        this.filterDateFrom.value = "";
-
-    if (this.filterDateTo)
-        this.filterDateTo.value = "";
-
-    if (this.filterStatus)
-        this.filterStatus.value = "all";
-
-    if (this.filterFindBy)
-        this.filterFindBy.value = "journal_no";
-
-    if (this.filterKeyword)
-        this.filterKeyword.value = "";
-
-}
-
-/*
-==========================================================
-UPDATE RECORD INFORMATION
-==========================================================
-*/
-
-updateRecordInformation() {
-
-    if (!this.displayRecord) {
-
-        return;
-
-    }
-
-    if (this.totalRows === 0) {
-
-        this.displayRecord.textContent =
-            "Records 0 - 0 of 0";
-
-        return;
-
-    }
-
-    const start =
-        ((this.currentPage - 1) * this.pageSize) + 1;
-
-    const end =
-        Math.min(
-            this.currentPage * this.pageSize,
-            this.totalRows
-        );
-
-    this.displayRecord.textContent =
-        `Records ${start} - ${end} of ${this.totalRows}`;
-
-}
-/*
-==========================================================
-RENDER TABLE
-==========================================================
-*/
-
-renderTable() {
-
-    if (!this.tableBody) {
-
-        return;
-
-    }
-
-    this.tableBody.innerHTML = "";
-
-    /*
-    ======================================================
-    NO DATA
-    ======================================================
-    */
-
-    if (this.journals.length === 0) {
-
-        this.tableBody.innerHTML = `
-
-            <tr>
-
-                <td colspan="8"
-                    class="text-center py-5 text-muted">
-
-                    No General Journal Found
-
-                </td>
-
-            </tr>
-
-        `;
-
-        return;
-
-    }
-
-    /*
-    ======================================================
-    PAGINATION
-    ======================================================
-    */
-
-    const startIndex =
-        (this.currentPage - 1) *
-        this.pageSize;
-
-    const endIndex =
-        startIndex +
-        this.pageSize;
-
-    const rows =
-        this.journals.slice(
-            startIndex,
-            endIndex
+    this.detailModalContainer =
+        document.getElementById(
+            "journal-detail-modal-container"
         );
 
     /*
     ======================================================
-    RENDER ROW
+    CACHE VALIDATION
     ======================================================
     */
 
-    rows.forEach((journal, index) => {
+    console.groupCollapsed(
+        "GL Journal DOM Cache"
+    );
 
-        this.tableBody.insertAdjacentHTML(
+    console.log(
+        "Add Journal :",
+        Boolean(this.btnAddJournal)
+    );
 
-            "beforeend",
+    console.log(
+        "Refresh Journal :",
+        Boolean(this.btnRefreshJournal)
+    );
 
-            this.createTableRow(
+    console.log(
+        "Download Journal :",
+        Boolean(this.btnDownloadJournal)
+    );
 
-                journal,
+    console.log(
+        "Filter Date From :",
+        Boolean(this.filterDateFrom)
+    );
 
-                startIndex + index + 1
+    console.log(
+        "Filter Date To :",
+        Boolean(this.filterDateTo)
+    );
 
-            )
+    console.log(
+        "Filter Status :",
+        Boolean(this.filterStatus)
+    );
 
+    console.log(
+        "Filter Find By :",
+        Boolean(this.filterFindBy)
+    );
+
+    console.log(
+        "Filter Keyword :",
+        Boolean(this.filterKeyword)
+    );
+
+    console.log(
+        "Find Button :",
+        Boolean(this.btnFindJournal)
+    );
+
+    console.log(
+        "Table :",
+        Boolean(this.table)
+    );
+
+    console.log(
+        "Table Body :",
+        Boolean(this.tableBody)
+    );
+
+    console.log(
+        "Modal Container :",
+        Boolean(this.modalContainer)
+    );
+
+    console.log(
+        "Detail Modal Container :",
+        Boolean(this.detailModalContainer)
+    );
+
+    console.groupEnd();
+        /*
+    ==========================================================
+    SUMMARY
+    ==========================================================
+    */
+
+    this.summaryTotalLine =
+        document.getElementById(
+            "summary-total-line"
         );
+
+    this.summaryTotalAmount =
+        document.getElementById(
+            "summary-total-amount"
+        );
+      
+  
+}
+/*
+==========================================================
+CACHE DETAIL MODAL DOM
+==========================================================
+*/
+
+cacheDetailModalDom() {
+    console.log(this.btnSaveLine);
+
+    /*
+    ======================================================
+    MODAL
+    ======================================================
+    */
+
+    this.detailModalElement =
+        document.getElementById(
+            "journalDetailModal"
+        );
+
+    /*
+    ======================================================
+    HIDDEN FIELD
+    ======================================================
+    */
+
+    this.detailId =
+        document.getElementById(
+            "detail-id"
+        );
+
+    this.detailMode =
+        document.getElementById(
+            "detail-mode"
+        );
+
+    /*
+    ======================================================
+    DETAIL FORM
+    ======================================================
+    */
+
+    this.detailDescription =
+        document.getElementById(
+            "detail-description"
+        );
+
+    this.detailDebitAccount =
+        document.getElementById(
+            "detail-debit-account"
+        );
+
+    this.detailCreditAccount =
+        document.getElementById(
+            "detail-credit-account"
+        );
+
+    this.detailAmount =
+        document.getElementById(
+            "detail-amount"
+        );
+
+    this.detailBusinessPartner =
+        document.getElementById(
+            "detail-business-partner"
+        );
+
+    /*
+    ======================================================
+    FOOTER
+    ======================================================
+    */
+
+    this.btnSaveLine =
+        document.getElementById(
+            "btn-save-detail-line"
+        );
+
+    /*
+    ======================================================
+    CACHE VALIDATION
+    ======================================================
+    */
+
+    console.groupCollapsed(
+        "Journal Detail Modal Cache"
+    );
+
+    console.table({
+
+        modal :
+            Boolean(this.detailModalElement),
+
+        detailId :
+            Boolean(this.detailId),
+
+        detailMode :
+            Boolean(this.detailMode),
+
+        description :
+            Boolean(this.detailDescription),
+
+        debitAccount :
+            Boolean(this.detailDebitAccount),
+
+        creditAccount :
+            Boolean(this.detailCreditAccount),
+
+        amount :
+            Boolean(this.detailAmount),
+
+        businessPartner :
+            Boolean(this.detailBusinessPartner),
+
+        saveLineButton :
+            Boolean(this.btnSaveLine)
 
     });
 
-}
-
-/*
-==========================================================
-CREATE TABLE ROW
-==========================================================
-*/
-
-createTableRow(journal, no) {
-
-    const isDraft =
-    journal.status === "Draft";
-
-const isPosted =
-    journal.status === "Posted";
-
-const isVoid =
-    journal.status === "Void";
-console.log("Journal", journal.journal_no, "Status =", journal.status);
-
-    return `
-
-<tr>
-
-    <td>${no}</td>
-
-    <td>${journal.journal_date ?? "-"}</td>
-
-    <td>${journal.journal_no ?? "-"}</td>
-
-    <td>${journal.description ?? "-"}</td>
-
-    <td class="text-end">
-
-        ${this.formatCurrency(journal.total_debit)}
-
-    </td>
-
-    <td class="text-end">
-
-        ${this.formatCurrency(journal.total_credit)}
-
-    </td>
-
-    <td class="text-center">
-
-        ${this.renderStatus(journal.status)}
-
-    </td>
-
-    <td class="text-center">
-
-        <div class="btn-group btn-group-sm">
-
-            ${
-isDraft
-? `
-<button
-class="btn btn-outline-primary btn-edit-journal"
-data-id="${journal.id}"
-title="Edit">
-<i class="fa-solid fa-pen"></i>
-</button>
-
-<button
-class="btn btn-outline-danger btn-delete-journal"
-data-id="${journal.id}"
-title="Delete">
-<i class="fa-solid fa-trash"></i>
-</button>
-
-<button
-class="btn btn-outline-dark btn-post-journal"
-data-id="${journal.id}"
-title="Post This Journal">
-<i class="fa-solid fa-check"></i>
-</button>
-
-<button
-class="btn btn-outline-success btn-duplicate-journal"
-data-id="${journal.id}"
-title="Duplicate">
-<i class="fa-regular fa-copy"></i>
-</button>
-`
-: ""
-}
-           ${
-isPosted
-? `
-<button
-class="btn btn-outline-secondary btn-view-journal"
-data-id="${journal.id}"
-title="View This Entry">
-<i class="fa-solid fa-eye"></i>
-</button>
-
-<button
-class="btn btn-outline-info btn-voucher-journal"
-data-id="${journal.id}"
-title="Voucher">
-<i class="fa-solid fa-file-invoice"></i>
-</button>
-
-<button
-class="btn btn-outline-warning btn-void-journal"
-data-id="${journal.id}"
-title="Void">
-<i class="fa-solid fa-ban"></i>
-</button>
-
-<button
-class="btn btn-outline-success btn-duplicate-journal"
-data-id="${journal.id}"
-title="Duplicate">
-<i class="fa-regular fa-copy"></i>
-</button>
-`
-: ""
-}
-${
-isVoid
-? `
-<button
-class="btn btn-outline-secondary btn-view-journal"
-data-id="${journal.id}"
-title="View This Entry">
-<i class="fa-solid fa-eye"></i>
-</button>
-
-<button
-class="btn btn-outline-info btn-voucher-journal"
-data-id="${journal.id}"
-title="Voucher">
-<i class="fa-solid fa-file-invoice"></i>
-</button>
-
-<button
-class="btn btn-outline-success btn-duplicate-journal"
-data-id="${journal.id}"
-title="Duplicate">
-<i class="fa-regular fa-copy"></i>
-</button>
-`
-: ""
-}
-
-            
-        </div>
-
-    </td>
-
-</tr>
-
-`;
-
-}
-
-handleTableAction(event) {
-
-    const button = event.target.closest("button");
-
-    if (!button) return;
-
-    const id = button.dataset.id;
-
-    if (!id) return;
-
-    if (button.classList.contains("btn-view-journal")) {
-
-    return this.viewJournal(id);
-
-}
-
-if (button.classList.contains("btn-voucher-journal")) {
-
-    return this.printVoucher(id);
-
-}
-
-if (button.classList.contains("btn-edit-journal")) {
-
-    return this.openEditJournal(id);
-
-}
-
-if (button.classList.contains("btn-delete-journal")) {
-
-    return this.deleteJournal(id);
-
-}
-
-if (button.classList.contains("btn-post-journal")) {
-
-    return this.postJournal(id);
-
-}
-
-if (button.classList.contains("btn-void-journal")) {
-
-    return this.voidJournal(id);
-
-}
-
-if (button.classList.contains("btn-duplicate-journal")) {
-
-    return this.duplicateJournal(id);
-
-}
+    console.groupEnd();
 
 }
 /*
 ==========================================================
-RENDER STATUS
+UPDATE SUMMARY DISPLAY
 ==========================================================
 */
 
-renderStatus(status) {
-
-    switch (String(status).trim().toLowerCase()) {
-
-        case "draft":
-
-            return `
-                <span class="badge bg-warning text-dark">
-                    Draft
-                </span>
-            `;
-
-        case "posted":
-
-            return `
-                <span class="badge bg-success">
-                    Posted
-                </span>
-            `;
-
-        case "void":
-
-            return `
-                <span class="badge bg-danger">
-                    Void
-                </span>
-            `;
-
-        default:
-
-            return `
-                <span class="badge bg-secondary">
-                    ${status}
-                </span>
-            `;
-    }
-
-}
-
-/*
-==========================================================
-FORMAT CURRENCY
-==========================================================
-*/
-
-formatCurrency(value) {
-
-    return Number(
-        value ?? 0
-    ).toLocaleString(
-
-        "id-ID",
-
-        {
-
-            minimumFractionDigits: 2,
-
-            maximumFractionDigits: 2
-
-        }
-
-    );
-
-}
-/*
-==========================================================
-OPEN ADD JOURNAL
-==========================================================
-*/
-
-async openAddJournal() {
-
-    console.log("========== OPEN ADD ==========");
-
-    this.currentMode = "add";
-
-    this.currentJournal = null;
-
-    console.log("Current Journal :", this.currentJournal);
-
-    await this.loadJournalModal();
-
-    this.clearJournalForm();
-
-    console.log("Form Cleared");
-
-    await this.loadMasterData();
-
-    await this.initializeJournalHeader();
-
-    await this.addDetailLine();
-
-    console.log("Detail Row :", this.detailBody.children.length);
-
-    this.modal.show();
-
-}
-/*
-==========================================================
-OPEN EDIT JOURNAL
-==========================================================
-*/
-
-async openEditJournal(id) {
-
-    try {
-
-        this.currentMode = "edit";
-
-        this.currentJournal =
-            await this.service.getById(id);
-
-        if (!this.currentJournal) {
-
-            this.showMessage(
-                "Journal not found.",
-                "warning"
-            );
-
-            return;
-
-        }
-
-        await this.loadJournalModal();
-
-this.clearJournalForm();
-
-await this.loadMasterData();
-
-await this.initializeJournalHeader();
-
-await this.loadJournalData();
-
-this.modal.show();
-    }
-
-    catch (error) {
-
-        console.error(error);
-
-        this.showError(error);
-
-    }
-
-}
-/*
-==========================================================
-VIEW JOURNAL (READ ONLY)
-==========================================================
-*/
-
-async viewJournal(id) {
-
-    try {
-
-        this.currentMode = "view";
-
-        this.currentJournal =
-            await this.service.getById(id);
-
-        if (!this.currentJournal) {
-
-            this.showMessage(
-                "Journal not found.",
-                "warning"
-            );
-
-            return;
-
-        }
-
-        await this.loadJournalModal();
-
-        this.clearJournalForm();
-
-        await this.loadMasterData();
-
-        await this.initializeJournalHeader();
-
-        await this.loadJournalData();
-
-        this.setReadOnly(true);
-
-        this.modal.show();
-
-    }
-
-    catch (error) {
-
-        console.error(error);
-
-        this.showError(error);
-
-    }
-
-}
-/*
-==========================================================
-PRINT VOUCHER
-==========================================================
-*/
-
-async printVoucher(id) {
-
-    console.log("Voucher :", id);
+updateSummaryDisplay() {
 
     /*
-    nanti kita arahkan
-    ke PDF Voucher
+    ======================================================
+    VALIDATION
+    ======================================================
     */
 
-}
-/*
-==========================================================
-LOAD JOURNAL MODAL
-==========================================================
-*/
-
-async loadJournalModal() {
-
-    if (this.modalLoaded) {
+    if (!this.summary) {
 
         return;
 
     }
 
-    const response =
-        await fetch(
-            "modules/gl-journal/gl-journal-modal.html"
-        );
+    /*
+    ======================================================
+    TOTAL LINE
+    ======================================================
+    */
 
-    if (!response.ok) {
+    if (this.summaryTotalLine) {
 
-        throw new Error(
-            "Cannot load Journal Modal."
-        );
+        this.summaryTotalLine.value =
+            this.detailLines.length;
 
     }
 
-    const html =
-        await response.text();
+    /*
+    ======================================================
+    TOTAL AMOUNT
+    ======================================================
+    */
 
-    this.modalContainer.innerHTML =
-        html;
+    if (this.summaryTotalAmount) {
 
-    this.modalElement =
-        document.getElementById(
-            "glJournalModal"
-        );
+        this.summaryTotalAmount.value =
+            this.formatCurrency(
 
-    this.modal =
-        new bootstrap.Modal(
-            this.modalElement
-        );
+                this.summary.totalDebit
 
-    this.cacheModalDom();
+            );
 
-    this.bindModalEvents();
-
-    this.modalLoaded = true;
+    }
 
 }
 /*
 ==========================================================
-CACHE MODAL DOM
+CACHE JOURNAL MODAL DOM
 ==========================================================
 */
 
 cacheModalDom() {
+
+    /*
+    ======================================================
+    JOURNAL HEADER
+    ======================================================
+    */
 
     this.txtAccountingDate =
         document.getElementById(
@@ -1197,25 +668,59 @@ cacheModalDom() {
             "journal-status"
         );
 
-    this.detailBody =
+    /*
+    ======================================================
+    JOURNAL DETAIL
+    ======================================================
+    */
+
+    this.detailTable =
         document.getElementById(
-            "journal-detail-body"
+            "journal-detail-table"
         );
 
-    this.detailTemplate =
+    this.detailTableBody =
         document.getElementById(
-            "journal-detail-template"
+            "journal-detail-tbody"
         );
 
-    this.btnAddDetail =
+    this.emptyRow =
         document.getElementById(
-            "btn-add-detail"
+            "journal-empty-row"
         );
 
-    this.btnDeleteDetail =
+    /*
+    ======================================================
+    DETAIL TOOLBAR
+    ======================================================
+    */
+
+    this.btnAddLine =
         document.getElementById(
-            "btn-delete-detail"
+            "btn-add-line"
         );
+
+    /*
+    ======================================================
+    SUMMARY
+    ======================================================
+    */
+
+    this.summaryTotalLine =
+        document.getElementById(
+            "summary-total-line"
+        );
+
+    this.summaryTotalAmount =
+        document.getElementById(
+            "summary-total-amount"
+        );
+
+    /*
+    ======================================================
+    FOOTER
+    ======================================================
+    */
 
     this.btnSaveJournal =
         document.getElementById(
@@ -1226,34 +731,524 @@ cacheModalDom() {
         document.getElementById(
             "btn-post-journal"
         );
-        this.summaryDebit =
-document.getElementById(
-    "summary-total-debit"
-);
 
-this.summaryCredit =
-document.getElementById(
-    "summary-total-credit"
-);
+    /*
+    ======================================================
+    CACHE VALIDATION
+    ======================================================
+    */
 
-this.summaryDifference =
-document.getElementById(
-    "summary-difference"
-);
+    console.groupCollapsed(
+        "GL Journal Modal Cache"
+    );
 
-this.summaryStatus =
-document.getElementById(
-    "summary-balance-status"
-);
+    console.table({
+
+        accountingDate :
+            Boolean(this.txtAccountingDate),
+
+        journalNo :
+            Boolean(this.txtJournalNo),
+
+        description :
+            Boolean(this.txtDescription),
+
+        status :
+            Boolean(this.cboStatus),
+
+        detailTable :
+            Boolean(this.detailTable),
+
+        detailTableBody :
+            Boolean(this.detailTableBody),
+
+        addLineButton :
+            Boolean(this.btnAddLine),
+
+        summaryTotalLine :
+            Boolean(this.summaryTotalLine),
+
+        summaryTotalAmount :
+            Boolean(this.summaryTotalAmount),
+
+        saveJournalButton :
+            Boolean(this.btnSaveJournal),
+
+        postJournalButton :
+            Boolean(this.btnPostJournal)
+
+    });
+
+    console.groupEnd();
+
 }
-
 /*
 ==========================================================
-BIND MODAL EVENTS
+CACHE DETAIL MODAL DOM
+==========================================================
+*/
+
+cacheDetailModalDom() {
+
+    /*
+    ======================================================
+    HIDDEN FIELD
+    ======================================================
+    */
+
+    this.detailId =
+        document.getElementById(
+            "detail-id"
+        );
+
+    this.detailMode =
+        document.getElementById(
+            "detail-mode"
+        );
+
+    /*
+    ======================================================
+    DETAIL FORM
+    ======================================================
+    */
+
+    this.detailDescription =
+        document.getElementById(
+            "detail-description"
+        );
+
+    this.detailDebitAccount =
+        document.getElementById(
+            "detail-debit-account"
+        );
+
+    this.detailCreditAccount =
+        document.getElementById(
+            "detail-credit-account"
+        );
+
+    this.detailAmount =
+        document.getElementById(
+            "detail-amount"
+        );
+
+    this.detailBusinessPartner =
+        document.getElementById(
+            "detail-business-partner"
+        );
+
+    /*
+    ======================================================
+    FOOTER
+    ======================================================
+    */
+
+    this.btnSaveLine =
+        document.getElementById(
+            "btn-save-detail-line"
+        );
+
+    /*
+    ======================================================
+    CACHE VALIDATION
+    ======================================================
+    */
+
+    console.groupCollapsed(
+        "Journal Detail Modal Cache"
+    );
+
+    console.table({
+
+        detailId :
+            Boolean(this.detailId),
+
+        detailMode :
+            Boolean(this.detailMode),
+
+        description :
+            Boolean(this.detailDescription),
+
+        debitAccount :
+            Boolean(this.detailDebitAccount),
+
+        creditAccount :
+            Boolean(this.detailCreditAccount),
+
+        amount :
+            Boolean(this.detailAmount),
+
+        businessPartner :
+            Boolean(this.detailBusinessPartner),
+
+        saveLineButton :
+            Boolean(this.btnSaveLine)
+
+    });
+
+    console.groupEnd();
+
+}
+/*
+==========================================================
+BIND ALL EVENTS
+==========================================================
+*/
+
+bindEvents() {
+
+    /*
+    ======================================================
+    HEADER
+    ======================================================
+    */
+
+    this.btnAddJournal?.addEventListener(
+
+        "click",
+
+        () => this.openAddJournal()
+
+    );
+
+    this.btnRefreshJournal?.addEventListener(
+
+        "click",
+
+        () => this.loadData()
+
+    );
+
+    this.btnDownloadJournal?.addEventListener(
+
+        "click",
+
+        () => this.exportExcel()
+
+    );
+    /*
+==========================================================
+DETAIL TABLE EVENT
+==========================================================
+*/
+
+if (this.gridBody) {
+
+    this.gridBody.addEventListener(
+
+        "click",
+
+        (event) => {
+
+
+            const editButton =
+
+                event.target.closest(
+
+                    ".btn-edit-detail"
+
+                );
+
+
+            if (editButton) {
+
+                this.openEditDetailModal(
+
+                    Number(
+
+                        editButton.dataset.index
+
+                    )
+
+                );
+
+                return;
+
+            }
+
+
+
+            const deleteButton =
+
+                event.target.closest(
+
+                    ".btn-delete-detail"
+
+                );
+
+
+            if (deleteButton) {
+
+                this.deleteDetail(
+
+                    Number(
+
+                        deleteButton.dataset.index
+
+                    )
+
+                );
+
+            }
+
+
+        }
+
+    );
+
+}
+
+    /*
+    ======================================================
+    SUB EVENTS
+    ======================================================
+    */
+
+    this.bindFilterEvents();
+
+    this.bindPaginationEvents();
+
+    this.bindTableEvents();
+
+}
+/*
+==========================================================
+BIND FILTER EVENTS
+==========================================================
+*/
+
+bindFilterEvents() {
+
+    /*
+    ======================================================
+    FIND BUTTON
+    ======================================================
+    */
+
+    this.btnFindJournal?.addEventListener(
+
+        "click",
+
+        () => this.search()
+
+    );
+
+    /*
+    ======================================================
+    KEYWORD
+    ======================================================
+    */
+
+    this.filterKeyword?.addEventListener(
+
+        "keydown",
+
+        (event) => {
+
+            if (event.key === "Enter") {
+
+                this.search();
+
+            }
+
+        }
+
+    );
+
+    /*
+    ======================================================
+    STATUS
+    ======================================================
+    */
+
+    this.filterStatus?.addEventListener(
+
+        "change",
+
+        () => this.search()
+
+    );
+
+    /*
+    ======================================================
+    FIND BY
+    ======================================================
+    */
+
+    this.filterFindBy?.addEventListener(
+
+        "change",
+
+        () => this.search()
+
+    );
+
+    /*
+    ======================================================
+    DATE FROM
+    ======================================================
+    */
+
+    this.filterDateFrom?.addEventListener(
+
+        "change",
+
+        () => this.search()
+
+    );
+
+    /*
+    ======================================================
+    DATE TO
+    ======================================================
+    */
+
+    this.filterDateTo?.addEventListener(
+
+        "change",
+
+        () => this.search()
+
+    );
+
+}
+/*
+==========================================================
+BIND PAGINATION EVENTS
+==========================================================
+*/
+
+bindPaginationEvents() {
+
+    /*
+    ======================================================
+    FIRST PAGE
+    ======================================================
+    */
+
+    this.btnFirstPage?.addEventListener(
+
+        "click",
+
+        () => this.firstPage()
+
+    );
+
+    /*
+    ======================================================
+    PREVIOUS PAGE
+    ======================================================
+    */
+
+    this.btnPreviousPage?.addEventListener(
+
+        "click",
+
+        () => this.previousPage()
+
+    );
+
+    /*
+    ======================================================
+    NEXT PAGE
+    ======================================================
+    */
+
+    this.btnNextPage?.addEventListener(
+
+        "click",
+
+        () => this.nextPage()
+
+    );
+
+    /*
+    ======================================================
+    LAST PAGE
+    ======================================================
+    */
+
+    this.btnLastPage?.addEventListener(
+
+        "click",
+
+        () => this.lastPage()
+
+    );
+
+    /*
+    ======================================================
+    GO TO PAGE
+    ======================================================
+    */
+
+    this.currentPageInput?.addEventListener(
+
+        "change",
+
+        () => this.goToPage()
+
+    );
+
+    /*
+    ======================================================
+    ENTER PAGE NUMBER
+    ======================================================
+    */
+
+    this.currentPageInput?.addEventListener(
+
+        "keydown",
+
+        (event) => {
+
+            if (event.key === "Enter") {
+
+                this.goToPage();
+
+            }
+
+        }
+
+    );
+
+}
+/*
+==========================================================
+BIND TABLE EVENTS
+==========================================================
+*/
+
+bindTableEvents() {
+
+    /*
+    ======================================================
+    TABLE ACTION
+    ======================================================
+    */
+
+    this.tableBody?.addEventListener(
+
+        "click",
+
+        (event) => {
+
+            this.handleTableAction(event);
+
+        }
+
+    );
+
+}
+/*
+==========================================================
+BIND JOURNAL MODAL EVENTS
 ==========================================================
 */
 
 bindModalEvents() {
+
+    console.log("BIND JOURNAL MODAL EVENTS");
 
     /*
     ======================================================
@@ -1275,41 +1270,35 @@ bindModalEvents() {
     ======================================================
     */
 
-    this.btnAddDetail?.addEventListener(
+    this.btnAddLine?.addEventListener(
 
         "click",
 
-        () => {
-
-            this.addDetailLine();
-
-        }
+        () => this.openAddDetailModal()
 
     );
 
     /*
     ======================================================
-    DELETE SELECTED DETAIL
+    DETAIL TABLE
     ======================================================
     */
 
-    this.btnDeleteDetail?.addEventListener(
+    this.detailTableBody?.addEventListener(
 
         "click",
 
-        () => {
-
-            this.deleteSelectedLines();
-
-        }
+        (event) => this.handleDetailTableAction(event)
 
     );
 
     /*
     ======================================================
-    SAVE
+    SAVE DRAFT
     ======================================================
     */
+
+    console.log("BTN SAVE :", this.btnSaveJournal);
 
     this.btnSaveJournal?.addEventListener(
 
@@ -1317,11 +1306,7 @@ bindModalEvents() {
 
         () => {
 
-            console.log("========== SAVE BUTTON ==========");
-
-            console.log("Mode :", this.currentMode);
-
-            console.log("Journal :", this.currentJournal);
+            console.log("SAVE DRAFT CLICK");
 
             this.saveJournal("Draft");
 
@@ -1331,9 +1316,11 @@ bindModalEvents() {
 
     /*
     ======================================================
-    POST
+    SAVE & POST
     ======================================================
     */
+
+    console.log("BTN POST :", this.btnPostJournal);
 
     this.btnPostJournal?.addEventListener(
 
@@ -1341,11 +1328,7 @@ bindModalEvents() {
 
         () => {
 
-            console.log("========== POST BUTTON ==========");
-
-            console.log("Mode :", this.currentMode);
-
-            console.log("Journal :", this.currentJournal);
+            console.log("POST CLICK");
 
             this.saveJournal("Posted");
 
@@ -1356,1618 +1339,1561 @@ bindModalEvents() {
 }
 /*
 ==========================================================
-BIND DETAIL ROW EVENTS
+BIND DETAIL MODAL EVENTS
 ==========================================================
 */
 
-bindDetailRowEvents(row) {
+bindDetailModalEvents() {
 
-    if (!row) return;
+    if (this.detailModalEventsBound) {
+
+        return;
+
+    }
+
+    this.detailModalEventsBound = true;
 
     /*
     ======================================================
-    RECALCULATE
+    SAVE
     ======================================================
     */
 
-    row.querySelectorAll(
+    this.btnSaveLine?.addEventListener(
 
-    ".detail-debit-account, " +
-    ".detail-credit-account"
+        "click",
 
-).forEach(element => {
+        () => this.saveDetailLine()
 
-    element.addEventListener(
+    );
 
-        "change",
+    /*
+    ======================================================
+    FORMAT AMOUNT
+    ======================================================
+    */
+
+    this.detailAmount?.addEventListener(
+
+        "blur",
 
         () => {
 
-            const debitAccount =
-                row.querySelector(
-                    ".detail-debit-account"
-                )?.value;
+            const amount = Number(
 
-            const creditAccount =
-                row.querySelector(
-                    ".detail-credit-account"
-                )?.value;
+                this.detailAmount.value || 0
 
-            /*
-            ==========================================
-            DEBIT & CREDIT CANNOT BE SAME
-            ==========================================
-            */
+            );
 
-            if (
+            this.detailAmount.value =
+                amount.toFixed(2);
 
-                debitAccount &&
-                creditAccount &&
-                debitAccount === creditAccount
+        }
 
-            ) {
+    );
 
-                this.showMessage(
+    /*
+    ======================================================
+    ENTER = SAVE
+    ======================================================
+    */
 
-                    "Debit Account dan Credit Account tidak boleh sama.",
+    this.detailModalElement?.addEventListener(
 
-                    "warning"
+        "keydown",
 
-                );
+        (event) => {
 
-                element.value = "";
+            if (event.key !== "Enter") {
+
+                return;
 
             }
 
-            this.calculateSummary();
+            if (
+
+                event.target.tagName ===
+
+                "TEXTAREA"
+
+            ) {
+
+                return;
+
+            }
+
+            event.preventDefault();
+
+            this.saveDetailLine();
 
         }
 
     );
 
-});
-
-/*
-======================================================
-AMOUNT INPUT
-======================================================
-*/
-
-const amountInput =
-
-    row.querySelector(
-
-        ".detail-amount"
-
-    );
-
-amountInput?.addEventListener(
-
-    "input",
-
-    () => {
-
-        /*
-        ==========================================
-        POSITIVE NUMBER ONLY
-        ==========================================
-        */
-
-        if (
-
-            Number(amountInput.value) < 0
-
-        ) {
-
-            amountInput.value = 0;
-
-        }
-
-        this.calculateSummary();
-
-    }
-
-);
     /*
     ======================================================
-    DESCRIPTION
+    RESET
     ======================================================
     */
 
-    row.querySelector(
+    this.detailModalElement?.addEventListener(
 
-        ".detail-description"
-
-    )?.addEventListener(
-
-        "input",
+        "hidden.bs.modal",
 
         () => {
 
-            // reserved
+            this.clearDetailForm();
 
         }
 
     );
-    /*
-======================================================
-DELETE CURRENT LINE
-======================================================
+
+}
+/*
+==========================================================
+LOAD DETAIL MODAL
+==========================================================
 */
 
-row.querySelector(
+async loadDetailModal() {
 
-    ".btn-delete-detail"
+    if (this.detailModalLoaded) {
 
-)?.addEventListener(
+        return;
 
-    "click",
+    }
 
-    () => {
+    const response = await fetch(
 
-        row.remove();
+        "modules/gl-journal/journal-detail-modal.html"
 
-        /*
-        ==========================================
-        MINIMUM 1 ROW
-        ==========================================
-        */
+    );
 
-        if (
+    if (!response.ok) {
 
-            this.detailBody.querySelectorAll(
+        throw new Error(
 
-                ".journal-detail-row"
+            "Failed to load Journal Detail Modal."
 
-            ).length === 0
+        );
 
-        ) {
+    }
 
-            this.addDetailLine();
+    this.detailModalContainer.innerHTML =
+
+        await response.text();
+
+    this.detailModal =
+
+        new bootstrap.Modal(
+
+            document.getElementById(
+
+                "journalDetailModal"
+
+            )
+
+        );
+
+    this.cacheDetailModalDom();
+
+    this.bindDetailModalEvents();
+
+    this.detailModalLoaded = true;
+    /*
+    ==========================================================
+    SAVE DETAIL LINE
+    ==========================================================
+    */
+
+    this.btnSaveLine?.addEventListener(
+
+        "click",
+
+        () => {
+
+            console.log("SAVE LINE CLICK");
+
+            this.saveDetailLine();
 
         }
 
-        this.renumberDetailLines();
+    );
 
-        this.calculateSummary();
+}
+/*
+==========================================================
+LOAD JOURNAL MODAL
+==========================================================
+*/
+
+async loadJournalModal() {
+
+    /*
+    ======================================================
+    ALREADY LOADED
+    ======================================================
+    */
+
+    if (this.modalLoaded) {
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    LOAD HTML
+    ======================================================
+    */
+
+    const response =
+        await fetch(
+            "modules/gl-journal/gl-journal-modal.html"
+        );
+
+    if (!response.ok) {
+
+        throw new Error(
+            "Failed to load Journal Modal."
+        );
+
+    }
+
+    const html =
+        await response.text();
+
+    this.modalContainer.innerHTML =
+        html;
+
+    /*
+    ======================================================
+    INITIALIZE MODAL
+    ======================================================
+    */
+
+    this.modalElement =
+        document.getElementById(
+            "glJournalModal"
+        );
+
+    this.modal =
+        new bootstrap.Modal(
+            this.modalElement
+        );
+
+    /*
+    ======================================================
+    CACHE MODAL DOM
+    ======================================================
+    */
+
+    this.cacheModalDom();
+
+    /*
+    ======================================================
+    LOAD DETAIL MODAL
+    ======================================================
+    */
+
+    await this.loadDetailModal();
+    await this.populateCOA();
+
+    await this.populateBusinessPartners();
+
+    /*
+    ======================================================
+    BIND MODAL EVENTS
+    ======================================================
+    */
+
+    this.bindModalEvents();
+
+    /*
+    ======================================================
+    MARK AS LOADED
+    ======================================================
+    */
+
+    this.modalLoaded = true;
+
+        /*
+        ==========================================================
+        SAVE DRAFT
+        ==========================================================
+        */
+
+        const btnSaveJournal =
+
+            document.getElementById(
+
+                "btn-save-journal"
+
+            );
+
+        if (btnSaveJournal) {
+
+            btnSaveJournal.onclick = () => {
+
+                this.saveJournal(
+
+                    "Draft"
+
+                );
+
+            };
+
+        }
+
+        /*
+        ==========================================================
+        SAVE & POST
+        ==========================================================
+        */
+
+        const btnPostJournal =
+
+            document.getElementById(
+
+                "btn-post-journal"
+
+            );
+
+        if (btnPostJournal) {
+
+            btnPostJournal.onclick = () => {
+
+                this.saveJournal(
+
+                    "Posted"
+
+                );
+
+            };
+
+        }
+
+        }
+    /*
+    ==========================================================
+    LOAD GENERAL JOURNAL
+    ==========================================================
+    */
+
+    async loadData() {
+
+        try {
+
+            /*
+            ======================================================
+            SHOW LOADING
+            ======================================================
+            */
+
+            window.App?.showLoading?.();
+
+            /*
+            ======================================================
+            LOAD DATA
+            ======================================================
+            */
+
+            const result =
+                await this.service.getAll();
+
+            /*
+            ======================================================
+            VALIDATE RESULT
+            ======================================================
+            */
+
+            this.journals =
+                Array.isArray(result)
+                    ? result
+                    : [];
+
+            /*
+            ======================================================
+            INITIAL FILTER
+            ======================================================
+            */
+
+            this.filteredJournals =
+                [...this.journals];
+
+            /*
+            ======================================================
+            PAGINATION
+            ======================================================
+            */
+
+            this.totalRows =
+                this.filteredJournals.length;
+
+            this.totalPages =
+                Math.max(
+                    1,
+                    Math.ceil(
+                        this.totalRows /
+                        this.pageSize
+                    )
+                );
+
+            this.currentPage = 1;
+
+            /*
+            ======================================================
+            REFRESH VIEW
+            ======================================================
+            */
+
+            this.refreshView();
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Failed to load journal.",
+                error
+            );
+
+            this.journals = [];
+
+            this.filteredJournals = [];
+
+            this.totalRows = 0;
+
+            this.totalPages = 1;
+
+            this.currentPage = 1;
+
+            throw error;
+
+        }
+
+        finally {
+
+            window.App?.hideLoading?.();
+
+        }
+
+    }
+/*
+==========================================================
+REFRESH VIEW
+==========================================================
+*/
+
+refreshView() {
+
+    /*
+    ======================================================
+    RECALCULATE PAGINATION
+    ======================================================
+    */
+
+    this.totalRows =
+        this.filteredJournals.length;
+
+    this.totalPages =
+        Math.max(
+            1,
+            Math.ceil(
+                this.totalRows /
+                this.pageSize
+            )
+        );
+
+    /*
+    ======================================================
+    VALIDATE CURRENT PAGE
+    ======================================================
+    */
+
+    if (this.currentPage < 1) {
+
+        this.currentPage = 1;
+
+    }
+
+    if (this.currentPage > this.totalPages) {
+
+        this.currentPage =
+            this.totalPages;
+
+    }
+
+    /*
+    ======================================================
+    RENDER TABLE
+    ======================================================
+    */
+
+    this.renderTable();
+
+    /*
+    ======================================================
+    UPDATE PAGINATION
+    ======================================================
+    */
+
+    this.updatePagination();
+
+}
+/*
+==========================================================
+RENDER TABLE
+==========================================================
+*/
+
+renderTable() {
+
+    /*
+    ======================================================
+    VALIDATION
+    ======================================================
+    */
+
+    if (!this.tableBody) {
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    CLEAR TABLE
+    ======================================================
+    */
+
+    this.tableBody.innerHTML = "";
+
+    /*
+    ======================================================
+    PAGINATION
+    ======================================================
+    */
+
+    const start =
+        (this.currentPage - 1) *
+        this.pageSize;
+
+    const end =
+        start + this.pageSize;
+
+    const journals =
+        this.filteredJournals.slice(
+            start,
+            end
+        );
+
+    /*
+    ======================================================
+    EMPTY DATA
+    ======================================================
+    */
+
+    if (journals.length === 0) {
+
+        this.tableBody.innerHTML = `
+
+            <tr>
+
+                <td colspan="8"
+                    class="text-center text-muted py-5">
+
+                    No General Journal found.
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    RENDER ROW
+    ======================================================
+    */
+
+    journals.forEach(
+
+    (journal, index) => {
+
+        this.tableBody.insertAdjacentHTML(
+
+            "beforeend",
+
+            this.createTableRow(
+
+                journal,
+
+                start + index + 1
+
+            )
+
+        );
 
     }
 
 );
 
 }
-
 /*
 ==========================================================
-INITIALIZE JOURNAL HEADER
+CREATE TABLE ROW
 ==========================================================
 */
 
-async initializeJournalHeader() {
+createTableRow(journal, rowNumber) {
 
-    /*
-    ==========================================
-    DOCUMENT NUMBER
-    ==========================================
-    */
+    return `
 
-    if (this.currentMode === "add") {
+        <tr>
 
-        this.txtJournalNo.value =
-            await this.service.generateDocumentNumber();
+            <!-- ==========================================
+                 NO
+            =========================================== -->
+
+            <td class="text-center">
+
+                ${rowNumber}
+
+            </td>
+
+            <!-- ==========================================
+                 ACCOUNTING DATE
+            =========================================== -->
+
+            <td>
+
+                ${journal.journal_date ?? "-"}
+
+            </td>
+
+            <!-- ==========================================
+                 JOURNAL NO
+            =========================================== -->
+
+            <td>
+
+                ${journal.journal_no ?? "-"}
+
+            </td>
+
+            <!-- ==========================================
+                 DESCRIPTION
+            =========================================== -->
+
+            <td>
+
+                ${journal.description ?? "-"}
+
+            </td>
+
+            <!-- ==========================================
+                 TOTAL DEBIT
+            =========================================== -->
+
+            <td class="text-end">
+
+                ${this.formatCurrency(
+
+                    Number(
+                        journal.total_debit ?? 0
+                    )
+
+                )}
+
+            </td>
+
+            <!-- ==========================================
+                 TOTAL CREDIT
+            =========================================== -->
+
+            <td class="text-end">
+
+                ${this.formatCurrency(
+
+                    Number(
+                        journal.total_credit ?? 0
+                    )
+
+                )}
+
+            </td>
+
+            <!-- ==========================================
+                 STATUS
+            =========================================== -->
+
+            <td class="text-center">
+
+                ${this.renderStatusBadge(
+
+                    journal.status
+
+                )}
+
+            </td>
+
+            <!-- ==========================================
+                 ACTION
+            =========================================== -->
+
+            <td class="text-center">
+
+                ${this.renderActionButtons(
+
+                    journal
+
+                )}
+
+            </td>
+
+        </tr>
+
+    `;
+
+}
+
+/*
+==========================================================
+RENDER STATUS BADGE
+==========================================================
+*/
+
+renderStatusBadge(status) {
+
+    const value =
+        (status || "")
+            .toString()
+            .trim()
+            .toLowerCase();
+
+    if (value === "posted") {
+
+        return `
+
+            <span class="badge bg-success">
+
+                Posted
+
+            </span>
+
+        `;
 
     }
-    else {
 
-        this.txtJournalNo.value =
-    this.currentJournal.journal_no;
-    }
+    return `
 
-    /*
-    ==========================================
-    ACCOUNTING DATE
-    ==========================================
-    */
+        <span class="badge bg-secondary">
 
-    if (this.currentMode === "add") {
+            Draft
 
-        this.txtAccountingDate.value =
-            new Date()
-            .toISOString()
-            .substring(0,10);
+        </span>
 
-    }
-    else {
-
-        this.txtAccountingDate.value =
-    this.currentJournal.journal_date;
-
-    }
-
-    /*
-    ==========================================
-    STATUS
-    ==========================================
-    */
-
-    this.cboStatus.value =
-        this.currentMode === "add"
-        ? "Draft"
-        : this.currentJournal.status;
+    `;
 
 }
 /*
 ==========================================================
-LOAD JOURNAL DATA
+RENDER ACTION BUTTONS
 ==========================================================
 */
 
-async loadJournalData() {
+renderActionButtons(journal) {
 
-    if (!this.currentJournal) {
+    const status =
+        (journal.status || "")
+            .toString()
+            .trim()
+            .toLowerCase();
 
-        return;
+    /*
+    ======================================================
+    DRAFT
+    ======================================================
+    */
+
+    if (status === "draft") {
+
+        return `
+
+            <div class="btn-group btn-group-sm">
+
+                <button
+                    type="button"
+                    class="btn btn-outline-primary btn-edit-journal"
+                    data-id="${journal.id}"
+                    title="Edit">
+
+                    <i class="fa-solid fa-pen"></i>
+
+                </button>
+
+                <button
+                    type="button"
+                    class="btn btn-outline-danger btn-delete-journal"
+                    data-id="${journal.id}"
+                    title="Delete">
+
+                    <i class="fa-solid fa-trash"></i>
+
+                </button>
+
+                <button
+                    type="button"
+                    class="btn btn-outline-success btn-post-journal"
+                    data-id="${journal.id}"
+                    title="Post">
+
+                    <i class="fa-solid fa-upload"></i>
+
+                </button>
+
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary btn-duplicate-journal"
+                    data-id="${journal.id}"
+                    title="Duplicate">
+
+                    <i class="fa-solid fa-copy"></i>
+
+                </button>
+                </button>
+
+                <button
+                    type="button"
+                    class="btn btn-outline-info btn-voucher-journal"
+                    data-id="${journal.id}"
+                    title="Voucher">
+
+                    <i class="fa-solid fa-file-lines"></i>
+
+                </button>
+
+            </div>
+
+        `;
 
     }
 
     /*
     ======================================================
-    HEADER
+    POSTED
     ======================================================
     */
 
-    this.txtDescription.value =
-        this.currentJournal.description ?? "";
+    if (status === "posted") {
 
-    this.cboStatus.value =
-        this.currentJournal.status ?? "Draft";
+        return `
+
+            <div class="btn-group btn-group-sm">
+
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary btn-view-journal"
+                    data-id="${journal.id}"
+                    title="View">
+
+                    <i class="fa-solid fa-eye"></i>
+
+                </button>
+
+                <button
+                    type="button"
+                    class="btn btn-outline-info btn-voucher-journal"
+                    data-id="${journal.id}"
+                    title="Voucher">
+
+                    <i class="fa-solid fa-file-lines"></i>
+
+                </button>
+
+                <button
+                    type="button"
+                    class="btn btn-outline-dark btn-void-journal"
+                    data-id="${journal.id}"
+                    title="Void">
+
+                    <i class="fa-solid fa-ban"></i>
+
+                </button>
+
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary btn-duplicate-journal"
+                    data-id="${journal.id}"
+                    title="Duplicate">
+
+                    <i class="fa-solid fa-copy"></i>
+
+                </button>
+
+            </div>
+
+        `;
+
+    }
 
     /*
     ======================================================
-    DETAIL
+    VOID / CANCELLED
     ======================================================
     */
 
-    this.detailBody.innerHTML = "";
+    return `
 
-    if (!Array.isArray(this.currentJournal.details)) {
+        <div class="btn-group btn-group-sm">
+
+            <button
+                type="button"
+                class="btn btn-outline-secondary btn-view-journal"
+                data-id="${journal.id}"
+                title="View">
+
+                <i class="fa-solid fa-eye"></i>
+
+            </button>
+
+        </div>
+
+    `;
+
+}
+/*
+==========================================================
+RENDER DETAIL TABLE
+==========================================================
+*/
+
+renderDetailTable() {
+
+    if (!this.detailTableBody) {
 
         return;
 
     }
 
-    const details =
-    this.currentJournal.details;
+    this.detailTableBody.innerHTML = "";
 
-const debitDetails =
-    details.filter(
-        detail =>
-            Number(
-                detail.debit
-            ) > 0
-    );
+    if (
+        !Array.isArray(this.detailLines) ||
+        this.detailLines.length === 0
+    ) {
 
-const creditDetails =
-    details.filter(
-        detail =>
-            Number(
-                detail.credit
-            ) > 0
-    );
+        this.detailTableBody.innerHTML = `
+            <tr id="journal-empty-row">
+                <td colspan="7"
+                    class="text-center py-5 text-muted">
 
-for (
-    let i = 0;
-    i < debitDetails.length;
-    i++
-) {
+                    No journal detail available.
 
-    const debit =
-        debitDetails[i];
+                </td>
+            </tr>
+        `;
 
-    const credit =
-        creditDetails[i];
+        return;
 
-    await this.addDetailLine({
+    }
 
-        description:
-            debit.description
-            ??
-            credit?.description
-            ??
-            "",
+    this.detailLines.forEach((detail, index) => {
 
-        debit_account_id:
-            debit.account_id,
+        this.detailTableBody.insertAdjacentHTML(
 
-        credit_account_id:
-            credit?.account_id
-            ?? "",
+            "beforeend",
 
-        amount:
-            Number(
-                debit.debit
-            ),
+            this.createDetailRow(
+                detail,
+                index
+            )
 
-        business_partner_id:
-            debit.business_partner_id
-            ??
-            credit?.business_partner_id
-            ??
-            null
+        );
 
     });
 
 }
-
-    this.calculateSummary();
-
-}
 /*
 ==========================================================
-ADD DETAIL LINE
+CREATE DETAIL ROW
 ==========================================================
 */
 
-async addDetailLine(data = {}) {
-
-    const template =
-        this.detailTemplate;
-
-    if (!template) {
-
-        console.error(
-            "Template journal-detail-template tidak ditemukan"
-        );
-
-        return;
-
-    }
-
-    if (!this.detailBody) {
-
-        console.error(
-            "journal-detail-body tidak ditemukan"
-        );
-
-        return;
-
-    }
+createDetailRow(detail, index) {
 
     /*
     ======================================================
-    CLONE TEMPLATE
-    ======================================================
-    */
-
-    const clone =
-        template.content.cloneNode(true);
-
-    /*
-    ======================================================
-    APPEND ROW
-    ======================================================
-    */
-
-    this.detailBody.appendChild(
-        clone
-    );
-
-    const addedRow =
-        this.detailBody.lastElementChild;
-
-    if (!addedRow) {
-
-        console.error(
-            "Detail row gagal dibuat."
-        );
-
-        return;
-
-    }
-
-    /*
-    ======================================================
-    GET ELEMENT
+    ACCOUNT DISPLAY
     ======================================================
     */
 
     const debitAccount =
-        addedRow.querySelector(
-            ".detail-debit-account"
-        );
+
+        detail.debit_account_code && detail.debit_account_name
+
+            ? `${detail.debit_account_code} - ${detail.debit_account_name}`
+
+            : (
+
+                detail.debit_account_name ||
+
+                detail.debit_account ||
+
+                "-"
+
+            );
 
     const creditAccount =
-        addedRow.querySelector(
-            ".detail-credit-account"
-        );
+
+        detail.credit_account_code && detail.credit_account_name
+
+            ? `${detail.credit_account_code} - ${detail.credit_account_name}`
+
+            : (
+
+                detail.credit_account_name ||
+
+                detail.credit_account ||
+
+                "-"
+
+            );
+
+    /*
+    ======================================================
+    BUSINESS PARTNER
+    ======================================================
+    */
 
     const businessPartner =
-        addedRow.querySelector(
-            ".detail-business-partner"
-        );
 
-    const description =
-        addedRow.querySelector(
-            ".detail-description"
-        );
+        detail.business_partner_name ||
+
+        detail.bp_name ||
+
+        "-";
+
+    /*
+    ======================================================
+    AMOUNT
+    ======================================================
+    */
 
     const amount =
-        addedRow.querySelector(
-            ".detail-amount"
-        );
+
+        Number(detail.amount || 0);
 
     /*
     ======================================================
-    LOAD COA
+    RETURN
     ======================================================
     */
 
-    this.loadCOA(
-        debitAccount
-    );
+    return `
 
-    this.loadCOA(
-        creditAccount
-    );
+        <tr data-index="${index}">
+
+            <td class="text-center">
+
+                ${index + 1}
+
+            </td>
+
+            <td>
+
+                ${detail.description || "-"}
+
+            </td>
+
+            <td>
+
+                ${debitAccount}
+
+            </td>
+
+            <td>
+
+                ${creditAccount}
+
+            </td>
+
+            <td class="text-end">
+
+                ${this.formatCurrency(amount)}
+
+            </td>
+
+            <td>
+
+                ${businessPartner}
+
+            </td>
+
+            <td class="text-center">
+
+                <div class="btn-group btn-group-sm">
+
+                    <button
+                        type="button"
+                        class="btn btn-outline-primary btn-edit-detail"
+                        data-index="${index}"
+                        title="Edit">
+
+                        <i class="fa-solid fa-pen"></i>
+
+                    </button>
+
+                    <button
+                        type="button"
+                        class="btn btn-outline-danger btn-delete-detail"
+                        data-index="${index}"
+                        title="Delete">
+
+                        <i class="fa-solid fa-trash"></i>
+
+                    </button>
+
+                </div>
+
+            </td>
+
+        </tr>
+
+    `;
+
+}
+/*
+==========================================================
+SEARCH JOURNAL
+==========================================================
+*/
+
+search() {
 
     /*
     ======================================================
-    LOAD BUSINESS PARTNER
+    GET FILTER VALUE
     ======================================================
     */
 
-    this.loadBusinessPartner(
-        businessPartner
-    );
+    const keyword =
+        (this.filterKeyword?.value || "")
+            .trim()
+            .toLowerCase();
+
+    const findBy =
+        this.filterFindBy?.value || "";
+
+    const status =
+        this.filterStatus?.value || "";
+
+    const dateFrom =
+        this.filterDateFrom?.value || "";
+
+    const dateTo =
+        this.filterDateTo?.value || "";
 
     /*
     ======================================================
-    SET VALUE
+    FILTER DATA
     ======================================================
     */
 
-    if (description) {
+    this.filteredJournals =
+        this.journals.filter(
 
-        description.value =
-            data.description ?? "";
+            (journal) => {
 
-    }
+                /*
+                ==========================================
+                STATUS
+                ==========================================
+                */
 
-    if (debitAccount) {
+                if (
+                    status &&
+                    journal.status !== status
+                ) {
 
-        debitAccount.value =
-            data.debit_account_id ?? "";
+                    return false;
 
-    }
+                }
 
-    if (creditAccount) {
+                /*
+                ==========================================
+                DATE FROM
+                ==========================================
+                */
 
-        creditAccount.value =
-            data.credit_account_id ?? "";
+                if (
+                    dateFrom &&
+                    journal.journal_date < dateFrom
+                ) {
 
-    }
+                    return false;
 
-    if (amount) {
+                }
 
-        amount.value =
-            data.amount ?? 0;
+                /*
+                ==========================================
+                DATE TO
+                ==========================================
+                */
 
-    }
+                if (
+                    dateTo &&
+                    journal.journal_date > dateTo
+                ) {
 
-    if (businessPartner) {
+                    return false;
 
-        businessPartner.value =
-            data.business_partner_id ?? "";
+                }
 
-    }
+                /*
+                ==========================================
+                KEYWORD
+                ==========================================
+                */
 
-    /*
-    ======================================================
-    BIND ROW EVENTS
-    ======================================================
-    */
+                if (!keyword) {
 
-    this.bindDetailRowEvents(
-        addedRow
-    );
+                    return true;
 
-    /*
-    ======================================================
-    RENUMBER
-    ======================================================
-    */
+                }
 
-    this.renumberDetailLines();
+                /*
+                ==========================================
+                SEARCH BY FIELD
+                ==========================================
+                */
 
-    /*
-    ======================================================
-    CALCULATE
-    ======================================================
-    */
+                switch (findBy) {
 
-    this.calculateSummary();
+                    case "journal_no":
 
-}
-/*
-==========================================================
-LOAD COA
-==========================================================
-*/
+                        return (
+                            journal.journal_no || ""
+                        )
+                        .toLowerCase()
+                        .includes(keyword);
 
-loadCOA(selectElement) {
+                    case "description":
 
-    if (!selectElement) {
+                        return (
+                            journal.description || ""
+                        )
+                        .toLowerCase()
+                        .includes(keyword);
 
-        console.error(
-            "COA select tidak ditemukan."
-        );
+                    case "status":
 
-        return;
+                        return (
+                            journal.status || ""
+                        )
+                        .toLowerCase()
+                        .includes(keyword);
 
-    }
+                    default:
 
-    selectElement.innerHTML = "";
+                        return [
 
-    const defaultOption =
-        document.createElement(
-            "option"
-        );
+                            journal.journal_no,
 
-    defaultOption.value = "";
+                            journal.description,
 
-    defaultOption.textContent =
-        "-- Select Account --";
+                            journal.status
 
-    selectElement.appendChild(
-        defaultOption
-    );
+                        ]
 
-    if (
-        !Array.isArray(
-            this.coaList
-        )
-    ) {
+                        .join(" ")
 
-        console.warn(
-            "COA list kosong."
-        );
+                        .toLowerCase()
 
-        return;
+                        .includes(keyword);
 
-    }
-
-    this.coaList.forEach(
-        account => {
-
-            const option =
-                document.createElement(
-                    "option"
-                );
-
-            option.value =
-                account.id;
-
-            option.textContent =
-                `${account.account_code} - ${account.account_name}`;
-
-            selectElement.appendChild(
-                option
-            );
-
-        }
-    );
-
-}
-/*
-==========================================================
-LOAD MASTER DATA
-==========================================================
-*/
-
-async loadMasterData() {
-
-    try {
-
-        /*
-        ==================================================
-        LOAD COA
-        ==================================================
-        */
-
-        this.coaList =
-            await this.service.getCOA();
-
-        /*
-        ==================================================
-        LOAD BUSINESS PARTNER
-        ==================================================
-        */
-
-        this.businessPartnerList =
-            await this.service.getBusinessPartner();
-
-        /*
-        ==================================================
-        VALIDATE COA
-        ==================================================
-        */
-
-        if (
-            !Array.isArray(
-                this.coaList
-            )
-        ) {
-
-            this.coaList = [];
-
-        }
-
-        /*
-        ==================================================
-        VALIDATE BUSINESS PARTNER
-        ==================================================
-        */
-
-        if (
-            !Array.isArray(
-                this.businessPartnerList
-            )
-        ) {
-
-            this.businessPartnerList = [];
-
-        }
-
-        console.log(
-            "COA loaded:",
-            this.coaList.length
-        );
-
-        console.log(
-            "Business Partner loaded:",
-            this.businessPartnerList.length
-        );
-
-    }
-
-    catch (error) {
-
-        console.error(
-            "Failed to load master data:",
-            error
-        );
-
-        this.coaList = [];
-
-        this.businessPartnerList = [];
-
-        throw error;
-
-    }
-
-}
-
-/*
-==========================================================
-LOAD BUSINESS PARTNER
-==========================================================
-*/
-
-/*
-==========================================================
-LOAD BUSINESS PARTNER
-==========================================================
-*/
-
-loadBusinessPartner(selectElement) {
-
-    if (!selectElement) {
-
-        console.error(
-            "Business Partner select tidak ditemukan."
-        );
-
-        return;
-
-    }
-
-    selectElement.innerHTML = "";
-
-    const defaultOption =
-        document.createElement(
-            "option"
-        );
-
-    defaultOption.value = "";
-
-    defaultOption.textContent =
-        "-- Optional --";
-
-    selectElement.appendChild(
-        defaultOption
-    );
-
-    if (
-        !Array.isArray(
-            this.businessPartnerList
-        )
-    ) {
-
-        console.warn(
-            "Business Partner list kosong."
-        );
-
-        return;
-
-    }
-
-    this.businessPartnerList.forEach(
-        partner => {
-
-            const option =
-                document.createElement(
-                    "option"
-                );
-
-            option.value =
-                partner.id;
-
-            option.textContent =
-`${partner.bp_code} - ${partner.bp_name}`;
-
-            selectElement.appendChild(
-                option
-            );
-
-        }
-    );
-
-}
-/*
-==========================================================
-CALCULATE SUMMARY
-==========================================================
-*/
-
-calculateSummary() {
-
-    let totalDebit = 0;
-
-    let totalCredit = 0;
-
-    const rows =
-        this.detailBody.querySelectorAll(
-            ".journal-detail-row"
-        );
-
-    rows.forEach(row => {
-
-        const debitAccount =
-            row.querySelector(
-                ".detail-debit-account"
-            )?.value;
-
-        const creditAccount =
-            row.querySelector(
-                ".detail-credit-account"
-            )?.value;
-
-        const amount =
-            Number(
-                row.querySelector(
-                    ".detail-amount"
-                )?.value || 0
-            );
-
-        if (
-            debitAccount &&
-            amount > 0
-        ) {
-
-            totalDebit += amount;
-
-        }
-
-        if (
-            creditAccount &&
-            amount > 0
-        ) {
-
-            totalCredit += amount;
-
-        }
-
-    });
-
-    const difference =
-        Math.abs(
-            totalDebit -
-            totalCredit
-        );
-
-    const debitElement =
-this.summaryDebit;
-
-const creditElement =
-this.summaryCredit;
-
-const differenceElement =
-this.summaryDifference;
-
-const statusElement =
-this.summaryStatus;
-
-    if (debitElement) {
-
-        debitElement.value =
-            this.formatCurrency(
-                totalDebit
-            );
-
-    }
-
-    if (creditElement) {
-
-        creditElement.value =
-            this.formatCurrency(
-                totalCredit
-            );
-
-    }
-
-    if (differenceElement) {
-
-        differenceElement.value =
-            this.formatCurrency(
-                difference
-            );
-
-    }
-
-    // =====================================================
-// Validation
-// =====================================================
-
-const requiredElements = {
-
-    txtAccountingDate : this.txtAccountingDate,
-    txtJournalNo      : this.txtJournalNo,
-    cboStatus         : this.cboStatus,
-    txtDescription    : this.txtDescription,
-    detailBody        : this.detailBody,
-    summaryDebit      : this.summaryDebit,
-    summaryCredit     : this.summaryCredit,
-    summaryDifference : this.summaryDifference,
-    summaryStatus     : this.summaryStatus
-
-};
-
-for (const [name, element] of Object.entries(requiredElements)) {
-
-    if (!element) {
-
-        console.error(
-
-            `[GL Journal] Missing element : ${name}`
-
-        );
-
-    }
-
-}
-}
-/*
-==========================================================
-DELETE SELECTED DETAIL LINE
-==========================================================
-*/
-
-deleteSelectedLines() {
-
-    const selectedRows =
-        this.detailBody.querySelectorAll(
-            ".detail-check:checked"
-        );
-
-    if (
-        selectedRows.length === 0
-    ) {
-
-        this.showMessage(
-            "Pilih detail jurnal yang akan dihapus.",
-            "warning"
-        );
-
-        return;
-
-    }
-
-    selectedRows.forEach(
-        checkbox => {
-
-            const row =
-                checkbox.closest(
-                    ".journal-detail-row"
-                );
-
-            row?.remove();
-
-        }
-    );
-
-    this.renumberDetailLines();
-
-    this.calculateSummary();
-
-}
-
-/*
-==========================================================
-RENUMBER DETAIL LINE
-==========================================================
-*/
-
-renumberDetailLines() {
-
-    const rows =
-        this.detailBody.querySelectorAll(
-            ".journal-detail-row"
-        );
-
-    rows.forEach(
-        (row, index) => {
-
-            const number =
-                row.querySelector(
-                    ".detail-line-number"
-                );
-
-            if (number) {
-
-                number.textContent =
-                    index + 1;
+                }
 
             }
 
-        }
-    );
-
-}
-
-/*
-==========================================================
-COLLECT DETAIL DATA
-==========================================================
-*/
-
-collectDetailData() {
-
-    const details = [];
-
-    const rows =
-        this.detailBody.querySelectorAll(
-            ".journal-detail-row"
         );
 
-    for (const row of rows) {
-
-        const description =
-            row.querySelector(
-                ".detail-description"
-            )?.value.trim() ?? "";
-
-        const debitAccount =
-            row.querySelector(
-                ".detail-debit-account"
-            )?.value ?? "";
-
-        const creditAccount =
-            row.querySelector(
-                ".detail-credit-account"
-            )?.value ?? "";
-
-        const amount =
-            Number(
-                row.querySelector(
-                    ".detail-amount"
-                )?.value || 0
-            );
-
-        const businessPartner =
-            row.querySelector(
-                ".detail-business-partner"
-            )?.value || null;
-
-        /*
-        ==================================================
-        SKIP EMPTY ROW
-        ==================================================
-        */
-
-        if (
-            !debitAccount &&
-            !creditAccount &&
-            amount === 0 &&
-            description === ""
-        ) {
-
-            continue;
-
-        }
-
-        /*
-        ==================================================
-        VALIDATE ACCOUNT
-        ==================================================
-        */
-
-        if (
-            !debitAccount &&
-            !creditAccount
-        ) {
-
-            this.showMessage(
-                "Account wajib dipilih.",
-                "warning"
-            );
-
-            row.querySelector(
-                ".detail-debit-account"
-            )?.focus();
-
-            return [];
-
-        }
-
-        /*
-        ==================================================
-        VALIDATE DOUBLE ACCOUNT
-        ==================================================
-        */
-
-        if (
-            debitAccount &&
-            creditAccount
-        ) {
-
-            this.showMessage(
-                "Satu baris hanya boleh memiliki Debit atau Credit.",
-                "warning"
-            );
-
-            return [];
-
-        }
-
-        /*
-        ==================================================
-        VALIDATE AMOUNT
-        ==================================================
-        */
-
-        if (amount <= 0) {
-
-            this.showMessage(
-                "Amount harus lebih besar dari nol.",
-                "warning"
-            );
-
-            row.querySelector(
-                ".detail-amount"
-            )?.focus();
-
-            return [];
-
-        }
-
-        details.push({
-
-            debit_account_id:
-                debitAccount,
-
-            credit_account_id:
-                creditAccount,
-
-            amount,
-
-            business_partner_id:
-                businessPartner,
-
-            description
-
-        });
-
-    }
-
-    return details;
-
-}
-/*
-==========================================================
-SAVE JOURNAL
-==========================================================
-*/
-
-async saveJournal(
-    status = "Draft"
-) {
-/*
-==========================================================
-PREVENT DOUBLE SAVE
-==========================================================
-*/
-
-if (this.isSaving) {
-
-    console.warn(
-        "Journal is being saved..."
-    );
-
-    return;
-
-}
-
-this.isSaving = true;
-
-/*
-==========================================================
-TRANSACTION SNAPSHOT
-==========================================================
-*/
-
-const transactionMode =
-    this.currentMode;
-
-const transactionJournal =
-    this.currentJournal;
-
-try {
-
-    this.btnSaveJournal.disabled = true;
-    this.btnPostJournal.disabled = true;
-
     /*
-    ==========================================
-    SHOW LOADING
-    ==========================================
+    ======================================================
+    RESET PAGE
+    ======================================================
     */
 
-    window.App?.showLoading?.();
+    this.currentPage = 1;
 
     /*
-==========================================================
-HEADER
-==========================================================
-*/
-
-const header = {
-
-    journal_date:
-        this.txtAccountingDate.value.trim(),
-
-    journal_no:
-        this.txtJournalNo.value.trim(),
-
-    description:
-        this.txtDescription.value.trim(),
-
-    status
-
-};
-
-/*
-==========================================================
-VALIDATE HEADER
-==========================================================
-*/
-
-if (!header.journal_date) {
-
-    this.showMessage(
-
-        "Accounting Date wajib diisi.",
-
-        "warning"
-
-    );
-
-    this.txtAccountingDate?.focus();
-
-    return;
-
-}
-
-if (!header.journal_no) {
-
-    this.showMessage(
-
-        "Journal No wajib diisi.",
-
-        "warning"
-
-    );
-
-    this.txtJournalNo?.focus();
-
-    return;
-
-}
-
-if (!header.description) {
-
-    this.showMessage(
-
-        "Description wajib diisi.",
-
-        "warning"
-
-    );
-
-    this.txtDescription?.focus();
-
-    return;
-
-}
-
-        const details =
-            this.collectDetailData();
-
-        if (
-            details.length === 0
-        ) {
-
-            this.showMessage(
-                "Journal detail belum diisi.",
-                "warning"
-            );
-
-            return;
-
-        }
-
-        const journalDetails =
-            this.service.buildJournalDetail(
-                details
-            );
-
-        const total =
-            this.service.calculateTotal(
-                journalDetails
-            );
-
-        if (
-            Number(
-                total.totalDebit.toFixed(2)
-            ) !==
-            Number(
-                total.totalCredit.toFixed(2)
-            )
-        ) {
-
-            this.showMessage(
-                "Journal belum balance.",
-                "warning"
-            );
-
-            return;
-
-        }
-
-       if (
-    transactionMode === "add"
-) {
-
-    await this.service.create(
-        header,
-        details
-    );
-
-} else {
-
-    const success =
-    await this.service.create(
-        header,
-        details
-    );
-
-if (!success) {
-
-    throw new Error(
-        "Create journal failed."
-    );
-
-}
-
-}
-
-        this.showMessage(
-            status === "Posted"
-                ? "Journal berhasil diposting."
-                : "Journal berhasil disimpan."
-        );
-
-        this.modal.hide();
-
-        await this.loadData();
-
-    }
-
-   catch (error) {
-
-    console.error(
-        "saveJournal error:",
-        error
-    );
-
-    this.showError(
-        error
-    );
-
-}
-
-finally {
-
-    this.isSaving = false;
-
-    /*
-    ==========================================
-    HIDE LOADING
-    ==========================================
+    ======================================================
+    REFRESH VIEW
+    ======================================================
     */
 
-    window.App?.hideLoading?.();
+    this.refreshView();
+
+}
+/*
+==========================================================
+HANDLE TABLE ACTION
+==========================================================
+*/
+
+handleTableAction(event) {
 
     /*
-    ==========================================
-    ENABLE BUTTON
-    ==========================================
+    ======================================================
+    BUTTON
+    ======================================================
     */
 
-    this.btnSaveJournal.disabled = false;
-    this.btnPostJournal.disabled = false;
+    const button =
 
-}
-}
-/*
-==========================================================
-RENDER PAGINATION
-==========================================================
-*/
+        event.target.closest("button");
 
-renderPagination() {
-
-    if (!this.currentPageInput) return;
-
-    this.currentPageInput.value = this.currentPage;
-
-    if (this.totalPageLabel) {
-
-        this.totalPageLabel.textContent =
-            `of ${this.totalPages}`;
-
-    }
-
-    if (this.btnFirstPage)
-        this.btnFirstPage.disabled =
-            this.currentPage === 1;
-
-    if (this.btnPreviousPage)
-        this.btnPreviousPage.disabled =
-            this.currentPage === 1;
-
-    if (this.btnNextPage)
-        this.btnNextPage.disabled =
-            this.currentPage >= this.totalPages;
-
-    if (this.btnLastPage)
-        this.btnLastPage.disabled =
-            this.currentPage >= this.totalPages;
-
-}
-/*
-==========================================================
-POST JOURNAL
-==========================================================
-*/
-
-async postJournal(id) {
-
-    try {
-
-        const confirmPost = confirm(
-            "Post jurnal ini?"
-        );
-
-        if (!confirmPost) {
-
-            return;
-
-        }
-
-        await this.service.post(id);
-
-        this.showMessage(
-            "Journal berhasil diposting."
-        );
-
-        await this.loadData();
-
-    }
-
-    catch (error) {
-
-        console.error(error);
-
-        this.showError(error);
-
-    }
-
-}
-/*
-==========================================================
-VOID JOURNAL
-==========================================================
-*/
-
-async voidJournal(id) {
-
-    try {
-
-        const confirmVoid = confirm(
-            "Void journal ini?"
-        );
-
-        if (!confirmVoid) {
-
-            return;
-
-        }
-
-        await this.service.voidJournal(id, "");
-
-        this.showMessage(
-            "Journal berhasil di-void."
-        );
-
-        await this.loadData();
-
-    }
-
-    catch (error) {
-
-        console.error(error);
-
-        this.showError(error);
-
-    }
-
-}
-/*
-==========================================================
-DELETE JOURNAL
-==========================================================
-*/
-
-async deleteJournal(id) {
-
-    try {
-
-        const confirmDelete = confirm(
-            "Apakah Anda yakin ingin menghapus journal ini?"
-        );
-
-        if (!confirmDelete) {
-
-            return;
-
-        }
-
-        await this.service.delete(id);
-
-        this.showMessage(
-            "Journal berhasil dihapus.",
-            "success"
-        );
-
-        await this.loadData();
-
-    }
-
-    catch (error) {
-
-        console.error(error);
-
-        this.showError(error);
-
-    }
-
-}
-/*
-==========================================================
-DUPLICATE JOURNAL
-==========================================================
-*/
-
-async duplicateJournal(id) {
-
-    try {
-
-        const confirmDuplicate = confirm(
-            "Apakah Anda yakin ingin menduplikasi journal ini?"
-        );
-
-        if (!confirmDuplicate) {
-
-            return;
-
-        }
-
-        await this.service.duplicate(id);
-
-        this.showMessage(
-            "Journal berhasil diduplikasi.",
-            "success"
-        );
-
-        await this.loadData();
-
-    }
-
-    catch (error) {
-
-        console.error(error);
-
-        this.showError(error);
-
-    }
-
-}
-/*
-==========================================================
-SHOW MESSAGE
-==========================================================
-*/
-
-showMessage(
-    message,
-    type = "success"
-) {
-
-    console.log(`[${type.toUpperCase()}]`, message);
-
-    if (window.Toast) {
-
-        window.Toast.show(
-            message,
-            type
-        );
+    if (!button) {
 
         return;
 
     }
 
-    alert(message);
+    /*
+    ======================================================
+    JOURNAL ID
+    ======================================================
+    */
+
+    const id =
+
+        button.dataset.id;
+
+    if (!id) {
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    EDIT
+    ======================================================
+    */
+
+    if (
+
+        button.classList.contains(
+
+            "btn-edit-journal"
+
+        )
+
+    ) {
+
+        this.openEditJournal(id);
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    DELETE
+    ======================================================
+    */
+
+    if (
+
+        button.classList.contains(
+
+            "btn-delete-journal"
+
+        )
+
+    ) {
+
+        this.deleteJournal(id);
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    POST
+    ======================================================
+    */
+
+    if (
+
+        button.classList.contains(
+
+            "btn-post-journal"
+
+        )
+
+    ) {
+
+        this.postJournal(id);
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    DUPLICATE
+    ======================================================
+    */
+
+    if (
+
+        button.classList.contains(
+
+            "btn-duplicate-journal"
+
+        )
+
+    ) {
+
+        this.duplicateJournal(id);
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    VIEW
+    ======================================================
+    */
+
+    if (
+
+        button.classList.contains(
+
+            "btn-view-journal"
+
+        )
+
+    ) {
+
+        this.openViewJournal(id);
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    VOUCHER
+    ======================================================
+    */
+
+    if (
+
+        button.classList.contains(
+
+            "btn-voucher-journal"
+
+        )
+
+    ) {
+
+        this.openVoucher(id);
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    VOID
+    ======================================================
+    */
+
+    if (
+
+        button.classList.contains(
+
+            "btn-void-journal"
+
+        )
+
+    ) {
+
+        this.voidJournal(id);
+
+        return;
+
+    }
 
 }
-
 /*
 ==========================================================
-SHOW ERROR
+OPEN ADD JOURNAL
 ==========================================================
 */
 
-showError(error) {
+async openAddJournal() {
 
-    console.error(error);
+    /*
+    ======================================================
+    MODE
+    ======================================================
+    */
 
-    const message =
-        error?.message ??
-        "Unexpected Error";
+    this.currentMode = "add";
 
-    this.showMessage(
-        message,
-        "danger"
-    );
+    this.currentJournal = null;
+
+    /*
+    ======================================================
+    RESET DETAIL
+    ======================================================
+    */
+
+    this.detailLines = [];
+
+    /*
+    ======================================================
+    PREPARE FORM
+    ======================================================
+    */
+
+    this.clearJournalForm();
+
+    /*
+    ======================================================
+    LOAD MASTER
+    ======================================================
+    */
+
+    await this.loadMasterData();
+
+    /*
+    ======================================================
+    INITIALIZE HEADER
+    ======================================================
+    */
+
+    await this.initializeJournalHeader();
+
+    this.refreshDetailView();
+
+    /*
+    ======================================================
+    SHOW MODAL
+    ======================================================
+    */
+
+    this.modal.show();
 
 }
 /*
@@ -2978,9 +2904,11 @@ CLEAR JOURNAL FORM
 
 clearJournalForm() {
 
-    // =====================================================
-    // Journal Header
-    // =====================================================
+    /*
+    ======================================================
+    HEADER
+    ======================================================
+    */
 
     if (this.txtAccountingDate) {
 
@@ -3006,49 +2934,4864 @@ clearJournalForm() {
 
     }
 
-    // =====================================================
-    // Detail Journal
-    // =====================================================
+    /*
+    ======================================================
+    DETAIL
+    ======================================================
+    */
 
-    if (this.detailBody) {
+    this.detailLines = [];
 
-        this.detailBody.innerHTML = "";
+    this.renderDetailTable();
+
+    /*
+    ======================================================
+    SUMMARY
+    ======================================================
+    */
+
+    this.calculateSummary();
+
+}
+/*
+==========================================================
+INITIALIZE JOURNAL HEADER
+==========================================================
+*/
+
+async initializeJournalHeader() {
+
+    /*
+    ======================================================
+    VALIDATION
+    ======================================================
+    */
+
+    if (
+        !this.txtJournalNo ||
+        !this.txtAccountingDate ||
+        !this.cboStatus
+    ) {
+
+        return;
 
     }
 
-    // =====================================================
-    // Summary
-    // =====================================================
+    /*
+    ======================================================
+    ADD MODE
+    ======================================================
+    */
 
-    if (this.summaryDebit) {
+    if (this.currentMode === "add") {
 
-        this.summaryDebit.value = "0.00";
+        /*
+        ==================================================
+        DOCUMENT NUMBER
+        ==================================================
+        */
+
+        this.txtJournalNo.value =
+            await this.service.generateDocumentNumber();
+
+        /*
+        ==================================================
+        ACCOUNTING DATE
+        ==================================================
+        */
+
+        this.txtAccountingDate.value =
+            new Date()
+                .toISOString()
+                .substring(0, 10);
+
+        /*
+        ==================================================
+        STATUS
+        ==================================================
+        */
+
+        this.cboStatus.value =
+            "Draft";
+
+        return;
 
     }
 
-    if (this.summaryCredit) {
+    /*
+    ======================================================
+    EDIT MODE
+    ======================================================
+    */
 
-        this.summaryCredit.value = "0.00";
+    if (!this.currentJournal) {
+
+        return;
 
     }
 
-    if (this.summaryDifference) {
+    /*
+    ======================================================
+    DOCUMENT NUMBER
+    ======================================================
+    */
 
-        this.summaryDifference.value = "0.00";
+    this.txtJournalNo.value =
+        this.currentJournal.journal_no ?? "";
+
+    /*
+    ======================================================
+    ACCOUNTING DATE
+    ======================================================
+    */
+
+    this.txtAccountingDate.value =
+        this.currentJournal.journal_date ?? "";
+
+    /*
+    ======================================================
+    DESCRIPTION
+    ======================================================
+    */
+
+    if (this.txtDescription) {
+
+        this.txtDescription.value =
+            this.currentJournal.description ?? "";
 
     }
 
-    if (this.summaryStatus) {
+    /*
+    ======================================================
+    STATUS
+    ======================================================
+    */
 
-        this.summaryStatus.textContent = "NOT BALANCED";
+    this.cboStatus.value =
+        this.currentJournal.status ?? "Draft";
 
-        this.summaryStatus.className =
-            "badge bg-danger fs-6 px-3 py-2";
+}
+/*
+==========================================================
+LOAD MASTER DATA
+==========================================================
+*/
+
+async loadMasterData() {
+
+    try {
+
+        /*
+        ======================================================
+        LOAD CHART OF ACCOUNTS
+        ======================================================
+        */
+
+        await this.loadCOA();
+
+        /*
+        ======================================================
+        LOAD BUSINESS PARTNERS
+        ======================================================
+        */
+
+        await this.loadBusinessPartners();
+
+        /*
+        ======================================================
+        LOAD SUCCESS
+        ======================================================
+        */
+
+        console.log(
+
+            "Master Data Loaded",
+
+            {
+
+                coa:
+                    this.coaList.length,
+
+                businessPartners:
+                    this.businessPartnerList.length
+
+            }
+
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+
+            "Failed to load master data.",
+
+            error
+
+        );
+
+        throw error;
 
     }
 
 }
+/*
+==========================================================
+OPEN EDIT JOURNAL
+==========================================================
+*/
+
+async openEditJournal(id) {
+
+    console.log("OPEN EDIT :", id);
+
+    if (!id) {
+
+        return;
+
+    }
+
+    this.currentMode = "edit";
+
+    console.log("1. Load Master");
+
+    await this.loadMasterData();
+
+    console.log("2. Load Journal");
+
+    await this.loadJournal(id);
+
+    console.log("3. Fill Form");
+
+    this.fillJournalForm();
+
+    console.log("4. Show Modal");
+
+    this.modal.show();
+
+    console.log("5. ReadOnly");
+
+    this.setJournalReadOnly(false);
+
+}
+/*
+==========================================================
+LOAD JOURNAL
+==========================================================
+*/
+
+async loadJournal(id) {
+
+    /*
+    ======================================================
+    VALIDATION
+    ======================================================
+    */
+
+    if (!id) {
+
+        throw new Error(
+            "Journal ID is required."
+        );
+
+    }
+
+    /*
+    ======================================================
+    LOAD HEADER + DETAIL
+    ======================================================
+    */
+   
+
+    const journal =
+        await this.service.getById(id);
+
+    if (!journal) {
+
+        throw new Error(
+            "Journal not found."
+        );
+
+    }
+    
+
+    /*
+    ======================================================
+    STORE HEADER
+    ======================================================
+    */
+
+    this.currentJournal = journal;
+
+    /*
+    ======================================================
+    STORE DETAIL
+    ======================================================
+    */
+
+    this.detailLines =
+        Array.isArray(journal.details)
+            ? this.convertDatabaseDetail(
+                  journal.details
+              )
+            : [];
+    
+            console.log("DETAIL LINES :", this.detailLines);
+
+    /*
+    ======================================================
+    RENDER
+    ======================================================
+    */
+
+    this.renderDetailTable();
+
+    this.calculateSummary();
+    
+
+}
+/*
+==========================================================
+FILL JOURNAL FORM
+==========================================================
+*/
+
+fillJournalForm() {
+
+    /*
+    ======================================================
+    VALIDATION
+    ======================================================
+    */
+
+    if (!this.currentJournal) {
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    JOURNAL HEADER
+    ======================================================
+    */
+
+    if (this.txtJournalNo) {
+
+        this.txtJournalNo.value =
+            this.currentJournal.journal_no ?? "";
+
+    }
+
+    if (this.txtAccountingDate) {
+
+        this.txtAccountingDate.value =
+            this.currentJournal.journal_date ?? "";
+
+    }
+
+    if (this.txtDescription) {
+
+        this.txtDescription.value =
+            this.currentJournal.description ?? "";
+
+    }
+
+    if (this.cboStatus) {
+
+        this.cboStatus.value =
+            this.currentJournal.status ?? "Draft";
+
+    }
+
+    this.refreshDetailView();
+
+}
+/*
+==========================================================
+VALIDATE JOURNAL
+==========================================================
+*/
+
+validateJournal() {
+
+    /*
+    ======================================================
+    ACCOUNTING DATE
+    ======================================================
+    */
+
+    if (!this.txtAccountingDate?.value) {
+
+        window.App?.showError?.(
+            "Accounting Date is required."
+        );
+
+        this.txtAccountingDate?.focus();
+
+        return false;
+
+    }
+
+    /*
+    ======================================================
+    DESCRIPTION
+    ======================================================
+    */
+
+    if (!this.txtDescription?.value.trim()) {
+
+        window.App?.showError?.(
+            "Description is required."
+        );
+
+        this.txtDescription?.focus();
+
+        return false;
+
+    }
+
+    /*
+    ======================================================
+    DETAIL LINE
+    ======================================================
+    */
+
+    if (this.detailLines.length === 0) {
+
+        window.App?.showError?.(
+            "Please add at least one journal detail."
+        );
+
+        return false;
+
+    }
+
+    /*
+    ======================================================
+    VALIDATE EACH DETAIL
+    ======================================================
+    */
+
+    for (const line of this.detailLines) {
+
+        /*
+        ==================================================
+        DESCRIPTION
+        ==================================================
+        */
+
+        if (!line.description?.trim()) {
+
+            window.App?.showError?.(
+                "Every detail line must have a description."
+            );
+
+            return false;
+
+        }
+
+        /*
+        ==================================================
+        DEBIT ACCOUNT
+        ==================================================
+        */
+
+        if (!line.debitAccountId) {
+
+            window.App?.showError?.(
+                "Please select Debit Account."
+            );
+
+            return false;
+
+        }
+
+        /*
+        ==================================================
+        CREDIT ACCOUNT
+        ==================================================
+        */
+
+        if (!line.creditAccountId) {
+
+            window.App?.showError?.(
+                "Please select Credit Account."
+            );
+
+            return false;
+
+        }
+
+        /*
+        ==================================================
+        AMOUNT
+        ==================================================
+        */
+
+        if (Number(line.amount) <= 0) {
+
+            window.App?.showError?.(
+                "Amount must be greater than zero."
+            );
+
+            return false;
+
+        }
+
+    }
+
+    /*
+    ======================================================
+    SUCCESS
+    ======================================================
+    */
+
+    return true;
+
+}
+/*
+==========================================================
+SAVE JOURNAL
+==========================================================
+*/
+
+async saveJournal(status = "Draft") {
+    console.log("===== SAVE JOURNAL START =====");
+
+    console.log("STATUS :", status);
+
+    console.log("DETAIL LINES :", this.detailLines);
+
+    console.log("DETAIL COUNT :", this.detailLines.length);
+
+    try {
+
+        /*
+        ======================================================
+        VALIDATION
+        ======================================================
+        */
+
+        if (!this.validateJournal()) {
+
+            return;
+
+        }
+
+        /*
+        ======================================================
+        BUILD HEADER
+        ======================================================
+        */
+
+        const journal = {
+
+            id:
+                this.currentMode === "edit"
+                    ? this.currentJournal?.id
+                    : null,
+
+            journal_no:
+                this.txtJournalNo.value.trim(),
+
+            journal_date:
+                this.txtAccountingDate.value,
+
+            description:
+                this.txtDescription.value.trim(),
+
+            status
+
+        };
+
+        /*
+==========================================================
+BUILD DETAIL
+==========================================================
+*/
+
+const details =
+
+    this.detailLines.map(
+
+        (line, index) => ({
+
+            line_no:
+
+                index + 1,
+
+            description:
+
+                line.description,
+
+            debit_account_id:
+
+                line.debit_account_id,
+
+            credit_account_id:
+
+                line.credit_account_id,
+
+            business_partner_id:
+
+                line.business_partner_id || null,
+
+            amount:
+
+                Number(line.amount)
+
+        })
+
+    );
+
+        /*
+        ==========================================================
+        SAVE
+        ==========================================================
+        */
+
+        if (this.currentMode === "add") {
+            console.log("===== BEFORE SERVICE =====");
+            console.log("CURRENT MODE :", this.currentMode);
+            console.log("HEADER :", journal);
+            console.table(details);
+
+            await this.service.create(
+
+                journal,
+
+                details
+
+            );
+
+        }
+        else {
+
+            await this.service.update(
+
+                journal.id,
+
+                journal,
+
+                details
+
+            );
+
+        }
+        /*
+        ======================================================
+        RELOAD DATA
+        ======================================================
+        */
+
+        await this.loadData();
+
+        /*
+        ======================================================
+        CLOSE MODAL
+        ======================================================
+        */
+
+        this.modal.hide();
+
+        /*
+        ======================================================
+        SUCCESS
+        ======================================================
+        */
+
+        window.App?.showSuccess?.(
+
+            `Journal ${status} successfully.`
+
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        window.App?.showError?.(
+
+            error.message ||
+
+            "Failed to save journal."
+
+        );
+
+    }
+
+}
+/*
+==========================================================
+DELETE JOURNAL
+==========================================================
+*/
+
+async deleteJournal(id) {
+
+    /*
+    ======================================================
+    VALIDATION
+    ======================================================
+    */
+
+    if (!id) {
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    CONFIRM DELETE
+    ======================================================
+    */
+
+    const confirmed =
+        window.confirm(
+
+            "Are you sure you want to delete this journal?"
+
+        );
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+    try {
+
+        /*
+        ======================================================
+        SHOW LOADING
+        ======================================================
+        */
+
+        window.App?.showLoading?.();
+
+        /*
+        ======================================================
+        DELETE JOURNAL
+        ======================================================
+        */
+
+        await this.service.delete(id);
+
+        /*
+        ======================================================
+        RELOAD DATA
+        ======================================================
+        */
+
+        await this.loadData();
+
+        /*
+        ======================================================
+        SUCCESS
+        ======================================================
+        */
+
+        window.App?.showSuccess?.(
+
+            "Journal deleted successfully."
+
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        window.App?.showError?.(
+
+            error.message ||
+
+            "Failed to delete journal."
+
+        );
+
+    }
+
+    finally {
+
+        /*
+        ======================================================
+        HIDE LOADING
+        ======================================================
+        */
+
+        window.App?.hideLoading?.();
+
+    }
+
+}
+/*
+==========================================================
+OPEN ADD LINE
+==========================================================
+*/
+
+openAddLine() {
+
+    /*
+    ======================================================
+    VALIDATION
+    ======================================================
+    */
+
+    if (!this.detailModal) {
+
+        console.error(
+            "Detail modal has not been initialized."
+        );
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    ADD MODE
+    ======================================================
+    */
+
+    this.detailMode = "add";
+
+    this.currentDetailIndex = -1;
+
+    this.currentDetail = null;
+
+    /*
+    ======================================================
+    CLEAR FORM
+    ======================================================
+    */
+
+    this.clearDetailForm();
+
+    /*
+    ======================================================
+    SHOW MODAL
+    ======================================================
+    */
+
+    this.detailModal.show();
+
+}
+/*
+==========================================================
+OPEN EDIT LINE
+==========================================================
+*/
+
+openEditLine(index) {
+
+    /*
+    ======================================================
+    VALIDATION
+    ======================================================
+    */
+
+    if (!this.detailModal) {
+
+        console.error(
+            "Detail modal has not been initialized."
+        );
+
+        return;
+
+    }
+
+    if (
+
+        index < 0 ||
+
+        index >= this.detailLines.length
+
+    ) {
+
+        console.error(
+            "Invalid detail line index."
+        );
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    EDIT MODE
+    ======================================================
+    */
+
+    this.detailMode = "edit";
+
+    this.currentDetailIndex = index;
+
+    this.currentDetail =
+        this.detailLines[index];
+
+    /*
+    ======================================================
+    FILL FORM
+    ======================================================
+    */
+
+    this.fillDetailForm();
+
+    /*
+    ======================================================
+    SHOW MODAL
+    ======================================================
+    */
+
+    this.detailModal.show();
+
+}
+/*
+==========================================================
+OPEN ADD DETAIL MODAL
+==========================================================
+*/
+
+async openAddDetailModal() {
+
+    await this.loadDetailModal();
+
+    this.populateCOA();
+
+    this.populateBusinessPartners();
+
+    this.clearDetailForm();
+
+    this.detailMode.value = "add";
+
+    this.detailId.value = "";
+
+    this.currentDetail = null;
+
+    this.currentDetailIndex = -1;
+
+    this.detailModal.show();
+
+}
+/*
+==========================================================
+CLEAR DETAIL FORM
+==========================================================
+*/
+
+clearDetailForm() {
+
+    if (this.detailId) {
+
+        this.detailId.value = "";
+
+    }
+
+    if (this.detailMode) {
+
+        this.detailMode.value = "add";
+
+    }
+
+    if (this.detailDescription) {
+
+        this.detailDescription.value = "";
+
+    }
+
+    if (this.detailDebitAccount) {
+
+        this.detailDebitAccount.value = "";
+
+    }
+
+    if (this.detailCreditAccount) {
+
+        this.detailCreditAccount.value = "";
+
+    }
+
+    if (this.detailBusinessPartner) {
+
+        this.detailBusinessPartner.value = "";
+
+    }
+
+    if (this.detailAmount) {
+
+        this.detailAmount.value = "0.00";
+
+    }
+
+}
+/*
+==========================================================
+FILL DETAIL FORM
+==========================================================
+*/
+
+fillDetailForm() {
+
+    if (!this.currentDetail) {
+
+        return;
+
+    }
+
+    this.detailDescription.value =
+        this.currentDetail.description ?? "";
+
+    this.detailDebitAccount.value =
+        this.currentdetail.debit_account_id ?? "";
+
+    this.detailCreditAccount.value =
+        this.currentDetail.credit_account_id ?? "";
+
+    this.detailBusinessPartner.value =
+        this.currentDetail.businessPartnerId ?? "";
+
+    this.detailAmount.value =
+        Number(
+            this.currentDetail.amount ?? 0
+        ).toFixed(2);
+
+}
+/*
+==========================================================
+COLLECT DETAIL FORM
+==========================================================
+*/
+
+collectDetailForm() {
+    console.log("detailDebitAccount", this.detailDebitAccount);
+    console.log("detailCreditAccount", this.detailCreditAccount);
+    console.log("detailBusinessPartner", this.detailBusinessPartner);
+    /*
+    ======================================================
+    DEBIT ACCOUNT
+    ======================================================
+    */
+
+    const debitOption =
+        this.detailDebitAccount.selectedOptions[0];
+
+    /*
+    ======================================================
+    CREDIT ACCOUNT
+    ======================================================
+    */
+
+    const creditOption =
+        this.detailCreditAccount.selectedOptions[0];
+
+    /*
+    ======================================================
+    BUSINESS PARTNER
+    ======================================================
+    */
+
+    const bpOption =
+        this.detailBusinessPartner.selectedOptions[0];
+
+    /*
+    ======================================================
+    RETURN
+    ======================================================
+    */
+
+    return {
+
+        description:
+
+            this.detailDescription.value.trim(),
+
+        debit_account_id:
+
+            this.detailDebitAccount.value,
+
+        debit_account_code:
+
+            debitOption?.dataset.code || "",
+
+        debit_account_name:
+
+            debitOption?.dataset.name || "",
+
+        credit_account_id:
+
+            this.detailCreditAccount.value,
+
+        credit_account_code:
+
+            creditOption?.dataset.code || "",
+
+        credit_account_name:
+
+            creditOption?.dataset.name || "",
+
+        business_partner_id:
+
+            this.detailBusinessPartner.value || null,
+
+        business_partner_name:
+
+            bpOption?.text || "",
+
+        amount:
+
+            Number(
+                this.detailAmount.value || 0
+            )
+
+    };
+
+}
+/*
+==========================================================
+SAVE DETAIL LINE
+==========================================================
+*/
+
+saveDetailLine() {
+    
+
+     /*
+    ======================================================
+    COLLECT FORM
+    ======================================================
+    */
+
+    const detail = this.collectDetailForm();
+
+    console.log("DETAIL SAVE", detail);
+
+    if (!detail) {
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    VALIDATION
+    ======================================================
+    */
+
+    if (!detail.description) {
+
+        window.App?.showError?.(
+            "Description is required."
+        );
+
+        this.detailDescription?.focus();
+
+        return;
+
+    }
+
+    if (!detail.debit_account_id) {
+
+        window.App?.showError?.(
+            "Please select Debit Account."
+        );
+
+        this.detailDebitAccount?.focus();
+
+        return;
+
+    }
+
+    if (!detail.credit_account_id) {
+
+        window.App?.showError?.(
+            "Please select Credit Account."
+        );
+
+        this.detailCreditAccount?.focus();
+
+        return;
+
+    }
+
+    if (
+
+        detail.debit_account_id ===
+        detail.credit_account_id
+
+    ) {
+
+        window.App?.showError?.(
+
+            "Debit Account and Credit Account cannot be the same."
+
+        );
+
+        this.detailCreditAccount?.focus();
+
+        return;
+
+    }
+
+    if (
+
+        Number(detail.amount) <= 0
+
+    ) {
+
+        window.App?.showError?.(
+
+            "Amount must be greater than zero."
+
+        );
+
+        this.detailAmount?.focus();
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    ADD / UPDATE
+    ======================================================
+    */
+
+    if (
+
+        this.detailMode.value === "add"
+
+    ) {
+
+        this.detailLines.push(detail);
+
+    }
+    else {
+
+        const index =
+
+            Number(
+                this.detailId.value
+            );
+
+        if (
+
+            index >= 0 &&
+            index < this.detailLines.length
+
+        ) {
+
+            this.detailLines[index] = detail;
+
+        }
+
+    }
+        console.table(this.detailLines);
+
+    /*
+    ======================================================
+    REFRESH TABLE
+    ======================================================
+    */
+
+    this.refreshDetailView();
+
+    /*
+    ======================================================
+    CLOSE MODAL
+    ======================================================
+    */
+
+    this.detailModal.hide();
+
+}
+/*
+==========================================================
+DELETE DETAIL LINE
+==========================================================
+*/
+
+deleteDetailLine(index) {
+
+    /*
+    ======================================================
+    VALIDATION
+    ======================================================
+    */
+
+    if (
+
+        index < 0 ||
+
+        index >= this.detailLines.length
+
+    ) {
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    CONFIRM DELETE
+    ======================================================
+    */
+
+    const confirmed = window.confirm(
+
+        "Are you sure you want to delete this journal detail?"
+
+    );
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    DELETE DETAIL
+    ======================================================
+    */
+
+    this.detailLines.splice(
+
+        index,
+
+        1
+
+    );
+
+    this.refreshDetailView();
+
+}
+/*
+==========================================================
+RENDER TABLE
+==========================================================
+*/
+
+renderTable() {
+
+    /*
+    ======================================================
+    VALIDATION
+    ======================================================
+    */
+
+    if (!this.tableBody) {
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    CLEAR TABLE
+    ======================================================
+    */
+
+    this.tableBody.innerHTML = "";
+
+    /*
+    ======================================================
+    PAGINATION
+    ======================================================
+    */
+
+    const start =
+        (this.currentPage - 1) *
+        this.pageSize;
+
+    const end =
+        start + this.pageSize;
+
+    const journals =
+        this.filteredJournals.slice(
+            start,
+            end
+        );
+
+    /*
+    ======================================================
+    EMPTY DATA
+    ======================================================
+    */
+
+    if (journals.length === 0) {
+
+        this.tableBody.innerHTML = `
+
+            <tr>
+
+                <td colspan="8"
+                    class="text-center text-muted py-5">
+
+                    No General Journal found.
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    RENDER ROW
+    ======================================================
+    */
+
+    journals.forEach(
+
+        (journal, index) => {
+
+            this.tableBody.insertAdjacentHTML(
+
+                "beforeend",
+
+                this.createTableRow(
+
+                    journal,
+
+                    start + index + 1
+
+                )
+
+            );
+
+        }
+
+    );
+
+}
+/*
+==========================================================
+FORMAT CURRENCY
+==========================================================
+*/
+
+formatCurrency(value = 0) {
+
+    return Number(value).toLocaleString(
+
+        "en-US",
+
+        {
+
+            minimumFractionDigits: 2,
+
+            maximumFractionDigits: 2
+
+        }
+
+    );
+
+}
+/*
+==========================================================
+CALCULATE SUMMARY
+==========================================================
+*/
+
+calculateSummary() {
+
+    /*
+    ======================================================
+    VALIDATION
+    ======================================================
+    */
+
+    if (!Array.isArray(this.detailLines)) {
+
+        this.detailLines = [];
+
+    }
+
+    /*
+    ======================================================
+    INITIAL VALUE
+    ======================================================
+    */
+
+    let totalLine = 0;
+
+    let totalAmount = 0;
+
+    /*
+    ======================================================
+    CALCULATE
+    ======================================================
+    */
+
+    this.detailLines.forEach(detail => {
+
+        totalLine++;
+
+        totalAmount += Number(
+
+            detail.amount || 0
+
+        );
+
+    });
+
+    /*
+    ======================================================
+    ROUNDING
+    ======================================================
+    */
+
+    totalAmount = Number(
+
+        totalAmount.toFixed(2)
+
+    );
+
+    /*
+    ======================================================
+    STORE SUMMARY
+    ======================================================
+    */
+
+    this.summary = {
+
+        totalLine,
+
+        totalAmount,
+
+        totalDebit: totalAmount,
+
+        totalCredit: totalAmount,
+
+        difference: 0,
+
+        isBalanced: true
+
+    };
+
+    /*
+    ======================================================
+    UPDATE DISPLAY
+    ======================================================
+    */
+
+    this.updateSummaryDisplay();
+
+}
+/*
+==========================================================
+HANDLE DETAIL TABLE ACTION
+==========================================================
+*/
+
+handleDetailTableAction(event) {
+
+    const button =
+        event.target.closest("button");
+
+    if (!button) {
+
+        return;
+
+    }
+
+    const index =
+        Number(button.dataset.index);
+
+    /*
+    ======================================================
+    EDIT
+    ======================================================
+    */
+
+    if (
+
+        button.classList.contains(
+            "btn-edit-detail"
+        )
+
+    ) {
+
+        this.openEditDetailModal(index);
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    DELETE
+    ======================================================
+    */
+
+    if (
+
+        button.classList.contains(
+            "btn-delete-detail"
+        )
+
+    ) {
+
+        this.deleteDetail(index);
+
+        return;
+
+    }
+
+}
+/*
+==========================================================
+UPDATE PAGINATION
+==========================================================
+*/
+
+updatePagination() {
+
+    /*
+    ======================================================
+    TOTAL PAGE
+    ======================================================
+    */
+
+    this.totalPages = Math.max(
+
+        1,
+
+        Math.ceil(
+
+            this.totalRows /
+
+            this.pageSize
+
+        )
+
+    );
+
+    /*
+    ======================================================
+    CURRENT PAGE
+    ======================================================
+    */
+
+    this.currentPage = Math.min(
+
+        Math.max(this.currentPage, 1),
+
+        this.totalPages
+
+    );
+
+    /*
+    ======================================================
+    PAGE INPUT
+    ======================================================
+    */
+
+    if (this.currentPageInput) {
+
+        this.currentPageInput.value =
+            this.currentPage;
+
+    }
+
+    /*
+    ======================================================
+    TOTAL PAGE LABEL
+    ======================================================
+    */
+
+    if (this.totalPageLabel) {
+
+        this.totalPageLabel.textContent =
+            `of ${this.totalPages}`;
+
+    }
+
+    /*
+    ======================================================
+    RECORD INFORMATION
+    ======================================================
+    */
+
+    if (this.displayRecord) {
+
+        const start =
+
+            this.totalRows === 0
+
+                ? 0
+
+                : ((this.currentPage - 1) * this.pageSize) + 1;
+
+        const end =
+
+            Math.min(
+
+                this.currentPage * this.pageSize,
+
+                this.totalRows
+
+            );
+
+        this.displayRecord.textContent =
+
+            `Records ${start} - ${end} of ${this.totalRows}`;
+
+    }
+
+    /*
+    ======================================================
+    BUTTON STATE
+    ======================================================
+    */
+
+    const firstPage =
+        this.currentPage === 1;
+
+    const lastPage =
+        this.currentPage === this.totalPages;
+
+    this.btnFirstPage.disabled =
+        firstPage;
+
+    this.btnPreviousPage.disabled =
+        firstPage;
+
+    this.btnNextPage.disabled =
+        lastPage;
+
+    this.btnLastPage.disabled =
+        lastPage;
+
+}
+/*
+==========================================================
+FIRST PAGE
+==========================================================
+*/
+
+firstPage() {
+
+    if (this.currentPage === 1) {
+
+        return;
+
+    }
+
+    this.currentPage = 1;
+
+    this.refreshView();
+
+}
+/*
+==========================================================
+PREVIOUS PAGE
+==========================================================
+*/
+
+previousPage() {
+
+    if (this.currentPage <= 1) {
+
+        return;
+
+    }
+
+    this.currentPage--;
+
+    this.refreshView();
+
+}
+/*
+==========================================================
+NEXT PAGE
+==========================================================
+*/
+
+nextPage() {
+
+    if (this.currentPage >= this.totalPages) {
+
+        return;
+
+    }
+
+    this.currentPage++;
+
+    this.refreshView();
+
+}
+
+/*
+==========================================================
+LAST PAGE
+==========================================================
+*/
+
+lastPage() {
+
+    if (this.currentPage === this.totalPages) {
+
+        return;
+
+    }
+
+    this.currentPage =
+        this.totalPages;
+
+    this.refreshView();
+
+}
+/*
+==========================================================
+GO TO PAGE
+==========================================================
+*/
+
+goToPage() {
+
+    /*
+    ======================================================
+    VALIDATION
+    ======================================================
+    */
+
+    if (!this.currentPageInput) {
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    GET PAGE
+    ======================================================
+    */
+
+    let page = Number(
+
+        this.currentPageInput.value
+
+    );
+
+    if (isNaN(page)) {
+
+        page = 1;
+
+    }
+
+    /*
+    ======================================================
+    LIMIT
+    ======================================================
+    */
+
+    page = Math.max(
+
+        1,
+
+        Math.min(
+
+            page,
+
+            this.totalPages
+
+        )
+
+    );
+
+    /*
+    ======================================================
+    REFRESH
+    ======================================================
+    */
+
+    this.currentPage = page;
+
+    this.refreshView();
+
+}
+/*
+==========================================================
+LOAD CHART OF ACCOUNTS
+==========================================================
+*/
+
+async loadCOA() {
+
+    try {
+
+        const { data, error } =
+            await supabase
+
+                .from(TABLE.CHART_OF_ACCOUNTS)
+
+                .select(`
+                    id,
+                    account_code,
+                    account_name,
+                    allow_transaction,
+                    status
+                `)
+
+                .eq("status", true)
+
+                .eq("allow_transaction", true)
+
+                .order("account_code");
+
+        if (error) {
+
+            throw error;
+
+        }
+
+        this.coaList =
+            Array.isArray(data)
+                ? data
+                : [];
+
+        this.populateCOA();
+
+    }
+
+    catch (error) {
+
+        console.error(
+
+            "Failed to load Chart Of Accounts.",
+
+            error
+
+        );
+
+        this.coaList = [];
+
+    }
+
+}
+/*
+==========================================================
+POPULATE CHART OF ACCOUNTS
+==========================================================
+*/
+
+populateCOA() {
+
+    if (
+
+        !this.detailDebitAccount ||
+
+        !this.detailCreditAccount
+
+    ) {
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    RESET
+    ======================================================
+    */
+
+    this.detailDebitAccount.innerHTML = `
+        <option value="">
+            -- Select Debit Account --
+        </option>
+    `;
+
+    this.detailCreditAccount.innerHTML = `
+        <option value="">
+            -- Select Credit Account --
+        </option>
+    `;
+
+    /*
+    ======================================================
+    OPTION
+    ======================================================
+    */
+
+    this.coaList.forEach(account => {
+
+        const option = `
+
+            <option
+                value="${account.id}"
+                data-code="${account.account_code}"
+                data-name="${account.account_name}">
+
+                ${account.account_code}
+                :: ${account.account_name}
+
+            </option>
+
+        `;
+
+        this.detailDebitAccount.insertAdjacentHTML(
+
+            "beforeend",
+
+            option
+
+        );
+
+        this.detailCreditAccount.insertAdjacentHTML(
+
+            "beforeend",
+
+            option
+
+        );
+
+    });
+
+}
+/*
+==========================================================
+LOAD BUSINESS PARTNERS
+==========================================================
+*/
+
+async loadBusinessPartners() {
+
+    try {
+
+        const { data, error } =
+            await supabase
+
+                .from(TABLE.BUSINESS_PARTNER)
+
+                .select(`
+                    id,
+                    bp_code,
+                    bp_name,
+                    status
+                `)
+
+                .eq("status", true)
+
+                .order("bp_name");
+
+        if (error) {
+
+            throw error;
+
+        }
+
+        this.businessPartnerList =
+            Array.isArray(data)
+                ? data
+                : [];
+
+        this.populateBusinessPartners();
+
+    }
+
+    catch (error) {
+
+        console.error(
+
+            "Failed to load Business Partner.",
+
+            error
+
+        );
+
+        this.businessPartnerList = [];
+
+    }
+
+}
+/*
+==========================================================
+POPULATE BUSINESS PARTNERS
+==========================================================
+*/
+
+populateBusinessPartners() {
+
+    if (!this.detailBusinessPartner) {
+
+        return;
+
+    }
+
+    this.detailBusinessPartner.innerHTML = `
+
+        <option value="">
+
+            -- Optional --
+
+        </option>
+
+    `;
+
+    this.businessPartnerList.forEach(bp => {
+
+        this.detailBusinessPartner.insertAdjacentHTML(
+
+            "beforeend",
+
+            `
+
+            <option value="${bp.id}">
+
+                ${bp.bp_code}
+                :: ${bp.bp_name}
+
+            </option>
+
+            `
+
+        );
+
+    });
+
+}
+/*
+==========================================================
+REFRESH DETAIL VIEW
+==========================================================
+*/
+
+refreshDetailView() {
+
+    this.renderDetailTable();
+
+    this.calculateSummary();
+
+}
+/*
+==========================================================
+RESET DETAIL STATE
+==========================================================
+*/
+
+resetDetailState() {
+
+    this.detailMode = "add";
+
+    this.currentDetail = null;
+
+    this.currentDetailIndex = -1;
+
+}
+/*
+==========================================================
+SET READ ONLY
+==========================================================
+*/
+
+setReadOnly(readOnly = true) {
+
+    [
+        this.txtAccountingDate,
+        this.txtDescription
+
+    ].forEach(control => {
+
+        if (control) {
+
+            control.readOnly = readOnly;
+
+        }
+
+    });
+
+    [
+        this.btnAddLine,
+        this.btnSaveJournal,
+        this.btnPostJournal
+
+    ].forEach(button => {
+
+        if (button) {
+
+            button.disabled = readOnly;
+
+        }
+
+    });
+
+}
+/*
+==========================================================
+OPEN VIEW JOURNAL
+==========================================================
+*/
+
+async openViewJournal(id) {
+
+    try {
+
+        /*
+        ======================================================
+        VALIDATION
+        ======================================================
+        */
+
+        if (!id) {
+
+            return;
+
+        }
+
+        /*
+        ======================================================
+        OPEN EDIT MODE
+        ======================================================
+        */
+
+        await this.openEditJournal(id);
+
+        /*
+        ======================================================
+        MODE
+        ======================================================
+        */
+
+        this.currentMode = "view";
+
+        /*
+        ======================================================
+        SET READ ONLY
+        ======================================================
+        */
+
+        this.setJournalReadOnly(true);
+
+    }
+
+    catch (error) {
+
+        console.error(
+
+            "Open View Journal Error",
+
+            error
+
+        );
+
+        alert(
+
+            error.message
+
+        );
+
+    }
+
+}
+/*
+==========================================================
+SET JOURNAL READ ONLY
+==========================================================
+*/
+
+setJournalReadOnly(readOnly = true) {
+
+    /*
+    ======================================================
+    HEADER
+    ======================================================
+    */
+
+    [
+
+        "journal-accounting-date",
+
+        "journal-reference-no",
+
+        "journal-description"
+
+    ].forEach(id => {
+
+        const element =
+
+            document.getElementById(id);
+
+        if (!element) {
+
+            return;
+
+        }
+
+        element.disabled = readOnly;
+
+        element.readOnly = readOnly;
+
+    });
+
+    /*
+    ======================================================
+    BUTTON
+    ======================================================
+    */
+
+    const btnAddLine =
+
+        document.getElementById(
+
+            "btn-add-line"
+
+        );
+
+    if (btnAddLine) {
+
+        btnAddLine.style.display =
+
+            readOnly
+
+                ? "none"
+
+                : "";
+
+    }
+
+    const btnSave =
+
+        document.getElementById(
+
+            "btn-save-journal"
+
+        );
+
+    if (btnSave) {
+
+        btnSave.style.display =
+
+            readOnly
+
+                ? "none"
+
+                : "";
+
+    }
+
+    const btnPost =
+
+        document.getElementById(
+
+            "btn-post-journal"
+
+        );
+
+    if (btnPost) {
+
+        btnPost.style.display =
+
+            readOnly
+
+                ? "none"
+
+                : "";
+
+    }
+
+    /*
+    ======================================================
+    DETAIL ACTION
+    ======================================================
+    */
+
+    document
+
+        .querySelectorAll(
+
+            ".btn-edit-detail, .btn-delete-detail"
+
+        )
+
+        .forEach(button => {
+
+            button.style.display =
+
+                readOnly
+
+                    ? "none"
+
+                    : "";
+
+        });
+
+}
+/*
+==========================================================
+EXPORT EXCEL
+==========================================================
+*/
+
+async exportExcel() {
+
+    window.App?.showInfo?.(
+
+        "Excel Export will be available in the next module."
+
+    );
+
+}
+/*
+==========================================================
+CALCULATE SUMMARY
+==========================================================
+*/
+
+calculateSummary() {
+
+    /*
+    ======================================================
+    VALIDATION
+    ======================================================
+    */
+
+    if (!Array.isArray(this.detailLines)) {
+
+        this.detailLines = [];
+
+    }
+
+    /*
+    ======================================================
+    INITIAL VALUE
+    ======================================================
+    */
+
+    let totalDebit = 0;
+
+    let totalCredit = 0;
+
+    /*
+    ======================================================
+    CALCULATE
+    ======================================================
+    */
+
+    this.detailLines.forEach(detail => {
+
+        totalDebit += Number(
+
+            detail.debit ?? 0
+
+        );
+
+        totalCredit += Number(
+
+            detail.credit ?? 0
+
+        );
+
+    });
+
+    /*
+    ======================================================
+    ROUNDING
+    ======================================================
+    */
+
+    totalDebit = Number(
+
+        totalDebit.toFixed(2)
+
+    );
+
+    totalCredit = Number(
+
+        totalCredit.toFixed(2)
+
+    );
+
+    /*
+    ======================================================
+    DIFFERENCE
+    ======================================================
+    */
+
+    const difference = Number(
+
+        (totalDebit - totalCredit)
+
+            .toFixed(2)
+
+    );
+
+    /*
+    ======================================================
+    BALANCED
+    ======================================================
+    */
+
+    const isBalanced =
+
+        difference === 0;
+
+    /*
+    ======================================================
+    STORE SUMMARY
+    ======================================================
+    */
+
+    this.summary = {
+
+        totalLine:
+
+            this.detailLines.length,
+
+        totalDebit,
+
+        totalCredit,
+
+        difference,
+
+        isBalanced
+
+    };
+
+    /*
+    ======================================================
+    UPDATE DISPLAY
+    ======================================================
+    */
+
+    this.updateSummaryDisplay();
+
+}
+/*
+==========================================================
+UPDATE SUMMARY DISPLAY
+==========================================================
+*/
+
+updateSummaryDisplay() {
+
+    if (!this.summary) {
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    TOTAL LINE
+    ======================================================
+    */
+
+    if (this.summaryTotalLine) {
+
+        this.summaryTotalLine.value =
+
+            this.summary.totalLine;
+
+    }
+
+    /*
+    ======================================================
+    TOTAL AMOUNT
+    ======================================================
+    */
+
+    if (this.summaryTotalAmount) {
+
+        this.summaryTotalAmount.value =
+
+            this.formatCurrency(
+
+                this.summary.totalAmount
+
+            );
+
+    }
 
 
+}
+/*
+==========================================================
+SAVE DETAIL
+==========================================================
+*/
+
+saveDetail(detail) {
+
+    /*
+    ======================================================
+    VALIDATION
+    ======================================================
+    */
+
+    if (!detail) {
+
+        console.error(
+            "Detail data is required."
+        );
+
+        return false;
+
+    }
+
+    /*
+    ======================================================
+    DEFAULT VALUE
+    ======================================================
+    */
+
+    detail.debit = Number(
+        detail.debit ?? 0
+    );
+
+    detail.credit = Number(
+        detail.credit ?? 0
+    );
+
+    /*
+    ======================================================
+    VALIDATION
+    ======================================================
+    */
+
+    if (
+
+        detail.debit < 0 ||
+
+        detail.credit < 0
+
+    ) {
+
+        alert(
+            "Debit / Credit cannot be negative."
+        );
+
+        return false;
+
+    }
+
+    if (
+
+        detail.debit > 0 &&
+
+        detail.credit > 0
+
+    ) {
+
+        alert(
+            "Only Debit or Credit may contain a value."
+        );
+
+        return false;
+
+    }
+
+    if (
+
+        detail.debit === 0 &&
+
+        detail.credit === 0
+
+    ) {
+
+        alert(
+            "Debit or Credit must be greater than zero."
+        );
+
+        return false;
+
+    }
+
+    /*
+    ======================================================
+    EDIT / ADD
+    ======================================================
+    */
+
+    if (
+
+        Number.isInteger(
+            this.editDetailIndex
+        ) &&
+
+        this.editDetailIndex >= 0
+
+    ) {
+
+        this.detailLines[
+            this.editDetailIndex
+        ] = detail;
+
+    }
+
+    else {
+
+        this.detailLines.push(
+            detail
+        );
+
+    }
+
+    /*
+    ======================================================
+    RESET EDIT INDEX
+    ======================================================
+    */
+
+    this.editDetailIndex = -1;
+
+    /*
+    ======================================================
+    REFRESH
+    ======================================================
+    */
+
+    this.renderDetailTable();
+
+    this.calculateSummary();
+
+    return true;
+
+}
+/*
+==========================================================
+COLLECT DETAIL FORM
+==========================================================
+*/
+
+collectDetailForm() {
+
+    /*
+    ======================================================
+    DEBIT ACCOUNT
+    ======================================================
+    */
+
+    const debitOption =
+        this.detailDebitAccount?.selectedOptions?.[0];
+
+    /*
+    ======================================================
+    CREDIT ACCOUNT
+    ======================================================
+    */
+
+    const creditOption =
+        this.detailCreditAccount?.selectedOptions?.[0];
+
+    /*
+    ======================================================
+    BUSINESS PARTNER
+    ======================================================
+    */
+
+    const bpOption =
+        this.detailBusinessPartner?.selectedOptions?.[0];
+
+    /*
+    ======================================================
+    RETURN
+    ======================================================
+    */
+
+    return {
+
+        description:
+            this.detailDescription?.value.trim() || "",
+
+        debit_account_id:
+            this.detailDebitAccount?.value || "",
+
+        debit_account_code:
+            debitOption?.dataset.code || "",
+
+        debit_account_name:
+            debitOption?.dataset.name || "",
+
+        credit_account_id:
+            this.detailCreditAccount?.value || "",
+
+        credit_account_code:
+            creditOption?.dataset.code || "",
+
+        credit_account_name:
+            creditOption?.dataset.name || "",
+
+        amount:
+            Number(
+                this.detailAmount?.value || 0
+            ),
+
+        business_partner_id:
+            this.detailBusinessPartner?.value || null,
+
+        business_partner_name:
+            bpOption?.dataset.name ||
+            bpOption?.text ||
+            ""
+
+    };
+
+}
+
+/*
+==========================================================
+SAVE DETAIL
+==========================================================
+*/
+
+saveDetail() {
+
+    /*
+    ======================================================
+    COLLECT DATA
+    ======================================================
+    */
+
+    const detail =
+        this.collectDetailForm();
+
+    if (!detail) {
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    MODE
+    ======================================================
+    */
+
+    const mode =
+        this.detailMode?.value || "add";
+
+    /*
+    ======================================================
+    EDIT
+    ======================================================
+    */
+
+    if (mode === "edit") {
+
+        const index = Number(
+
+            this.detailId?.value
+
+        );
+
+        if (
+
+            !Number.isNaN(index) &&
+
+            this.detailLines[index]
+
+        ) {
+
+            this.detailLines[index] = detail;
+
+        }
+
+    }
+
+    /*
+    ======================================================
+    ADD
+    ======================================================
+    */
+
+    else {
+
+        this.detailLines.push(
+
+            detail
+
+        );
+
+    }
+
+    /*
+    ======================================================
+    RENDER TABLE
+    ======================================================
+    */
+
+    this.renderDetailTable();
+
+    /*
+    ======================================================
+    SUMMARY
+    ======================================================
+    */
+
+    this.calculateSummary();
+
+    /*
+    ======================================================
+    CLEAR FORM
+    ======================================================
+    */
+
+    this.clearDetailForm();
+
+    /*
+    ======================================================
+    CLOSE MODAL
+    ======================================================
+    */
+
+    if (this.detailModal) {
+
+        this.detailModal.hide();
+
+    }
+
+}
+/*
+==========================================================
+CLEAR DETAIL FORM
+==========================================================
+*/
+
+clearDetailForm() {
+
+    if (this.detailId) {
+
+        this.detailId.value = "";
+
+    }
+
+    if (this.detailMode) {
+
+        this.detailMode.value = "add";
+
+    }
+
+    if (this.detailDescription) {
+
+        this.detailDescription.value = "";
+
+    }
+
+    if (this.detailDebitAccount) {
+
+        this.detailDebitAccount.selectedIndex = 0;
+
+    }
+
+    if (this.detailCreditAccount) {
+
+        this.detailCreditAccount.selectedIndex = 0;
+
+    }
+
+    if (this.detailBusinessPartner) {
+
+        this.detailBusinessPartner.selectedIndex = 0;
+
+    }
+
+    if (this.detailAmount) {
+
+        this.detailAmount.value = 0;
+
+    }
+
+}
+/*
+==========================================================
+OPEN EDIT DETAIL MODAL
+==========================================================
+*/
+
+async openEditDetailModal(index) {
+
+    if (
+
+        index === undefined ||
+
+        index === null ||
+
+        !this.detailLines[index]
+
+    ) {
+
+        return;
+
+    }
+
+    await this.loadDetailModal();
+
+    this.populateCOA();
+
+    this.populateBusinessPartners();
+
+    const detail =
+
+        this.detailLines[index];
+
+    this.detailMode.value = "edit";
+
+    this.detailId.value = index;
+
+    this.detailDescription.value =
+        detail.description || "";
+
+    this.detailDebitAccount.value =
+        detail.debit_account_id || "";
+
+    this.detailCreditAccount.value =
+        detail.credit_account_id || "";
+
+    this.detailAmount.value =
+        Number(detail.amount || 0).toFixed(2);
+
+    this.detailBusinessPartner.value =
+        detail.business_partner_id || "";
+
+    this.detailModal.show();
+
+}
+/*
+==========================================================
+DELETE DETAIL
+==========================================================
+*/
+
+deleteDetail(index) {
+
+    /*
+    ======================================================
+    VALIDATION
+    ======================================================
+    */
+
+    if (
+
+        index === undefined ||
+
+        index === null ||
+
+        !Array.isArray(this.detailLines) ||
+
+        !this.detailLines[index]
+
+    ) {
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    CONFIRMATION
+    ======================================================
+    */
+
+    const confirmed = window.confirm(
+
+        "Are you sure you want to delete this journal detail?"
+
+    );
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    REMOVE DETAIL
+    ======================================================
+    */
+
+    this.detailLines.splice(
+
+        index,
+
+        1
+
+    );
+
+    /*
+    ======================================================
+    RENDER TABLE
+    ======================================================
+    */
+
+    this.renderDetailTable();
+
+    /*
+    ======================================================
+    RECALCULATE SUMMARY
+    ======================================================
+    */
+
+    this.calculateSummary();
+
+}
+/*
+==========================================================
+BIND DETAIL MODAL EVENTS
+==========================================================
+*/
+
+bindDetailModalEvents() {
+    console.log("BIND DETAIL EVENTS");
+
+}
+/*
+==========================================================
+COLLECT JOURNAL HEADER
+==========================================================
+*/
+
+collectJournalHeader() {
+
+    /*
+    ======================================================
+    GET VALUE
+    ======================================================
+    */
+
+    const accountingDate =
+        document.getElementById(
+            "journal-accounting-date"
+        )?.value || null;
+
+    const journalNo =
+        document.getElementById(
+            "journal-journal-no"
+        )?.value || "";
+
+    const referenceNo =
+        document.getElementById(
+            "journal-reference-no"
+        )?.value.trim() || null;
+
+    const description =
+        document.getElementById(
+            "journal-description"
+        )?.value.trim() || "";
+
+    const status =
+        document.getElementById(
+            "journal-status"
+        )?.value || "Draft";
+
+    /*
+    ======================================================
+    SUMMARY
+    ======================================================
+    */
+
+    const totalAmount =
+
+        this.summary ?
+
+        Number(
+
+            this.summary.totalAmount || 0
+
+        )
+
+        :
+
+        0;
+
+    /*
+    ======================================================
+    RETURN
+    ======================================================
+    */
+
+    return {
+
+        journal_no:
+
+            journalNo,
+
+        journal_date:
+
+            accountingDate,
+
+        reference_no:
+
+            referenceNo,
+
+        description:
+
+            description,
+
+        source_module:
+
+            "GENERAL",
+
+        total_debit:
+
+            totalAmount,
+
+        total_credit:
+
+            totalAmount,
+
+        status:
+
+            status
+
+    };
+
+}
+/*
+==========================================================
+COLLECT JOURNAL DETAIL
+==========================================================
+*/
+
+collectJournalDetail(journalId) {
+
+    /*
+    ======================================================
+    RESULT
+    ======================================================
+    */
+
+    const details = [];
+
+    /*
+    ======================================================
+    LINE NUMBER
+    ======================================================
+    */
+
+    let lineNo = 1;
+
+    /*
+    ======================================================
+    LOOP DETAIL
+    ======================================================
+    */
+
+    this.detailLines.forEach(
+
+        detail => {
+
+            /*
+            ===============================================
+            DEBIT LINE
+            ===============================================
+            */
+
+            details.push({
+
+                journal_id:
+
+                    journalId,
+
+                line_no:
+
+                    lineNo++,
+
+                account_id:
+
+                    Number(
+
+                        detail.debit_account_id
+
+                    ),
+
+                business_partner_id:
+
+                    detail.business_partner_id ||
+
+                    null,
+
+                description:
+
+                    detail.description ||
+
+                    null,
+
+                debit:
+
+                    Number(
+
+                        detail.amount || 0
+
+                    ),
+
+                credit:
+
+                    0
+
+            });
+
+            /*
+            ===============================================
+            CREDIT LINE
+            ===============================================
+            */
+
+            details.push({
+
+                journal_id:
+
+                    journalId,
+
+                line_no:
+
+                    lineNo++,
+
+                account_id:
+
+                    Number(
+
+                        detail.credit_account_id
+
+                    ),
+
+                business_partner_id:
+
+                    detail.business_partner_id ||
+
+                    null,
+
+                description:
+
+                    detail.description ||
+
+                    null,
+
+                debit:
+
+                    0,
+
+                credit:
+
+                    Number(
+
+                        detail.amount || 0
+
+                    )
+
+            });
+
+        }
+
+    );
+
+    /*
+    ======================================================
+    RETURN
+    ======================================================
+    */
+
+    return details;
+
+}
+/*
+==========================================================
+SAVE JOURNAL
+==========================================================
+*/
+
+async saveJournal(status = "Draft") {
+
+    try {
+
+        /*
+        ======================================================
+        VALIDATION
+        ======================================================
+        */
+
+        if (!this.validateJournal()) {
+
+            return;
+
+        }
+
+        /*
+        ======================================================
+        HEADER
+        ======================================================
+        */
+
+        const header = {
+
+            id:
+
+                this.currentMode === "edit"
+
+                    ? this.currentJournal?.id
+
+                    : null,
+
+            journal_no:
+
+                this.txtJournalNo.value.trim(),
+
+            journal_date:
+
+                this.txtAccountingDate.value,
+
+            description:
+
+                this.txtDescription.value.trim(),
+
+            source_module:
+
+                "GENERAL",
+
+            status
+
+        };
+
+        /*
+        ======================================================
+        DETAIL
+        ======================================================
+        */
+
+        const details = this.detailLines.map(
+
+            (line, index) => ({
+
+                line_no:
+
+                    index + 1,
+
+                description:
+
+                    line.description,
+
+                debit_account_id:
+
+                    Number(line.debit_account_id),
+
+                credit_account_id:
+
+                    Number(line.credit_account_id),
+
+                business_partner_id:
+
+                    line.business_partner_id
+
+                        ? Number(line.business_partner_id)
+
+                        : null,
+
+                amount:
+
+                    Number(line.amount)
+
+            })
+
+        );
+
+        /*
+        ======================================================
+        SAVE
+        ======================================================
+        */
+
+        if (this.currentMode === "add") {
+
+            await this.service.create(
+
+                header,
+
+                details
+
+            );
+
+        }
+        else {
+
+            await this.service.update(
+
+                header.id,
+
+                header,
+
+                details
+
+            );
+
+        }
+
+        /*
+        ======================================================
+        RELOAD
+        ======================================================
+        */
+
+        await this.loadData();
+
+        /*
+        ======================================================
+        CLOSE
+        ======================================================
+        */
+
+        this.modal.hide();
+
+        /*
+        ======================================================
+        SUCCESS
+        ======================================================
+        */
+
+        window.App?.showSuccess?.(
+
+            `Journal ${status} successfully.`
+
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+
+            "Save Journal",
+
+            error
+
+        );
+
+        window.App?.showError?.(
+
+            error.message ||
+
+            "Failed to save journal."
+
+        );
+
+    }
+
+}
+/*
+==========================================================
+SAVE JOURNAL DETAIL
+==========================================================
+*/
+
+async saveJournalDetail(journalId) {
+
+    /*
+    ======================================================
+    VALIDATION
+    ======================================================
+    */
+
+    if (!journalId) {
+
+        throw new Error(
+
+            "Journal ID is required."
+
+        );
+
+    }
+
+    /*
+    ======================================================
+    COLLECT DETAIL
+    ======================================================
+    */
+
+    const details =
+
+        this.collectJournalDetail(
+
+            journalId
+
+        );
+
+    /*
+    ======================================================
+    EMPTY DETAIL
+    ======================================================
+    */
+
+    if (!details.length) {
+
+        throw new Error(
+
+            "Journal detail cannot be empty."
+
+        );
+
+    }
+
+    /*
+    ======================================================
+    INSERT DETAIL
+    ======================================================
+    */
+
+    const {
+
+        error
+
+    } = await supabase
+
+        .from(
+
+            TABLE.GL_JOURNAL_DETAIL
+
+        )
+
+        .insert(
+
+            details
+
+        );
+
+    /*
+    ======================================================
+    ERROR
+    ======================================================
+    */
+
+    if (error) {
+
+        throw error;
+
+    }
+
+}
+/*
+==========================================================
+DUPLICATE JOURNAL
+==========================================================
+*/
+
+async duplicateJournal(id) {
+
+    try {
+
+        /*
+        ======================================================
+        LOAD HEADER
+        ======================================================
+        */
+
+        const {
+
+            data: header,
+
+            error: headerError
+
+        } = await supabase
+
+            .from(TABLE.GL_JOURNAL)
+
+            .select("*")
+
+            .eq("id", id)
+
+            .single();
+
+        if (headerError) {
+
+            throw headerError;
+
+        }
+
+        /*
+        ======================================================
+        LOAD DETAIL
+        ======================================================
+        */
+
+        const {
+
+            data: details,
+
+            error: detailError
+
+        } = await supabase
+
+            .from(TABLE.GL_JOURNAL_DETAIL)
+
+            .select(`
+                *,
+                mst_chart_of_accounts (
+                    id,
+                    account_code,
+                    account_name
+                ),
+                mst_business_partner (
+                    id,
+                    bp_code,
+                    bp_name
+                )
+            `)
+
+            .eq(
+
+                "journal_id",
+
+                id
+
+            )
+
+            .order(
+
+                "line_no",
+
+                {
+
+                    ascending: true
+
+                }
+
+            );
+
+        if (detailError) {
+
+            throw detailError;
+
+        }
+
+        /*
+        ======================================================
+        OPEN ADD MODE
+        ======================================================
+        */
+
+        await this.openAddJournal();
+
+        /*
+        ======================================================
+        MODE
+        ======================================================
+        */
+
+        this.currentMode = "add";
+
+        this.currentJournal = null;
+
+        /*
+        ======================================================
+        HEADER
+        ======================================================
+        */
+
+        document.getElementById(
+
+            "journal-accounting-date"
+
+        ).value =
+
+            header.journal_date;
+
+        document.getElementById(
+
+            "journal-reference-no"
+
+        ).value =
+
+            header.reference_no || "";
+
+        document.getElementById(
+
+            "journal-description"
+
+        ).value =
+
+            header.description || "";
+
+        document.getElementById(
+
+            "journal-status"
+
+        ).value =
+
+            "Draft";
+
+        /*
+        ======================================================
+        JOURNAL NUMBER
+        ======================================================
+        */
+
+        document.getElementById(
+
+            "journal-journal-no"
+
+        ).value = "";
+
+        /*
+        ======================================================
+        DETAIL
+        ======================================================
+        */
+
+        this.detailLines =
+
+            this.convertDatabaseDetail(
+
+                details
+
+            );
+
+        /*
+        ======================================================
+        REFRESH
+        ======================================================
+        */
+
+        this.renderDetailTable();
+
+        this.calculateSummary();
+
+    }
+
+    catch (error) {
+
+        console.error(
+
+            "Duplicate Journal Error",
+
+            error
+
+        );
+
+        alert(
+
+            error.message
+
+        );
+
+    }
+
+}
+/*
+==========================================================
+CONVERT DATABASE DETAIL
+==========================================================
+*/
+
+convertDatabaseDetail(databaseDetails = []) {
+
+    /*
+    ======================================================
+    RESULT
+    ======================================================
+    */
+
+    const result = [];
+
+    /*
+    ======================================================
+    LOOP EVERY 2 ROWS
+    ======================================================
+    */
+
+    for (
+
+        let i = 0;
+
+        i < databaseDetails.length;
+
+        i += 2
+
+    ) {
+
+        const debitLine =
+
+            databaseDetails[i];
+
+        const creditLine =
+
+            databaseDetails[i + 1];
+
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
+
+        if (
+
+            !debitLine ||
+
+            !creditLine
+
+        ) {
+
+            continue;
+
+        }
+
+        /*
+        ==================================================
+        PUSH
+        ==================================================
+        */
+
+        result.push({
+
+            description:
+
+                debitLine.description ||
+
+                creditLine.description ||
+
+                "",
+
+            amount:
+
+                Number(
+
+                    debitLine.debit || 0
+
+                ),
+
+            debit_account_id:
+
+                debitLine.account_id,
+
+            credit_account_id:
+
+                creditLine.account_id,
+
+            business_partner_id:
+
+                debitLine.business_partner_id ||
+
+                creditLine.business_partner_id ||
+
+                null,
+
+            /*
+            ===============================================
+            DISPLAY DATA
+            ===============================================
+            */
+
+            debit_account_code:
+
+                debitLine.mst_chart_of_accounts
+                ?.account_code ||
+
+                "",
+
+            debit_account_name:
+
+                debitLine.mst_chart_of_accounts
+                ?.account_name ||
+
+                "",
+
+            credit_account_code:
+
+                creditLine.mst_chart_of_accounts
+                ?.account_code ||
+
+                "",
+
+            credit_account_name:
+
+                creditLine.mst_chart_of_accounts
+                ?.account_name ||
+
+                "",
+
+            business_partner_name:
+
+                debitLine.mst_business_partner
+                ?.bp_name ||
+
+                creditLine.mst_business_partner
+                ?.bp_name ||
+
+                ""
+
+        });
+
+    }
+
+    /*
+    ======================================================
+    RETURN
+    ======================================================
+    */
+
+    return result;
+
+}
+/*
+==========================================================
+POST JOURNAL
+==========================================================
+*/
+
+async postJournal(id) {
+
+    try {
+
+        /*
+        ======================================================
+        VALIDATION
+        ======================================================
+        */
+
+        if (!id) {
+
+            return;
+
+        }
+
+        /*
+        ======================================================
+        LOAD DETAIL
+        ======================================================
+        */
+
+        const {
+
+            data: details,
+
+            error
+
+        } = await supabase
+
+            .from(
+
+                TABLE.GL_JOURNAL_DETAIL
+
+            )
+
+            .select("*")
+
+            .eq(
+
+                "journal_id",
+
+                id
+
+            );
+
+        if (error) {
+
+            throw error;
+
+        }
+
+        /*
+        ======================================================
+        NO DETAIL
+        ======================================================
+        */
+
+        if (
+
+            !details ||
+
+            details.length === 0
+
+        ) {
+
+            alert(
+
+                "Journal detail is empty."
+
+            );
+
+            return;
+
+        }
+
+        /*
+        ======================================================
+        CALCULATE
+        ======================================================
+        */
+
+        let totalDebit = 0;
+
+        let totalCredit = 0;
+
+        details.forEach(
+
+            row => {
+
+                totalDebit += Number(
+
+                    row.debit || 0
+
+                );
+
+                totalCredit += Number(
+
+                    row.credit || 0
+
+                );
+
+            }
+
+        );
+
+        /*
+        ======================================================
+        BALANCED
+        ======================================================
+        */
+
+        if (
+
+            Math.abs(
+
+                totalDebit - totalCredit
+
+            ) > 0.01
+
+        ) {
+
+            alert(
+
+                "Journal is not balanced."
+
+            );
+
+            return;
+
+        }
+
+        /*
+        ======================================================
+        UPDATE STATUS
+        ======================================================
+        */
+
+        const {
+
+            error: updateError
+
+        } = await supabase
+
+            .from(
+
+                TABLE.GL_JOURNAL
+
+            )
+
+            .update({
+
+                status: "Posted"
+
+            })
+
+            .eq(
+
+                "id",
+
+                id
+
+            );
+
+        if (updateError) {
+
+            throw updateError;
+
+        }
+
+        /*
+        ======================================================
+        SUCCESS
+        ======================================================
+        */
+
+        alert(
+
+            "Journal posted successfully."
+
+        );
+
+        /*
+        ======================================================
+        RELOAD
+        ======================================================
+        */
+
+        await this.loadData();
+
+    }
+
+    catch (error) {
+
+        console.error(
+
+            "Post Journal Error",
+
+            error
+
+        );
+
+        alert(
+
+            error.message
+
+        );
+
+    }
+
+}
+/*
+==========================================================
+OPEN VOUCHER
+==========================================================
+*/
+
+async openVoucher(id) {
+
+    try {
+
+        /*
+        ======================================================
+        VALIDATION
+        ======================================================
+        */
+
+        if (!id) {
+
+            return;
+
+        }
+
+        /*
+        ======================================================
+        LOAD HEADER
+        ======================================================
+        */
+
+        const {
+
+            data: header,
+
+            error: headerError
+
+        } = await supabase
+
+            .from(
+
+                TABLE.GL_JOURNAL
+
+            )
+
+            .select("*")
+
+            .eq(
+
+                "id",
+
+                id
+
+            )
+
+            .single();
+
+        if (headerError) {
+
+            throw headerError;
+
+        }
+
+        /*
+        ======================================================
+        LOAD DETAIL
+        ======================================================
+        */
+
+        const {
+
+            data: details,
+
+            error: detailError
+
+        } = await supabase
+
+            .from(
+
+                TABLE.GL_JOURNAL_DETAIL
+
+            )
+
+            .select(`
+
+                *,
+
+                mst_chart_of_accounts(
+
+                    account_code,
+
+                    account_name
+
+                ),
+
+                mst_business_partner(
+
+                    bp_name
+
+                )
+
+            `)
+
+            .eq(
+
+                "journal_id",
+
+                id
+
+            )
+
+            .order(
+
+                "line_no",
+
+                {
+
+                    ascending: true
+
+                }
+
+            );
+
+        if (detailError) {
+
+            throw detailError;
+
+        }
+
+        /*
+        ======================================================
+        GENERATE HTML
+        ======================================================
+        */
+
+        const html =
+
+            this.generateVoucherHTML(
+
+                header,
+
+                details
+
+            );
+
+        /*
+        ======================================================
+        PRINT WINDOW
+        ======================================================
+        */
+
+        const printWindow =
+
+            window.open(
+
+                "",
+
+                "_blank"
+
+            );
+
+        printWindow.document.write(
+
+            html
+
+        );
+
+        printWindow.document.close();
+
+    }
+
+    catch (error) {
+
+        console.error(
+
+            "Voucher Error",
+
+            error
+
+        );
+
+        alert(
+
+            error.message
+
+        );
+
+    }
+
+}
+/*
+==========================================================
+GENERATE VOUCHER HTML
+==========================================================
+*/
+
+generateVoucherHTML(header, details) {
+
+    /*
+    ======================================================
+    CALCULATE TOTAL
+    ======================================================
+    */
+
+    let totalDebit = 0;
+
+    let totalCredit = 0;
+
+    details.forEach(detail => {
+
+        totalDebit += Number(
+
+            detail.debit || 0
+
+        );
+
+        totalCredit += Number(
+
+            detail.credit || 0
+
+        );
+
+    });
+
+    /*
+    ======================================================
+    DETAIL HTML
+    ======================================================
+    */
+
+    const detailHtml =
+
+        details.map((detail, index) => `
+
+            <tr>
+
+                <td>
+
+                    ${index + 1}
+
+                </td>
+
+                <td>
+
+                    ${detail.mst_chart_of_accounts?.account_code || ""}
+
+                </td>
+
+                <td>
+
+                    ${detail.mst_chart_of_accounts?.account_name || ""}
+
+                </td>
+
+                <td>
+
+                    ${detail.description || ""}
+
+                </td>
+
+                <td style="text-align:right">
+
+                    ${this.formatCurrency(
+
+                        Number(
+
+                            detail.debit || 0
+
+                        )
+
+                    )}
+
+                </td>
+
+                <td style="text-align:right">
+
+                    ${this.formatCurrency(
+
+                        Number(
+
+                            detail.credit || 0
+
+                        )
+
+                    )}
+
+                </td>
+
+            </tr>
+
+        `).join("");
+
+    /*
+    ======================================================
+    HTML
+    ======================================================
+    */
+
+    return `
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8">
+
+<title>
+
+Journal Voucher
+
+</title>
+
+<style>
+
+body{
+
+    font-family:Arial,sans-serif;
+
+    margin:40px;
+
+    color:#333;
+
+}
+
+h2{
+
+    margin-bottom:0;
+
+}
+
+.header{
+
+    margin-bottom:30px;
+
+}
+
+table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+    margin-top:20px;
+
+}
+
+th{
+
+    background:#f5f5f5;
+
+}
+
+th,td{
+
+    border:1px solid #ccc;
+
+    padding:8px;
+
+    font-size:13px;
+
+}
+
+.total{
+
+    font-weight:bold;
+
+    background:#fafafa;
+
+}
+
+.footer{
+
+    margin-top:60px;
+
+}
+
+.signature{
+
+    width:200px;
+
+    display:inline-block;
+
+    text-align:center;
+
+}
+
+.watermark{
+
+    position:fixed;
+
+    top:35%;
+
+    left:15%;
+
+    font-size:90px;
+
+    color:#000;
+
+    opacity:.05;
+
+    transform:rotate(-30deg);
+
+    font-weight:bold;
+
+}
+
+@media print{
+
+button{
+
+display:none;
+
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="watermark">
+
+POSTED
+
+</div>
+
+<div class="header">
+
+<h2>
+
+FINOVA ACCOUNTING SYSTEM
+
+</h2>
+
+<h3>
+
+GENERAL JOURNAL VOUCHER
+
+</h3>
+
+</div>
+
+<table>
+
+<tr>
+
+<td width="180">
+
+Journal No
+
+</td>
+
+<td>
+
+${header.journal_no}
+
+</td>
+
+<td width="180">
+
+Status
+
+</td>
+
+<td>
+
+${header.status}
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+Accounting Date
+
+</td>
+
+<td>
+
+${header.journal_date}
+
+</td>
+
+<td>
+
+Reference No
+
+</td>
+
+<td>
+
+${header.reference_no || "-"}
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+Description
+
+</td>
+
+<td colspan="3">
+
+${header.description || "-"}
+
+</td>
+
+</tr>
+
+</table>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th width="60">
+
+No
+
+</th>
+
+<th width="120">
+
+Code
+
+</th>
+
+<th>
+
+Account
+
+</th>
+
+<th>
+
+Description
+
+</th>
+
+<th width="150">
+
+Debit
+
+</th>
+
+<th width="150">
+
+Credit
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+${detailHtml}
+
+<tr class="total">
+
+<td colspan="4">
+
+TOTAL
+
+</td>
+
+<td style="text-align:right">
+
+${this.formatCurrency(
+
+    totalDebit
+
+)}
+
+</td>
+
+<td style="text-align:right">
+
+${this.formatCurrency(
+
+    totalCredit
+
+)}
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+<div class="footer">
+
+<div class="signature">
+
+Prepared By
+
+<br><br><br><br>
+
+____________________
+
+</div>
+
+<div class="signature">
+
+Posted By
+
+<br><br><br><br>
+
+____________________
+
+</div>
+
+</div>
+
+<script>
+
+window.onload=function(){
+
+window.print();
+
+};
+
+</script>
+
+</body>
+
+</html>
+
+`;
+
+}
 
 }

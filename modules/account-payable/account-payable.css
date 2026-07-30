@@ -1,0 +1,207 @@
+/*
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+Account Payable
+Version : 2.0 Enterprise
+==========================================================
+*/
+
+
+/* ==========================================================
+   ACCOUNT PAYABLE PAGE
+========================================================== */
+
+.account-payable-page{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:20px;
+
+    width:100%;
+
+}
+
+
+/* ==========================================================
+   PAGE HEADER
+========================================================== */
+
+.account-payable-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:24px;
+
+    padding:24px 28px;
+
+    background:#FFFFFF;
+
+    border:1px solid #E9EEF5;
+
+    border-radius:18px;
+
+    box-shadow:
+        0 6px 20px rgba(15,23,42,.05);
+
+}
+
+
+/* ==========================================================
+   HEADER LEFT
+========================================================== */
+
+.account-payable-header-left{
+
+    flex:1;
+
+}
+
+
+/* ==========================================================
+   TITLE
+========================================================== */
+
+.account-payable-title{
+
+    margin:0;
+
+    font-size:30px;
+
+    font-weight:700;
+
+    line-height:1.15;
+
+    letter-spacing:-0.6px;
+
+    color:#0F172A;
+
+}
+
+
+/* ==========================================================
+   BREADCRUMB
+========================================================== */
+
+.account-payable-breadcrumb{
+
+    display:flex;
+
+    align-items:center;
+
+    flex-wrap:wrap;
+
+    gap:6px;
+
+    margin-top:8px;
+
+    font-size:13px;
+
+    font-weight:500;
+
+    line-height:1.5;
+
+    color:#64748B;
+
+}
+
+
+/* ==========================================================
+   HEADER RIGHT
+========================================================== */
+
+.account-payable-header-right{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:flex-end;
+
+    gap:12px;
+
+    flex-wrap:wrap;
+
+}
+
+
+/* ==========================================================
+   HEADER BUTTON HOVER
+========================================================== */
+
+.account-payable-header-right .btn:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:
+        0 8px 20px rgba(15,23,42,.12);
+
+}
+
+
+/* ==========================================================
+   HEADER BUTTON
+========================================================== */
+
+.account-payable-header-right .btn{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:8px;
+
+    height:40px;
+
+    padding:0 16px;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    border-radius:8px;
+
+}
+
+
+/* ==========================================================
+   HEADER BUTTON ICON
+========================================================== */
+
+.account-payable-header-right .btn i{
+
+    font-size:14px;
+
+}
+
+
+/* ==========================================================
+   BUTTON WIDTH
+========================================================== */
+
+#btn-add-ap{
+
+    min-width:140px;
+
+}
+
+
+#btn-download-ap{
+
+    min-width:165px;
+
+}
+
+
+#btn-refresh-ap{
+
+    min-width:120px;
+
+}

@@ -1,0 +1,497 @@
+<!--
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+Account Payable
+Version : 2.0 Enterprise
+==========================================================
+-->
+
+<div class="account-payable-page">
+
+    <!-- ==========================================================
+         PAGE HEADER
+    =========================================================== -->
+
+    <div class="finova-page-header">
+
+        <!-- LEFT -->
+
+        <div class="finova-page-header-left">
+
+            <h1 class="finova-page-title">
+
+                Account Payable
+
+            </h1>
+
+            <p class="finova-page-subtitle">
+
+                Finance / Account Payable
+
+            </p>
+
+        </div>
+
+        <!-- RIGHT -->
+
+        <div class="finova-page-header-right">
+
+            <button
+                id="btn-add-ap"
+                class="btn btn-primary finova-btn">
+
+                <i class="fas fa-plus"></i>
+
+                Add AP
+
+            </button>
+
+            <button
+                id="btn-download-ap"
+                class="btn btn-outline-success finova-btn">
+
+                <i class="fas fa-file-excel"></i>
+
+                Download Excel
+
+            </button>
+
+            <button
+                id="btn-refresh-ap"
+                class="btn btn-outline-secondary finova-btn">
+
+                <i class="fas fa-rotate-right"></i>
+
+                Refresh
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- ==========================================================
+         FILTER CARD
+    =========================================================== -->
+
+    <div class="card account-payable-filter-card">
+
+        <div class="card-body">
+
+            <div class="row g-3 align-items-end">
+
+                <!-- ==========================================
+                     INVOICE DATE FROM
+                =========================================== -->
+
+                <div class="col-xl-2 col-lg-3 col-md-6">
+
+                    <label
+                        for="filter-date-from"
+                        class="form-label">
+
+                        Invoice Date From
+
+                    </label>
+
+                    <input
+                        id="filter-date-from"
+                        type="date"
+                        class="form-control">
+
+                </div>
+
+                <!-- ==========================================
+                     INVOICE DATE TO
+                =========================================== -->
+
+                <div class="col-xl-2 col-lg-3 col-md-6">
+
+                    <label
+                        for="filter-date-to"
+                        class="form-label">
+
+                        Invoice Date To
+
+                    </label>
+
+                    <input
+                        id="filter-date-to"
+                        type="date"
+                        class="form-control">
+
+                </div>
+
+                <!-- ==========================================
+                     AP STATUS
+                =========================================== -->
+
+                <div class="col-xl-2 col-lg-3 col-md-6">
+
+                    <label
+                        for="filter-status"
+                        class="form-label">
+
+                        AP Status
+
+                    </label>
+
+                    <select
+                        id="filter-status"
+                        class="form-select">
+
+                        <option value="all">
+
+                            Show All Data
+
+                        </option>
+
+                        <option value="Draft">
+
+                            Show Draft Only
+
+                        </option>
+
+                        <option value="Posted">
+
+                            Show Posted Only
+
+                        </option>
+
+                        <option value="Cancelled">
+
+                            Show Cancelled Only
+
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <!-- ==========================================
+                     FIND BY
+                =========================================== -->
+
+                <div class="col-xl-2 col-lg-3 col-md-6">
+
+                    <label
+                        for="filter-find-by"
+                        class="form-label">
+
+                        Find By
+
+                    </label>
+
+                    <select
+                        id="filter-find-by"
+                        class="form-select">
+
+                        <option value="ap_no">
+
+                            AP Number
+
+                        </option>
+
+                        <option value="invoice_no">
+
+                            Invoice Number
+
+                        </option>
+
+                        <option value="po_no">
+
+                            PO Number
+
+                        </option>
+
+                        <option value="vendor">
+
+                            Vendor
+
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <!-- ==========================================
+                     KEYWORD
+                =========================================== -->
+
+                <div class="col-xl-4 col-lg-6 col-md-12">
+
+                    <label
+                        for="filter-keyword"
+                        class="form-label">
+
+                        Keyword
+
+                    </label>
+
+                    <div class="input-group">
+
+                        <input
+                            id="filter-keyword"
+                            type="text"
+                            class="form-control"
+                            placeholder="Search AP Number, Invoice Number, PO Number or Vendor...">
+
+                        <button
+                            id="btn-find-ap"
+                            type="button"
+                            class="btn btn-primary">
+
+                            <i class="fa-solid fa-magnifying-glass"></i>
+
+                            Find
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+        <div class="card account-payable-table-card">
+
+        <div
+            id="account-payable-table-wrapper"
+            class="table-responsive">
+
+            <table
+                id="account-payable-table"
+                class="table table-hover align-middle">
+
+                <thead>
+
+                    <tr>
+
+                        <th style="width:70px;">
+
+                            No
+
+                        </th>
+
+                        <th style="width:150px;">
+
+                            Invoice Date
+
+                        </th>
+
+                        <th style="width:170px;">
+
+                            AP Number
+
+                        </th>
+
+                        <th style="min-width:240px;">
+
+                            Vendor
+
+                        </th>
+
+                        <th style="width:180px;">
+
+                            Invoice Number
+
+                        </th>
+
+                        <th style="width:180px;">
+
+                            PO Number
+
+                        </th>
+
+                        <th style="width:150px;">
+
+                            Due Date
+
+                        </th>
+
+                        <th
+                            class="text-end"
+                            style="width:170px;">
+
+                            Total Amount
+
+                        </th>
+
+                        <th
+                            class="text-center"
+                            style="width:130px;">
+
+                            Status
+
+                        </th>
+
+                        <th
+                            class="text-center"
+                            style="width:90px;">
+
+                            Action
+
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="account-payable-tbody">
+
+                    <!-- ==========================================
+                         Render By JavaScript
+                    =========================================== -->
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+               <div class="d-flex justify-content-between align-items-center px-3 py-3">
+
+            <!-- ==========================================
+                 PAGINATION
+            =========================================== -->
+
+            <nav aria-label="Account Payable Pagination">
+
+                <ul class="pagination finova-pagination mb-0">
+
+                    <!-- FIRST -->
+
+                    <li class="page-item disabled">
+
+                        <button
+                            id="btn-first-page"
+                            class="page-link">
+
+                            <i class="fa-solid fa-backward-step"></i>
+
+                        </button>
+
+                    </li>
+
+                    <!-- PREVIOUS -->
+
+                    <li class="page-item disabled">
+
+                        <button
+                            id="btn-prev-page"
+                            class="page-link">
+
+                            <i class="fa-solid fa-chevron-left"></i>
+
+                        </button>
+
+                    </li>
+
+                    <!-- PAGE -->
+
+                    <li class="page-item">
+
+                        <span class="finova-page-text">
+
+                            Page
+
+                        </span>
+
+                    </li>
+
+                    <!-- CURRENT PAGE -->
+
+                    <li class="page-item">
+
+                        <input
+                            id="current-page"
+                            type="number"
+                            value="1"
+                            min="1"
+                            class="form-control form-control-sm finova-page-input">
+
+                    </li>
+
+                    <!-- TOTAL PAGE -->
+
+                    <li class="page-item">
+
+                        <span
+                            id="total-pages"
+                            class="finova-page-text">
+
+                            of 1
+
+                        </span>
+
+                    </li>
+
+                    <!-- NEXT -->
+
+                    <li class="page-item">
+
+                        <button
+                            id="btn-next-page"
+                            class="page-link">
+
+                            <i class="fa-solid fa-chevron-right"></i>
+
+                        </button>
+
+                    </li>
+
+                    <!-- LAST -->
+
+                    <li class="page-item">
+
+                        <button
+                            id="btn-last-page"
+                            class="page-link">
+
+                            <i class="fa-solid fa-forward-step"></i>
+
+                        </button>
+
+                    </li>
+
+                </ul>
+
+            </nav>
+
+            <!-- ==========================================
+                 RECORD INFO
+            =========================================== -->
+
+            <div
+                id="display-record"
+                class="finova-record-info">
+
+                Records 0 - 0 of 0
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ==========================================================
+         END TABLE CARD
+    =========================================================== -->
+
+    <!-- ==========================================================
+         ACCOUNT PAYABLE MODAL CONTAINER
+    =========================================================== -->
+
+    <div id="account-payable-modal-container"></div>
+
+    <!-- ==========================================================
+         ACCOUNT PAYABLE DETAIL MODAL CONTAINER
+    =========================================================== -->
+
+    <div id="account-payable-detail-modal-container"></div>
+
+</div>
