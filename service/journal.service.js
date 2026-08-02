@@ -401,7 +401,8 @@ async create(header, details = []) {
         const journalDetails =
 
             this.buildJournalDetail(details);
-
+        console.log("===== BUILD JOURNAL DETAIL =====");
+        console.table(journalDetails);
         /*
         ======================================================
         CALCULATE TOTAL
@@ -500,8 +501,11 @@ async create(header, details = []) {
         INSERT DETAIL
         ======================================================
         */
-
-        if (insertDetails.length) {
+            console.log("===== INSERT DETAILS =====");
+            console.table(insertDetails);
+            console.log("TOTAL DETAIL :", insertDetails.length);
+        
+            if (insertDetails.length) {
 
             const {
 
@@ -512,6 +516,9 @@ async create(header, details = []) {
                 .from(TABLE.GL_JOURNAL_DETAIL)
 
                 .insert(insertDetails);
+            console.log("DETAIL INSERT RESULT");
+            console.log(insertedDetail);
+            console.log(detailError);
 
             if (detailError) {
 
@@ -589,6 +596,8 @@ async update(id, header, details = []) {
 
         const journalDetails =
             this.buildJournalDetail(details);
+            console.log("===== BUILD JOURNAL DETAIL =====");
+            console.table(journalDetails);
 
         /*
         ======================================================

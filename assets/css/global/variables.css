@@ -27,21 +27,35 @@ Version : 1.0.0
     --font-weight-semibold: 600;
     --font-weight-bold: 700;
 
-    /* ===========================================
-       SIDEBAR
-    =========================================== */
+    
+/* ===========================================
+   SIDEBAR
+=========================================== */
 
-    --sidebar-width: 260px;
-    --sidebar-collapse-width: 80px;
+--sidebar-width: 260px;
+--sidebar-collapse-width: 80px;
 
-    --sidebar-bg: #111827;
-    --sidebar-hover: #1F2937;
-    --sidebar-active: #2563EB;
+/* Background */
 
-    --sidebar-text: #D1D5DB;
-    --sidebar-text-active: #FFFFFF;
+--sidebar-bg: #0F172A;
 
-    --sidebar-header: #9CA3AF;
+/* Hover */
+
+--sidebar-hover: #1E293B;
+
+/* Active */
+
+--sidebar-active: #2563EB;
+
+/* Text */
+
+--sidebar-text: #FFFFFF;
+
+--sidebar-text-active: #FFFFFF;
+
+/* Header */
+
+--sidebar-header: #94A3B8;
 
     /* ===========================================
        TOPBAR
@@ -67,11 +81,11 @@ Version : 1.0.0
        TEXT
     =========================================== */
 
-    --text-primary: #111827;
+    --text-primary: #183153;
 
-    --text-secondary: #6B7280;
+   --text-secondary: #64748B;
 
-    --text-muted: #9CA3AF;
+   --text-muted: #94A3B8;
 
     /* ===========================================
        BRAND

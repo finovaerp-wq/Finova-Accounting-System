@@ -7,16 +7,6 @@ Author  : FINOVA Development Team
 ==========================================================
 */
 
-/*
-==========================================================
-CORE
-==========================================================
-*/
-
-import {
-    supabase,
-    TABLE
-} from "../../assets/js/core/supabase.js";
 
 /*
 ==========================================================
@@ -1298,21 +1288,17 @@ bindModalEvents() {
     ======================================================
     */
 
-    console.log("BTN SAVE :", this.btnSaveJournal);
+    this.btnSaveJournal.onclick = () => {
 
-    this.btnSaveJournal?.addEventListener(
+    console.log("BUTTON CLICK");
 
-        "click",
+    console.log(this);
 
-        () => {
+    console.log(this.saveJournal);
 
-            console.log("SAVE DRAFT CLICK");
+    this.saveJournal("Draft");
 
-            this.saveJournal("Draft");
-
-        }
-
-    );
+};
 
     /*
     ======================================================
@@ -3505,6 +3491,7 @@ async saveJournal(status = "Draft") {
             status
 
         };
+        
 
         /*
 ==========================================================

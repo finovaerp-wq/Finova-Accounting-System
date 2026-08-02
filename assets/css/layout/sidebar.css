@@ -22,49 +22,98 @@ Version : 1.0.0
 
     color: var(--sidebar-text);
 
+    border-right: 1px solid var(--border-color);
+
     overflow: hidden;
 
 }
 
 /* ===========================================
-   LOGO
+   SIDEBAR BRAND
 =========================================== */
 
-.finova-sidebar-logo {
+.finova-sidebar-logo{
 
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    display:flex;
 
-    height: 70px;
+    align-items:center;
 
-    padding: 0 var(--space-lg);
+    gap:10px;
 
-    border-bottom: 1px solid rgba(255,255,255,.08);
+    height:70px;
 
-}
+    padding:0 18px;
 
-.finova-sidebar-logo h2 {
+    border-bottom:1px solid #E5E7EB;
 
-    margin: 0;
-
-    color: #FFFFFF;
-
-    font-size: 22px;
-
-    font-weight: var(--font-weight-bold);
-
-    letter-spacing: 1px;
+    background:#FFFFFF;
 
 }
 
-.finova-sidebar-logo span {
 
-    margin-top: 2px;
+/* ===========================================
+   LOGO IMAGE
+=========================================== */
 
-    color: var(--sidebar-header);
+.finova-sidebar-logo-image{
 
-    font-size: var(--font-size-xs);
+    width: 70px;
+
+    height: 80px;
+
+    object-fit: contain;
+
+    flex-shrink: 0;
+
+}
+
+/* ===========================================
+   BRAND
+=========================================== */
+
+.finova-sidebar-brand{
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    min-width:0;
+
+}
+
+/* ===========================================
+   TITLE
+=========================================== */
+
+.finova-sidebar-title{
+
+    color:#0F172A;
+
+    font-size:22px;
+
+    font-weight:700;
+
+    line-height:1.1;
+
+}
+
+/* ===========================================
+   SUBTITLE
+=========================================== */
+
+.finova-sidebar-subtitle{
+
+    margin-top:2px;
+
+    color:#64748B;
+
+    font-size:12px;
+
+    font-weight:500;
+
+    letter-spacing:.5px;
 
 }
 
@@ -146,24 +195,24 @@ Version : 1.0.0
 
     gap:12px;
 
-    min-height:40px;
+    min-height:42px;
 
     padding:0 18px;
 
-    border-radius:10px;
-
     margin:2px 8px;
+
+    border-radius:10px;
 
     cursor:pointer;
 
     color:var(--sidebar-text);
 
+    font-weight:500;
+
     transition:
         background .20s ease,
         color .20s ease,
         transform .18s ease;
-
-    user-select:none;
 
 }
 
@@ -195,9 +244,7 @@ Version : 1.0.0
 
     background:var(--sidebar-hover);
 
-    color:var(--sidebar-text-active);
-
-    transform:translateX(3px);
+    color:#FFFFFF;
 
 }
 
@@ -209,29 +256,21 @@ Version : 1.0.0
 
     background:var(--sidebar-active);
 
-    color:var(--sidebar-text-active);
+    color:#FFFFFF;
 
     font-weight:600;
 
 }
 
-.finova-menu-item.active::before{
+.finova-menu-item.active i{
 
-    content:"";
+    color:#FFFFFF;
 
-    position:absolute;
+}
 
-    left:0;
+.finova-menu-item.active span{
 
-    top:7px;
-
-    bottom:7px;
-
-    width:4px;
-
-    border-radius:0 6px 6px 0;
-
-    background:#4DA3FF;
+    color:#FFFFFF;
 
 }
 /* ===========================================
@@ -256,7 +295,7 @@ Version : 1.0.0
 
     justify-content:space-between;
 
-    min-height:40px;
+    min-height:42px;
 
     padding:0 18px;
 
@@ -264,11 +303,11 @@ Version : 1.0.0
 
     border-radius:10px;
 
-    cursor:pointer;
-
-    user-select:none;
-
     color:var(--sidebar-text);
+
+    font-weight:500;
+
+    cursor:pointer;
 
     transition:
         background .20s ease,
@@ -281,9 +320,7 @@ Version : 1.0.0
 
     background:var(--sidebar-hover);
 
-    color:var(--sidebar-text-active);
-
-    transform:translateX(3px);
+    color:#FFFFFF;
 
 }
 /* ===========================================
@@ -292,7 +329,9 @@ Version : 1.0.0
 
 .finova-menu-group.open .finova-menu-group-header{
 
-    color: var(--sidebar-text-active);
+    color:#FFFFFF;
+
+    font-weight:600;
 
 }
 
@@ -421,17 +460,17 @@ Version : 1.0.0
 
     gap:12px;
 
-    min-height:38px;
+    min-height:40px;
 
     padding:0 18px 0 42px;
 
     margin:2px 8px;
 
-    border-radius:8px;
+    border-radius:10px;
 
     cursor:pointer;
 
-    color:var(--sidebar-text);
+    color:#FFFFFF;
 
     transition:
         background .20s ease,
@@ -439,14 +478,13 @@ Version : 1.0.0
         transform .18s ease;
 
 }
-
 .finova-submenu-item i{
 
     width:16px;
 
     font-size:13px;
 
-    flex-shrink:0;
+    color:#FFFFFF;
 
 }
 
@@ -468,7 +506,7 @@ Version : 1.0.0
 
     background:var(--sidebar-hover);
 
-    color:var(--sidebar-text-active);
+    color:#FFFFFF;
 
     transform:translateX(3px);
 
@@ -483,9 +521,21 @@ Version : 1.0.0
 
     background:var(--sidebar-active);
 
-    color:var(--sidebar-text-active);
+    color:#FFFFFF;
 
     font-weight:600;
+
+}
+
+.finova-submenu-item.active i{
+
+    color:#FFFFFF;
+
+}
+
+.finova-submenu-item.active span{
+
+    color:#FFFFFF;
 
 }
 
@@ -505,7 +555,7 @@ Version : 1.0.0
 
     border-radius:0 6px 6px 0;
 
-    background:#4DA3FF;
+    background:#FFFFFF;
 
 }
 /* ===========================================
@@ -516,7 +566,7 @@ Version : 1.0.0
 
     padding: var(--space-md);
 
-    border-top: 1px solid rgba(255,255,255,.08);
+    border-top:1px solid rgba(255,255,255,.08);
 
 }
 
@@ -540,29 +590,22 @@ Version : 1.0.0
 
 }
 
-.finova-sidebar.collapsed .finova-sidebar-logo span,
-.finova-sidebar.collapsed .finova-menu-header,
-.finova-sidebar.collapsed .finova-menu-item span {
+.finova-sidebar.collapsed
+.finova-sidebar-brand{
 
-    display: none;
-
-}
-
-.finova-sidebar.collapsed .finova-menu-item {
-
-    justify-content: center;
-
-    padding: 0;
+    display:none;
 
 }
 
-.finova-sidebar.collapsed .finova-sidebar-logo {
+.finova-sidebar.collapsed
+.finova-sidebar-logo{
 
-    align-items: center;
+    justify-content:center;
 
-    padding: 0;
+    padding:0;
 
 }
+
 
 /* ===========================================
    RESPONSIVE

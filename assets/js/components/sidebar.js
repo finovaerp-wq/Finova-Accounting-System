@@ -33,11 +33,28 @@ export class FinovaSidebar {
 
                 <div class="finova-sidebar-logo">
 
-                    <h2>FINOVA</h2>
+    <img
+    src="assets/images/brand/sidebar-logo.png.png"
+    alt="FINOVA"
+    class="finova-sidebar-logo-image">
 
-                    <span>Accounting System</span>
+    <div class="finova-sidebar-brand">
 
-                </div>
+        <div class="finova-sidebar-title">
+
+            FINOVA
+
+        </div>
+
+        <div class="finova-sidebar-subtitle">
+
+            Accounting System
+
+        </div>
+
+    </div>
+
+</div>
 
                 <div class="finova-sidebar-menu">
 
