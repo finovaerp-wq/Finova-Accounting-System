@@ -90,26 +90,26 @@ export class FinovaSidebar {
 
         ${this.menuGroup(
             "Master Data",
-            "fa-solid fa-database",
+            "fa-solid fa-layer-group",
             [
 
                 this.menuItem(
                     "User Management",
-                    "fa-solid fa-user-shield",
+                    "fa-solid fa-users-gear",
                     "user-management",
                     true
                 ),
 
                 this.menuItem(
                     "Business Partner",
-                    "fa-solid fa-users",
+                    "fa-solid fa-handshake",
                     "business-partner",
                     true
                 ),
 
                 this.menuItem(
                     "Chart Of Accounts",
-                    "fa-solid fa-book",
+                    "fa-solid fa-book-open",
                     "chart-of-accounts",
                     true
                 )
@@ -119,7 +119,7 @@ export class FinovaSidebar {
 
        ${this.menuGroup(
     "Finance",
-    "fa-solid fa-coins",
+    "fa-solid fa-building-columns",
     [
 
         this.menuItem(
@@ -131,7 +131,7 @@ export class FinovaSidebar {
 
         this.menuItem(
             "Account Receivable",
-            "fa-solid fa-money-check-dollar",
+            "fa-solid fa-money-check",
             "account-receivable",
             true
         ),
@@ -145,7 +145,7 @@ export class FinovaSidebar {
 
         this.menuItem(
             "Aging Receivable",
-            "fa-solid fa-clock",
+            "fa-solid fa-business-time",
             "aging-receivable",
             true
         )
@@ -155,12 +155,12 @@ export class FinovaSidebar {
 
         ${this.menuGroup(
     "Accounting",
-    "fa-solid fa-book-open",
+    "fa-solid fa-calculator",
     [
 
         this.menuItem(
             "GL Journal",
-            "fa-solid fa-book-open",
+            "fa-solid fa-book-journal-whills",
             "gl-journal",
             true
         )
@@ -169,19 +169,19 @@ export class FinovaSidebar {
 )}
         ${this.menuGroup(
     "Payment",
-    "fa-solid fa-credit-card",
+    "fa-solid fa-wallet",
     [
 
         this.menuItem(
             "AP Payment",
-            "fa-solid fa-credit-card",
+            "fa-solid fa-money-check-dollar",
             "ap-payment",
             true
         ),
 
         this.menuItem(
             "AR Payment",
-            "fa-solid fa-wallet",
+            "fa-solid fa-money-bill-transfer",
             "ar-payment",
             true
         )
@@ -196,7 +196,7 @@ export class FinovaSidebar {
 
         this.menuItem(
             "General Ledger",
-            "fa-solid fa-book",
+            "fa-solid fa-book-bookmark",
             "general-ledger",
             true
         ),
