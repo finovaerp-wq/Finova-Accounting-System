@@ -1234,140 +1234,74 @@ else {
 
 }
 
-    /*
-    ======================================================
-    SAVE & POST
-    ======================================================
-    */
-
-    console.log("BTN POST :", this.btnPostJournal);
-
-    this.btnPostJournal?.addEventListener(
-
-        "click",
-
-        () => {
-
-            console.log("POST CLICK");
-
-            this.saveJournal("Posted");
-
-        }
-
-    );
-
-}
-/*
+   /*
 ==========================================================
-BIND DETAIL MODAL EVENTS
+SAVE & POST
 ==========================================================
 */
 
-bindDetailModalEvents() {
+console.log(
+    "BTN POST :",
+    this.btnPostJournal
+);
 
-    if (this.detailModalEventsBound) {
+this.btnPostJournal?.addEventListener(
+    "click",
+    async (event) => {
 
-        return;
+        event.preventDefault();
 
-    }
+        console.log(
+            "POST CLICK - SHOW CONFIRMATION MODAL"
+        );
 
-    this.detailModalEventsBound = true;
+        /*
+        ======================================================
+        SHOW BOOTSTRAP CONFIRMATION
+        ======================================================
+        */
 
-    /*
-    ======================================================
-    SAVE
-    ======================================================
-    */
+        const confirmed =
+            await this.showPostConfirmation();
 
-    this.btnSaveLine?.addEventListener(
+        /*
+        ======================================================
+        CANCEL
+        ======================================================
+        */
 
-        "click",
+        if (!confirmed) {
 
-        () => this.saveDetailLine()
-
-    );
-
-    /*
-    ======================================================
-    FORMAT AMOUNT
-    ======================================================
-    */
-
-    this.detailAmount?.addEventListener(
-
-        "blur",
-
-        () => {
-
-            const amount = Number(
-
-                this.detailAmount.value || 0
-
+            console.log(
+                "POST CANCELLED"
             );
 
-            this.detailAmount.value =
-                amount.toFixed(2);
+            return;
 
         }
 
-    );
+        /*
+        ======================================================
+        CONFIRMED
+        ======================================================
+        */
 
-    /*
-    ======================================================
-    ENTER = SAVE
-    ======================================================
-    */
+        console.log(
+            "POST CONFIRMED"
+        );
 
-    this.detailModalElement?.addEventListener(
+        /*
+        ======================================================
+        POST JOURNAL
+        ======================================================
+        */
 
-        "keydown",
+        await this.saveJournal(
+            "Posted"
+        );
 
-        (event) => {
-
-            if (event.key !== "Enter") {
-
-                return;
-
-            }
-
-            if (
-
-                event.target.tagName ===
-
-                "TEXTAREA"
-
-            ) {
-
-                return;
-
-            }
-
-            event.preventDefault();
-
-            this.saveDetailLine();
-
-        }
-
-    );
-
-    /*
-    ======================================================
-    RESET
-    ======================================================
-    */
-
-    this.detailModalElement?.addEventListener(
-
-        "hidden.bs.modal",
-
-        () => {
-
-            this.clearDetailForm();
-
-        }
-
-    );
-
+    }
+);
 }
 /*
 ==========================================================
@@ -1923,28 +1857,48 @@ renderStatusBadge(status) {
             .trim()
             .toLowerCase();
 
+    /*
+    ======================================================
+    POSTED
+    ======================================================
+    */
+
     if (value === "posted") {
 
         return `
-
             <span class="badge bg-success">
-
                 Posted
-
             </span>
-
         `;
 
     }
 
+    /*
+    ======================================================
+    VOID
+    ======================================================
+    */
+
+    if (value === "void") {
+
+        return `
+            <span class="badge bg-danger">
+                Void
+            </span>
+        `;
+
+    }
+
+    /*
+    ======================================================
+    DRAFT
+    ======================================================
+    */
+
     return `
-
         <span class="badge bg-secondary">
-
             Draft
-
         </span>
-
     `;
 
 }
@@ -2090,29 +2044,76 @@ renderActionButtons(journal) {
     }
 
     /*
-    ======================================================
-    VOID / CANCELLED
-    ======================================================
-    */
+==========================================================
+VOID
+SAME ACTION AS DRAFT
+==========================================================
+*/
+
+if (status === "void") {
 
     return `
-
         <div class="btn-group btn-group-sm">
 
+            <!-- EDIT -->
             <button
                 type="button"
-                class="btn btn-outline-secondary btn-view-journal"
+                class="btn btn-outline-primary btn-edit-journal"
                 data-id="${journal.id}"
-                title="View">
+                title="Edit">
 
-                <i class="fa-solid fa-eye"></i>
+                <i class="fa-solid fa-pen"></i>
+
+            </button>
+
+            <!-- DELETE -->
+            <button
+                type="button"
+                class="btn btn-outline-danger btn-delete-journal"
+                data-id="${journal.id}"
+                title="Delete">
+
+                <i class="fa-solid fa-trash"></i>
+
+            </button>
+
+            <!-- POST -->
+            <button
+                type="button"
+                class="btn btn-outline-success btn-post-journal"
+                data-id="${journal.id}"
+                title="Post">
+
+                <i class="fa-solid fa-upload"></i>
+
+            </button>
+
+            <!-- DUPLICATE -->
+            <button
+                type="button"
+                class="btn btn-outline-secondary btn-duplicate-journal"
+                data-id="${journal.id}"
+                title="Duplicate">
+
+                <i class="fa-solid fa-copy"></i>
+
+            </button>
+
+            <!-- VOUCHER -->
+            <button
+                type="button"
+                class="btn btn-outline-info btn-voucher-journal"
+                data-id="${journal.id}"
+                title="Voucher">
+
+                <i class="fa-solid fa-file-lines"></i>
 
             </button>
 
         </div>
-
     `;
 
+}
 }
 /*
 ==========================================================
@@ -3037,31 +3038,25 @@ async loadJournal(id) {
     */
 
     if (!id) {
-
         throw new Error(
             "Journal ID is required."
         );
-
     }
 
     /*
     ======================================================
-    LOAD HEADER + DETAIL
+    LOAD JOURNAL HEADER
     ======================================================
     */
-   
 
     const journal =
         await this.service.getById(id);
 
     if (!journal) {
-
         throw new Error(
             "Journal not found."
         );
-
     }
-    
 
     /*
     ======================================================
@@ -3069,22 +3064,93 @@ async loadJournal(id) {
     ======================================================
     */
 
-    this.currentJournal = journal;
+    this.currentJournal =
+        journal;
 
     /*
     ======================================================
-    STORE DETAIL
+    LOAD JOURNAL DETAIL DIRECTLY
+    ======================================================
+    */
+
+    const {
+        data: databaseDetails,
+        error: detailError
+    } = await supabase
+
+        .from(
+            TABLE.GL_JOURNAL_DETAIL
+        )
+
+        .select(`
+            *,
+            mst_chart_of_accounts(
+                account_code,
+                account_name
+            ),
+            mst_business_partner(
+                bp_name
+            )
+        `)
+
+        .eq(
+            "journal_id",
+            id
+        )
+
+        .order(
+            "line_no",
+            {
+                ascending: true
+            }
+        );
+
+    /*
+    ======================================================
+    DETAIL ERROR
+    ======================================================
+    */
+
+    if (detailError) {
+        console.error(
+            "LOAD JOURNAL DETAIL ERROR:",
+            detailError
+        );
+
+        throw detailError;
+    }
+
+    /*
+    ======================================================
+    CONVERT DETAIL
     ======================================================
     */
 
     this.detailLines =
-        Array.isArray(journal.details)
-            ? this.convertDatabaseDetail(
-                  journal.details
-              )
-            : [];
-    
-            console.log("DETAIL LINES :", this.detailLines);
+        this.convertDatabaseDetail(
+            databaseDetails || []
+        );
+
+    /*
+    ======================================================
+    DEBUG
+    ======================================================
+    */
+
+    console.log(
+        "JOURNAL HEADER:",
+        journal
+    );
+
+    console.log(
+        "DATABASE DETAILS:",
+        databaseDetails
+    );
+
+    console.log(
+        "CONVERTED DETAIL LINES:",
+        this.detailLines
+    );
 
     /*
     ======================================================
@@ -3095,7 +3161,6 @@ async loadJournal(id) {
     this.renderDetailTable();
 
     this.calculateSummary();
-    
 
 }
 /*
@@ -3161,7 +3226,7 @@ VALIDATE JOURNAL
 ==========================================================
 */
 
-validateJournal() {
+validateJournal(status = "Draft") {
 
     /*
     ======================================================
@@ -3200,20 +3265,23 @@ validateJournal() {
     }
 
     /*
-    ======================================================
-    DETAIL LINE
-    ======================================================
-    */
+==========================================================
+DETAIL VALIDATION
+==========================================================
+*/
 
-    if (this.detailLines.length === 0) {
+// Draft boleh disimpan tanpa detail
+if (
+    this.detailLines.length === 0 &&
+    this.currentSaveStatus !== "Draft"
+) {
 
-        window.App?.showError?.(
-            "Please add at least one journal detail."
-        );
+    window.App?.showError?.(
+        "Please add at least one journal detail."
+    );
 
-        return false;
-
-    }
+    return false;
+}
 
     /*
     ======================================================
@@ -3615,22 +3683,20 @@ FILL DETAIL FORM
 fillDetailForm() {
 
     if (!this.currentDetail) {
-
         return;
-
     }
 
     this.detailDescription.value =
         this.currentDetail.description ?? "";
 
     this.detailDebitAccount.value =
-        this.currentdetail.debit_account_id ?? "";
+        this.currentDetail.debit_account_id ?? "";
 
     this.detailCreditAccount.value =
         this.currentDetail.credit_account_id ?? "";
 
     this.detailBusinessPartner.value =
-        this.currentDetail.businessPartnerId ?? "";
+        this.currentDetail.business_partner_id ?? "";
 
     this.detailAmount.value =
         Number(
@@ -4056,20 +4122,16 @@ FORMAT CURRENCY
 ==========================================================
 */
 
-formatCurrency(value = 0) {
+formatCurrency(value) {
 
-    return Number(value).toLocaleString(
-
-        "en-US",
-
+    return new Intl.NumberFormat(
+        "id-ID",
         {
-
-            minimumFractionDigits: 2,
-
-            maximumFractionDigits: 2
-
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
         }
-
+    ).format(
+        Number(value || 0)
     );
 
 }
@@ -4946,29 +5008,43 @@ calculateSummary() {
 
     this.detailLines.forEach(line => {
 
-        totalAmount += Number(line.amount || 0);
+        totalAmount +=
+            Number(line.amount || 0);
 
     });
 
-    totalAmount = Number(totalAmount.toFixed(2));
+    totalAmount =
+    Math.round(totalAmount);
 
     this.summary = {
 
-        totalLine: this.detailLines.length,
+        totalLine:
+            this.detailLines.length,
 
-        totalDebit: totalAmount,
+        totalDebit:
+            totalAmount,
 
-        totalCredit: totalAmount,
+        totalCredit:
+            totalAmount,
 
-        difference: 0,
+        difference:
+            0,
 
-        isBalanced: true
+        isBalanced:
+            true
 
     };
+
+    console.log(
+        "JOURNAL SUMMARY :",
+        this.summary
+    );
 
     this.updateSummaryDisplay();
 
 }
+
+
 /*
 ==========================================================
 UPDATE SUMMARY DISPLAY
@@ -4992,7 +5068,9 @@ updateSummaryDisplay() {
     if (this.summaryTotalLine) {
 
         this.summaryTotalLine.value =
+            this.summary.totalLine;
 
+        this.summaryTotalLine.textContent =
             this.summary.totalLine;
 
     }
@@ -5005,16 +5083,18 @@ updateSummaryDisplay() {
 
     if (this.summaryTotalAmount) {
 
-        this.summaryTotalAmount.value =
-
+        const amount =
             this.formatCurrency(
-
-                this.summary.totalAmount
-
+                this.summary.totalDebit
             );
 
-    }
+        this.summaryTotalAmount.value =
+            amount;
 
+        this.summaryTotalAmount.textContent =
+            amount;
+
+    }
 
 }
 /*
@@ -5807,6 +5887,286 @@ collectJournalDetail(journalId) {
 }
 /*
 ==========================================================
+POST CONFIRMATION MODAL
+==========================================================
+*/
+
+showPostConfirmation() {
+
+    return new Promise((resolve) => {
+
+        /*
+        ======================================================
+        REMOVE OLD MODAL
+        ======================================================
+        */
+
+        const oldModal =
+            document.getElementById(
+                "confirmPostJournalModal"
+            );
+
+        if (oldModal) {
+
+            oldModal.remove();
+
+        }
+
+        /*
+        ======================================================
+        CREATE MODAL
+        ======================================================
+        */
+
+        const modalHtml = `
+
+            <div
+                class="modal fade"
+                id="confirmPostJournalModal"
+                tabindex="-1"
+                aria-labelledby="confirmPostJournalModalLabel"
+                aria-hidden="true"
+            >
+
+                <div
+                    class="modal-dialog modal-dialog-centered"
+                >
+
+                    <div class="modal-content">
+
+                        <!-- HEADER -->
+
+                        <div class="modal-header">
+
+                            <h5
+                                class="modal-title"
+                                id="confirmPostJournalModalLabel"
+                            >
+
+                                <i
+                                    class="fa-solid fa-circle-check text-success me-2"
+                                ></i>
+
+                                Confirm Posting Journal
+
+                            </h5>
+
+                            <button
+                                type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"
+                            ></button>
+
+                        </div>
+
+
+                        <!-- BODY -->
+
+                        <div class="modal-body">
+
+                            <div
+                                class="text-center py-2"
+                            >
+
+                                <i
+                                    class="fa-solid fa-circle-question text-warning"
+                                    style="font-size: 42px;"
+                                ></i>
+
+                            </div>
+
+                            <p
+                                class="text-center mb-2"
+                            >
+
+                                Apakah Anda yakin ingin
+                                <strong>Posting Journal</strong>
+                                ini?
+
+                            </p>
+
+                            <div
+                                class="alert alert-warning mb-0"
+                            >
+
+                                <i
+                                    class="fa-solid fa-triangle-exclamation me-2"
+                                ></i>
+
+                                Setelah Journal di-post,
+                                status akan berubah menjadi
+                                <strong>Posted</strong>.
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- FOOTER -->
+
+                        <div
+                            class="modal-footer"
+                        >
+
+                            <button
+                                type="button"
+                                class="btn btn-secondary"
+                                id="btn-cancel-post-journal"
+                            >
+
+                                <i
+                                    class="fa-solid fa-xmark me-1"
+                                ></i>
+
+                                Batal
+
+                            </button>
+
+                            <button
+                                type="button"
+                                class="btn btn-success"
+                                id="btn-confirm-post-journal"
+                            >
+
+                                <i
+                                    class="fa-solid fa-check me-1"
+                                ></i>
+
+                                Ya, Posting
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        `;
+
+        /*
+        ======================================================
+        INSERT MODAL
+        ======================================================
+        */
+
+        document.body.insertAdjacentHTML(
+            "beforeend",
+            modalHtml
+        );
+
+        /*
+        ======================================================
+        GET ELEMENT
+        ======================================================
+        */
+
+        const modalElement =
+            document.getElementById(
+                "confirmPostJournalModal"
+            );
+
+        const btnConfirm =
+            document.getElementById(
+                "btn-confirm-post-journal"
+            );
+
+        const btnCancel =
+            document.getElementById(
+                "btn-cancel-post-journal"
+            );
+
+        /*
+        ======================================================
+        BOOTSTRAP MODAL
+        ======================================================
+        */
+
+        const modal =
+            new bootstrap.Modal(
+                modalElement
+            );
+
+        let completed = false;
+
+        /*
+        ======================================================
+        CONFIRM
+        ======================================================
+        */
+
+        btnConfirm.addEventListener(
+            "click",
+            () => {
+
+                completed = true;
+
+                modal.hide();
+
+                resolve(true);
+
+            }
+        );
+
+        /*
+        ======================================================
+        CANCEL
+        ======================================================
+        */
+
+        btnCancel.addEventListener(
+            "click",
+            () => {
+
+                completed = true;
+
+                modal.hide();
+
+                resolve(false);
+
+            }
+        );
+
+        /*
+        ======================================================
+        CLOSE / BACKDROP / ESC
+        ======================================================
+        */
+
+        modalElement.addEventListener(
+            "hidden.bs.modal",
+            () => {
+
+                if (!completed) {
+
+                    resolve(false);
+
+                }
+
+                modalElement.remove();
+
+            },
+            {
+                once: true
+            }
+        );
+
+        /*
+        ======================================================
+        SHOW
+        ======================================================
+        */
+
+        modal.show();
+
+    });
+
+}
+/*
+==========================================================
 SAVE JOURNAL
 ==========================================================
 */
@@ -5815,19 +6175,10 @@ async saveJournal(status = "Draft") {
 
     try {
 
-        /*
-        ======================================================
-        VALIDATION
-        ======================================================
-        */
-
-        if (!this.validateJournal()) {
-
+        if (!this.validateJournal(status)) {
             return;
-
         }
-
-        /*
+/*
 ======================================================
 HEADER
 ======================================================
@@ -5880,40 +6231,28 @@ if (
         */
 
         const details = this.detailLines.map(
+    (line, index) => ({
 
-            (line, index) => ({
+        line_no:
+            index + 1,
 
-                line_no:
+        description:
+            line.description,
 
-                    index + 1,
+        debit_account_id:
+            line.debit_account_id,
 
-                description:
+        credit_account_id:
+            line.credit_account_id,
 
-                    line.description,
+        business_partner_id:
+            line.business_partner_id || null,
 
-                debit_account_id:
+        amount:
+            Number(line.amount)
 
-                    Number(line.debit_account_id),
-
-                credit_account_id:
-
-                    Number(line.credit_account_id),
-
-                business_partner_id:
-
-                    line.business_partner_id
-
-                        ? Number(line.business_partner_id)
-
-                        : null,
-
-                amount:
-
-                    Number(line.amount)
-
-            })
-
-        );
+    })
+);
 
         /*
         ======================================================
@@ -6471,6 +6810,22 @@ async postJournal(id) {
             return;
 
         }
+        /*
+        ======================================================
+        BOOTSTRAP CONFIRMATION
+        ======================================================
+        */
+
+        const confirmed =
+            await this.showPostConfirmation();
+
+        if (!confirmed) {
+
+            return;
+
+        }
+
+        
 
         /*
         ======================================================
@@ -6665,6 +7020,443 @@ async postJournal(id) {
         );
 
     }
+
+}
+/*
+==========================================================
+VOID JOURNAL
+==========================================================
+*/
+
+async voidJournal(id) {
+
+    try {
+
+        /*
+        ======================================================
+        VALIDATION
+        ======================================================
+        */
+
+        if (!id) {
+
+            return;
+
+        }
+
+        /*
+        ======================================================
+        BOOTSTRAP CONFIRMATION
+        ======================================================
+        */
+
+        const confirmed =
+            await this.showVoidConfirmation();
+
+        if (!confirmed) {
+
+            return;
+
+        }
+
+        /*
+        ======================================================
+        GET VOID REASON
+        ======================================================
+        */
+
+        const reasonInput =
+            document.getElementById(
+                "void-journal-reason"
+            );
+
+        const reason =
+            reasonInput?.value?.trim() || "";
+
+        if (!reason) {
+
+            alert(
+                "Alasan Void wajib diisi."
+            );
+
+            return;
+
+        }
+
+        /*
+        ======================================================
+        UPDATE STATUS
+        ======================================================
+        */
+
+        await this.service.voidJournal(
+            id,
+            reason
+        );
+
+        /*
+        ======================================================
+        SUCCESS
+        ======================================================
+        */
+
+        alert(
+            "Journal berhasil di-VOID."
+        );
+
+        /*
+        ======================================================
+        RELOAD
+        ======================================================
+        */
+
+        await this.loadData();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Void Journal Error",
+            error
+        );
+
+        alert(
+            error?.message ||
+            "Gagal melakukan Void Journal."
+        );
+
+    }
+
+}
+
+/*
+==========================================================
+VOID CONFIRMATION MODAL
+==========================================================
+*/
+
+showVoidConfirmation() {
+
+    return new Promise((resolve) => {
+
+        /*
+        ======================================================
+        REMOVE OLD MODAL
+        ======================================================
+        */
+
+        const oldModal =
+            document.getElementById(
+                "confirmVoidJournalModal"
+            );
+
+        if (oldModal) {
+
+            oldModal.remove();
+
+        }
+
+        /*
+        ======================================================
+        CREATE MODAL
+        ======================================================
+        */
+
+        const modalHtml = `
+
+            <div
+                class="modal fade"
+                id="confirmVoidJournalModal"
+                tabindex="-1"
+                aria-labelledby="confirmVoidJournalModalLabel"
+                aria-hidden="true"
+            >
+
+                <div
+                    class="modal-dialog modal-dialog-centered"
+                >
+
+                    <div class="modal-content">
+
+                        <!-- HEADER -->
+
+                        <div class="modal-header">
+
+                            <h5
+                                class="modal-title"
+                                id="confirmVoidJournalModalLabel"
+                            >
+
+                                <i
+                                    class="fa-solid fa-ban text-danger me-2"
+                                ></i>
+
+                                Confirm Void Journal
+
+                            </h5>
+
+                            <button
+                                type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close"
+                            ></button>
+
+                        </div>
+
+
+                        <!-- BODY -->
+
+                        <div class="modal-body">
+
+                            <div
+                                class="text-center py-2"
+                            >
+
+                                <i
+                                    class="fa-solid fa-circle-question text-danger"
+                                    style="font-size:42px;"
+                                ></i>
+
+                            </div>
+
+
+                            <p
+                                class="text-center mb-3"
+                            >
+
+                                Apakah Anda yakin ingin
+                                <strong>VOID Journal</strong>
+                                ini?
+
+                            </p>
+
+
+                            <div
+                                class="alert alert-danger"
+                            >
+
+                                <i
+                                    class="fa-solid fa-triangle-exclamation me-2"
+                                ></i>
+
+                                Journal yang di-VOID tidak
+                                dapat dianggap sebagai
+                                transaksi Posted.
+
+                            </div>
+
+
+                            <!-- VOID REASON -->
+
+                            <div class="mb-2">
+
+                                <label
+                                    for="void-journal-reason"
+                                    class="form-label fw-semibold"
+                                >
+
+                                    Alasan Void
+                                    <span class="text-danger">
+                                        *
+                                    </span>
+
+                                </label>
+
+                                <textarea
+                                    id="void-journal-reason"
+                                    class="form-control"
+                                    rows="3"
+                                    placeholder="Masukkan alasan Void..."
+                                ></textarea>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- FOOTER -->
+
+                        <div
+                            class="modal-footer"
+                        >
+
+                            <button
+                                type="button"
+                                class="btn btn-secondary"
+                                id="btn-cancel-void-journal"
+                            >
+
+                                <i
+                                    class="fa-solid fa-xmark me-1"
+                                ></i>
+
+                                Batal
+
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="btn btn-danger"
+                                id="btn-confirm-void-journal"
+                            >
+
+                                <i
+                                    class="fa-solid fa-ban me-1"
+                                ></i>
+
+                                Ya, Void
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        `;
+
+        /*
+        ======================================================
+        INSERT
+        ======================================================
+        */
+
+        document.body.insertAdjacentHTML(
+            "beforeend",
+            modalHtml
+        );
+
+        /*
+        ======================================================
+        ELEMENT
+        ======================================================
+        */
+
+        const modalElement =
+            document.getElementById(
+                "confirmVoidJournalModal"
+            );
+
+        const btnConfirm =
+            document.getElementById(
+                "btn-confirm-void-journal"
+            );
+
+        const btnCancel =
+            document.getElementById(
+                "btn-cancel-void-journal"
+            );
+
+        /*
+        ======================================================
+        BOOTSTRAP
+        ======================================================
+        */
+
+        const modal =
+            new bootstrap.Modal(
+                modalElement
+            );
+
+        let completed = false;
+
+        /*
+        ======================================================
+        CONFIRM
+        ======================================================
+        */
+
+        btnConfirm.addEventListener(
+            "click",
+            () => {
+
+                const reason =
+                    document
+                        .getElementById(
+                            "void-journal-reason"
+                        )
+                        ?.value
+                        ?.trim();
+
+                if (!reason) {
+
+                    document
+                        .getElementById(
+                            "void-journal-reason"
+                        )
+                        ?.focus();
+
+                    return;
+
+                }
+
+                completed = true;
+
+                modal.hide();
+
+                resolve(true);
+
+            }
+        );
+
+        /*
+        ======================================================
+        CANCEL
+        ======================================================
+        */
+
+        btnCancel.addEventListener(
+            "click",
+            () => {
+
+                completed = true;
+
+                modal.hide();
+
+                resolve(false);
+
+            }
+        );
+
+        /*
+        ======================================================
+        CLOSE / ESC / BACKDROP
+        ======================================================
+        */
+
+        modalElement.addEventListener(
+            "hidden.bs.modal",
+            () => {
+
+                if (!completed) {
+
+                    resolve(false);
+
+                }
+
+                modalElement.remove();
+
+            },
+            {
+                once: true
+            }
+        );
+
+        /*
+        ======================================================
+        SHOW
+        ======================================================
+        */
+
+        modal.show();
+
+    });
 
 }
 /*

@@ -494,90 +494,144 @@ if (headerError) {
         */
 
         const insertDetails =
+    journalDetails.map(item => ({
 
-            journalDetails.map(item => ({
+        journal_id:
+            journal.id,
 
-                journal_id:
+        line_no:
+            item.line_no,
 
-                    journal.id,
+        account_id:
+            item.account_id,
 
-                line_no:
+        business_partner_id:
+            item.business_partner_id,
 
-                    item.line_no,
+        description:
+            item.description,
 
-                account_id:
+        debit:
+            item.debit,
 
-                    item.account_id,
+        credit:
+            item.credit,
 
-                business_partner_id:
+        transaction_group:
+            item.transaction_group
 
-                    item.business_partner_id,
+    }));
 
-                description:
+/*
+==========================================================
+INSERT DETAIL
+==========================================================
+*/
 
-                    item.description,
+console.log(
+    "========== INSERT DETAIL PAYLOAD =========="
+);
 
-                debit:
+console.table(insertDetails);
 
-                    item.debit,
+console.log(
+    "FIRST DETAIL :",
+    JSON.stringify(
+        insertDetails[0],
+        null,
+        2
+    )
+);
 
-                credit:
+console.log(
+    "SECOND DETAIL :",
+    JSON.stringify(
+        insertDetails[1],
+        null,
+        2
+    )
+);
 
-                    item.credit
+console.log(
+    "==========================================="
+);
 
-            }));
+if (insertDetails.length) {
 
-        /*
-        ======================================================
-        INSERT DETAIL
-        ======================================================
-        */
-            console.log("===== INSERT DETAILS =====");
-            console.table(insertDetails);
-            console.log("TOTAL DETAIL :", insertDetails.length);
-        
-            if (insertDetails.length) {
+    const {
 
-            const {
+        data: insertedDetails,
 
-                error: detailError
+        error: detailError
 
-            } = await supabase
+    } = await supabase
 
-                .from(TABLE.GL_JOURNAL_DETAIL)
+        .from(TABLE.GL_JOURNAL_DETAIL)
 
-                .insert(insertDetails);
-            console.log("DETAIL INSERT RESULT");
-            console.log(insertedDetail);
-            console.log(detailError);
+        .insert(insertDetails)
 
-            if (detailError) {
+        .select();
 
-                /*
-                ==============================================
-                ROLLBACK HEADER
-                ==============================================
-                */
+    console.log(
+        "DETAIL INSERT RESULT :",
+        insertedDetails
+    );
 
-                await supabase
+    console.error(
+        "========== DETAIL INSERT ERROR =========="
+    );
 
-                    .from(TABLE.GL_JOURNAL)
+    console.error(
+        "MESSAGE :",
+        detailError?.message
+    );
 
-                    .delete()
+    console.error(
+        "DETAILS :",
+        detailError?.details
+    );
 
-                    .eq(
+    console.error(
+        "HINT :",
+        detailError?.hint
+    );
 
-                        "id",
+    console.error(
+        "CODE :",
+        detailError?.code
+    );
 
-                        journal.id
+    console.error(
+        "FULL ERROR :",
+        JSON.stringify(
+            detailError,
+            null,
+            2
+        )
+    );
 
-                    );
+    console.error(
+        "=========================================="
+    );
 
-                throw detailError;
+    if (detailError) {
 
-            }
+        await supabase
 
-        }
+            .from(TABLE.GL_JOURNAL)
+
+            .delete()
+
+            .eq(
+                "id",
+                journal.id
+            );
+
+        throw detailError;
+
+    }
+
+}
 
         /*
         ======================================================
@@ -707,27 +761,33 @@ async update(id, header, details = []) {
         console.log("JOURNAL DETAIL");
         console.table(journalDetails);
         const insertDetail =
-            journalDetails.map(item => ({
+    journalDetails.map(item => ({
 
-                journal_id: id,
+        journal_id:
+            id,
 
-                line_no: item.line_no,
+        line_no:
+            item.line_no,
 
-                account_id: item.account_id,
+        account_id:
+            item.account_id,
 
-                business_partner_id:
-                    item.business_partner_id,
+        business_partner_id:
+            item.business_partner_id,
 
-                description:
-                    item.description,
+        description:
+            item.description,
 
-                debit:
-                    item.debit,
+        debit:
+            item.debit,
 
-                credit:
-                    item.credit
+        credit:
+            item.credit,
 
-            }));
+        transaction_group:
+            item.transaction_group
+
+    }));
 
         /*
         ======================================================
@@ -1469,6 +1529,15 @@ buildJournalDetail(details = []) {
         const amount =
             Number(item.amount || 0);
 
+        /*
+        ======================================================
+        TRANSACTION GROUP
+        ======================================================
+        */
+
+        const transactionGroup =
+            crypto.randomUUID();
+
         return [
 
             /*
@@ -1480,28 +1549,29 @@ buildJournalDetail(details = []) {
             {
 
                 line_no:
-
                     (index * 2) + 1,
 
                 account_id:
-
                     Number(item.debit_account_id),
 
                 business_partner_id:
-
-                    item.business_partner_id || null,
+                    item.business_partner_id
+                        ? Number(
+                            item.business_partner_id
+                        )
+                        : null,
 
                 description:
-
                     item.description || "",
 
                 debit:
-
                     amount,
 
                 credit:
+                    0,
 
-                    0
+                transaction_group:
+                    transactionGroup
 
             },
 
@@ -1514,28 +1584,29 @@ buildJournalDetail(details = []) {
             {
 
                 line_no:
-
                     (index * 2) + 2,
 
                 account_id:
-
                     Number(item.credit_account_id),
 
                 business_partner_id:
-
-                    item.business_partner_id || null,
+                    item.business_partner_id
+                        ? Number(
+                            item.business_partner_id
+                        )
+                        : null,
 
                 description:
-
                     item.description || "",
 
                 debit:
-
                     0,
 
                 credit:
+                    amount,
 
-                    amount
+                transaction_group:
+                    transactionGroup
 
             }
 
