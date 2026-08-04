@@ -265,63 +265,54 @@ Version : 2.0.0
 
     </div>
 
-    <!-- ==========================================
-         PAGINATION
-    =========================================== -->
+   <!-- ==========================================================
+     FINOVA GLOBAL PAGINATION
+========================================================== -->
 
-    <div class="d-flex justify-content-between align-items-center mt-3">
+<div class="finova-pagination-wrapper">
 
-        <div
-            id="bp-pagination-info"
-            class="text-muted">
+    <div class="finova-pagination-left">
 
-            Showing 0 of 0 records
+        <button type="button" id="pagination-first" class="finova-pagination-btn" title="First Page">
+            <i class="fa-solid fa-angles-left"></i>
+        </button>
 
-        </div>
+        <button type="button" id="pagination-prev" class="finova-pagination-btn" title="Previous Page">
+            <i class="fa-solid fa-angle-left"></i>
+        </button>
 
-        <nav>
+        <span class="finova-pagination-label">Page</span>
 
-            <ul class="pagination finova-pagination">
-                <li class="page-item disabled">
+        <input
+            type="number"
+            id="pagination-page-input"
+            class="finova-pagination-input"
+            value="1"
+            min="1"
+            step="1"
+            autocomplete="off"
+        >
 
-                    <button
-                        class="page-link"
-                        type="button">
+        <span class="finova-pagination-label">of</span>
 
-                        Previous
+        <span id="pagination-total-pages" class="finova-pagination-total">1</span>
 
-                    </button>
+        <button type="button" id="pagination-next" class="finova-pagination-btn" title="Next Page">
+            <i class="fa-solid fa-angle-right"></i>
+        </button>
 
-                </li>
+        <button type="button" id="pagination-last" class="finova-pagination-btn" title="Last Page">
+            <i class="fa-solid fa-angles-right"></i>
+        </button>
 
-                <li class="page-item active">
+        <button type="button" id="pagination-refresh" class="finova-pagination-refresh" title="Refresh">
+            <i class="fa-solid fa-rotate-right"></i>
+        </button>
 
-                    <button
-                        class="page-link"
-                        type="button">
+    </div>
 
-                        1
-
-                    </button>
-
-                </li>
-
-                <li class="page-item disabled">
-
-                    <button
-                        class="page-link"
-                        type="button">
-
-                        Next
-
-                    </button>
-
-                </li>
-
-            </ul>
-
-        </nav>
-
+    <div id="pagination-info" class="finova-pagination-info">
+        Displaying Record 0 - 0 of 0
     </div>
 
 </div>

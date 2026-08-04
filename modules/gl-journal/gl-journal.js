@@ -18,6 +18,10 @@ import {
     GeneralJournalService
 } from "../../service/journal.service.js";
 
+import {
+    supabase,
+    TABLE
+} from "../../assets/js/core/supabase.js";
 /*
 ==========================================================
 GENERAL JOURNAL
@@ -724,157 +728,68 @@ cacheModalDom() {
 
     /*
     ======================================================
-    CACHE VALIDATION
+    VALIDATION
     ======================================================
     */
 
-    console.groupCollapsed(
-        "GL Journal Modal Cache"
+    const controls = {
+
+        accountingDate:
+            this.txtAccountingDate,
+
+        journalNo:
+            this.txtJournalNo,
+
+        description:
+            this.txtDescription,
+
+        status:
+            this.cboStatus,
+
+        detailTable:
+            this.detailTable,
+
+        detailTableBody:
+            this.detailTableBody,
+
+        addLineButton:
+            this.btnAddLine,
+
+        summaryTotalLine:
+            this.summaryTotalLine,
+
+        summaryTotalAmount:
+            this.summaryTotalAmount,
+
+        saveJournalButton:
+            this.btnSaveJournal,
+
+        postJournalButton:
+            this.btnPostJournal
+
+    };
+
+    console.group("GL JOURNAL CACHE");
+
+    console.table(
+
+        Object.fromEntries(
+
+            Object.entries(controls).map(
+
+                ([key, value]) => [
+
+                    key,
+
+                    Boolean(value)
+
+                ]
+
+            )
+
+        )
+
     );
-
-    console.table({
-
-        accountingDate :
-            Boolean(this.txtAccountingDate),
-
-        journalNo :
-            Boolean(this.txtJournalNo),
-
-        description :
-            Boolean(this.txtDescription),
-
-        status :
-            Boolean(this.cboStatus),
-
-        detailTable :
-            Boolean(this.detailTable),
-
-        detailTableBody :
-            Boolean(this.detailTableBody),
-
-        addLineButton :
-            Boolean(this.btnAddLine),
-
-        summaryTotalLine :
-            Boolean(this.summaryTotalLine),
-
-        summaryTotalAmount :
-            Boolean(this.summaryTotalAmount),
-
-        saveJournalButton :
-            Boolean(this.btnSaveJournal),
-
-        postJournalButton :
-            Boolean(this.btnPostJournal)
-
-    });
-
-    console.groupEnd();
-
-}
-/*
-==========================================================
-CACHE DETAIL MODAL DOM
-==========================================================
-*/
-
-cacheDetailModalDom() {
-
-    /*
-    ======================================================
-    HIDDEN FIELD
-    ======================================================
-    */
-
-    this.detailId =
-        document.getElementById(
-            "detail-id"
-        );
-
-    this.detailMode =
-        document.getElementById(
-            "detail-mode"
-        );
-
-    /*
-    ======================================================
-    DETAIL FORM
-    ======================================================
-    */
-
-    this.detailDescription =
-        document.getElementById(
-            "detail-description"
-        );
-
-    this.detailDebitAccount =
-        document.getElementById(
-            "detail-debit-account"
-        );
-
-    this.detailCreditAccount =
-        document.getElementById(
-            "detail-credit-account"
-        );
-
-    this.detailAmount =
-        document.getElementById(
-            "detail-amount"
-        );
-
-    this.detailBusinessPartner =
-        document.getElementById(
-            "detail-business-partner"
-        );
-
-    /*
-    ======================================================
-    FOOTER
-    ======================================================
-    */
-
-    this.btnSaveLine =
-        document.getElementById(
-            "btn-save-detail-line"
-        );
-
-    /*
-    ======================================================
-    CACHE VALIDATION
-    ======================================================
-    */
-
-    console.groupCollapsed(
-        "Journal Detail Modal Cache"
-    );
-
-    console.table({
-
-        detailId :
-            Boolean(this.detailId),
-
-        detailMode :
-            Boolean(this.detailMode),
-
-        description :
-            Boolean(this.detailDescription),
-
-        debitAccount :
-            Boolean(this.detailDebitAccount),
-
-        creditAccount :
-            Boolean(this.detailCreditAccount),
-
-        amount :
-            Boolean(this.detailAmount),
-
-        businessPartner :
-            Boolean(this.detailBusinessPartner),
-
-        saveLineButton :
-            Boolean(this.btnSaveLine)
-
-    });
 
     console.groupEnd();
 
@@ -1282,23 +1197,42 @@ bindModalEvents() {
 
     );
 
-    /*
-    ======================================================
-    SAVE DRAFT
-    ======================================================
-    */
+   /*
+==========================================================
+SAVE DRAFT
+==========================================================
+*/
 
-    this.btnSaveJournal.onclick = () => {
+if (!this.btnSaveJournal) {
 
-    console.log("BUTTON CLICK");
+    console.error("BTN SAVE JOURNAL NOT FOUND");
 
-    console.log(this);
+}
+else {
 
-    console.log(this.saveJournal);
+    console.log("REGISTER SAVE DRAFT EVENT");
 
-    this.saveJournal("Draft");
+    this.btnSaveJournal.addEventListener(
 
-};
+        "click",
+
+        async (event) => {
+
+            event.preventDefault();
+
+            console.log("SAVE DRAFT CLICK");
+
+            console.log("CURRENT MODE :", this.currentMode);
+
+            console.log("DETAIL :", this.detailLines);
+
+            await this.saveJournal("Draft");
+
+        }
+
+    );
+
+}
 
     /*
     ======================================================
@@ -1486,25 +1420,7 @@ async loadDetailModal() {
     this.bindDetailModalEvents();
 
     this.detailModalLoaded = true;
-    /*
-    ==========================================================
-    SAVE DETAIL LINE
-    ==========================================================
-    */
-
-    this.btnSaveLine?.addEventListener(
-
-        "click",
-
-        () => {
-
-            console.log("SAVE LINE CLICK");
-
-            this.saveDetailLine();
-
-        }
-
-    );
+    
 
 }
 /*
@@ -1603,62 +1519,7 @@ async loadJournalModal() {
 
     this.modalLoaded = true;
 
-        /*
-        ==========================================================
-        SAVE DRAFT
-        ==========================================================
-        */
-
-        const btnSaveJournal =
-
-            document.getElementById(
-
-                "btn-save-journal"
-
-            );
-
-        if (btnSaveJournal) {
-
-            btnSaveJournal.onclick = () => {
-
-                this.saveJournal(
-
-                    "Draft"
-
-                );
-
-            };
-
-        }
-
-        /*
-        ==========================================================
-        SAVE & POST
-        ==========================================================
-        */
-
-        const btnPostJournal =
-
-            document.getElementById(
-
-                "btn-post-journal"
-
-            );
-
-        if (btnPostJournal) {
-
-            btnPostJournal.onclick = () => {
-
-                this.saveJournal(
-
-                    "Posted"
-
-                );
-
-            };
-
-        }
-
+        
         }
     /*
     ==========================================================
@@ -3379,36 +3240,36 @@ validateJournal() {
         }
 
         /*
-        ==================================================
-        DEBIT ACCOUNT
-        ==================================================
-        */
+==================================================
+DEBIT ACCOUNT
+==================================================
+*/
 
-        if (!line.debitAccountId) {
+if (!line.debit_account_id) {
 
-            window.App?.showError?.(
-                "Please select Debit Account."
-            );
+    window.App?.showError?.(
+        "Please select Debit Account."
+    );
 
-            return false;
+    return false;
 
-        }
+}
 
-        /*
-        ==================================================
-        CREDIT ACCOUNT
-        ==================================================
-        */
+/*
+==================================================
+CREDIT ACCOUNT
+==================================================
+*/
 
-        if (!line.creditAccountId) {
+if (!line.credit_account_id) {
 
-            window.App?.showError?.(
-                "Please select Credit Account."
-            );
+    window.App?.showError?.(
+        "Please select Credit Account."
+    );
 
-            return false;
+    return false;
 
-        }
+}
 
         /*
         ==================================================
@@ -3437,181 +3298,7 @@ validateJournal() {
     return true;
 
 }
-/*
-==========================================================
-SAVE JOURNAL
-==========================================================
-*/
 
-async saveJournal(status = "Draft") {
-    console.log("===== SAVE JOURNAL START =====");
-
-    console.log("STATUS :", status);
-
-    console.log("DETAIL LINES :", this.detailLines);
-
-    console.log("DETAIL COUNT :", this.detailLines.length);
-
-    try {
-
-        /*
-        ======================================================
-        VALIDATION
-        ======================================================
-        */
-
-        if (!this.validateJournal()) {
-
-            return;
-
-        }
-
-        /*
-        ======================================================
-        BUILD HEADER
-        ======================================================
-        */
-
-        const journal = {
-
-            id:
-                this.currentMode === "edit"
-                    ? this.currentJournal?.id
-                    : null,
-
-            journal_no:
-                this.txtJournalNo.value.trim(),
-
-            journal_date:
-                this.txtAccountingDate.value,
-
-            description:
-                this.txtDescription.value.trim(),
-
-            status
-
-        };
-        
-
-        /*
-==========================================================
-BUILD DETAIL
-==========================================================
-*/
-
-const details =
-
-    this.detailLines.map(
-
-        (line, index) => ({
-
-            line_no:
-
-                index + 1,
-
-            description:
-
-                line.description,
-
-            debit_account_id:
-
-                line.debit_account_id,
-
-            credit_account_id:
-
-                line.credit_account_id,
-
-            business_partner_id:
-
-                line.business_partner_id || null,
-
-            amount:
-
-                Number(line.amount)
-
-        })
-
-    );
-
-        /*
-        ==========================================================
-        SAVE
-        ==========================================================
-        */
-
-        if (this.currentMode === "add") {
-            console.log("===== BEFORE SERVICE =====");
-            console.log("CURRENT MODE :", this.currentMode);
-            console.log("HEADER :", journal);
-            console.table(details);
-
-            await this.service.create(
-
-                journal,
-
-                details
-
-            );
-
-        }
-        else {
-
-            await this.service.update(
-
-                journal.id,
-
-                journal,
-
-                details
-
-            );
-
-        }
-        /*
-        ======================================================
-        RELOAD DATA
-        ======================================================
-        */
-
-        await this.loadData();
-
-        /*
-        ======================================================
-        CLOSE MODAL
-        ======================================================
-        */
-
-        this.modal.hide();
-
-        /*
-        ======================================================
-        SUCCESS
-        ======================================================
-        */
-
-        window.App?.showSuccess?.(
-
-            `Journal ${status} successfully.`
-
-        );
-
-    }
-
-    catch (error) {
-
-        console.error(error);
-
-        window.App?.showError?.(
-
-            error.message ||
-
-            "Failed to save journal."
-
-        );
-
-    }
-
-}
 /*
 ==========================================================
 DELETE JOURNAL
@@ -4386,97 +4073,7 @@ formatCurrency(value = 0) {
     );
 
 }
-/*
-==========================================================
-CALCULATE SUMMARY
-==========================================================
-*/
 
-calculateSummary() {
-
-    /*
-    ======================================================
-    VALIDATION
-    ======================================================
-    */
-
-    if (!Array.isArray(this.detailLines)) {
-
-        this.detailLines = [];
-
-    }
-
-    /*
-    ======================================================
-    INITIAL VALUE
-    ======================================================
-    */
-
-    let totalLine = 0;
-
-    let totalAmount = 0;
-
-    /*
-    ======================================================
-    CALCULATE
-    ======================================================
-    */
-
-    this.detailLines.forEach(detail => {
-
-        totalLine++;
-
-        totalAmount += Number(
-
-            detail.amount || 0
-
-        );
-
-    });
-
-    /*
-    ======================================================
-    ROUNDING
-    ======================================================
-    */
-
-    totalAmount = Number(
-
-        totalAmount.toFixed(2)
-
-    );
-
-    /*
-    ======================================================
-    STORE SUMMARY
-    ======================================================
-    */
-
-    this.summary = {
-
-        totalLine,
-
-        totalAmount,
-
-        totalDebit: totalAmount,
-
-        totalCredit: totalAmount,
-
-        difference: 0,
-
-        isBalanced: true
-
-    };
-
-    /*
-    ======================================================
-    UPDATE DISPLAY
-    ======================================================
-    */
-
-    this.updateSummaryDisplay();
-
-}
 /*
 ==========================================================
 HANDLE DETAIL TABLE ACTION
@@ -5339,119 +4936,35 @@ CALCULATE SUMMARY
 
 calculateSummary() {
 
-    /*
-    ======================================================
-    VALIDATION
-    ======================================================
-    */
-
     if (!Array.isArray(this.detailLines)) {
 
         this.detailLines = [];
 
     }
 
-    /*
-    ======================================================
-    INITIAL VALUE
-    ======================================================
-    */
+    let totalAmount = 0;
 
-    let totalDebit = 0;
+    this.detailLines.forEach(line => {
 
-    let totalCredit = 0;
-
-    /*
-    ======================================================
-    CALCULATE
-    ======================================================
-    */
-
-    this.detailLines.forEach(detail => {
-
-        totalDebit += Number(
-
-            detail.debit ?? 0
-
-        );
-
-        totalCredit += Number(
-
-            detail.credit ?? 0
-
-        );
+        totalAmount += Number(line.amount || 0);
 
     });
 
-    /*
-    ======================================================
-    ROUNDING
-    ======================================================
-    */
-
-    totalDebit = Number(
-
-        totalDebit.toFixed(2)
-
-    );
-
-    totalCredit = Number(
-
-        totalCredit.toFixed(2)
-
-    );
-
-    /*
-    ======================================================
-    DIFFERENCE
-    ======================================================
-    */
-
-    const difference = Number(
-
-        (totalDebit - totalCredit)
-
-            .toFixed(2)
-
-    );
-
-    /*
-    ======================================================
-    BALANCED
-    ======================================================
-    */
-
-    const isBalanced =
-
-        difference === 0;
-
-    /*
-    ======================================================
-    STORE SUMMARY
-    ======================================================
-    */
+    totalAmount = Number(totalAmount.toFixed(2));
 
     this.summary = {
 
-        totalLine:
+        totalLine: this.detailLines.length,
 
-            this.detailLines.length,
+        totalDebit: totalAmount,
 
-        totalDebit,
+        totalCredit: totalAmount,
 
-        totalCredit,
+        difference: 0,
 
-        difference,
-
-        isBalanced
+        isBalanced: true
 
     };
-
-    /*
-    ======================================================
-    UPDATE DISPLAY
-    ======================================================
-    */
 
     this.updateSummaryDisplay();
 
@@ -6032,109 +5545,117 @@ BIND DETAIL MODAL EVENTS
 */
 
 bindDetailModalEvents() {
+
+    /*
+    ======================================================
+    PREVENT DOUBLE BIND
+    ======================================================
+    */
+
+    if (this.detailModalEventsBound) {
+
+        return;
+
+    }
+
+    this.detailModalEventsBound = true;
+
     console.log("BIND DETAIL EVENTS");
 
-}
-/*
-==========================================================
-COLLECT JOURNAL HEADER
-==========================================================
-*/
-
-collectJournalHeader() {
-
     /*
     ======================================================
-    GET VALUE
+    SAVE LINE
     ======================================================
     */
 
-    const accountingDate =
-        document.getElementById(
-            "journal-accounting-date"
-        )?.value || null;
+    this.btnSaveLine?.addEventListener(
 
-    const journalNo =
-        document.getElementById(
-            "journal-journal-no"
-        )?.value || "";
+        "click",
 
-    const referenceNo =
-        document.getElementById(
-            "journal-reference-no"
-        )?.value.trim() || null;
+        () => {
 
-    const description =
-        document.getElementById(
-            "journal-description"
-        )?.value.trim() || "";
+            console.log("SAVE LINE CLICK");
 
-    const status =
-        document.getElementById(
-            "journal-status"
-        )?.value || "Draft";
+            this.saveDetailLine();
+
+        }
+
+    );
 
     /*
     ======================================================
-    SUMMARY
+    FORMAT AMOUNT
     ======================================================
     */
 
-    const totalAmount =
+    this.detailAmount?.addEventListener(
 
-        this.summary ?
+        "blur",
 
-        Number(
+        () => {
 
-            this.summary.totalAmount || 0
+            const amount = Number(
 
-        )
+                this.detailAmount.value || 0
 
-        :
+            );
 
-        0;
+            this.detailAmount.value =
+                amount.toFixed(2);
+
+        }
+
+    );
 
     /*
     ======================================================
-    RETURN
+    ENTER = SAVE
     ======================================================
     */
 
-    return {
+    this.detailModalElement?.addEventListener(
 
-        journal_no:
+        "keydown",
 
-            journalNo,
+        (event) => {
 
-        journal_date:
+            if (event.key !== "Enter") {
 
-            accountingDate,
+                return;
 
-        reference_no:
+            }
 
-            referenceNo,
+            if (event.target.tagName === "TEXTAREA") {
 
-        description:
+                return;
 
-            description,
+            }
 
-        source_module:
+            event.preventDefault();
 
-            "GENERAL",
+            this.saveDetailLine();
 
-        total_debit:
+        }
 
-            totalAmount,
+    );
 
-        total_credit:
+    /*
+    ======================================================
+    RESET
+    ======================================================
+    */
 
-            totalAmount,
+    this.detailModalElement?.addEventListener(
 
-        status:
+        "hidden.bs.modal",
 
-            status
+        () => {
 
-    };
+            this.clearDetailForm();
+
+        }
+
+    );
 
 }
 /*
@@ -6307,40 +5828,50 @@ async saveJournal(status = "Draft") {
         }
 
         /*
-        ======================================================
-        HEADER
-        ======================================================
-        */
+======================================================
+HEADER
+======================================================
+*/
 
-        const header = {
+const header = {
 
-            id:
+    journal_no:
 
-                this.currentMode === "edit"
+        this.txtJournalNo.value.trim(),
 
-                    ? this.currentJournal?.id
+    journal_date:
 
-                    : null,
+        this.txtAccountingDate.value,
 
-            journal_no:
+    description:
 
-                this.txtJournalNo.value.trim(),
+        this.txtDescription.value.trim(),
 
-            journal_date:
+    source_module:
 
-                this.txtAccountingDate.value,
+        "GENERAL",
 
-            description:
+    status
 
-                this.txtDescription.value.trim(),
+};
 
-            source_module:
+/*
+======================================================
+EDIT MODE
+======================================================
+*/
 
-                "GENERAL",
+if (
 
-            status
+    this.currentMode === "edit" &&
 
-        };
+    this.currentJournal?.id
+
+) {
+
+    header.id = this.currentJournal.id;
+
+}
 
         /*
         ======================================================

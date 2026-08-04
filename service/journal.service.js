@@ -424,37 +424,68 @@ async create(header, details = []) {
         header.total_credit =
 
             total.totalCredit;
+/*
+==========================================================
+REMOVE EMPTY ID
+==========================================================
+*/
 
+if (header.id == null) {
+
+    delete header.id;
+
+}
+
+console.log("HEADER SEND");
+
+console.log(header);
         /*
-        ======================================================
-        INSERT HEADER
-        ======================================================
-        */
+==========================================================
+INSERT HEADER
+==========================================================
+*/
 
-        const {
+console.log("===== HEADER DATA =====");
 
-            data: journal,
+console.table(header);
 
-            error: headerError
+const {
 
-        } = await supabase
+    data: journal,
 
-            .from(TABLE.GL_JOURNAL)
+    error: headerError
 
-            .insert(header)
+} = await supabase
 
-            .select()
+    .from(TABLE.GL_JOURNAL)
+    
 
-            .single();
-            console.log("HEADER INSERT RESULT");
-            console.log(journal);
-            console.log(headerError);
+    .insert(header)
+    
 
-        if (headerError) {
+    .select()
 
-            throw headerError;
+    .single();
 
-        }
+console.log("HEADER RESULT :", journal);
+
+console.error("HEADER ERROR FULL");
+
+console.dir(headerError);
+
+console.log("MESSAGE :", headerError?.message);
+
+console.log("DETAILS :", headerError?.details);
+
+console.log("HINT :", headerError?.hint);
+
+console.log("CODE :", headerError?.code);
+
+if (headerError) {
+
+    throw headerError;
+
+}
 
         /*
         ======================================================
@@ -1037,7 +1068,7 @@ async generateDocumentNumber() {
         ======================================================
         */
 
-        return `${prefix}-${String(running).padStart(5,"0")}`;
+        return `${prefix}-${String(running).padStart(6, "0")}`;
 
     }
 
@@ -1753,5 +1784,6 @@ async voidJournal(id, reason = "") {
     }
 
 }
+
 
 }
