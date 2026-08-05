@@ -894,8 +894,6 @@ btnDelete?.addEventListener(
 
         try {
 
-            this.deleteJournalModal.hide();
-
             await this.deleteJournal(
 
                 this.selectedDeleteJournalId
@@ -903,6 +901,7 @@ btnDelete?.addEventListener(
             );
 
         }
+
         finally {
 
             btnDelete.disabled = false;
@@ -1246,11 +1245,11 @@ showDeleteJournalModal(id) {
 
     document.getElementById(
 
-        "delete-accounting-date"
+    "delete-accounting-date"
 
     ).textContent =
 
-        journal.accounting_date || "-";
+    journal.journal_date || "-";
 
     document.getElementById(
 
@@ -3928,25 +3927,6 @@ async deleteJournal(id) {
 
     }
 
-    /*
-    ======================================================
-    CONFIRM DELETE
-    ======================================================
-    */
-
-    const confirmed =
-        window.confirm(
-
-            "Are you sure you want to delete this journal?"
-
-        );
-
-    if (!confirmed) {
-
-        return;
-
-    }
-
     try {
 
         /*
@@ -3964,6 +3944,14 @@ async deleteJournal(id) {
         */
 
         await this.service.delete(id);
+
+        /*
+        ======================================================
+        CLOSE DELETE MODAL
+        ======================================================
+        */
+
+        this.deleteJournalModal.hide();
 
         /*
         ======================================================
