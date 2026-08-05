@@ -246,6 +246,7 @@ cacheDom() {
         document.getElementById(
             "btn-download-journal"
         );
+    
 
     /*
     ======================================================
@@ -646,6 +647,11 @@ cacheModalDom() {
         document.getElementById(
             "journal-accounting-date"
         );
+            
+    this.txtPostingPeriod =
+    document.getElementById(
+        "journal-posting-period"
+    );
 
     this.txtJournalNo =
         document.getElementById(
@@ -1168,6 +1174,30 @@ bindModalEvents() {
     }
 
     this.modalEventsBound = true;
+
+        /*
+    ======================================================
+    ACCOUNTING DATE → POSTING PERIOD
+    ======================================================
+    */
+
+    this.txtAccountingDate?.addEventListener(
+        "change",
+        () => {
+
+            if (!this.txtPostingPeriod) {
+
+                return;
+
+            }
+
+            this.txtPostingPeriod.value =
+                this.getPostingPeriod(
+                    this.txtAccountingDate.value
+                );
+
+        }
+    );
 
     /*
     ======================================================
@@ -2764,6 +2794,12 @@ clearJournalForm() {
 
     }
 
+    if (this.txtPostingPeriod) {
+
+    this.txtPostingPeriod.value = "";
+
+}
+
     if (this.txtJournalNo) {
 
         this.txtJournalNo.value = "";
@@ -2799,6 +2835,39 @@ clearJournalForm() {
     */
 
     this.calculateSummary();
+
+}
+/*
+==========================================================
+GET POSTING PERIOD
+==========================================================
+*/
+
+getPostingPeriod(dateValue) {
+
+    if (!dateValue) {
+
+        return "";
+
+    }
+
+    /*
+    ======================================================
+    EXPECTED FORMAT
+    YYYY-MM-DD
+    ======================================================
+    */
+
+    const parts =
+        String(dateValue).split("-");
+
+    if (parts.length < 2) {
+
+        return "";
+
+    }
+
+    return `${parts[0]}-${parts[1]}`;
 
 }
 /*
@@ -2849,15 +2918,26 @@ async initializeJournalHeader() {
         */
 
         this.txtAccountingDate.value =
-            new Date()
-                .toISOString()
-                .substring(0, 10);
+         new Date()
+        .toISOString()
+        .substring(0, 10);
+
 
         /*
-        ==================================================
-        STATUS
-        ==================================================
+        ======================================================
+        POSTING PERIOD
+        ======================================================
         */
+
+        if (this.txtPostingPeriod) {
+
+            this.txtPostingPeriod.value =
+                this.getPostingPeriod(
+                    this.txtAccountingDate.value
+                );
+
+        }
+
 
         this.cboStatus.value =
             "Draft";
@@ -2895,6 +2975,25 @@ async initializeJournalHeader() {
 
     this.txtAccountingDate.value =
         this.currentJournal.journal_date ?? "";
+
+
+        /*
+    ======================================================
+    POSTING PERIOD
+    ======================================================
+    */
+
+    if (this.txtPostingPeriod) {
+
+        this.txtPostingPeriod.value =
+
+            this.currentJournal.posting_period ||
+
+            this.getPostingPeriod(
+                this.currentJournal.journal_date
+            );
+
+    }
 
     /*
     ======================================================
@@ -3163,6 +3262,7 @@ async loadJournal(id) {
     this.calculateSummary();
 
 }
+
 /*
 ==========================================================
 FILL JOURNAL FORM
@@ -3183,9 +3283,10 @@ fillJournalForm() {
 
     }
 
+
     /*
     ======================================================
-    JOURNAL HEADER
+    JOURNAL NO
     ======================================================
     */
 
@@ -3196,12 +3297,45 @@ fillJournalForm() {
 
     }
 
+
+    /*
+    ======================================================
+    ACCOUNTING DATE
+    ======================================================
+    */
+
     if (this.txtAccountingDate) {
 
         this.txtAccountingDate.value =
             this.currentJournal.journal_date ?? "";
 
     }
+
+
+    /*
+    ======================================================
+    POSTING PERIOD
+    ======================================================
+    */
+
+    if (this.txtPostingPeriod) {
+
+        this.txtPostingPeriod.value =
+
+            this.currentJournal.posting_period ||
+
+            this.getPostingPeriod(
+                this.currentJournal.journal_date
+            );
+
+    }
+
+
+    /*
+    ======================================================
+    DESCRIPTION
+    ======================================================
+    */
 
     if (this.txtDescription) {
 
@@ -3210,6 +3344,13 @@ fillJournalForm() {
 
     }
 
+
+    /*
+    ======================================================
+    STATUS
+    ======================================================
+    */
+
     if (this.cboStatus) {
 
         this.cboStatus.value =
@@ -3217,16 +3358,23 @@ fillJournalForm() {
 
     }
 
+
+    /*
+    ======================================================
+    REFRESH DETAIL
+    ======================================================
+    */
+
     this.refreshDetailView();
 
 }
-/*
-==========================================================
-VALIDATE JOURNAL
-==========================================================
-*/
+    /*
+    ==========================================================
+    VALIDATE JOURNAL
+    ==========================================================
+    */
 
-validateJournal(status = "Draft") {
+    validateJournal(status = "Draft") {
 
     /*
     ======================================================
@@ -3245,6 +3393,7 @@ validateJournal(status = "Draft") {
         return false;
 
     }
+    
 
     /*
     ======================================================
@@ -4857,14 +5006,13 @@ setJournalReadOnly(readOnly = true) {
     */
 
     [
-
-        "journal-accounting-date",
-
-        "journal-reference-no",
-
-        "journal-description"
-
-    ].forEach(id => {
+    "journal-accounting-date",
+    "journal-posting-period",
+    "journal-reference-no",
+    "journal-description"
+    ]
+    
+    .forEach(id => {
 
         const element =
 
@@ -6187,19 +6335,22 @@ HEADER
 const header = {
 
     journal_no:
-
         this.txtJournalNo.value.trim(),
 
     journal_date:
-
         this.txtAccountingDate.value,
 
-    description:
+    posting_period:
+        this.txtPostingPeriod?.value ||
 
+        this.getPostingPeriod(
+            this.txtAccountingDate.value
+        ),
+
+    description:
         this.txtDescription.value.trim(),
 
     source_module:
-
         "GENERAL",
 
     status

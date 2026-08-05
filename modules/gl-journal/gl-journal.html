@@ -241,14 +241,22 @@ Version : 2.0 Enterprise
 </div> <!-- End Filter Card -->
 
     <!-- ==========================================================
-         TABLE CARD
-    =========================================================== -->
+     TABLE CARD
+========================================================== -->
 
-    <div class="card gl-journal-table-card">
+<div class="card gl-journal-table-card">
 
-        <div
-            id="gl-journal-table-wrapper"
-            class="table-responsive">
+    <div class="card-body finova-card-body">
+
+        <div class="finova-table-container">
+
+            <!-- ==================================================
+                 TABLE
+            =================================================== -->
+
+            <div
+                id="gl-journal-table-wrapper"
+                class="table-responsive">
 
                 <table
                     id="gl-journal-table"
@@ -259,27 +267,19 @@ Version : 2.0 Enterprise
                         <tr>
 
                             <th style="width:70px;">
-
                                 No
-
                             </th>
 
                             <th style="width:150px;">
-
                                 Accounting Date
-
                             </th>
 
                             <th style="width:180px;">
-
                                 Journal No
-
                             </th>
 
                             <th>
-
                                 Description
-
                             </th>
 
                             <th
@@ -327,117 +327,119 @@ Version : 2.0 Enterprise
                 </table>
 
             </div>
-                
-<!-- ==========================================================
-     PAGINATION
-========================================================== -->
 
-<div class="d-flex justify-content-between align-items-center px-3 py-3">
 
-    <!-- LEFT -->
+            <!-- ==================================================
+                 PAGINATION
+            =================================================== -->
 
-    <nav aria-label="General Journal Pagination">
+            <div class="finova-pagination-wrapper">
 
-        <ul class="pagination finova-pagination mb-0">
+                <div class="finova-pagination-left">
 
-            <li class="page-item disabled">
+                    <!-- FIRST -->
 
-                <button
-                    id="btn-first-page"
-                    class="page-link">
+                    <button
+                        type="button"
+                        id="btn-first-page"
+                        class="finova-pagination-btn"
+                        title="First Page">
 
-                    <i class="fa-solid fa-backward-step"></i>
+                        <i class="fa-solid fa-backward-step"></i>
 
-                </button>
+                    </button>
 
-            </li>
 
-            <li class="page-item disabled">
+                    <!-- PREVIOUS -->
 
-                <button
-                    id="btn-prev-page"
-                    class="page-link">
+                    <button
+                        type="button"
+                        id="btn-prev-page"
+                        class="finova-pagination-btn"
+                        title="Previous Page">
 
-                    <i class="fa-solid fa-chevron-left"></i>
+                        <i class="fa-solid fa-chevron-left"></i>
 
-                </button>
+                    </button>
 
-            </li>
 
-            <li class="page-item">
+                    <!-- PAGE -->
 
-                <span class="finova-page-text">
+                    <span class="finova-pagination-label">
 
-                    Page
+                        Page
 
-                </span>
+                    </span>
 
-            </li>
 
-            <li class="page-item">
+                    <!-- CURRENT PAGE -->
 
-                <input
-                    id="current-page"
-                    type="number"
-                    value="1"
-                    min="1"
-                    class="form-control form-control-sm finova-page-input">
+                    <input
+                        type="number"
+                        id="current-page"
+                        value="1"
+                        min="1"
+                        class="form-control finova-pagination-input"
+                        aria-label="Current Page">
 
-            </li>
 
-            <li class="page-item">
+                    <!-- TOTAL PAGE -->
 
-                <span
-                    id="total-pages"
-                    class="finova-page-text">
+                    <span
+                        id="total-pages"
+                        class="finova-pagination-total">
 
-                    of 1
+                        of 1
 
-                </span>
+                    </span>
 
-            </li>
 
-            <li class="page-item">
+                    <!-- NEXT -->
 
-                <button
-                    id="btn-next-page"
-                    class="page-link">
+                    <button
+                        type="button"
+                        id="btn-next-page"
+                        class="finova-pagination-btn"
+                        title="Next Page">
 
-                    <i class="fa-solid fa-chevron-right"></i>
+                        <i class="fa-solid fa-chevron-right"></i>
 
-                </button>
+                    </button>
 
-            </li>
 
-            <li class="page-item">
+                    <!-- LAST -->
 
-                <button
-                    id="btn-last-page"
-                    class="page-link">
+                    <button
+                        type="button"
+                        id="btn-last-page"
+                        class="finova-pagination-btn"
+                        title="Last Page">
 
-                    <i class="fa-solid fa-forward-step"></i>
+                        <i class="fa-solid fa-forward-step"></i>
 
-                </button>
+                    </button>
 
-            </li>
+                </div>
 
-        </ul>
 
-    </nav>
+                <!-- RECORD INFO -->
 
-    <!-- RIGHT -->
+                <div
+                    id="display-record"
+                    class="finova-pagination-info">
 
-    <div
-        id="display-record"
-        class="finova-record-info">
+                    Records 0 - 0 of 0
 
-        Records 0 - 0 of 0
+                </div>
+
+            </div>
+
+        </div>
 
     </div>
 
 </div>
-</div> <!-- End Card Body -->
-</div> <!-- End Table Card -->
+
 
     <!-- ==========================================================
          MODAL CONTAINER
