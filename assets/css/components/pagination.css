@@ -47,7 +47,7 @@
 
     width: 100%;
 
-    padding-top: 12px;
+    padding-top: 2px;
 
     border-top: 1px solid var(--border-color);
 
@@ -187,16 +187,20 @@
 
 
 /* ==========================================================
-   TOTAL
+   COA PAGINATION TOTAL
 ========================================================== */
 
-.finova-pagination-total {
+.coa-page .finova-pagination-total {
 
-    min-width: 20px;
+    display: inline-flex;
 
-    text-align: center;
+    align-items: center;
 
-    flex-shrink: 0;
+    justify-content: center;
+
+    min-width: 48px;
+
+    white-space: nowrap;
 
 }
 
@@ -279,3 +283,5 @@
     background: #FFFFFF;
 
 }
+
+

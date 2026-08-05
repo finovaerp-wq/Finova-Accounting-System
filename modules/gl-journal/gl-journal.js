@@ -22,6 +22,9 @@ import {
     supabase,
     TABLE
 } from "../../assets/js/core/supabase.js";
+
+import { PreviewService }
+from "../../service/preview.service.js";
 /*
 ==========================================================
 GENERAL JOURNAL
@@ -246,6 +249,10 @@ cacheDom() {
         document.getElementById(
             "btn-download-journal"
         );
+    this.btnPreviewJournal =
+    document.getElementById(
+        "btn-preview-journal"
+    );
     
 
     /*
@@ -435,6 +442,10 @@ cacheDom() {
     console.log(
         "Detail Modal Container :",
         Boolean(this.detailModalContainer)
+    );
+    console.log(
+    "Preview Button :",
+    this.btnPreview
     );
 
     console.groupEnd();
@@ -814,30 +825,44 @@ bindEvents() {
     ======================================================
     */
 
-    this.btnAddJournal?.addEventListener(
+ this.btnAddJournal?.addEventListener(
 
-        "click",
+    "click",
 
-        () => this.openAddJournal()
+    () => this.openAddJournal()
 
-    );
+);
 
-    this.btnRefreshJournal?.addEventListener(
+this.btnRefreshJournal?.addEventListener(
 
-        "click",
+    "click",
 
-        () => this.loadData()
+    () => this.loadData()
 
-    );
+);
 
-    this.btnDownloadJournal?.addEventListener(
+this.btnDownloadJournal?.addEventListener(
 
-        "click",
+    "click",
 
-        () => this.exportExcel()
+    () => this.exportExcel()
 
-    );
-    /*
+);
+
+this.btnPreview?.addEventListener(
+
+    "click",
+
+    () => {
+
+        console.log("PREVIEW CLICK");
+
+        this.previewHTML();
+
+    }
+
+);
+/*
 ==========================================================
 DETAIL TABLE EVENT
 ==========================================================
@@ -5125,6 +5150,91 @@ setJournalReadOnly(readOnly = true) {
 }
 /*
 ==========================================================
+PREVIEW HTML
+==========================================================
+*/
+
+previewHTML() {
+
+    /*
+    ======================================================
+    VALIDATION
+    ======================================================
+    */
+
+    if (!this.filteredJournals.length) {
+
+    this.showError(
+        "No journal available."
+    );
+
+    return;
+
+}
+
+    /*
+    ======================================================
+    BUILD ROWS
+    ======================================================
+    */
+
+    const rows = this.filteredJournals.map(journal => `
+
+        <tr>
+
+            <td>${journal.journal_date ?? "-"}</td>
+
+            <td>${journal.journal_no ?? "-"}</td>
+
+            <td>${journal.description ?? "-"}</td>
+
+            <td style="text-align:right">
+
+                ${this.formatCurrency(journal.total_debit)}
+
+            </td>
+
+            <td style="text-align:right">
+
+                ${this.formatCurrency(journal.total_credit)}
+
+            </td>
+
+            <td>${journal.status}</td>
+
+        </tr>
+
+    `);
+
+    PreviewService.open({
+
+        title: "General Journal",
+
+        subtitle: "Accounting / General Journal",
+
+        columns: [
+
+            "Accounting Date",
+
+            "Journal No",
+
+            "Description",
+
+            "Debit",
+
+            "Credit",
+
+            "Status"
+
+        ],
+
+        rows
+
+    });
+
+}
+/*
+==========================================================
 EXPORT EXCEL
 ==========================================================
 */
@@ -5138,6 +5248,7 @@ async exportExcel() {
     );
 
 }
+
 /*
 ==========================================================
 CALCULATE SUMMARY

@@ -1230,18 +1230,17 @@ renderPagination() {
 
 
     /*
-    ======================================================
-    TOTAL PAGES
-    ======================================================
-    */
+======================================================
+TOTAL PAGES
+======================================================
+*/
 
-    if (totalPagesElement) {
+if (totalPagesElement) {
 
-        totalPagesElement.textContent =
-            totalPages;
+    totalPagesElement.textContent =
+        `of ${totalPages}`;
 
-    }
-
+}
 
     /*
     ======================================================

@@ -14,61 +14,67 @@ Version : 2.0.0
 
    <div class="finova-page-header">
 
+    <!-- LEFT -->
+
     <div class="finova-page-header-left">
 
         <h1 class="finova-page-title">
-    Chart Of Accounts
-</h1>
+            Chart Of Accounts
+        </h1>
 
-<p class="finova-page-subtitle">
-    Master Data / Chart Of Accounts
-</p>
+        <p class="finova-page-subtitle">
+            Master Data / Chart Of Accounts
+        </p>
 
     </div>
 
+    <!-- RIGHT -->
+
     <div class="finova-page-header-right">
-        </div>
 
-        </div>
+        <button
+            id="btn-add-account"
+            class="btn btn-primary finova-btn">
 
-    <button
-    id="btn-add-account"
-    class="btn btn-primary finova-btn">
+            <i class="fas fa-plus"></i>
 
-    <i class="fas fa-plus"></i>
-    Add Account
+            Add Account
 
-</button>
+        </button>
 
-    <button
-        id="btn-export"
-        class="btn btn-outline-success finova-btn">
+        <button
+            id="btn-export"
+            class="btn btn-outline-success finova-btn">
 
-        <i class="fas fa-file-excel"></i>
-        Download Excel
+            <i class="fas fa-file-excel"></i>
 
-    </button>
+            Download Excel
 
-    <button
-        id="btn-preview"
-        class="btn btn-outline-primary finova-btn">
+        </button>
 
-        <i class="fas fa-print"></i>
-        Preview HTML
+        <button
+            id="btn-preview"
+            class="btn btn-outline-primary finova-btn">
 
-    </button>
+            <i class="fas fa-print"></i>
 
-    <button
-        id="btn-refresh"
-        class="btn btn-outline-secondary finova-btn">
+            Preview HTML
 
-        <i class="fas fa-rotate-right"></i>
-        Refresh
+        </button>
 
-    </button>
+        <button
+            id="btn-refresh"
+            class="btn btn-outline-secondary finova-btn">
+
+            <i class="fas fa-rotate-right"></i>
+
+            Refresh
+
+        </button>
+
+    </div>
 
 </div>
-
     <!-- ==========================================
          TOOLBAR
     =========================================== -->
@@ -154,24 +160,19 @@ Version : 2.0.0
      DATA TABLE
 ========================================== -->
 
-<div class="finova-card coa-table-card">
+<div class="card coa-table-card">
 
-    <div class="finova-card-body">
+    <div class="card-body finova-card-body">
 
         <div class="finova-table-container">
 
-            <!-- ======================================
-                 TABLE
-            ======================================= -->
-
-            <div class="table-responsive coa-table-responsive">
+            <div class="table-responsive">
 
                 <table class="table finova-table table-hover">
 
                     <thead class="finova-table-header">
 
                         <tr>
-
                             <th style="width:130px">
                                 Account Code
                             </th>
@@ -196,30 +197,17 @@ Version : 2.0.0
                                 Posting Type
                             </th>
 
-                            <th
-                                class="text-center"
-                                style="width:90px">
-
+                            <th class="text-center" style="width:90px">
                                 Header
-
                             </th>
 
-                            <th
-                                class="text-center"
-                                style="width:100px">
-
+                            <th class="text-center" style="width:100px">
                                 Status
-
                             </th>
 
-                            <th
-                                class="text-center"
-                                style="width:110px">
-
+                            <th class="text-center" style="width:110px">
                                 Action
-
                             </th>
-
                         </tr>
 
                     </thead>
@@ -227,7 +215,6 @@ Version : 2.0.0
                     <tbody id="coa-table-body">
 
                         <tr>
-
                             <td colspan="9">
 
                                 <div class="finova-empty">
@@ -247,7 +234,6 @@ Version : 2.0.0
                                 </div>
 
                             </td>
-
                         </tr>
 
                     </tbody>
@@ -257,112 +243,130 @@ Version : 2.0.0
             </div>
 
 
-            <!-- ======================================
-                 PAGINATION
-            ======================================= -->
+<!-- ==================================================
+     PAGINATION
+=================================================== -->
 
-            <div class="finova-pagination-wrapper coa-pagination-wrapper">
+<div class="finova-pagination-wrapper">
 
-                <div class="finova-pagination-left">
+    <div class="finova-pagination-left">
 
-                    <button
-                        type="button"
-                        id="pagination-first"
-                        class="finova-pagination-btn"
-                        title="First Page">
+        <!-- FIRST -->
 
-                        <i class="fa-solid fa-angles-left"></i>
+        <button
+            type="button"
+            id="pagination-first"
+            class="finova-pagination-btn"
+            title="First Page">
 
-                    </button>
+            <i class="fa-solid fa-backward-step"></i>
 
-
-                    <button
-                        type="button"
-                        id="pagination-prev"
-                        class="finova-pagination-btn"
-                        title="Previous Page">
-
-                        <i class="fa-solid fa-angle-left"></i>
-
-                    </button>
+        </button>
 
 
-                    <span class="finova-pagination-label">
-                        Page
-                    </span>
+        <!-- PREVIOUS -->
+
+        <button
+            type="button"
+            id="pagination-prev"
+            class="finova-pagination-btn"
+            title="Previous Page">
+
+            <i class="fa-solid fa-chevron-left"></i>
+
+        </button>
 
 
-                    <input
-                        type="number"
-                        id="pagination-page-input"
-                        class="form-control finova-pagination-input"
-                        value="1"
-                        min="1"
-                        step="1"
-                        autocomplete="off">
+        <!-- PAGE -->
+
+        <span class="finova-pagination-label">
+
+            Page
+
+        </span>
 
 
-                    <span class="finova-pagination-label">
-                        of
-                    </span>
+        <!-- CURRENT PAGE -->
+
+        <input
+            type="number"
+            id="pagination-page-input"
+            value="1"
+            min="1"
+            class="form-control finova-pagination-input"
+            aria-label="Current Page"
+            autocomplete="off">
 
 
-                    <span
-                        id="pagination-total-pages"
-                        class="finova-pagination-total">
+        <!-- TOTAL PAGE -->
 
-                        1
+        <span
+            id="pagination-total-pages"
+            class="finova-pagination-total">
 
-                    </span>
+            of 1
 
-
-                    <button
-                        type="button"
-                        id="pagination-next"
-                        class="finova-pagination-btn"
-                        title="Next Page">
-
-                        <i class="fa-solid fa-angle-right"></i>
-
-                    </button>
+        </span>
 
 
-                    <button
-                        type="button"
-                        id="pagination-last"
-                        class="finova-pagination-btn"
-                        title="Last Page">
+        <!-- NEXT -->
 
-                        <i class="fa-solid fa-angles-right"></i>
+        <button
+            type="button"
+            id="pagination-next"
+            class="finova-pagination-btn"
+            title="Next Page">
 
-                    </button>
+            <i class="fa-solid fa-chevron-right"></i>
 
-
-                    <button
-                        type="button"
-                        id="pagination-refresh"
-                        class="finova-pagination-refresh"
-                        title="Refresh">
-
-                        <i class="fa-solid fa-rotate-right"></i>
-
-                    </button>
-
-                </div>
+        </button>
 
 
-                <div
-                    id="pagination-info"
-                    class="finova-pagination-info">
+        <!-- LAST -->
 
-                    Displaying Record 0 - 0 of 0
+        <button
+            type="button"
+            id="pagination-last"
+            class="finova-pagination-btn"
+            title="Last Page">
 
-                </div>
+            <i class="fa-solid fa-forward-step"></i>
 
-            </div>
+        </button>
 
-        </div>
+
+        <!-- REFRESH -->
+
+        <button
+            type="button"
+            id="pagination-refresh"
+            class="finova-pagination-refresh"
+            title="Refresh">
+
+            <i class="fa-solid fa-rotate-right"></i>
+
+        </button>
+
+    </div>
+
+
+    <!-- RECORD INFO -->
+
+    <div
+        id="pagination-info"
+        class="finova-pagination-info">
+
+        Displaying Record 0 - 0 of 0
 
     </div>
 
 </div>
+</div> <!-- finova-pagination-wrapper -->
+
+</div> <!-- finova-table-container -->
+
+</div> <!-- finova-card-body -->
+
+</div> <!-- coa-table-card -->
+
+</div> <!-
