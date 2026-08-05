@@ -181,6 +181,14 @@ async init() {
 
         /*
         ======================================================
+        CREATE DELETE MODAL
+        ======================================================
+        */
+
+        this.createDeleteJournalModal();
+
+        /*
+        ======================================================
         BIND ALL EVENTS
         ======================================================
         */
@@ -864,6 +872,48 @@ this.btnPreview?.addEventListener(
 );
 /*
 ==========================================================
+CONFIRM DELETE JOURNAL
+==========================================================
+*/
+
+const btnDelete =
+
+    document.getElementById(
+
+        "btn-confirm-delete-journal"
+
+    );
+
+btnDelete?.addEventListener(
+
+    "click",
+
+    async () => {
+
+        btnDelete.disabled = true;
+
+        try {
+
+            this.deleteJournalModal.hide();
+
+            await this.deleteJournal(
+
+                this.selectedDeleteJournalId
+
+            );
+
+        }
+        finally {
+
+            btnDelete.disabled = false;
+
+        }
+
+    }
+
+);
+/*
+==========================================================
 DETAIL TABLE EVENT
 ==========================================================
 */
@@ -947,6 +997,7 @@ if (this.gridBody) {
     this.bindTableEvents();
 
 }
+
 /*
 ==========================================================
 BIND FILTER EVENTS
@@ -1046,6 +1097,7 @@ bindFilterEvents() {
         () => this.search()
 
     );
+    
 
 }
 /*
@@ -1147,6 +1199,82 @@ bindPaginationEvents() {
         }
 
     );
+
+}
+
+/*
+==========================================================
+SHOW DELETE JOURNAL MODAL
+==========================================================
+*/
+
+showDeleteJournalModal(id) {
+
+    /*
+    ======================================================
+    FIND JOURNAL
+    ======================================================
+    */
+
+    const journal =
+
+        this.journals.find(
+
+            x => String(x.id) === String(id)
+
+        );
+
+    if (!journal) {
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    FILL INFORMATION
+    ======================================================
+    */
+
+    document.getElementById(
+
+        "delete-journal-no"
+
+    ).textContent =
+
+        journal.journal_no || "-";
+
+    document.getElementById(
+
+        "delete-accounting-date"
+
+    ).textContent =
+
+        journal.accounting_date || "-";
+
+    document.getElementById(
+
+        "delete-description"
+
+    ).textContent =
+
+        journal.description || "-";
+
+    /*
+    ======================================================
+    SAVE ID
+    ======================================================
+    */
+
+    this.selectedDeleteJournalId = id;
+
+    /*
+    ======================================================
+    SHOW MODAL
+    ======================================================
+    */
+
+    this.deleteJournalModal.show();
 
 }
 /*
@@ -2372,6 +2500,245 @@ createDetailRow(detail, index) {
 
 }
 /*
+======================================================
+CREATE DELETE JOURNAL MODAL
+======================================================
+*/
+
+createDeleteJournalModal() {
+
+    /*
+    ======================================================
+    ALREADY EXISTS
+    ======================================================
+    */
+
+    if (
+        document.getElementById(
+            "confirmDeleteJournalModal"
+        )
+    ) {
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    CREATE MODAL
+    ======================================================
+    */
+
+    const modalHtml = `
+
+        <div
+            class="modal fade"
+            id="confirmDeleteJournalModal"
+            tabindex="-1"
+            data-bs-backdrop="static"
+            data-bs-keyboard="false"
+            aria-labelledby="confirmDeleteJournalModalLabel"
+            aria-hidden="true">
+
+            <div
+                class="modal-dialog modal-dialog-centered">
+
+                <div class="modal-content">
+
+                    <!-- HEADER -->
+
+                    <div class="modal-header">
+
+                        <h5
+                            class="modal-title"
+                            id="confirmDeleteJournalModalLabel">
+
+                            <i
+                                class="fa-solid fa-trash-can text-danger me-2">
+                            </i>
+
+                            Confirm Delete Journal
+
+                        </h5>
+
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close">
+                        </button>
+
+                    </div>
+
+                    <!-- BODY -->
+
+                    <div class="modal-body">
+
+                        <div
+                            class="text-center py-2">
+
+                            <i
+                                class="fa-solid fa-trash-can text-danger"
+                                style="font-size:42px;">
+                            </i>
+
+                        </div>
+
+                        <p
+                            class="text-center mb-4">
+
+                            Apakah Anda yakin ingin
+                            <strong>menghapus Journal</strong>
+                            ini?
+
+                        </p>
+
+                        <table
+                            class="table table-bordered table-sm">
+
+                            <tbody>
+
+                                <tr>
+
+                                    <th width="150">
+
+                                        Journal No
+
+                                    </th>
+
+                                    <td
+                                        id="delete-journal-no">
+
+                                        -
+
+                                    </td>
+
+                                </tr>
+
+                                <tr>
+
+                                    <th>
+
+                                        Accounting Date
+
+                                    </th>
+
+                                    <td
+                                        id="delete-accounting-date">
+
+                                        -
+
+                                    </td>
+
+                                </tr>
+
+                                <tr>
+
+                                    <th>
+
+                                        Description
+
+                                    </th>
+
+                                    <td
+                                        id="delete-description">
+
+                                        -
+
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                        <div
+                            class="alert alert-danger">
+
+                            <i
+                                class="fa-solid fa-triangle-exclamation me-2">
+                            </i>
+
+                            Journal yang dihapus tidak dapat
+                            dikembalikan.
+
+                        </div>
+
+                    </div>
+
+                    <!-- FOOTER -->
+
+                    <div
+                        class="modal-footer">
+
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+
+                            <i
+                                class="fa-solid fa-xmark me-1">
+                            </i>
+
+                            Batal
+
+                        </button>
+
+                        <button
+                            type="button"
+                            id="btn-confirm-delete-journal"
+                            class="btn btn-danger">
+
+                            <i
+                                class="fa-solid fa-trash-can me-1">
+                            </i>
+
+                            Ya, Hapus
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+    /*
+    ======================================================
+    APPEND MODAL
+    ======================================================
+    */
+
+    document.body.insertAdjacentHTML(
+
+        "beforeend",
+
+        modalHtml
+
+    );
+
+    /*
+    ======================================================
+    BOOTSTRAP MODAL
+    ======================================================
+    */
+
+    this.deleteJournalModal =
+        new bootstrap.Modal(
+
+            document.getElementById(
+                "confirmDeleteJournalModal"
+            )
+
+        );
+
+}
+/*
 ==========================================================
 SEARCH JOURNAL
 ==========================================================
@@ -2613,19 +2980,19 @@ handleTableAction(event) {
 
     if (
 
-        button.classList.contains(
+    button.classList.contains(
 
-            "btn-delete-journal"
+        "btn-delete-journal"
 
-        )
+    )
 
-    ) {
+) {
 
-        this.deleteJournal(id);
+    this.showDeleteJournalModal(id);
 
-        return;
+    return;
 
-    }
+}
 
     /*
     ======================================================
@@ -7582,6 +7949,7 @@ showVoidConfirmation() {
             </div>
 
         `;
+        
 
         /*
         ======================================================
