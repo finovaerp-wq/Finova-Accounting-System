@@ -6,15 +6,17 @@ Version : 1.0.0
 ===========================================
 */
 
+
 /* ===========================================
    DASHBOARD
 =========================================== */
 
 .finova-dashboard {
 
-    width: 100%;
+    width:100%;
 
 }
+
 
 /* ===========================================
    WELCOME CARD
@@ -22,47 +24,51 @@ Version : 1.0.0
 
 .finova-dashboard-welcome {
 
-    margin-top: var(--space-md);
+    margin-top:var(--space-md);
 
-    margin-bottom: var(--space-lg);
+    margin-bottom:var(--space-lg);
 
-    padding: var(--space-xl);
+    padding:var(--space-xl);
 
-    background: linear-gradient(
+    background:linear-gradient(
         135deg,
         var(--primary),
         #1D4ED8
     );
 
-    border-radius: var(--radius-lg);
+    border-radius:var(--radius-lg);
 
-    color: #FFFFFF;
+    color:#FFFFFF;
 
-    box-shadow: var(--shadow-md);
+    box-shadow:var(--shadow-md);
 
 }
+
 
 .finova-dashboard-welcome-content h3 {
 
-    margin-bottom: var(--space-sm);
+    margin-bottom:var(--space-sm);
 
-    color: #FFFFFF;
+    color:#FFFFFF;
 
-    font-size: var(--font-size-xxl);
+    font-size:var(--font-size-xxl);
 
-    font-weight: var(--font-weight-bold);
+    font-weight:var(--font-weight-bold);
 
 }
+
 
 .finova-dashboard-welcome-content p {
 
-    margin: 0;
+    margin:0;
 
-    color: rgba(255,255,255,.90);
+    color:rgba(255,255,255,.90);
 
-    font-size: var(--font-size-md);
+    font-size:var(--font-size-md);
 
 }
+
+
 
 /* ===========================================
    SUMMARY CARD
@@ -70,35 +76,42 @@ Version : 1.0.0
 
 .finova-summary-card {
 
-    display: flex;
+    display:flex;
 
-    align-items: center;
+    align-items:center;
 
-    gap: var(--space-md);
+    gap:var(--space-md);
 
-    padding: var(--space-lg);
+    padding:var(--space-lg);
 
-    background: var(--card-bg);
+    background:var(--card-bg);
 
-    border-radius: var(--radius-lg);
+    border-radius:var(--radius-lg);
 
-    box-shadow: var(--shadow-sm);
+    box-shadow:var(--shadow-sm);
 
-    transition: all var(--transition-fast);
+    transition:all var(--transition-fast);
 
-    cursor: default;
+    cursor:default;
 
 }
+
 
 .finova-summary-card:hover {
 
-    transform: translateY(-4px);
+    transform:translateY(-4px);
 
-    box-shadow: var(--shadow-md);
+    box-shadow:var(--shadow-md);
 
 }
 
-.finova-summary-icon{
+
+
+/* ===========================================
+   SUMMARY ICON
+=========================================== */
+
+.finova-summary-icon {
 
     display:flex;
 
@@ -123,12 +136,10 @@ Version : 1.0.0
     transition:all .25s ease;
 
 }
-/* ==========================================
-   SUMMARY ICON HOVER
-========================================== */
+
 
 .finova-summary-card:hover
-.finova-summary-icon{
+.finova-summary-icon {
 
     background:#2563EB;
 
@@ -138,144 +149,51 @@ Version : 1.0.0
 
 }
 
+
+
+/* ===========================================
+   SUMMARY CONTENT
+=========================================== */
+
 .finova-summary-content {
 
-    flex: 1;
+    flex:1;
 
 }
+
 
 .finova-summary-content span {
 
-    display: block;
+    display:block;
 
-    color: var(--text-secondary);
+    color:var(--text-secondary);
 
-    font-size: var(--font-size-sm);
+    font-size:var(--font-size-sm);
 
-    margin-bottom: 4px;
+    margin-bottom:4px;
 
 }
+
 
 .finova-summary-content h3 {
 
-    margin: 0;
+    margin:0;
 
-    color: var(--text-primary);
+    color:var(--text-primary);
 
-    font-size: 28px;
+    font-size:28px;
 
-    font-weight: var(--font-weight-bold);
+    font-weight:var(--font-weight-bold);
 
 }
+
+
 
 /* ===========================================
-   CARD
-=========================================== */
-
-.finova-card {
-
-    background: var(--card-bg);
-
-    border-radius: var(--radius-lg);
-
-    box-shadow: var(--shadow-sm);
-
-    overflow: hidden;
-
-}
-
-.finova-card-header {
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: space-between;
-
-    padding: var(--space-lg);
-
-    border-bottom: 1px solid var(--border-color);
-
-}
-
-.finova-card-header h5 {
-
-    margin: 0;
-
-    font-size: var(--font-size-lg);
-
-    font-weight: var(--font-weight-semibold);
-
-}
-
-.finova-card-body {
-
-    padding: var(--space-lg);
-
-}
-
-/* ===========================================
-   QUICK ACCESS
-=========================================== */
-
-.finova-card-body .btn {
-
-    height: 42px;
-
-    border-radius: var(--radius-md);
-
-    font-size: var(--font-size-md);
-
-    font-weight: var(--font-weight-medium);
-
-}
-
-/* ===========================================
-   RESPONSIVE
-=========================================== */
-
-@media (max-width: 992px) {
-
-    .finova-dashboard-welcome {
-
-        padding: var(--space-lg);
-
-    }
-
-    .finova-dashboard-welcome-content h3 {
-
-        font-size: var(--font-size-xl);
-
-    }
-
-    .finova-summary-card {
-
-        margin-bottom: var(--space-md);
-
-    }
-
-}
-
-@media (max-width: 768px) {
-
-    .finova-summary-card {
-
-        flex-direction: column;
-
-        text-align: center;
-
-    }
-
-    .finova-summary-content {
-
-        text-align: center;
-
-    }
-    /* ==========================================
    SYSTEM INFORMATION
-========================================== */
+=========================================== */
 
-.finova-system-info{
+.finova-system-info {
 
     display:flex;
 
@@ -285,13 +203,15 @@ Version : 1.0.0
 
 }
 
-.finova-system-item{
+
+.finova-system-item {
 
     padding:8px 0;
 
 }
 
-.finova-system-label{
+
+.finova-system-label {
 
     margin-bottom:6px;
 
@@ -307,7 +227,8 @@ Version : 1.0.0
 
 }
 
-.finova-system-value{
+
+.finova-system-value {
 
     display:flex;
 
@@ -320,11 +241,14 @@ Version : 1.0.0
     color:#111827;
 
 }
-/* ==========================================
-   SYSTEM DATE
-========================================== */
 
-.finova-system-date{
+
+
+/* ===========================================
+   SYSTEM DATE
+=========================================== */
+
+.finova-system-date {
 
     font-size:14px;
 
@@ -334,11 +258,13 @@ Version : 1.0.0
 
 }
 
-/* ==========================================
-   SYSTEM TIME
-========================================== */
 
-.finova-system-time{
+
+/* ===========================================
+   SYSTEM TIME
+=========================================== */
+
+.finova-system-time {
 
     font-size:20px;
 
@@ -350,7 +276,8 @@ Version : 1.0.0
 
 }
 
-.finova-system-info hr{
+
+.finova-system-info hr {
 
     margin:4px 0;
 
@@ -359,99 +286,58 @@ Version : 1.0.0
     border-top:1px solid #ECEFF3;
 
 }
-/* ==========================================
-   SUMMARY CARD
-========================================== */
 
-.finova-summary-card{
 
-    height:100%;
 
-    background:#FFFFFF;
+/* ===========================================
+   RESPONSIVE
+=========================================== */
 
-    border:1px solid #E5E7EB;
+@media (max-width:992px) {
 
-    border-radius:14px;
 
-    padding:20px;
+    .finova-dashboard-welcome {
 
-    box-shadow:0 2px 8px rgba(0,0,0,.05);
+        padding:var(--space-lg);
 
-    transition:
-        transform .25s ease,
-        box-shadow .25s ease,
-        border-color .25s ease;
+    }
 
-}
 
-/* Hover */
+    .finova-dashboard-welcome-content h3 {
 
-.finova-summary-card:hover{
+        font-size:var(--font-size-xl);
 
-    transform:translateY(-3px);
+    }
 
-    box-shadow:0 10px 24px rgba(0,0,0,.10);
 
-    border-color:#2563EB22;
+    .finova-summary-card {
+
+        margin-bottom:var(--space-md);
+
+    }
+
 
 }
-/* ==========================================
-   SUMMARY TOP
-========================================== */
 
-.finova-summary-top{
 
-    display:flex;
 
-    align-items:center;
+@media (max-width:768px) {
 
-    gap:14px;
 
-    margin-bottom:22px;
+    .finova-summary-card {
 
-}
-/* ==========================================
-   SUMMARY TITLE
-========================================== */
+        flex-direction:column;
 
-.finova-summary-title{
+        text-align:center;
 
-    flex:1;
+    }
 
-    font-size:14px;
 
-    font-weight:600;
+    .finova-summary-content {
 
-    color:#374151;
+        text-align:center;
 
-}
-/* ==========================================
-   SUMMARY NUMBER
-========================================== */
+    }
 
-.finova-summary-number{
-
-    font-size:34px;
-
-    font-weight:700;
-
-    line-height:1;
-
-    color:#111827;
-
-}
-/* ==========================================
-   SUMMARY STATUS
-========================================== */
-
-.finova-summary-status{
-
-    margin-top:10px;
-
-    font-size:13px;
-
-    color:#9CA3AF;
-
-}
 
 }

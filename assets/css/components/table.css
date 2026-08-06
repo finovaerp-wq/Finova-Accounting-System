@@ -65,6 +65,83 @@
     color:var(--text-secondary);
 
 }
+/* ==========================================================
+   TABLE CARD STRUCTURE
+========================================================== */
+
+.finova-table-card{
+
+    display:flex;
+
+    flex-direction:column;
+
+    flex:1;
+
+    min-height:0;
+
+}
+
+
+/* ==========================================================
+   CARD BODY TABLE MODE
+========================================================== */
+
+.finova-table-card .finova-card-body{
+
+    display:flex;
+
+    flex-direction:column;
+
+    flex:1;
+
+    min-height:0;
+
+    overflow:hidden;
+
+}
+
+
+/* ==========================================================
+   TABLE CONTAINER
+========================================================== */
+
+.finova-table-container{
+
+    display:flex;
+
+    flex-direction:column;
+
+    flex:1;
+
+    min-height:0;
+
+}
+
+
+/* ==========================================================
+   TABLE RESPONSIVE AREA
+========================================================== */
+
+.finova-table-container .table-responsive{
+
+    flex:1;
+
+    min-height:0;
+
+    overflow:auto;
+
+}
+
+
+/* ==========================================================
+   TABLE
+========================================================== */
+
+.finova-table-container table{
+
+    margin-bottom:0;
+
+}
 
 /* ==========================================================
    STRIPED
@@ -89,5 +166,23 @@
 .finova-table.table-hover tbody tr:hover{
 
     background:#F5F9FF;
+
+}
+/* ==========================================================
+   TABLE INTERNAL SCROLL
+========================================================== */
+
+.finova-table-container{
+
+    height:100%;
+
+}
+
+
+.finova-table-container .table-responsive{
+
+    flex:1;
+
+    overflow:auto;
 
 }

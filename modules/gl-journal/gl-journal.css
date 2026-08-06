@@ -16,9 +16,15 @@ Version : 2.0 Enterprise
 
     flex-direction:column;
 
-    gap:20px;
+    flex:1;
+
+    height:100%;
+
+    min-height:0;
 
     width:100%;
+
+    gap:20px;
 
 }
 
@@ -323,33 +329,53 @@ Version : 2.0 Enterprise
     --bs-gutter-y:16px;
 
 }
+
 /* ==========================================================
-   TABLE CARD
+   GL JOURNAL TABLE FLEX LAYOUT
 ========================================================== */
 
 .gl-journal-table-card{
 
-    border:1px solid #DEE2E6;
+    display:flex;
 
-    border-radius:8px;
+    flex-direction:column;
 
-    box-shadow:none;
+    flex:1;
+
+    min-height:0;
 
     overflow:hidden;
 
 }
 
-/* ==========================================================
-   TABLE CARD BODY
-========================================================== */
 
-.gl-journal-table-card .card-body{
+.gl-journal-table-card .finova-card-body{
+
+    display:flex;
+
+    flex-direction:column;
+
+    flex:1;
+
+    min-height:0;
 
     padding:0;
 
-    position:relative;
+}
+
+
+.gl-journal-table-card .finova-table-container{
+
+    display:flex;
+
+    flex-direction:column;
+
+    flex:1;
+
+    min-height:0;
 
 }
+
 
 /* ==========================================================
    TABLE RESPONSIVE
@@ -357,11 +383,11 @@ Version : 2.0 Enterprise
 
 .gl-journal-table-card .table-responsive{
 
-    overflow-x:auto;
+    flex:1;
 
-    overflow-y:auto;
+    min-height:0;
 
-    max-height:650px;
+    overflow:auto;
 
 }
 
@@ -671,6 +697,75 @@ Version : 2.0 Enterprise
     font-weight:700;
 
     letter-spacing:.5px;
+
+}
+/* ==========================================================
+   FIX GL JOURNAL PAGINATION POSITION
+========================================================== */
+
+
+.gl-journal-page .finova-table-card {
+
+    flex:1;
+
+    display:flex;
+
+    flex-direction:column;
+
+    min-height:0;
+
+}
+
+
+.gl-journal-page .finova-table-card > .finova-card-body {
+
+    display:flex;
+
+    flex-direction:column;
+
+    flex:1;
+
+    min-height:0;
+
+    padding:0;
+
+}
+
+
+
+.gl-journal-page .finova-table-container {
+
+    display:flex;
+
+    flex-direction:column;
+
+    flex:1;
+
+    min-height:0;
+
+}
+
+
+
+.gl-journal-page .table-responsive {
+
+    flex:1;
+
+    min-height:0;
+
+    overflow:auto;
+
+}
+
+
+
+/* PENTING */
+
+.gl-journal-page .finova-pagination-wrapper {
+
+    flex-shrink:0;
+
+    margin-top:0;
 
 }
 

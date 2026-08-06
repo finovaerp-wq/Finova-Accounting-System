@@ -8,25 +8,36 @@
    TABLE LAYOUT
 ========================================================== */
 
-.finova-card-body {
+.finova-table-card {
 
     display: flex;
+
     flex-direction: column;
 
+    flex: 1;
+
+    min-height: 0;
+
 }
+
 
 .finova-table-container {
 
     display: flex;
+
     flex-direction: column;
 
-    min-height: 560px;      /* tinggi card tetap */
+    flex: 1;
+
+    min-height: 0;
 
 }
 
 .finova-table-container .table-responsive {
 
-    flex: 1;                /* mengisi ruang kosong */
+    flex: 1;
+
+    min-height: 0;
 
     overflow: auto;
 
@@ -47,13 +58,23 @@
 
     width: 100%;
 
-    padding-top: 2px;
+    min-height: 46px;
 
-    border-top: 1px solid var(--border-color);
+    padding: 10px 0;
+
+    margin-top: auto;
 
     gap: 16px;
 
     flex-wrap: nowrap;
+
+    flex-shrink: 0;
+
+    box-sizing: border-box;
+
+    background: var(--card-bg);
+
+    border-top: 1px solid var(--border-color);
 
 }
 
@@ -69,8 +90,6 @@
     align-items: center;
 
     gap: 8px;
-
-    flex-wrap: nowrap;
 
     white-space: nowrap;
 
@@ -167,6 +186,8 @@
 
     font-size: 12px;
 
+    text-align: center;
+
     flex-shrink: 0;
 
 }
@@ -187,10 +208,10 @@
 
 
 /* ==========================================================
-   COA PAGINATION TOTAL
+   TOTAL PAGE
 ========================================================== */
 
-.coa-page .finova-pagination-total {
+.finova-pagination-total {
 
     display: inline-flex;
 
@@ -206,7 +227,7 @@
 
 
 /* ==========================================================
-   INFO
+   RECORD INFO
 ========================================================== */
 
 .finova-pagination-info {
@@ -216,6 +237,10 @@
     white-space: nowrap;
 
     flex-shrink: 0;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
 
 }
 
@@ -228,12 +253,6 @@
 
     .finova-pagination-wrapper {
 
-        flex-direction: row;
-
-        justify-content: space-between;
-
-        align-items: center;
-
         flex-wrap: wrap;
 
         gap: 10px;
@@ -241,10 +260,6 @@
     }
 
     .finova-pagination-left {
-
-        display: flex;
-
-        align-items: center;
 
         flex-wrap: wrap;
 
@@ -254,7 +269,9 @@
 
     .finova-pagination-info {
 
-        margin-left: auto;
+        width: 100%;
+
+        margin-left: 0;
 
         text-align: right;
 
@@ -277,11 +294,8 @@
 
 }
 
-
 .finova-empty-row:hover td {
 
     background: #FFFFFF;
 
 }
-
-

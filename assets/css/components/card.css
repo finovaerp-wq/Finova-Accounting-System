@@ -1,0 +1,208 @@
+/*
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+GLOBAL CARD COMPONENT
+Version : 1.0.0
+==========================================================
+*/
+
+
+/* ==========================================================
+   FINOVA CARD
+========================================================== */
+
+.finova-card {
+
+    display:flex;
+
+    flex-direction:column;
+
+    width:100%;
+
+    background:var(--card-bg);
+
+    border-radius:var(--radius-lg);
+
+    box-shadow:var(--shadow-sm);
+
+    overflow:hidden;
+
+}
+
+
+
+/* ==========================================================
+   CARD HEADER
+========================================================== */
+
+.finova-card-header {
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    padding:var(--space-lg);
+
+    border-bottom:1px solid var(--border-color);
+
+    flex-shrink:0;
+
+}
+
+
+.finova-card-header h5 {
+
+    margin:0;
+
+    font-size:var(--font-size-lg);
+
+    font-weight:var(--font-weight-semibold);
+
+    color:var(--text-primary);
+
+}
+
+
+
+/* ==========================================================
+   CARD BODY
+========================================================== */
+
+.finova-card-body {
+
+    display:flex;
+
+    flex-direction:column;
+
+    flex:1;
+
+    min-height:0;
+
+    padding:var(--space-lg);
+
+}
+/* ==========================================================
+   CARD BODY FLEX CONTENT
+========================================================== */
+
+.finova-card-body {
+
+    display:flex;
+
+    flex-direction:column;
+
+    flex:1;
+
+    min-height:0;
+
+}
+
+
+/* ==========================================================
+   CARD BODY WITHOUT PADDING
+   Untuk table yang membutuhkan full width
+========================================================== */
+
+.finova-card-body.no-padding {
+
+    padding:0;
+
+}
+
+
+
+/* ==========================================================
+   CARD FOOTER
+========================================================== */
+
+.finova-card-footer {
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    padding:var(--space-lg);
+
+    border-top:1px solid var(--border-color);
+
+    flex-shrink:0;
+
+}
+
+
+
+/* ==========================================================
+   CARD HOVER
+========================================================== */
+
+.finova-card-hover {
+
+    transition:
+
+        transform .2s ease,
+
+        box-shadow .2s ease;
+
+}
+
+
+.finova-card-hover:hover {
+
+    transform:translateY(-3px);
+
+    box-shadow:var(--shadow-md);
+
+}
+
+
+
+/* ==========================================================
+   CARD RESPONSIVE
+========================================================== */
+
+@media (max-width:768px) {
+
+
+    .finova-card-header {
+
+        padding:var(--space-md);
+
+    }
+
+
+    .finova-card-body {
+
+        padding:var(--space-md);
+
+    }
+
+
+    .finova-card-footer {
+
+        padding:var(--space-md);
+
+    }
+    /* ==========================================================
+   FLEX CARD HEIGHT SUPPORT
+========================================================== */
+
+.finova-card{
+
+    min-height:0;
+
+}
+
+
+.finova-card-body{
+
+    overflow:hidden;
+
+}
+
+
+
+}

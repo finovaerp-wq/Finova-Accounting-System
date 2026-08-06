@@ -258,17 +258,33 @@ cacheElement() {
     this.btnPreview =
         document.getElementById("btn-preview");
 
-        /* ==========================================
+    /* ==========================================
        PAGINATION
     ========================================== */
 
-    this.pagination =
-        document.querySelector(".finova-pagination");
+    this.btnFirst =
+    document.getElementById("pagination-first");
 
-    this.paginationInfo =
-        document.getElementById(
-            "bp-pagination-info"
-        );
+this.btnPrev =
+    document.getElementById("pagination-prev");
+
+this.btnNext =
+    document.getElementById("pagination-next");
+
+this.btnLast =
+    document.getElementById("pagination-last");
+
+this.btnPaginationRefresh =
+    document.getElementById("pagination-refresh");
+
+this.txtPage =
+    document.getElementById("pagination-page-input");
+
+this.lblTotalPages =
+    document.getElementById("pagination-total-pages");
+
+this.lblPaginationInfo =
+    document.getElementById("pagination-info");
 
     /* ==========================================
        TOTAL RECORD
@@ -394,6 +410,127 @@ bindEvents() {
         "click",
         () => this.preview()
     );
+    /*
+==========================================================
+PAGINATION
+==========================================================
+*/
+
+this.btnFirst?.addEventListener("click", () => {
+
+    this.currentPage = 1;
+
+    this.renderTable();
+
+});
+
+this.btnPrev?.addEventListener("click", () => {
+
+    if (this.currentPage > 1) {
+
+        this.currentPage--;
+
+        this.renderTable();
+
+    }
+
+});
+
+this.btnNext?.addEventListener("click", () => {
+
+    const totalPages = Math.ceil(
+
+        this.filteredData.length /
+
+        this.pageSize
+
+    );
+
+    if (this.currentPage < totalPages) {
+
+        this.currentPage++;
+
+        this.renderTable();
+
+    }
+
+});
+
+this.btnLast?.addEventListener("click", () => {
+
+    this.currentPage = Math.max(
+
+        1,
+
+        Math.ceil(
+
+            this.filteredData.length /
+
+            this.pageSize
+
+        )
+
+    );
+
+    this.renderTable();
+
+});
+
+this.btnPaginationRefresh?.addEventListener(
+
+    "click",
+
+    () => this.refresh()
+
+);
+
+this.txtPage?.addEventListener(
+
+    "change",
+
+    () => {
+
+        const totalPages = Math.max(
+
+            1,
+
+            Math.ceil(
+
+                this.filteredData.length /
+
+                this.pageSize
+
+            )
+
+        );
+
+        let page = parseInt(
+
+            this.txtPage.value,
+
+            10
+
+        );
+
+        if (isNaN(page))
+
+            page = 1;
+
+        page = Math.min(
+
+            Math.max(page, 1),
+
+            totalPages
+
+        );
+
+        this.currentPage = page;
+
+        this.renderTable();
+
+    }
+
+);
 
     
 }
@@ -638,9 +775,8 @@ renderTable(data) {
 
         this.renderEmptyState();
 
-        this.renderPagination();
-
-        this.updatePaginationInfo();
+        
+        this.updatePagination();
 
         return;
 
@@ -679,6 +815,86 @@ renderTable(data) {
     this.renderPagination();
 
     this.updatePaginationInfo();
+
+}
+/*
+==========================================================
+UPDATE PAGINATION
+==========================================================
+*/
+
+updatePagination() {
+
+    const totalRecords =
+        this.filteredData.length;
+
+    const totalPages =
+        Math.max(
+            1,
+            Math.ceil(
+                totalRecords /
+                this.pageSize
+            )
+        );
+
+    if (this.currentPage > totalPages) {
+
+        this.currentPage = totalPages;
+
+    }
+
+    if (this.txtPage) {
+
+        this.txtPage.value =
+            this.currentPage;
+
+        this.txtPage.max =
+            totalPages;
+
+    }
+
+    if (this.lblTotalPages) {
+
+        this.lblTotalPages.textContent =
+            totalPages;
+
+    }
+
+    const start =
+        totalRecords === 0
+            ? 0
+            : (this.currentPage - 1) *
+              this.pageSize + 1;
+
+    const end =
+        Math.min(
+            this.currentPage *
+            this.pageSize,
+            totalRecords
+        );
+
+    if (this.lblPaginationInfo) {
+
+        this.lblPaginationInfo.textContent =
+            `Displaying Record ${start} - ${end} of ${totalRecords}`;
+
+    }
+
+    if (this.btnFirst)
+        this.btnFirst.disabled =
+            this.currentPage === 1;
+
+    if (this.btnPrev)
+        this.btnPrev.disabled =
+            this.currentPage === 1;
+
+    if (this.btnNext)
+        this.btnNext.disabled =
+            this.currentPage >= totalPages;
+
+    if (this.btnLast)
+        this.btnLast.disabled =
+            this.currentPage >= totalPages;
 
 }
 /*

@@ -1,0 +1,112 @@
+/*
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+Chart Of Accounts
+Version : 2.0 Enterprise
+==========================================================
+*/
+
+
+/* ==========================================================
+   COA PAGE
+========================================================== */
+
+.coa-page{
+
+    display:flex;
+
+    flex-direction:column;
+
+    flex:1;
+
+    min-height:0;
+
+}
+
+
+
+/* ==========================================================
+   COA TABLE CARD
+========================================================== */
+
+.coa-table-card{
+
+    display:flex;
+
+    flex-direction:column;
+
+    flex:1;
+
+    min-height:0;
+
+    overflow:hidden;
+
+}
+
+
+
+/* ==========================================================
+   CARD BODY
+========================================================== */
+
+.coa-table-card .finova-card-body{
+
+    display:flex;
+
+    flex-direction:column;
+
+    flex:1;
+
+    min-height:0;
+
+    padding:0;
+
+}
+
+
+
+/* ==========================================================
+   TABLE CONTAINER
+========================================================== */
+
+.coa-table-card .finova-table-container{
+
+    display:flex;
+
+    flex-direction:column;
+
+    flex:1;
+
+    min-height:0;
+
+}
+
+
+
+/* ==========================================================
+   TABLE SCROLL
+========================================================== */
+
+.coa-table-card .table-responsive{
+
+    flex:1;
+
+    min-height:0;
+
+    overflow:auto;
+
+}
+
+
+
+/* ==========================================================
+   PAGINATION
+========================================================== */
+
+.coa-table-card .finova-pagination-wrapper{
+
+    flex-shrink:0;
+
+    margin-top:0;
+
+}
