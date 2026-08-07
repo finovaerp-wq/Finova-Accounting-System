@@ -2847,12 +2847,16 @@ console.log(
 
     const status =
         this.filterStatus?.value || "";
-
+    
     const dateFrom =
         this.filterDateFrom?.value || "";
 
     const dateTo =
         this.filterDateTo?.value || "";
+    console.log("STATUS :", status);
+    console.log("DATE FROM :", dateFrom);
+    console.log("DATE TO :", dateTo);
+
 
     /*
     ======================================================
@@ -2870,21 +2874,27 @@ console.log(
                 STATUS
                 ==========================================
                 */
-
+                console.log({
+    journalNo: journal.journal_no,
+    journalStatus: journal.status,
+    filterStatus: status,
+    journalDate: journal.journal_date
+});
                 if (
 
-                    status &&
+                status &&
+                status !== "all" &&
 
-                    (journal.status || "")
-                        .toLowerCase() !==
-                    status.toLowerCase()
+                (journal.status || "")
+                    .toLowerCase() !==
+                status.toLowerCase()
 
-                ) {
+            ) {
 
-                    return false;
+                return false;
 
-                }
-                /*
+            }
+                            /*
                 ==========================================
                 DATE FROM
                 ==========================================
@@ -2936,19 +2946,29 @@ console.log(
                 SEARCH BY FIELD
                 ==========================================
                 */
+console.log(
+    "FIND BY =",
+    `"${findBy}"`
+);
 
+console.log(
+    "KEYWORD =",
+    `"${keyword}"`
+);
                 switch (findBy) {
 
                     case "journal_no":
 
-                return (
+    console.log(
+        "COMPARE JOURNAL NO :",
+        journal.journal_no
+    );
 
-                    journal.journal_no || ""
-
-                )
-                .toString()
-                .toLowerCase()
-                .includes(keyword);
+    return (
+        journal.journal_no || ""
+    )
+    .toLowerCase()
+    .includes(keyword);
 
 
                 case "description":
