@@ -8,16 +8,15 @@
    TABLE LAYOUT
 ========================================================== */
 
-.finova-table-card {
+.finova-table-card{
 
-    display: flex;
+    display:flex;
 
-    flex-direction: column;
+    flex-direction:column;
 
-    flex: 1;
+    height:100%;
 
-    min-height: 0;
-
+    min-height:0;
 }
 
 
@@ -42,40 +41,41 @@
     overflow: auto;
 
 }
+.finova-table-container{
+
+    overflow:hidden;
+}
 
 
 /* ==========================================================
    PAGINATION WRAPPER
 ========================================================== */
 
-.finova-pagination-wrapper {
+.finova-pagination-wrapper{
 
-    display: flex;
+    position: sticky;
+    bottom: 0;
 
-    justify-content: space-between;
+    display:flex;
 
-    align-items: center;
+    justify-content:space-between;
+    align-items:center;
 
-    width: 100%;
+    width:100%;
 
-    min-height: 46px;
+    min-height:52px;
 
-    padding: 10px 0;
+    padding:10px 16px;
 
-    margin-top: auto;
+    margin-top:auto;
 
-    gap: 16px;
+    background:var(--card-bg);
 
-    flex-wrap: nowrap;
+    border-top:1px solid var(--border-color);
 
-    flex-shrink: 0;
+    z-index:20;
 
-    box-sizing: border-box;
-
-    background: var(--card-bg);
-
-    border-top: 1px solid var(--border-color);
-
+    flex-shrink:0;
 }
 
 

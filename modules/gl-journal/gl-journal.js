@@ -25,6 +25,7 @@ import {
 
 import { PreviewService }
 from "../../service/preview.service.js";
+import { ExcelExportService } from "../../service/excel-export.service.js";
 /*
 ==========================================================
 GENERAL JOURNAL
@@ -845,7 +846,11 @@ this.btnRefreshJournal?.addEventListener(
 
     "click",
 
-    () => this.loadData()
+    async () => {
+
+        await this.resetFilter();
+
+    }
 
 );
 
@@ -857,18 +862,12 @@ this.btnDownloadJournal?.addEventListener(
 
 );
 
-this.btnPreview?.addEventListener(
-
+this.btnPreviewJournal?.addEventListener(
     "click",
-
     () => {
-
         console.log("PREVIEW CLICK");
-
         this.previewHTML();
-
     }
-
 );
 /*
 ==========================================================
@@ -911,6 +910,7 @@ btnDelete?.addEventListener(
     }
 
 );
+
 /*
 ==========================================================
 DETAIL TABLE EVENT
@@ -994,6 +994,55 @@ if (this.gridBody) {
     this.bindPaginationEvents();
 
     this.bindTableEvents();
+
+}
+/*
+==========================================================
+RESET FILTER & REFRESH DATA
+==========================================================
+*/
+
+resetFilter(){
+
+    if(this.filterDateFrom){
+
+        this.filterDateFrom.value = "";
+
+    }
+
+
+    if(this.filterDateTo){
+
+        this.filterDateTo.value = "";
+
+    }
+
+
+    if(this.filterStatus){
+
+        this.filterStatus.value = "all";
+
+    }
+
+
+    if(this.filterKeyword){
+
+        this.filterKeyword.value = "";
+
+    }
+
+
+    if(this.filterFindBy){
+
+        this.filterFindBy.value = "journal_no";
+
+    }
+
+
+    this.currentPage = 1;
+
+
+    this.loadData();
 
 }
 
@@ -1656,14 +1705,34 @@ async loadJournalModal() {
             window.App?.showLoading?.();
 
             /*
-            ======================================================
-            LOAD DATA
-            ======================================================
-            */
+======================================================
+LOAD HEADER
+======================================================
+*/
 
-            const result =
-                await this.service.getAll();
+const headers =
+    await this.service.getAll();
 
+/*
+======================================================
+LOAD DETAIL EACH JOURNAL
+======================================================
+*/
+
+const result = await Promise.all(
+
+    (headers || []).map(async journal => {
+
+        const fullJournal =
+            await this.service.getById(
+                journal.id
+            );
+
+        return fullJournal;
+
+    })
+
+);
             /*
             ======================================================
             VALIDATE RESULT
@@ -2759,6 +2828,23 @@ search() {
     const findBy =
         this.filterFindBy?.value || "";
 
+    /*
+======================================================
+DEBUG SEARCH
+======================================================
+*/
+
+console.log("FIND BY :", findBy);
+console.log("KEYWORD :", keyword);
+console.log(
+    "DATA DETAIL :",
+    JSON.stringify(
+        this.journals[0],
+        null,
+        2
+    )
+);
+
     const status =
         this.filterStatus?.value || "";
 
@@ -2786,14 +2872,18 @@ search() {
                 */
 
                 if (
+
                     status &&
-                    journal.status !== status
+
+                    (journal.status || "")
+                        .toLowerCase() !==
+                    status.toLowerCase()
+
                 ) {
 
                     return false;
 
                 }
-
                 /*
                 ==========================================
                 DATE FROM
@@ -2835,6 +2925,11 @@ search() {
                     return true;
 
                 }
+                console.log(
+                "COMPARE :",
+                journal.journal_no,
+                journal.description
+            );
 
                 /*
                 ==========================================
@@ -2846,20 +2941,34 @@ search() {
 
                     case "journal_no":
 
-                        return (
-                            journal.journal_no || ""
-                        )
-                        .toLowerCase()
-                        .includes(keyword);
+                return (
 
-                    case "description":
+                    journal.journal_no || ""
 
-                        return (
-                            journal.description || ""
-                        )
-                        .toLowerCase()
-                        .includes(keyword);
+                )
+                .toString()
+                .toLowerCase()
+                .includes(keyword);
 
+
+                case "description":
+
+                    return (
+
+                        journal.description ||
+
+                        journal.journal_description ||
+
+                        journal.memo ||
+
+                        journal.remark ||
+
+                        ""
+
+                    )
+                    .toString()
+                    .toLowerCase()
+                    .includes(keyword);
                     case "status":
 
                         return (
@@ -2870,15 +2979,25 @@ search() {
 
                     default:
 
-                        return [
+                       return [
 
-                            journal.journal_no,
+                        journal.journal_no,
 
-                            journal.description,
+                        journal.journal_number,
 
-                            journal.status
+                        journal.document_no,
 
-                        ]
+                        journal.description,
+
+                        journal.journal_description,
+
+                        journal.memo,
+
+                        journal.remark,
+
+                        journal.status
+
+                    ]
 
                         .join(" ")
 
@@ -2891,6 +3010,11 @@ search() {
             }
 
         );
+        console.log(
+    "FILTER RESULT :",
+    this.filteredJournals
+);
+        
 
     /*
     ======================================================
@@ -5512,6 +5636,17 @@ previewHTML() {
     return;
 
 }
+console.log("===== PREVIEW DATA =====");
+
+console.log(this.filteredJournals);
+
+console.log(
+    this.filteredJournals[0]
+);
+
+console.log(
+    this.filteredJournals[0]?.details
+);
 
     /*
     ======================================================
@@ -5519,33 +5654,57 @@ previewHTML() {
     ======================================================
     */
 
-    const rows = this.filteredJournals.map(journal => `
+    const rows = [];
 
-        <tr>
+this.filteredJournals.forEach(journal => {
 
-            <td>${journal.journal_date ?? "-"}</td>
+    (journal.details || []).forEach(detail => {
 
-            <td>${journal.journal_no ?? "-"}</td>
+        rows.push(`
 
-            <td>${journal.description ?? "-"}</td>
+            <tr>
 
-            <td style="text-align:right">
+                <td>${journal.journal_date ?? "-"}</td>
 
-                ${this.formatCurrency(journal.total_debit)}
+                <td>${journal.journal_no ?? "-"}</td>
 
-            </td>
+                <td>
 
-            <td style="text-align:right">
+                    ${detail.mst_chart_of_accounts?.account_code ?? "-"}
 
-                ${this.formatCurrency(journal.total_credit)}
+                </td>
 
-            </td>
+                <td>
 
-            <td>${journal.status}</td>
+                    ${detail.mst_chart_of_accounts?.account_name ?? "-"}
 
-        </tr>
+                </td>
 
-    `);
+                <td>
+
+                    ${detail.description ?? "-"}
+
+                </td>
+
+                <td style="text-align:right">
+
+                    ${this.formatCurrency(detail.debit)}
+
+                </td>
+
+                <td style="text-align:right">
+
+                    ${this.formatCurrency(detail.credit)}
+
+                </td>
+
+            </tr>
+
+        `);
+
+    });
+
+});
 
     PreviewService.open({
 
@@ -5553,21 +5712,23 @@ previewHTML() {
 
         subtitle: "Accounting / General Journal",
 
-        columns: [
+       columns: [
 
-            "Accounting Date",
+    "Accounting Date",
 
-            "Journal No",
+    "Journal No",
 
-            "Description",
+    "Account Code",
 
-            "Debit",
+    "Account Name",
 
-            "Credit",
+    "Description",
 
-            "Status"
+    "Debit",
 
-        ],
+    "Credit"
+
+],
 
         rows
 
@@ -5582,11 +5743,76 @@ EXPORT EXCEL
 
 async exportExcel() {
 
-    window.App?.showInfo?.(
+    if (!this.filteredJournals.length) {
 
-        "Excel Export will be available in the next module."
+        window.App?.showWarning?.(
+
+            "No journal available."
+
+        );
+
+        return;
+
+    }
+
+    console.log(
+
+        "EXPORT DATA :",
+
+        this.filteredJournals
 
     );
+    /*
+==========================================================
+BUILD EXPORT DATA
+==========================================================
+*/
+
+const exportData = [];
+
+this.filteredJournals.forEach(journal => {
+
+    (journal.details || []).forEach(detail => {
+
+        exportData.push({
+
+            "Accounting Date": journal.journal_date,
+
+            "Journal No": journal.journal_no,
+
+            "Account Code": detail.mst_chart_of_accounts?.account_code ?? "",
+
+            "Account Name": detail.mst_chart_of_accounts?.account_name ?? "",
+
+            "Description": detail.description ?? "",
+
+            "Debit": detail.debit ?? 0,
+
+            "Credit": detail.credit ?? 0,
+
+            "Status": journal.status
+
+        });
+
+    });
+
+});
+
+/*
+==========================================================
+EXPORT TO EXCEL
+==========================================================
+*/
+
+ExcelExportService.export(
+
+    exportData,
+
+    "General Journal",
+
+    "General Journal"
+
+);
 
 }
 

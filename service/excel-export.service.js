@@ -17,8 +17,10 @@ export class ExcelExportService {
     static export(data = [], fileName = "Export", sheetName = "Sheet1") {
 
         if (!Array.isArray(data) || data.length === 0) {
-            alert("No data available to export.");
-            return;
+            window.App?.showWarning?.(
+            "No data available to export."
+        );
+         return;
         }
 
         // Buat worksheet
