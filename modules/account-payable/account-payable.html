@@ -1,66 +1,103 @@
 <!--
 ==========================================================
 FINOVA ACCOUNTING SYSTEM
-Account Payable
-Version : 2.0 Enterprise
+MODULE  : ACCOUNT PAYABLE
+FILE    : account-payable.html
+VERSION : 1.0.0
 ==========================================================
 -->
 
-<div class="account-payable-page">
+<div class="container-fluid">
 
-    <!-- ==========================================================
+    <!-- ==================================================
          PAGE HEADER
-    =========================================================== -->
+    =================================================== -->
 
-    <div class="finova-page-header">
+    <div class="d-flex
+                justify-content-between
+                align-items-center
+                mb-3">
 
-        <!-- LEFT -->
+        <!-- ==============================================
+             PAGE TITLE
+        =============================================== -->
 
-        <div class="finova-page-header-left">
+        <div>
 
-            <h1 class="finova-page-title">
+            <h5 class="mb-1">
+
+                <i class="fa-solid fa-file-invoice-dollar me-2"></i>
 
                 Account Payable
 
-            </h1>
+            </h5>
 
-            <p class="finova-page-subtitle">
+            <div class="text-muted small">
 
-                Finance / Account Payable
+                Accounting / Account Payable
 
-            </p>
+            </div>
 
         </div>
 
-        <!-- RIGHT -->
 
-        <div class="finova-page-header-right">
+        <!-- ==============================================
+             TOOLBAR
+        =============================================== -->
+
+        <div class="d-flex align-items-center gap-2">
+
+            <!-- ADD AP -->
 
             <button
+                type="button"
                 id="btn-add-ap"
-                class="btn btn-primary finova-btn">
+                class="btn btn-primary">
 
-                <i class="fas fa-plus"></i>
+                <i class="fa-solid fa-plus me-2"></i>
 
                 Add AP
 
             </button>
 
-            <button
-                id="btn-download-ap"
-                class="btn btn-outline-success finova-btn">
 
-                <i class="fas fa-file-excel"></i>
+            <!-- DOWNLOAD EXCEL -->
+
+            <button
+                type="button"
+                id="btn-download-excel-ap"
+                class="btn btn-outline-success">
+
+                <i class="fa-solid fa-file-excel me-2"></i>
 
                 Download Excel
 
             </button>
 
-            <button
-                id="btn-refresh-ap"
-                class="btn btn-outline-secondary finova-btn">
 
-                <i class="fas fa-rotate-right"></i>
+            <!-- PREVIEW HTML -->
+
+            <button
+                type="button"
+                id="btn-preview-html-ap"
+                class="btn btn-outline-primary">
+
+                <i class="fa-solid fa-print me-2"></i>
+
+                Preview HTML
+
+            </button>
+
+
+            <!-- REFRESH -->
+
+            <button
+                type="button"
+                id="btn-refresh-ap"
+                class="btn btn-outline-secondary"
+                title="Refresh">
+
+                <i class="fa-solid fa-rotate me-2"></i>
 
                 Refresh
 
@@ -70,74 +107,78 @@ Version : 2.0 Enterprise
 
     </div>
 
-    <!-- ==========================================================
-         FILTER CARD
-    =========================================================== -->
 
-    <div class="card account-payable-filter-card">
+    <!-- ==================================================
+         FILTER CARD
+    =================================================== -->
+
+    <div class="card shadow-sm border-0 rounded-4 mb-0">
 
         <div class="card-body">
 
             <div class="row g-3 align-items-end">
 
-                <!-- ==========================================
-                     INVOICE DATE FROM
-                =========================================== -->
 
-                <div class="col-xl-2 col-lg-3 col-md-6">
+                <!-- ======================================
+                     INVOICE DATE FROM
+                ======================================= -->
+
+                <div class="col-md-2">
 
                     <label
-                        for="filter-date-from"
-                        class="form-label">
+                        for="ap-date-from"
+                        class="form-label fw-semibold">
 
                         Invoice Date From
 
                     </label>
 
                     <input
-                        id="filter-date-from"
                         type="date"
+                        id="ap-date-from"
                         class="form-control">
 
                 </div>
 
-                <!-- ==========================================
-                     INVOICE DATE TO
-                =========================================== -->
 
-                <div class="col-xl-2 col-lg-3 col-md-6">
+                <!-- ======================================
+                     INVOICE DATE TO
+                ======================================= -->
+
+                <div class="col-md-2">
 
                     <label
-                        for="filter-date-to"
-                        class="form-label">
+                        for="ap-date-to"
+                        class="form-label fw-semibold">
 
                         Invoice Date To
 
                     </label>
 
                     <input
-                        id="filter-date-to"
                         type="date"
+                        id="ap-date-to"
                         class="form-control">
 
                 </div>
 
-                <!-- ==========================================
-                     AP STATUS
-                =========================================== -->
 
-                <div class="col-xl-2 col-lg-3 col-md-6">
+                <!-- ======================================
+                     SHOW
+                ======================================= -->
+
+                <div class="col-md-2">
 
                     <label
-                        for="filter-status"
-                        class="form-label">
+                        for="ap-status-filter"
+                        class="form-label fw-semibold">
 
-                        AP Status
+                        Show
 
                     </label>
 
                     <select
-                        id="filter-status"
+                        id="ap-status-filter"
                         class="form-select">
 
                         <option value="all">
@@ -146,21 +187,15 @@ Version : 2.0 Enterprise
 
                         </option>
 
-                        <option value="Draft">
+                        <option value="not_completed">
 
-                            Show Draft Only
-
-                        </option>
-
-                        <option value="Posted">
-
-                            Show Posted Only
+                            Show Not Completed Only
 
                         </option>
 
-                        <option value="Cancelled">
+                        <option value="completed">
 
-                            Show Cancelled Only
+                            Show Completed Only
 
                         </option>
 
@@ -168,39 +203,28 @@ Version : 2.0 Enterprise
 
                 </div>
 
-                <!-- ==========================================
-                     FIND BY
-                =========================================== -->
 
-                <div class="col-xl-2 col-lg-3 col-md-6">
+                <!-- ======================================
+                     FIND BY
+                ======================================= -->
+
+                <div class="col-md-2">
 
                     <label
-                        for="filter-find-by"
-                        class="form-label">
+                        for="ap-find-by"
+                        class="form-label fw-semibold">
 
                         Find By
 
                     </label>
 
                     <select
-                        id="filter-find-by"
+                        id="ap-find-by"
                         class="form-select">
-
-                        <option value="ap_no">
-
-                            AP Number
-
-                        </option>
 
                         <option value="invoice_no">
 
-                            Invoice Number
-
-                        </option>
-
-                        <option value="po_no">
-
-                            PO Number
+                            Invoice No
 
                         </option>
 
@@ -214,15 +238,16 @@ Version : 2.0 Enterprise
 
                 </div>
 
-                <!-- ==========================================
-                     KEYWORD
-                =========================================== -->
 
-                <div class="col-xl-4 col-lg-6 col-md-12">
+                <!-- ======================================
+                     KEYWORD
+                ======================================= -->
+
+                <div class="col-md-4">
 
                     <label
-                        for="filter-keyword"
-                        class="form-label">
+                        for="ap-keyword"
+                        class="form-label fw-semibold">
 
                         Keyword
 
@@ -231,17 +256,17 @@ Version : 2.0 Enterprise
                     <div class="input-group">
 
                         <input
-                            id="filter-keyword"
                             type="text"
+                            id="ap-keyword"
                             class="form-control"
-                            placeholder="Search AP Number, Invoice Number, PO Number or Vendor...">
+                            placeholder="Search Invoice No or Vendor...">
 
                         <button
-                            id="btn-find-ap"
                             type="button"
+                            id="btn-find-ap"
                             class="btn btn-primary">
 
-                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <i class="fa-solid fa-magnifying-glass me-1"></i>
 
                             Find
 
@@ -257,241 +282,288 @@ Version : 2.0 Enterprise
 
     </div>
 
-        <div class="card account-payable-table-card">
 
-        <div
-            id="account-payable-table-wrapper"
-            class="table-responsive">
+    <!-- ==================================================
+         AP DATA TABLE
+    =================================================== -->
 
-            <table
-                id="account-payable-table"
-                class="table table-hover align-middle">
+    <div class="card shadow-sm border-0 rounded-4">
 
-                <thead>
+        <div class="card-body p-0">
 
-                    <tr>
+            <div class="table-responsive">
 
-                        <th style="width:70px;">
+                <table
+                    class="table table-hover align-middle mb-0">
 
-                            No
+                    <!-- ==================================
+                         TABLE HEADER
+                    =================================== -->
 
-                        </th>
+                    <thead>
 
-                        <th style="width:150px;">
+                        <tr>
 
-                            Invoice Date
+                            <th
+                                class="text-center"
+                                style="width: 60px;">
 
-                        </th>
+                                No
 
-                        <th style="width:170px;">
+                            </th>
 
-                            AP Number
 
-                        </th>
+                            <th
+                                style="min-width: 140px;">
 
-                        <th style="min-width:240px;">
+                                Invoice No
 
-                            Vendor
+                            </th>
 
-                        </th>
 
-                        <th style="width:180px;">
+                            <th
+                                style="min-width: 200px;">
 
-                            Invoice Number
+                                Vendor
 
-                        </th>
+                            </th>
 
-                        <th style="width:180px;">
 
-                            PO Number
+                            <th
+                                style="min-width: 130px;">
 
-                        </th>
+                                PO No
 
-                        <th style="width:150px;">
+                            </th>
 
-                            Due Date
 
-                        </th>
+                            <th
+                                style="min-width: 130px;">
 
-                        <th
-                            class="text-end"
-                            style="width:170px;">
+                                Invoice Date
 
-                            Total Amount
+                            </th>
 
-                        </th>
 
-                        <th
-                            class="text-center"
-                            style="width:130px;">
+                            <th
+                                style="min-width: 130px;">
 
-                            Status
+                                Due Date
 
-                        </th>
+                            </th>
 
-                        <th
-                            class="text-center"
-                            style="width:90px;">
 
-                            Action
+                            <th
+                                class="text-end"
+                                style="min-width: 150px;">
 
-                        </th>
+                                Total Amount
 
-                    </tr>
+                            </th>
 
-                </thead>
 
-                <tbody id="account-payable-tbody">
+                            <th
+                                class="text-end"
+                                style="min-width: 150px;">
 
-                    <!-- ==========================================
-                         Render By JavaScript
-                    =========================================== -->
+                                Outstanding
 
-                </tbody>
+                            </th>
 
-            </table>
 
-        </div>
+                            <th
+                                class="text-center"
+                                style="min-width: 110px;">
 
-               <div class="d-flex justify-content-between align-items-center px-3 py-3">
+                                Status
 
-            <!-- ==========================================
-                 PAGINATION
-            =========================================== -->
+                            </th>
 
-            <nav aria-label="Account Payable Pagination">
 
-                <ul class="pagination finova-pagination mb-0">
+                            <th
+                                class="text-center"
+                                style="min-width: 150px;">
 
-                    <!-- FIRST -->
+                                Action
 
-                    <li class="page-item disabled">
+                            </th>
 
-                        <button
-                            id="btn-first-page"
-                            class="page-link">
+                        </tr>
 
-                            <i class="fa-solid fa-backward-step"></i>
+                    </thead>
 
-                        </button>
 
-                    </li>
+                    <!-- ==================================
+                         TABLE BODY
+                    =================================== -->
 
-                    <!-- PREVIOUS -->
+                    <tbody id="ap-table-body">
 
-                    <li class="page-item disabled">
+                        <!--
+                        ==================================================
+                        DATA ROWS WILL BE RENDERED BY
+                        account-payable.js
+                        ==================================================
+                        -->
 
-                        <button
-                            id="btn-prev-page"
-                            class="page-link">
+                    </tbody>
 
-                            <i class="fa-solid fa-chevron-left"></i>
-
-                        </button>
-
-                    </li>
-
-                    <!-- PAGE -->
-
-                    <li class="page-item">
-
-                        <span class="finova-page-text">
-
-                            Page
-
-                        </span>
-
-                    </li>
-
-                    <!-- CURRENT PAGE -->
-
-                    <li class="page-item">
-
-                        <input
-                            id="current-page"
-                            type="number"
-                            value="1"
-                            min="1"
-                            class="form-control form-control-sm finova-page-input">
-
-                    </li>
-
-                    <!-- TOTAL PAGE -->
-
-                    <li class="page-item">
-
-                        <span
-                            id="total-pages"
-                            class="finova-page-text">
-
-                            of 1
-
-                        </span>
-
-                    </li>
-
-                    <!-- NEXT -->
-
-                    <li class="page-item">
-
-                        <button
-                            id="btn-next-page"
-                            class="page-link">
-
-                            <i class="fa-solid fa-chevron-right"></i>
-
-                        </button>
-
-                    </li>
-
-                    <!-- LAST -->
-
-                    <li class="page-item">
-
-                        <button
-                            id="btn-last-page"
-                            class="page-link">
-
-                            <i class="fa-solid fa-forward-step"></i>
-
-                        </button>
-
-                    </li>
-
-                </ul>
-
-            </nav>
-
-            <!-- ==========================================
-                 RECORD INFO
-            =========================================== -->
-
-            <div
-                id="display-record"
-                class="finova-record-info">
-
-                Records 0 - 0 of 0
+                </table>
 
             </div>
 
         </div>
 
+
+        <!-- ==================================================
+     PAGINATION FOOTER
+=================================================== -->
+
+<div
+    class="card-footer bg-white border-0">
+
+    <div
+        class="d-flex
+               justify-content-between
+               align-items-center">
+
+
+        <!-- ==========================================
+             PAGINATION CONTROL
+        =========================================== -->
+
+        <div
+            class="d-flex
+                   align-items-center
+                   gap-2">
+
+
+            <!-- ======================================
+                 FIRST PAGE
+            ======================================= -->
+
+            <button
+                type="button"
+                id="ap-page-first"
+                class="btn btn-light border"
+                title="First Page"
+                disabled>
+
+                <i class="fa-solid fa-backward-step"></i>
+
+            </button>
+
+
+            <!-- ======================================
+                 PREVIOUS PAGE
+            ======================================= -->
+
+            <button
+                type="button"
+                id="ap-page-prev"
+                class="btn btn-light border"
+                title="Previous Page"
+                disabled>
+
+                <i class="fa-solid fa-chevron-left"></i>
+
+            </button>
+
+
+            <!-- ======================================
+                 PAGE LABEL
+            ======================================= -->
+
+            <span class="ms-1">
+
+                Page
+
+            </span>
+
+
+            <!-- ======================================
+                 DIRECT PAGE INPUT
+            ======================================= -->
+
+            <input
+                type="number"
+                id="ap-current-page"
+                class="form-control text-center"
+                value="1"
+                min="1"
+                style="
+                    width: 42px;
+                    height: 32px;
+                    padding: 0;
+                "
+                title="Enter page number">
+
+
+            <!-- ======================================
+                 TOTAL PAGE
+            ======================================= -->
+
+            <span>
+
+                of
+
+            </span>
+
+
+            <span
+                id="ap-total-pages">
+
+                1
+
+            </span>
+
+
+            <!-- ======================================
+                 NEXT PAGE
+            ======================================= -->
+
+            <button
+                type="button"
+                id="ap-page-next"
+                class="btn btn-light border"
+                title="Next Page"
+                disabled>
+
+                <i class="fa-solid fa-chevron-right"></i>
+
+            </button>
+
+
+            <!-- ======================================
+                 LAST PAGE
+            ======================================= -->
+
+            <button
+                type="button"
+                id="ap-page-last"
+                class="btn btn-light border"
+                title="Last Page"
+                disabled>
+
+                <i class="fa-solid fa-forward-step"></i>
+
+            </button>
+
+        </div>
+
+
+        <!-- ==========================================
+             RECORD INFORMATION
+        =========================================== -->
+
+        <div
+            id="ap-record-info"
+            class="text-muted">
+
+            Records 0 - 0 of 0
+
+        </div>
+
     </div>
-
-    <!-- ==========================================================
-         END TABLE CARD
-    =========================================================== -->
-
-    <!-- ==========================================================
-         ACCOUNT PAYABLE MODAL CONTAINER
-    =========================================================== -->
-
-    <div id="account-payable-modal-container"></div>
-
-    <!-- ==========================================================
-         ACCOUNT PAYABLE DETAIL MODAL CONTAINER
-    =========================================================== -->
-
-    <div id="account-payable-detail-modal-container"></div>
 
 </div>

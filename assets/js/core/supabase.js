@@ -75,12 +75,13 @@ export const TABLE = {
 
     ACCOUNT_PAYABLE: "trx_account_payable",
 
+    ACCOUNT_PAYABLE_DETAIL: "trx_account_payable_detail",
+
     ACCOUNT_RECEIVABLE: "trx_account_receivable",
 
     AP_PAYMENT: "trx_ap_payment",
 
     AR_PAYMENT: "trx_ar_payment"
-
 
 };
 /*

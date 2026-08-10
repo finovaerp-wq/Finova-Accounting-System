@@ -19,6 +19,8 @@ Version : 1.0.0
 
     width:100%;
 
+    min-height:0;
+
     background:var(--card-bg);
 
     border-radius:var(--radius-lg);
@@ -70,34 +72,22 @@ Version : 1.0.0
    CARD BODY
 ========================================================== */
 
-.finova-card-body {
+.finova-card-body{
 
     display:flex;
 
     flex-direction:column;
 
-    flex:1;
+    flex:1 1 auto;
 
     min-height:0;
+
+    overflow:hidden;
 
     padding:var(--space-lg);
 
 }
-/* ==========================================================
-   CARD BODY FLEX CONTENT
-========================================================== */
 
-.finova-card-body {
-
-    display:flex;
-
-    flex-direction:column;
-
-    flex:1;
-
-    min-height:0;
-
-}
 
 
 /* ==========================================================
@@ -124,6 +114,8 @@ Version : 1.0.0
     align-items:center;
 
     justify-content:space-between;
+
+    gap:var(--space-md);
 
     padding:var(--space-lg);
 
