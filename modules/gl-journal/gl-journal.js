@@ -687,6 +687,10 @@ cacheModalDom() {
         document.getElementById(
             "journal-status"
         );
+    this.journalHeaderStatus =
+    document.getElementById(
+        "journal-header-status"
+    );
 
     /*
     ======================================================
@@ -3349,9 +3353,14 @@ clearJournalForm() {
 
     if (this.cboStatus) {
 
-        this.cboStatus.value = "Draft";
+    this.cboStatus.value =
+        "Draft";
 
-    }
+    this.updateJournalHeaderStatus(
+        "Draft"
+    );
+
+}
 
     /*
     ======================================================
@@ -3544,13 +3553,24 @@ async initializeJournalHeader() {
     }
 
     /*
-    ======================================================
-    STATUS
-    ======================================================
-    */
+======================================================
+STATUS
+======================================================
+*/
+
+if (this.cboStatus) {
+
+    const status =
+        this.currentJournal.status ?? "Draft";
 
     this.cboStatus.value =
-        this.currentJournal.status ?? "Draft";
+        status;
+
+    this.updateJournalHeaderStatus(
+        status
+    );
+
+}
 
 }
 /*
@@ -3881,18 +3901,24 @@ fillJournalForm() {
 
 
     /*
-    ======================================================
-    STATUS
-    ======================================================
-    */
+======================================================
+STATUS
+======================================================
+*/
 
-    if (this.cboStatus) {
+const journalStatus =
+    this.currentJournal.status ?? "Draft";
 
-        this.cboStatus.value =
-            this.currentJournal.status ?? "Draft";
+if (this.cboStatus) {
 
-    }
+    this.cboStatus.value =
+        journalStatus;
 
+}
+
+this.updateJournalHeaderStatus(
+    journalStatus
+);
 
     /*
     ======================================================
@@ -4048,6 +4074,83 @@ if (!line.credit_account_id) {
     */
 
     return true;
+
+}
+/*
+==========================================================
+UPDATE JOURNAL HEADER STATUS
+==========================================================
+*/
+
+updateJournalHeaderStatus(status = "Draft") {
+
+    if (!this.journalHeaderStatus) {
+
+        return;
+
+    }
+
+    const normalizedStatus =
+        String(status || "Draft")
+            .trim();
+
+    /*
+    ======================================================
+    TEXT
+    ======================================================
+    */
+
+    this.journalHeaderStatus.textContent =
+        normalizedStatus;
+
+    /*
+    ======================================================
+    RESET BADGE COLOR
+    ======================================================
+    */
+
+    this.journalHeaderStatus.classList.remove(
+        "bg-primary",
+        "bg-success",
+        "bg-danger",
+        "bg-secondary"
+    );
+
+    /*
+    ======================================================
+    STATUS COLOR
+    ======================================================
+    */
+
+    switch (normalizedStatus) {
+
+        case "Posted":
+
+            this.journalHeaderStatus.classList.add(
+                "bg-success"
+            );
+
+            break;
+
+        case "Void":
+
+            this.journalHeaderStatus.classList.add(
+                "bg-danger"
+            );
+
+            break;
+
+        case "Draft":
+
+        default:
+
+            this.journalHeaderStatus.classList.add(
+                "bg-primary"
+            );
+
+            break;
+
+    }
 
 }
 
