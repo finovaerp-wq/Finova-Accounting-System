@@ -4461,9 +4461,9 @@ fillDetailForm() {
         this.currentDetail.business_partner_id ?? "";
 
     this.detailAmount.value =
-        Number(
-            this.currentDetail.amount ?? 0
-        ).toFixed(2);
+    this.formatDetailAmount(
+        detail.amount || 0
+    );
 
 }
 /*
@@ -6480,7 +6480,7 @@ async openEditDetailModal(index) {
         detail.credit_account_id || "";
 
     this.detailAmount.value =
-        Number(detail.amount || 0).toFixed(2);
+    Number(detail.amount || 0).toString();
 
     this.detailBusinessPartner.value =
         detail.business_partner_id || "";
@@ -6569,6 +6569,41 @@ deleteDetail(index) {
 }
 /*
 ==========================================================
+FORMAT DETAIL AMOUNT
+==========================================================
+*/
+
+formatDetailAmount(value) {
+
+    if (
+        value === null ||
+        value === undefined ||
+        value === ""
+    ) {
+
+        return "";
+
+    }
+
+    const number =
+        Number(
+            String(value)
+                .replace(/\./g, "")
+                .replace(/,/g, "")
+        );
+
+    if (!Number.isFinite(number)) {
+
+        return "";
+
+    }
+
+    return Math.round(number)
+        .toLocaleString("id-ID");
+
+}
+/*
+==========================================================
 BIND DETAIL MODAL EVENTS
 ==========================================================
 */
@@ -6623,11 +6658,11 @@ bindDetailModalEvents() {
 
         () => {
 
-            const amount = Number(
-
-                this.detailAmount.value || 0
-
-            );
+            const amount =
+    Number(
+        this.detailAmount.value
+            .replace(/\./g, "")
+    );
 
             this.detailAmount.value =
                 amount.toFixed(2);
@@ -6635,6 +6670,28 @@ bindDetailModalEvents() {
         }
 
     );
+    this.detailAmount?.addEventListener(
+    "input",
+    () => {
+
+        const rawValue =
+            this.detailAmount.value
+                .replace(/\D/g, "");
+
+        if (!rawValue) {
+
+            this.detailAmount.value = "";
+
+            return;
+
+        }
+
+        this.detailAmount.value =
+            Number(rawValue)
+                .toLocaleString("id-ID");
+
+    }
+);
 
     /*
     ======================================================
