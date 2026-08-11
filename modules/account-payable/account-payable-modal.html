@@ -1,0 +1,610 @@
+<!-- ==========================================================
+     FINOVA ACCOUNTING SYSTEM
+     MODULE : ACCOUNT PAYABLE
+     FILE   : account-payable-modal.html
+=========================================================== -->
+
+
+<!-- ==========================================================
+     ACCOUNT PAYABLE MODAL
+=========================================================== -->
+
+<div
+    class="modal fade"
+    id="accountPayableModal"
+    tabindex="-1"
+    aria-labelledby="accountPayableModalLabel"
+    aria-hidden="true">
+
+    <div
+        class="modal-dialog modal-xl modal-dialog-scrollable">
+
+        <div class="modal-content">
+
+
+            <!-- ==================================================
+                 MODAL HEADER
+            =================================================== -->
+
+            <div class="modal-header">
+
+                <div>
+
+                    <h5
+                        class="modal-title fw-semibold"
+                        id="accountPayableModalLabel">
+
+                        <i
+                            class="fa-solid fa-file-invoice-dollar me-2">
+                        </i>
+
+                        Add Account Payable
+
+                    </h5>
+
+                    <div
+                        class="text-muted small">
+
+                        Create new Account Payable
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close">
+                </button>
+
+            </div>
+
+
+            <!-- ==================================================
+                 MODAL BODY
+            =================================================== -->
+
+            <div class="modal-body">
+
+
+                <!-- ==================================================
+                     AP HEADER INFORMATION
+                =================================================== -->
+
+                <div class="finova-card">
+
+                    <div class="finova-card-body">
+
+                        <div class="row g-3">
+
+
+                            <!-- ==========================================
+                                 VENDOR
+                            =========================================== -->
+
+                            <div class="col-md-6">
+
+                                <label
+                                    for="ap-form-vendor"
+                                    class="form-label">
+
+                                    Vendor
+
+                                    <span class="text-danger">
+                                        *
+                                    </span>
+
+                                </label>
+
+                                <select
+                                    id="ap-form-vendor"
+                                    class="form-select">
+
+                                    <option value="">
+                                        Select Vendor
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            <!-- ==========================================
+                                 PO NUMBER
+                            =========================================== -->
+
+                            <div class="col-md-6">
+
+                                <label
+                                    for="ap-form-po-no"
+                                    class="form-label">
+
+                                    PO No
+
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="ap-form-po-no"
+                                    class="form-control"
+                                    placeholder="Enter PO number">
+
+                            </div>
+
+
+                            <!-- ==========================================
+                                 INVOICE NUMBER
+                            =========================================== -->
+
+                            <div class="col-md-6">
+
+                                <label
+                                    for="ap-form-invoice-no"
+                                    class="form-label">
+
+                                    Invoice No
+
+                                    <span class="text-danger">
+                                        *
+                                    </span>
+
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="ap-form-invoice-no"
+                                    class="form-control"
+                                    placeholder="Enter invoice number">
+
+                            </div>
+
+
+                            <!-- ==========================================
+                                 INVOICE DATE
+                            =========================================== -->
+
+                            <div class="col-md-6">
+
+                                <label
+                                    for="ap-form-invoice-date"
+                                    class="form-label">
+
+                                    Invoice Date
+
+                                    <span class="text-danger">
+                                        *
+                                    </span>
+
+                                </label>
+
+                                <input
+                                    type="date"
+                                    id="ap-form-invoice-date"
+                                    class="form-control">
+
+                            </div>
+
+
+                            <!-- ==========================================
+                                 DATE RECEIVED
+                            =========================================== -->
+
+                            <div class="col-md-4">
+
+                                <label
+                                    for="ap-form-date-received"
+                                    class="form-label">
+
+                                    Date Received
+
+                                    <span class="text-danger">
+                                        *
+                                    </span>
+
+                                </label>
+
+                                <input
+                                    type="date"
+                                    id="ap-form-date-received"
+                                    class="form-control">
+
+                            </div>
+
+
+                            <!-- ==========================================
+                                 TERM OF PAYMENT
+                            =========================================== -->
+
+                            <div class="col-md-4">
+
+                                <label
+                                    for="ap-form-top"
+                                    class="form-label">
+
+                                    Term of Payment
+
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="ap-form-top"
+                                    class="form-control"
+                                    readonly
+                                    placeholder="Auto from Vendor">
+
+                            </div>
+
+
+                            <!-- ==========================================
+                                 DUE DATE
+                            =========================================== -->
+
+                            <div class="col-md-4">
+
+                                <label
+                                    for="ap-form-due-date"
+                                    class="form-label">
+
+                                    Due Date
+
+                                </label>
+
+                                <input
+                                    type="date"
+                                    id="ap-form-due-date"
+                                    class="form-control"
+                                    readonly>
+
+                            </div>
+
+
+                            <!-- ==========================================
+                                 DESCRIPTION
+                            =========================================== -->
+
+                            <div class="col-12">
+
+                                <label
+                                    for="ap-form-description"
+                                    class="form-label">
+
+                                    Description
+
+                                </label>
+
+                                <textarea
+                                    id="ap-form-description"
+                                    class="form-control"
+                                    rows="2"
+                                    placeholder="Enter description"></textarea>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ==================================================
+                     INVOICE DETAILS
+                =================================================== -->
+
+                <div class="finova-card mt-3">
+
+                    <div class="finova-card-body">
+
+
+                        <!-- ==========================================
+                             DETAIL HEADER
+                        =========================================== -->
+
+                        <div
+                            class="d-flex
+                                   justify-content-between
+                                   align-items-center
+                                   mb-3">
+
+                            <div>
+
+                                <div class="fw-semibold">
+
+                                    Invoice Details
+
+                                </div>
+
+                                <div
+                                    class="text-muted small">
+
+                                    Add account payable detail
+
+                                </div>
+
+                            </div>
+
+
+                            <button
+                            type="button"
+                            class="btn btn-sm btn-primary"
+                            id="btn-add-ap-detail">
+
+                            <i class="fa-solid fa-plus me-1"></i>
+
+                            Add Detail
+
+                        </button>
+
+                        </div>
+
+
+                        <!-- ==========================================
+                             DETAIL TABLE
+                        =========================================== -->
+
+                        <div
+                            class="table-responsive">
+
+                            <table
+                                class="table
+                                       table-sm
+                                       table-hover
+                                       align-middle
+                                       mb-0">
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th>
+                                            No
+                                        </th>
+
+                                        <th>
+                                            Account
+                                        </th>
+
+                                        <th>
+                                            Description
+                                        </th>
+
+                                        <th
+                                            class="text-end">
+
+                                            Qty
+
+                                        </th>
+
+                                        <th
+                                            class="text-end">
+
+                                            Unit Price
+
+                                        </th>
+
+                                        <th
+                                            class="text-end">
+
+                                            Tax
+
+                                        </th>
+
+                                        <th
+                                            class="text-end">
+
+                                            WHT
+
+                                        </th>
+
+                                        <th
+                                            class="text-end">
+
+                                            Amount
+
+                                        </th>
+
+                                        <th
+                                            class="text-center">
+
+                                            Action
+
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+
+                                <tbody
+                                    id="ap-detail-body">
+
+                                    <tr
+                                        id="ap-detail-empty">
+
+                                        <td
+                                            colspan="9"
+                                            class="text-center
+                                                   text-muted
+                                                   py-4">
+
+                                            No detail added.
+
+                                        </td>
+
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ==================================================
+                     TOTAL SUMMARY
+                =================================================== -->
+
+                <div
+                    class="d-flex
+                           justify-content-end
+                           mt-3">
+
+                    <div
+                        class="finova-card"
+                        style="width: 420px;">
+
+                        <div class="finova-card-body">
+
+
+                            <!-- ==========================================
+                                 SUBTOTAL
+                            =========================================== -->
+
+                            <div
+                                class="d-flex
+                                       justify-content-between
+                                       align-items-center
+                                       mb-2">
+
+                                <span>
+                                    Subtotal
+                                </span>
+
+                                <strong
+                                    id="ap-form-subtotal">
+
+                                    0
+
+                                </strong>
+
+                            </div>
+
+
+                            <!-- ==========================================
+                                 TAX INPUT
+                            =========================================== -->
+
+                            <div
+                                class="d-flex
+                                       justify-content-between
+                                       align-items-center
+                                       mb-2">
+
+                                <span>
+                                    Tax Input
+                                </span>
+
+                                <strong
+                                    id="ap-form-tax">
+
+                                    0
+
+                                </strong>
+
+                            </div>
+
+
+                            <!-- ==========================================
+                                 WITHHOLDING TAX
+                            =========================================== -->
+
+                            <div
+                                class="d-flex
+                                       justify-content-between
+                                       align-items-center
+                                       mb-2">
+
+                                <span>
+                                    Withholding Tax
+                                </span>
+
+                                <strong
+                                    id="ap-form-wht">
+
+                                    0
+
+                                </strong>
+
+                            </div>
+
+
+                            <hr>
+
+
+                            <!-- ==========================================
+                                 TOTAL
+                            =========================================== -->
+
+                            <div
+                                class="d-flex
+                                       justify-content-between
+                                       align-items-center">
+
+                                <span
+                                    class="fw-semibold">
+
+                                    TOTAL
+
+                                </span>
+
+                                <strong
+                                    id="ap-form-total"
+                                    class="fs-5">
+
+                                    0
+
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ==================================================
+                 MODAL FOOTER
+            =================================================== -->
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-light border"
+                    data-bs-dismiss="modal">
+
+                    Cancel
+
+                </button>
+
+
+                <button
+                    type="button"
+                    id="btn-ap-save-draft"
+                    class="btn btn-primary">
+
+                    <i
+                        class="fa-solid fa-floppy-disk me-1">
+                    </i>
+
+                    Save Draft
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

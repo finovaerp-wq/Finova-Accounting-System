@@ -1,0 +1,479 @@
+<!-- ======================================================
+     FINOVA ACCOUNTING SYSTEM
+     MODULE : ACCOUNT PAYABLE
+     COMPONENT : INVOICE DETAIL MODAL
+     ====================================================== -->
+
+
+<!-- ======================================================
+     ACCOUNT PAYABLE DETAIL MODAL
+     ====================================================== -->
+
+<div
+    class="modal fade"
+    id="accountPayableDetailModal"
+    tabindex="-1"
+    aria-labelledby="accountPayableDetailModalLabel"
+    aria-hidden="true"
+    data-bs-backdrop="static"
+    data-bs-keyboard="false">
+
+    <div
+        class="modal-dialog modal-lg modal-dialog-centered">
+
+        <div class="modal-content shadow-lg">
+
+
+            <!-- ==================================================
+                 HEADER
+                 ================================================== -->
+
+            <div class="modal-header">
+
+                <div>
+
+                    <h5
+                        class="modal-title fw-semibold"
+                        id="accountPayableDetailModalLabel">
+
+                        <i
+                            class="fa-solid fa-file-invoice-dollar me-2">
+                        </i>
+
+                        Add Invoice Detail
+
+                    </h5>
+
+
+                    <div
+                        class="text-muted small mt-1">
+
+                        Add account payable invoice detail
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close">
+                </button>
+
+            </div>
+
+
+            <!-- ==================================================
+                 BODY
+                 ================================================== -->
+
+            <div class="modal-body">
+
+
+                <!-- ==================================================
+                     ACCOUNT
+                     ================================================== -->
+
+                <div class="mb-3">
+
+                    <label
+                        for="ap-detail-coa"
+                        class="form-label">
+
+                        Account
+                        <span class="text-danger">*</span>
+
+                    </label>
+
+
+                    <select
+                        id="ap-detail-coa"
+                        class="form-select">
+
+                        <option value="">
+
+                            Select Chart of Account
+
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- ==================================================
+                     DESCRIPTION
+                     ================================================== -->
+
+                <div class="mb-3">
+
+                    <label
+                        for="ap-detail-description"
+                        class="form-label">
+
+                        Description
+
+                    </label>
+
+
+                    <textarea
+                        id="ap-detail-description"
+                        class="form-control"
+                        rows="2"
+                        placeholder="Enter description">
+                    </textarea>
+
+                </div>
+
+
+                <!-- ==================================================
+                     QUANTITY / UNIT PRICE
+                     ================================================== -->
+
+                <div class="row g-3">
+
+
+                    <!-- ==============================================
+                         QUANTITY
+                         ============================================== -->
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="ap-detail-quantity"
+                            class="form-label">
+
+                            Quantity
+                            <span class="text-danger">*</span>
+
+                        </label>
+
+
+                        <input
+                            type="number"
+                            id="ap-detail-quantity"
+                            class="form-control text-start"
+                            min="0"
+                            step="1"
+                            value="0"
+                            placeholder="0">
+
+                    </div>
+
+
+                    <!-- ==============================================
+                         UNIT PRICE
+                         ============================================== -->
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="ap-detail-unit-price"
+                            class="form-label">
+
+                            Unit Price
+                            <span class="text-danger">*</span>
+
+                        </label>
+
+
+                        <input
+                        type="text"
+                        id="ap-detail-unit-price"
+                        class="form-control text-start"
+                        inputmode="numeric"
+                        value="0"
+                        placeholder="0">
+
+                    </div>
+
+                </div>
+
+
+                <!-- ==================================================
+     TAX
+     ================================================== -->
+
+<div class="row g-3 mt-1">
+
+
+    <!-- ==============================================
+         TAX (+)
+         ============================================== -->
+
+    <div class="col-md-6">
+
+        <label
+            for="ap-detail-tax-input-rate"
+            class="form-label">
+
+            Tax (+)
+
+        </label>
+
+
+        <select
+            id="ap-detail-tax-input-rate"
+            class="form-select">
+
+            <option value="0">
+                No Tax
+            </option>
+
+            <option value="11">
+                11%
+            </option>
+
+            <option value="1.1">
+                1.1%
+            </option>
+
+        </select>
+
+    </div>
+
+
+
+    <!-- ==============================================
+         TAX (-)
+         ============================================== -->
+
+    <div class="col-md-6">
+
+        <label
+            for="ap-detail-withholding-tax-rate"
+            class="form-label">
+
+            Tax (-)
+
+        </label>
+
+
+        <select
+            id="ap-detail-withholding-tax-rate"
+            class="form-select">
+
+            <option value="0">
+                No Tax
+            </option>
+
+            <option value="2">
+                2%
+            </option>
+
+            <option value="2.5">
+                2.5%
+            </option>
+
+            <option value="10">
+                10%
+            </option>
+
+            <option value="4">
+                4%
+            </option>
+
+        </select>
+
+    </div>
+
+
+</div>
+                <!-- ==================================================
+                     CALCULATION SUMMARY
+                     ================================================== -->
+
+                <div
+                    class="card mt-4 bg-light border-0">
+
+                    <div
+                        class="card-body">
+
+
+                        <!-- ==========================================
+                             LINE AMOUNT
+                             ========================================== -->
+
+                        <div
+                            class="d-flex
+                                   justify-content-between
+                                   align-items-center
+                                   mb-2">
+
+                            <span
+                                class="text-muted">
+
+                                Line Amount
+
+                            </span>
+
+
+                            <span
+                                id="ap-detail-line-amount"
+                                class="fw-semibold">
+
+                                0
+
+                            </span>
+
+                        </div>
+
+
+                        <!-- ==========================================
+                             TAX INPUT AMOUNT
+                             ========================================== -->
+
+                        <div
+                            class="d-flex
+                                   justify-content-between
+                                   align-items-center
+                                   mb-2">
+
+                            <span
+                                class="text-muted">
+
+                                Tax Input
+
+                            </span>
+
+
+                            <span
+                                id="ap-detail-tax-input-amount"
+                                class="fw-semibold">
+
+                                0
+
+                            </span>
+
+                        </div>
+
+
+                        <!-- ==========================================
+                             WITHHOLDING TAX AMOUNT
+                             ========================================== -->
+
+                        <div
+                            class="d-flex
+                                   justify-content-between
+                                   align-items-center
+                                   mb-2">
+
+                            <span
+                                class="text-muted">
+
+                                Withholding Tax
+
+                            </span>
+
+
+                            <span
+                                id="ap-detail-withholding-tax-amount"
+                                class="fw-semibold">
+
+                                0
+
+                            </span>
+
+                        </div>
+
+
+                        <!-- ==========================================
+                             TOTAL
+                             ========================================== -->
+
+                        <div
+                            class="border-top
+                                   pt-2
+                                   mt-2
+                                   d-flex
+                                   justify-content-between
+                                   align-items-center">
+
+                            <span
+                                class="fw-semibold">
+
+                                Total Amount
+
+                            </span>
+
+
+                            <span
+                                id="ap-detail-total-amount"
+                                class="fw-bold">
+
+                                0
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ==================================================
+                     HIDDEN DETAIL ID
+                     ================================================== -->
+
+                <input
+                    type="hidden"
+                    id="ap-detail-id"
+                    value="">
+
+
+            </div>
+
+
+            <!-- ==================================================
+                 FOOTER
+                 ================================================== -->
+
+            <div class="modal-footer">
+
+
+                <!-- ==============================================
+                     CANCEL
+                     ============================================== -->
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+
+                    <i
+                        class="fa-solid fa-xmark me-1">
+                    </i>
+
+                    Cancel
+
+                </button>
+
+
+                <!-- ==============================================
+                     SAVE DETAIL
+                     ============================================== -->
+
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    id="btn-save-ap-detail">
+
+                    <i
+                        class="fa-solid fa-check me-1">
+                    </i>
+
+                    Save Detail
+
+                </button>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
