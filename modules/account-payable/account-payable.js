@@ -40,6 +40,13 @@ export class AccountPayable {
 
     constructor() {
 
+         /*
+        ==================================================
+        DELETE STATE
+        ==================================================
+        */
+
+        this.deleteInvoiceId = null;
         /*
         ==============================================
         SERVICE
@@ -63,6 +70,9 @@ export class AccountPayable {
         this.currentCOA = [];
         this.currentInvoiceId = null;
         this.currentMode = "add";
+        this.currentDetailId = null;
+        this.resetInvoiceDetailForm();
+        this.pendingDeleteDetailId = null;
 
 
         /*
@@ -507,7 +517,40 @@ cacheDOM() {
             "ap-table-body"
         );
 
+    /*
+======================================================
+DELETE INVOICE MODAL
+======================================================
+*/
 
+this.apDeleteInvoiceModal =
+    document.getElementById(
+        "apDeleteInvoiceModal"
+    );
+
+
+this.apDeleteInvoiceNo =
+    document.getElementById(
+        "ap-delete-invoice-no"
+    );
+
+
+this.apDeleteVendor =
+    document.getElementById(
+        "ap-delete-vendor"
+    );
+
+
+this.apDeletePoNo =
+    document.getElementById(
+        "ap-delete-po-no"
+    );
+
+
+this.btnConfirmApDeleteInvoice =
+    document.getElementById(
+        "btn-confirm-ap-delete-invoice"
+    );
     /*
     ==================================================
     ACCOUNT PAYABLE MODAL
@@ -1169,7 +1212,112 @@ bindEvents() {
         }
     );
 
+    /*
+======================================================
+CONFIRM DELETE DETAIL
+======================================================
+*/
 
+const btnConfirmDelete =
+    document.getElementById(
+        "btn-confirm-ap-delete"
+    );
+
+
+btnConfirmDelete?.addEventListener(
+    "click",
+    () => {
+
+        const id =
+            this.pendingDeleteDetailId;
+
+
+        if (!id) {
+
+            return;
+
+        }
+
+
+        const index =
+            this.invoiceDetails.findIndex(
+                item =>
+                    String(item.id)
+                    ===
+                    String(id)
+            );
+
+
+        if (index === -1) {
+
+            this.showError(
+                "Invoice detail not found."
+            );
+
+            return;
+
+        }
+
+
+        /*
+        ==============================================
+        REMOVE DETAIL FROM ARRAY
+        ==============================================
+        */
+
+        this.invoiceDetails.splice(
+            index,
+            1
+        );
+
+
+        /*
+        ==============================================
+        CLEAR PENDING ID
+        ==============================================
+        */
+
+        this.pendingDeleteDetailId =
+            null;
+
+
+        /*
+        ==============================================
+        RENDER
+        ==============================================
+        */
+
+        this.renderInvoiceDetails();
+
+
+        /*
+        ==============================================
+        CLOSE CONFIRM MODAL
+        ==============================================
+        */
+
+        const modalElement =
+            document.getElementById(
+                "apDeleteDetailModal"
+            );
+
+
+        const modal =
+            bootstrap.Modal.getInstance(
+                modalElement
+            );
+
+
+        modal?.hide();
+
+
+        console.log(
+            "AP Invoice Detail deleted:",
+            id
+        );
+
+    }
+);
     /*
     ==================================================
     DETAIL CALCULATION
@@ -1274,6 +1422,71 @@ bindEvents() {
 
         }
     );
+    /*
+======================================================
+INVOICE DETAIL ACTION
+======================================================
+*/
+
+const detailBody =
+    document.getElementById(
+        "ap-detail-body"
+    );
+
+
+detailBody?.addEventListener(
+    "click",
+    event => {
+
+        const button =
+            event.target.closest(
+                "[data-detail-action]"
+            );
+
+
+        if (!button) {
+
+            return;
+
+        }
+
+
+        const action =
+            button.dataset.detailAction;
+
+
+        const id =
+            button.dataset.detailId;
+
+
+        if (!id) {
+
+            return;
+
+        }
+
+
+        if (
+            action === "edit"
+        ) {
+
+            this.editInvoiceDetail(id);
+
+            return;
+
+        }
+
+
+        if (
+            action === "delete"
+        ) {
+
+            this.deleteInvoiceDetail(id);
+
+        }
+
+    }
+);
 
 
     /*
@@ -1452,6 +1665,56 @@ bindEvents() {
 
         }
     );
+    /*
+==================================================
+CONFIRM DELETE ACCOUNT PAYABLE
+==================================================
+*/
+
+const btnConfirmDeleteInvoice =
+    document.getElementById(
+        "btn-confirm-ap-delete-invoice"
+    );
+
+
+btnConfirmDeleteInvoice?.addEventListener(
+    "click",
+    async () => {
+
+        const id =
+            this.deleteInvoiceId;
+
+
+        console.log(
+            "CONFIRM DELETE INVOICE:",
+            id
+        );
+
+
+        if (!id) {
+
+            this.showError(
+                "Account Payable ID is missing."
+            );
+
+            return;
+
+        }
+
+
+        /*
+        ==============================================
+        TEMPORARY TEST
+        ==============================================
+        */
+
+        console.log(
+            "READY TO DELETE ACCOUNT PAYABLE:",
+            id
+        );
+
+    }
+);
 
 
     /*
@@ -1463,6 +1726,7 @@ bindEvents() {
     this.bindTableActions();
 
 }
+
         /*
     ======================================================
     BIND TABLE ACTION
@@ -1519,6 +1783,321 @@ bindEvents() {
         );
 
     }
+    /*
+======================================================
+EDIT INVOICE DETAIL
+======================================================
+*/
+
+async editInvoiceDetail(id) {
+
+    try {
+
+        const detail =
+            this.invoiceDetails.find(
+                item =>
+                    String(item.id)
+                    ===
+                    String(id)
+            );
+
+
+        if (!detail) {
+
+            this.showError(
+                "Invoice detail not found."
+            );
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        SET EDIT DETAIL
+        ==================================================
+        */
+
+        this.currentDetailId =
+            id;
+
+
+        /*
+        ==================================================
+        LOAD COA
+        ==================================================
+        */
+
+        await this.loadDetailCOA();
+
+
+        /*
+        ==================================================
+        SET FORM VALUES
+        ==================================================
+        */
+
+        const detailId =
+            document.getElementById(
+                "ap-detail-id"
+            );
+
+        const description =
+            document.getElementById(
+                "ap-detail-description"
+            );
+
+
+        if (detailId) {
+
+            detailId.value =
+                detail.id || "";
+
+        }
+
+
+        if (this.apDetailCOA) {
+
+            this.apDetailCOA.value =
+                String(
+                    detail.charge_account_id
+                    || ""
+                );
+
+        }
+
+
+        if (description) {
+
+            description.value =
+                detail.description
+                || "";
+
+        }
+
+
+        if (this.apDetailQuantity) {
+
+            this.apDetailQuantity.value =
+                detail.quantity
+                ?? 1;
+
+        }
+
+
+        if (this.apDetailUnitPrice) {
+
+            this.apDetailUnitPrice.value =
+                Number(
+                    detail.unit_price
+                    || 0
+                ).toLocaleString(
+                    "id-ID"
+                );
+
+        }
+
+
+        if (this.apDetailTaxInputRate) {
+
+            this.apDetailTaxInputRate.value =
+                Number(
+                    detail.tax_input_rate
+                    || 0
+                );
+
+        }
+
+
+        if (
+            this.apDetailWithholdingTaxRate
+        ) {
+
+            this.apDetailWithholdingTaxRate.value =
+                Number(
+                    detail.withholding_tax_rate
+                    || 0
+                );
+
+        }
+
+
+        /*
+        ==================================================
+        CALCULATE
+        ==================================================
+        */
+
+        this.calculateDetail();
+
+
+        /*
+        ==================================================
+        CHANGE BUTTON TEXT
+        ==================================================
+        */
+
+        if (this.btnSaveAPDetail) {
+
+            this.btnSaveAPDetail.innerHTML = `
+                <i class="fa-solid fa-floppy-disk me-1"></i>
+                Update Detail
+            `;
+
+        }
+
+
+        /*
+        ==================================================
+        SHOW MODAL
+        ==================================================
+        */
+
+        const modal =
+            bootstrap.Modal.getOrCreateInstance(
+                this.accountPayableDetailModal
+            );
+
+
+        modal.show();
+
+
+        console.log(
+            "AP Edit Detail:",
+            detail
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountPayable.editInvoiceDetail:",
+            error
+        );
+
+        this.showError(
+            error.message
+            || "Failed to edit invoice detail."
+        );
+
+    }
+
+}
+/*
+======================================================
+DELETE INVOICE DETAIL
+======================================================
+*/
+
+deleteInvoiceDetail(id) {
+
+    try {
+
+        const detail =
+            this.invoiceDetails.find(
+                item =>
+                    String(item.id)
+                    ===
+                    String(id)
+            );
+
+
+        if (!detail) {
+
+            this.showError(
+                "Invoice detail not found."
+            );
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        STORE PENDING DELETE
+        ==================================================
+        */
+
+        this.pendingDeleteDetailId =
+            id;
+
+
+        /*
+        ==================================================
+        DETAIL NAME
+        ==================================================
+        */
+
+        const detailName =
+            document.getElementById(
+                "ap-delete-detail-name"
+            );
+
+
+        if (detailName) {
+
+            detailName.textContent =
+                detail.description
+                ||
+                detail.account_name
+                ||
+                "Invoice Detail";
+
+        }
+
+
+        /*
+        ==================================================
+        SHOW BOOTSTRAP MODAL
+        ==================================================
+        */
+
+        const modalElement =
+            document.getElementById(
+                "apDeleteDetailModal"
+            );
+
+
+        if (!modalElement) {
+
+            this.showError(
+                "Delete confirmation modal not found."
+            );
+
+            return;
+
+        }
+
+
+        const modal =
+            bootstrap.Modal.getOrCreateInstance(
+                modalElement
+            );
+
+
+        modal.show();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountPayable.deleteInvoiceDetail:",
+            error
+        );
+
+        this.showError(
+            error.message
+            ||
+            "Failed to prepare delete action."
+        );
+
+    }
+
+}
     /*
 ======================================================
 SAVE INVOICE DETAIL
@@ -1707,9 +2286,17 @@ saveInvoiceDetail() {
         ==================================================
         */
 
-        const detail = {
+        /*
+==================================================
+CREATE / UPDATE DETAIL
+==================================================
+*/
+
+const detail = {
 
     id:
+        this.currentDetailId
+        ||
         crypto.randomUUID(),
 
     charge_account_id:
@@ -1733,17 +2320,17 @@ saveInvoiceDetail() {
     tax_input_rate:
         taxInputRate,
 
-    withholding_tax_rate:
-        withholdingTaxRate,
-
-    line_amount:
-        calculated.line_amount,
-
     tax_input_amount:
         calculated.tax_input_amount,
 
+    withholding_tax_rate:
+        withholdingTaxRate,
+
     withholding_tax_amount:
         calculated.withholding_tax_amount,
+
+    line_amount:
+        calculated.line_amount,
 
     total_amount:
         calculated.total_amount
@@ -1751,16 +2338,68 @@ saveInvoiceDetail() {
 };
 
 
-        /*
-        ==================================================
-        ADD TO DETAIL ARRAY
-        ==================================================
-        */
+/*
+==================================================
+ADD / UPDATE ARRAY
+==================================================
+*/
 
-        this.invoiceDetails.push(
-            detail
+if (
+    this.currentDetailId
+) {
+
+    const index =
+        this.invoiceDetails.findIndex(
+            item =>
+                String(item.id)
+                ===
+                String(
+                    this.currentDetailId
+                )
         );
 
+
+    if (index === -1) {
+
+        throw new Error(
+            "Invoice detail to update was not found."
+        );
+
+    }
+
+
+    this.invoiceDetails[index] =
+        detail;
+
+
+    console.log(
+        "AP Invoice Detail updated:",
+        JSON.stringify(
+            detail,
+            null,
+            2
+        )
+    );
+
+}
+
+else {
+
+    this.invoiceDetails.push(
+        detail
+    );
+
+
+    console.log(
+        "AP Invoice Detail added:",
+        JSON.stringify(
+            detail,
+            null,
+            2
+        )
+    );
+
+}
 
         /*
         ==================================================
@@ -2068,6 +2707,265 @@ renderInvoiceDetails() {
 }
 /*
 ======================================================
+BOOTSTRAP CONFIRM MODAL
+======================================================
+*/
+
+showConfirmModal({
+
+    title = "Confirmation",
+
+    message = "Are you sure?",
+
+    confirmText = "Confirm",
+
+    confirmClass = "btn-primary",
+
+    icon = "fa-solid fa-circle-question",
+
+    onConfirm = null
+
+} = {}) {
+
+
+    /*
+    ==================================================
+    REMOVE EXISTING MODAL
+    ==================================================
+    */
+
+    const existing =
+        document.getElementById(
+            "ap-confirm-modal"
+        );
+
+
+    if (existing) {
+
+        existing.remove();
+
+    }
+
+
+    /*
+    ==================================================
+    CREATE MODAL
+    ==================================================
+    */
+
+    const modalHTML = `
+
+        <div
+            class="modal fade"
+            id="ap-confirm-modal"
+            tabindex="-1"
+            aria-hidden="true"
+        >
+
+            <div
+                class="modal-dialog modal-dialog-centered"
+            >
+
+                <div class="modal-content shadow-lg">
+
+
+                    <!-- ==================================
+                    HEADER
+                    ================================== -->
+
+                    <div class="modal-header">
+
+                        <h5 class="modal-title">
+
+                            <i
+                                class="${icon} me-2"
+                            ></i>
+
+                            ${title}
+
+                        </h5>
+
+
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                        ></button>
+
+                    </div>
+
+
+                    <!-- ==================================
+                    BODY
+                    ================================== -->
+
+                    <div class="modal-body">
+
+                        <div class="text-muted">
+
+                            ${message}
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ==================================
+                    FOOTER
+                    ================================== -->
+
+                    <div class="modal-footer">
+
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal"
+                        >
+
+                            <i
+                                class="fa-solid fa-xmark me-1"
+                            ></i>
+
+                            Cancel
+
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="btn ${confirmClass}"
+                            id="ap-confirm-button"
+                        >
+
+                            <i
+                                class="${icon} me-1"
+                            ></i>
+
+                            ${confirmText}
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    /*
+    ==================================================
+    APPEND
+    ==================================================
+    */
+
+    document.body.insertAdjacentHTML(
+        "beforeend",
+        modalHTML
+    );
+
+
+    /*
+    ==================================================
+    GET ELEMENT
+    ==================================================
+    */
+
+    const modalElement =
+        document.getElementById(
+            "ap-confirm-modal"
+        );
+
+
+    const confirmButton =
+        document.getElementById(
+            "ap-confirm-button"
+        );
+
+
+    /*
+    ==================================================
+    BOOTSTRAP MODAL
+    ==================================================
+    */
+
+    const modal =
+        bootstrap.Modal.getOrCreateInstance(
+            modalElement
+        );
+
+
+    /*
+    ==================================================
+    CONFIRM ACTION
+    ==================================================
+    */
+
+    confirmButton.addEventListener(
+        "click",
+        async () => {
+
+            /*
+            ==========================================
+            DISABLE BUTTON
+            ==========================================
+            */
+
+            confirmButton.disabled =
+                true;
+
+
+            try {
+
+                if (
+                    typeof onConfirm
+                    ===
+                    "function"
+                ) {
+
+                    await onConfirm();
+
+                }
+
+
+                modal.hide();
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "AccountPayable.showConfirmModal:",
+                    error
+                );
+
+                this.showError(
+                    error.message
+                    ||
+                    "Action failed."
+                );
+
+            }
+
+        }
+    );
+
+
+    /*
+    ==================================================
+    SHOW
+    ==================================================
+    */
+
+    modal.show();
+
+}
+/*
+======================================================
 SHOW ERROR
 ======================================================
 */
@@ -2369,6 +3267,15 @@ async addInvoiceDetail() {
         */
 
         this.resetInvoiceDetailForm();
+        this.currentDetailId = null;
+        if (this.btnSaveAPDetail) {
+
+    this.btnSaveAPDetail.innerHTML = `
+        <i class="fa-solid fa-floppy-disk me-1"></i>
+        Save Detail
+    `;
+
+}
 
 
         /*
@@ -3795,7 +4702,7 @@ async saveEdit() {
     }
 
 }
-/*
+    /*
     ======================================================
     HANDLE TABLE ACTION
     ======================================================
@@ -4311,37 +5218,286 @@ async editInvoice(id) {
 }
 
 
-    /*
-    ======================================================
-    DELETE
-    ======================================================
-    */
+  /*
+==================================================
+DELETE INVOICE
+==================================================
+*/
 
-    async deleteInvoice(id) {
+async deleteInvoice(id) {
+
+    try {
+
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
+
+        if (!id) {
+
+            throw new Error(
+                "Account Payable ID is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        STORE DELETE ID
+        ==================================================
+        */
+
+        this.deleteInvoiceId =
+            id;
+
+
+        /*
+        ==================================================
+        FIND INVOICE
+        ==================================================
+        */
+
+        const data =
+            Array.isArray(this.data)
+                ? this.data
+                : [];
+
+
+        const invoice =
+            data.find(
+                item =>
+                    String(item.id)
+                    ===
+                    String(id)
+            );
+
+
+        if (!invoice) {
+
+            throw new Error(
+                "Account Payable not found."
+            );
+
+        }
+
 
         console.log(
-            "Delete Account Payable:",
-            id
+            "DELETE INVOICE:",
+            invoice
+        );
+
+
+        /*
+        ==================================================
+        FIND VENDOR ID
+        ==================================================
+        */
+
+        const vendorId =
+            invoice.vendor_id
+            ||
+            invoice.bp_id
+            ||
+            invoice.business_partner_id;
+
+
+        console.log(
+            "VENDOR ID:",
+            vendorId
+        );
+
+
+        /*
+        ==================================================
+        FIND VENDOR FROM VENDOR DATA
+        ==================================================
+        */
+
+        let vendorObject = null;
+
+
+        if (
+            vendorId
+            &&
+            Array.isArray(
+                this.vendorData
+            )
+        ) {
+
+            vendorObject =
+                this.vendorData.find(
+                    vendor => {
+
+                        return String(
+                            vendor.id
+                        )
+                        ===
+                        String(
+                            vendorId
+                        );
+
+                    }
+                );
+
+        }
+
+
+        console.log(
+            "VENDOR OBJECT:",
+            vendorObject
+        );
+
+
+        /*
+        ==================================================
+        DEBUG VENDOR OBJECT
+        ==================================================
+        */
+
+        if (vendorObject) {
+
+            console.log(
+                "VENDOR OBJECT JSON:",
+                JSON.stringify(
+                    vendorObject,
+                    null,
+                    2
+                )
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        GET VENDOR NAME
+        ==================================================
+        */
+
+        const vendorName =
+            vendorObject?.bp_name
+            ||
+            invoice.vendor_name
+            ||
+            "-";
+
+
+        console.log(
+            "VENDOR NAME:",
+            vendorName
+        );
+
+
+        /*
+        ==================================================
+        SET DELETE MODAL INFORMATION
+        ==================================================
+        */
+
+        if (
+            this.apDeleteInvoiceNo
+        ) {
+
+            this.apDeleteInvoiceNo.textContent =
+                invoice.invoice_no
+                ||
+                "-";
+
+        }
+
+
+        /*
+        ==================================================
+        VENDOR
+        ==================================================
+        */
+
+        if (
+            this.apDeleteVendor
+        ) {
+
+            this.apDeleteVendor.textContent =
+                vendorName;
+
+        }
+
+
+        /*
+        ==================================================
+        PO NUMBER
+        ==================================================
+        */
+
+        if (
+            this.apDeletePoNo
+        ) {
+
+            this.apDeletePoNo.textContent =
+                invoice.po_no
+                ||
+                "-";
+
+        }
+
+
+        /*
+        ==================================================
+        VALIDATE DELETE MODAL
+        ==================================================
+        */
+
+        if (
+            !this.apDeleteInvoiceModal
+        ) {
+
+            throw new Error(
+                "Delete confirmation modal not found."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        SHOW DELETE CONFIRMATION MODAL
+        ==================================================
+        */
+
+        const modal =
+            bootstrap.Modal.getOrCreateInstance(
+                this.apDeleteInvoiceModal
+            );
+
+
+        modal.show();
+
+
+        console.log(
+            "DELETE CONFIRMATION MODAL OPENED"
         );
 
     }
-    
 
 
-    /*
-    ======================================================
-    POST
-    ======================================================
-    */
+    catch (error) {
 
-    async postInvoice(id) {
+        console.error(
+            "AccountPayable.deleteInvoice:",
+            error
+        );
 
-        console.log(
-            "Post Account Payable:",
-            id
+
+        this.showError(
+            error.message
+            ||
+            "Failed to delete Account Payable."
         );
 
     }
+
+}
 
 
     /*
