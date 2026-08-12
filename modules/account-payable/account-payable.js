@@ -61,6 +61,8 @@ export class AccountPayable {
         this.filteredData = [];
         this.invoiceDetails = [];
         this.currentCOA = [];
+        this.currentInvoiceId = null;
+        this.currentMode = "add";
 
 
         /*
@@ -1239,17 +1241,23 @@ bindEvents() {
     */
 
     this.btnSaveDraft?.addEventListener(
-        "click",
-        () => {
+    "click",
+    async () => {
 
-            console.log(
-                "SAVE DRAFT CLICKED"
-            );
+        if (
+            this.currentMode === "edit"
+        ) {
 
-            this.saveDraft();
+            await this.saveEdit();
+
+            return;
 
         }
-    );
+
+        await this.saveDraft();
+
+    }
+);
 
 
     /*
@@ -2850,6 +2858,8 @@ ADD ACCOUNT PAYABLE
 
 addInvoice() {
 
+    this.currentInvoiceId = null;
+    this.currentMode = "add";
     /*
     ==================================================
     CHECK MODAL
@@ -3491,6 +3501,301 @@ else {
 
 }
 /*
+======================================================
+SAVE EDIT
+======================================================
+*/
+
+async saveEdit() {
+
+    try {
+
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
+
+        if (!this.currentInvoiceId) {
+
+            throw new Error(
+                "Account Payable ID is required."
+            );
+
+        }
+
+
+        if (!this.apFormVendor?.value) {
+
+            return this.showError(
+                "Vendor is required."
+            );
+
+        }
+
+
+        if (
+            !this.apFormInvoiceNo?.value.trim()
+        ) {
+
+            return this.showError(
+                "Invoice No is required."
+            );
+
+        }
+
+
+        if (!this.apFormInvoiceDate?.value) {
+
+            return this.showError(
+                "Invoice Date is required."
+            );
+
+        }
+
+
+        if (!this.apFormDateReceived?.value) {
+
+            return this.showError(
+                "Date Received is required."
+            );
+
+        }
+
+
+        if (!this.apFormDueDate?.value) {
+
+            return this.showError(
+                "Due Date is required."
+            );
+
+        }
+
+
+        if (
+            !Array.isArray(this.invoiceDetails)
+            ||
+            !this.invoiceDetails.length
+        ) {
+
+            return this.showError(
+                "Please add at least one invoice detail."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        HEADER
+        ==================================================
+        */
+
+        const header = {
+
+            vendor_id:
+                this.apFormVendor.value,
+
+            po_no:
+                this.apFormPoNo?.value
+                    ?.trim()
+                || null,
+
+            invoice_no:
+                this.apFormInvoiceNo.value
+                    .trim(),
+
+            invoice_date:
+                this.apFormInvoiceDate.value,
+
+            date_received:
+                this.apFormDateReceived.value,
+
+            due_date:
+                this.apFormDueDate.value,
+
+            description:
+                this.apFormDescription?.value
+                    ?.trim()
+                || null,
+
+            status:
+                "Draft"
+
+        };
+
+
+        /*
+        ==================================================
+        DETAILS
+        ==================================================
+        */
+
+        const details =
+            this.invoiceDetails.map(
+                item => ({
+
+                    charge_account_id:
+                        Number(
+                            item.account_id
+                            ||
+                            item.charge_account_id
+                            ||
+                            0
+                        ),
+
+                    description:
+                        item.description
+                        || null,
+
+                    quantity:
+                        Number(
+                            item.quantity
+                            || 1
+                        ),
+
+                    unit_price:
+                        Number(
+                            item.unit_price
+                            || 0
+                        ),
+
+                    tax_input_rate:
+                        Number(
+                            item.tax_input_rate
+                            || 0
+                        ),
+
+                    withholding_tax_rate:
+                        Number(
+                            item.withholding_tax_rate
+                            || 0
+                        )
+
+                })
+            );
+
+
+        console.log(
+            "AP UPDATE HEADER:",
+            header
+        );
+
+        console.log(
+            "AP UPDATE DETAILS:",
+            details
+        );
+
+
+        /*
+        ==================================================
+        UPDATE
+        ==================================================
+        */
+
+        const result =
+            await this.service.update(
+                this.currentInvoiceId,
+                header,
+                details
+            );
+
+
+        console.log(
+            "AP UPDATED:",
+            result
+        );
+
+
+        /*
+        ==================================================
+        CLOSE MODAL
+        ==================================================
+        */
+
+        const modalElement =
+            document.getElementById(
+                "accountPayableModal"
+            );
+
+
+        if (modalElement) {
+
+            bootstrap.Modal
+                .getInstance(
+                    modalElement
+                )
+                ?.hide();
+
+        }
+
+
+        /*
+        ==================================================
+        RESET STATE
+        ==================================================
+        */
+
+        this.currentInvoiceId =
+            null;
+
+        this.currentMode =
+            "add";
+
+
+        /*
+        ==================================================
+        RESET BUTTON
+        ==================================================
+        */
+
+        if (this.btnSaveDraft) {
+
+            this.btnSaveDraft.innerHTML = `
+                <i class="fa-solid fa-floppy-disk me-1"></i>
+                Save Draft
+            `;
+
+        }
+
+
+        /*
+        ==================================================
+        RELOAD
+        ==================================================
+        */
+
+        await this.loadData();
+
+
+        /*
+        ==================================================
+        SUCCESS
+        ==================================================
+        */
+
+        console.log(
+            "Account Payable draft updated successfully."
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountPayable.saveEdit:",
+            error
+        );
+
+        this.showError(
+            error.message
+            || "Failed to update Account Payable."
+        );
+
+    }
+
+}
+/*
     ======================================================
     HANDLE TABLE ACTION
     ======================================================
@@ -3604,19 +3909,406 @@ else {
 
 
     /*
-    ======================================================
-    EDIT
-    ======================================================
-    */
+======================================================
+EDIT
+======================================================
+*/
 
-    async editInvoice(id) {
+async editInvoice(id) {
+
+    try {
+
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
+
+        if (!id) {
+
+            throw new Error(
+                "Account Payable ID is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        LOAD MODAL
+        ==================================================
+        */
+
+        await this.loadModalHTML();
+
+        await this.loadDetailModalHTML();
+
+
+        /*
+        ==================================================
+        CACHE DOM
+        ==================================================
+        */
+
+        this.cacheDOM();
+
+
+        /*
+        ==================================================
+        LOAD VENDORS
+        ==================================================
+        */
+
+        if (
+            !Array.isArray(this.vendorData)
+            ||
+            !this.vendorData.length
+        ) {
+
+            await this.loadVendors();
+
+        }
+
+
+        /*
+        ==================================================
+        LOAD INVOICE
+        ==================================================
+        */
+
+        const result =
+            await this.service.getById(id);
+
+
+        if (!result) {
+
+            throw new Error(
+                "Account Payable not found."
+            );
+
+        }
+
+
+        const header =
+            result.header;
+
+        const details =
+            Array.isArray(result.details)
+                ? result.details
+                : [];
+
+
+        /*
+        ==================================================
+        CHECK STATUS
+        ==================================================
+        */
+
+        if (
+            header.status !==
+            this.service.STATUS.DRAFT
+        ) {
+
+            throw new Error(
+                "Only Draft Account Payable can be edited."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        SET EDIT STATE
+        ==================================================
+        */
+
+        this.currentInvoiceId =
+            id;
+
+        this.currentMode =
+            "edit";
+
+
+        /*
+        ==================================================
+        HEADER FORM
+        ==================================================
+        */
+
+        if (this.apFormVendor) {
+
+            this.apFormVendor.value =
+                String(
+                    header.vendor_id
+                    || ""
+                );
+
+        }
+
+
+        /*
+        ==================================================
+        TERM OF PAYMENT
+        ==================================================
+        */
+
+        if (this.apFormTop) {
+
+            this.apFormTop.value =
+                String(
+                    header.top_id
+                    || ""
+                );
+
+        }
+
+
+        /*
+        ==================================================
+        PO NO
+        ==================================================
+        */
+
+        if (this.apFormPoNo) {
+
+            this.apFormPoNo.value =
+                header.po_no
+                || "";
+
+        }
+
+
+        /*
+        ==================================================
+        INVOICE NO
+        ==================================================
+        */
+
+        if (this.apFormInvoiceNo) {
+
+            this.apFormInvoiceNo.value =
+                header.invoice_no
+                || "";
+
+        }
+
+
+        /*
+        ==================================================
+        INVOICE DATE
+        ==================================================
+        */
+
+        if (this.apFormInvoiceDate) {
+
+            this.apFormInvoiceDate.value =
+                header.invoice_date
+                || "";
+
+        }
+
+
+        /*
+        ==================================================
+        DATE RECEIVED
+        ==================================================
+        */
+
+        if (this.apFormDateReceived) {
+
+            this.apFormDateReceived.value =
+                header.date_received
+                || "";
+
+        }
+
+
+        /*
+        ==================================================
+        DUE DATE
+        ==================================================
+        */
+
+        if (this.apFormDueDate) {
+
+            this.apFormDueDate.value =
+                header.due_date
+                || "";
+
+        }
+
+
+        /*
+        ==================================================
+        DESCRIPTION
+        ==================================================
+        */
+
+        if (this.apFormDescription) {
+
+            this.apFormDescription.value =
+                header.description
+                || "";
+
+        }
+
+
+        /*
+        ==================================================
+        DETAILS
+        ==================================================
+        */
+
+        this.invoiceDetails =
+            details.map(
+                detail => {
+
+                    const coa =
+                        detail.mst_chart_of_accounts
+                        || {};
+
+                    return {
+
+                        id:
+                            detail.id
+                            || crypto.randomUUID(),
+
+                        charge_account_id:
+                            Number(
+                                detail.charge_account_id
+                                || 0
+                            ),
+
+                        account_code:
+                            detail.account_code
+                            || coa.account_code
+                            || "",
+
+                        account_name:
+                            detail.account_name
+                            || coa.account_name
+                            || "",
+
+                        description:
+                            detail.description
+                            || "",
+
+                        quantity:
+                            Number(
+                                detail.quantity
+                                || 1
+                            ),
+
+                        unit_price:
+                            Number(
+                                detail.unit_price
+                                || 0
+                            ),
+
+                        tax_input_rate:
+                            Number(
+                                detail.tax_input_rate
+                                || 0
+                            ),
+
+                        tax_input_amount:
+                            Number(
+                                detail.tax_input_amount
+                                || 0
+                            ),
+
+                        withholding_tax_rate:
+                            Number(
+                                detail.withholding_tax_rate
+                                || 0
+                            ),
+
+                        withholding_tax_amount:
+                            Number(
+                                detail.withholding_tax_amount
+                                || 0
+                            ),
+
+                        line_amount:
+                            Number(
+                                detail.line_amount
+                                || 0
+                            ),
+
+                        total_amount:
+                            Number(
+                                detail.total_amount
+                                || 0
+                            )
+
+                    };
+
+                }
+            );
+
+
+        /*
+        ==================================================
+        RENDER DETAILS
+        ==================================================
+        */
+
+        this.renderInvoiceDetails();
+
+
+        /*
+        ==================================================
+        BUTTON MODE
+        ==================================================
+        */
+
+        if (this.btnSaveDraft) {
+
+            this.btnSaveDraft.innerHTML = `
+                <i class="fa-solid fa-floppy-disk me-1"></i>
+                Save Changes
+            `;
+
+        }
+
+
+        /*
+        ==================================================
+        SHOW MODAL
+        ==================================================
+        */
+
+        const modal =
+            bootstrap.Modal.getOrCreateInstance(
+                this.accountPayableModal
+            );
+
+
+        modal.show();
+
 
         console.log(
-            "Edit Account Payable:",
-            id
+            "AP EDIT LOADED:",
+            result
         );
 
     }
+
+    catch (error) {
+
+        console.error(
+            "AccountPayable.editInvoice:",
+            error
+        );
+
+        this.showError(
+            error.message
+            || "Failed to load Account Payable."
+        );
+
+    }
+
+}
 
 
     /*
