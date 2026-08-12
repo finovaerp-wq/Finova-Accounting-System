@@ -18,8 +18,10 @@
     data-bs-backdrop="static"
     data-bs-keyboard="false">
 
+
     <div
         class="modal-dialog modal-lg modal-dialog-centered">
+
 
         <div class="modal-content shadow-lg">
 
@@ -155,10 +157,10 @@
                             type="number"
                             id="ap-detail-quantity"
                             class="form-control text-start"
-                            min="0"
+                            min="1"
                             step="1"
-                            value="0"
-                            placeholder="0">
+                            value="1"
+                            placeholder="1">
 
                     </div>
 
@@ -180,12 +182,12 @@
 
 
                         <input
-                        type="text"
-                        id="ap-detail-unit-price"
-                        class="form-control text-start"
-                        inputmode="numeric"
-                        value="0"
-                        placeholder="0">
+                            type="text"
+                            id="ap-detail-unit-price"
+                            class="form-control text-start"
+                            inputmode="numeric"
+                            value="0"
+                            placeholder="0">
 
                     </div>
 
@@ -193,100 +195,101 @@
 
 
                 <!-- ==================================================
-     TAX
-     ================================================== -->
+                     TAX
+                     ================================================== -->
 
-<div class="row g-3 mt-1">
-
-
-    <!-- ==============================================
-         TAX (+)
-         ============================================== -->
-
-    <div class="col-md-6">
-
-        <label
-            for="ap-detail-tax-input-rate"
-            class="form-label">
-
-            Tax (+)
-
-        </label>
+                <div class="row g-3 mt-1">
 
 
-        <select
-            id="ap-detail-tax-input-rate"
-            class="form-select">
+                    <!-- ==============================================
+                         TAX (+)
+                         ============================================== -->
 
-            <option value="0">
-                No Tax
-            </option>
+                    <div class="col-md-6">
 
-            <option value="11">
-                11%
-            </option>
+                        <label
+                            for="ap-detail-tax-input-rate"
+                            class="form-label">
 
-            <option value="1.1">
-                1.1%
-            </option>
+                            Tax (+)
 
-        </select>
-
-    </div>
+                        </label>
 
 
+                        <select
+                            id="ap-detail-tax-input-rate"
+                            class="form-select">
 
-    <!-- ==============================================
-         TAX (-)
-         ============================================== -->
+                            <option value="0">
+                                No Tax
+                            </option>
 
-    <div class="col-md-6">
+                            <option value="1.1">
+                                1,1%
+                            </option>
 
-        <label
-            for="ap-detail-withholding-tax-rate"
-            class="form-label">
+                            <option value="11">
+                                11%
+                            </option>
 
-            Tax (-)
+                        </select>
 
-        </label>
-
-
-        <select
-            id="ap-detail-withholding-tax-rate"
-            class="form-select">
-
-            <option value="0">
-                No Tax
-            </option>
-
-            <option value="2">
-                2%
-            </option>
-
-            <option value="2.5">
-                2.5%
-            </option>
-
-            <option value="10">
-                10%
-            </option>
-
-            <option value="4">
-                4%
-            </option>
-
-        </select>
-
-    </div>
+                    </div>
 
 
-</div>
+                    <!-- ==============================================
+                         TAX (-)
+                         ============================================== -->
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="ap-detail-withholding-tax-rate"
+                            class="form-label">
+
+                            Tax (-)
+
+                        </label>
+
+
+                        <select
+                            id="ap-detail-withholding-tax-rate"
+                            class="form-select">
+
+                            <option value="0">
+                                No Tax
+                            </option>
+
+                            <option value="2">
+                                2%
+                            </option>
+
+                            <option value="2.5">
+                                2,5%
+                            </option>
+
+                            <option value="4">
+                                4%
+                            </option>
+
+                            <option value="10">
+                                10%
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
                 <!-- ==================================================
                      CALCULATION SUMMARY
                      ================================================== -->
 
                 <div
                     class="card mt-4 bg-light border-0">
+
 
                     <div
                         class="card-body">
@@ -322,7 +325,7 @@
 
 
                         <!-- ==========================================
-                             TAX INPUT AMOUNT
+                             TAX (+)
                              ========================================== -->
 
                         <div
@@ -334,7 +337,7 @@
                             <span
                                 class="text-muted">
 
-                                Tax Input
+                                Tax (+)
 
                             </span>
 
@@ -351,7 +354,7 @@
 
 
                         <!-- ==========================================
-                             WITHHOLDING TAX AMOUNT
+                             TAX (-)
                              ========================================== -->
 
                         <div
@@ -363,7 +366,7 @@
                             <span
                                 class="text-muted">
 
-                                Withholding Tax
+                                Tax (-)
 
                             </span>
 
@@ -408,6 +411,7 @@
                             </span>
 
                         </div>
+
 
                     </div>
 
@@ -468,6 +472,7 @@
                     Save Detail
 
                 </button>
+
 
             </div>
 

@@ -14,7 +14,8 @@ IMPORT
 */
 
 import {
-    CONFIG
+    CONFIG,
+    supabase
 } from "../../assets/js/core/supabase.js";
 
 import {
@@ -85,6 +86,7 @@ export class AccountPayable {
         this.accountPayableDetailModal = null;
         this.apDetailCOA = null;
         this.apDetailQuantity = null;
+        this.btnSaveDraft = null;
 
         this.apDetailUnitPrice = null;
 
@@ -484,10 +486,10 @@ async loadDetailModalHTML() {
 
 }
 
-    /*
-======================================================
+  /*
+==================================================
 CACHE DOM
-======================================================
+==================================================
 */
 
 cacheDOM() {
@@ -502,20 +504,180 @@ cacheDOM() {
         document.getElementById(
             "ap-table-body"
         );
+
+
     /*
-    ======================================================
-    AP FORM
-    ======================================================
+    ==================================================
+    ACCOUNT PAYABLE MODAL
+    ==================================================
+    */
+
+    this.accountPayableModal =
+        document.getElementById(
+            "accountPayableModal"
+        );
+
+
+    /*
+    ==================================================
+    ACCOUNT PAYABLE DETAIL MODAL
+    ==================================================
+    */
+
+    this.accountPayableDetailModal =
+        document.getElementById(
+            "accountPayableDetailModal"
+        );
+
+
+    /*
+    ==================================================
+    ADD AP FORM
+    ==================================================
     */
 
     this.apFormVendor =
         document.getElementById(
             "ap-form-vendor"
         );
+
+
+    this.apFormPoNo =
+        document.getElementById(
+            "ap-form-po-no"
+        );
+
+
+    this.apFormInvoiceNo =
+        document.getElementById(
+            "ap-form-invoice-no"
+        );
+
+
+    this.apFormInvoiceDate =
+        document.getElementById(
+            "ap-form-invoice-date"
+        );
+
+
+    this.apFormDateReceived =
+        document.getElementById(
+            "ap-form-date-received"
+        );
+
+
+    this.apFormTop =
+        document.getElementById(
+            "ap-form-top"
+        );
+
+
+    this.apFormDueDate =
+        document.getElementById(
+            "ap-form-due-date"
+        );
+
+
+    this.apFormDescription =
+        document.getElementById(
+            "ap-form-description"
+        );
+
+
     /*
-    ======================================================
+    ==================================================
+    AP DETAIL TABLE
+    ==================================================
+    */
+
+    this.apDetailBody =
+        document.getElementById(
+            "ap-detail-body"
+        );
+
+
+    /*
+    ==================================================
+    AP TOTAL
+    ==================================================
+    */
+
+    this.apFormSubtotal =
+        document.getElementById(
+            "ap-form-subtotal"
+        );
+
+
+    this.apFormTax =
+        document.getElementById(
+            "ap-form-tax"
+        );
+
+
+    this.apFormWht =
+        document.getElementById(
+            "ap-form-wht"
+        );
+
+
+    this.apFormTotal =
+        document.getElementById(
+            "ap-form-total"
+        );
+
+
+    /*
+    ==================================================
+    SAVE DRAFT
+    ==================================================
+    */
+
+    this.btnSaveDraft =
+        document.getElementById(
+            "btn-save-ap-draft"
+        );
+
+
+    /*
+    ==================================================
+    ADD INVOICE DETAIL
+    ==================================================
+    */
+
+    this.btnAddDetail =
+        document.getElementById(
+            "btn-add-ap-detail"
+        );
+
+
+    /*
+    ==================================================
+    SAVE INVOICE DETAIL
+    ==================================================
+    */
+
+    this.btnSaveAPDetail =
+        document.getElementById(
+            "btn-save-ap-detail"
+        );
+
+
+    /*
+    ==================================================
+    DETAIL COA
+    ==================================================
+    */
+
+    this.apDetailCOA =
+        document.getElementById(
+            "ap-detail-coa"
+        );
+
+
+    /*
+    ==================================================
     DETAIL CALCULATION
-    ======================================================
+    ==================================================
     */
 
     this.apDetailQuantity =
@@ -565,270 +727,144 @@ cacheDOM() {
             "ap-detail-total-amount"
         );
 
+
     /*
-    ======================================================
-    DETAIL MODAL BUTTON
-    ======================================================
+    ==================================================
+    FILTER
+    ==================================================
     */
 
-    this.btnSaveAPDetail =
+    this.dateFrom =
         document.getElementById(
-            "btn-save-ap-detail"
+            "ap-date-from"
         );
-    /*
-    ======================================================
-    DETAIL COA
-    ======================================================
-    */
 
-    this.apDetailCOA =
+
+    this.dateTo =
         document.getElementById(
-            "ap-detail-coa"
+            "ap-date-to"
         );
+
+
+    this.statusFilter =
+        document.getElementById(
+            "ap-status"
+        );
+
+
+    this.findBy =
+        document.getElementById(
+            "ap-find-by"
+        );
+
+
+    this.keyword =
+        document.getElementById(
+            "ap-keyword"
+        );
+
+
     /*
-    ======================================================
-    INVOICE DETAIL
-    ======================================================
+    ==================================================
+    TOOLBAR
+    ==================================================
     */
 
-    this.btnAddDetail =
+    this.btnFind =
         document.getElementById(
-            "btn-add-ap-detail"
+            "btn-ap-find"
+        );
+
+
+    this.btnAdd =
+        document.getElementById(
+            "btn-add-ap"
+        );
+
+
+    this.btnRefresh =
+        document.getElementById(
+            "btn-refresh-ap"
+        );
+
+
+    this.btnDownloadExcel =
+        document.getElementById(
+            "btn-download-excel-ap"
+        );
+
+
+    this.btnPreviewHTML =
+        document.getElementById(
+            "btn-preview-html-ap"
+        );
+
+
+    /*
+    ==================================================
+    PAGINATION
+    ==================================================
+    */
+
+    this.btnFirstPage =
+        document.getElementById(
+            "ap-page-first"
+        );
+
+
+    this.btnPrevPage =
+        document.getElementById(
+            "ap-page-prev"
+        );
+
+
+    this.currentPageInput =
+        document.getElementById(
+            "ap-current-page"
+        );
+
+
+    this.totalPagesElement =
+        document.getElementById(
+            "ap-total-pages"
+        );
+
+
+    this.btnNextPage =
+        document.getElementById(
+            "ap-page-next"
+        );
+
+
+    this.btnLastPage =
+        document.getElementById(
+            "ap-page-last"
+        );
+
+
+    /*
+    ==================================================
+    RECORD INFORMATION
+    ==================================================
+    */
+
+    this.recordInfo =
+        document.getElementById(
+            "ap-record-info"
+        );
+
+
+    /*
+    ==================================================
+    DEBUG DOM
+    ==================================================
+    */
+
+    console.log(
+        "Account Payable DOM cached."
     );
-    /*
-    ======================================================
-    MODAL
-    ======================================================
-    */
 
-    this.accountPayableModal =
-        document.getElementById(
-            "accountPayableModal"
-        );
-
-    this.accountPayableDetailModal =
-        document.getElementById(
-            "accountPayableDetailModal"
-        );
-        /*
-    ======================================================
-    AP FORM
-    ======================================================
-    */
-
-    this.apFormVendor =
-        document.getElementById(
-            "ap-form-vendor"
-        );
-
-    this.apFormTop =
-        document.getElementById(
-            "ap-form-top"
-        );
-
-    this.apFormDateReceived =
-        document.getElementById(
-            "ap-form-date-received"
-        );
-
-    this.apFormDueDate =
-        document.getElementById(
-            "ap-form-due-date"
-        );
-
-        /*
-        ==================================================
-        FILTER
-        ==================================================
-        */
-
-        this.dateFrom =
-            document.getElementById(
-                "ap-date-from"
-            );
-
-        this.dateTo =
-            document.getElementById(
-                "ap-date-to"
-            );
-
-        this.statusFilter =
-            document.getElementById(
-                "ap-status"
-            );
-
-        this.findBy =
-            document.getElementById(
-                "ap-find-by"
-            );
-
-        this.keyword =
-            document.getElementById(
-                "ap-keyword"
-            );
-        /*
-    ======================================================
-    ADD AP MODAL FORM
-    ======================================================
-    */
-
-    this.apFormVendor =
-        document.getElementById(
-            "ap-form-vendor"
-        );
-
-    this.apFormPoNo =
-        document.getElementById(
-            "ap-form-po-no"
-        );
-
-    this.apFormInvoiceNo =
-        document.getElementById(
-            "ap-form-invoice-no"
-        );
-
-    this.apFormInvoiceDate =
-        document.getElementById(
-            "ap-form-invoice-date"
-        );
-
-    this.apFormDateReceived =
-        document.getElementById(
-            "ap-form-date-received"
-        );
-
-    this.apFormTop =
-        document.getElementById(
-            "ap-form-top"
-        );
-
-    this.apFormDueDate =
-        document.getElementById(
-            "ap-form-due-date"
-        );
-
-    this.apFormDescription =
-        document.getElementById(
-            "ap-form-description"
-        );
-
-    this.apDetailBody =
-        document.getElementById(
-            "ap-detail-body"
-        );
-
-    this.apFormSubtotal =
-        document.getElementById(
-            "ap-form-subtotal"
-        );
-
-    this.apFormTax =
-        document.getElementById(
-            "ap-form-tax"
-        );
-
-    this.apFormWht =
-        document.getElementById(
-            "ap-form-wht"
-        );
-
-    this.apFormTotal =
-        document.getElementById(
-            "ap-form-total"
-        );
-
-        /*
-        ==================================================
-        TOOLBAR
-        ==================================================
-        */
-
-        this.btnFind =
-            document.getElementById(
-                "btn-ap-find"
-            );
-
-        this.btnAdd =
-            document.getElementById(
-                "btn-add-ap"
-            );
-
-        this.btnRefresh =
-            document.getElementById(
-                "btn-refresh-ap"
-            );
-
-        this.btnDownloadExcel =
-            document.getElementById(
-                "btn-download-excel-ap"
-            );
-
-        this.btnPreviewHTML =
-            document.getElementById(
-                "btn-preview-html-ap"
-            );
-
-
-        /*
-        ==================================================
-        PAGINATION
-        ==================================================
-        */
-
-        this.btnFirstPage =
-            document.getElementById(
-                "ap-page-first"
-            );
-
-        this.btnPrevPage =
-            document.getElementById(
-                "ap-page-prev"
-            );
-
-        this.currentPageInput =
-            document.getElementById(
-                "ap-current-page"
-            );
-
-        this.totalPagesElement =
-            document.getElementById(
-                "ap-total-pages"
-            );
-
-        this.btnNextPage =
-            document.getElementById(
-                "ap-page-next"
-            );
-
-        this.btnLastPage =
-            document.getElementById(
-                "ap-page-last"
-            );
-
-
-        /*
-        ==================================================
-        RECORD INFORMATION
-        ==================================================
-        */
-
-        this.recordInfo =
-            document.getElementById(
-                "ap-record-info"
-            );
-        
-        /*
-        ======================================================
-        ACCOUNT PAYABLE MODAL
-        ======================================================
-        */
-
-        this.accountPayableModal =
-            document.getElementById(
-                "accountPayableModal"
-            );
-
-    }
+}
     /*
 ======================================================
 LOAD DETAIL COA
@@ -1108,10 +1144,10 @@ renderVendorOptions() {
 
 }
 
-   /*
-======================================================
+  /*
+==================================================
 BIND EVENTS
-======================================================
+==================================================
 */
 
 bindEvents() {
@@ -1130,10 +1166,12 @@ bindEvents() {
 
         }
     );
+
+
     /*
-    ======================================================
-    DETAIL CALCULATION EVENTS
-    ======================================================
+    ==================================================
+    DETAIL CALCULATION
+    ==================================================
     */
 
     this.apDetailQuantity?.addEventListener(
@@ -1147,15 +1185,15 @@ bindEvents() {
 
 
     this.apDetailUnitPrice?.addEventListener(
-    "input",
-    () => {
+        "input",
+        () => {
 
-        this.formatUnitPrice();
+            this.formatUnitPrice();
 
-        this.calculateDetail();
+            this.calculateDetail();
 
-    }
-);
+        }
+    );
 
 
     this.apDetailTaxInputRate?.addEventListener(
@@ -1176,10 +1214,12 @@ bindEvents() {
 
         }
     );
+
+
     /*
-    ======================================================
+    ==================================================
     SAVE INVOICE DETAIL
-    ======================================================
+    ==================================================
     */
 
     this.btnSaveAPDetail?.addEventListener(
@@ -1190,10 +1230,32 @@ bindEvents() {
 
         }
     );
+
+
     /*
-    ======================================================
+    ==================================================
+    SAVE DRAFT
+    ==================================================
+    */
+
+    this.btnSaveDraft?.addEventListener(
+        "click",
+        () => {
+
+            console.log(
+                "SAVE DRAFT CLICKED"
+            );
+
+            this.saveDraft();
+
+        }
+    );
+
+
+    /*
+    ==================================================
     ADD INVOICE DETAIL
-    ======================================================
+    ==================================================
     */
 
     this.btnAddDetail?.addEventListener(
@@ -1204,10 +1266,12 @@ bindEvents() {
 
         }
     );
+
+
     /*
-    ======================================================
+    ==================================================
     VENDOR CHANGE
-    ======================================================
+    ==================================================
     */
 
     this.apFormVendor?.addEventListener(
@@ -1218,10 +1282,12 @@ bindEvents() {
 
         }
     );
+
+
     /*
-    ======================================================
+    ==================================================
     DATE RECEIVED CHANGE
-    ======================================================
+    ==================================================
     */
 
     this.apFormDateReceived?.addEventListener(
@@ -1260,7 +1326,7 @@ bindEvents() {
 
     /*
     ==================================================
-    ADD AP
+    ADD ACCOUNT PAYABLE
     ==================================================
     */
 
@@ -1378,7 +1444,6 @@ bindEvents() {
 
         }
     );
-    
 
 
     /*
@@ -1636,46 +1701,46 @@ saveInvoiceDetail() {
 
         const detail = {
 
-            id:
-                crypto.randomUUID(),
+    id:
+        crypto.randomUUID(),
 
-            account_id:
-                coaId,
+    charge_account_id:
+        Number(coaId),
 
-            account_code:
-                coa?.account_code
-                || "",
+    account_code:
+        coa?.account_code
+        || "",
 
-            account_name:
-                coa?.account_name
-                || "",
+    account_name:
+        coa?.account_name
+        || "",
 
-            description,
+    description,
 
-            quantity,
+    quantity,
 
-            unit_price:
-                unitPrice,
+    unit_price:
+        unitPrice,
 
-            tax_input_rate:
-                taxInputRate,
+    tax_input_rate:
+        taxInputRate,
 
-            withholding_tax_rate:
-                withholdingTaxRate,
+    withholding_tax_rate:
+        withholdingTaxRate,
 
-            line_amount:
-                calculated.line_amount,
+    line_amount:
+        calculated.line_amount,
 
-            tax_input_amount:
-                calculated.tax_input_amount,
+    tax_input_amount:
+        calculated.tax_input_amount,
 
-            withholding_tax_amount:
-                calculated.withholding_tax_amount,
+    withholding_tax_amount:
+        calculated.withholding_tax_amount,
 
-            total_amount:
-                calculated.total_amount
+    total_amount:
+        calculated.total_amount
 
-        };
+};
 
 
         /*
@@ -1723,10 +1788,13 @@ saveInvoiceDetail() {
 
 
         console.log(
-            "AP Invoice Detail added:",
-            detail
-        );
-
+    "AP Invoice Detail added:",
+    JSON.stringify(
+        detail,
+        null,
+        2
+    )
+);
     }
 
     catch (error) {
@@ -2360,35 +2428,83 @@ resetInvoiceDetailForm() {
 
 
     fields.forEach(
-        id => {
+    id => {
 
-            const element =
-                document.getElementById(id);
-
-
-            if (!element) {
-
-                return;
-
-            }
+        const element =
+            document.getElementById(id);
 
 
-            if (
-                id ===
-                "ap-detail-quantity"
-            ) {
+        if (!element) {
 
-                element.value = "0";
-
-                return;
-
-            }
-
-
-            element.value = "";
+            return;
 
         }
-    );
+
+
+        /*
+        ==========================================
+        QUANTITY
+        ==========================================
+        */
+
+        if (
+            id ===
+            "ap-detail-quantity"
+        ) {
+
+            element.value = "1";
+
+            return;
+
+        }
+
+
+        /*
+        ==========================================
+        TAX (+)
+        ==========================================
+        */
+
+        if (
+            id ===
+            "ap-detail-tax-input-rate"
+        ) {
+
+            element.value = "0";
+
+            return;
+
+        }
+
+
+        /*
+        ==========================================
+        TAX (-)
+        ==========================================
+        */
+
+        if (
+            id ===
+            "ap-detail-withholding-tax-rate"
+        ) {
+
+            element.value = "0";
+
+            return;
+
+        }
+
+
+        /*
+        ==========================================
+        OTHER FIELD
+        ==========================================
+        */
+
+        element.value = "";
+
+    }
+);
 
 
     /*
@@ -2811,15 +2927,9 @@ resetAddForm() {
     ==================================================
     */
 
+    this.selectedTopId = null;
+
     if (this.apFormTop) {
-
-        this.apFormTop.innerHTML = `
-
-            <option value="">
-                Select Term of Payment
-            </option>
-
-        `;
 
         this.apFormTop.value = "";
 
@@ -2904,11 +3014,13 @@ resetAddForm() {
     }
 
 
-    /*
+        /*
     ==================================================
     DETAIL
     ==================================================
     */
+
+    this.invoiceDetails = [];
 
     if (this.apDetailBody) {
 
@@ -2919,8 +3031,8 @@ resetAddForm() {
                 <td
                     colspan="9"
                     class="text-center
-                           text-muted
-                           py-4">
+                        text-muted
+                        py-4">
 
                     No detail added.
 
@@ -2931,7 +3043,6 @@ resetAddForm() {
         `;
 
     }
-
 
     /*
     ==================================================
@@ -2971,7 +3082,415 @@ resetAddForm() {
     }
 
 }
+
+   /*
+======================================================
+SAVE DRAFT
+======================================================
+*/
+
+async saveDraft() {
+
+    try {
+
+        console.log(
+            "SAVE DRAFT CLICKED"
+        );
+
+        console.log(
+            "AP VENDOR ELEMENT:",
+            this.apFormVendor
+        );
+
+        console.log(
+            "AP VENDOR VALUE:",
+            this.apFormVendor?.value
+        );
+
+        console.log(
+            "AP VENDOR SELECTED:",
+            this.apFormVendor?.selectedOptions?.[0]
+        );
+
+
         /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
+
+        if (!this.apFormVendor?.value) {
+
+            return this.showError(
+                "Vendor is required."
+            );
+
+        }
+
+
+        if (
+            !this.apFormInvoiceNo?.value.trim()
+        ) {
+
+            return this.showError(
+                "Invoice No is required."
+            );
+
+        }
+
+
+        if (
+            !this.apFormInvoiceDate?.value
+        ) {
+
+            return this.showError(
+                "Invoice Date is required."
+            );
+
+        }
+
+
+        if (
+            !this.apFormDateReceived?.value
+        ) {
+
+            return this.showError(
+                "Date Received is required."
+            );
+
+        }
+
+
+        if (
+            !this.apFormDueDate?.value
+        ) {
+
+            return this.showError(
+                "Due Date is required."
+            );
+
+        }
+
+
+        if (
+            !this.invoiceDetails ||
+            !this.invoiceDetails.length
+        ) {
+
+            return this.showError(
+                "Please add at least one invoice detail."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        HEADER
+        ==================================================
+        */
+
+        const header = {
+
+            vendor_id:
+                this.apFormVendor.value,
+
+            po_no:
+                this.apFormPoNo?.value
+                ?.trim() || null,
+
+            invoice_no:
+                this.apFormInvoiceNo.value
+                .trim(),
+
+            invoice_date:
+                this.apFormInvoiceDate.value,
+
+            date_received:
+                this.apFormDateReceived.value,
+
+            due_date:
+                this.apFormDueDate.value,
+
+            description:
+                this.apFormDescription
+                    ?.value
+                    ?.trim() || null,
+
+            status:
+                "Draft"
+
+        };
+
+
+        console.log(
+            "AP HEADER:",
+            header
+        );
+
+
+        /*
+==================================================
+DETAILS
+==================================================
+*/
+
+const details =
+    this.invoiceDetails.map(
+        item => {
+
+            const chargeAccountId =
+                Number(
+                    item.account_id
+                    || item.charge_account_id
+                    || 0
+                );
+
+
+            return {
+
+                charge_account_id:
+                    chargeAccountId,
+
+                description:
+                    item.description
+                    || null,
+
+                quantity:
+                    Number(
+                        item.quantity || 1
+                    ),
+
+                unit_price:
+                    Number(
+                        item.unit_price || 0
+                    ),
+
+                tax_input_rate:
+                    Number(
+                        item.tax_input_rate || 0
+                    ),
+
+                withholding_tax_rate:
+                    Number(
+                        item.withholding_tax_rate || 0
+                    )
+
+            };
+
+        }
+    );
+
+
+/*
+==================================================
+DEBUG DETAILS
+==================================================
+*/
+
+console.log(
+    "AP DETAILS BEFORE SAVE:",
+    JSON.stringify(
+        details,
+        null,
+        2
+    )
+);
+
+
+/*
+==================================================
+VALIDATE COA
+==================================================
+*/
+
+const invalidDetail =
+    details.find(
+        detail =>
+            !Number.isInteger(
+                detail.charge_account_id
+            )
+            ||
+            detail.charge_account_id <= 0
+    );
+
+
+if (invalidDetail) {
+
+    console.error(
+        "INVALID AP DETAIL:",
+        invalidDetail
+    );
+
+    return this.showError(
+        "Chart of Account is required for every detail."
+    );
+
+}
+/*
+==================================================
+CHECK SUPABASE SESSION
+==================================================
+*/
+
+const {
+    data: {
+        session
+    }
+} = await supabase.auth.getSession();
+const {
+    data: {
+        user
+    }
+} = await supabase.auth.getUser();
+
+console.log(
+    "SUPABASE SESSION:",
+    session
+);
+
+console.log(
+    "SUPABASE USER:",
+    user
+);
+
+console.log(
+    "AP SAVE SESSION:",
+    session
+);
+
+console.log(
+    "AP SAVE USER:",
+    session?.user
+);
+
+console.log(
+    "AP SAVE ROLE:",
+    session?.user?.role
+);
+
+        /*
+        ==================================================
+        SAVE
+        ==================================================
+        */
+
+        const result =
+            await this.service.create(
+                header,
+                details
+            );
+
+
+        console.log(
+            "AP SAVED:",
+            result
+        );
+
+
+        /*
+        ==================================================
+        CLOSE MODAL
+        ==================================================
+        */
+
+        const modalElement =
+            document.getElementById(
+                "accountPayableModal"
+            );
+
+
+        if (modalElement) {
+
+            const modal =
+                bootstrap.Modal
+                    .getInstance(
+                        modalElement
+                    );
+
+            modal?.hide();
+
+        }
+
+
+        /*
+==================================================
+RELOAD DATA
+==================================================
+*/
+
+await this.loadData();
+
+
+/*
+==================================================
+RESET FORM AFTER SUCCESS
+==================================================
+*/
+
+this.resetAddForm();
+
+
+/*
+==================================================
+SUCCESS
+==================================================
+*/
+
+if (
+    typeof this.showSuccess ===
+    "function"
+) {
+
+    this.showSuccess(
+        "Account Payable saved as Draft."
+    );
+
+}
+
+else {
+
+    alert(
+        "Account Payable saved as Draft."
+    );
+
+}
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountPayable.saveDraft:",
+            error
+        );
+
+
+        if (
+            typeof this.showError ===
+            "function"
+        ) {
+
+            this.showError(
+                error.message ||
+                "Failed to save Account Payable."
+            );
+
+        }
+
+        else {
+
+            alert(
+                error.message ||
+                "Failed to save Account Payable."
+            );
+
+        }
+
+    }
+
+}
+/*
     ======================================================
     HANDLE TABLE ACTION
     ======================================================
@@ -3579,201 +4098,281 @@ resetAddForm() {
         }
 
     }
-        /*
-    ======================================================
-    CREATE TABLE ROW
-    ======================================================
+      /*
+======================================================
+CREATE TABLE ROW
+======================================================
+*/
+
+createTableRow(invoice, number) {
+
+    /*
+    ==================================================
+    VENDOR
+    ==================================================
     */
 
-    createTableRow(invoice, number) {
+    const vendor =
+        invoice?.mst_business_partner;
 
-        const vendor =
-            invoice?.mst_business_partner;
-
-
-        const vendorName =
-            vendor?.bp_name
-            || "-";
+    const vendorName =
+        vendor?.bp_name
+        || "-";
 
 
-        const invoiceNo =
-            invoice?.invoice_no
-            || "-";
+    /*
+    ==================================================
+    HEADER DATA
+    ==================================================
+    */
+
+    const invoiceNo =
+        invoice?.invoice_no
+        || "-";
 
 
-        const invoiceDate =
-            invoice?.invoice_date
-            || "-";
+    const poNo =
+        invoice?.po_no
+        || "-";
 
 
-        const poNo =
-            invoice?.po_no
-            || "-";
+    const invoiceDate =
+        invoice?.invoice_date
+        || "-";
 
 
-        const description =
-            invoice?.description
-            || "-";
+    const dueDate =
+        invoice?.due_date
+        || "-";
 
 
-        const totalAmount =
-            this.formatCurrency(
-                invoice?.total_amount || 0
-            );
+    /*
+    ==================================================
+    AMOUNT
+    ==================================================
+    */
+
+    const totalAmount =
+        this.formatCurrency(
+            invoice?.total_amount || 0
+        );
 
 
-        const paidAmount =
-            this.formatCurrency(
-                invoice?.paid_amount || 0
-            );
+    const outstandingAmount =
+        this.formatCurrency(
+            invoice?.outstanding_amount || 0
+        );
 
 
-        const outstandingAmount =
-            this.formatCurrency(
-                invoice?.outstanding_amount || 0
-            );
+    /*
+    ==================================================
+    STATUS
+    ==================================================
+    */
+
+    const status =
+        invoice?.status
+        || "Draft";
 
 
-        const status =
-            invoice?.status
-            || "Draft";
+    /*
+    ==================================================
+    RETURN ROW
+    ==================================================
+    */
+
+    return `
+
+        <tr>
+
+            <!-- ======================================
+                 NO
+            ======================================= -->
+
+            <td>
+                ${number}
+            </td>
 
 
-        return `
+            <!-- ======================================
+                 INVOICE NO
+            ======================================= -->
 
-            <tr>
+            <td>
 
-                <!-- ======================================
-                     NO
-                ======================================= -->
-
-                <td>
-
-                    ${number}
-
-                </td>
-
-
-                <!-- ======================================
-                     INVOICE DATE
-                ======================================= -->
-
-                <td>
-
-                    ${invoiceDate}
-
-                </td>
-
-
-                <!-- ======================================
-                     DOCUMENT NO
-                ======================================= -->
-
-                <td>
+                <div class="fw-semibold">
 
                     ${invoiceNo}
 
-                </td>
+                </div>
+
+            </td>
 
 
-                <!-- ======================================
-                     VENDOR
-                ======================================= -->
+            <!-- ======================================
+                 VENDOR
+            ======================================= -->
 
-                <td>
+            <td>
 
-                    <div class="fw-semibold">
+                <div class="fw-semibold">
 
-                        ${vendorName}
+                    ${vendorName}
 
-                    </div>
+                </div>
 
-                </td>
-
-
-                <!-- ======================================
-                     PO NO
-                ======================================= -->
-
-                <td>
-
-                    ${poNo}
-
-                </td>
+            </td>
 
 
-                <!-- ======================================
-                     DESCRIPTION
-                ======================================= -->
+            <!-- ======================================
+                 PO NO
+            ======================================= -->
 
-                <td>
+            <td>
 
-                    ${description}
+                ${poNo}
 
-                </td>
-
-
-                <!-- ======================================
-                     TOTAL
-                ======================================= -->
-
-                <td class="text-end">
-
-                    ${totalAmount}
-
-                </td>
+            </td>
 
 
-                <!-- ======================================
-                     PAID
-                ======================================= -->
+            <!-- ======================================
+                 INVOICE DATE
+            ======================================= -->
 
-                <td class="text-end">
+            <td>
 
-                    ${paidAmount}
+                ${invoiceDate}
 
-                </td>
-
-
-                <!-- ======================================
-                     OUTSTANDING
-                ======================================= -->
-
-                <td class="text-end">
-
-                    ${outstandingAmount}
-
-                </td>
+            </td>
 
 
-                <!-- ======================================
-                     STATUS
-                ======================================= -->
+            <!-- ======================================
+                 DUE DATE
+            ======================================= -->
 
-                <td class="text-center">
+            <td>
 
-                    ${this.renderStatus(status)}
+                ${dueDate}
 
-                </td>
+            </td>
 
 
-                <!-- ======================================
-                     ACTION
-                ======================================= -->
+            <!-- ======================================
+                 TOTAL AMOUNT
+            ======================================= -->
 
-                <td class="text-center">
+            <td class="text-end">
 
-                    ${this.renderActionButtons(
-                        invoice
-                    )}
+                ${totalAmount}
 
-                </td>
+            </td>
 
-            </tr>
 
-        `;
+            <!-- ======================================
+                 OUTSTANDING
+            ======================================= -->
+
+            <td class="text-end">
+
+                ${outstandingAmount}
+
+            </td>
+
+
+            <!-- ======================================
+                 STATUS
+            ======================================= -->
+
+            <td class="text-center">
+
+                ${this.renderStatus(status)}
+
+            </td>
+
+
+            <!-- ======================================
+                 ACTION
+            ======================================= -->
+
+            <td class="text-center">
+
+                ${this.renderActionButtons(invoice)}
+
+            </td>
+
+        </tr>
+
+    `;
+
+}
+/*
+======================================================
+RENDER STATUS
+======================================================
+*/
+
+renderStatus(status) {
+
+    const normalizedStatus =
+        String(
+            status || "Draft"
+        )
+        .trim()
+        .toLowerCase();
+
+
+    switch (normalizedStatus) {
+
+        case "posted":
+
+            return `
+                <span class="badge bg-success">
+                    Posted
+                </span>
+            `;
+
+
+        case "partial paid":
+
+            return `
+                <span class="badge bg-warning text-dark">
+                    Partial Paid
+                </span>
+            `;
+
+
+        case "paid":
+
+            return `
+                <span class="badge bg-primary">
+                    Paid
+                </span>
+            `;
+
+
+        case "void":
+
+            return `
+                <span class="badge bg-danger">
+                    Void
+                </span>
+            `;
+
+
+        case "draft":
+
+        default:
+
+            return `
+                <span class="badge bg-secondary">
+                    Draft
+                </span>
+            `;
 
     }
+
+}
+
         /*
     ======================================================
     RENDER ACTION BUTTONS

@@ -48,6 +48,31 @@ export const supabase = createClient(
     }
 
 );
+/*
+======================================================
+DEBUG SUPABASE AUTH SESSION
+======================================================
+*/
+
+supabase.auth.getSession()
+    .then(({ data, error }) => {
+
+        console.log(
+            "FINOVA SUPABASE SESSION:",
+            data?.session
+        );
+
+        console.log(
+            "FINOVA SUPABASE USER:",
+            data?.session?.user
+        );
+
+        console.log(
+            "FINOVA SUPABASE AUTH ERROR:",
+            error
+        );
+
+    });
 
 /*
 ===========================================
