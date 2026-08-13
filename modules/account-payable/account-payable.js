@@ -1061,6 +1061,8 @@ async loadDetailCOA() {
 
         const data =
             await this.service.getVendors();
+        console.log(
+    
 
 
         /*

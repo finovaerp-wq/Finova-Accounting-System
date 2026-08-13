@@ -354,17 +354,32 @@ bindEvents() {
         () => this.save()
     );
     /* ======================================================
-   CONFIRM DELETE
+   BUSINESS PARTNER NAME - AUTO UPPERCASE
 ====================================================== */
 
-this.btnConfirmDelete?.addEventListener(
-    "click",
-    async () => {
+this.bpName?.addEventListener(
+    "input",
+    () => {
 
-        await this.confirmDeleteBusinessPartner();
+        this.bpName.value =
+            this.bpName.value.toUpperCase();
 
     }
 );
+    
+    
+    /* ======================================================
+    CONFIRM DELETE
+    ====================================================== */
+
+    this.btnConfirmDelete?.addEventListener(
+        "click",
+        async () => {
+
+            await this.confirmDeleteBusinessPartner();
+
+        }
+    );
 
     /* ======================================================
        SEARCH
@@ -1517,17 +1532,19 @@ async refresh() {
 }
 
     /*
-    ==========================================================
-    COLLECT FORM DATA
-    ==========================================================
-    */
+==========================================================
+COLLECT FORM DATA
+==========================================================
+*/
 
-    collectFormData() {
+collectFormData() {
 
     return {
 
         bp_name:
-            this.bpName.value.trim(),
+            this.bpName.value
+                .trim()
+                .toUpperCase(),
 
         bp_type:
             this.bpType.value,
@@ -1728,13 +1745,9 @@ validate() {
 
 }
 
-    /*
-    ==========================================================
-    UPDATE
-    ==========================================================
-    */
+    
 
-    /*
+   /*
 ==========================================================
 UPDATE
 ==========================================================
@@ -1746,11 +1759,64 @@ async update(id) {
 
         /*
         ==========================================
+        LOAD CURRENT BUSINESS PARTNER
+        ==========================================
+        */
+
+        const current =
+            await BusinessPartnerService.getById(id);
+
+
+        if (!current) {
+
+            throw new Error(
+                "Business Partner not found."
+            );
+
+        }
+
+
+        /*
+        ==========================================
         COLLECT FORM DATA
         ==========================================
         */
 
-        const payload = this.collectFormData();
+        const payload =
+            this.collectFormData();
+
+
+        /*
+        ==========================================
+        CHECK BUSINESS PARTNER TYPE
+        ==========================================
+        */
+
+        const oldType =
+            current.bp_type;
+
+        const newType =
+            payload.bp_type;
+
+
+        /*
+        ==========================================
+        GENERATE NEW CODE
+        ONLY WHEN TYPE CHANGES
+        ==========================================
+        */
+
+        if (
+            oldType !== newType
+        ) {
+
+            payload.bp_code =
+                await BusinessPartnerService.generateCode(
+                    newType
+                );
+
+        }
+
 
         /*
         ==========================================
@@ -1763,6 +1829,7 @@ async update(id) {
             payload
         );
 
+
         /*
         ==========================================
         UPDATE BANK ACCOUNT
@@ -1772,23 +1839,45 @@ async update(id) {
         const banks =
             this.bankGrid.getData();
 
+
         await BusinessPartnerBankService.saveBanks(
             id,
             banks
         );
 
+
         /*
         ==========================================
-        REFRESH
+        CLOSE MODAL
         ==========================================
         */
 
         this.closeModal();
 
+
+        /*
+        ==========================================
+        RELOAD DATA
+        ==========================================
+        */
+
         await this.loadData();
 
+
+        /*
+        ==========================================
+        SUCCESS
+        ==========================================
+        */
+
         this.showSuccess(
-            "Business Partner successfully updated."
+
+            oldType !== newType
+
+                ? `Business Partner successfully updated. New code: ${payload.bp_code}`
+
+                : "Business Partner successfully updated."
+
         );
 
     }
