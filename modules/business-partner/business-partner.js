@@ -168,6 +168,7 @@ cacheElement() {
 
     this.tableBody =
         document.getElementById("business-partner-table");
+    
 
     /* ==========================================
        FORM
@@ -175,6 +176,7 @@ cacheElement() {
 
     this.form =
     document.getElementById("businessPartnerForm");
+    
 
     /* ==========================================
        MODAL
@@ -245,6 +247,10 @@ cacheElement() {
 
     this.btnSave =
         document.getElementById("btn-save-business-partner");
+    this.btnConfirmDelete =
+    document.getElementById(
+        "btn-confirm-bp-delete"
+    );
 
     this.btnSearch =
         document.getElementById("btn-search");
@@ -347,6 +353,18 @@ bindEvents() {
         "click",
         () => this.save()
     );
+    /* ======================================================
+   CONFIRM DELETE
+====================================================== */
+
+this.btnConfirmDelete?.addEventListener(
+    "click",
+    async () => {
+
+        await this.confirmDeleteBusinessPartner();
+
+    }
+);
 
     /* ======================================================
        SEARCH
@@ -1787,50 +1805,261 @@ async update(id) {
 
 }
     /*
-    ==========================================================
-    DELETE
-    ==========================================================
-    */
+==========================================================
+DELETE
+==========================================================
+*/
 
-    async delete(id) {
+async delete(id) {
 
-        const confirmDelete = confirm(
+    try {
 
-            "Delete this Business Partner?"
+        /*
+        ==============================================
+        FIND BUSINESS PARTNER
+        ==============================================
+        */
 
-        );
+        const businessPartner =
+            this.data.find(
+                item =>
+                    String(item.id) === String(id)
+            );
 
-        if (!confirmDelete) {
+
+        if (!businessPartner) {
+
+            console.error(
+                "Business Partner not found:",
+                id
+            );
+
+            this.showError(
+                "Business Partner not found."
+            );
 
             return;
 
         }
 
-        try {
 
-            await BusinessPartnerService.delete(id);
+        /*
+        ==============================================
+        STORE DELETE ID
+        ==============================================
+        */
 
-            this.currentPage = 1;
+        this.deleteBusinessPartnerId = id;
 
-            await this.loadData();
 
-            this.showSuccess(
+        /*
+        ==============================================
+        FILL DELETE MODAL
+        ==============================================
+        */
 
-                "Business Partner successfully deleted."
-
+        const deleteCode =
+            document.getElementById(
+                "bp-delete-code"
             );
 
+        const deleteName =
+            document.getElementById(
+                "bp-delete-name"
+            );
+
+        const deleteType =
+            document.getElementById(
+                "bp-delete-type"
+            );
+
+
+        if (deleteCode) {
+
+            deleteCode.textContent =
+                businessPartner.bp_code || "-";
+
         }
 
-        catch (error) {
 
-            console.error(error);
+        if (deleteName) {
 
-            this.showError(error.message);
+            deleteName.textContent =
+                businessPartner.bp_name || "-";
 
         }
+
+
+        if (deleteType) {
+
+            deleteType.textContent =
+                businessPartner.bp_type || "-";
+
+        }
+
+
+        /*
+        ==============================================
+        GET DELETE MODAL
+        ==============================================
+        */
+
+        const modalElement =
+            document.getElementById(
+                "bpDeleteModal"
+            );
+
+
+        if (!modalElement) {
+
+            console.error(
+                "BP Delete Modal not found."
+            );
+
+            return;
+
+        }
+
+
+        /*
+        ==============================================
+        BOOTSTRAP MODAL
+        ==============================================
+        */
+
+        this.bpDeleteModal =
+            bootstrap.Modal.getOrCreateInstance(
+                modalElement
+            );
+
+
+        this.bpDeleteModal.show();
 
     }
+
+    catch (error) {
+
+        console.error(
+            "Failed to open delete confirmation:",
+            error
+        );
+
+        this.showError(
+            error.message
+        );
+
+    }
+
+}
+/*
+==========================================================
+CONFIRM DELETE BUSINESS PARTNER
+==========================================================
+*/
+
+async confirmDeleteBusinessPartner() {
+
+    const id =
+        this.deleteBusinessPartnerId;
+
+
+    /*
+    ==============================================
+    VALIDATE ID
+    ==============================================
+    */
+
+    if (!id) {
+
+        console.error(
+            "Business Partner delete ID is empty."
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+        /*
+        ==============================================
+        DELETE BUSINESS PARTNER
+        ==============================================
+        */
+
+        await BusinessPartnerService.delete(
+            id
+        );
+
+
+        /*
+        ==============================================
+        CLOSE DELETE MODAL
+        ==============================================
+        */
+
+        if (this.bpDeleteModal) {
+
+            this.bpDeleteModal.hide();
+
+        }
+
+
+        /*
+        ==============================================
+        RESET DELETE ID
+        ==============================================
+        */
+
+        this.deleteBusinessPartnerId =
+            null;
+
+
+        /*
+        ==============================================
+        RESET PAGE
+        ==============================================
+        */
+
+        this.currentPage = 1;
+
+
+        /*
+        ==============================================
+        RELOAD DATA
+        ==============================================
+        */
+
+        await this.loadData();
+
+
+        /*
+        ==============================================
+        SUCCESS
+        ==============================================
+        */
+
+        this.showSuccess(
+            "Business Partner successfully deleted."
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Failed to delete Business Partner:",
+            error
+        );
+
+        this.showError(
+            error.message
+        );
+
+    }
+
+}
     /*
     ==========================================================
     CLOSE MODAL

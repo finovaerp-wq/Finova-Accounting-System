@@ -387,3 +387,215 @@ Version : 4.0.0
     </div>
 
 </div>
+<!-- ==========================================================
+     DELETE BUSINESS PARTNER CONFIRMATION
+=========================================================== -->
+
+<div
+    class="modal fade"
+    id="bpDeleteModal"
+    tabindex="-1"
+    aria-labelledby="bpDeleteModalLabel"
+    aria-hidden="true">
+
+    <div
+        class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content shadow-lg">
+
+
+            <!-- ==================================================
+                 HEADER
+            =================================================== -->
+
+            <div class="modal-header">
+
+                <h5
+                    class="modal-title fw-semibold"
+                    id="bpDeleteModalLabel">
+
+                    <i
+                        class="fa-solid fa-trash text-danger me-2">
+                    </i>
+
+                    Confirm Delete Business Partner
+
+                </h5>
+
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close">
+                </button>
+
+            </div>
+
+
+            <!-- ==================================================
+                 BODY
+            =================================================== -->
+
+            <div class="modal-body">
+
+                <div class="text-center">
+
+
+                    <!-- DELETE ICON -->
+
+                    <div class="mb-3">
+
+                        <i
+                            class="fa-solid fa-trash-can text-danger"
+                            style="font-size: 48px;">
+                        </i>
+
+                    </div>
+
+
+                    <!-- QUESTION -->
+
+                    <div
+                        class="mb-3"
+                        style="font-size: 16px;">
+
+                        Apakah Anda yakin ingin
+                        <strong>
+                            menghapus Business Partner ini?
+                        </strong>
+
+                    </div>
+
+
+                    <!-- BP INFORMATION -->
+
+                    <div
+                        class="table-responsive text-start mb-3">
+
+                        <table
+                            class="table table-sm table-bordered mb-0">
+
+                            <tbody>
+
+                                <tr>
+
+                                    <th
+                                        style="width: 150px;">
+
+                                        BP Code
+
+                                    </th>
+
+                                    <td
+                                        id="bp-delete-code">
+
+                                        -
+
+                                    </td>
+
+                                </tr>
+
+
+                                <tr>
+
+                                    <th>
+
+                                        BP Name
+
+                                    </th>
+
+                                    <td
+                                        id="bp-delete-name">
+
+                                        -
+
+                                    </td>
+
+                                </tr>
+
+
+                                <tr>
+
+                                    <th>
+
+                                        Type
+
+                                    </th>
+
+                                    <td
+                                        id="bp-delete-type">
+
+                                        -
+
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+
+                    <!-- WARNING -->
+
+                    <div
+                        class="alert alert-danger text-start mb-0">
+
+                        <i
+                            class="fa-solid fa-triangle-exclamation me-2">
+                        </i>
+
+                        Business Partner yang dihapus
+                        tidak dapat dikembalikan.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ==================================================
+                 FOOTER
+            =================================================== -->
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+
+                    <i
+                        class="fa-solid fa-xmark me-1">
+                    </i>
+
+                    Batal
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="btn btn-danger"
+                    id="btn-confirm-bp-delete">
+
+                    <i
+                        class="fa-solid fa-trash me-1">
+                    </i>
+
+                    Ya, Hapus
+
+                </button>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>

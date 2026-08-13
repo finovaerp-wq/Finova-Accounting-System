@@ -55,6 +55,9 @@ constructor() {
     */
 
     this.modal = null;
+    this.deleteChartOfAccountId = null;
+
+    this.coaDeleteModal = null;
 
     /*
     ======================================================
@@ -154,23 +157,24 @@ async loadModal() {
         ======================================================
         */
 
-        const response = await fetch(
+        const response =
+            await fetch(
+                `modules/chart-of-accounts/chart-of-accounts-modal.html?v=${Date.now()}`
+            );
 
-            "modules/chart-of-accounts/chart-of-accounts-modal.html"
-
-        );
 
         if (!response.ok) {
 
             throw new Error(
-
                 "Failed to load Chart Of Accounts modal."
-
             );
 
         }
 
-        const html = await response.text();
+
+        const html =
+            await response.text();
+
 
         /*
         ======================================================
@@ -178,50 +182,92 @@ async loadModal() {
         ======================================================
         */
 
-        const container = document.getElementById(
+        const container =
+            document.getElementById(
+                "modal-container"
+            );
 
-            "modal-container"
-
-        );
 
         if (!container) {
 
             throw new Error(
-
                 "Modal container not found."
-
             );
 
         }
 
-        container.innerHTML = html;
 
         /*
         ======================================================
-        INITIALIZE MODAL
+        LOAD HTML
         ======================================================
         */
 
-        const modalElement = document.getElementById(
+        container.innerHTML =
+            html;
 
-            "coa-modal"
 
-        );
+        /*
+        ======================================================
+        MAIN COA MODAL
+        ======================================================
+        */
+
+        const modalElement =
+            container.querySelector(
+                "#coa-modal"
+            );
+
 
         if (!modalElement) {
 
             throw new Error(
-
                 "Chart Of Accounts modal not found."
-
             );
 
         }
 
-        this.modal = bootstrap.Modal.getOrCreateInstance(
 
-            modalElement
+        this.modal =
+            bootstrap.Modal.getOrCreateInstance(
+                modalElement
+            );
 
+
+        /*
+        ======================================================
+        DELETE COA MODAL
+        ======================================================
+        */
+
+        const deleteModalElement =
+            container.querySelector(
+                "#coaDeleteModal"
+            );
+
+
+        if (!deleteModalElement) {
+
+            throw new Error(
+                "COA Delete Modal not found."
+            );
+
+        }
+
+
+        this.coaDeleteModal =
+            bootstrap.Modal.getOrCreateInstance(
+                deleteModalElement
+            );
+
+
+        console.log(
+            "Chart Of Accounts modal loaded."
+        );
+
+
+        console.log(
+            "COA Delete Modal loaded."
         );
 
     }
@@ -308,6 +354,15 @@ cacheElements() {
 
     this.modalElement =
         document.getElementById("coa-modal");
+    this.deleteModalElement =
+    document.getElementById(
+        "coaDeleteModal"
+    );
+
+this.btnConfirmDelete =
+    document.getElementById(
+        "btn-confirm-coa-delete"
+    );
 
     this.modalTitle =
         document.getElementById("coa-modal-title");
@@ -567,52 +622,76 @@ bindModalEvents() {
 
     /*
     ======================================================
-    BUTTON SAVE
+    MODAL ELEMENT
+    ======================================================
+    */
+
+    this.modalElement =
+        document.getElementById(
+            "coa-modal"
+        );
+
+
+    this.form =
+        document.getElementById(
+            "coa-form"
+        );
+
+
+    /*
+    ======================================================
+    SAVE BUTTON
     ======================================================
     */
 
     this.btnSave =
-
         document.getElementById(
-
-            "btn-save-chart-of-accounts"
-
+            "btn-save-coa"
         );
 
-    this.btnSave?.addEventListener(
-
-        "click",
-
-        () => this.save()
-
-    );
 
     /*
     ======================================================
-    RESET FORM
+    CONFIRM DELETE BUTTON
     ======================================================
     */
 
-    this.modalElement?.addEventListener(
+    this.btnConfirmDelete =
+        document.getElementById(
+            "btn-confirm-coa-delete"
+        );
 
-        "hidden.bs.modal",
 
-        () => {
+    /*
+    ======================================================
+    SAVE EVENT
+    ======================================================
+    */
 
-            this.coaForm?.reset();
+    this.btnSave?.addEventListener(
+        "click",
+        () => this.save()
+    );
 
-            this.selectedId = null;
 
-            if (this.coaId) {
+    /*
+    ======================================================
+    CONFIRM DELETE EVENT
+    ======================================================
+    */
 
-                this.coaId.value = "";
+    this.btnConfirmDelete?.addEventListener(
+        "click",
+        async () => {
 
-            }
+            console.log(
+                "COA CONFIRM DELETE BUTTON CLICKED"
+            );
 
-            this.closeModal();
+
+            await this.confirmDeleteChartOfAccount();
 
         }
-
     );
 
 }
@@ -2329,43 +2408,278 @@ async update(id) {
 }
 /*
 ==========================================================
-DELETE
+DELETE CHART OF ACCOUNT
 ==========================================================
 */
 
 async delete(id) {
 
-    const confirmDelete = confirm(
-
-        "Delete this Chart Of Account?"
-
-    );
-
-    if (!confirmDelete) {
-
-        return;
-
-    }
-
     try {
 
-        const used =
+        /*
+        ==============================================
+        FIND ACCOUNT
+        ==============================================
+        */
 
-            await ChartOfAccountsService.isUsed(id);
+        const account =
+            this.data.find(
+                item =>
+                    String(item.id) === String(id)
+            );
 
-        if (used) {
+
+        if (!account) {
+
+            console.error(
+                "Chart Of Account not found:",
+                id
+            );
 
             this.showError(
-
-                "This account is already used in transactions."
-
+                "Chart Of Account not found."
             );
 
             return;
 
         }
 
-        await ChartOfAccountsService.delete(id);
+
+        /*
+        ==============================================
+        STORE DELETE ID
+        ==============================================
+        */
+
+        this.deleteChartOfAccountId =
+            id;
+
+
+        /*
+        ==============================================
+        FILL DELETE MODAL
+        ==============================================
+        */
+
+        const deleteCode =
+            document.getElementById(
+                "coa-delete-code"
+            );
+
+        const deleteName =
+            document.getElementById(
+                "coa-delete-name"
+            );
+
+        const deleteCurrency =
+            document.getElementById(
+                "coa-delete-currency"
+            );
+
+
+        if (deleteCode) {
+
+            deleteCode.textContent =
+                account.account_code || "-";
+
+        }
+
+
+        if (deleteName) {
+
+            deleteName.textContent =
+                account.account_name || "-";
+
+        }
+
+
+        if (deleteCurrency) {
+
+            deleteCurrency.textContent =
+                account.currency || "-";
+
+        }
+
+
+        /*
+        ==============================================
+        GET DELETE MODAL
+        ==============================================
+        */
+
+        const modalElement =
+            document.getElementById(
+                "coaDeleteModal"
+            );
+
+
+        console.log(
+            "DELETE BUTTON CLICKED - ID:",
+            id
+        );
+
+        console.log(
+            "COA DELETE MODAL ELEMENT:",
+            modalElement
+        );
+
+
+        if (!modalElement) {
+
+            console.error(
+                "COA Delete Modal element not found."
+            );
+
+            return;
+
+        }
+
+
+        /*
+        ==============================================
+        BOOTSTRAP DELETE MODAL
+        ==============================================
+        */
+
+        this.coaDeleteModal =
+            bootstrap.Modal.getOrCreateInstance(
+                modalElement
+            );
+
+
+        console.log(
+            "SHOWING COA DELETE MODAL"
+        );
+
+
+        this.coaDeleteModal.show();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Failed to open COA delete confirmation:",
+            error
+        );
+
+        this.showError(
+            error.message
+        );
+
+    }
+
+}
+/*
+==========================================================
+CONFIRM DELETE CHART OF ACCOUNT
+==========================================================
+*/
+
+async confirmDeleteChartOfAccount() {
+
+    const id =
+        this.deleteChartOfAccountId;
+
+
+    console.log(
+        "CONFIRM DELETE COA ID:",
+        id
+    );
+
+
+    if (!id) {
+
+        console.error(
+            "Chart Of Account delete ID is empty."
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+        /*
+        ==================================================
+        CHECK ACCOUNT USAGE
+        ==================================================
+        */
+
+        const isUsed =
+            await ChartOfAccountsService.isUsed(
+                id
+            );
+
+
+        console.log(
+            "COA IS USED:",
+            isUsed
+        );
+
+
+        if (isUsed) {
+
+            if (this.coaDeleteModal) {
+
+                this.coaDeleteModal.hide();
+
+            }
+
+
+            this.deleteChartOfAccountId =
+                null;
+
+
+            this.showError(
+                "Chart Of Account cannot be deleted because it is still being used."
+            );
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        DELETE
+        ==================================================
+        */
+
+        await ChartOfAccountsService.delete(
+            id
+        );
+
+
+        /*
+        ==================================================
+        CLOSE MODAL
+        ==================================================
+        */
+
+        if (this.coaDeleteModal) {
+
+            this.coaDeleteModal.hide();
+
+        }
+
+
+        /*
+        ==================================================
+        RESET DELETE ID
+        ==================================================
+        */
+
+        this.deleteChartOfAccountId =
+            null;
+
+
+        /*
+        ==================================================
+        RELOAD DATA
+        ==================================================
+        */
 
         this.currentPage = 1;
 
@@ -2373,24 +2687,40 @@ async delete(id) {
 
         await this.loadParentAccounts();
 
+
+        /*
+        ==================================================
+        SUCCESS
+        ==================================================
+        */
+
         this.showSuccess(
-
             "Chart Of Account successfully deleted."
-
         );
 
     }
 
     catch (error) {
 
-        console.error(error);
+        console.error(
+            "Failed to delete Chart Of Account:",
+            error
+        );
+
+
+        if (this.coaDeleteModal) {
+
+            this.coaDeleteModal.hide();
+
+        }
+
+
+        this.deleteChartOfAccountId =
+            null;
+
 
         this.showError(
-
-            error.message ??
-
-            "Failed to delete Chart Of Account."
-
+            error.message
         );
 
     }

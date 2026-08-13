@@ -975,3 +975,221 @@
     </div>
 
 </div>
+<!-- ==========================================================
+     DELETE CHART OF ACCOUNTS CONFIRMATION
+=========================================================== -->
+
+<div
+    class="modal fade"
+    id="coaDeleteModal"
+    tabindex="-1"
+    aria-labelledby="coaDeleteModalLabel"
+    aria-hidden="true">
+
+    <div
+        class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content shadow-lg">
+
+
+            <!-- ==================================================
+                 HEADER
+            =================================================== -->
+
+            <div class="modal-header">
+
+                <h5
+                    class="modal-title fw-semibold"
+                    id="coaDeleteModalLabel">
+
+                    <i
+                        class="fa-solid fa-trash text-danger me-2">
+                    </i>
+
+                    Confirm Delete Chart Of Account
+
+                </h5>
+
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close">
+                </button>
+
+            </div>
+
+
+            <!-- ==================================================
+                 BODY
+            =================================================== -->
+
+            <div class="modal-body">
+
+                <div class="text-center">
+
+
+                    <!-- DELETE ICON -->
+
+                    <div class="mb-3">
+
+                        <i
+                            class="fa-solid fa-trash-can text-danger"
+                            style="font-size: 48px;">
+                        </i>
+
+                    </div>
+
+
+                    <!-- QUESTION -->
+
+                    <div
+                        class="mb-3"
+                        style="font-size: 16px;">
+
+                        Apakah Anda yakin ingin
+                        <strong>
+                            menghapus Chart Of Account ini?
+                        </strong>
+
+                    </div>
+
+
+                    <!-- ACCOUNT INFORMATION -->
+
+                    <div
+                        class="table-responsive text-start mb-3">
+
+                        <table
+                            class="table table-sm table-bordered mb-0">
+
+                            <tbody>
+
+                                <!-- ACCOUNT CODE -->
+
+                                <tr>
+
+                                    <th
+                                        style="width: 150px;">
+
+                                        Account Code
+
+                                    </th>
+
+                                    <td
+                                        id="coa-delete-code">
+
+                                        -
+
+                                    </td>
+
+                                </tr>
+
+
+                                <!-- ACCOUNT NAME -->
+
+                                <tr>
+
+                                    <th>
+
+                                        Account Name
+
+                                    </th>
+
+                                    <td
+                                        id="coa-delete-name">
+
+                                        -
+
+                                    </td>
+
+                                </tr>
+
+
+                                <!-- CURRENCY -->
+
+                                <tr>
+
+                                    <th>
+
+                                        Currency
+
+                                    </th>
+
+                                    <td
+                                        id="coa-delete-currency">
+
+                                        -
+
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+
+                    <!-- WARNING -->
+
+                    <div
+                        class="alert alert-danger text-start mb-0">
+
+                        <i
+                            class="fa-solid fa-triangle-exclamation me-2">
+                        </i>
+
+                        Chart Of Account yang dihapus
+                        tidak dapat dikembalikan.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ==================================================
+                 FOOTER
+            =================================================== -->
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+
+                    <i
+                        class="fa-solid fa-xmark me-1">
+                    </i>
+
+                    Batal
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="btn btn-danger"
+                    id="btn-confirm-coa-delete">
+
+                    <i
+                        class="fa-solid fa-trash me-1">
+                    </i>
+
+                    Ya, Hapus
+
+                </button>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
