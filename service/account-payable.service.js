@@ -1436,116 +1436,204 @@ export class AccountPayableService {
     }
 
 
-    /*
-    ======================================================
-    DELETE
-    ======================================================
-    */
+   /*
+======================================================
+DELETE
+======================================================
+*/
 
-    async delete(id) {
+async delete(id) {
 
-        try {
+    try {
 
-            if (!id) {
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
 
-                throw new Error(
-                    "Account Payable ID is required."
-                );
+        if (!id) {
 
-            }
-
-
-            /*
-            ==================================================
-            CHECK STATUS
-            ==================================================
-            */
-
-            const {
-
-                data: invoice,
-
-                error: findError
-
-            } = await supabase
-
-                .from(this.table)
-
-                .select(
-                    "id,status"
-                )
-
-                .eq(
-                    "id",
-                    id
-                )
-
-                .single();
-
-
-            if (findError) {
-
-                throw findError;
-
-            }
-
-
-            if (
-                invoice.status !==
-                this.STATUS.DRAFT
-            ) {
-
-                throw new Error(
-                    "Only Draft Account Payable can be deleted."
-                );
-
-            }
-
-
-            /*
-            ==================================================
-            DELETE
-            ==================================================
-            */
-
-            const {
-
-                error
-
-            } = await supabase
-
-                .from(this.table)
-
-                .delete()
-
-                .eq(
-                    "id",
-                    id
-                );
-
-
-            if (error) {
-
-                throw error;
-
-            }
-
-
-            return true;
-
-        }
-
-        catch (error) {
-
-            console.error(
-                "AccountPayableService.delete:",
-                error
+            throw new Error(
+                "Account Payable ID is required."
             );
 
-            throw error;
+        }
+
+
+        /*
+        ==================================================
+        CHECK INVOICE
+        ==================================================
+        */
+
+        const {
+
+            data: invoice,
+
+            error: findError
+
+        } = await supabase
+
+            .from(this.table)
+
+            .select(`
+                id,
+                invoice_no,
+                status
+            `)
+
+            .eq(
+                "id",
+                id
+            )
+
+            .single();
+
+
+        if (findError) {
+
+            throw findError;
 
         }
+
+
+        if (!invoice) {
+
+            throw new Error(
+                "Account Payable not found."
+            );
+
+        }
+
+
+        console.log(
+            "DELETE TARGET:",
+            invoice
+        );
+
+
+        /*
+        ==================================================
+        CHECK STATUS
+        ==================================================
+        */
+
+        if (
+            invoice.status !==
+            this.STATUS.DRAFT
+        ) {
+
+            throw new Error(
+                "Only Draft Account Payable can be deleted."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        DELETE HEADER
+        ==================================================
+        */
+
+        const {
+
+            data: deletedInvoice,
+
+            error: deleteError
+
+        } = await supabase
+
+            .from(this.table)
+
+            .delete()
+
+            .eq(
+                "id",
+                id
+            )
+
+            .select(`
+                id,
+                invoice_no
+            `);
+
+
+        /*
+        ==================================================
+        DATABASE ERROR
+        ==================================================
+        */
+
+        if (deleteError) {
+
+            console.error(
+                "DELETE DATABASE ERROR:",
+                deleteError
+            );
+
+            throw deleteError;
+
+        }
+
+
+        /*
+        ==================================================
+        DEBUG RESULT
+        ==================================================
+        */
+
+        console.log(
+            "DELETE RESULT:",
+            deletedInvoice
+        );
+
+
+        /*
+        ==================================================
+        VERIFY DELETE
+        ==================================================
+        */
+
+        if (
+            !deletedInvoice ||
+            deletedInvoice.length === 0
+        ) {
+
+            throw new Error(
+                "Account Payable was not deleted from database."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        SUCCESS
+        ==================================================
+        */
+
+        console.log(
+            "ACCOUNT PAYABLE DELETED SUCCESSFULLY:",
+            deletedInvoice[0]
+        );
+
+
+        return true;
 
     }
 
+    catch (error) {
+
+        console.error(
+            "AccountPayableService.delete:",
+            error
+        );
+
+        throw error;
+
+    }
+
+}
 }

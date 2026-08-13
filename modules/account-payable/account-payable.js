@@ -1665,58 +1665,20 @@ detailBody?.addEventListener(
 
         }
     );
-    /*
-==================================================
-CONFIRM DELETE ACCOUNT PAYABLE
-==================================================
-*/
+        /*
+    ==================================================
+    CONFIRM DELETE ACCOUNT PAYABLE
+    ==================================================
+    */
 
-const btnConfirmDeleteInvoice =
-    document.getElementById(
-        "btn-confirm-ap-delete-invoice"
-    );
+    this.btnConfirmApDeleteInvoice?.addEventListener(
+        "click",
+        async () => {
 
-
-btnConfirmDeleteInvoice?.addEventListener(
-    "click",
-    async () => {
-
-        const id =
-            this.deleteInvoiceId;
-
-
-        console.log(
-            "CONFIRM DELETE INVOICE:",
-            id
-        );
-
-
-        if (!id) {
-
-            this.showError(
-                "Account Payable ID is missing."
-            );
-
-            return;
+            await this.confirmDelete();
 
         }
-
-
-        /*
-        ==============================================
-        TEMPORARY TEST
-        ==============================================
-        */
-
-        console.log(
-            "READY TO DELETE ACCOUNT PAYABLE:",
-            id
-        );
-
-    }
-);
-
-
+    );
     /*
     ==================================================
     TABLE ACTION
@@ -1981,6 +1943,227 @@ async editInvoiceDetail(id) {
             error.message
             || "Failed to edit invoice detail."
         );
+
+    }
+
+}
+/*
+======================================================
+SHOW SUCCESS
+======================================================
+*/
+
+showSuccess(message) {
+
+    /*
+    ==================================================
+    VALIDATION
+    ==================================================
+    */
+
+    if (!message) {
+
+        message =
+            "Operation completed successfully.";
+
+    }
+
+
+    /*
+    ==================================================
+    CONSOLE
+    ==================================================
+    */
+
+    console.log(
+        "Account Payable SUCCESS:",
+        message
+    );
+
+
+    /*
+    ==================================================
+    USE EXISTING ALERT SYSTEM
+    ==================================================
+    */
+
+    if (
+        typeof window.showSuccess ===
+        "function"
+    ) {
+
+        window.showSuccess(
+            message
+        );
+
+        return;
+
+    }
+
+
+    /*
+    ==================================================
+    FALLBACK
+    ==================================================
+    */
+
+    alert(message);
+
+}
+/*
+======================================================
+CONFIRM DELETE ACCOUNT PAYABLE
+======================================================
+*/
+
+async confirmDelete() {
+
+    try {
+
+        /*
+        ==================================================
+        GET DELETE ID
+        ==================================================
+        */
+
+        const id =
+            this.deleteInvoiceId;
+
+
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
+
+        if (!id) {
+
+            this.showError(
+                "Account Payable ID is missing."
+            );
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        DISABLE CONFIRM BUTTON
+        ==================================================
+        */
+
+        if (
+            this.btnConfirmApDeleteInvoice
+        ) {
+
+            this.btnConfirmApDeleteInvoice.disabled =
+                true;
+
+        }
+
+
+        /*
+        ==================================================
+        DELETE
+        ==================================================
+        */
+
+        await this.service.delete(
+            id
+        );
+
+
+        /*
+        ==================================================
+        CLEAR DELETE ID
+        ==================================================
+        */
+
+        this.deleteInvoiceId =
+            null;
+
+
+        /*
+        ==================================================
+        CLOSE DELETE MODAL
+        ==================================================
+        */
+
+        if (
+            this.apDeleteInvoiceModal
+        ) {
+
+            const modal =
+                bootstrap.Modal.getInstance(
+                    this.apDeleteInvoiceModal
+                );
+
+
+            modal?.hide();
+
+        }
+
+
+        /*
+        ==================================================
+        REFRESH DATA
+        ==================================================
+        */
+
+        await this.refresh();
+
+
+        /*
+        ==================================================
+        SUCCESS ALERT
+        ==================================================
+        */
+
+        this.showSuccess(
+            "Account Payable deleted successfully."
+        );
+
+    }
+
+    catch (error) {
+
+        /*
+        ==================================================
+        ERROR
+        ==================================================
+        */
+
+        console.error(
+            "AccountPayable.confirmDelete:",
+            error
+        );
+
+
+        this.showError(
+            error?.message
+            ||
+            "Failed to delete Account Payable."
+        );
+
+    }
+
+    finally {
+
+        /*
+        ==================================================
+        ENABLE CONFIRM BUTTON
+        ==================================================
+        */
+
+        if (
+            this.btnConfirmApDeleteInvoice
+        ) {
+
+            this.btnConfirmApDeleteInvoice.disabled =
+                false;
+
+        }
 
     }
 
@@ -2461,6 +2644,135 @@ else {
 }
 /*
 ======================================================
+UPDATE INVOICE SUMMARY
+======================================================
+*/
+
+updateInvoiceSummary() {
+
+    /*
+    ==================================================
+    GET DETAILS
+    ==================================================
+    */
+
+    const details =
+        Array.isArray(this.invoiceDetails)
+            ? this.invoiceDetails
+            : [];
+
+
+    /*
+    ==================================================
+    CALCULATE SUMMARY
+    ==================================================
+    */
+
+    let subtotal = 0;
+    let tax = 0;
+    let wht = 0;
+
+
+    details.forEach(detail => {
+
+        subtotal +=
+            Number(
+                detail.line_amount
+                || 0
+            );
+
+        tax +=
+            Number(
+                detail.tax_input_amount
+                || 0
+            );
+
+        wht +=
+            Number(
+                detail.withholding_tax_amount
+                || 0
+            );
+
+    });
+
+
+    /*
+    ==================================================
+    TOTAL
+    ==================================================
+    */
+
+    const total =
+        subtotal
+        + tax
+        - wht;
+
+
+    /*
+    ==================================================
+    RENDER SUMMARY
+    ==================================================
+    */
+
+    if (this.apFormSubtotal) {
+
+        this.apFormSubtotal.textContent =
+            this.formatCurrency(
+                subtotal
+            );
+
+    }
+
+
+    if (this.apFormTax) {
+
+        this.apFormTax.textContent =
+            this.formatCurrency(
+                tax
+            );
+
+    }
+
+
+    if (this.apFormWht) {
+
+        this.apFormWht.textContent =
+            this.formatCurrency(
+                wht
+            );
+
+    }
+
+
+    if (this.apFormTotal) {
+
+        this.apFormTotal.textContent =
+            this.formatCurrency(
+                total
+            );
+
+    }
+
+
+    /*
+    ==================================================
+    DEBUG
+    ==================================================
+    */
+
+    console.log(
+        "AP SUMMARY:",
+        {
+            subtotal,
+            tax,
+            wht,
+            total
+        }
+    );
+
+}
+/*
+======================================================
 RENDER INVOICE DETAILS
 ======================================================
 */
@@ -2516,6 +2828,16 @@ renderInvoiceDetails() {
             </tr>
 
         `;
+
+
+        /*
+        ==================================================
+        UPDATE SUMMARY
+        ==================================================
+        */
+
+        this.updateInvoiceSummary();
+
 
         return;
 
@@ -2650,51 +2972,51 @@ renderInvoiceDetails() {
                             </td>
 
 
-                        <!-- ==================================
-                            ACTION
-                        =================================== -->
+                            <!-- ==================================
+                                 ACTION
+                            ================================== -->
 
-                        <td
-                            class="text-center">
+                            <td
+                                class="text-center">
 
-                            <div
-                                class="btn-group btn-group-sm"
-                                role="group">
+                                <div
+                                    class="btn-group btn-group-sm"
+                                    role="group">
 
-                                <!-- EDIT -->
+                                    <!-- EDIT -->
 
-                                <button
-                                    type="button"
-                                    class="btn btn-outline-primary"
-                                    title="Edit Detail"
-                                    data-detail-action="edit"
-                                    data-detail-id="${detail.id}">
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-primary"
+                                        title="Edit Detail"
+                                        data-detail-action="edit"
+                                        data-detail-id="${detail.id}">
 
-                                    <i
-                                        class="fa-solid fa-pen">
-                                    </i>
+                                        <i
+                                            class="fa-solid fa-pen">
+                                        </i>
 
-                                </button>
+                                    </button>
 
 
-                                <!-- DELETE -->
+                                    <!-- DELETE -->
 
-                                <button
-                                    type="button"
-                                    class="btn btn-outline-danger"
-                                    title="Remove Detail"
-                                    data-detail-action="delete"
-                                    data-detail-id="${detail.id}">
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-danger"
+                                        title="Remove Detail"
+                                        data-detail-action="delete"
+                                        data-detail-id="${detail.id}">
 
-                                    <i
-                                        class="fa-solid fa-trash">
-                                    </i>
+                                        <i
+                                            class="fa-solid fa-trash">
+                                        </i>
 
-                                </button>
+                                    </button>
 
-                            </div>
+                                </div>
 
-                        </td>
+                            </td>
 
                         </tr>
 
@@ -2703,6 +3025,15 @@ renderInvoiceDetails() {
                 }
             )
             .join("");
+
+
+    /*
+    ==================================================
+    UPDATE SUMMARY
+    ==================================================
+    */
+
+    this.updateInvoiceSummary();
 
 }
 /*
