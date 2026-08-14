@@ -5,6 +5,32 @@ Layout
 Version : 1.0.0
 ===========================================
 */
+/*
+==========================================================
+FINOVA FULL HEIGHT
+==========================================================
+*/
+
+html,
+body {
+
+    width: 100%;
+
+    min-height: 100%;
+
+    margin: 0;
+
+    padding: 0;
+
+}
+
+#finova-app {
+
+    width: 100%;
+
+    min-height: 100vh;
+
+}
 
 /* ===========================================
    APPLICATION
@@ -17,6 +43,8 @@ Version : 1.0.0
     width: 100%;
 
     min-height: 100vh;
+
+    height: 100vh;
 
     background: var(--body-bg);
 
@@ -86,17 +114,19 @@ Version : 1.0.0
    CONTENT
 =========================================== */
 
-#finova-content{
+#finova-content {
 
-    display:flex;
+    display: flex;
 
-    flex-direction:column;
+    flex-direction: column;
 
-    flex:1;
+    flex: 1;
 
-    padding:var(--space-lg);
+    min-height: 0;
 
-    overflow:visible;
+    padding: var(--space-lg);
+
+    overflow: auto;
 
 }
 
@@ -107,6 +137,10 @@ Version : 1.0.0
 #finova-footer {
 
     width: 100%;
+
+    margin-top: auto;
+
+    flex-shrink: 0;
 
 }
 /* ===========================================

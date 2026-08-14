@@ -76,79 +76,72 @@ Version : 2.0.0
 
 </div>
     <!-- ==========================================
-         TOOLBAR
-    =========================================== -->
+     TOOLBAR
+========================================== -->
 
-    <div class="finova-card mb-1">
+<div class="finova-card mb-1">
 
-        <div class="finova-card-body">
+    <div class="finova-card-body">
 
-            <div class="row align-items-end g-3">
+        <div class="row align-items-end g-3">
 
-                <!-- Search -->
+            <!-- SEARCH -->
 
-                <div class="col-lg-7">
+            <div class="col-lg-9">
 
-                    <label class="form-label">
-                        Search
-                    </label>
+                <label
+                    for="coa-search"
+                    class="form-label">
 
-                    <input
+                    Search
+
+                </label>
+
+                <input
                     id="coa-search"
                     type="text"
                     class="form-control finova-control"
-                    placeholder="Search Account Code or Account Name">
+                    placeholder="Search Account Code or Account Name"
+                    autocomplete="off">
 
-                </div>
+            </div>
 
-                
-                <!-- Status -->
 
-                <div class="col-lg-2">
+            <!-- STATUS -->
 
-                    <label class="form-label">
-                        Status
-                    </label>
+            <div class="col-lg-3">
 
-                    <select
-                        id="coa-status-filter"
-                        class="form-select finova-control">
+                <label
+                    for="coa-status-filter"
+                    class="form-label">
 
-                        <option value="">
-                            All Status
-                        </option>
+                    Status
 
-                        <option value="true">
-                            Active
-                        </option>
+                </label>
 
-                        <option value="false">
-                            Inactive
-                        </option>
+                <select
+                    id="coa-status-filter"
+                    class="form-select finova-control">
 
-                    </select>
+                    <option value="">
 
-                </div>
+                        All Status
 
-                <!-- Search Button -->
+                    </option>
 
-                <div class="col-lg-3">
+                    <option value="true">
 
-                    <label class="form-label">
-                        &nbsp;
-                    </label>
+                        Active
 
-                    <button
-                        id="btn-search"
-                        class="btn btn-primary finova-btn finova-btn-block">
+                    </option>
 
-                        <i class="fas fa-search me-1"></i>
+                    <option value="false">
 
-                        Search
+                        Inactive
 
-                    </button>
+                    </option>
 
-                </div>
+                </select>
 
             </div>
 
@@ -156,6 +149,7 @@ Version : 2.0.0
 
     </div>
 
+</div>
 <!-- ==========================================
      DATA TABLE
 ========================================== -->

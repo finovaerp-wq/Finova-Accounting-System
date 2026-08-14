@@ -380,37 +380,37 @@ this.btnConfirmDelete =
         document.getElementById("coa-id");
 
     /*
-    ======================================================
-    ACCOUNT
-    ======================================================
-    */
+==========================================================
+ACCOUNT FORM ELEMENTS
+==========================================================
+*/
 
-    this.parentId =
-        document.getElementById("parent-id");
+this.parentId =
+    document.getElementById("coa-parent");
 
-    this.accountCode =
-        document.getElementById("account-code");
+this.accountCode =
+    document.getElementById("coa-code");
 
-    this.accountName =
-        document.getElementById("account-name");
+this.accountName =
+    document.getElementById("coa-name");
 
-    this.currency =
-        document.getElementById("currency");
+this.currency =
+    document.getElementById("currency");
 
-    this.postingType =
-        document.getElementById("posting-type");
+this.postingType =
+    document.getElementById("coa-posting-type");
 
-    this.isHeader =
-        document.getElementById("is-header");
+this.isHeader =
+    document.getElementById("is-header");
 
-    this.allowTransaction =
-        document.getElementById("allow-transaction");
+this.allowTransaction =
+    document.getElementById("allow-transaction");
 
-    this.status =
-        document.getElementById("status");
+this.status =
+    document.getElementById("status");
 
-    this.description =
-        document.getElementById("description");
+this.description =
+    document.getElementById("coa-description");
 
     /*
     ======================================================
@@ -477,13 +477,21 @@ bindEvents() {
 
     );
 
-    this.btnSearch?.addEventListener(
+    /*
+==========================================================
+REAL-TIME SEARCH
+==========================================================
+*/
 
-        "click",
+this.searchInput?.addEventListener(
+    "input",
+    () => {
 
-        () => this.search()
+        this.handleSearch();
 
-    );
+    }
+);
+
 
     /*
     ======================================================
@@ -550,6 +558,71 @@ bindEvents() {
     */
 
     this.bindModalEvents();
+
+}
+/*
+==========================================================
+HANDLE REAL-TIME SEARCH
+==========================================================
+*/
+
+handleSearch() {
+
+    const keyword =
+        this.searchInput
+            ?.value
+            .trim()
+            .toLowerCase() || "";
+
+    if (!keyword) {
+
+        this.filteredData =
+            [...this.data];
+
+    } else {
+
+        this.filteredData =
+            this.data.filter(account => {
+
+                const code =
+                    String(
+                        account.account_code || ""
+                    ).toLowerCase();
+
+                const name =
+                    String(
+                        account.account_name || ""
+                    ).toLowerCase();
+
+                return (
+
+                    code.includes(keyword) ||
+
+                    name.includes(keyword)
+
+                );
+
+            });
+
+    }
+
+    /*
+    ======================================================
+    RESET PAGE
+    ======================================================
+    */
+
+    this.currentPage = 1;
+
+    /*
+    ======================================================
+    RENDER
+    ======================================================
+    */
+
+    this.renderTable();
+
+    this.renderPagination();
 
 }
 
@@ -657,9 +730,9 @@ bindModalEvents() {
     */
 
     this.btnConfirmDelete =
-        document.getElementById(
-            "btn-confirm-coa-delete"
-        );
+    document.getElementById(
+        "btn-confirm-delete-coa"
+    );
 
 
     /*
@@ -759,9 +832,17 @@ preview() {
 
             <tr>
 
-                <td>${item.account_code ?? "-"}</td>
+                <td>
+                <strong style="color: #000000;">
+                    ${item.account_code ?? "-"}
+                </strong>
+            </td>
 
-                <td>${item.account_name ?? "-"}</td>
+            <td>
+                <strong style="color: #000000;">
+                    ${item.account_name ?? "-"}
+                </strong>
+            </td>
 
                 <td>${item.parent_name ?? "-"}</td>
 
@@ -1017,6 +1098,10 @@ async loadParentAccounts() {
 
         if (!this.parentId) {
 
+            console.error(
+                "Parent Account element #coa-parent not found."
+            );
+
             return;
 
         }
@@ -1028,7 +1113,6 @@ async loadParentAccounts() {
         */
 
         const accounts =
-
             await ChartOfAccountsService.getHeaderAccounts();
 
         /*
@@ -1063,7 +1147,9 @@ async loadParentAccounts() {
 
                 <option value="${account.id}">
 
-                    ${account.account_code} - ${account.account_name}
+                    ${account.account_code}
+                    -
+                    ${account.account_name}
 
                 </option>
 
@@ -1077,12 +1163,13 @@ async loadParentAccounts() {
 
     catch (error) {
 
-        console.error(error);
+        console.error(
+            "Failed to load parent accounts:",
+            error
+        );
 
         this.showError(
-
             "Failed to load parent accounts."
-
         );
 
     }
@@ -1690,9 +1777,17 @@ renderRow(item) {
 
 <tr>
 
-    <td>${item.account_code ?? "-"}</td>
+    <td>
+        <strong style="color: #000000;">
+            ${item.account_code ?? "-"}
+        </strong>
+    </td>
 
-    <td>${item.account_name ?? "-"}</td>
+    <td>
+        <strong style="color: #000000;">
+            ${item.account_name ?? "-"}
+        </strong>
+    </td>
 
     <td>${item.parent_name ?? "-"}</td>
 
@@ -1769,175 +1864,60 @@ async openAddModal() {
 
     try {
 
-        /*
-        ======================================================
-        RESET FORM
-        ======================================================
-        */
-
         if (this.form) {
-
             this.form.reset();
-
         }
-
-
-        /*
-        ======================================================
-        RESET ID
-        ======================================================
-        */
 
         if (this.coaId) {
-
             this.coaId.value = "";
-
         }
-
-
-        /*
-        ======================================================
-        PARENT ACCOUNT
-        ======================================================
-        */
 
         if (this.parentId) {
-
             this.parentId.value = "";
-
         }
-
-
-        /*
-        ======================================================
-        ACCOUNT CODE
-        ======================================================
-        */
 
         if (this.accountCode) {
-
             this.accountCode.value = "";
-
         }
-
-
-        /*
-        ======================================================
-        ACCOUNT NAME
-        ======================================================
-        */
 
         if (this.accountName) {
-
             this.accountName.value = "";
-
         }
-
-
-        /*
-        ======================================================
-        ACCOUNT CATEGORY
-        ======================================================
-        */
 
         if (this.accountCategory) {
-
             this.accountCategory.value = "";
-
         }
-
-
-        /*
-        ======================================================
-        CURRENCY
-        ======================================================
-        */
 
         if (this.currency) {
-
             this.currency.value = "IDR";
-
         }
-
-
-        /*
-        ======================================================
-        NORMAL BALANCE
-        ======================================================
-        */
 
         if (this.normalBalance) {
-
             this.normalBalance.value = "Debit";
-
         }
-
-
-        /*
-        ======================================================
-        DESCRIPTION
-        ======================================================
-        */
 
         if (this.description) {
-
             this.description.value = "";
-
         }
-
-
-        /*
-        ======================================================
-        PARENT CHILD COUNT
-        ======================================================
-        */
 
         const parentChildCount =
             document.getElementById(
                 "parent-child-count"
             );
 
-
         if (parentChildCount) {
-
             parentChildCount.textContent = "-";
-
         }
-
-
-        /*
-        ======================================================
-        LOAD PARENT ACCOUNT
-        ======================================================
-        */
 
         await this.loadParentAccounts();
 
-
-        /*
-        ======================================================
-        MODAL TITLE
-        ======================================================
-        */
-
         if (this.modalTitle) {
-
             this.modalTitle.textContent =
                 "Add Chart Of Account";
-
         }
 
-
-        /*
-        ======================================================
-        SHOW MODAL
-        ======================================================
-        */
-
         if (this.modal) {
-
             this.modal.show();
-
         }
 
     }
@@ -2296,6 +2276,7 @@ async refresh() {
 
         }
 
+
         /*
         ======================================================
         RESET FILTER
@@ -2308,6 +2289,16 @@ async refresh() {
 
         }
 
+
+        /*
+        ======================================================
+        RESET PAGINATION
+        ======================================================
+        */
+
+        this.currentPage = 1;
+
+
         /*
         ======================================================
         RELOAD
@@ -2316,22 +2307,21 @@ async refresh() {
 
         await this.loadData();
 
-            }
+    }
 
-            catch (error) {
+    catch (error) {
 
-                console.error(error);
+        console.error(error);
 
-                this.showError(
+        this.showError(
 
-                    "Failed to refresh data."
+            "Failed to refresh data."
 
-                );
+        );
 
-            }
+    }
 
-        }
-
+}
 /*
 ==========================================================
 COLLECT FORM DATA
@@ -2343,45 +2333,43 @@ collectFormData() {
     return {
 
         account_code:
-
             this.accountCode.value.trim(),
 
         account_name:
-
             this.accountName.value.trim(),
 
         parent_id:
-
             this.parentId.value || null,
 
-        currency:
+        level:
+            null,
 
-            this.currency.value,
-
-        posting_type:
-
-            this.postingType.value,
+        account_class:
+            document.getElementById(
+                "coa-type"
+            ).value,
 
         normal_balance:
-
             document.querySelector(
                 'input[name="normal-balance"]:checked'
             )?.value ?? "Debit",
 
         is_header:
-
             this.isHeader.checked,
 
         allow_transaction:
-
             this.allowTransaction.checked,
 
         status:
-
             this.status.checked,
 
-        description:
+        posting_type:
+            this.postingType.value,
 
+        currency:
+            this.currency.value,
+
+        description:
             this.description.value.trim()
 
     };
@@ -2623,50 +2611,94 @@ async delete(id) {
 
 
         /*
-        ==============================================
-        FILL DELETE MODAL
-        ==============================================
-        */
+==========================================================
+FILL DELETE MODAL
+==========================================================
+*/
 
-        const deleteCode =
-            document.getElementById(
-                "coa-delete-code"
+const deleteCode =
+    document.getElementById(
+        "coa-delete-code"
+    );
+
+const deleteName =
+    document.getElementById(
+        "coa-delete-name"
+    );
+
+const deleteParent =
+    document.getElementById(
+        "coa-delete-parent"
+    );
+
+
+/*
+==========================================================
+ACCOUNT CODE
+==========================================================
+*/
+
+if (deleteCode) {
+
+    deleteCode.textContent =
+        account.account_code || "-";
+
+}
+
+
+/*
+==========================================================
+ACCOUNT NAME
+==========================================================
+*/
+
+if (deleteName) {
+
+    deleteName.textContent =
+        account.account_name || "-";
+
+}
+
+
+/*
+==========================================================
+PARENT ACCOUNT
+==========================================================
+*/
+
+if (deleteParent) {
+
+    if (!account.parent_id) {
+
+        deleteParent.textContent =
+            "-- None --";
+
+    } else {
+
+        const parentAccount =
+            this.data.find(
+
+                item =>
+                    String(item.id) ===
+                    String(account.parent_id)
+
             );
 
-        const deleteName =
-            document.getElementById(
-                "coa-delete-name"
-            );
+        if (parentAccount) {
 
-        const deleteCurrency =
-            document.getElementById(
-                "coa-delete-currency"
-            );
+            deleteParent.textContent =
+                parentAccount.account_name || "-";
 
+        } else {
 
-        if (deleteCode) {
-
-            deleteCode.textContent =
-                account.account_code || "-";
+            deleteParent.textContent =
+                "-- None --";
 
         }
 
+    }
 
-        if (deleteName) {
-
-            deleteName.textContent =
-                account.account_name || "-";
-
-        }
-
-
-        if (deleteCurrency) {
-
-            deleteCurrency.textContent =
-                account.currency || "-";
-
-        }
-
+}
 
         /*
         ==============================================
