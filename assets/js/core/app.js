@@ -8,7 +8,7 @@ Version : 2.0 Enterprise
 
 import { FinovaSidebar } from "../components/sidebar.js";
 import { FinovaTopbar } from "../components/topbar.js";
-import { FinovaFooter } from "../components/footer.js";
+
 
 import { FinovaRouter } from "./router.js";
 
@@ -36,13 +36,7 @@ class FinovaApp {
         ==========================================
         */
 
-        this.sidebar = null;
-
-        this.topbar = null;
-
-        this.footer = null;
-
-        this.router = null;
+        
 
         /*
         ==========================================
@@ -218,10 +212,7 @@ class FinovaApp {
                     <main
                         id="finova-content">
                     </main>
-
-                    <footer
-                        id="finova-footer">
-                    </footer>
+                                        
 
                 </div>
 
@@ -258,16 +249,7 @@ class FinovaApp {
 
             new FinovaTopbar();
 
-        /*
-        ==========================================
-        FOOTER
-        ==========================================
-        */
-
-        this.footer =
-
-            new FinovaFooter();
-
+       
         /*
         ==========================================
         GLOBAL ACCESS
@@ -395,7 +377,7 @@ class FinovaApp {
 
         window.finovaTopbar = null;
 
-        window.finovaFooter = null;
+        
 
         window.finovaRouter = null;
 
@@ -409,7 +391,7 @@ class FinovaApp {
 
         this.topbar = null;
 
-        this.footer = null;
+        
 
         this.router = null;
 

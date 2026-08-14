@@ -153,6 +153,55 @@ async initialize() {
     );
 
 }
+/*
+==========================================================
+FORMAT NPWP
+Format:
+XX.XXX.XXX.X-XXX.XXX
+==========================================================
+*/
+
+formatNPWP(value) {
+
+    const digits =
+        String(value || "")
+            .replace(/\D/g, "")
+            .slice(0, 15);
+
+    let result = "";
+
+    if (digits.length > 0) {
+        result += digits.substring(0, 2);
+    }
+
+    if (digits.length > 2) {
+        result += ".";
+        result += digits.substring(2, 5);
+    }
+
+    if (digits.length > 5) {
+        result += ".";
+        result += digits.substring(5, 8);
+    }
+
+    if (digits.length > 8) {
+        result += ".";
+        result += digits.substring(8, 9);
+    }
+
+    if (digits.length > 9) {
+        result += "-";
+        result += digits.substring(9, 12);
+    }
+
+    if (digits.length > 12) {
+        result += ".";
+        result += digits.substring(12, 15);
+    }
+
+    return result;
+
+}
 
     /*
 ==========================================================
@@ -252,9 +301,7 @@ cacheElement() {
         "btn-confirm-bp-delete"
     );
 
-    this.btnSearch =
-        document.getElementById("btn-search");
-
+    
     this.btnRefresh =
         document.getElementById("btn-refresh");
 
@@ -366,6 +413,55 @@ this.bpName?.addEventListener(
 
     }
 );
+/*
+==========================================================
+BUSINESS PARTNER NAME CLICK
+==========================================================
+*/
+
+document
+    .querySelector("#bp-table-body")
+    ?.addEventListener(
+        "click",
+        (event) => {
+
+            const cell =
+                event.target.closest(
+                    ".bp-name-link"
+                );
+
+            if (!cell) return;
+
+            const id =
+                cell.dataset.id;
+
+            if (!id) return;
+
+            this.editBusinessPartner(id);
+
+        }
+    );
+/*
+==========================================================
+NPWP AUTO FORMAT
+==========================================================
+*/
+
+if (this.bpTaxNumber) {
+
+    this.bpTaxNumber.addEventListener(
+        "input",
+        () => {
+
+            this.bpTaxNumber.value =
+                this.formatNPWP(
+                    this.bpTaxNumber.value
+                );
+
+        }
+    );
+
+}
     
     
     /* ======================================================
@@ -390,18 +486,20 @@ this.bpName?.addEventListener(
         () => this.search()
     );
 
-    this.searchInput?.addEventListener(
-    "keyup",
-        (event) => {
+    /*
+==========================================================
+REALTIME SEARCH
+==========================================================
+*/
 
-            if (event.key === "Enter") {
+this.searchInput?.addEventListener(
+    "input",
+    () => {
 
-                this.search();
+        this.search();
 
-            }
-
-        }
-    );
+    }
+);
 
     /* ======================================================
        FILTER
@@ -600,9 +698,17 @@ preview() {
 
 <tr>
 
-<td>${item.bp_code}</td>
+<td>
+    <strong class="text-dark">
+        ${item.bp_code}
+    </strong>
+</td>
 
-<td>${item.bp_name}</td>
+<td>
+    <strong class="text-dark">
+        ${item.bp_name}
+    </strong>
+</td>
 
 <td>${item.bp_type}</td>
 
@@ -1263,15 +1369,43 @@ renderRow(item, index) {
 
             <td>${index + 1}</td>
 
-            <td>${item.bp_code}</td>
+            <td style="font-weight: 700; color: #000000;">
+    ${item.bp_code}
+</td>
 
-            <td>${item.bp_name}</td>
+<td
+    class="bp-name-link"
+    data-id="${item.id}"
+    style="
+        font-weight: 700 !important;
+        color: #000000 !important;
+        cursor: pointer;
+    "
+>
+    ${item.bp_name}
+</td>
 
             <td>${item.bp_type}</td>
 
             <td>${item.phone || "-"}</td>
 
-            <td>${item.email ?? ""}</td>
+            <td>
+    ${
+        item.email
+            ? `
+                <a
+                    href="mailto:${item.email}"
+                    class="text-primary text-decoration-none">
+                    ${item.email}
+                </a>
+              `
+            : "-"
+    }
+</td>
+<td>
+    ${item.tax_number || "-"}
+</td>
+
 
             <td>
 
@@ -1531,13 +1665,7 @@ async refresh() {
 
 }
 
-    /*
-==========================================================
-COLLECT FORM DATA
-==========================================================
-*/
-
-collectFormData() {
+    collectFormData() {
 
     return {
 
@@ -1553,22 +1681,27 @@ collectFormData() {
             this.bpTop.value || null,
 
         phone:
-            this.bpPhone.value.trim(),
+            this.bpPhone.value
+                .trim(),
 
         email:
-            this.bpEmail.value.trim(),
+            this.bpEmail.value
+                .trim(),
 
         address:
-            this.bpAddress.value.trim(),
+            this.bpAddress.value
+                .trim(),
 
         city:
-            this.bpCity.value.trim(),
+            this.bpCity.value
+                .trim(),
 
         country:
-            this.bpCountry.value.trim(),
+            "Indonesia",
 
         tax_number:
-            this.bpTaxNumber.value.trim(),
+            this.bpTaxNumber.value
+                .trim(),
 
         status:
             this.bpStatus.value === "true"

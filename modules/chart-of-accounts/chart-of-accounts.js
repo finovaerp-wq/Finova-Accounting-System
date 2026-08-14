@@ -1775,11 +1775,135 @@ async openAddModal() {
         ======================================================
         */
 
-        this.coaForm?.reset();
+        if (this.form) {
 
-        this.selectedId = null;
+            this.form.reset();
 
-        this.coaId.value = "";
+        }
+
+
+        /*
+        ======================================================
+        RESET ID
+        ======================================================
+        */
+
+        if (this.coaId) {
+
+            this.coaId.value = "";
+
+        }
+
+
+        /*
+        ======================================================
+        PARENT ACCOUNT
+        ======================================================
+        */
+
+        if (this.parentId) {
+
+            this.parentId.value = "";
+
+        }
+
+
+        /*
+        ======================================================
+        ACCOUNT CODE
+        ======================================================
+        */
+
+        if (this.accountCode) {
+
+            this.accountCode.value = "";
+
+        }
+
+
+        /*
+        ======================================================
+        ACCOUNT NAME
+        ======================================================
+        */
+
+        if (this.accountName) {
+
+            this.accountName.value = "";
+
+        }
+
+
+        /*
+        ======================================================
+        ACCOUNT CATEGORY
+        ======================================================
+        */
+
+        if (this.accountCategory) {
+
+            this.accountCategory.value = "";
+
+        }
+
+
+        /*
+        ======================================================
+        CURRENCY
+        ======================================================
+        */
+
+        if (this.currency) {
+
+            this.currency.value = "IDR";
+
+        }
+
+
+        /*
+        ======================================================
+        NORMAL BALANCE
+        ======================================================
+        */
+
+        if (this.normalBalance) {
+
+            this.normalBalance.value = "Debit";
+
+        }
+
+
+        /*
+        ======================================================
+        DESCRIPTION
+        ======================================================
+        */
+
+        if (this.description) {
+
+            this.description.value = "";
+
+        }
+
+
+        /*
+        ======================================================
+        PARENT CHILD COUNT
+        ======================================================
+        */
+
+        const parentChildCount =
+            document.getElementById(
+                "parent-child-count"
+            );
+
+
+        if (parentChildCount) {
+
+            parentChildCount.textContent = "-";
+
+        }
+
 
         /*
         ======================================================
@@ -1789,57 +1913,20 @@ async openAddModal() {
 
         await this.loadParentAccounts();
 
-        /*
-        ======================================================
-        DEFAULT VALUE
-        ======================================================
-        */
-
-        this.parentId.value = "";
-
-        this.accountCode.value = "";
-
-        this.accountName.value = "";
-
-        this.currency.value = "IDR";
-
-        this.postingType.value = "Manual & Auto";
-
-        document.getElementById(
-
-            "normal-debit"
-
-        ).checked = true;
-
-        this.isHeader.checked = false;
-
-        this.allowTransaction.checked = true;
-
-        this.status.checked = true;
-
-        this.description.value = "";
 
         /*
         ======================================================
-        RESET PARENT INFO
+        MODAL TITLE
         ======================================================
         */
 
-        this.parentName.textContent = "-";
+        if (this.modalTitle) {
 
-        this.parentLevel.textContent = "-";
+            this.modalTitle.textContent =
+                "Add Chart Of Account";
 
-        this.parentChildCount.textContent = "-";
+        }
 
-        /*
-        ======================================================
-        TITLE
-        ======================================================
-        */
-
-        this.modalTitle.textContent =
-
-            "Add Chart Of Account";
 
         /*
         ======================================================
@@ -1847,18 +1934,23 @@ async openAddModal() {
         ======================================================
         */
 
-        this.modal.show();
+        if (this.modal) {
+
+            this.modal.show();
+
+        }
 
     }
 
     catch (error) {
 
-        console.error(error);
+        console.error(
+            "Failed to open Add Chart Of Account modal:",
+            error
+        );
 
         this.showError(
-
-            "Failed to open Chart Of Account."
-
+            error.message
         );
 
     }
@@ -1877,11 +1969,12 @@ async openEditModal(id) {
 
         /*
         ======================================================
-        LOAD PARENT
+        LOAD PARENT ACCOUNT
         ======================================================
         */
 
         await this.loadParentAccounts();
+
 
         /*
         ======================================================
@@ -1890,20 +1983,19 @@ async openEditModal(id) {
         */
 
         const item =
-
             await ChartOfAccountsService.getById(id);
+
 
         if (!item) {
 
             this.showError(
-
                 "Chart Of Account not found."
-
             );
 
             return;
 
         }
+
 
         /*
         ======================================================
@@ -1911,9 +2003,13 @@ async openEditModal(id) {
         ======================================================
         */
 
-        this.coaId.value =
+        if (this.coaId) {
 
-            item.id ?? "";
+            this.coaId.value =
+                item.id ?? "";
+
+        }
+
 
         /*
         ======================================================
@@ -1921,25 +2017,45 @@ async openEditModal(id) {
         ======================================================
         */
 
-        this.parentId.value =
+        if (this.parentId) {
 
-            item.parent_id ?? "";
+            this.parentId.value =
+                item.parent_id ?? "";
 
-        this.accountCode.value =
+        }
 
-            item.account_code ?? "";
 
-        this.accountName.value =
+        if (this.accountCode) {
 
-            item.account_name ?? "";
+            this.accountCode.value =
+                item.account_code ?? "";
 
-        this.currency.value =
+        }
 
-            item.currency ?? "IDR";
 
-        this.postingType.value =
+        if (this.accountName) {
 
-            item.posting_type ?? "Manual & Auto";
+            this.accountName.value =
+                item.account_name ?? "";
+
+        }
+
+
+        if (this.currency) {
+
+            this.currency.value =
+                item.currency ?? "IDR";
+
+        }
+
+
+        if (this.postingType) {
+
+            this.postingType.value =
+                item.posting_type ?? "Manual & Auto";
+
+        }
+
 
         /*
         ======================================================
@@ -1947,37 +2063,70 @@ async openEditModal(id) {
         ======================================================
         */
 
-        document.getElementById(
+        const normalDebit =
+            document.getElementById(
+                "normal-debit"
+            );
 
-            item.normal_balance === "Credit"
+        const normalCredit =
+            document.getElementById(
+                "normal-credit"
+            );
 
-            ? "normal-credit"
 
-            : "normal-debit"
+        if (normalDebit) {
 
-        ).checked = true;
+            normalDebit.checked =
+                item.normal_balance !== "Credit";
+
+        }
+
+
+        if (normalCredit) {
+
+            normalCredit.checked =
+                item.normal_balance === "Credit";
+
+        }
+
 
         /*
         ======================================================
-        OPTION
+        OPTIONS
         ======================================================
         */
 
-        this.isHeader.checked =
+        if (this.isHeader) {
 
-            item.is_header ?? false;
+            this.isHeader.checked =
+                item.is_header ?? false;
 
-        this.allowTransaction.checked =
+        }
 
-            item.allow_transaction ?? true;
 
-        this.status.checked =
+        if (this.allowTransaction) {
 
-            item.status ?? true;
+            this.allowTransaction.checked =
+                item.allow_transaction ?? true;
 
-        this.description.value =
+        }
 
-            item.description ?? "";
+
+        if (this.status) {
+
+            this.status.checked =
+                item.status ?? true;
+
+        }
+
+
+        if (this.description) {
+
+            this.description.value =
+                item.description ?? "";
+
+        }
+
 
         /*
         ======================================================
@@ -1985,18 +2134,28 @@ async openEditModal(id) {
         ======================================================
         */
 
-        this.parentName.textContent =
+        if (this.parentName) {
 
-            item.parent_name ?? "-";
+            this.parentName.textContent =
+                item.parent_name ?? "-";
 
-        this.parentLevel.textContent =
+        }
+
+
+        if (this.parentLevel) {
 
             this.parentLevel.textContent =
-            item.level ?? "-";
+                item.level ?? "-";
 
-        this.parentChildCount.textContent =
+        }
 
-            item.child_count
+
+        if (this.parentChildCount) {
+
+            this.parentChildCount.textContent =
+                item.child_count ?? "-";
+
+        }
 
 
         /*
@@ -2005,34 +2164,42 @@ async openEditModal(id) {
         ======================================================
         */
 
-        this.modalTitle.textContent =
+        if (this.modalTitle) {
 
-            "Edit Chart Of Account";
+            this.modalTitle.textContent =
+                "Edit Chart Of Account";
+
+        }
+
 
         /*
         ======================================================
-        SHOW
+        SHOW MODAL
         ======================================================
         */
 
-        this.modal.show();
+        if (this.modal) {
+
+            this.modal.show();
+
+        }
 
     }
 
     catch (error) {
 
-        console.error(error);
+        console.error(
+            "Failed to load Chart Of Account:",
+            error
+        );
 
         this.showError(
-
             "Failed to load Chart Of Account."
-
         );
 
     }
 
 }
-
 /*
 ==========================================================
 SEARCH

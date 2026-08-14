@@ -287,12 +287,8 @@ INIT
 async init() {
 
     try {
-        console.log(
-            "AccountPayable methods:",
-            Object.getOwnPropertyNames(
-                AccountPayable.prototype
-            )
-        );
+
+        console.log("AccountPayable: INIT START");
 
         /*
         ==============================================
@@ -302,7 +298,6 @@ async init() {
 
         await this.loadModalHTML();
 
-
         /*
         ==============================================
         LOAD AP DETAIL MODAL
@@ -310,7 +305,6 @@ async init() {
         */
 
         await this.loadDetailModalHTML();
-
 
         /*
         ==============================================
@@ -320,15 +314,24 @@ async init() {
 
         this.cacheDOM();
 
-
         /*
         ==============================================
         LOAD VENDORS
         ==============================================
         */
 
-        await this.loadVendors();
+        try {
 
+            await this.loadVendors();
+
+        } catch (error) {
+
+            console.error(
+                "AccountPayable - loadVendors:",
+                error
+            );
+
+        }
 
         /*
         ==============================================
@@ -338,21 +341,20 @@ async init() {
 
         this.bindEvents();
 
-
         /*
         ==============================================
-        LOAD DATA
+        LOAD ACCOUNT PAYABLE
         ==============================================
         */
 
         await this.loadData();
 
-    }
+        console.log("AccountPayable: INIT COMPLETE");
 
-    catch (error) {
+    } catch (error) {
 
         console.error(
-            "AccountPayable.init:",
+            "AccountPayable - INIT ERROR:",
             error
         );
 
@@ -1044,14 +1046,14 @@ async loadDetailCOA() {
 
 }
     /*
-    ======================================================
-    LOAD ACTIVE VENDORS
-    ======================================================
-    */
+======================================================
+LOAD ACTIVE VENDORS
+======================================================
+*/
 
-    async loadVendors() {
+async loadVendors() {
 
-        try {
+    try {
 
         /*
         ==================================================
@@ -1061,8 +1063,11 @@ async loadDetailCOA() {
 
         const data =
             await this.service.getVendors();
+
         console.log(
-    
+            "AP Vendors:",
+            data
+        );
 
 
         /*
