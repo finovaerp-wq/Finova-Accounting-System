@@ -1516,21 +1516,22 @@ async delete(id) {
 
 
         /*
-        ==================================================
-        CHECK STATUS
-        ==================================================
-        */
+==================================================
+ONLY DRAFT / VOID CAN BE DELETED
+==================================================
+*/
 
-        if (
-            invoice.status !==
-            this.STATUS.DRAFT
-        ) {
+if (
+    invoice.status !== this.STATUS.DRAFT
+    &&
+    invoice.status !== this.STATUS.VOID
+) {
 
-            throw new Error(
-                "Only Draft Account Payable can be deleted."
-            );
+    throw new Error(
+        "Only Draft or Void Account Payable can be deleted."
+    );
 
-        }
+}
 
 
         /*

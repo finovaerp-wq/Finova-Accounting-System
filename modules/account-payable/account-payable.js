@@ -55,7 +55,8 @@ export class AccountPayable {
 
         this.service =
             new AccountPayableService();
-
+        window.apService =
+        this.service;
 
         /*
         ==============================================
@@ -99,7 +100,9 @@ export class AccountPayable {
         this.apDetailCOA = null;
         this.apDetailQuantity = null;
         this.btnSaveDraft = null;
-
+       
+        this.pendingPostId = null;
+        this.pendingVoidId = null;
         this.apDetailUnitPrice = null;
 
         this.apDetailTaxInputRate = null;
@@ -363,6 +366,286 @@ async init() {
         );
 
     }
+    /*
+======================================================
+CONFIRM POSTING BUTTON
+======================================================
+*/
+
+const confirmPostButton =
+    document.getElementById(
+        "ap-confirm-post-btn"
+    );
+
+
+if (confirmPostButton) {
+
+    confirmPostButton.addEventListener(
+        "click",
+        async () => {
+
+            try {
+
+                const id =
+                    this.pendingPostId;
+
+
+                if (!id) {
+
+                    throw new Error(
+                        "Account Payable ID for posting is missing."
+                    );
+
+                }
+
+
+                /*
+                ==========================================
+                CLOSE MODAL
+                ==========================================
+                */
+
+                const modalElement =
+                    document.getElementById(
+                        "ap-post-confirm-modal"
+                    );
+
+
+                const modal =
+                    bootstrap.Modal.getInstance(
+                        modalElement
+                    );
+
+
+                if (modal) {
+
+                    modal.hide();
+
+                }
+
+
+                /*
+                ==========================================
+                POST
+                ==========================================
+                */
+
+                await this.service.postInvoice(
+                    id
+                );
+
+
+                /*
+                ==========================================
+                CLEAR STATE
+                ==========================================
+                */
+
+                this.pendingPostId =
+                    null;
+
+
+                /*
+                ==========================================
+                RELOAD
+                ==========================================
+                */
+
+                await this.loadData();
+
+
+                /*
+                ==========================================
+                SUCCESS
+                ==========================================
+                */
+
+                this.showSuccess(
+                    "Account Payable successfully posted."
+                );
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "AccountPayable.confirmPost:",
+                    error
+                );
+
+
+                this.showError(
+                    error.message
+                    || "Failed to post Account Payable."
+                );
+
+            }
+
+        }
+    );
+
+}
+/*
+======================================================
+CONFIRM VOID BUTTON
+======================================================
+*/
+
+const confirmVoidButton =
+    document.getElementById(
+        "ap-confirm-void-btn"
+    );
+
+
+if (confirmVoidButton) {
+
+    confirmVoidButton.addEventListener(
+        "click",
+        async () => {
+
+            try {
+
+                /*
+                ==========================================
+                GET PENDING ID
+                ==========================================
+                */
+
+                const id =
+                    this.pendingVoidId;
+
+
+                if (!id) {
+
+                    throw new Error(
+                        "Account Payable ID for Void is missing."
+                    );
+
+                }
+
+
+                /*
+                ==========================================
+                GET VOID REASON
+                ==========================================
+                */
+
+                const reasonElement =
+                    document.getElementById(
+                        "ap-void-reason"
+                    );
+
+
+                const reason =
+                    reasonElement?.value
+                        ?.trim();
+
+
+                /*
+                ==========================================
+                VALIDATE REASON
+                ==========================================
+                */
+
+                if (!reason) {
+
+                    reasonElement?.focus();
+
+                    this.showError(
+                        "Void reason is required."
+                    );
+
+                    return;
+
+                }
+
+
+                /*
+                ==========================================
+                CLOSE MODAL
+                ==========================================
+                */
+
+                const modalElement =
+                    document.getElementById(
+                        "ap-void-confirm-modal"
+                    );
+
+
+                const modal =
+                    bootstrap.Modal.getInstance(
+                        modalElement
+                    );
+
+
+                if (modal) {
+
+                    modal.hide();
+
+                }
+
+
+                /*
+                ==========================================
+                EXECUTE VOID
+                ==========================================
+                */
+
+                await this.service.voidInvoice(
+                    id,
+                    reason
+                );
+
+
+                /*
+                ==========================================
+                CLEAR STATE
+                ==========================================
+                */
+
+                this.pendingVoidId =
+                    null;
+
+
+                /*
+                ==========================================
+                RELOAD DATA
+                ==========================================
+                */
+
+                await this.loadData();
+
+
+                /*
+                ==========================================
+                SUCCESS
+                ==========================================
+                */
+
+                this.showSuccess(
+                    "Account Payable successfully voided."
+                );
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "AccountPayable.confirmVoid:",
+                    error
+                );
+
+                this.showError(
+                    error.message
+                    || "Failed to void Account Payable."
+                );
+
+            }
+
+        }
+    );
+
+}
 
 }
 /*
@@ -5215,25 +5498,38 @@ if (
     );
 
 }
+/*
+==================================================
+OPEN POSTING CONFIRMATION MODAL
+==================================================
+*/
+
+this.pendingPostId = id;
+
+const modalElement =
+    document.getElementById(
+        "ap-post-confirm-modal"
+    );
 
 
-        /*
-        ==================================================
-        CONFIRM POST
-        ==================================================
-        */
+if (!modalElement) {
 
-        const confirmed =
-            confirm(
-                "Are you sure you want to post this Account Payable?"
-            );
+    throw new Error(
+        "Posting confirmation modal not found."
+    );
+
+}
 
 
-        if (!confirmed) {
+const modal =
+    bootstrap.Modal.getOrCreateInstance(
+        modalElement
+    );
 
-            return;
 
-        }
+modal.show();
+
+return;
 
 
         /*
@@ -5300,7 +5596,7 @@ if (
     }
 
 
-    /*
+/*
 ======================================================
 EDIT
 ======================================================
@@ -5382,20 +5678,27 @@ async editInvoice(id) {
 
 
         const header =
-            result.header;
+    result.header;
 
-        const details =
-            Array.isArray(result.details)
-                ? result.details
-                : [];
+const details =
+    Array.isArray(result.details)
+        ? result.details
+        : [];
 
 
-        /*
+/*
 ==================================================
 CHECK CURRENT STATUS
 Draft / Void CAN BE EDITED
 ==================================================
 */
+
+const currentStatus =
+    String(
+        header?.status || "Draft"
+    )
+    .trim();
+
 
 if (
     currentStatus !== "Draft"
@@ -6064,37 +6367,29 @@ async voidInvoice(id) {
             );
 
         }
-        console.log(
-    "AP VOID BEFORE UPDATE:",
-    {
-        invoice_no: invoice?.invoice_no,
-        status: invoice?.status,
-        total_amount: invoice?.total_amount,
-        outstanding_amount: invoice?.outstanding_amount,
-        paid_amount: invoice?.paid_amount
-    }
-);
 
 
         /*
         ==================================================
-        ONLY POSTED CAN BE VOIDED
+        CHECK STATUS
         ==================================================
         */
 
-        const technicalStatus =
+        const currentStatus =
             String(
-                invoice.status || "Draft"
+                invoice.status || ""
             )
             .trim();
 
 
         if (
-            technicalStatus !== "Posted"
+            currentStatus !== "Posted"
+            &&
+            currentStatus !== "Partial Paid"
         ) {
 
             throw new Error(
-                "Only Posted Account Payable can be voided."
+                "Only Posted or Partial Paid Account Payable can be voided."
             );
 
         }
@@ -6102,77 +6397,62 @@ async voidInvoice(id) {
 
         /*
         ==================================================
-        SHOW VOID CONFIRMATION
+        STORE PENDING ID
         ==================================================
         */
 
-        const confirmed =
-            await this.showVoidConfirmation();
-
-
-        if (!confirmed) {
-
-            return;
-
-        }
+        this.pendingVoidId =
+            id;
 
 
         /*
         ==================================================
-        GET VOID REASON
+        RESET VOID REASON
         ==================================================
         */
 
-        const reasonInput =
+        const reasonElement =
             document.getElementById(
                 "void-ap-reason"
             );
 
 
-        const reason =
-            reasonInput?.value?.trim()
-            || "";
+        if (reasonElement) {
 
-
-        if (!reason) {
-
-            throw new Error(
-                "Void reason is required."
-            );
+            reasonElement.value = "";
 
         }
 
 
         /*
         ==================================================
-        SERVICE
+        OPEN BOOTSTRAP MODAL
         ==================================================
         */
 
-        await this.service.voidInvoice(
-            id,
-            reason
-        );
+        const modalElement =
+            document.getElementById(
+                "ap-void-modal"
+            );
 
 
-        /*
-        ==================================================
-        RELOAD DATA
-        ==================================================
-        */
+        if (!modalElement) {
 
-        await this.loadData();
+            throw new Error(
+                "Void confirmation modal not found."
+            );
+
+        }
 
 
-        /*
-        ==================================================
-        SUCCESS
-        ==================================================
-        */
+        const modal =
+            bootstrap.Modal.getOrCreateInstance(
+                modalElement
+            );
 
-        this.showSuccess(
-            "Account Payable successfully voided."
-        );
+
+        modal.show();
+
 
     }
 
@@ -6183,10 +6463,11 @@ async voidInvoice(id) {
             error
         );
 
+
         this.showError(
             error?.message
             ||
-            "Failed to void Account Payable."
+            "Failed to open Void confirmation."
         );
 
     }

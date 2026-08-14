@@ -1193,3 +1193,272 @@
     </div>
 
 </div>
+<!-- ======================================================
+     CONFIRM POSTING ACCOUNT PAYABLE
+====================================================== -->
+
+<div
+    class="modal fade"
+    id="ap-post-confirm-modal"
+    tabindex="-1"
+    aria-hidden="true">
+
+    <div
+        class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <!-- HEADER -->
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+
+                    <i class="fa-solid fa-circle-check text-success me-2"></i>
+
+                    Confirm Posting Journal
+
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close">
+                </button>
+
+            </div>
+
+
+            <!-- BODY -->
+
+            <div class="modal-body text-center">
+
+                <div
+                    class="mb-3">
+
+                    <div
+                        class="d-inline-flex align-items-center justify-content-center rounded-circle bg-warning"
+                        style="width: 56px; height: 56px;">
+
+                        <i
+                            class="fa-solid fa-question text-white fs-3">
+                        </i>
+
+                    </div>
+
+                </div>
+
+
+                <p class="mb-2 text-secondary">
+
+                    Apakah Anda yakin ingin
+                    <strong>Posting Journal</strong> ini?
+
+                </p>
+
+
+                <div
+                    class="alert alert-warning text-start mb-0">
+
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i>
+
+                    Setelah Journal di-post,
+                    status akan berubah menjadi
+                    <strong>Posted</strong>.
+
+                </div>
+
+            </div>
+
+
+            <!-- FOOTER -->
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+
+                    <i class="fa-solid fa-xmark me-1"></i>
+
+                    Batal
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="btn btn-success"
+                    id="ap-confirm-post-btn">
+
+                    <i class="fa-solid fa-check me-1"></i>
+
+                    Ya, Posting
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+<!-- ======================================================
+     CONFIRM VOID ACCOUNT PAYABLE
+====================================================== -->
+
+<div
+    class="modal fade"
+    id="ap-void-confirm-modal"
+    tabindex="-1"
+    aria-hidden="true">
+
+    <div
+        class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <!-- HEADER -->
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+
+                    <i class="fa-solid fa-ban text-danger me-2"></i>
+
+                    Confirm Void Journal
+
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close">
+                </button>
+
+            </div>
+
+
+            <!-- BODY -->
+
+            <div class="modal-body">
+
+                <!-- QUESTION -->
+
+                <div class="text-center mb-3">
+
+                    <div
+                        class="d-inline-flex
+                               align-items-center
+                               justify-content-center
+                               rounded-circle
+                               bg-danger"
+                        style="
+                            width: 56px;
+                            height: 56px;
+                        ">
+
+                        <i
+                            class="fa-solid fa-question text-white fs-3">
+                        </i>
+
+                    </div>
+
+                </div>
+
+
+                <p
+                    class="text-center
+                           mb-3
+                           text-secondary">
+
+                    Apakah Anda yakin ingin
+                    <strong>VOID Journal</strong> ini?
+
+                </p>
+
+
+                <!-- WARNING -->
+
+                <div
+                    class="alert alert-danger">
+
+                    <i
+                        class="fa-solid fa-triangle-exclamation me-2">
+                    </i>
+
+                    Journal yang di-VOID tidak dapat
+                    dianggap sebagai transaksi Posted.
+
+                </div>
+
+
+                <!-- VOID REASON -->
+
+                <div class="mb-0">
+
+                    <label
+                        for="ap-void-reason"
+                        class="form-label fw-semibold">
+
+                        Alasan Void
+                        <span class="text-danger">*</span>
+
+                    </label>
+
+
+                    <textarea
+                        id="ap-void-reason"
+                        class="form-control"
+                        rows="3"
+                        placeholder="Masukkan alasan Void..."
+                        required>
+                    </textarea>
+
+                </div>
+
+            </div>
+
+
+            <!-- FOOTER -->
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+
+                    <i
+                        class="fa-solid fa-xmark me-1">
+                    </i>
+
+                    Batal
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="btn btn-danger"
+                    id="ap-confirm-void-btn">
+
+                    <i
+                        class="fa-solid fa-ban me-1">
+                    </i>
+
+                    Ya, Void
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
