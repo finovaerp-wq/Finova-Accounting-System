@@ -374,3 +374,108 @@ body {
     min-height:0;
 
 }
+/*
+==========================================================
+ACCOUNT PAYABLE
+FULL HEIGHT LAYOUT
+==========================================================
+*/
+
+.ap-page {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    width: 100%;
+
+    min-height: 0;
+
+    height: 100%;
+
+}
+
+
+/*
+==========================================================
+AP TABLE CARD
+==========================================================
+*/
+
+.ap-page .finova-table-card {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1;
+
+    min-height: 0;
+
+}
+
+
+/*
+==========================================================
+AP TABLE CARD BODY
+==========================================================
+*/
+
+.ap-page .finova-table-card > .finova-card-body {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1;
+
+    min-height: 0;
+
+}
+
+
+/*
+==========================================================
+AP TABLE CONTAINER
+==========================================================
+*/
+
+.ap-page .finova-table-container {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1;
+
+    min-height: 0;
+
+}
+
+
+/*
+==========================================================
+AP TABLE
+==========================================================
+*/
+
+.ap-page .table-responsive {
+
+    flex: 1;
+
+    min-height: 0;
+
+    overflow: auto;
+
+}
+
+
+.ap-page .finova-pagination-wrapper {
+
+    flex-shrink: 0;
+
+    width: 100%;
+
+}

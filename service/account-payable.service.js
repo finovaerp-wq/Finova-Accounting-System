@@ -1460,6 +1460,8 @@ async delete(id) {
 
         }
 
+        
+
 
         /*
         ==================================================
@@ -1628,6 +1630,356 @@ async delete(id) {
 
         console.error(
             "AccountPayableService.delete:",
+            error
+        );
+
+        throw error;
+
+    }
+
+}
+/*
+======================================================
+VOID ACCOUNT PAYABLE
+======================================================
+*/
+
+async voidInvoice(
+    id,
+    reason
+) {
+
+    try {
+
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
+
+        if (!id) {
+
+            throw new Error(
+                "Account Payable ID is required."
+            );
+
+        }
+
+
+        if (
+            !reason ||
+            !reason.trim()
+        ) {
+
+            throw new Error(
+                "Void reason is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        GET INVOICE
+        ==================================================
+        */
+
+        const {
+            data: invoice,
+            error: findError
+        } = await supabase
+
+            .from(this.table)
+
+            .select(`
+                id,
+                invoice_no,
+                status
+            `)
+
+            .eq(
+                "id",
+                id
+            )
+
+            .single();
+
+
+        if (findError) {
+
+            throw findError;
+
+        }
+
+
+        if (!invoice) {
+
+            throw new Error(
+                "Account Payable not found."
+            );
+
+        }
+        console.log(
+    "AP VOID BEFORE UPDATE:",
+    {
+        id: invoice?.id,
+        invoice_no: invoice?.invoice_no,
+        status: invoice?.status,
+        total_amount: invoice?.total_amount,
+        outstanding_amount:
+            invoice?.outstanding_amount
+    }
+);
+
+        /*
+        ==================================================
+        ONLY POSTED CAN BE VOIDED
+        ==================================================
+        */
+
+        if (
+            invoice.status !==
+            this.STATUS.POSTED
+        ) {
+
+            throw new Error(
+                "Only Posted Account Payable can be voided."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        UPDATE STATUS
+        ==================================================
+        */
+
+        const {
+            data,
+            error: updateError
+        } = await supabase
+
+            .from(this.table)
+
+            .update({
+
+                status:
+                    this.STATUS.VOID
+
+            })
+
+            .eq(
+                "id",
+                id
+            )
+
+            .select()
+
+            .single();
+
+
+        if (updateError) {
+
+            throw updateError;
+
+        }
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
+
+        return data;
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountPayableService.voidInvoice:",
+            error
+        );
+
+        throw error;
+
+    }
+
+}
+/*
+======================================================
+POST ACCOUNT PAYABLE
+======================================================
+*/
+
+async postInvoice(id) {
+
+    try {
+
+        if (!id) {
+
+            throw new Error(
+                "Account Payable ID is required."
+            );
+
+        }
+
+
+        const {
+            data,
+            error
+        } = await supabase
+
+            .from(this.table)
+
+            .update({
+
+                status: "Posted"
+
+            })
+
+            .eq(
+                "id",
+                id
+            )
+
+            .select()
+
+            .single();
+
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        return data;
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountPayableService.postInvoice:",
+            error
+        );
+
+        throw error;
+
+    }
+
+}
+/*
+======================================================
+RECOVER ACCOUNT PAYABLE TOTALS
+======================================================
+*/
+
+async recoverTotals(id) {
+
+    try {
+
+        /*
+        ==============================================
+        VALIDATION
+        ==============================================
+        */
+
+        if (!id) {
+
+            throw new Error(
+                "Account Payable ID is required."
+            );
+
+        }
+
+
+        /*
+        ==============================================
+        GET DETAILS
+        ==============================================
+        */
+
+        const {
+            data: details,
+            error: detailError
+        } = await supabase
+
+            .from(this.detailTable)
+
+            .select(`
+                quantity,
+                unit_price,
+                tax_input_rate,
+                withholding_tax_rate
+            `)
+
+            .eq(
+                "account_payable_id",
+                id
+            );
+
+
+        if (detailError) {
+
+            throw detailError;
+
+        }
+
+
+        /*
+        ==============================================
+        VALIDATE DETAILS
+        ==============================================
+        */
+
+        if (
+            !Array.isArray(details)
+            ||
+            !details.length
+        ) {
+
+            throw new Error(
+                "No Account Payable detail found."
+            );
+
+        }
+
+
+        /*
+        ==============================================
+        CALCULATE TOTAL
+        ==============================================
+        */
+
+        const totals =
+            this.calculateTotals(
+                details
+            );
+
+
+        console.log(
+            "AP RECOVER TOTALS:",
+            {
+                id,
+                details,
+                totals
+            }
+        );
+
+
+        return totals;
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountPayableService.recoverTotals:",
             error
         );
 

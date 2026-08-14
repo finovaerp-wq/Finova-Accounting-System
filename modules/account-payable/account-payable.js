@@ -5137,6 +5137,153 @@ async saveEdit() {
         }
 
     }
+    /*
+======================================================
+POST ACCOUNT PAYABLE
+======================================================
+*/
+
+async postInvoice(id) {
+
+    try {
+
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
+
+        if (!id) {
+
+            throw new Error(
+                "Account Payable ID is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        FIND INVOICE
+        ==================================================
+        */
+
+        const invoice =
+            this.data.find(
+                item =>
+                    String(item.id) === String(id)
+            );
+
+
+        if (!invoice) {
+
+            throw new Error(
+                "Account Payable not found."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        CHECK CURRENT STATUS
+        ==================================================
+        */
+
+        const currentStatus =
+            String(
+                invoice.status || "Draft"
+            )
+            .trim();
+
+
+       /*
+==================================================
+CHECK CURRENT STATUS
+Draft / Void CAN BE POSTED
+==================================================
+*/
+
+if (
+    currentStatus !== "Draft"
+    &&
+    currentStatus !== "Void"
+) {
+
+    throw new Error(
+        "Only Draft or Void Account Payable can be posted."
+    );
+
+}
+
+
+        /*
+        ==================================================
+        CONFIRM POST
+        ==================================================
+        */
+
+        const confirmed =
+            confirm(
+                "Are you sure you want to post this Account Payable?"
+            );
+
+
+        if (!confirmed) {
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        UPDATE STATUS
+        ==================================================
+        */
+
+       await this.service.postInvoice(
+    id
+);
+
+
+        /*
+        ==================================================
+        RELOAD DATA
+        ==================================================
+        */
+
+        await this.loadData();
+
+
+        /*
+        ==================================================
+        SUCCESS
+        ==================================================
+        */
+
+        this.showSuccess(
+            "Account Payable successfully posted."
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountPayable.postInvoice:",
+            error
+        );
+
+        this.showError(
+            error.message
+            || "Failed to post Account Payable."
+        );
+
+    }
+
+}
+
         /*
     ======================================================
     VIEW
@@ -5244,21 +5391,23 @@ async editInvoice(id) {
 
 
         /*
-        ==================================================
-        CHECK STATUS
-        ==================================================
-        */
+==================================================
+CHECK CURRENT STATUS
+Draft / Void CAN BE EDITED
+==================================================
+*/
 
-        if (
-            header.status !==
-            this.service.STATUS.DRAFT
-        ) {
+if (
+    currentStatus !== "Draft"
+    &&
+    currentStatus !== "Void"
+) {
 
-            throw new Error(
-                "Only Draft Account Payable can be edited."
-            );
+    throw new Error(
+        "Only Draft or Void Account Payable can be edited."
+    );
 
-        }
+}
 
 
         /*
@@ -5870,21 +6019,459 @@ async deleteInvoice(id) {
     }
 
 
-    /*
-    ======================================================
-    VOID
-    ======================================================
-    */
+   /*
+======================================================
+VOID ACCOUNT PAYABLE
+======================================================
+*/
 
-    async voidInvoice(id) {
+async voidInvoice(id) {
 
+    try {
+
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
+
+        if (!id) {
+
+            throw new Error(
+                "Account Payable ID is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        FIND INVOICE
+        ==================================================
+        */
+
+        const invoice =
+            this.data.find(
+                item =>
+                    String(item.id) === String(id)
+            );
+
+
+        if (!invoice) {
+
+            throw new Error(
+                "Account Payable not found."
+            );
+
+        }
         console.log(
-            "Void Account Payable:",
-            id
+    "AP VOID BEFORE UPDATE:",
+    {
+        invoice_no: invoice?.invoice_no,
+        status: invoice?.status,
+        total_amount: invoice?.total_amount,
+        outstanding_amount: invoice?.outstanding_amount,
+        paid_amount: invoice?.paid_amount
+    }
+);
+
+
+        /*
+        ==================================================
+        ONLY POSTED CAN BE VOIDED
+        ==================================================
+        */
+
+        const technicalStatus =
+            String(
+                invoice.status || "Draft"
+            )
+            .trim();
+
+
+        if (
+            technicalStatus !== "Posted"
+        ) {
+
+            throw new Error(
+                "Only Posted Account Payable can be voided."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        SHOW VOID CONFIRMATION
+        ==================================================
+        */
+
+        const confirmed =
+            await this.showVoidConfirmation();
+
+
+        if (!confirmed) {
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        GET VOID REASON
+        ==================================================
+        */
+
+        const reasonInput =
+            document.getElementById(
+                "void-ap-reason"
+            );
+
+
+        const reason =
+            reasonInput?.value?.trim()
+            || "";
+
+
+        if (!reason) {
+
+            throw new Error(
+                "Void reason is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        SERVICE
+        ==================================================
+        */
+
+        await this.service.voidInvoice(
+            id,
+            reason
+        );
+
+
+        /*
+        ==================================================
+        RELOAD DATA
+        ==================================================
+        */
+
+        await this.loadData();
+
+
+        /*
+        ==================================================
+        SUCCESS
+        ==================================================
+        */
+
+        this.showSuccess(
+            "Account Payable successfully voided."
         );
 
     }
 
+    catch (error) {
+
+        console.error(
+            "AccountPayable.voidInvoice:",
+            error
+        );
+
+        this.showError(
+            error?.message
+            ||
+            "Failed to void Account Payable."
+        );
+
+    }
+
+}
+/*
+======================================================
+SHOW VOID CONFIRMATION
+======================================================
+*/
+
+showVoidConfirmation() {
+
+    return new Promise(
+        resolve => {
+
+            /*
+            ==================================================
+            REMOVE EXISTING MODAL
+            ==================================================
+            */
+
+            const existingModal =
+                document.getElementById(
+                    "ap-void-modal"
+                );
+
+
+            if (existingModal) {
+
+                existingModal.remove();
+
+            }
+
+
+            /*
+            ==================================================
+            MODAL HTML
+            ==================================================
+            */
+
+            const modalHTML = `
+
+                <div
+                    class="modal fade"
+                    id="ap-void-modal"
+                    tabindex="-1"
+                    aria-hidden="true">
+
+                    <div
+                        class="modal-dialog modal-dialog-centered">
+
+                        <div
+                            class="modal-content shadow">
+
+                            <!-- HEADER -->
+
+                            <div class="modal-header">
+
+                                <h5
+                                    class="modal-title text-danger">
+
+                                    <i
+                                        class="fa-solid fa-ban me-2">
+                                    </i>
+
+                                    Void Account Payable
+
+                                </h5>
+
+                                <button
+                                    type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="modal">
+                                </button>
+
+                            </div>
+
+
+                            <!-- BODY -->
+
+                            <div class="modal-body">
+
+                                <div
+                                    class="alert alert-warning">
+
+                                    <i
+                                        class="fa-solid fa-triangle-exclamation me-2">
+                                    </i>
+
+                                    This Account Payable will be
+                                    marked as <strong>Void</strong>.
+
+                                </div>
+
+
+                                <label
+                                    for="void-ap-reason"
+                                    class="form-label fw-semibold">
+
+                                    Void Reason
+                                    <span class="text-danger">
+                                        *
+                                    </span>
+
+                                </label>
+
+
+                                <textarea
+                                    id="void-ap-reason"
+                                    class="form-control"
+                                    rows="4"
+                                    placeholder="Enter the reason for void..."
+                                    required>
+                                </textarea>
+
+                            </div>
+
+
+                            <!-- FOOTER -->
+
+                            <div class="modal-footer">
+
+                                <button
+                                    type="button"
+                                    class="btn btn-secondary"
+                                    id="ap-void-cancel">
+
+                                    Cancel
+
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    class="btn btn-danger"
+                                    id="ap-void-confirm">
+
+                                    <i
+                                        class="fa-solid fa-ban me-1">
+                                    </i>
+
+                                    Void
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            `;
+
+
+            /*
+            ==================================================
+            APPEND
+            ==================================================
+            */
+
+            document.body.insertAdjacentHTML(
+                "beforeend",
+                modalHTML
+            );
+
+
+            /*
+            ==================================================
+            ELEMENTS
+            ==================================================
+            */
+
+            const modalElement =
+                document.getElementById(
+                    "ap-void-modal"
+                );
+
+
+            const modal =
+                new bootstrap.Modal(
+                    modalElement
+                );
+
+
+            const btnConfirm =
+                document.getElementById(
+                    "ap-void-confirm"
+                );
+
+
+            const btnCancel =
+                document.getElementById(
+                    "ap-void-cancel"
+                );
+
+
+            const reasonInput =
+                document.getElementById(
+                    "void-ap-reason"
+                );
+
+
+            /*
+            ==================================================
+            CONFIRM
+            ==================================================
+            */
+
+            btnConfirm.addEventListener(
+                "click",
+                () => {
+
+                    const reason =
+                        reasonInput.value.trim();
+
+
+                    if (!reason) {
+
+                        reasonInput.focus();
+
+                        return;
+
+                    }
+
+
+                    modal.hide();
+
+                    resolve(true);
+
+                }
+            );
+
+
+            /*
+            ==================================================
+            CANCEL
+            ==================================================
+            */
+
+            btnCancel.addEventListener(
+                "click",
+                () => {
+
+                    modal.hide();
+
+                    resolve(false);
+
+                }
+            );
+
+
+            /*
+            ==================================================
+            CLOSE
+            ==================================================
+            */
+
+            modalElement.addEventListener(
+                "hidden.bs.modal",
+                () => {
+
+                    modalElement.remove();
+
+                },
+                {
+                    once: true
+                }
+            );
+
+
+            /*
+            ==================================================
+            SHOW
+            ==================================================
+            */
+
+            modal.show();
+
+        }
+    );
+
+}
 
     /*
     ======================================================
@@ -6304,6 +6891,17 @@ createTableRow(invoice, number) {
     const vendorName =
         vendor?.bp_name
         || "-";
+    
+    console.log(
+    "AP ROW:",
+    invoice?.invoice_no,
+    "STATUS:",
+    invoice?.status,
+    "TOTAL:",
+    invoice?.total_amount,
+    "OUTSTANDING:",
+    invoice?.outstanding_amount
+);    
 
 
     /*
@@ -6333,34 +6931,83 @@ createTableRow(invoice, number) {
 
 
     /*
-    ==================================================
-    AMOUNT
-    ==================================================
-    */
+==================================================
+AMOUNT
+==================================================
+*/
 
-    const totalAmount =
-        this.formatCurrency(
-            invoice?.total_amount || 0
-        );
+const totalValue =
+    Number(
+        invoice?.total_amount
+        ?? invoice?.total
+        ?? 0
+    );
 
 
-    const outstandingAmount =
-        this.formatCurrency(
-            invoice?.outstanding_amount || 0
-        );
+const outstandingValue =
+    Number(
+        invoice?.outstanding_amount
+        ?? invoice?.outstanding
+        ?? totalValue
+    );
+
+
+const totalAmount =
+    this.formatCurrency(
+        totalValue
+    );
+
+
+const outstandingAmount =
+    this.formatCurrency(
+        outstandingValue
+    );
 
 
     /*
     ==================================================
-    STATUS
+    TECHNICAL DOCUMENT STATUS
+    Draft / Posted / Void
     ==================================================
     */
 
-    const status =
-        invoice?.status
-        || "Draft";
+    const technicalStatus =
+        String(
+            invoice?.status || "Draft"
+        )
+        .trim()
+        .toLowerCase();
 
 
+    /*
+    ==================================================
+    PAYMENT STATUS
+    Unpaid / Partial Paid / Less Paid / Paid
+    ==================================================
+    */
+
+    const paymentStatus =
+        this.getPaymentStatus(invoice);
+
+
+    /*
+==================================================
+ROW CLASS
+==================================================
+*/
+
+let rowClass = "ap-row-posted";
+
+
+if (
+    technicalStatus === "draft"
+    ||
+    technicalStatus === "void"
+) {
+
+    rowClass = "ap-row-draft";
+
+}
     /*
     ==================================================
     RETURN ROW
@@ -6369,7 +7016,7 @@ createTableRow(invoice, number) {
 
     return `
 
-        <tr>
+        <tr class="${rowClass}">
 
             <!-- ======================================
                  NO
@@ -6471,7 +7118,7 @@ createTableRow(invoice, number) {
 
             <td class="text-center">
 
-                ${this.renderStatus(status)}
+                ${this.renderStatus(paymentStatus)}
 
             </td>
 
@@ -6493,7 +7140,93 @@ createTableRow(invoice, number) {
 }
 /*
 ======================================================
-RENDER STATUS
+GET PAYMENT STATUS
+======================================================
+*/
+
+getPaymentStatus(invoice) {
+
+    const totalAmount =
+        Number(
+            invoice?.total_amount || 0
+        );
+
+
+    const outstandingAmount =
+        Number(
+            invoice?.outstanding_amount || 0
+        );
+
+
+    /*
+    ==================================================
+    VALIDATION
+    ==================================================
+    */
+
+    if (totalAmount <= 0) {
+
+        return "Unpaid";
+
+    }
+
+
+    /*
+    ==================================================
+    LESS PAID
+    Outstanding becomes negative
+    ==================================================
+    */
+
+    if (outstandingAmount < 0) {
+
+        return "Less Paid";
+
+    }
+
+
+    /*
+    ==================================================
+    PAID
+    ==================================================
+    */
+
+    if (
+        outstandingAmount === 0
+    ) {
+
+        return "Paid";
+
+    }
+
+
+    /*
+    ==================================================
+    UNPAID
+    ==================================================
+    */
+
+    if (
+        outstandingAmount >= totalAmount
+    ) {
+
+        return "Unpaid";
+
+    }
+
+
+    /*
+    ==================================================
+    PARTIAL PAID
+    ==================================================
+    */
+
+    return "Partial Paid";
+
+}
+/*
+======================================================
+RENDER PAYMENT STATUS
 ======================================================
 */
 
@@ -6501,7 +7234,7 @@ renderStatus(status) {
 
     const normalizedStatus =
         String(
-            status || "Draft"
+            status || "Unpaid"
         )
         .trim()
         .toLowerCase();
@@ -6509,14 +7242,27 @@ renderStatus(status) {
 
     switch (normalizedStatus) {
 
-        case "posted":
+
+        /*
+        ==============================================
+        UNPAID
+        ==============================================
+        */
+
+        case "unpaid":
 
             return `
-                <span class="badge bg-success">
-                    Posted
+                <span class="badge bg-danger">
+                    Unpaid
                 </span>
             `;
 
+
+        /*
+        ==============================================
+        PARTIAL PAID
+        ==============================================
+        */
 
         case "partial paid":
 
@@ -6527,427 +7273,433 @@ renderStatus(status) {
             `;
 
 
+        /*
+        ==============================================
+        LESS PAID
+        ==============================================
+        */
+
+        case "less paid":
+
+            return `
+                <span class="badge bg-info text-dark">
+                    Less Paid
+                </span>
+            `;
+
+
+        /*
+        ==============================================
+        PAID
+        ==============================================
+        */
+
         case "paid":
 
             return `
-                <span class="badge bg-primary">
+                <span class="badge bg-success">
                     Paid
                 </span>
             `;
 
 
-        case "void":
-
-            return `
-                <span class="badge bg-danger">
-                    Void
-                </span>
-            `;
-
-
-        case "draft":
+        /*
+        ==============================================
+        DEFAULT
+        ==============================================
+        */
 
         default:
 
             return `
-                <span class="badge bg-secondary">
-                    Draft
+                <span class="badge bg-danger">
+                    Unpaid
                 </span>
             `;
 
     }
 
 }
+       /*
+======================================================
+RENDER ACTION BUTTONS
+======================================================
+*/
 
-        /*
-    ======================================================
-    RENDER ACTION BUTTONS
-    ======================================================
+renderActionButtons(invoice) {
+
+    const id =
+        invoice?.id;
+
+
+    /*
+    ==================================================
+    TECHNICAL DOCUMENT STATUS
+    Draft / Posted / Void
+    ==================================================
     */
 
-    renderActionButtons(invoice) {
+    const technicalStatus =
+        String(
+            invoice?.status || "Draft"
+        )
+        .trim();
 
-        const id =
-            invoice?.id;
 
+    /*
+    ==================================================
+    PAYMENT STATUS
+    Unpaid / Partial Paid / Less Paid / Paid
+    ==================================================
+    */
 
-        const status =
-            invoice?.status
-            || "Draft";
+    const paymentStatus =
+        this.getPaymentStatus(invoice);
 
 
-        if (!id) {
-
-            return "";
-
-        }
-
-
-        /*
-        ==================================================
-        DRAFT
-        ==================================================
-        */
-
-        if (
-            status === "Draft"
-        ) {
-
-            return `
-
-                <div
-                    class="btn-group btn-group-sm"
-                    role="group">
-
-                    <!-- EDIT -->
-
-                    <button
-                        type="button"
-                        class="btn btn-outline-primary"
-                        title="Edit"
-                        data-action="edit"
-                        data-id="${id}">
-
-                        <i class="fa-solid fa-pen"></i>
-
-                    </button>
-
-
-                    <!-- DELETE -->
-
-                    <button
-                        type="button"
-                        class="btn btn-outline-danger"
-                        title="Delete"
-                        data-action="delete"
-                        data-id="${id}">
-
-                        <i class="fa-solid fa-trash"></i>
-
-                    </button>
-
-
-                    <!-- POST -->
-
-                    <button
-                        type="button"
-                        class="btn btn-outline-success"
-                        title="Post"
-                        data-action="post"
-                        data-id="${id}">
-
-                        <i class="fa-solid fa-upload"></i>
-
-                    </button>
-
-
-                    <!-- DUPLICATE -->
-
-                    <button
-                        type="button"
-                        class="btn btn-outline-secondary"
-                        title="Duplicate"
-                        data-action="duplicate"
-                        data-id="${id}">
-
-                        <i class="fa-regular fa-copy"></i>
-
-                    </button>
-
-
-                    <!-- VIEW -->
-
-                    <button
-                        type="button"
-                        class="btn btn-outline-info"
-                        title="View"
-                        data-action="view"
-                        data-id="${id}">
-
-                        <i class="fa-regular fa-file-lines"></i>
-
-                    </button>
-
-                </div>
-
-            `;
-
-        }
-
-
-        /*
-        ==================================================
-        POSTED
-        ==================================================
-        */
-
-        if (
-            status === "Posted"
-        ) {
-
-            return `
-
-                <div
-                    class="btn-group btn-group-sm"
-                    role="group">
-
-                    <!-- VIEW -->
-
-                    <button
-                        type="button"
-                        class="btn btn-outline-secondary"
-                        title="View"
-                        data-action="view"
-                        data-id="${id}">
-
-                        <i class="fa-regular fa-eye"></i>
-
-                    </button>
-
-
-                    <!-- PAYMENT -->
-
-                    <button
-                        type="button"
-                        class="btn btn-outline-info"
-                        title="Create Payment"
-                        data-action="payment"
-                        data-id="${id}">
-
-                        <i class="fa-solid fa-money-bill-wave"></i>
-
-                    </button>
-
-
-                    <!-- VOID -->
-
-                    <button
-                        type="button"
-                        class="btn btn-outline-danger"
-                        title="Void"
-                        data-action="void"
-                        data-id="${id}">
-
-                        <i class="fa-solid fa-ban"></i>
-
-                    </button>
-
-
-                    <!-- DUPLICATE -->
-
-                    <button
-                        type="button"
-                        class="btn btn-outline-secondary"
-                        title="Duplicate"
-                        data-action="duplicate"
-                        data-id="${id}">
-
-                        <i class="fa-regular fa-copy"></i>
-
-                    </button>
-
-                </div>
-
-            `;
-
-        }
-
-
-        /*
-        ==================================================
-        PARTIAL PAID
-        ==================================================
-        */
-
-        if (
-            status === "Partial Paid"
-        ) {
-
-            return `
-
-                <div
-                    class="btn-group btn-group-sm"
-                    role="group">
-
-                    <!-- VIEW -->
-
-                    <button
-                        type="button"
-                        class="btn btn-outline-secondary"
-                        title="View"
-                        data-action="view"
-                        data-id="${id}">
-
-                        <i class="fa-regular fa-eye"></i>
-
-                    </button>
-
-
-                    <!-- PAYMENT -->
-
-                    <button
-                        type="button"
-                        class="btn btn-outline-info"
-                        title="Create Payment"
-                        data-action="payment"
-                        data-id="${id}">
-
-                        <i class="fa-solid fa-money-bill-wave"></i>
-
-                    </button>
-
-
-                    <!-- VOID -->
-
-                    <button
-                        type="button"
-                        class="btn btn-outline-danger"
-                        title="Void"
-                        data-action="void"
-                        data-id="${id}">
-
-                        <i class="fa-solid fa-ban"></i>
-
-                    </button>
-
-
-                    <!-- DUPLICATE -->
-
-                    <button
-                        type="button"
-                        class="btn btn-outline-secondary"
-                        title="Duplicate"
-                        data-action="duplicate"
-                        data-id="${id}">
-
-                        <i class="fa-regular fa-copy"></i>
-
-                    </button>
-
-                </div>
-
-            `;
-
-        }
-
-
-        /*
-        ==================================================
-        PAID
-        ==================================================
-        */
-
-        if (
-            status === "Paid"
-        ) {
-
-            return `
-
-                <div
-                    class="btn-group btn-group-sm"
-                    role="group">
-
-                    <!-- VIEW -->
-
-                    <button
-                        type="button"
-                        class="btn btn-outline-secondary"
-                        title="View"
-                        data-action="view"
-                        data-id="${id}">
-
-                        <i class="fa-regular fa-eye"></i>
-
-                    </button>
-
-
-                    <!-- PAYMENT HISTORY -->
-
-                    <button
-                        type="button"
-                        class="btn btn-outline-info"
-                        title="Payment History"
-                        data-action="payment-history"
-                        data-id="${id}">
-
-                        <i class="fa-solid fa-file-invoice-dollar"></i>
-
-                    </button>
-
-
-                    <!-- DUPLICATE -->
-
-                    <button
-                        type="button"
-                        class="btn btn-outline-secondary"
-                        title="Duplicate"
-                        data-action="duplicate"
-                        data-id="${id}">
-
-                        <i class="fa-regular fa-copy"></i>
-
-                    </button>
-
-                </div>
-
-            `;
-
-        }
-
-
-        /*
-        ==================================================
-        VOID
-        ==================================================
-        */
-
-        if (
-            status === "Void"
-        ) {
-
-            return `
-
-                <div
-                    class="btn-group btn-group-sm"
-                    role="group">
-
-                    <!-- VIEW -->
-
-                    <button
-                        type="button"
-                        class="btn btn-outline-secondary"
-                        title="View"
-                        data-action="view"
-                        data-id="${id}">
-
-                        <i class="fa-regular fa-eye"></i>
-
-                    </button>
-
-
-                    <!-- DUPLICATE -->
-
-                    <button
-                        type="button"
-                        class="btn btn-outline-secondary"
-                        title="Duplicate"
-                        data-action="duplicate"
-                        data-id="${id}">
-
-                        <i class="fa-regular fa-copy"></i>
-
-                    </button>
-
-                </div>
-
-            `;
-
-        }
-
+    if (!id) {
 
         return "";
 
     }
+
+
+   /*
+==================================================
+DRAFT / VOID
+SAME ACTION AND ACTIVITY
+==================================================
+*/
+
+if (
+    technicalStatus === "Draft"
+    ||
+    technicalStatus === "Void"
+) {
+
+    return `
+
+        <div
+            class="btn-group btn-group-sm"
+            role="group">
+
+            <!-- EDIT -->
+
+            <button
+                type="button"
+                class="btn btn-outline-primary"
+                title="Edit"
+                data-action="edit"
+                data-id="${id}">
+
+                <i class="fa-solid fa-pen"></i>
+
+            </button>
+
+
+            <!-- DELETE -->
+
+            <button
+                type="button"
+                class="btn btn-outline-danger"
+                title="Delete"
+                data-action="delete"
+                data-id="${id}">
+
+                <i class="fa-solid fa-trash"></i>
+
+            </button>
+
+
+            <!-- POST -->
+
+            <button
+                type="button"
+                class="btn btn-outline-success"
+                title="Post"
+                data-action="post"
+                data-id="${id}">
+
+                <i class="fa-solid fa-upload"></i>
+
+            </button>
+
+
+            <!-- DUPLICATE -->
+
+            <button
+                type="button"
+                class="btn btn-outline-secondary"
+                title="Duplicate"
+                data-action="duplicate"
+                data-id="${id}">
+
+                <i class="fa-regular fa-copy"></i>
+
+            </button>
+
+
+            <!-- VIEW -->
+
+            <button
+                type="button"
+                class="btn btn-outline-info"
+                title="View"
+                data-action="view"
+                data-id="${id}">
+
+                <i class="fa-regular fa-file-lines"></i>
+
+            </button>
+
+        </div>
+
+    `;
+
+}
+
+    /*
+    ==================================================
+    POSTED
+    ==================================================
+    */
+
+    if (
+        technicalStatus === "Posted"
+    ) {
+
+
+        /*
+        ==============================================
+        PAYMENT BUTTON
+        ==============================================
+        */
+
+        let paymentButton = "";
+
+
+        /*
+        ----------------------------------------------
+        UNPAID
+        PARTIAL PAID
+        LESS PAID
+        ----------------------------------------------
+        */
+
+        if (
+            paymentStatus === "Unpaid"
+            ||
+            paymentStatus === "Partial Paid"
+            ||
+            paymentStatus === "Less Paid"
+        ) {
+
+            paymentButton = `
+
+                <button
+                    type="button"
+                    class="btn btn-outline-info"
+                    title="Create Payment"
+                    data-action="payment"
+                    data-id="${id}">
+
+                    <i class="fa-solid fa-money-bill-wave"></i>
+
+                </button>
+
+            `;
+
+        }
+
+
+        /*
+        ----------------------------------------------
+        PAID
+        ----------------------------------------------
+        */
+
+        else if (
+            paymentStatus === "Paid"
+        ) {
+
+            paymentButton = `
+
+                <button
+                    type="button"
+                    class="btn btn-outline-info"
+                    title="Payment History"
+                    data-action="payment-history"
+                    data-id="${id}">
+
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+
+                </button>
+
+            `;
+
+        }
+
+
+        return `
+
+            <div
+                class="btn-group btn-group-sm"
+                role="group">
+
+                <!-- VIEW -->
+
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    title="View"
+                    data-action="view"
+                    data-id="${id}">
+
+                    <i class="fa-regular fa-eye"></i>
+
+                </button>
+
+
+                <!-- PAYMENT / PAYMENT HISTORY -->
+
+                ${paymentButton}
+
+
+                <!-- VOID -->
+
+                <button
+                    type="button"
+                    class="btn btn-outline-danger"
+                    title="Void"
+                    data-action="void"
+                    data-id="${id}">
+
+                    <i class="fa-solid fa-ban"></i>
+
+                </button>
+
+
+                <!-- DUPLICATE -->
+
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    title="Duplicate"
+                    data-action="duplicate"
+                    data-id="${id}">
+
+                    <i class="fa-regular fa-copy"></i>
+
+                </button>
+
+            </div>
+
+        `;
+
+    }
+
+
+    /*
+==================================================
+VOID
+SAME ACTION AS DRAFT
+==================================================
+*/
+
+if (
+    technicalStatus === "Void"
+) {
+
+    return `
+
+        <div
+            class="btn-group btn-group-sm"
+            role="group">
+
+            <!-- EDIT -->
+
+            <button
+                type="button"
+                class="btn btn-outline-primary"
+                title="Edit"
+                data-action="edit"
+                data-id="${id}">
+
+                <i class="fa-solid fa-pen"></i>
+
+            </button>
+
+
+            <!-- DELETE -->
+
+            <button
+                type="button"
+                class="btn btn-outline-danger"
+                title="Delete"
+                data-action="delete"
+                data-id="${id}">
+
+                <i class="fa-solid fa-trash"></i>
+
+            </button>
+
+
+            <!-- POST -->
+
+            <button
+                type="button"
+                class="btn btn-outline-success"
+                title="Post"
+                data-action="post"
+                data-id="${id}">
+
+                <i class="fa-solid fa-upload"></i>
+
+            </button>
+
+
+            <!-- DUPLICATE -->
+
+            <button
+                type="button"
+                class="btn btn-outline-secondary"
+                title="Duplicate"
+                data-action="duplicate"
+                data-id="${id}">
+
+                <i class="fa-regular fa-copy"></i>
+
+            </button>
+
+
+            <!-- VIEW -->
+
+            <button
+                type="button"
+                class="btn btn-outline-info"
+                title="View"
+                data-action="view"
+                data-id="${id}">
+
+                <i class="fa-regular fa-file-lines"></i>
+
+            </button>
+
+        </div>
+
+    `;
+
+}
+
+    /*
+    ==================================================
+    DEFAULT
+    ==================================================
+    */
+
+    return "";
+
+}
         /*
     ======================================================
     FORMAT CURRENCY
