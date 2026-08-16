@@ -1262,71 +1262,162 @@ SHOW DELETE JOURNAL MODAL
 
 showDeleteJournalModal(id) {
 
-    /*
-    ======================================================
-    FIND JOURNAL
-    ======================================================
-    */
+    try {
 
-    const journal =
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
 
-        this.journals.find(
+        if (!id) {
 
-            x => String(x.id) === String(id)
+            throw new Error(
+                "Journal ID is required."
+            );
 
-        );
+        }
 
-    if (!journal) {
 
-        return;
+        /*
+        ==================================================
+        FIND JOURNAL
+        ==================================================
+        */
+
+        const journal =
+            this.journals.find(
+                x =>
+                    String(x.id)
+                    ===
+                    String(id)
+            );
+
+
+        if (!journal) {
+
+            throw new Error(
+                "Journal not found."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        FILL JOURNAL INFORMATION
+        ==================================================
+        */
+
+        const journalNo =
+            document.getElementById(
+                "delete-journal-no"
+            );
+
+        if (journalNo) {
+
+            journalNo.textContent =
+                journal.journal_no
+                || "-";
+
+        }
+
+
+        const accountingDate =
+            document.getElementById(
+                "delete-accounting-date"
+            );
+
+        if (accountingDate) {
+
+            accountingDate.textContent =
+                journal.journal_date
+                || "-";
+
+        }
+
+
+        const description =
+            document.getElementById(
+                "delete-description"
+            );
+
+        if (description) {
+
+            description.textContent =
+                journal.description
+                || "-";
+
+        }
+
+
+        /*
+        ==================================================
+        SAVE DELETE ID
+        ==================================================
+        */
+
+        this.selectedDeleteJournalId =
+            id;
+
+
+        /*
+        ==================================================
+        GET MODAL
+        ==================================================
+        */
+
+        const modalElement =
+            document.getElementById(
+                "confirmDeleteJournalModal"
+            );
+
+
+        if (!modalElement) {
+
+            throw new Error(
+                "Confirm Delete Journal Modal not found."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        INITIALIZE / REUSE BOOTSTRAP MODAL
+        ==================================================
+        */
+
+        this.deleteJournalModal =
+            bootstrap.Modal.getOrCreateInstance(
+                modalElement
+            );
+
+
+        /*
+        ==================================================
+        SHOW MODAL
+        ==================================================
+        */
+
+        this.deleteJournalModal.show();
 
     }
 
-    /*
-    ======================================================
-    FILL INFORMATION
-    ======================================================
-    */
+    catch (error) {
 
-    document.getElementById(
+        console.error(
+            "GeneralJournal.showDeleteJournalModal:",
+            error
+        );
 
-        "delete-journal-no"
+        alert(
+            error?.message
+            ||
+            "Failed to open delete confirmation."
+        );
 
-    ).textContent =
-
-        journal.journal_no || "-";
-
-    document.getElementById(
-
-    "delete-accounting-date"
-
-    ).textContent =
-
-    journal.journal_date || "-";
-
-    document.getElementById(
-
-        "delete-description"
-
-    ).textContent =
-
-        journal.description || "-";
-
-    /*
-    ======================================================
-    SAVE ID
-    ======================================================
-    */
-
-    this.selectedDeleteJournalId = id;
-
-    /*
-    ======================================================
-    SHOW MODAL
-    ======================================================
-    */
-
-    this.deleteJournalModal.show();
+    }
 
 }
 /*
@@ -4162,12 +4253,6 @@ DELETE JOURNAL
 
 async deleteJournal(id) {
 
-    /*
-    ======================================================
-    VALIDATION
-    ======================================================
-    */
-
     if (!id) {
 
         return;
@@ -4176,38 +4261,41 @@ async deleteJournal(id) {
 
     try {
 
-        /*
-        ======================================================
-        DELETE JOURNAL
-        ======================================================
-        */
-
-        await this.service.delete(id);
-
-        /*
-        ======================================================
-        CLOSE DELETE MODAL
-        ======================================================
-        */
-
-        this.deleteJournalModal.hide();
-
-        /*
-        ======================================================
-        SUCCESS
-        ======================================================
-        */
-
-        alert(
-
-            "Journal deleted successfully."
-
+        await this.service.delete(
+            id
         );
 
+
         /*
-        ======================================================
-        RELOAD DATA
-        ======================================================
+        ==================================================
+        CLOSE DELETE MODAL
+        ==================================================
+        */
+
+        if (
+            this.deleteJournalModal
+        ) {
+
+            this.deleteJournalModal.hide();
+
+        }
+
+
+        /*
+        ==================================================
+        SUCCESS BOOTSTRAP
+        ==================================================
+        */
+
+        this.showSuccess(
+            "Journal deleted successfully."
+        );
+
+
+        /*
+        ==================================================
+        RELOAD GL JOURNAL
+        ==================================================
         */
 
         await this.loadData();
@@ -4217,22 +4305,53 @@ async deleteJournal(id) {
     catch (error) {
 
         console.error(
-
-            "DELETE JOURNAL ERROR :",
-
+            "DELETE JOURNAL ERROR:",
             error
-
         );
 
-        alert(
-
-            error.message ||
-
-            "Failed to delete journal."
-
+        this.showError(
+            error.message
+            || "Failed to delete journal."
         );
 
     }
+
+}
+showSuccess(message) {
+
+    const modalElement =
+        document.getElementById(
+            "finovaSuccessModal"
+        );
+
+    if (!modalElement) {
+
+        console.log(
+            "SUCCESS:",
+            message
+        );
+
+        return;
+
+    }
+
+    const messageElement =
+        modalElement.querySelector(
+            ".finova-success-message"
+        );
+
+    if (messageElement) {
+
+        messageElement.textContent =
+            message;
+
+    }
+
+    bootstrap.Modal
+        .getOrCreateInstance(
+            modalElement
+        )
+        .show();
 
 }
 /*

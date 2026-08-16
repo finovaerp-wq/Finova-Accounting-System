@@ -39,29 +39,24 @@ export class AccountPayableService {
 
 
     /*
-    ======================================================
-    STATUS
-    ======================================================
-    */
+======================================================
+STATUS
+======================================================
+*/
 
-    get STATUS() {
+get STATUS() {
 
-        return {
+    return {
 
-            DRAFT: "Draft",
+        DRAFT:
+            "Draft",
 
-            POSTED: "Posted",
+        COMPLETE:
+            "Complete"
 
-            PARTIAL_PAID: "Partial Paid",
+    };
 
-            PAID: "Paid",
-
-            VOID: "Void"
-
-        };
-
-    }
-
+}
 
     /*
     ======================================================
@@ -264,6 +259,213 @@ export class AccountPayableService {
         }
 
     }
+   /*
+======================================================
+COMPLETE ACCOUNT PAYABLE
+Draft → Complete
+======================================================
+*/
+
+async completeInvoice(id) {
+
+    try {
+
+        if (!id) {
+
+            throw new Error(
+                "Account Payable ID is required."
+            );
+
+        }
+
+
+        const {
+            data,
+            error
+        } = await supabase
+
+            .from(
+                this.table
+            )
+
+            .update({
+
+                status:
+                    "Complete"
+
+            })
+
+            .eq(
+                "id",
+                id
+            )
+
+            .eq(
+                "status",
+                "Draft"
+            )
+
+            .select();
+
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        if (
+            !Array.isArray(data)
+            ||
+            data.length === 0
+        ) {
+
+            throw new Error(
+                "Account Payable could not be completed. The document is no longer in Draft status."
+            );
+
+        }
+
+
+        return data[0];
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountPayableService.completeInvoice:",
+            error
+        );
+
+        throw error;
+
+    }
+
+}
+/*
+======================================================
+LINK GL JOURNAL
+======================================================
+*/
+
+async linkGLJournal(
+    apId,
+    journalId
+) {
+
+    try {
+
+        console.log(
+            "========== LINK GL JOURNAL =========="
+        );
+
+        console.log(
+            "AP ID      :",
+            apId
+        );
+
+        console.log(
+            "JOURNAL ID :",
+            journalId
+        );
+
+        if (!apId) {
+
+            throw new Error(
+                "Account Payable ID is required."
+            );
+
+        }
+
+        if (!journalId) {
+
+            throw new Error(
+                "GL Journal ID is required."
+            );
+
+        }
+
+        /*
+        ==================================================
+        UPDATE AP
+        ==================================================
+        */
+
+        const {
+            data,
+            error
+        } = await supabase
+
+            .from(
+                this.table
+            )
+
+            .update({
+
+                gl_journal_id:
+                    journalId
+
+            })
+
+            .eq(
+                "id",
+                apId
+            )
+
+            .select()
+            .single();
+
+
+        console.log(
+            "LINK GL RESULT:",
+            data
+        );
+
+        console.log(
+            "LINK GL ERROR:",
+            error
+        );
+
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        if (!data) {
+
+            throw new Error(
+                "Failed to link GL Journal to Account Payable."
+            );
+
+        }
+
+
+        console.log(
+            "========== LINK GL SUCCESS =========="
+        );
+
+
+        return data;
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountPayableService.linkGLJournal:",
+            error
+        );
+
+        throw error;
+
+    }
+
+}
 
 
     /*
@@ -1811,11 +2013,14 @@ async voidInvoice(
 }
 /*
 ======================================================
-POST ACCOUNT PAYABLE
+LINK GL JOURNAL
 ======================================================
 */
 
-async postInvoice(id) {
+async linkGLJournal(
+    id,
+    journalId
+) {
 
     try {
 
@@ -1827,17 +2032,28 @@ async postInvoice(id) {
 
         }
 
+        if (!journalId) {
+
+            throw new Error(
+                "GL Journal ID is required."
+            );
+
+        }
+
 
         const {
             data,
             error
         } = await supabase
 
-            .from(this.table)
+            .from(
+                this.table
+            )
 
             .update({
 
-                status: "Posted"
+                gl_journal_id:
+                    journalId
 
             })
 
@@ -1847,7 +2063,6 @@ async postInvoice(id) {
             )
 
             .select()
-
             .single();
 
 
@@ -1861,11 +2076,10 @@ async postInvoice(id) {
         return data;
 
     }
-
     catch (error) {
 
         console.error(
-            "AccountPayableService.postInvoice:",
+            "AccountPayableService.linkGLJournal:",
             error
         );
 

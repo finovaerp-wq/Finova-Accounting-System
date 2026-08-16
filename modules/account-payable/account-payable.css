@@ -252,3 +252,41 @@ Lighter
     opacity: 0.45;
 
 }
+/* ==========================================================
+   ACCOUNT PAYABLE - POSTED ROW
+========================================================== */
+
+#ap-table-body tr[data-status="posted"] td {
+    background-color: #e9ecef !important;
+    color: #6c757d !important;
+}
+
+
+/* ==========================================================
+   POSTED - LINKS / TEXT
+========================================================== */
+
+#ap-table-body tr[data-status="posted"] td *,
+#ap-table-body tr[data-status="posted"] td .fw-semibold {
+    color: #6c757d !important;
+}
+
+
+/* ==========================================================
+   DRAFT
+========================================================== */
+
+#ap-table-body tr[data-status="draft"] td {
+    background-color: transparent !important;
+    color: inherit !important;
+}
+
+
+/* ==========================================================
+   VOID
+========================================================== */
+
+#ap-table-body tr[data-status="void"] td {
+    background-color: transparent !important;
+    color: inherit !important;
+}

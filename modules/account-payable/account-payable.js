@@ -21,6 +21,9 @@ import {
 import {
     AccountPayableService
 } from "../../service/account-payable.service.js";
+import {
+    GeneralJournalService
+} from "../../service/journal.service.js";
 
 
 /*
@@ -57,6 +60,9 @@ export class AccountPayable {
             new AccountPayableService();
         window.apService =
         this.service;
+
+        this.journalService =
+        new GeneralJournalService();
 
         /*
         ==============================================
@@ -104,6 +110,9 @@ export class AccountPayable {
         this.pendingPostId = null;
         this.pendingVoidId = null;
         this.apDetailUnitPrice = null;
+        this.accountPayableCompleteModal = null;
+
+        this.pendingCompleteAPId = null;
 
         this.apDetailTaxInputRate = null;
 
@@ -124,6 +133,7 @@ export class AccountPayable {
         this.apFormDateReceived = null;
 
         this.apFormDueDate = null;
+        this.apFormJournalNo = null;
 
         this.vendorData = [];
         this.selectedVendor = null;
@@ -308,6 +318,8 @@ async init() {
         */
 
         await this.loadDetailModalHTML();
+        await this.loadCompleteModalHTML();
+        
 
         /*
         ==============================================
@@ -366,6 +378,7 @@ async init() {
         );
 
     }
+    
     /*
 ======================================================
 CONFIRM POSTING BUTTON
@@ -425,14 +438,143 @@ if (confirmPostButton) {
 
 
                 /*
-                ==========================================
-                POST
-                ==========================================
-                */
+==================================================
+GET ACCOUNT PAYABLE
+==================================================
+*/
 
-                await this.service.postInvoice(
-                    id
-                );
+const result =
+    await this.service.getById(
+        id
+    );
+
+
+if (!result) {
+
+    throw new Error(
+        "Account Payable not found."
+    );
+
+}
+
+
+const invoice =
+    result.header;
+
+const details =
+    Array.isArray(
+        result.details
+    )
+        ? result.details
+        : [];
+
+
+/*
+==================================================
+CHECK / GENERATE GL JOURNAL
+==================================================
+*/
+
+let journalId =
+    invoice.gl_journal_id;
+
+
+/*
+==================================================
+GENERATE GL ONLY IF NOT EXISTS
+==================================================
+*/
+
+if (!journalId) {
+
+    const journal =
+        await this.generateAPJournal(
+            invoice,
+            details
+        );
+
+
+    if (!journal) {
+
+        throw new Error(
+            "Failed to generate GL Journal."
+        );
+
+    }
+
+
+    journalId =
+        journal.id;
+
+
+    /*
+    ==============================================
+    LINK GL JOURNAL
+    ==============================================
+    */
+
+    await this.service.linkGLJournal(
+        id,
+        journalId
+    );
+
+}
+
+
+/*
+==================================================
+COMPLETE ACCOUNT PAYABLE
+==================================================
+*/
+
+await this.service.completeInvoice(
+    id
+);
+
+
+/*
+==================================================
+GENERATE GL JOURNAL
+==================================================
+*/
+
+const journal =
+    await this.generateAPJournal(
+        invoice,
+        details
+    );
+
+
+if (!journal) {
+
+    throw new Error(
+        "Failed to generate GL Journal."
+    );
+
+}
+
+
+/*
+==================================================
+LINK GL JOURNAL TO ACCOUNT PAYABLE
+==================================================
+*/
+
+await this.service.linkGLJournal(
+    id,
+    journal.id
+);
+
+
+/*
+==================================================
+POST ACCOUNT PAYABLE
+==================================================
+*/
+
+await this.service.postInvoice(
+    id
+);
 
 
                 /*
@@ -646,6 +788,811 @@ if (confirmVoidButton) {
     );
 
 }
+
+}
+/*
+======================================================
+LOAD COMPLETE ACCOUNT PAYABLE MODAL HTML
+======================================================
+*/
+
+async loadCompleteModalHTML() {
+
+    try {
+
+        const existingModal =
+            document.getElementById(
+                "accountPayableCompleteModal"
+            );
+
+
+        if (existingModal) {
+
+            this.accountPayableCompleteModal =
+                existingModal;
+
+            return;
+
+        }
+
+
+        const response =
+            await fetch(
+                new URL(
+                    "./account-payable-complete-modal.html",
+                    import.meta.url
+                )
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                `Failed to load Account Payable Complete Modal: ${response.status}`
+            );
+
+        }
+
+
+        const html =
+            await response.text();
+
+
+        document.body.insertAdjacentHTML(
+            "beforeend",
+            html
+        );
+
+
+        this.accountPayableCompleteModal =
+            document.getElementById(
+                "accountPayableCompleteModal"
+            );
+
+
+        if (
+            !this.accountPayableCompleteModal
+        ) {
+
+            throw new Error(
+                "Account Payable Complete Modal not found."
+            );
+
+        }
+
+
+        console.log(
+            "Account Payable Complete Modal loaded."
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountPayable.loadCompleteModalHTML:",
+            error
+        );
+
+        throw error;
+
+    }
+
+}
+/*
+======================================================
+GENERATE GL JOURNAL FROM ACCOUNT PAYABLE
+======================================================
+*/
+
+async generateAPJournal(
+    invoice,
+    details
+) {
+
+    try {
+
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
+
+        if (!invoice) {
+
+            throw new Error(
+                "Account Payable header is required."
+            );
+
+        }
+
+
+        if (
+            !Array.isArray(details)
+            ||
+            !details.length
+        ) {
+
+            throw new Error(
+                "Account Payable detail cannot be empty."
+            );
+
+        }
+
+
+       
+
+
+
+        /*
+        ==================================================
+        BUILD JOURNAL DETAILS
+        ==================================================
+        */
+
+        const journalDetails = [];
+
+
+        for (
+            const detail
+            of details
+        ) {
+
+            const debitAccountId =
+                Number(
+                    detail.charge_account_id
+                );
+
+
+            const amount =
+                Number(
+                    detail.line_amount
+                    || 0
+                );
+
+
+            if (!debitAccountId) {
+
+                throw new Error(
+                    `Account is missing on AP detail: ${
+                        detail.description
+                        || ""
+                    }`
+                );
+
+            }
+
+
+            if (
+                amount <= 0
+            ) {
+
+                continue;
+
+            }
+
+
+            journalDetails.push({
+
+                debit_account_id:
+                    debitAccountId,
+
+                credit_account_id:
+                    39,
+
+                business_partner_id:
+                    invoice.vendor_id
+                    ? Number(
+                        invoice.vendor_id
+                    )
+                    : null,
+
+                description:
+                    detail.description
+                    ||
+                    invoice.invoice_no,
+
+                amount:
+                    amount
+
+            });
+
+        }
+
+
+        /*
+        ==================================================
+        VALIDATE DETAIL
+        ==================================================
+        */
+
+        if (
+            !journalDetails.length
+        ) {
+
+            throw new Error(
+                "No valid AP detail available for GL Journal."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        GL HEADER
+        ==================================================
+        */
+
+        const journalHeader = {
+
+            journal_no:
+                "",
+
+            journal_date:
+                invoice.invoice_date,
+
+            posting_period:
+                invoice.invoice_date
+                    ? invoice.invoice_date.substring(
+                        0,
+                        7
+                    )
+                    : "",
+
+            description:
+                `AP - ${
+                    invoice.invoice_no
+                    || ""
+                }`,
+
+            source_module:
+                "ACCOUNT PAYABLE",
+
+            status:
+                "Draft"
+
+        };
+
+
+        /*
+        ==================================================
+        CREATE GL
+        ==================================================
+        */
+
+        const journal =
+            await this.journalService.create(
+                journalHeader,
+                journalDetails
+            );
+
+
+        if (!journal) {
+
+            throw new Error(
+                "Failed to generate GL Journal."
+            );
+
+        }
+
+
+        console.log(
+            "AP GL JOURNAL CREATED:",
+            journal
+        );
+
+
+        return journal;
+
+    }
+    catch (error) {
+
+        console.error(
+            "AccountPayable.generateAPJournal:",
+            error
+        );
+
+        throw error;
+
+    }
+
+}
+/*
+======================================================
+SHOW COMPLETE ACCOUNT PAYABLE CONFIRMATION
+======================================================
+*/
+
+showCompleteConfirmation(id) {
+
+    try {
+
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
+
+        if (!id) {
+
+            throw new Error(
+                "Account Payable ID is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        GET MODAL
+        ==================================================
+        */
+
+        const modalElement =
+            document.getElementById(
+                "accountPayableCompleteModal"
+            );
+
+
+        if (!modalElement) {
+
+            throw new Error(
+                "Account Payable Complete Modal not found."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        STORE PENDING ID
+        ==================================================
+        */
+
+        this.pendingCompleteAPId =
+            id;
+
+
+        /*
+        ==================================================
+        CREATE / GET BOOTSTRAP MODAL
+        ==================================================
+        */
+
+        this.accountPayableCompleteModal =
+            bootstrap.Modal.getOrCreateInstance(
+                modalElement
+            );
+
+
+        /*
+        ==================================================
+        SHOW MODAL
+        ==================================================
+        */
+
+        this.accountPayableCompleteModal.show();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountPayable.showCompleteConfirmation:",
+            error
+        );
+
+        this.showError(
+            error.message
+            || "Failed to open complete confirmation."
+        );
+
+    }
+
+}
+/*
+======================================================
+COMPLETE ACCOUNT PAYABLE
+GENERATE GL JOURNAL AS DRAFT
+======================================================
+*/
+
+async completeInvoice(id) {
+
+    try {
+
+        if (!id) {
+
+            throw new Error(
+                "Account Payable ID is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        LOAD ACCOUNT PAYABLE
+        ==================================================
+        */
+
+        const result =
+            await this.service.getById(
+                id
+            );
+
+
+        if (!result) {
+
+            throw new Error(
+                "Account Payable not found."
+            );
+
+        }
+
+
+        const invoice =
+            result.header;
+
+
+        const details =
+            Array.isArray(
+                result.details
+            )
+                ? result.details
+                : [];
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "========== COMPLETE AP DEBUG =========="
+        );
+
+        console.log(
+            "AP ID:",
+            id
+        );
+
+        console.log(
+            "AP INVOICE:",
+            invoice?.invoice_no
+        );
+
+        console.log(
+            "AP STATUS:",
+            invoice?.status
+        );
+
+        console.log(
+            "AP GL JOURNAL ID:",
+            invoice?.gl_journal_id
+        );
+
+        console.log(
+            "AP DETAIL COUNT:",
+            details.length
+        );
+
+        console.log(
+            "======================================="
+        );
+
+
+        /*
+        ==================================================
+        CHECK STATUS
+        ONLY DRAFT CAN BE COMPLETED
+        ==================================================
+        */
+
+        const currentStatus =
+            String(
+                invoice?.status
+                || ""
+            )
+            .trim();
+
+
+        if (
+            currentStatus !== "Draft"
+        ) {
+
+            throw new Error(
+                `Account Payable status is "${currentStatus}". Only Draft Account Payable can be completed.`
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        EXISTING GL JOURNAL
+        ==================================================
+        */
+
+        let journal = null;
+
+        let journalId =
+            invoice?.gl_journal_id
+            || null;
+
+
+        /*
+        ==================================================
+        GENERATE GL JOURNAL
+        ONLY IF NOT EXISTS
+        ==================================================
+        */
+
+        if (!journalId) {
+
+            console.log(
+                "AP COMPLETE: GENERATING GL JOURNAL..."
+            );
+
+
+            journal =
+                await this.generateAPJournal(
+                    invoice,
+                    details
+                );
+
+
+            /*
+            ==============================================
+            VALIDATE JOURNAL RESULT
+            ==============================================
+            */
+
+            if (!journal) {
+
+                throw new Error(
+                    "Failed to generate GL Journal."
+                );
+
+            }
+
+
+            console.log(
+                "AP GENERATED JOURNAL:",
+                journal
+            );
+
+
+            journalId =
+                journal?.id
+                || null;
+
+
+            if (!journalId) {
+
+                throw new Error(
+                    "GL Journal was created but Journal ID is missing."
+                );
+
+            }
+
+
+            /*
+            ==============================================
+            LINK GL JOURNAL
+            ==============================================
+            */
+
+            console.log(
+                "AP LINK GL JOURNAL:",
+                {
+                    apId: id,
+                    journalId
+                }
+            );
+
+
+            const linked =
+                await this.service.linkGLJournal(
+                    id,
+                    journalId
+                );
+
+
+            /*
+            ==============================================
+            VALIDATE LINK RESULT
+            ==============================================
+            */
+
+            if (!linked) {
+
+                throw new Error(
+                    "GL Journal was created but could not be linked to Account Payable."
+                );
+
+            }
+
+
+            console.log(
+                "AP GL LINK RESULT:",
+                linked
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        VERIFY AP → GL LINK
+        ==================================================
+        */
+
+        const verifyLink =
+            await this.service.getById(
+                id
+            );
+
+
+        const linkedJournalId =
+            verifyLink?.header?.gl_journal_id
+            || null;
+
+
+        console.log(
+            "========== VERIFY AP GL LINK =========="
+        );
+
+        console.log(
+            "AP ID:",
+            id
+        );
+
+        console.log(
+            "EXPECTED GL ID:",
+            journalId
+        );
+
+        console.log(
+            "DATABASE GL ID:",
+            linkedJournalId
+        );
+
+        console.log(
+            "========================================"
+        );
+
+
+        /*
+        ==================================================
+        LINK MUST EXIST
+        ==================================================
+        */
+
+        if (
+            !linkedJournalId
+        ) {
+
+            throw new Error(
+                "GL Journal was generated, but the Account Payable was not linked to the GL Journal."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        VERIFY SAME JOURNAL
+        ==================================================
+        */
+
+        if (
+            String(linkedJournalId)
+            !==
+            String(journalId)
+        ) {
+
+            throw new Error(
+                "Account Payable GL Journal link is invalid."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        COMPLETE ACCOUNT PAYABLE
+        ==================================================
+        */
+
+        console.log(
+            "AP LINK VERIFIED. COMPLETING AP..."
+        );
+
+
+        const completed =
+            await this.service.completeInvoice(
+                id
+            );
+
+
+        if (!completed) {
+
+            throw new Error(
+                "Failed to complete Account Payable."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        LOG
+        ==================================================
+        */
+
+        console.log(
+            "========== AP COMPLETED =========="
+        );
+
+        console.log(
+            {
+                ap_id:
+                    id,
+
+                invoice_no:
+                    invoice?.invoice_no,
+
+                gl_journal_id:
+                    journalId,
+
+                journal_no:
+                    journal?.journal_no
+                    || null,
+
+                status:
+                    completed?.status
+            }
+        );
+
+
+        /*
+        ==================================================
+        RELOAD AP DATA
+        ==================================================
+        */
+
+        await this.loadData();
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
+
+        return {
+
+            ap:
+                completed,
+
+            journal:
+                journal
+
+        };
+
+    }
+    catch (error) {
+
+        console.error(
+            "AccountPayable.completeInvoice:",
+            error
+        );
+
+        throw error;
+
+    }
 
 }
 /*
@@ -882,7 +1829,10 @@ this.btnConfirmApDeleteInvoice =
         document.getElementById(
             "ap-form-invoice-no"
         );
-
+    this.apFormJournalNo =
+    document.getElementById(
+        "ap-form-journal-no"
+    );
 
     this.apFormInvoiceDate =
         document.getElementById(
@@ -1170,6 +2120,8 @@ this.btnConfirmApDeleteInvoice =
         document.getElementById(
             "ap-page-last"
         );
+    
+    
 
 
     /*
@@ -1501,6 +2453,58 @@ bindEvents() {
 
         }
     );
+    const btnConfirmCompleteAP =
+    document.getElementById(
+        "btn-confirm-complete-ap"
+    );
+
+
+if (btnConfirmCompleteAP) {
+
+    btnConfirmCompleteAP.addEventListener(
+        "click",
+        async () => {
+
+            const id =
+                this.pendingCompleteAPId;
+
+
+            if (!id) {
+
+                return;
+
+            }
+
+
+            /*
+            ==========================================
+            CLOSE MODAL
+            ==========================================
+            */
+
+            if (
+                this.accountPayableCompleteModal
+            ) {
+
+                this.accountPayableCompleteModal.hide();
+
+            }
+
+
+            /*
+            ==========================================
+            COMPLETE AP
+            ==========================================
+            */
+
+            await this.completeInvoice(
+                id
+            );
+
+        }
+    );
+
+}
 
     /*
 ======================================================
@@ -3063,6 +4067,26 @@ updateInvoiceSummary() {
 }
 /*
 ======================================================
+FORMAT CURRENCY
+======================================================
+*/
+
+formatCurrency(value) {
+
+    const amount =
+        Number(value || 0);
+
+    return new Intl.NumberFormat(
+        "id-ID",
+        {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }
+    ).format(amount);
+
+}
+/*
+======================================================
 RENDER INVOICE DETAILS
 ======================================================
 */
@@ -4472,6 +5496,18 @@ resetAddForm() {
         this.apFormTop.value = "";
 
     }
+    /*
+==================================================
+JOURNAL NO
+==================================================
+*/
+
+if (this.apFormJournalNo) {
+
+    this.apFormJournalNo.value =
+        "";
+
+}
 
 
     /*
@@ -5114,43 +6150,81 @@ async saveEdit() {
 
 
         /*
-        ==================================================
-        HEADER
-        ==================================================
-        */
+==================================================
+GET CURRENT DOCUMENT STATUS
+==================================================
+*/
 
-        const header = {
+const currentInvoice =
+    this.data.find(
+        item =>
+            String(item.id)
+            ===
+            String(this.currentInvoiceId)
+    );
 
-            vendor_id:
-                this.apFormVendor.value,
 
-            po_no:
-                this.apFormPoNo?.value
-                    ?.trim()
-                || null,
+const currentStatus =
+    String(
+        currentInvoice?.status
+        || "Draft"
+    )
+    .trim();
 
-            invoice_no:
-                this.apFormInvoiceNo.value
-                    .trim(),
 
-            invoice_date:
-                this.apFormInvoiceDate.value,
+/*
+==================================================
+PRESERVE VOID STATUS
+==================================================
 
-            date_received:
-                this.apFormDateReceived.value,
+Draft  → tetap Draft
+Void   → tetap Void
+*/
 
-            due_date:
-                this.apFormDueDate.value,
+const editStatus =
+    currentStatus === "Void"
+        ? "Void"
+        : "Draft";
 
-            description:
-                this.apFormDescription?.value
-                    ?.trim()
-                || null,
 
-            status:
-                "Draft"
+/*
+==================================================
+HEADER
+==================================================
+*/
 
-        };
+const header = {
+
+    vendor_id:
+        this.apFormVendor.value,
+
+    po_no:
+        this.apFormPoNo?.value
+            ?.trim()
+        || null,
+
+    invoice_no:
+        this.apFormInvoiceNo.value
+            .trim(),
+
+    invoice_date:
+        this.apFormInvoiceDate.value,
+
+    date_received:
+        this.apFormDateReceived.value,
+
+    due_date:
+        this.apFormDueDate.value,
+
+    description:
+        this.apFormDescription?.value
+            ?.trim()
+        || null,
+
+    status:
+        editStatus
+
+};  
 
 
         /*
@@ -5359,11 +6433,11 @@ async saveEdit() {
                     break;
 
 
-                case "post":
+                case "complete":
 
-                    await this.postInvoice(id);
+    this.showCompleteConfirmation(id);
 
-                    break;
+    break;
 
 
                 case "payment":
@@ -5470,6 +6544,7 @@ async postInvoice(id) {
         /*
         ==================================================
         CHECK CURRENT STATUS
+        Draft / Void CAN BE POSTED
         ==================================================
         */
 
@@ -5480,90 +6555,52 @@ async postInvoice(id) {
             .trim();
 
 
-       /*
-==================================================
-CHECK CURRENT STATUS
-Draft / Void CAN BE POSTED
-==================================================
-*/
+        if (
+            currentStatus !== "Draft"
+            &&
+            currentStatus !== "Void"
+        ) {
 
-if (
-    currentStatus !== "Draft"
-    &&
-    currentStatus !== "Void"
-) {
+            throw new Error(
+                "Only Draft or Void Account Payable can be posted."
+            );
 
-    throw new Error(
-        "Only Draft or Void Account Payable can be posted."
-    );
-
-}
-/*
-==================================================
-OPEN POSTING CONFIRMATION MODAL
-==================================================
-*/
-
-this.pendingPostId = id;
-
-const modalElement =
-    document.getElementById(
-        "ap-post-confirm-modal"
-    );
-
-
-if (!modalElement) {
-
-    throw new Error(
-        "Posting confirmation modal not found."
-    );
-
-}
-
-
-const modal =
-    bootstrap.Modal.getOrCreateInstance(
-        modalElement
-    );
-
-
-modal.show();
-
-return;
+        }
 
 
         /*
         ==================================================
-        UPDATE STATUS
+        OPEN POSTING CONFIRMATION MODAL
         ==================================================
         */
 
-       await this.service.postInvoice(
-    id
-);
+        this.pendingPostId = id;
 
 
-        /*
-        ==================================================
-        RELOAD DATA
-        ==================================================
-        */
-
-        await this.loadData();
+        const modalElement =
+            document.getElementById(
+                "ap-post-confirm-modal"
+            );
 
 
-        /*
-        ==================================================
-        SUCCESS
-        ==================================================
-        */
+        if (!modalElement) {
 
-        this.showSuccess(
-            "Account Payable successfully posted."
-        );
+            throw new Error(
+                "Posting confirmation modal not found."
+            );
+
+        }
+
+
+        const modal =
+            bootstrap.Modal.getOrCreateInstance(
+                modalElement
+            );
+
+
+        modal.show();
 
     }
-
     catch (error) {
 
         console.error(
@@ -5573,20 +6610,564 @@ return;
 
         this.showError(
             error.message
-            || "Failed to post Account Payable."
+            ||
+            "Failed to post Account Payable."
         );
 
     }
 
 }
 
-        /*
-    ======================================================
-    VIEW
-    ======================================================
-    */
+      /*
+======================================================
+VIEW ACCOUNT PAYABLE
+READ ONLY
+======================================================
+*/
 
-    async viewInvoice(id) {
+async viewInvoice(id) {
+
+    try {
+
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
+
+        if (!id) {
+
+            throw new Error(
+                "Account Payable ID is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        LOAD MODAL
+        ==================================================
+        */
+
+        await this.loadModalHTML();
+
+        await this.loadDetailModalHTML();
+
+
+        /*
+        ==================================================
+        CACHE DOM
+        ==================================================
+        */
+
+        this.cacheDOM();
+
+
+        /*
+        ==================================================
+        LOAD VENDORS
+        ==================================================
+        */
+
+        if (
+            !Array.isArray(
+                this.vendorData
+            )
+            ||
+            !this.vendorData.length
+        ) {
+
+            await this.loadVendors();
+
+        }
+        /*
+        ==================================================
+        LOAD CHART OF ACCOUNTS
+        ==================================================
+        */
+
+        await this.loadDetailCOA();
+
+
+        /*
+        ==================================================
+        LOAD ACCOUNT PAYABLE
+        ==================================================
+        */
+
+        const result =
+            await this.service.getById(
+                id
+            );
+
+
+        if (!result) {
+
+            throw new Error(
+                "Account Payable not found."
+            );
+
+        }
+
+
+        const header =
+            result.header;
+
+        const details =
+            Array.isArray(
+                result.details
+            )
+                ? result.details
+                : [];
+
+
+        /*
+==================================================
+SET VIEW STATE
+==================================================
+*/
+
+this.currentInvoiceId =
+    id;
+
+this.currentMode =
+    "view";
+
+
+/*
+==================================================
+MAP INVOICE DETAILS
+==================================================
+*/
+
+this.invoiceDetails =
+    details.map(
+        detail => {
+
+            const coa =
+                detail.mst_chart_of_accounts
+                || {};
+
+
+            return {
+
+                id:
+                    detail.id
+                    ||
+                    crypto.randomUUID(),
+
+                charge_account_id:
+                    Number(
+                        detail.charge_account_id
+                        ||
+                        coa.id
+                        ||
+                        0
+                    ),
+
+                account_code:
+                    detail.account_code
+                    ||
+                    coa.account_code
+                    ||
+                    "",
+
+                account_name:
+                    detail.account_name
+                    ||
+                    coa.account_name
+                    ||
+                    "",
+
+                description:
+                    detail.description
+                    || "",
+
+                quantity:
+                    Number(
+                        detail.quantity
+                        || 0
+                    ),
+
+                unit_price:
+                    Number(
+                        detail.unit_price
+                        || 0
+                    ),
+
+                tax_input_rate:
+                    Number(
+                        detail.tax_input_rate
+                        || 0
+                    ),
+
+                tax_input_amount:
+                    Number(
+                        detail.tax_input_amount
+                        || 0
+                    ),
+
+                withholding_tax_rate:
+                    Number(
+                        detail.withholding_tax_rate
+                        || 0
+                    ),
+
+                withholding_tax_amount:
+                    Number(
+                        detail.withholding_tax_amount
+                        || 0
+                    ),
+
+                line_amount:
+                    Number(
+                        detail.line_amount
+                        || 0
+                    ),
+
+                total_amount:
+                    Number(
+                        detail.total_amount
+                        || 0
+                    )
+
+            };
+
+        }
+    );
+
+
+        /*
+        ==================================================
+        HEADER
+        ==================================================
+        */
+
+        if (this.apFormVendor) {
+
+            this.apFormVendor.value =
+                String(
+                    header.vendor_id
+                    || ""
+                );
+
+        }
+
+
+        /*
+        ==================================================
+        TERM OF PAYMENT
+        ==================================================
+        */
+
+        const vendor =
+            this.vendorData.find(
+                item =>
+                    String(item.id)
+                    ===
+                    String(
+                        header.vendor_id
+                    )
+            );
+
+
+        if (vendor) {
+
+            this.selectedVendor =
+                vendor;
+
+            this.renderVendorTOP(
+                vendor
+            );
+
+        }
+        else if (
+            this.apFormTop
+        ) {
+
+            this.apFormTop.value =
+                "No Term of Payment";
+
+        }
+
+
+        /*
+        ==================================================
+        PO NO
+        ==================================================
+        */
+
+        if (this.apFormPoNo) {
+
+            this.apFormPoNo.value =
+                header.po_no
+                || "";
+
+        }
+
+
+        /*
+        ==================================================
+        INVOICE NO
+        ==================================================
+        */
+
+        if (this.apFormInvoiceNo) {
+
+            this.apFormInvoiceNo.value =
+                header.invoice_no
+                || "";
+
+        }
+        /*
+==================================================
+JOURNAL NO
+==================================================
+*/
+
+if (this.apFormJournalNo) {
+
+    this.apFormJournalNo.value =
+        header.journal_no
+        || "";
+
+}
+
+
+        /*
+        ==================================================
+        INVOICE DATE
+        ==================================================
+        */
+
+        if (
+            this.apFormInvoiceDate
+        ) {
+
+            this.apFormInvoiceDate.value =
+                header.invoice_date
+                || "";
+
+        }
+
+
+        /*
+        ==================================================
+        DATE RECEIVED
+        ==================================================
+        */
+
+        if (
+            this.apFormDateReceived
+        ) {
+
+            this.apFormDateReceived.value =
+                header.date_received
+                || "";
+
+        }
+
+
+        /*
+        ==================================================
+        DUE DATE
+        ==================================================
+        */
+
+        if (
+            this.apFormDueDate
+        ) {
+
+            this.apFormDueDate.value =
+                header.due_date
+                || "";
+
+        }
+
+
+        /*
+        ==================================================
+        DESCRIPTION
+        ==================================================
+        */
+
+        if (
+            this.apFormDescription
+        ) {
+
+            this.apFormDescription.value =
+                header.description
+                || "";
+
+        }
+
+
+        /*
+        ==================================================
+        RENDER DETAILS
+        ==================================================
+        */
+
+        this.renderInvoiceDetails();
+
+
+        /*
+        ==================================================
+        READ ONLY
+        ==================================================
+        */
+
+        const viewFields = [
+
+            this.apFormVendor,
+
+            this.apFormPoNo,
+
+            this.apFormInvoiceNo,
+
+            this.apFormInvoiceDate,
+
+            this.apFormDateReceived,
+
+            this.apFormTop,
+
+            this.apFormDueDate,
+
+            this.apFormDescription
+
+        ];
+
+
+        viewFields.forEach(
+            field => {
+
+                if (field) {
+
+                    field.disabled =
+                        true;
+
+                    field.readOnly =
+                        true;
+
+                }
+
+            }
+        );
+
+
+        /*
+        ==================================================
+        DISABLE DETAIL ACTION
+        ==================================================
+        */
+
+        document
+            .querySelectorAll(
+                "#ap-detail-body [data-detail-action]"
+            )
+            .forEach(
+                button => {
+
+                    button.disabled =
+                        true;
+
+                }
+            );
+
+
+        /*
+        ==================================================
+        DISABLE ADD DETAIL
+        ==================================================
+        */
+
+        if (
+            this.btnAddDetail
+        ) {
+
+            this.btnAddDetail.disabled =
+                true;
+
+        }
+
+
+        /*
+        ==================================================
+        DISABLE SAVE
+        ==================================================
+        */
+
+        if (
+            this.btnSaveDraft
+        ) {
+
+            this.btnSaveDraft.disabled =
+                true;
+
+        }
+
+
+        /*
+        ==================================================
+        MODAL TITLE
+        ==================================================
+        */
+
+        const modalElement =
+            document.getElementById(
+                "accountPayableModal"
+            );
+
+
+        const titleElement =
+            modalElement?.querySelector(
+                ".modal-title"
+            );
+
+
+        if (titleElement) {
+
+            titleElement.innerHTML = `
+                <i class="fa-solid fa-eye me-2"></i>
+                View Account Payable
+            `;
+
+        }
+
+
+        const subtitleElement =
+            modalElement?.querySelector(
+                ".modal-subtitle"
+            );
+
+
+        if (subtitleElement) {
+
+            subtitleElement.textContent =
+                "View Account Payable";
+
+        }
+
+
+        /*
+        ==================================================
+        SHOW MODAL
+        ==================================================
+        */
+
+        if (modalElement) {
+
+            const modal =
+                bootstrap.Modal
+                    .getOrCreateInstance(
+                        modalElement
+                    );
+
+            modal.show();
+
+        }
+
 
         console.log(
             "View Account Payable:",
@@ -5594,7 +7175,87 @@ return;
         );
 
     }
+    catch (error) {
 
+        console.error(
+            "AccountPayable.viewInvoice:",
+            error
+        );
+
+        this.showError(
+            error.message
+            ||
+            "Failed to view Account Payable."
+        );
+
+    }
+    
+
+}
+
+/*
+======================================================
+GET GL JOURNAL NUMBER
+======================================================
+*/
+
+async getAPJournalNo(
+    glJournalId
+) {
+
+    try {
+
+        if (!glJournalId) {
+
+            return "";
+
+        }
+
+
+        const {
+            data,
+            error
+        } = await supabase
+
+            .from(
+                "trx_gl_journal"
+            )
+
+            .select(
+                "journal_no"
+            )
+
+            .eq(
+                "id",
+                glJournalId
+            )
+
+            .maybeSingle();
+
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        return data?.journal_no
+            || "";
+
+    }
+    catch (error) {
+
+        console.error(
+            "AccountPayable.getAPJournalNo:",
+            error
+        );
+
+        throw error;
+
+    }
+
+}
 
 /*
 ======================================================
@@ -5684,6 +7345,30 @@ const details =
     Array.isArray(result.details)
         ? result.details
         : [];
+        /*
+==================================================
+GL JOURNAL REFERENCE
+==================================================
+*/
+
+const journalId =
+    header.gl_journal_id;
+/*
+==================================================
+LOAD JOURNAL NO
+==================================================
+*/
+
+let journalNo = "";
+
+if (journalId) {
+
+    journalNo =
+        await this.getAPJournalNo(
+            journalId
+        );
+
+}
 
 
 /*
@@ -5744,20 +7429,56 @@ if (
 
 
         /*
-        ==================================================
-        TERM OF PAYMENT
-        ==================================================
-        */
+==================================================
+TERM OF PAYMENT
+==================================================
+*/
 
-        if (this.apFormTop) {
+const editVendor =
+    this.vendorData.find(
+        item =>
+            String(item.id)
+            ===
+            String(header.vendor_id)
+    );
 
-            this.apFormTop.value =
-                String(
-                    header.top_id
-                    || ""
-                );
 
-        }
+if (editVendor) {
+
+    /*
+    ==============================================
+    STORE SELECTED VENDOR
+    ==============================================
+    */
+
+    this.selectedVendor =
+        editVendor;
+
+
+    /*
+    ==============================================
+    RENDER VENDOR TERM OF PAYMENT
+    ==============================================
+    */
+
+    this.renderVendorTOP(
+        editVendor
+    );
+
+}
+else {
+
+    if (this.apFormTop) {
+
+        this.apFormTop.value =
+            "No Term of Payment";
+
+    }
+
+    this.selectedTopId =
+        null;
+
+}
 
 
         /*
@@ -5788,6 +7509,19 @@ if (
                 || "";
 
         }
+        /*
+==================================================
+JOURNAL NO
+==================================================
+*/
+
+if (this.apFormJournalNo) {
+
+    this.apFormJournalNo.value =
+        header.journal_no
+        || "";
+
+}
 
 
         /*
@@ -6356,7 +8090,9 @@ async voidInvoice(id) {
         const invoice =
             this.data.find(
                 item =>
-                    String(item.id) === String(id)
+                    String(item.id)
+                    ===
+                    String(id)
             );
 
 
@@ -6426,36 +8162,99 @@ async voidInvoice(id) {
 
         /*
         ==================================================
-        OPEN BOOTSTRAP MODAL
+        SHOW VOID CONFIRMATION
         ==================================================
         */
 
-        const modalElement =
-            document.getElementById(
-                "ap-void-modal"
-            );
+        const result =
+            await this.showVoidConfirmation();
 
 
-        if (!modalElement) {
+        /*
+        ==================================================
+        CANCEL
+        ==================================================
+        */
+
+        if (
+            !result
+            ||
+            !result.confirmed
+        ) {
+
+            this.pendingVoidId =
+                null;
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        GET VOID REASON
+        ==================================================
+        */
+
+        const reason =
+            String(
+                result.reason || ""
+            )
+            .trim();
+
+
+        if (!reason) {
 
             throw new Error(
-                "Void confirmation modal not found."
+                "Void reason is required."
             );
 
         }
 
 
-        const modal =
-            bootstrap.Modal.getOrCreateInstance(
-                modalElement
-            );
+        /*
+        ==================================================
+        EXECUTE VOID
+        ==================================================
+        */
+
+        await this.service.voidInvoice(
+            id,
+            reason
+        );
 
 
-        modal.show();
+        /*
+        ==================================================
+        CLEAR PENDING ID
+        ==================================================
+        */
+
+        this.pendingVoidId =
+            null;
+
+
+        /*
+        ==================================================
+        RELOAD DATA
+        ==================================================
+        */
+
+        await this.loadData();
+
+
+        /*
+        ==================================================
+        SUCCESS
+        ==================================================
+        */
+
+        this.showSuccess(
+            "Account Payable voided successfully."
+        );
 
 
     }
-
     catch (error) {
 
         console.error(
@@ -6464,10 +8263,14 @@ async voidInvoice(id) {
         );
 
 
+        this.pendingVoidId =
+            null;
+
+
         this.showError(
             error?.message
             ||
-            "Failed to open Void confirmation."
+            "Failed to void Account Payable."
         );
 
     }
@@ -6481,140 +8284,212 @@ SHOW VOID CONFIRMATION
 
 showVoidConfirmation() {
 
-    return new Promise(
-        resolve => {
+    return new Promise((resolve) => {
 
-            /*
-            ==================================================
-            REMOVE EXISTING MODAL
-            ==================================================
-            */
+        /*
+        ==================================================
+        REMOVE OLD MODAL
+        ==================================================
+        */
 
-            const existingModal =
-                document.getElementById(
-                    "ap-void-modal"
-                );
-
-
-            if (existingModal) {
-
-                existingModal.remove();
-
-            }
+        const oldModal =
+            document.getElementById(
+                "ap-void-modal"
+            );
 
 
-            /*
-            ==================================================
-            MODAL HTML
-            ==================================================
-            */
+        if (oldModal) {
 
-            const modalHTML = `
+            oldModal.remove();
+
+        }
+
+
+        /*
+        ==================================================
+        CREATE MODAL
+        ==================================================
+        */
+
+        const modalHTML = `
+
+            <div
+                class="modal fade"
+                id="ap-void-modal"
+                tabindex="-1"
+                aria-hidden="true">
 
                 <div
-                    class="modal fade"
-                    id="ap-void-modal"
-                    tabindex="-1"
-                    aria-hidden="true">
+                    class="modal-dialog modal-dialog-centered">
 
                     <div
-                        class="modal-dialog modal-dialog-centered">
+                        class="modal-content">
+
+                        <!-- ==================================
+                             HEADER
+                        =================================== -->
 
                         <div
-                            class="modal-content shadow">
+                            class="modal-header">
 
-                            <!-- HEADER -->
+                            <h5
+                                class="modal-title fw-semibold">
 
-                            <div class="modal-header">
+                                <i
+                                    class="fa-solid fa-ban text-danger me-2">
+                                </i>
 
-                                <h5
-                                    class="modal-title text-danger">
+                                Confirm Void Account Payable
 
-                                    <i
-                                        class="fa-solid fa-ban me-2">
-                                    </i>
-
-                                    Void Account Payable
-
-                                </h5>
-
-                                <button
-                                    type="button"
-                                    class="btn-close"
-                                    data-bs-dismiss="modal">
-                                </button>
-
-                            </div>
+                            </h5>
 
 
-                            <!-- BODY -->
+                            <button
+                                type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close">
+                            </button>
 
-                            <div class="modal-body">
+                        </div>
+
+
+                        <!-- ==================================
+                             BODY
+                        =================================== -->
+
+                        <div
+                            class="modal-body">
+
+                            <!-- QUESTION ICON -->
+
+                            <div
+                                class="text-center mb-3">
 
                                 <div
-                                    class="alert alert-warning">
+                                    class="d-inline-flex
+                                           align-items-center
+                                           justify-content-center
+                                           rounded-circle
+                                           bg-danger
+                                           text-white"
+                                    style="
+                                        width:52px;
+                                        height:52px;
+                                        font-size:26px;
+                                    ">
 
-                                    <i
-                                        class="fa-solid fa-triangle-exclamation me-2">
-                                    </i>
-
-                                    This Account Payable will be
-                                    marked as <strong>Void</strong>.
+                                    ?
 
                                 </div>
 
+                            </div>
+
+
+                            <!-- QUESTION -->
+
+                            <div
+                                class="text-center mb-3">
+
+                                <span>
+
+                                    Apakah Anda yakin ingin
+
+                                    <strong>
+                                        VOID Account Payable
+                                    </strong>
+
+                                    ini?
+
+                                </span>
+
+                            </div>
+
+
+                            <!-- WARNING -->
+
+                            <div
+                                class="alert alert-danger
+                                       d-flex align-items-start"
+                                role="alert">
+
+                                <i
+                                    class="fa-solid fa-triangle-exclamation
+                                           me-2 mt-1">
+                                </i>
+
+                                <div>
+
+                                    Account Payable yang
+                                    di-VOID tidak dapat
+                                    dianggap sebagai transaksi
+                                    <strong>Posted</strong>.
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- REASON -->
+
+                            <div
+                                class="mb-2">
 
                                 <label
-                                    for="void-ap-reason"
-                                    class="form-label fw-semibold">
+                                for="void-ap-reason"
+                                class="form-label fw-semibold">
 
-                                    Void Reason
-                                    <span class="text-danger">
-                                        *
-                                    </span>
+                                Alasan Void
+                                <span class="text-danger">*</span>
 
-                                </label>
+                            </label>
 
 
-                                <textarea
-                                    id="void-ap-reason"
-                                    class="form-control"
-                                    rows="4"
-                                    placeholder="Enter the reason for void..."
-                                    required>
-                                </textarea>
-
+                            <textarea
+                                id="void-ap-reason"
+                                class="form-control"
+                                rows="3"
+                                placeholder="Masukkan alasan Void..."
+                                required></textarea>
                             </div>
 
-
-                            <!-- FOOTER -->
-
-                            <div class="modal-footer">
-
-                                <button
-                                    type="button"
-                                    class="btn btn-secondary"
-                                    id="ap-void-cancel">
-
-                                    Cancel
-
-                                </button>
+                        </div>
 
 
-                                <button
-                                    type="button"
-                                    class="btn btn-danger"
-                                    id="ap-void-confirm">
+                        <!-- ==================================
+                             FOOTER
+                        =================================== -->
 
-                                    <i
-                                        class="fa-solid fa-ban me-1">
-                                    </i>
+                        <div
+                            class="modal-footer">
 
-                                    Void
+                            <button
+                                type="button"
+                                class="btn btn-secondary"
+                                id="btn-cancel-ap-void"
+                                data-bs-dismiss="modal">
 
-                                </button>
+                                <i
+                                    class="fa-solid fa-xmark me-1">
+                                </i>
 
-                            </div>
+                                Batal
+
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="btn btn-danger"
+                                id="btn-confirm-ap-void">
+
+                                <i
+                                    class="fa-solid fa-ban me-1">
+                                </i>
+
+                                Ya, Void
+
+                            </button>
 
                         </div>
 
@@ -6622,138 +8497,165 @@ showVoidConfirmation() {
 
                 </div>
 
-            `;
+            </div>
+
+        `;
 
 
-            /*
-            ==================================================
-            APPEND
-            ==================================================
-            */
+        /*
+        ==================================================
+        APPEND MODAL
+        ==================================================
+        */
 
-            document.body.insertAdjacentHTML(
-                "beforeend",
-                modalHTML
+        document.body.insertAdjacentHTML(
+            "beforeend",
+            modalHTML
+        );
+
+
+        /*
+        ==================================================
+        GET ELEMENT
+        ==================================================
+        */
+
+        const modalElement =
+            document.getElementById(
+                "ap-void-modal"
             );
 
 
-            /*
-            ==================================================
-            ELEMENTS
-            ==================================================
-            */
-
-            const modalElement =
-                document.getElementById(
-                    "ap-void-modal"
-                );
+        const reasonElement =
+            document.getElementById(
+                "void-ap-reason"
+            );
 
 
-            const modal =
-                new bootstrap.Modal(
-                    modalElement
-                );
+        const confirmButton =
+            document.getElementById(
+                "btn-confirm-ap-void"
+            );
 
 
-            const btnConfirm =
-                document.getElementById(
-                    "ap-void-confirm"
-                );
+        /*
+        ==================================================
+        BOOTSTRAP MODAL
+        ==================================================
+        */
+
+        const modal =
+            bootstrap.Modal.getOrCreateInstance(
+                modalElement
+            );
 
 
-            const btnCancel =
-                document.getElementById(
-                    "ap-void-cancel"
-                );
+        /*
+        ==================================================
+        CONFIRM
+        ==================================================
+        */
+
+        confirmButton.addEventListener(
+            "click",
+            () => {
+
+                const reason =
+                    String(
+                        reasonElement?.value || ""
+                    ).trim();
 
 
-            const reasonInput =
-                document.getElementById(
-                    "void-ap-reason"
-                );
+                /*
+                ==========================================
+                VALIDATION
+                ==========================================
+                */
 
+                if (!reason) {
 
-            /*
-            ==================================================
-            CONFIRM
-            ==================================================
-            */
+                    reasonElement.classList.add(
+                        "is-invalid"
+                    );
 
-            btnConfirm.addEventListener(
-                "click",
-                () => {
+                    reasonElement.focus();
 
-                    const reason =
-                        reasonInput.value.trim();
-
-
-                    if (!reason) {
-
-                        reasonInput.focus();
-
-                        return;
-
-                    }
-
-
-                    modal.hide();
-
-                    resolve(true);
+                    return;
 
                 }
-            );
 
 
-            /*
-            ==================================================
-            CANCEL
-            ==================================================
-            */
+                /*
+                ==========================================
+                REMOVE VALIDATION
+                ==========================================
+                */
 
-            btnCancel.addEventListener(
-                "click",
-                () => {
-
-                    modal.hide();
-
-                    resolve(false);
-
-                }
-            );
+                reasonElement.classList.remove(
+                    "is-invalid"
+                );
 
 
-            /*
-            ==================================================
-            CLOSE
-            ==================================================
-            */
+                /*
+                ==========================================
+                CLOSE
+                ==========================================
+                */
 
-            modalElement.addEventListener(
-                "hidden.bs.modal",
-                () => {
-
-                    modalElement.remove();
-
-                },
-                {
-                    once: true
-                }
-            );
+                modal.hide();
 
 
-            /*
-            ==================================================
-            SHOW
-            ==================================================
-            */
+                resolve({
+                    confirmed: true,
+                    reason: reason
+                });
 
-            modal.show();
+            }
+        );
 
-        }
-    );
+
+        /*
+        ==================================================
+        CANCEL
+        ==================================================
+        */
+
+        modalElement.addEventListener(
+            "hidden.bs.modal",
+            () => {
+
+                modalElement.remove();
+
+
+                /*
+                ==========================================
+                IF NOT CONFIRMED
+                ==========================================
+                */
+
+                resolve({
+                    confirmed: false,
+                    reason: ""
+                });
+
+            },
+            {
+                once: true
+            }
+        );
+
+
+        /*
+        ==================================================
+        SHOW
+        ==================================================
+        */
+
+        modal.show();
+
+    });
 
 }
-
     /*
     ======================================================
     DUPLICATE
@@ -7041,8 +8943,40 @@ showVoidConfirmation() {
 
                 }
             ).join("");
+            /*
+======================================================
+POSTED ROW COLOR
+======================================================
+*/
+
+this.tableBody
+    .querySelectorAll(
+        "tr.ap-row-posted"
+    )
+    .forEach(row => {
+
+        row
+            .querySelectorAll("td")
+            .forEach(cell => {
+
+                cell.style.setProperty(
+                    "background-color",
+                    "#e9ecef",
+                    "important"
+                );
+
+                cell.style.setProperty(
+                    "color",
+                    "#6c757d",
+                    "important"
+                );
+
+            });
+
+    });
 
     }
+    
 
 
     /*
@@ -7271,22 +9205,48 @@ const outstandingAmount =
         this.getPaymentStatus(invoice);
 
 
-    /*
+/*
 ==================================================
 ROW CLASS
 ==================================================
 */
 
-let rowClass = "ap-row-posted";
+let rowClass = "";
+let rowStyle = "";
 
+
+/*
+==================================================
+POSTED
+ABU-ABU
+==================================================
+*/
 
 if (
+    technicalStatus === "posted"
+) {
+
+    rowClass =
+        "ap-row-posted";
+
+}
+
+
+/*
+==================================================
+DRAFT / VOID
+NORMAL
+==================================================
+*/
+
+else if (
     technicalStatus === "draft"
     ||
     technicalStatus === "void"
 ) {
 
-    rowClass = "ap-row-draft";
+    rowClass =
+        "ap-row-normal";
 
 }
     /*
@@ -7297,15 +9257,13 @@ if (
 
     return `
 
-        <tr class="${rowClass}">
+    <tr
+        class="${rowClass}"
+        data-status="${technicalStatus}">
 
-            <!-- ======================================
-                 NO
-            ======================================= -->
-
-            <td>
-                ${number}
-            </td>
+        <td>
+            ${number}
+        </td>
 
 
             <!-- ======================================
@@ -7601,9 +9559,10 @@ renderStatus(status) {
     }
 
 }
-       /*
+/*
 ======================================================
 RENDER ACTION BUTTONS
+ACCOUNT PAYABLE
 ======================================================
 */
 
@@ -7613,31 +9572,6 @@ renderActionButtons(invoice) {
         invoice?.id;
 
 
-    /*
-    ==================================================
-    TECHNICAL DOCUMENT STATUS
-    Draft / Posted / Void
-    ==================================================
-    */
-
-    const technicalStatus =
-        String(
-            invoice?.status || "Draft"
-        )
-        .trim();
-
-
-    /*
-    ==================================================
-    PAYMENT STATUS
-    Unpaid / Partial Paid / Less Paid / Paid
-    ==================================================
-    */
-
-    const paymentStatus =
-        this.getPaymentStatus(invoice);
-
-
     if (!id) {
 
         return "";
@@ -7645,181 +9579,108 @@ renderActionButtons(invoice) {
     }
 
 
-   /*
-==================================================
-DRAFT / VOID
-SAME ACTION AND ACTIVITY
-==================================================
-*/
+    /*
+    ==================================================
+    GET STATUS
+    ==================================================
+    */
 
-if (
-    technicalStatus === "Draft"
-    ||
-    technicalStatus === "Void"
-) {
-
-    return `
-
-        <div
-            class="btn-group btn-group-sm"
-            role="group">
-
-            <!-- EDIT -->
-
-            <button
-                type="button"
-                class="btn btn-outline-primary"
-                title="Edit"
-                data-action="edit"
-                data-id="${id}">
-
-                <i class="fa-solid fa-pen"></i>
-
-            </button>
+    const status =
+        String(
+            invoice?.status
+            || "Draft"
+        )
+        .trim();
 
 
-            <!-- DELETE -->
+    console.log(
+        "AP ACTION:",
+        {
+            id,
+            invoice_no:
+                invoice?.invoice_no,
+            status,
+            gl_journal_id:
+                invoice?.gl_journal_id || null
+        }
+    );
 
-            <button
-                type="button"
-                class="btn btn-outline-danger"
-                title="Delete"
-                data-action="delete"
-                data-id="${id}">
-
-                <i class="fa-solid fa-trash"></i>
-
-            </button>
-
-
-            <!-- POST -->
-
-            <button
-                type="button"
-                class="btn btn-outline-success"
-                title="Post"
-                data-action="post"
-                data-id="${id}">
-
-                <i class="fa-solid fa-upload"></i>
-
-            </button>
-
-
-            <!-- DUPLICATE -->
-
-            <button
-                type="button"
-                class="btn btn-outline-secondary"
-                title="Duplicate"
-                data-action="duplicate"
-                data-id="${id}">
-
-                <i class="fa-regular fa-copy"></i>
-
-            </button>
-
-
-            <!-- VIEW -->
-
-            <button
-                type="button"
-                class="btn btn-outline-info"
-                title="View"
-                data-action="view"
-                data-id="${id}">
-
-                <i class="fa-regular fa-file-lines"></i>
-
-            </button>
-
-        </div>
-
-    `;
-
-}
 
     /*
     ==================================================
-    POSTED
+    DRAFT
+    EDIT | DELETE | COMPLETE
     ==================================================
     */
 
     if (
-        technicalStatus === "Posted"
+        status === "Draft"
     ) {
 
+        return `
 
-        /*
-        ==============================================
-        PAYMENT BUTTON
-        ==============================================
-        */
+            <div
+                class="btn-group btn-group-sm"
+                role="group">
 
-        let paymentButton = "";
-
-
-        /*
-        ----------------------------------------------
-        UNPAID
-        PARTIAL PAID
-        LESS PAID
-        ----------------------------------------------
-        */
-
-        if (
-            paymentStatus === "Unpaid"
-            ||
-            paymentStatus === "Partial Paid"
-            ||
-            paymentStatus === "Less Paid"
-        ) {
-
-            paymentButton = `
+                <!-- EDIT -->
 
                 <button
                     type="button"
-                    class="btn btn-outline-info"
-                    title="Create Payment"
-                    data-action="payment"
+                    class="btn btn-outline-primary"
+                    title="Edit"
+                    data-action="edit"
                     data-id="${id}">
 
-                    <i class="fa-solid fa-money-bill-wave"></i>
+                    <i class="fa-solid fa-pen"></i>
 
                 </button>
 
-            `;
 
-        }
-
-
-        /*
-        ----------------------------------------------
-        PAID
-        ----------------------------------------------
-        */
-
-        else if (
-            paymentStatus === "Paid"
-        ) {
-
-            paymentButton = `
+                <!-- DELETE -->
 
                 <button
                     type="button"
-                    class="btn btn-outline-info"
-                    title="Payment History"
-                    data-action="payment-history"
+                    class="btn btn-outline-danger"
+                    title="Delete"
+                    data-action="delete"
                     data-id="${id}">
 
-                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                    <i class="fa-solid fa-trash"></i>
 
                 </button>
 
-            `;
 
-        }
+                <!-- COMPLETE -->
 
+                <button
+                    type="button"
+                    class="btn btn-outline-success"
+                    title="Complete"
+                    data-action="complete"
+                    data-id="${id}">
+
+                    <i class="fa-solid fa-check"></i>
+
+                </button>
+
+            </div>
+
+        `;
+
+    }
+
+
+    /*
+    ==================================================
+    COMPLETE
+    VIEW | PRINT
+    ==================================================
+    */
+
+    if (
+        status === "Complete"
+    ) {
 
         return `
 
@@ -7841,35 +9702,16 @@ if (
                 </button>
 
 
-                <!-- PAYMENT / PAYMENT HISTORY -->
-
-                ${paymentButton}
-
-
-                <!-- VOID -->
+                <!-- PRINT -->
 
                 <button
                     type="button"
-                    class="btn btn-outline-danger"
-                    title="Void"
-                    data-action="void"
+                    class="btn btn-outline-dark"
+                    title="Print"
+                    data-action="print"
                     data-id="${id}">
 
-                    <i class="fa-solid fa-ban"></i>
-
-                </button>
-
-
-                <!-- DUPLICATE -->
-
-                <button
-                    type="button"
-                    class="btn btn-outline-secondary"
-                    title="Duplicate"
-                    data-action="duplicate"
-                    data-id="${id}">
-
-                    <i class="fa-regular fa-copy"></i>
+                    <i class="fa-solid fa-print"></i>
 
                 </button>
 
@@ -7881,124 +9723,121 @@ if (
 
 
     /*
-==================================================
-VOID
-SAME ACTION AS DRAFT
-==================================================
-*/
+    ==================================================
+    LEGACY POSTED
+    VIEW | PRINT
+    ==================================================
+    */
 
-if (
-    technicalStatus === "Void"
-) {
+    if (
+        status === "Posted"
+    ) {
 
-    return `
+        return `
 
-        <div
-            class="btn-group btn-group-sm"
-            role="group">
+            <div
+                class="btn-group btn-group-sm"
+                role="group">
 
-            <!-- EDIT -->
+                <!-- VIEW -->
 
-            <button
-                type="button"
-                class="btn btn-outline-primary"
-                title="Edit"
-                data-action="edit"
-                data-id="${id}">
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    title="View"
+                    data-action="view"
+                    data-id="${id}">
 
-                <i class="fa-solid fa-pen"></i>
+                    <i class="fa-regular fa-eye"></i>
 
-            </button>
-
-
-            <!-- DELETE -->
-
-            <button
-                type="button"
-                class="btn btn-outline-danger"
-                title="Delete"
-                data-action="delete"
-                data-id="${id}">
-
-                <i class="fa-solid fa-trash"></i>
-
-            </button>
+                </button>
 
 
-            <!-- POST -->
+                <!-- PRINT -->
 
-            <button
-                type="button"
-                class="btn btn-outline-success"
-                title="Post"
-                data-action="post"
-                data-id="${id}">
+                <button
+                    type="button"
+                    class="btn btn-outline-dark"
+                    title="Print"
+                    data-action="print"
+                    data-id="${id}">
 
-                <i class="fa-solid fa-upload"></i>
+                    <i class="fa-solid fa-print"></i>
 
-            </button>
+                </button>
 
+            </div>
 
-            <!-- DUPLICATE -->
+        `;
 
-            <button
-                type="button"
-                class="btn btn-outline-secondary"
-                title="Duplicate"
-                data-action="duplicate"
-                data-id="${id}">
+    }
 
-                <i class="fa-regular fa-copy"></i>
-
-            </button>
-
-
-            <!-- VIEW -->
-
-            <button
-                type="button"
-                class="btn btn-outline-info"
-                title="View"
-                data-action="view"
-                data-id="${id}">
-
-                <i class="fa-regular fa-file-lines"></i>
-
-            </button>
-
-        </div>
-
-    `;
-
-}
 
     /*
     ==================================================
-    DEFAULT
+    LEGACY VOID
+    VIEW | PRINT
     ==================================================
     */
 
-    return "";
+    if (
+        status === "Void"
+    ) {
 
-}
-        /*
-    ======================================================
-    FORMAT CURRENCY
-    ======================================================
+        return `
+
+            <div
+                class="btn-group btn-group-sm"
+                role="group">
+
+                <!-- VIEW -->
+
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    title="View"
+                    data-action="view"
+                    data-id="${id}">
+
+                    <i class="fa-regular fa-eye"></i>
+
+                </button>
+
+
+                <!-- PRINT -->
+
+                <button
+                    type="button"
+                    class="btn btn-outline-dark"
+                    title="Print"
+                    data-action="print"
+                    data-id="${id}">
+
+                    <i class="fa-solid fa-print"></i>
+
+                </button>
+
+            </div>
+
+        `;
+
+    }
+
+
+    /*
+    ==================================================
+    UNKNOWN STATUS
+    ==================================================
     */
 
-    formatCurrency(value) {
+    console.warn(
+        "AP ACTION - UNKNOWN STATUS:",
+        status,
+        invoice
+    );
 
-    const amount =
-        Number(value || 0);
 
-    return new Intl.NumberFormat(
-        "id-ID",
-        {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
-        }
-    ).format(amount);
+    return "";
 
 }
     

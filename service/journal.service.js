@@ -577,9 +577,53 @@ if (insertDetails.length) {
         insertedDetails
     );
 
+    if (detailError) {
+
     console.error(
         "========== DETAIL INSERT ERROR =========="
     );
+
+    console.error(
+        "MESSAGE :",
+        detailError?.message
+    );
+
+    console.error(
+        "DETAILS :",
+        detailError?.details
+    );
+
+    console.error(
+        "HINT :",
+        detailError?.hint
+    );
+
+    console.error(
+        "CODE :",
+        detailError?.code
+    );
+
+    console.error(
+        "FULL ERROR :",
+        JSON.stringify(
+            detailError,
+            null,
+            2
+        )
+    );
+
+}
+else {
+
+    console.log(
+        "========== DETAIL INSERT SUCCESS =========="
+    );
+
+    console.table(
+        insertedDetails
+    );
+
+}
 
     console.error(
         "MESSAGE :",
@@ -839,12 +883,70 @@ async update(id, header, details = []) {
 /*
 ==========================================================
 DELETE GENERAL JOURNAL
+RESET LINKED ACCOUNT PAYABLE
 ==========================================================
 */
 
-async delete(id){
+async delete(id) {
 
-    try{
+    try {
+
+        if (!id) {
+
+            throw new Error(
+                "General Journal ID is required."
+            );
+
+        }
+
+
+        /*
+        ======================================================
+        RESET LINKED ACCOUNT PAYABLE
+        ======================================================
+        */
+
+        const {
+            data: resetAP,
+            error: apError
+        } = await supabase
+
+            .from(
+                TABLE.ACCOUNT_PAYABLE
+            )
+
+            .update({
+
+                status:
+                    "Draft",
+
+                gl_journal_id:
+                    null
+
+            })
+
+            .eq(
+                "gl_journal_id",
+                id
+            )
+
+            .select(
+                "id, invoice_no, status, gl_journal_id"
+            );
+
+
+        if (apError) {
+
+            throw apError;
+
+        }
+
+
+        console.log(
+            "GL DELETE - AP RESET:",
+            resetAP
+        );
+
 
         /*
         ======================================================
@@ -852,19 +954,28 @@ async delete(id){
         ======================================================
         */
 
-        await supabase
+        const {
+            error: detailError
+        } = await supabase
 
-            .from(TABLE.GL_JOURNAL_DETAIL)
+            .from(
+                TABLE.GL_JOURNAL_DETAIL
+            )
 
             .delete()
 
             .eq(
-
                 "journal_id",
-
                 id
-
             );
+
+
+        if (detailError) {
+
+            throw detailError;
+
+        }
+
 
         /*
         ======================================================
@@ -872,42 +983,56 @@ async delete(id){
         ======================================================
         */
 
-        const{
+        const {
+            error: headerError
+        } = await supabase
 
-            error
-
-        }=await supabase
-
-            .from(TABLE.GL_JOURNAL)
+            .from(
+                TABLE.GL_JOURNAL
+            )
 
             .delete()
 
             .eq(
-
                 "id",
-
                 id
-
             );
 
-        if(error){
 
-            throw error;
+        if (headerError) {
+
+            throw headerError;
 
         }
+
+
+        /*
+        ======================================================
+        SUCCESS
+        ======================================================
+        */
+
+        console.log(
+            "GENERAL JOURNAL DELETED:",
+            {
+                journal_id:
+                    id,
+
+                linked_ap_count:
+                    resetAP?.length || 0
+            }
+        );
+
 
         return true;
 
     }
 
-    catch(error){
+    catch (error) {
 
         console.error(
-
-            "GeneralJournalService.delete",
-
+            "GeneralJournalService.delete:",
             error
-
         );
 
         throw error;
@@ -915,7 +1040,6 @@ async delete(id){
     }
 
 }
-
 /*
 ==========================================================
 DUPLICATE GENERAL JOURNAL

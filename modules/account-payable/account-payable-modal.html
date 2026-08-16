@@ -160,6 +160,24 @@
 
                             </div>
 
+                            <div class="col-md-4">
+                            <label
+                                for="ap-form-journal-no"
+                                class="form-label">
+
+                                No. Journal
+
+                            </label>
+
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="ap-form-journal-no"
+                                name="journal_no"
+                                placeholder="AUTO"
+                                readonly>
+                                </div>
+
 
                             <!-- ==========================================
                                  INVOICE DATE
@@ -1452,6 +1470,118 @@
                     </i>
 
                     Ya, Void
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+<!--
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+ACCOUNT PAYABLE COMPLETE CONFIRMATION MODAL
+==========================================================
+-->
+
+<div
+    class="modal fade"
+    id="accountPayableCompleteModal"
+    tabindex="-1"
+    aria-hidden="true">
+
+    <div
+        class="modal-dialog modal-dialog-centered">
+
+        <div
+            class="modal-content">
+
+            <!-- HEADER -->
+
+            <div
+                class="modal-header">
+
+                <h5
+                    class="modal-title">
+
+                    Complete Account Payable
+
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close">
+                </button>
+
+            </div>
+
+
+            <!-- BODY -->
+
+            <div
+                class="modal-body">
+
+                <div
+                    class="text-center">
+
+                    <i
+                        class="fa-solid fa-circle-check text-success"
+                        style="font-size: 48px;">
+                    </i>
+
+                    <div
+                        class="mt-3">
+
+                        <h5>
+                            Complete Account Payable?
+                        </h5>
+
+                        <p
+                            class="text-muted mb-0">
+
+                            Account Payable ini akan
+                            dibuatkan GL Journal sebagai
+                            <strong>Draft</strong>.
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- FOOTER -->
+
+            <div
+                class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+
+                    Cancel
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="btn btn-success"
+                    id="btn-confirm-complete-ap">
+
+                    <i
+                        class="fa-solid fa-check me-1">
+                    </i>
+
+                    Complete
 
                 </button>
 
