@@ -1040,10 +1040,8 @@ async generateAPJournal(
                     : "",
 
             description:
-                `AP - ${
-                    invoice.invoice_no
-                    || ""
-                }`,
+                invoice?.description
+                || "",
 
             source_module:
                 "ACCOUNT PAYABLE",
@@ -6720,7 +6718,48 @@ async viewInvoice(id) {
             )
                 ? result.details
                 : [];
+        /*
+==================================================
+GL JOURNAL REFERENCE
+==================================================
+*/
 
+const journalId =
+    header?.gl_journal_id
+    || null;
+
+
+/*
+==================================================
+LOAD JOURNAL NO
+==================================================
+*/
+
+let journalNo = "";
+
+if (journalId) {
+
+    journalNo =
+        await this.getAPJournalNo(
+            journalId
+        );
+
+}
+
+
+/*
+==================================================
+SET JOURNAL NO
+==================================================
+*/
+
+if (this.apFormJournalNo) {
+
+    this.apFormJournalNo.value =
+        journalNo
+        || "";
+
+}
 
         /*
 ==================================================
@@ -6920,19 +6959,7 @@ this.invoiceDetails =
                 || "";
 
         }
-        /*
-==================================================
-JOURNAL NO
-==================================================
-*/
 
-if (this.apFormJournalNo) {
-
-    this.apFormJournalNo.value =
-        header.journal_no
-        || "";
-
-}
 
 
         /*
@@ -7340,6 +7367,7 @@ async editInvoice(id) {
 
         const header =
     result.header;
+    
 
 const details =
     Array.isArray(result.details)
@@ -8943,15 +8971,16 @@ showVoidConfirmation() {
 
                 }
             ).join("");
-            /*
+          /*
 ======================================================
-POSTED ROW COLOR
+ROW COLOR
+POSTED / COMPLETE
 ======================================================
 */
 
 this.tableBody
     .querySelectorAll(
-        "tr.ap-row-posted"
+        "tr.ap-row-posted, tr.ap-row-complete"
     )
     .forEach(row => {
 
@@ -8974,7 +9003,6 @@ this.tableBody
             });
 
     });
-
     }
     
 
@@ -9212,17 +9240,34 @@ ROW CLASS
 */
 
 let rowClass = "";
-let rowStyle = "";
+
+
+/*
+==================================================
+COMPLETE
+ABU-ABU
+==================================================
+*/
+
+if (
+    technicalStatus === "complete"
+) {
+
+    rowClass =
+        "ap-row-complete";
+
+}
 
 
 /*
 ==================================================
 POSTED
 ABU-ABU
+LEGACY
 ==================================================
 */
 
-if (
+else if (
     technicalStatus === "posted"
 ) {
 
@@ -9234,19 +9279,34 @@ if (
 
 /*
 ==================================================
-DRAFT / VOID
+DRAFT
 NORMAL
 ==================================================
 */
 
 else if (
     technicalStatus === "draft"
-    ||
+) {
+
+    rowClass =
+        "ap-row-draft";
+
+}
+
+
+/*
+==================================================
+VOID
+NORMAL / LIGHT
+==================================================
+*/
+
+else if (
     technicalStatus === "void"
 ) {
 
     rowClass =
-        "ap-row-normal";
+        "ap-row-void";
 
 }
     /*

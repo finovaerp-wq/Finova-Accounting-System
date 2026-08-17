@@ -184,7 +184,58 @@ get STATUS() {
 
             }
 
+            /*
+==================================================
+GL JOURNAL
+==================================================
+*/
 
+let glJournal = null;
+
+
+if (
+    header?.gl_journal_id
+) {
+
+    const {
+
+        data,
+        error
+
+    } = await supabase
+
+        .from(
+            TABLE.GL_JOURNAL
+        )
+
+        .select(`
+            id,
+            journal_no,
+            journal_date,
+            description,
+            status
+        `)
+
+        .eq(
+            "id",
+            header.gl_journal_id
+        )
+
+        .maybeSingle();
+
+
+    if (error) {
+
+        throw error;
+
+    }
+
+
+    glJournal =
+        data
+        || null;
+
+}
             /*
             ==================================================
             DETAIL
@@ -238,12 +289,19 @@ get STATUS() {
 
             return {
 
-                header,
+    header: {
 
-                details:
-                    details || []
+        ...header,
 
-            };
+        gl_journal:
+            glJournal
+
+    },
+
+    details:
+        details || []
+
+};
 
         }
 

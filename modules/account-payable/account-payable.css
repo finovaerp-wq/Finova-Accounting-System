@@ -205,7 +205,7 @@ Version : 2.0 Enterprise
     min-width:120px;
 
 }
-/*
+ /*
 ==========================================================
 ACCOUNT PAYABLE ROW STATUS
 ==========================================================
@@ -221,7 +221,7 @@ Normal / Strong
 
 .ap-row-posted {
 
-    opacity: 1;
+    opacity:1;
 
 }
 
@@ -229,13 +229,27 @@ Normal / Strong
 /*
 ==========================================================
 DRAFT
-Lighter
+Normal
 ==========================================================
 */
 
 .ap-row-draft {
 
-    opacity: 0.60;
+    opacity:1;
+
+}
+
+
+/*
+==========================================================
+COMPLETE
+Abu-abu
+==========================================================
+*/
+
+.ap-row-complete {
+
+    opacity:1;
 
 }
 
@@ -249,7 +263,59 @@ Lighter
 
 .ap-row-void {
 
-    opacity: 0.45;
+    opacity:0.45;
+
+}
+
+
+/* ==========================================================
+   COMPLETE
+========================================================== */
+
+#ap-table-body tr[data-status="complete"] td {
+
+    background-color:#e9ecef !important;
+
+    color:#6c757d !important;
+
+}
+
+
+/*
+==========================================================
+COMPLETE - TEXT / ICON / LINK
+==========================================================
+*/
+
+#ap-table-body tr[data-status="complete"] td * {
+
+    color:#6c757d !important;
+
+}
+
+
+/* ==========================================================
+   DRAFT
+========================================================== */
+
+#ap-table-body tr[data-status="draft"] td {
+
+    background-color:transparent !important;
+
+    color:inherit !important;
+
+}
+
+
+/* ==========================================================
+   VOID
+========================================================== */
+
+#ap-table-body tr[data-status="void"] td {
+
+    background-color:transparent !important;
+
+    color:inherit !important;
 
 }
 /* ==========================================================
@@ -290,3 +356,24 @@ Lighter
     background-color: transparent !important;
     color: inherit !important;
 }
+
+/*
+==========================================================
+ACCOUNT PAYABLE - COMPLETE ROW
+==========================================================
+*/
+
+#ap-table-body tr.ap-row-complete > td {
+    background-color: #e9ecef !important;
+    color: #6c757d !important;
+}
+
+#ap-table-body tr.ap-row-complete > td * {
+    color: #6c757d !important;
+}
+
+#ap-table-body tr.ap-row-complete > td .btn {
+    color: #6c757d !important;
+    border-color: #adb5bd !important;
+}
+

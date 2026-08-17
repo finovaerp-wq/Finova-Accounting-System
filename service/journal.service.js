@@ -52,7 +52,7 @@ export class GeneralJournalService {
 
 }
     
-    /*
+   /*
 ==========================================================
 GET ALL GENERAL JOURNAL
 ==========================================================
@@ -61,15 +61,38 @@ GET ALL GENERAL JOURNAL
 async getAll() {
 
     const { data, error } = await supabase
-        .from(TABLE.GL_JOURNAL)
-        .select("*");
 
-    console.log("DATA :", data);
-    console.log("ERROR :", error);
+        .from(
+            TABLE.GL_JOURNAL
+        )
+
+        .select("*")
+
+        .order(
+            "journal_no",
+            {
+                ascending: true
+            }
+        );
+
+
+    console.log(
+        "DATA :",
+        data
+    );
+
+    console.log(
+        "ERROR :",
+        error
+    );
+
 
     if (error) {
+
         throw error;
+
     }
+
 
     return data ?? [];
 
