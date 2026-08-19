@@ -2117,7 +2117,7 @@ createTableRow(journal, rowNumber) {
                  DESCRIPTION
             =========================================== -->
 
-            <td>
+            <td class="gl-journal-description">
 
                 ${journal.description ?? "-"}
 

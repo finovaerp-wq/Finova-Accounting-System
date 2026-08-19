@@ -387,9 +387,17 @@ Version : 2.0 Enterprise
 
     min-height:0;
 
+    width:100%;
+
+    max-width:100%;
+
     overflow:auto;
 
 }
+
+/* ==========================================================
+   TABLE
+========================================================== */
 
 /* ==========================================================
    TABLE
@@ -399,11 +407,15 @@ Version : 2.0 Enterprise
 
     width:100%;
 
+    max-width:100%;
+
     margin-bottom:0;
 
     border-collapse:separate;
 
     border-spacing:0;
+
+    table-layout:fixed;
 
 }
 
@@ -452,6 +464,33 @@ Version : 2.0 Enterprise
     vertical-align:middle;
 
     border-bottom:1px solid #F1F3F5;
+
+}
+
+
+/* ==========================================================
+   GL JOURNAL DESCRIPTION
+========================================================== */
+
+/* ==========================================================
+   GL JOURNAL DESCRIPTION
+========================================================== */
+
+#gl-journal-table td.gl-journal-description{
+
+    width:30%;
+
+    max-width:30%;
+
+    white-space:normal;
+
+    overflow-wrap:anywhere;
+
+    word-break:break-word;
+
+    line-height:1.5;
+
+    vertical-align:top;
 
 }
 

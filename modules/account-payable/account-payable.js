@@ -78,7 +78,7 @@ export class AccountPayable {
         this.currentInvoiceId = null;
         this.currentMode = "add";
         this.currentDetailId = null;
-        this.resetInvoiceDetailForm();
+        
         this.pendingDeleteDetailId = null;
 
 
@@ -3202,19 +3202,29 @@ async editInvoiceDetail(id) {
         }
 
 
-        /*
-        ==================================================
-        SHOW MODAL
-        ==================================================
-        */
+       /*
+==================================================
+RESET MODAL TAB
+Selalu mulai dari Header Info
+==================================================
+*/
 
-        const modal =
-            bootstrap.Modal.getOrCreateInstance(
-                this.accountPayableDetailModal
-            );
+this.resetAPModalTab();
 
 
-        modal.show();
+/*
+==================================================
+SHOW MODAL
+==================================================
+*/
+
+const modal =
+    bootstrap.Modal.getOrCreateInstance(
+        this.accountPayableModal
+    );
+
+
+modal.show();
 
 
         console.log(
@@ -5378,7 +5388,7 @@ async addInvoiceDetail() {
         */
 
         this.resetInvoiceDetailForm();
-        this.currentDetailId = null;
+        
         if (this.btnSaveAPDetail) {
 
     this.btnSaveAPDetail.innerHTML = `
@@ -5586,6 +5596,13 @@ resetInvoiceDetailForm() {
 
         }
     );
+    /*
+==================================================
+RESET CURRENT DETAIL ID
+==================================================
+*/
+
+this.currentDetailId = null;
 
 }
     /*
@@ -5868,7 +5885,8 @@ clearVendorTerms() {
     }
 
 }
-   /*
+
+/*
 ======================================================
 ADD ACCOUNT PAYABLE
 ======================================================
@@ -5877,7 +5895,10 @@ ADD ACCOUNT PAYABLE
 addInvoice() {
 
     this.currentInvoiceId = null;
+
     this.currentMode = "add";
+
+
     /*
     ==================================================
     CHECK MODAL
@@ -5906,6 +5927,15 @@ addInvoice() {
 
     /*
     ==================================================
+    RESET TAB
+    ==================================================
+    */
+
+    this.resetAPModalTab();
+
+
+    /*
+    ==================================================
     SHOW MODAL
     ==================================================
     */
@@ -5929,26 +5959,57 @@ resetAddForm() {
 
     /*
     ==================================================
-    SELECTED VENDOR
+    RESET TRANSACTION STATE
     ==================================================
     */
 
-    this.selectedVendor = null;
+    this.currentInvoiceId = null;
+
+    this.currentMode = "add";
+
+    this.currentDetailId = null;
+
+    this.pendingDeleteDetailId = null;
+
+   /*
+==================================================
+DETAIL
+==================================================
+*/
+
+this.invoiceDetails = [];
 
 
-    /*
-    ==================================================
-    VENDOR
-    ==================================================
-    */
+/*
+==================================================
+RESET TAX (+) / TAX (-)
+==================================================
+*/
 
-    if (this.apFormVendor) {
-
-        this.apFormVendor.value = "";
-
-    }
+this.resetAPTaxTables();
 
 
+if (this.apDetailBody) {
+
+    this.apDetailBody.innerHTML = `
+
+        <tr>
+
+            <td
+                colspan="9"
+                class="text-center
+                       text-muted
+                       py-4">
+
+                No detail added.
+
+            </td>
+
+        </tr>
+
+    `;
+
+}
     /*
     ==================================================
     TERM OF PAYMENT
@@ -6060,7 +6121,7 @@ if (this.apFormJournalNo) {
     ==================================================
     */
 
-    this.invoiceDetails = [];
+    
 
     if (this.apDetailBody) {
 
@@ -6123,6 +6184,196 @@ if (this.apFormJournalNo) {
 
 }
 
+/*
+======================================================
+RESET AP TAX TABLES
+Membersihkan history Tax (+) dan Tax (-)
+======================================================
+*/
+
+resetAPTaxTables() {
+
+    /*
+    ==================================================
+    TAX (+)
+    ==================================================
+    */
+
+    const taxPlusBody =
+        document.getElementById(
+            "ap-tax-plus-body"
+        );
+
+
+    if (taxPlusBody) {
+
+        taxPlusBody.innerHTML = `
+
+            <tr id="ap-tax-plus-empty">
+
+                <td
+                    colspan="7"
+                    class="text-center
+                           text-muted
+                           py-4">
+
+                    No Tax (+) found from Invoice Details.
+
+                </td>
+
+            </tr>
+
+        `;
+
+    }
+
+
+    /*
+    ==================================================
+    TAX (-)
+    ==================================================
+    */
+
+    const taxMinusBody =
+        document.getElementById(
+            "ap-tax-minus-body"
+        );
+
+
+    if (taxMinusBody) {
+
+        taxMinusBody.innerHTML = `
+
+            <tr id="ap-tax-minus-empty">
+
+                <td
+                    colspan="7"
+                    class="text-center
+                           text-muted
+                           py-4">
+
+                    No Tax (-) found from Invoice Details.
+
+                </td>
+
+            </tr>
+
+        `;
+
+    }
+
+}
+
+/*
+======================================================
+RESET AP MODAL TAB
+Always start from Header Info
+======================================================
+*/
+
+resetAPModalTab() {
+
+    const headerTab =
+        document.getElementById(
+            "ap-header-info-tab"
+        );
+
+
+    const tabs = [
+        "ap-header-info-tab",
+        "ap-invoice-details-tab",
+        "ap-tax-plus-tab",
+        "ap-tax-minus-tab"
+    ];
+
+
+    const panes = [
+        "ap-header-info-pane",
+        "ap-invoice-details-pane",
+        "ap-tax-plus-pane",
+        "ap-tax-minus-pane"
+    ];
+
+
+    /*
+    ==================================================
+    RESET TAB BUTTON
+    ==================================================
+    */
+
+    tabs.forEach(
+        id => {
+
+            const element =
+                document.getElementById(id);
+
+
+            if (!element) {
+
+                return;
+
+            }
+
+
+            element.classList.remove("active");
+
+            element.setAttribute(
+                "aria-selected",
+                "false"
+            );
+
+        }
+    );
+
+
+    /*
+    ==================================================
+    RESET TAB PANE
+    ==================================================
+    */
+
+    panes.forEach(
+        id => {
+
+            const element =
+                document.getElementById(id);
+
+
+            if (!element) {
+
+                return;
+
+            }
+
+
+            element.classList.remove(
+                "active",
+                "show"
+            );
+
+        }
+    );
+
+
+    /*
+    ==================================================
+    FORCE BOOTSTRAP HEADER TAB
+    ==================================================
+    */
+
+    if (headerTab) {
+
+        const tab =
+            bootstrap.Tab.getOrCreateInstance(
+                headerTab
+            );
+
+
+        tab.show();
+
+    }
+
+}
    /*
 ======================================================
 SAVE DRAFT
@@ -7905,7 +8156,7 @@ if (
 
         this.currentMode =
             "edit";
-
+       
 
         /*
         ==================================================
@@ -8180,7 +8431,15 @@ if (this.apFormJournalNo) {
         ==================================================
         */
 
+        
         this.renderInvoiceDetails();
+        /*
+        ==================================================
+        RESET TAB
+        ==================================================
+        */
+
+        this.resetAPModalTab();
 
 
         /*
@@ -8206,12 +8465,14 @@ if (this.apFormJournalNo) {
         */
 
         const modal =
-            bootstrap.Modal.getOrCreateInstance(
-                this.accountPayableModal
-            );
+    bootstrap.Modal.getOrCreateInstance(
+        this.accountPayableModal
+    );
 
 
-        modal.show();
+
+
+modal.show();
 
 
         console.log(
@@ -8236,6 +8497,7 @@ if (this.apFormJournalNo) {
     }
 
 }
+
 
 
   /*
