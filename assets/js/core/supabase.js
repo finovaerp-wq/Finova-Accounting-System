@@ -93,6 +93,7 @@ export const TABLE = {
     BANK: "mst_bank",
 
     CHART_OF_ACCOUNTS: "mst_chart_of_accounts",
+    TAX: "mst_taxes",
 
     GL_JOURNAL: "trx_gl_journal",
 

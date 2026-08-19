@@ -38,6 +38,13 @@ export class FinovaRouter {
                 html: "modules/chart-of-accounts/chart-of-accounts.html",
                 js: "modules/chart-of-accounts/chart-of-accounts.js",
                 className: "ChartOfAccounts"
+                
+            },
+            "tax": {
+                title: "Tax Master",
+                html: "modules/tax/tax.html",
+                js: "modules/tax/tax.js",
+                className: "Tax"
             },
 
             "account-payable": {
@@ -189,25 +196,148 @@ async loadModule(route) {
 
     try {
 
-        const url = new URL(`../../../${route.js}`, import.meta.url);
+        console.log(
+            "=========================================="
+        );
 
-        const module = await import(url.href);
+        console.log(
+            "FINOVA MODULE LOAD"
+        );
 
-        const page = new module[route.className]();
+        console.log(
+            "JS :",
+            route.js
+        );
 
-        if (typeof page.init === "function") {
-            await page.init();
+        console.log(
+            "CLASS :",
+            route.className
+        );
+
+
+        /*
+        ==============================================
+        MODULE URL
+        ==============================================
+        */
+
+        const url =
+            new URL(
+                route.js,
+                window.location.origin + "/"
+            );
+
+
+        console.log(
+            "MODULE URL :",
+            url.href
+        );
+
+
+        /*
+        ==============================================
+        IMPORT MODULE
+        ==============================================
+        */
+
+        const module =
+            await import(
+                url.href
+            );
+
+
+        console.log(
+            "MODULE IMPORTED :",
+            module
+        );
+
+
+        /*
+        ==============================================
+        GET CLASS
+        ==============================================
+        */
+
+        const PageClass =
+            module[
+                route.className
+            ];
+
+
+        if (!PageClass) {
+
+            throw new Error(
+                `Class "${route.className}" not found in ${route.js}`
+            );
+
         }
 
-    } catch (e) {
 
-        console.group("MODULE LOAD ERROR");
+        /*
+        ==============================================
+        CREATE INSTANCE
+        ==============================================
+        */
 
-        console.log("Module :", route.js);
+        const page =
+            new PageClass();
 
-        console.log("Class  :", route.className);
 
-        console.error(e);
+        console.log(
+            "MODULE INSTANCE :",
+            page
+        );
+
+
+        /*
+        ==============================================
+        INIT
+        ==============================================
+        */
+
+        if (
+            typeof page.init
+            ===
+            "function"
+        ) {
+
+            await page.init();
+
+        }
+
+
+        console.log(
+            "MODULE INITIALIZED :",
+            route.className
+        );
+
+
+        console.log(
+            "=========================================="
+        );
+
+    }
+
+    catch (error) {
+
+        console.group(
+            "MODULE LOAD ERROR"
+        );
+
+        console.error(
+            "Module :",
+            route.js
+        );
+
+        console.error(
+            "Class :",
+            route.className
+        );
+
+        console.error(
+            "Error :",
+            error
+        );
 
         console.groupEnd();
 

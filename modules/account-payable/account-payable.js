@@ -3882,7 +3882,25 @@ else {
         ==================================================
         */
 
-        this.renderInvoiceDetails();
+       this.renderInvoiceDetails();
+
+
+/*
+==================================================
+RENDER TAX (+)
+==================================================
+*/
+
+this.renderTaxPlus();
+
+
+/*
+==================================================
+RENDER TAX (-)
+==================================================
+*/
+
+this.renderTaxMinus();
 
 
         /*
@@ -4061,6 +4079,32 @@ updateInvoiceSummary() {
             total
         }
     );
+    /*
+==================================================
+SYNC TAX TABS
+==================================================
+*/
+
+this.renderTaxPlus();
+
+this.renderTaxMinus();
+
+
+/*
+==================================================
+DEBUG
+==================================================
+*/
+
+console.log(
+    "AP SUMMARY:",
+    {
+        subtotal,
+        tax,
+        wht,
+        total
+    }
+);
 
 }
 /*
@@ -4346,6 +4390,430 @@ renderInvoiceDetails() {
     */
 
     this.updateInvoiceSummary();
+
+}
+/*
+======================================================
+RENDER TAX (+)
+AUTO FROM INVOICE DETAILS
+======================================================
+*/
+
+renderTaxPlus() {
+
+    try {
+
+        /*
+        ==================================================
+        GET BODY
+        ==================================================
+        */
+
+        const body =
+            document.getElementById(
+                "ap-tax-plus-body"
+            );
+
+
+        if (!body) {
+
+            console.warn(
+                "Tax (+) table body not found."
+            );
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        FILTER DETAILS WITH TAX (+)
+        ==================================================
+        */
+
+        const taxDetails =
+            (this.invoiceDetails || [])
+            .filter(
+                detail =>
+                    Number(
+                        detail.tax_input_amount
+                        || 0
+                    ) > 0
+            );
+
+
+        /*
+        ==================================================
+        EMPTY
+        ==================================================
+        */
+
+        if (
+            taxDetails.length === 0
+        ) {
+
+            body.innerHTML = `
+                <tr
+                    id="ap-tax-plus-empty">
+
+                    <td
+                        colspan="7"
+                        class="text-center
+                               text-muted
+                               py-4">
+
+                        No Tax (+) found from Invoice Details.
+
+                    </td>
+
+                </tr>
+            `;
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        RENDER ROWS
+        ==================================================
+        */
+
+        body.innerHTML =
+            taxDetails
+            .map(
+                (
+                    detail,
+                    index
+                ) => {
+
+                    const taxBase =
+                        Number(
+                            detail.line_amount
+                            || 0
+                        );
+
+
+                    const taxRate =
+                        Number(
+                            detail.tax_input_rate
+                            || 0
+                        );
+
+
+                    const taxAmount =
+                        Number(
+                            detail.tax_input_amount
+                            || 0
+                        );
+
+
+                    return `
+
+                        <tr>
+
+                            <!-- NO -->
+
+                            <td>
+
+                                ${index + 1}
+
+                            </td>
+
+
+                            <!-- TAX CODE -->
+
+                            <td>
+
+                                TAX (+)
+
+                            </td>
+
+
+                            <!-- TAX NAME -->
+
+                            <td>
+
+                                Tax Input
+
+                            </td>
+
+
+                            <!-- TAX ACCOUNT -->
+
+                            <td>
+
+                                PIUTANG PPN
+
+                            </td>
+
+
+                            <!-- TAX BASE -->
+
+                            <td
+                                class="text-end">
+
+                                ${this.formatCurrency(
+                                    taxBase
+                                )}
+
+                            </td>
+
+
+                            <!-- RATE -->
+
+                            <td
+                                class="text-end">
+
+                                ${taxRate}%
+
+                            </td>
+
+
+                            <!-- TAX AMOUNT -->
+
+                            <td
+                                class="text-end
+                                       fw-semibold">
+
+                                ${this.formatCurrency(
+                                    taxAmount
+                                )}
+
+                            </td>
+
+                        </tr>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountPayable.renderTaxPlus:",
+            error
+        );
+
+    }
+
+}
+/*
+======================================================
+RENDER TAX (-)
+AUTO FROM INVOICE DETAILS
+======================================================
+*/
+
+renderTaxMinus() {
+
+    try {
+
+        /*
+        ==================================================
+        GET BODY
+        ==================================================
+        */
+
+        const body =
+            document.getElementById(
+                "ap-tax-minus-body"
+            );
+
+
+        if (!body) {
+
+            console.warn(
+                "Tax (-) table body not found."
+            );
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        FILTER DETAILS WITH TAX (-)
+        ==================================================
+        */
+
+        const taxDetails =
+            (this.invoiceDetails || [])
+            .filter(
+                detail =>
+                    Number(
+                        detail.withholding_tax_amount
+                        || 0
+                    ) > 0
+            );
+
+
+        /*
+        ==================================================
+        EMPTY
+        ==================================================
+        */
+
+        if (
+            taxDetails.length === 0
+        ) {
+
+            body.innerHTML = `
+                <tr
+                    id="ap-tax-minus-empty">
+
+                    <td
+                        colspan="7"
+                        class="text-center
+                               text-muted
+                               py-4">
+
+                        No Tax (-) found from Invoice Details.
+
+                    </td>
+
+                </tr>
+            `;
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        RENDER ROWS
+        ==================================================
+        */
+
+        body.innerHTML =
+            taxDetails
+            .map(
+                (
+                    detail,
+                    index
+                ) => {
+
+                    const taxBase =
+                        Number(
+                            detail.line_amount
+                            || 0
+                        );
+
+
+                    const taxRate =
+                        Number(
+                            detail.withholding_tax_rate
+                            || 0
+                        );
+
+
+                    const taxAmount =
+                        Number(
+                            detail.withholding_tax_amount
+                            || 0
+                        );
+
+
+                    return `
+
+                        <tr>
+
+                            <!-- NO -->
+
+                            <td>
+
+                                ${index + 1}
+
+                            </td>
+
+
+                            <!-- TAX CODE -->
+
+                            <td>
+
+                                WHT
+
+                            </td>
+
+
+                            <!-- TAX NAME -->
+
+                            <td>
+
+                                Withholding Tax
+
+                            </td>
+
+
+                            <!-- TAX ACCOUNT -->
+
+                            <td>
+
+                                HUTANG PPH 22/23
+
+                            </td>
+
+
+                            <!-- TAX BASE -->
+
+                            <td
+                                class="text-end">
+
+                                ${this.formatCurrency(
+                                    taxBase
+                                )}
+
+                            </td>
+
+
+                            <!-- RATE -->
+
+                            <td
+                                class="text-end">
+
+                                ${taxRate}%
+
+                            </td>
+
+
+                            <!-- TAX AMOUNT -->
+
+                            <td
+                                class="text-end
+                                       fw-semibold">
+
+                                ${this.formatCurrency(
+                                    taxAmount
+                                )}
+
+                            </td>
+
+                        </tr>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountPayable.renderTaxMinus:",
+            error
+        );
+
+    }
 
 }
 /*

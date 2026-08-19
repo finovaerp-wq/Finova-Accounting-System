@@ -89,33 +89,40 @@ export class FinovaSidebar {
         )}
 
         ${this.menuGroup(
-            "Master Data",
-            "fa-solid fa-layer-group",
-            [
+    "Master Data",
+    "fa-solid fa-layer-group",
+    [
 
-                this.menuItem(
-                    "User Management",
-                    "fa-solid fa-users-gear",
-                    "user-management",
-                    true
-                ),
+        this.menuItem(
+            "User Management",
+            "fa-solid fa-users-gear",
+            "user-management",
+            true
+        ),
 
-                this.menuItem(
-                    "Business Partner",
-                    "fa-solid fa-handshake",
-                    "business-partner",
-                    true
-                ),
+        this.menuItem(
+            "Business Partner",
+            "fa-solid fa-handshake",
+            "business-partner",
+            true
+        ),
 
-                this.menuItem(
-                    "Chart Of Accounts",
-                    "fa-solid fa-book-open",
-                    "chart-of-accounts",
-                    true
-                )
+        this.menuItem(
+            "Chart Of Accounts",
+            "fa-solid fa-book-open",
+            "chart-of-accounts",
+            true
+        ),
 
-            ]
-        )}
+        this.menuItem(
+            "Tax Master",
+            "fa-solid fa-percent",
+            "tax",
+            true
+        )
+
+    ]
+)}
 
        ${this.menuGroup(
     "Finance",

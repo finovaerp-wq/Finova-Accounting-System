@@ -1,70 +1,10 @@
 /* ==========================================================
    FINOVA ACCOUNTING SYSTEM
    GLOBAL TABLE COMPONENT
-   Version : 1.0.0
+   Version : 1.1.0
 ========================================================== */
 
-/* ==========================================================
-   TABLE
-========================================================== */
 
-.finova-table{
-
-    width:100%;
-
-    margin-bottom:0;
-
-    vertical-align:middle;
-
-}
-
-/* ==========================================================
-   TABLE HEADER
-========================================================== */
-
-.finova-table thead{
-
-    background:#F8FAFC;
-
-}
-
-.finova-table thead th{
-
-    padding:14px 16px;
-
-    border-bottom:1px solid var(--border-color);
-
-    font-size:13px;
-
-    font-weight:600;
-
-    color:var(--text-primary);
-
-    white-space:nowrap;
-
-    vertical-align:middle;
-
-}
-
-/* ==========================================================
-   TABLE BODY
-========================================================== */
-
-.finova-table tbody td{
-
-    padding:14px 16px;
-
-    height:56px;
-
-    vertical-align:middle;
-
-    border-bottom:1px solid #EEF2F7;
-
-    font-size:13px;
-
-    color:var(--text-secondary);
-
-}
 /* ==========================================================
    TABLE CARD STRUCTURE
 ========================================================== */
@@ -117,7 +57,22 @@
 
     width:100%;
 
+    height:100%;
+
+    background:#FFFFFF;
+
+    border:1px solid #D7DBE0;
+
+    border-radius:6px;
+
+    box-shadow:
+        0 1px 2px rgba(0,0,0,.05),
+        0 4px 10px rgba(0,0,0,.04);
+
+    overflow:hidden;
+
 }
+
 
 /* ==========================================================
    TABLE RESPONSIVE AREA
@@ -140,6 +95,17 @@
    TABLE
 ========================================================== */
 
+.finova-table{
+
+    width:100%;
+
+    margin-bottom:0;
+
+    vertical-align:middle;
+
+}
+
+
 .finova-table-container table{
 
     width:100%;
@@ -152,6 +118,101 @@
 
 }
 
+
+/* ==========================================================
+   TABLE HEADER
+========================================================== */
+
+.finova-table thead{
+
+    background:#F5F7FA;
+
+}
+
+
+.finova-table thead th{
+
+    position:relative;
+
+    padding:14px 16px;
+
+    background:#F5F7FA;
+
+    border-top:1px solid #FFFFFF;
+
+    border-bottom:1px solid #D1D5DB;
+
+    font-size:13px;
+
+    font-weight:600;
+
+    color:#111827;
+
+    white-space:nowrap;
+
+    vertical-align:middle;
+
+    box-shadow:
+        inset 0 -1px 0 rgba(255,255,255,.75);
+
+}
+
+
+/* ==========================================================
+   HEADER SEPARATOR
+========================================================== */
+
+.finova-table thead th + th{
+
+    border-left:1px solid #E5E7EB;
+
+}
+
+
+/* ==========================================================
+   HEADER FIRST COLUMN
+========================================================== */
+
+.finova-table thead th:first-child{
+
+    border-top-left-radius:5px;
+
+}
+
+
+/* ==========================================================
+   HEADER LAST COLUMN
+========================================================== */
+
+.finova-table thead th:last-child{
+
+    border-top-right-radius:5px;
+
+}
+
+/* ==========================================================
+   TABLE BODY
+========================================================== */
+
+.finova-table tbody td{
+
+    padding:14px 16px;
+
+    height:56px;
+
+    vertical-align:middle;
+
+    border-bottom:1px solid #EEF2F7;
+
+    font-size:13px;
+
+    color:var(--text-secondary);
+
+    background:#FFFFFF;
+
+}
+
+
 /* ==========================================================
    STRIPED
 ========================================================== */
@@ -162,36 +223,47 @@
 
 }
 
+
+.finova-table tbody tr:nth-child(even) td{
+
+    background:#FCFCFD;
+
+}
+
+
 /* ==========================================================
    HOVER
 ========================================================== */
 
 .finova-table.table-hover tbody tr{
 
-    transition:background .20s ease;
+    transition:
+        background .20s ease,
+        box-shadow .20s ease;
 
 }
+
 
 .finova-table.table-hover tbody tr:hover{
 
     background:#F5F9FF;
 
 }
-/* ==========================================================
-   TABLE INTERNAL SCROLL
-========================================================== */
 
-.finova-table-container{
 
-    height:100%;
+.finova-table.table-hover tbody tr:hover td{
+
+    background:#F5F9FF;
 
 }
 
 
-.finova-table-container .table-responsive{
+/* ==========================================================
+   LAST ROW
+========================================================== */
 
-    flex:1;
+.finova-table tbody tr:last-child td{
 
-    overflow:auto;
+    border-bottom:0;
 
 }
