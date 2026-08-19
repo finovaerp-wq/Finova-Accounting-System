@@ -2,7 +2,7 @@
 ==========================================================
 FINOVA ACCOUNTING SYSTEM
 Business Partner
-Version : 2.0 Enterprise
+Version : 2.1 Enterprise
 ==========================================================
 */
 
@@ -10,7 +10,6 @@ Version : 2.0 Enterprise
 /* ==========================================================
    BUSINESS PARTNER PAGE
 ========================================================== */
-
 
 .business-partner-page{
 
@@ -22,14 +21,14 @@ Version : 2.0 Enterprise
 
     min-height:0;
 
-}
+    width:100%;
 
+}
 
 
 /* ==========================================================
    TABLE CARD
 ========================================================== */
-
 
 .business-partner-table-card{
 
@@ -37,7 +36,7 @@ Version : 2.0 Enterprise
 
     flex-direction:column;
 
-    flex:1;
+    flex:1 1 auto;
 
     min-height:0;
 
@@ -46,11 +45,9 @@ Version : 2.0 Enterprise
 }
 
 
-
 /* ==========================================================
    CARD BODY
 ========================================================== */
-
 
 .business-partner-table-card .finova-card-body{
 
@@ -58,62 +55,132 @@ Version : 2.0 Enterprise
 
     flex-direction:column;
 
-    flex:1;
+    flex:1 1 auto;
 
     min-height:0;
 
     padding:0;
 
-}
+    overflow:hidden;
 
+}
 
 
 /* ==========================================================
    TABLE CONTAINER
+   FOLLOW GLOBAL TABLE
 ========================================================== */
 
-
-.business-partner-table-card .finova-table-container{
+.business-partner-table-card
+.finova-table-container{
 
     display:flex;
 
     flex-direction:column;
 
-    flex:1;
+    flex:1 1 auto;
 
     min-height:0;
+
+    width:100%;
+
+    height:100%;
+
+    background:#FFFFFF;
+
+    border:1px solid #D7DBE0;
+
+    border-radius:6px;
+
+    box-shadow:
+        0 1px 2px rgba(0,0,0,.05),
+        0 4px 10px rgba(0,0,0,.04);
+
+    overflow:hidden;
 
 }
 
 
-
 /* ==========================================================
-   TABLE SCROLL
+   TABLE RESPONSIVE
 ========================================================== */
 
+.business-partner-table-card
+.finova-table-container
+.table-responsive{
 
-.business-partner-table-card .table-responsive{
+    display:block;
 
-    flex:1;
+    flex:1 1 auto;
 
     min-height:0;
+
+    width:100%;
 
     overflow:auto;
 
 }
 
 
+/* ==========================================================
+   TABLE
+========================================================== */
+
+.business-partner-table-card
+.finova-table{
+
+    width:100%;
+
+    margin-bottom:0;
+
+    vertical-align:middle;
+
+}
+
+
+/* ==========================================================
+   TABLE FOOTER / PAGINATION
+========================================================== */
+
+.business-partner-table-card
+.card-footer{
+
+    flex-shrink:0;
+
+    background:#FFFFFF;
+
+    border:0;
+
+    border-top:1px solid #EEF2F7;
+
+}
+
 
 /* ==========================================================
    PAGINATION
 ========================================================== */
 
-
-.business-partner-table-card 
+.business-partner-table-card
 .finova-pagination-wrapper{
 
     flex-shrink:0;
 
     margin-top:0;
+
+}
+
+
+/* ==========================================================
+   TABLE CARD SHADOW
+   LIGHT PREMIUM DEPTH
+========================================================== */
+
+.business-partner-table-card{
+
+    border-radius:10px;
+
+    box-shadow:
+        0 1px 2px rgba(15,23,42,.04),
+        0 4px 12px rgba(15,23,42,.04);
 
 }

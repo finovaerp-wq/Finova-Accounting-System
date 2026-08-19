@@ -2,7 +2,7 @@
 ==========================================================
 FINOVA ACCOUNTING SYSTEM
 Chart Of Accounts
-Version : 2.0 Enterprise
+Version : 2.1 Enterprise
 ==========================================================
 */
 
@@ -21,8 +21,9 @@ Version : 2.0 Enterprise
 
     min-height:0;
 
-}
+    width:100%;
 
+}
 
 
 /* ==========================================================
@@ -35,14 +36,13 @@ Version : 2.0 Enterprise
 
     flex-direction:column;
 
-    flex:1;
+    flex:1 1 auto;
 
     min-height:0;
 
     overflow:hidden;
 
 }
-
 
 
 /* ==========================================================
@@ -55,7 +55,7 @@ Version : 2.0 Enterprise
 
     flex-direction:column;
 
-    flex:1;
+    flex:1 1 auto;
 
     min-height:0;
 
@@ -64,9 +64,9 @@ Version : 2.0 Enterprise
 }
 
 
-
 /* ==========================================================
    TABLE CONTAINER
+   USE GLOBAL FINOVA TABLE STYLE
 ========================================================== */
 
 .coa-table-card .finova-table-container{
@@ -75,12 +75,13 @@ Version : 2.0 Enterprise
 
     flex-direction:column;
 
-    flex:1;
+    flex:1 1 auto;
 
     min-height:0;
 
-}
+    width:100%;
 
+}
 
 
 /* ==========================================================
@@ -89,14 +90,15 @@ Version : 2.0 Enterprise
 
 .coa-table-card .table-responsive{
 
-    flex:1;
+    flex:1 1 auto;
 
     min-height:0;
+
+    width:100%;
 
     overflow:auto;
 
 }
-
 
 
 /* ==========================================================
