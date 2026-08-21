@@ -1,0 +1,618 @@
+/*
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+MODULE : TAX MASTER
+
+Version : 2.1 Enterprise
+
+TABLE STANDARD :
+GLOBAL TABLE COMPONENT
+
+VISUAL STANDARD :
+BUSINESS PARTNER / CHART OF ACCOUNTS
+
+NOTE :
+- Header aligned with BP / COA
+- Filter aligned with BP / COA
+- Table visual controlled by Global Table CSS
+- Pagination controlled by Global Pagination CSS
+==========================================================
+*/
+
+
+/* ==========================================================
+   TAX PAGE
+========================================================== */
+
+.tax-page {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    width: 100%;
+
+}
+
+
+/* ==========================================================
+   PAGE HEADER
+   SAME AS BP / COA
+========================================================== */
+
+.tax-page
+> .finova-page-header {
+
+    width: 100%;
+
+    margin-bottom: 8px !important;
+
+    flex-shrink: 0;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   FILTER CARD
+   SAME AS BP
+========================================================== */
+
+.tax-page
+> .tax-filter-card {
+
+    width: 100% !important;
+
+    max-width: none !important;
+
+    margin: 0 !important;
+
+    flex: 0 0 auto;
+
+    box-sizing: border-box;
+
+    border-radius: 12px;
+
+}
+
+
+/* ==========================================================
+   FILTER CARD BODY
+   SAME AS BP
+========================================================== */
+
+.tax-filter-card
+> .finova-card-body {
+
+    width: 100%;
+
+    padding: 8px 20px 6px 20px !important;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   FILTER ROW
+========================================================== */
+
+.tax-filter-card
+> .finova-card-body
+> .row {
+
+    width: 100% !important;
+
+    margin: 0 !important;
+
+    padding: 0 !important;
+
+    box-sizing: border-box;
+
+    align-items: end !important;
+
+}
+
+
+/* ==========================================================
+   FILTER COLUMN
+========================================================== */
+
+.tax-filter-card
+> .finova-card-body
+> .row
+> [class*="col-"] {
+
+    min-width: 0;
+
+    margin: 0;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   FILTER LABEL
+   SAME AS BP
+========================================================== */
+
+.tax-filter-card
+.form-label {
+
+    display: block;
+
+    margin-top: 0 !important;
+
+    margin-bottom: 6px !important;
+
+    color: #111827 !important;
+
+    font-size: 14px !important;
+
+    font-weight: 600 !important;
+
+    line-height: 1.2 !important;
+
+    text-align: left;
+
+}
+
+
+/* ==========================================================
+   FILTER INPUT & SELECT
+   SAME AS BP
+========================================================== */
+
+.tax-filter-card
+.form-control,
+
+.tax-filter-card
+.form-select {
+
+    width: 100% !important;
+
+    height: 46px !important;
+
+    min-height: 46px !important;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   TABLE CARD
+========================================================== */
+
+.tax-table-card {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    width: 100%;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   TABLE CARD BODY
+========================================================== */
+
+.tax-table-card
+.finova-card-body {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    padding: 0 !important;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   TABLE CONTAINER
+========================================================== */
+
+.tax-table-card
+.finova-table-container {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    width: 100%;
+
+    height: 100%;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   TABLE RESPONSIVE
+========================================================== */
+
+.tax-table-card
+.finova-table-container
+.table-responsive {
+
+    display: block;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    width: 100%;
+
+    overflow: auto;
+
+}
+
+
+/* ==========================================================
+   TABLE
+========================================================== */
+
+.tax-table-card
+.finova-table {
+
+    width: 100%;
+
+    margin-bottom: 0;
+
+    vertical-align: middle;
+
+}
+
+
+/* ==========================================================
+   TABLE HEADER
+   SAME AS BP / COA
+========================================================== */
+
+.tax-table-card
+.finova-table
+thead
+th {
+
+    font-weight: 700 !important;
+
+    color: #111827 !important;
+
+}
+
+
+/* ==========================================================
+   TABLE BODY
+========================================================== */
+
+.tax-table-card
+.finova-table
+tbody
+td {
+
+    font-weight: 400 !important;
+
+    color: #1F2937 !important;
+
+}
+
+
+/* ==========================================================
+   REMOVE UNWANTED BOLD
+========================================================== */
+
+.tax-table-card
+.finova-table
+tbody
+td strong,
+
+.tax-table-card
+.finova-table
+tbody
+td b,
+
+.tax-table-card
+.finova-table
+tbody
+td .fw-bold,
+
+.tax-table-card
+.finova-table
+tbody
+td .fw-semibold {
+
+    font-weight: 400 !important;
+
+}
+
+
+/* ==========================================================
+   NUMBER COLUMN
+========================================================== */
+
+.tax-table-card
+.finova-table
+th:first-child,
+
+.tax-table-card
+.finova-table
+td:first-child {
+
+    text-align: center !important;
+
+    vertical-align: middle !important;
+
+}
+
+
+/* ==========================================================
+   TYPE COLUMN
+========================================================== */
+
+.tax-table-card
+.finova-table
+th:nth-child(4),
+
+.tax-table-card
+.finova-table
+td:nth-child(4) {
+
+    text-align: center !important;
+
+}
+
+
+/* ==========================================================
+   RATE COLUMN
+========================================================== */
+
+.tax-table-card
+.finova-table
+th:nth-child(5),
+
+.tax-table-card
+.finova-table
+td:nth-child(5) {
+
+    text-align: right !important;
+
+}
+
+
+/* ==========================================================
+   STATUS COLUMN
+========================================================== */
+
+.tax-table-card
+.finova-table
+th:nth-child(8),
+
+.tax-table-card
+.finova-table
+td:nth-child(8) {
+
+    text-align: center !important;
+
+}
+
+
+/* ==========================================================
+   ACTION COLUMN
+========================================================== */
+
+.tax-table-card
+.finova-table
+th:nth-child(9),
+
+.tax-table-card
+.finova-table
+td:nth-child(9) {
+
+    text-align: center !important;
+
+    vertical-align: middle !important;
+
+}
+
+
+/* ==========================================================
+   ACTION BUTTON GROUP
+========================================================== */
+
+.tax-table-card
+.finova-table
+tbody
+td:nth-child(9)
+.btn-group {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+}
+
+
+/* ==========================================================
+   PAGINATION
+   SAME AS BP / COA
+========================================================== */
+
+.tax-table-card
+.finova-table-container
+.finova-pagination-wrapper {
+
+    flex: 0 0 auto;
+
+    width: 100%;
+
+    margin-top: auto;
+
+}
+
+
+/* ==========================================================
+   PAGINATION LEFT
+========================================================== */
+
+.tax-table-card
+.finova-pagination-left {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+}
+
+
+/* ==========================================================
+   PAGINATION LABEL
+========================================================== */
+
+.tax-table-card
+.finova-pagination-label {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   PAGINATION TOTAL
+========================================================== */
+
+.tax-table-card
+.finova-pagination-total {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    min-width: 18px;
+
+    margin-left: 2px;
+
+}
+
+
+/* ==========================================================
+   TAX MODAL
+========================================================== */
+
+#taxModal
+.modal-content {
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   TAX MODAL LABEL
+========================================================== */
+
+#taxModal
+.form-label {
+
+    color: #1F2937;
+
+}
+
+
+/* ==========================================================
+   TAX MODAL CONTROL
+========================================================== */
+
+#taxModal
+.form-control,
+
+#taxModal
+.form-select {
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   TAX MODAL TEXTAREA
+========================================================== */
+
+#taxModal
+textarea.form-control {
+
+    height: auto;
+
+}
+
+
+/* ==========================================================
+   TABLET
+========================================================== */
+
+@media (max-width: 1200px) {
+
+    .tax-filter-card
+    > .finova-card-body {
+
+        padding-left: 16px !important;
+
+        padding-right: 16px !important;
+
+    }
+
+}
+
+
+/* ==========================================================
+   MOBILE
+========================================================== */
+
+@media (max-width: 768px) {
+
+    .tax-filter-card
+    > .finova-card-body {
+
+        padding: 8px 16px !important;
+
+    }
+
+}
+
+
+/* ==========================================================
+   END TAX MASTER CSS
+========================================================== */

@@ -1,18 +1,20 @@
 <!--
-======================================================
+===========================================
 FINOVA ACCOUNTING SYSTEM
-MODULE : TAX MASTER
-Version : 2.1 Enterprise
-======================================================
+Tax Master Module
+Version : 2.1.0
+===========================================
 -->
 
 <div class="finova-page tax-page">
 
-    <!-- ==================================================
+    <!-- ==========================================
          PAGE HEADER
-    =================================================== -->
+    =========================================== -->
 
     <div class="finova-page-header">
+
+        <!-- LEFT -->
 
         <div class="finova-page-header-left">
 
@@ -27,6 +29,8 @@ Version : 2.1 Enterprise
         </div>
 
 
+        <!-- RIGHT -->
+
         <div class="finova-page-header-right">
 
             <button
@@ -34,17 +38,40 @@ Version : 2.1 Enterprise
                 id="btn-add-tax"
                 class="btn btn-primary finova-btn">
 
-                <i class="fa-solid fa-plus"></i>
+                <i class="fas fa-plus"></i>
                 Add Tax
 
             </button>
+
+
+            <button
+                type="button"
+                id="btn-export-tax"
+                class="btn btn-outline-success finova-btn">
+
+                <i class="fas fa-file-excel"></i>
+                Download Excel
+
+            </button>
+
+
+            <button
+                type="button"
+                id="btn-preview-tax"
+                class="btn btn-outline-primary finova-btn">
+
+                <i class="fas fa-print"></i>
+                Preview HTML
+
+            </button>
+
 
             <button
                 type="button"
                 id="btn-refresh-tax"
                 class="btn btn-outline-secondary finova-btn">
 
-                <i class="fa-solid fa-rotate-right"></i>
+                <i class="fas fa-rotate-right"></i>
                 Refresh
 
             </button>
@@ -54,119 +81,100 @@ Version : 2.1 Enterprise
     </div>
 
 
-    <!-- ==================================================
-         FILTER
-    =================================================== -->
+    <!-- ==========================================
+     TOOLBAR
+=========================================== -->
 
-    <div class="finova-card tax-filter-card mb-1">
+<div class="finova-card tax-filter-card mb-1">
 
-        <div class="finova-card-body">
+    <div class="finova-card-body">
 
-            <div class="row align-items-end g-3">
+        <div class="row align-items-end g-3">
 
-                <!-- SEARCH -->
+            <!-- SEARCH -->
 
-                <div class="col-lg-5">
+            <div class="col-lg-5">
 
-                    <label
-                        for="tax-filter-keyword"
-                        class="form-label">
+                <label
+                    for="tax-filter-keyword"
+                    class="form-label">
 
-                        Search
+                    Search
 
-                    </label>
+                </label>
 
-                    <input
-                        type="text"
-                        id="tax-filter-keyword"
-                        class="form-control finova-control"
-                        placeholder="Search Tax Code, Tax Name or Description"
-                        autocomplete="off">
+                <input
+                    type="text"
+                    id="tax-filter-keyword"
+                    class="form-control finova-control"
+                    placeholder="Search Tax Code, Tax Name or Description"
+                    autocomplete="off">
 
-                </div>
-
-
-                <!-- TYPE -->
-
-                <div class="col-lg-3">
-
-                    <label
-                        for="tax-filter-type"
-                        class="form-label">
-
-                        Tax Type
-
-                    </label>
-
-                    <select
-                        id="tax-filter-type"
-                        class="form-select finova-control">
-
-                        <option value="">
-                            All Type
-                        </option>
-
-                        <option value="PLUS">
-                            PLUS
-                        </option>
-
-                        <option value="MINUS">
-                            MINUS
-                        </option>
-
-                    </select>
-
-                </div>
+            </div>
 
 
-                <!-- STATUS -->
+            <!-- TAX TYPE -->
 
-                <div class="col-lg-2">
+            <div class="col-lg-2">
 
-                    <label
-                        for="tax-filter-status"
-                        class="form-label">
+                <label
+                    for="tax-filter-type"
+                    class="form-label">
 
-                        Status
+                    Tax Type
 
-                    </label>
+                </label>
 
-                    <select
-                        id="tax-filter-status"
-                        class="form-select finova-control">
+                <select
+                    id="tax-filter-type"
+                    class="form-select finova-control">
 
-                        <option value="">
-                            All Status
-                        </option>
+                    <option value="">
+                        All Type
+                    </option>
 
-                        <option value="true">
-                            Active
-                        </option>
+                    <option value="PLUS">
+                        PLUS
+                    </option>
 
-                        <option value="false">
-                            Inactive
-                        </option>
+                    <option value="MINUS">
+                        MINUS
+                    </option>
 
-                    </select>
+                </select>
 
-                </div>
+            </div>
 
 
-                <!-- FIND -->
+            <!-- STATUS -->
 
-                <div class="col-lg-2">
+            <div class="col-lg-2">
 
-                    <button
-                        type="button"
-                        id="btn-find-tax"
-                        class="btn btn-primary w-100 finova-btn">
+                <label
+                    for="tax-filter-status"
+                    class="form-label">
 
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        Find
+                    Status
 
-                    </button>
+                </label>
 
-                </div>
+                <select
+                    id="tax-filter-status"
+                    class="form-select finova-control">
+
+                    <option value="">
+                        All Status
+                    </option>
+
+                    <option value="true">
+                        Active
+                    </option>
+
+                    <option value="false">
+                        Inactive
+                    </option>
+
+                </select>
 
             </div>
 
@@ -174,16 +182,21 @@ Version : 2.1 Enterprise
 
     </div>
 
+</div>
 
-    <!-- ==================================================
-         TABLE
-    =================================================== -->
+    <!-- ==========================================
+         DATA TABLE
+    =========================================== -->
 
     <div class="finova-card finova-table-card tax-table-card">
 
         <div class="finova-card-body no-padding">
 
             <div class="finova-table-container">
+
+                <!-- ==========================================
+                     TABLE
+                =========================================== -->
 
                 <div class="table-responsive">
 
@@ -201,48 +214,66 @@ Version : 2.1 Enterprise
 
                                 </th>
 
-                                <th style="width:110px">
+
+                                <th
+                                    class="finova-table-code"
+                                    style="width:120px">
+
                                     Tax Code
+
                                 </th>
 
-                                <th>
+
+                                <th class="finova-table-name">
+
                                     Tax Name
-                                </th>
-
-                                <th
-                                    class="text-center"
-                                    style="width:90px">
-
-                                    Type
 
                                 </th>
 
-                                <th
-                                    class="text-end"
-                                    style="width:90px">
-
-                                    Rate
-
-                                </th>
-
-                                <th>
-                                    Tax Account
-                                </th>
-
-                                <th>
-                                    Offset Account
-                                </th>
 
                                 <th
                                     class="text-center"
                                     style="width:100px">
 
+                                    Type
+
+                                </th>
+
+
+                                <th
+                                    class="text-end"
+                                    style="width:100px">
+
+                                    Rate
+
+                                </th>
+
+
+                                <th>
+
+                                    Tax Account
+
+                                </th>
+
+
+                                <th>
+
+                                    Offset Account
+
+                                </th>
+
+
+                                <th
+                                    class="finova-table-status"
+                                    style="width:110px">
+
                                     Status
 
                                 </th>
 
+
                                 <th
-                                    class="text-center"
+                                    class="finova-table-action"
                                     style="width:110px">
 
                                     Action
@@ -258,11 +289,23 @@ Version : 2.1 Enterprise
 
                             <tr>
 
-                                <td
-                                    colspan="9"
-                                    class="text-center py-5 text-muted">
+                                <td colspan="9">
 
-                                    Loading...
+                                    <div class="finova-empty">
+
+                                        <i class="fas fa-folder-open"></i>
+
+                                        <h5>
+                                            No Tax Data Found
+                                        </h5>
+
+                                        <p>
+                                            Click
+                                            <strong>Add Tax</strong>
+                                            to create your first Tax.
+                                        </p>
+
+                                    </div>
 
                                 </td>
 
@@ -275,13 +318,15 @@ Version : 2.1 Enterprise
                 </div>
 
 
-                <!-- ==================================================
+                <!-- ==========================================
                      GLOBAL PAGINATION
-                =================================================== -->
+                =========================================== -->
 
                 <div class="finova-pagination-wrapper">
 
                     <div class="finova-pagination-left">
+
+                        <!-- FIRST -->
 
                         <button
                             type="button"
@@ -294,6 +339,8 @@ Version : 2.1 Enterprise
                         </button>
 
 
+                        <!-- PREVIOUS -->
+
                         <button
                             type="button"
                             id="tax-pagination-prev"
@@ -305,10 +352,16 @@ Version : 2.1 Enterprise
                         </button>
 
 
+                        <!-- PAGE -->
+
                         <span class="finova-pagination-label">
+
                             Page
+
                         </span>
 
+
+                        <!-- CURRENT PAGE -->
 
                         <input
                             type="number"
@@ -319,10 +372,16 @@ Version : 2.1 Enterprise
                             autocomplete="off">
 
 
+                        <!-- OF -->
+
                         <span class="finova-pagination-label">
+
                             of
+
                         </span>
 
+
+                        <!-- TOTAL PAGE -->
 
                         <span
                             id="tax-pagination-total-pages"
@@ -332,6 +391,8 @@ Version : 2.1 Enterprise
 
                         </span>
 
+
+                        <!-- NEXT -->
 
                         <button
                             type="button"
@@ -343,6 +404,8 @@ Version : 2.1 Enterprise
 
                         </button>
 
+
+                        <!-- LAST -->
 
                         <button
                             type="button"
@@ -356,6 +419,8 @@ Version : 2.1 Enterprise
 
                     </div>
 
+
+                    <!-- RECORD INFO -->
 
                     <div
                         id="tax-pagination-info"
@@ -375,6 +440,7 @@ Version : 2.1 Enterprise
 
 </div>
 
+
 <!-- ======================================================
      TAX MODAL
 ====================================================== -->
@@ -385,12 +451,13 @@ Version : 2.1 Enterprise
     tabindex="-1"
     aria-hidden="true">
 
-    <div
-        class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
 
         <div class="modal-content">
 
-            <!-- HEADER -->
+            <!-- ==========================================
+                 HEADER
+            =========================================== -->
 
             <div class="modal-header">
 
@@ -408,18 +475,18 @@ Version : 2.1 Enterprise
                     class="btn-close"
                     data-bs-dismiss="modal"
                     aria-label="Close">
-
                 </button>
 
             </div>
 
 
-            <!-- BODY -->
+            <!-- ==========================================
+                 BODY
+            =========================================== -->
 
             <div class="modal-body">
 
-                <form
-                    id="tax-form">
+                <form id="tax-form">
 
                     <!-- HIDDEN ID -->
 
@@ -435,6 +502,7 @@ Version : 2.1 Enterprise
                         <div class="col-md-6">
 
                             <label
+                                for="tax-form-code"
                                 class="form-label fw-semibold">
 
                                 Tax Code
@@ -457,6 +525,7 @@ Version : 2.1 Enterprise
                         <div class="col-md-6">
 
                             <label
+                                for="tax-form-name"
                                 class="form-label fw-semibold">
 
                                 Tax Name
@@ -479,6 +548,7 @@ Version : 2.1 Enterprise
                         <div class="col-md-6">
 
                             <label
+                                for="tax-form-type"
                                 class="form-label fw-semibold">
 
                                 Tax Type
@@ -513,6 +583,7 @@ Version : 2.1 Enterprise
                         <div class="col-md-6">
 
                             <label
+                                for="tax-form-rate"
                                 class="form-label fw-semibold">
 
                                 Tax Rate (%)
@@ -538,6 +609,7 @@ Version : 2.1 Enterprise
                         <div class="col-md-6">
 
                             <label
+                                for="tax-form-account"
                                 class="form-label fw-semibold">
 
                                 Tax Account
@@ -564,6 +636,7 @@ Version : 2.1 Enterprise
                         <div class="col-md-6">
 
                             <label
+                                for="tax-form-offset-account"
                                 class="form-label fw-semibold">
 
                                 Offset Account
@@ -590,6 +663,7 @@ Version : 2.1 Enterprise
                         <div class="col-12">
 
                             <label
+                                for="tax-form-description"
                                 class="form-label fw-semibold">
 
                                 Description
@@ -600,9 +674,7 @@ Version : 2.1 Enterprise
                                 id="tax-form-description"
                                 class="form-control"
                                 rows="3"
-                                placeholder="Tax description...">
-
-                            </textarea>
+                                placeholder="Tax description..."></textarea>
 
                         </div>
 
@@ -638,7 +710,9 @@ Version : 2.1 Enterprise
             </div>
 
 
-            <!-- FOOTER -->
+            <!-- ==========================================
+                 FOOTER
+            =========================================== -->
 
             <div class="modal-footer">
 

@@ -13,7 +13,13 @@ import {
     supabase,
     TABLE
 } from "../../assets/js/core/supabase.js";
+import {
+    ExcelExportService
+} from "../../service/excel-export.service.js";
 
+import {
+    PreviewService
+} from "../../service/preview.service.js";
 
 
 /*
@@ -62,15 +68,15 @@ export class Tax {
         this.currentMode = "add";
 
 
-        /*
-        ==============================================
-        PAGINATION
-        ==============================================
-        */
+       /*
+======================================================
+PAGINATION
+======================================================
+*/
 
-        this.currentPage = 1;
+this.currentPage = 1;
 
-        this.pageSize = 20;
+this.pageSize = 10;
 
 
         /*
@@ -98,147 +104,188 @@ export class Tax {
 
 
     /*
+======================================================
+CACHE DOM
+======================================================
+*/
+
+cacheDOM() {
+
+    /*
     ==================================================
-    CACHE DOM
+    TABLE
     ==================================================
     */
 
-    cacheDOM() {
-
-        this.tableBody =
-            document.getElementById(
-                "tax-table-body"
-            );
+    this.tableBody =
+        document.getElementById(
+            "tax-table-body"
+        );
 
 
-        this.keywordInput =
-            document.getElementById(
-                "tax-filter-keyword"
-            );
+    /*
+    ==================================================
+    FILTER
+    ==================================================
+    */
+
+    this.keywordInput =
+        document.getElementById(
+            "tax-filter-keyword"
+        );
+
+    this.typeFilter =
+        document.getElementById(
+            "tax-filter-type"
+        );
+
+    this.statusFilter =
+        document.getElementById(
+            "tax-filter-status"
+        );
 
 
-        this.typeFilter =
-            document.getElementById(
-                "tax-filter-type"
-            );
+    /*
+    ==================================================
+    HEADER BUTTON
+    ==================================================
+    */
+
+    this.btnAdd =
+        document.getElementById(
+            "btn-add-tax"
+        );
+
+    this.btnExport =
+        document.getElementById(
+            "btn-export-tax"
+        );
+
+    this.btnPreview =
+        document.getElementById(
+            "btn-preview-tax"
+        );
+
+    this.btnRefresh =
+        document.getElementById(
+            "btn-refresh-tax"
+        );
 
 
-        this.statusFilter =
-            document.getElementById(
-                "tax-filter-status"
-            );
+    /*
+    ==================================================
+    PAGINATION
+    ==================================================
+    */
+
+    this.btnFirst =
+        document.getElementById(
+            "tax-pagination-first"
+        );
+
+    this.btnPrev =
+        document.getElementById(
+            "tax-pagination-prev"
+        );
+
+    this.btnNext =
+        document.getElementById(
+            "tax-pagination-next"
+        );
+
+    this.btnLast =
+        document.getElementById(
+            "tax-pagination-last"
+        );
+
+    this.txtPage =
+        document.getElementById(
+            "tax-pagination-page-input"
+        );
+
+    this.lblTotalPages =
+        document.getElementById(
+            "tax-pagination-total-pages"
+        );
+
+    this.lblPaginationInfo =
+        document.getElementById(
+            "tax-pagination-info"
+        );
 
 
-        this.btnAdd =
-            document.getElementById(
-                "btn-add-tax"
-            );
+    /*
+    ==================================================
+    MODAL
+    ==================================================
+    */
 
+    this.taxModal =
+        document.getElementById(
+            "taxModal"
+        );
 
-        this.btnSearch =
-            document.getElementById(
-                "btn-find-tax"
-            );
+    this.taxForm =
+        document.getElementById(
+            "tax-form"
+        );
 
+    this.taxId =
+        document.getElementById(
+            "tax-form-id"
+        );
 
-        this.btnRefresh =
-            document.getElementById(
-                "btn-refresh-tax"
-            );
+    this.taxCode =
+        document.getElementById(
+            "tax-form-code"
+        );
 
+    this.taxName =
+        document.getElementById(
+            "tax-form-name"
+        );
 
-        this.pagination =
-            document.getElementById(
-                "tax-pagination"
-            );
+    this.taxTypeInput =
+        document.getElementById(
+            "tax-form-type"
+        );
 
+    this.taxRate =
+        document.getElementById(
+            "tax-form-rate"
+        );
 
-        /*
-        ==============================================
-        FORM
-        ==============================================
-        */
+    this.taxAccount =
+        document.getElementById(
+            "tax-form-account"
+        );
 
-        this.taxModal =
-            document.getElementById(
-                "taxModal"
-            );
+    this.offsetAccount =
+        document.getElementById(
+            "tax-form-offset-account"
+        );
 
+    this.description =
+        document.getElementById(
+            "tax-form-description"
+        );
 
-        this.taxForm =
-            document.getElementById(
-                "tax-form"
-            );
+    this.statusInput =
+        document.getElementById(
+            "tax-form-status"
+        );
 
+    this.btnSave =
+        document.getElementById(
+            "btn-save-tax"
+        );
 
-        this.taxId =
-            document.getElementById(
-                "tax-form-id"
-            );
+    this.modalTitle =
+        document.getElementById(
+            "taxModalLabel"
+        );
 
-
-        this.taxCode =
-            document.getElementById(
-                "tax-form-code"
-            );
-
-
-        this.taxName =
-            document.getElementById(
-                "tax-form-name"
-            );
-
-
-        this.taxTypeInput =
-            document.getElementById(
-                "tax-form-type"
-            );
-
-
-        this.taxRate =
-            document.getElementById(
-                "tax-form-rate"
-            );
-
-
-        this.taxAccount =
-            document.getElementById(
-                "tax-form-account"
-            );
-
-
-        this.offsetAccount =
-            document.getElementById(
-                "tax-form-offset-account"
-            );
-
-
-        this.description =
-            document.getElementById(
-                "tax-form-description"
-            );
-
-
-        this.statusInput =
-            document.getElementById(
-                "tax-form-status"
-            );
-
-
-        this.btnSave =
-            document.getElementById(
-                "btn-save-tax"
-            );
-
-
-        this.modalTitle =
-            document.getElementById(
-                "taxModalLabel"
-            );
-
-    }
-
-
+}
     /*
     ==================================================
     INIT
@@ -288,216 +335,378 @@ export class Tax {
 
 
     /*
+======================================================
+BIND EVENTS
+======================================================
+*/
+
+bindEvents() {
+
+    /*
     ==================================================
-    BIND EVENTS
+    ADD
     ==================================================
     */
 
-    bindEvents() {
+    this.btnAdd?.addEventListener(
+        "click",
+        () => {
 
-        /*
-        ==============================================
-        ADD
-        ==============================================
-        */
+            this.openAddModal();
 
-        this.btnAdd?.addEventListener(
-            "click",
-            () => {
-
-                this.openAddModal();
-
-            }
-        );
-
-
-        /*
-        ==============================================
-        SEARCH
-        ==============================================
-        */
-
-        this.btnSearch?.addEventListener(
-            "click",
-            () => {
-
-                this.search();
-
-            }
-        );
-
-
-        /*
-        ==============================================
-        ENTER SEARCH
-        ==============================================
-        */
-
-        this.keywordInput?.addEventListener(
-            "keydown",
-            event => {
-
-                if (
-                    event.key === "Enter"
-                ) {
-
-                    event.preventDefault();
-
-                    this.search();
-
-                }
-
-            }
-        );
-
-
-        /*
-        ==============================================
-        TYPE FILTER
-        ==============================================
-        */
-
-        this.typeFilter?.addEventListener(
-            "change",
-            () => {
-
-                this.search();
-
-            }
-        );
-
-
-        /*
-        ==============================================
-        STATUS FILTER
-        ==============================================
-        */
-
-        this.statusFilter?.addEventListener(
-            "change",
-            () => {
-
-                this.search();
-
-            }
-        );
-
-
-        /*
-        ==============================================
-        REFRESH
-        ==============================================
-        */
-
-        this.btnRefresh?.addEventListener(
-            "click",
-            () => {
-
-                this.refresh();
-
-            }
-        );
-
-
-        /*
-        ==============================================
-        SAVE
-        ==============================================
-        */
-
-        this.btnSave?.addEventListener(
-            "click",
-            () => {
-
-                this.save();
-
-            }
-        );
-
-
-        /*
-        ==============================================
-        TABLE ACTION
-        ==============================================
-        */
-
-        this.tableBody?.addEventListener(
-            "click",
-            event => {
-
-                const button =
-                    event.target.closest(
-                        "[data-tax-action]"
-                    );
-
-
-                if (!button) {
-
-                    return;
-
-                }
-
-
-                const action =
-                    button.dataset.taxAction;
-
-
-                const id =
-                    button.dataset.taxId;
-
-
-                this.handleAction(
-                    action,
-                    id
-                );
-
-            }
-        );
-
-    }
+        }
+    );
 
 
     /*
     ==================================================
-    LOAD DATA
+    REALTIME SEARCH
     ==================================================
     */
 
-    async loadData() {
+    this.keywordInput?.addEventListener(
+        "input",
+        () => {
 
-        try {
+            this.search();
 
-            const data =
-                await this.service.getAll();
-
-
-            this.taxes =
-                Array.isArray(data)
-                    ? data
-                    : [];
+        }
+    );
 
 
-            this.currentPage =
-                1;
+    /*
+    ==================================================
+    TYPE FILTER
+    ==================================================
+    */
 
+    this.typeFilter?.addEventListener(
+        "change",
+        () => {
+
+            this.search();
+
+        }
+    );
+
+
+    /*
+    ==================================================
+    STATUS FILTER
+    ==================================================
+    */
+
+    this.statusFilter?.addEventListener(
+        "change",
+        () => {
+
+            this.search();
+
+        }
+    );
+
+
+    /*
+    ==================================================
+    REFRESH
+    ==================================================
+    */
+
+    this.btnRefresh?.addEventListener(
+        "click",
+        () => {
+
+            this.refresh();
+
+        }
+    );
+
+
+    /*
+    ==================================================
+    EXPORT
+    ==================================================
+    */
+
+    this.btnExport?.addEventListener(
+        "click",
+        () => {
+
+            this.exportExcel();
+
+        }
+    );
+
+
+    /*
+    ==================================================
+    PREVIEW
+    ==================================================
+    */
+
+    this.btnPreview?.addEventListener(
+        "click",
+        () => {
+
+            this.preview();
+
+        }
+    );
+
+
+    /*
+    ==================================================
+    SAVE
+    ==================================================
+    */
+
+    this.btnSave?.addEventListener(
+        "click",
+        () => {
+
+            this.save();
+
+        }
+    );
+
+
+    /*
+    ==================================================
+    TABLE ACTION
+    ==================================================
+    */
+
+    this.tableBody?.addEventListener(
+        "click",
+        event => {
+
+            const button =
+                event.target.closest(
+                    "[data-tax-action]"
+                );
+
+            if (!button) {
+
+                return;
+
+            }
+
+            const action =
+                button.dataset.taxAction;
+
+            const id =
+                button.dataset.taxId;
+
+            this.handleAction(
+                action,
+                id
+            );
+
+        }
+    );
+
+
+    /*
+    ==================================================
+    PAGINATION FIRST
+    ==================================================
+    */
+
+    this.btnFirst?.addEventListener(
+        "click",
+        () => {
+
+            this.currentPage = 1;
 
             this.render();
 
         }
+    );
 
-        catch (error) {
 
-            console.error(
-                "Tax.loadData:",
-                error
-            );
+    /*
+    ==================================================
+    PAGINATION PREVIOUS
+    ==================================================
+    */
 
-            throw error;
+    this.btnPrev?.addEventListener(
+        "click",
+        () => {
+
+            if (
+                this.currentPage > 1
+            ) {
+
+                this.currentPage--;
+
+                this.render();
+
+            }
+
+        }
+    );
+
+
+    /*
+    ==================================================
+    PAGINATION NEXT
+    ==================================================
+    */
+
+    this.btnNext?.addEventListener(
+        "click",
+        () => {
+
+            const totalPages =
+                this.getTotalPages();
+
+            if (
+                this.currentPage <
+                totalPages
+            ) {
+
+                this.currentPage++;
+
+                this.render();
+
+            }
+
+        }
+    );
+
+
+    /*
+    ==================================================
+    PAGINATION LAST
+    ==================================================
+    */
+
+    this.btnLast?.addEventListener(
+        "click",
+        () => {
+
+            this.currentPage =
+                this.getTotalPages();
+
+            this.render();
+
+        }
+    );
+
+
+    /*
+    ==================================================
+    PAGE INPUT
+    ==================================================
+    */
+
+    this.txtPage?.addEventListener(
+        "change",
+        () => {
+
+            const totalPages =
+                this.getTotalPages();
+
+            let page =
+                parseInt(
+                    this.txtPage.value,
+                    10
+                );
+
+            if (
+                Number.isNaN(page)
+            ) {
+
+                page = 1;
+
+            }
+
+            page =
+                Math.min(
+                    Math.max(
+                        page,
+                        1
+                    ),
+                    totalPages
+                );
+
+            this.currentPage =
+                page;
+
+            this.render();
+
+        }
+    );
+
+}
+/*
+======================================================
+GET TOTAL PAGES
+======================================================
+*/
+
+getTotalPages() {
+
+    const totalRecords =
+        this.getFilteredData().length;
+
+    return Math.max(
+        1,
+        Math.ceil(
+            totalRecords /
+            this.pageSize
+        )
+    );
+
+}
+
+
+    /*
+======================================================
+LOAD DATA
+======================================================
+*/
+
+async loadData(
+    resetPage = true
+) {
+
+    try {
+
+        const data =
+            await this.service.getAll();
+
+
+        this.taxes =
+            Array.isArray(data)
+                ? data
+                : [];
+
+
+        if (resetPage) {
+
+            this.currentPage = 1;
 
         }
 
+
+        this.render();
+
     }
 
+    catch (error) {
+
+        console.error(
+            "Tax.loadData:",
+            error
+        );
+
+        throw error;
+
+    }
+
+}
 
     /*
     ==================================================
@@ -626,351 +835,707 @@ export class Tax {
 
 
     /*
+======================================================
+RENDER
+======================================================
+*/
+
+render() {
+
+    if (!this.tableBody) {
+
+        return;
+
+    }
+
+
+    const filtered =
+        this.getFilteredData();
+
+
+    const totalPages =
+        Math.max(
+            1,
+            Math.ceil(
+                filtered.length /
+                this.pageSize
+            )
+        );
+
+
+    /*
     ==================================================
-    RENDER
+    KEEP PAGE VALID
     ==================================================
     */
 
-    render() {
+    if (
+        this.currentPage >
+        totalPages
+    ) {
 
-        if (!this.tableBody) {
+        this.currentPage =
+            totalPages;
 
-            return;
+    }
 
-        }
 
+    const start =
+        (
+            this.currentPage - 1
+        )
+        *
+        this.pageSize;
 
-        const filtered =
-            this.getFilteredData();
 
+    const end =
+        start +
+        this.pageSize;
 
-        const start =
-            (
-                this.currentPage
-                - 1
-            )
-            *
-            this.pageSize;
 
+    const rows =
+        filtered.slice(
+            start,
+            end
+        );
 
-        const end =
-            start
-            +
-            this.pageSize;
 
+    /*
+    ==================================================
+    EMPTY
+    ==================================================
+    */
 
-        const rows =
-            filtered.slice(
-                start,
-                end
-            );
+    if (!rows.length) {
 
+        this.tableBody.innerHTML = `
 
-        /*
-        ==============================================
-        EMPTY
-        ==============================================
-        */
+            <tr>
 
-        if (!rows.length) {
+                <td colspan="9">
 
-            this.tableBody.innerHTML = `
+                    <div class="finova-empty">
 
-                <tr>
+                        <i class="fas fa-folder-open"></i>
 
-                    <td
-                        colspan="8"
-                        class="text-center text-muted py-4">
+                        <h5>
+                            No Tax Data Found
+                        </h5>
 
-                        No tax data found.
+                        <p>
+                            Click
+                            <strong>Add Tax</strong>
+                            to create your first Tax.
+                        </p>
 
-                    </td>
+                    </div>
 
-                </tr>
+                </td>
 
-            `;
+            </tr>
 
+        `;
 
-            this.renderPagination(
-                filtered.length
-            );
 
-
-            return;
-
-        }
-
-
-        /*
-        ==============================================
-        ROWS
-        ==============================================
-        */
-
-        this.tableBody.innerHTML =
-            rows.map(
-                (tax, index) => {
-
-                    const number =
-                        start
-                        +
-                        index
-                        +
-                        1;
-
-
-                    const typeBadge =
-                        tax.tax_type
-                        === "PLUS"
-
-                            ? `
-                                <span
-                                    class="badge bg-success">
-                                    PLUS
-                                </span>
-                              `
-
-                            : `
-                                <span
-                                    class="badge bg-warning text-dark">
-                                    MINUS
-                                </span>
-                              `;
-
-
-                    const statusBadge =
-                        tax.status
-
-                            ? `
-                                <span
-                                    class="badge bg-success">
-                                    Active
-                                </span>
-                              `
-
-                            : `
-                                <span
-                                    class="badge bg-secondary">
-                                    Inactive
-                                </span>
-                              `;
-
-
-                    const taxAccount =
-                        tax.tax_account
-                        ? `
-                            ${tax.tax_account.account_code}
-                            -
-                            ${tax.tax_account.account_name}
-                          `
-                        : "-";
-
-
-                    const offsetAccount =
-                        tax.offset_account
-                        ? `
-                            ${tax.offset_account.account_code}
-                            -
-                            ${tax.offset_account.account_name}
-                          `
-                        : "-";
-
-
-                    return `
-
-                        <tr>
-
-                            <td>
-                                ${number}
-                            </td>
-
-                            <td>
-                                <strong>
-                                    ${tax.tax_code || "-"}
-                                </strong>
-                            </td>
-
-                            <td>
-                                ${tax.tax_name || "-"}
-                            </td>
-
-                            <td>
-                                ${typeBadge}
-                            </td>
-
-                            <td class="text-end">
-                                ${this.formatRate(
-                                    tax.tax_rate
-                                )}
-                            </td>
-
-                            <td>
-                                ${taxAccount}
-                            </td>
-
-                            <td>
-                                ${offsetAccount}
-                            </td>
-
-                            <td class="text-center">
-                                ${statusBadge}
-                            </td>
-
-                            <td class="text-center">
-
-                                <div
-                                    class="btn-group btn-group-sm">
-
-                                    <button
-                                        type="button"
-                                        class="btn btn-outline-primary"
-                                        title="Edit"
-                                        data-tax-action="edit"
-                                        data-tax-id="${tax.id}">
-
-                                        <i
-                                            class="fa-solid fa-pen">
-                                        </i>
-
-                                    </button>
-
-
-                                    <button
-                                        type="button"
-                                        class="btn btn-outline-danger"
-                                        title="Delete"
-                                        data-tax-action="delete"
-                                        data-tax-id="${tax.id}">
-
-                                        <i
-                                            class="fa-solid fa-trash">
-                                        </i>
-
-                                    </button>
-
-                                </div>
-
-                            </td>
-
-                        </tr>
-
-                    `;
-
-                }
-            )
-            .join("");
-
-
-        this.renderPagination(
+        this.updatePagination(
             filtered.length
         );
+
+        return;
 
     }
 
 
     /*
     ==================================================
-    PAGINATION
+    ROWS
     ==================================================
     */
 
-    renderPagination(
-        total
+    this.tableBody.innerHTML =
+        rows.map(
+            (tax, index) => {
+
+                const number =
+                    start +
+                    index +
+                    1;
+
+
+                /*
+                ==========================================
+                TYPE
+                ==========================================
+                */
+
+                const typeBadge =
+                    tax.tax_type
+                    ===
+                    "PLUS"
+
+                        ? `
+                            <span class="badge bg-success">
+                                PLUS
+                            </span>
+                          `
+
+                        : `
+                            <span class="badge bg-warning text-dark">
+                                MINUS
+                            </span>
+                          `;
+
+
+                /*
+                ==========================================
+                STATUS
+                ==========================================
+                */
+
+                const statusBadge =
+                    tax.status
+
+                        ? `
+                            <span class="badge bg-success">
+                                Active
+                            </span>
+                          `
+
+                        : `
+                            <span class="badge bg-secondary">
+                                Inactive
+                            </span>
+                          `;
+
+
+                /*
+                ==========================================
+                TAX ACCOUNT
+                ==========================================
+                */
+
+                const taxAccount =
+                    tax.tax_account
+
+                        ? `
+                            ${tax.tax_account.account_code}
+                            -
+                            ${tax.tax_account.account_name}
+                          `
+
+                        : "-";
+
+
+                /*
+                ==========================================
+                OFFSET ACCOUNT
+                ==========================================
+                */
+
+                const offsetAccount =
+                    tax.offset_account
+
+                        ? `
+                            ${tax.offset_account.account_code}
+                            -
+                            ${tax.offset_account.account_name}
+                          `
+
+                        : "-";
+
+
+                return `
+
+                    <tr>
+
+                        <td class="text-center">
+
+                            ${number}
+
+                        </td>
+
+
+                        <td>
+
+                            ${tax.tax_code || "-"}
+
+                        </td>
+
+
+                        <td>
+
+                            ${tax.tax_name || "-"}
+
+                        </td>
+
+
+                        <td class="text-center">
+
+                            ${typeBadge}
+
+                        </td>
+
+
+                        <td class="text-end">
+
+                            ${this.formatRate(
+                                tax.tax_rate
+                            )}
+
+                        </td>
+
+
+                        <td>
+
+                            ${taxAccount}
+
+                        </td>
+
+
+                        <td>
+
+                            ${offsetAccount}
+
+                        </td>
+
+
+                        <td class="text-center">
+
+                            ${statusBadge}
+
+                        </td>
+
+
+                        <td class="text-center">
+
+                            <div class="btn-group btn-group-sm">
+
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-primary"
+                                    title="Edit"
+                                    data-tax-action="edit"
+                                    data-tax-id="${tax.id}">
+
+                                    <i class="fa-solid fa-pen"></i>
+
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-danger"
+                                    title="Delete"
+                                    data-tax-action="delete"
+                                    data-tax-id="${tax.id}">
+
+                                    <i class="fa-solid fa-trash"></i>
+
+                                </button>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+        )
+        .join("");
+
+
+    this.updatePagination(
+        filtered.length
+    );
+
+}
+    /*
+======================================================
+UPDATE PAGINATION
+======================================================
+*/
+
+updatePagination(
+    totalRecords
+) {
+
+    const totalPages =
+        Math.max(
+            1,
+            Math.ceil(
+                totalRecords /
+                this.pageSize
+            )
+        );
+
+
+    /*
+    ==================================================
+    CURRENT PAGE
+    ==================================================
+    */
+
+    if (
+        this.currentPage >
+        totalPages
     ) {
 
-        if (!this.pagination) {
-
-            return;
-
-        }
-
-
-        const totalPages =
-            Math.ceil(
-                total
-                /
-                this.pageSize
-            );
-
-
-        if (
-            totalPages <= 1
-        ) {
-
-            this.pagination.innerHTML =
-                "";
-
-            return;
-
-        }
-
-
-        let html = "";
-
-
-        for (
-            let page = 1;
-            page <= totalPages;
-            page++
-        ) {
-
-            html += `
-
-                <button
-                    type="button"
-                    class="
-                        btn
-                        btn-sm
-                        ${
-                            page
-                            ===
-                            this.currentPage
-                                ? "btn-primary"
-                                : "btn-light border"
-                        }
-                    "
-                    data-tax-page="${page}">
-
-                    ${page}
-
-                </button>
-
-            `;
-
-        }
-
-
-        this.pagination.innerHTML =
-            html;
-
-
-        this.pagination
-            .querySelectorAll(
-                "[data-tax-page]"
-            )
-            .forEach(
-                button => {
-
-                    button.addEventListener(
-                        "click",
-                        () => {
-
-                            this.currentPage =
-                                Number(
-                                    button.dataset.taxPage
-                                );
-
-
-                            this.render();
-
-                        }
-                    );
-
-                }
-            );
+        this.currentPage =
+            totalPages;
 
     }
 
+
+    /*
+    ==================================================
+    PAGE INPUT
+    ==================================================
+    */
+
+    if (this.txtPage) {
+
+        this.txtPage.value =
+            this.currentPage;
+
+        this.txtPage.max =
+            totalPages;
+
+    }
+
+
+    /*
+    ==================================================
+    TOTAL PAGE
+    ==================================================
+    */
+
+    if (
+        this.lblTotalPages
+    ) {
+
+        this.lblTotalPages.textContent =
+            totalPages;
+
+    }
+
+
+    /*
+    ==================================================
+    RECORD RANGE
+    ==================================================
+    */
+
+    const startRecord =
+        totalRecords === 0
+
+            ? 0
+
+            : (
+                (
+                    this.currentPage - 1
+                )
+                *
+                this.pageSize
+            )
+            +
+            1;
+
+
+    const endRecord =
+        totalRecords === 0
+
+            ? 0
+
+            : Math.min(
+                this.currentPage *
+                this.pageSize,
+                totalRecords
+            );
+
+
+    /*
+    ==================================================
+    RECORD INFO
+    ==================================================
+    */
+
+    if (
+        this.lblPaginationInfo
+    ) {
+
+        this.lblPaginationInfo.textContent =
+            `Displaying Record ${startRecord} - ${endRecord} of ${totalRecords}`;
+
+    }
+
+
+    /*
+    ==================================================
+    BUTTON STATE
+    ==================================================
+    */
+
+    const isFirst =
+        this.currentPage <= 1;
+
+    const isLast =
+        this.currentPage >=
+        totalPages;
+
+
+    if (this.btnFirst) {
+
+        this.btnFirst.disabled =
+            isFirst;
+
+    }
+
+
+    if (this.btnPrev) {
+
+        this.btnPrev.disabled =
+            isFirst;
+
+    }
+
+
+    if (this.btnNext) {
+
+        this.btnNext.disabled =
+            isLast;
+
+    }
+
+
+    if (this.btnLast) {
+
+        this.btnLast.disabled =
+            isLast;
+
+    }
+
+}
+/*
+======================================================
+PREVIEW
+======================================================
+*/
+
+preview() {
+
+    try {
+
+        const data =
+            this.getFilteredData();
+
+
+        if (!data.length) {
+
+            this.showError(
+                "No data available."
+            );
+
+            return;
+
+        }
+
+
+        const columns = [
+
+            "Tax Code",
+
+            "Tax Name",
+
+            "Type",
+
+            "Rate",
+
+            "Tax Account",
+
+            "Offset Account",
+
+            "Status"
+
+        ];
+
+
+        const rows =
+            data.map(
+                tax => `
+
+                    <tr>
+
+                        <td>
+                            ${tax.tax_code || ""}
+                        </td>
+
+                        <td>
+                            ${tax.tax_name || ""}
+                        </td>
+
+                        <td>
+                            ${tax.tax_type || ""}
+                        </td>
+
+                        <td>
+                            ${this.formatRate(
+                                tax.tax_rate
+                            )}
+                        </td>
+
+                        <td>
+                            ${
+                                tax.tax_account
+                                    ? `${tax.tax_account.account_code} - ${tax.tax_account.account_name}`
+                                    : ""
+                            }
+                        </td>
+
+                        <td>
+                            ${
+                                tax.offset_account
+                                    ? `${tax.offset_account.account_code} - ${tax.offset_account.account_name}`
+                                    : ""
+                            }
+                        </td>
+
+                        <td>
+                            ${
+                                tax.status
+                                    ? "Active"
+                                    : "Inactive"
+                            }
+                        </td>
+
+                    </tr>
+
+                `
+            );
+
+
+        PreviewService.open({
+
+            title:
+                "Tax Master",
+
+            subtitle:
+                "Master Data",
+
+            columns,
+
+            rows
+
+        });
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Tax.preview:",
+            error
+        );
+
+        this.showError(
+            "Preview failed."
+        );
+
+    }
+
+}
+/*
+======================================================
+EXPORT EXCEL
+======================================================
+*/
+
+exportExcel() {
+
+    try {
+
+        const taxes =
+            this.getFilteredData();
+
+
+        if (!taxes.length) {
+
+            this.showError(
+                "No data available to export."
+            );
+
+            return;
+
+        }
+
+
+        const data =
+            taxes.map(
+                tax => ({
+
+                    "Tax Code":
+                        tax.tax_code || "",
+
+                    "Tax Name":
+                        tax.tax_name || "",
+
+                    "Tax Type":
+                        tax.tax_type || "",
+
+                    "Tax Rate (%)":
+                        Number(
+                            tax.tax_rate || 0
+                        ),
+
+                    "Tax Account":
+                        tax.tax_account
+                            ? `${tax.tax_account.account_code} - ${tax.tax_account.account_name}`
+                            : "",
+
+                    "Offset Account":
+                        tax.offset_account
+                            ? `${tax.offset_account.account_code} - ${tax.offset_account.account_name}`
+                            : "",
+
+                    "Description":
+                        tax.description || "",
+
+                    "Status":
+                        tax.status
+                            ? "Active"
+                            : "Inactive"
+
+                })
+            );
+
+
+        ExcelExportService.export(
+
+            data,
+
+            "Tax Master",
+
+            "Tax Master"
+
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Tax.exportExcel:",
+            error
+        );
+
+        this.showError(
+            "Export Excel failed."
+        );
+
+    }
+
+}
 
     /*
     ==================================================
@@ -1302,7 +1867,7 @@ export class Tax {
             modal?.hide();
 
 
-            await this.loadData();
+            await this.loadData(false);
 
 
             this.showSuccess(
@@ -1418,7 +1983,7 @@ export class Tax {
             );
 
 
-            await this.loadData();
+            await this.loadData(false);
 
 
             this.showSuccess(
