@@ -74,213 +74,223 @@
             <div class="modal-body">
 
 
-                <!-- ==================================================
-                     ACCOUNT
-                     ================================================== -->
+             
+ <!-- ==================================================
+     ACCOUNT
+================================================== -->
 
-                <div class="mb-3">
+<div class="row g-3">
 
-                    <label
-                        for="ap-detail-coa"
-                        class="form-label">
+    <!-- ==============================================
+         DEBIT ACCOUNT
+    ============================================== -->
 
-                        Account
-                        <span class="text-danger">*</span>
+    <div class="col-md-6">
 
-                    </label>
+        <label
+            for="ap-detail-coa"
+            class="form-label">
 
+            Debit Account
+            <span class="text-danger">*</span>
 
-                    <select
-                        id="ap-detail-coa"
-                        class="form-select">
+        </label>
 
-                        <option value="">
 
-                            Select Chart of Account
+        <select
+    id="ap-detail-coa"
+    class="form-select">
 
-                        </option>
+    <option value=""></option>
 
-                    </select>
+</select>
 
-                </div>
+    </div>
 
 
-                <!-- ==================================================
-                     DESCRIPTION
-                     ================================================== -->
+    <!-- ==============================================
+         CREDIT ACCOUNT
+    ============================================== -->
 
-                <div class="mb-3">
+    <div class="col-md-6">
 
-                    <label
-                        for="ap-detail-description"
-                        class="form-label">
+        <label
+            for="ap-detail-credit-account"
+            class="form-label">
 
-                        Description
+            Credit Account
 
-                    </label>
+        </label>
 
 
-                    <textarea
-                        id="ap-detail-description"
-                        class="form-control"
-                        rows="2"
-                        placeholder="Enter description">
-                    </textarea>
+        <input
+            type="text"
+            id="ap-detail-credit-account"
+            class="form-control"
+            value="2-11011 - HUTANG USAHA"
+            readonly>
 
-                </div>
 
+        <input
+            type="hidden"
+            id="ap-detail-credit-account-id"
+            value="39">
 
-                <!-- ==================================================
-                     QUANTITY / UNIT PRICE
-                     ================================================== -->
+    </div>
 
-                <div class="row g-3">
+</div>
 
+<!-- ==================================================
+     DESCRIPTION
+================================================== -->
 
-                    <!-- ==============================================
-                         QUANTITY
-                         ============================================== -->
+<div class="mb-3 mt-3">
 
-                    <div class="col-md-6">
+    <label
+        for="ap-detail-description"
+        class="form-label">
 
-                        <label
-                            for="ap-detail-quantity"
-                            class="form-label">
+        Description
 
-                            Quantity
-                            <span class="text-danger">*</span>
+    </label>
 
-                        </label>
 
+    <textarea
+        id="ap-detail-description"
+        class="form-control"
+        rows="2"
+        placeholder="Enter description"></textarea>
 
-                        <input
-                            type="number"
-                            id="ap-detail-quantity"
-                            class="form-control text-start"
-                            min="1"
-                            step="1"
-                            value="1"
-                            placeholder="1">
+</div>
 
-                    </div>
 
+<!-- ==================================================
+     QUANTITY / UNIT PRICE
+================================================== -->
 
-                    <!-- ==============================================
-                         UNIT PRICE
-                         ============================================== -->
+<div class="row g-3">
 
-                    <div class="col-md-6">
 
-                        <label
-                            for="ap-detail-unit-price"
-                            class="form-label">
+    <!-- ==============================================
+         QUANTITY
+    ============================================== -->
 
-                            Unit Price
-                            <span class="text-danger">*</span>
+    <div class="col-md-6">
 
-                        </label>
+        <label
+            for="ap-detail-quantity"
+            class="form-label">
 
+            Quantity
+            <span class="text-danger">*</span>
 
-                        <input
-                            type="text"
-                            id="ap-detail-unit-price"
-                            class="form-control text-start"
-                            inputmode="numeric"
-                            value="0"
-                            placeholder="0">
+        </label>
 
-                    </div>
 
-                </div>
+        <input
+            type="number"
+            id="ap-detail-quantity"
+            class="form-control text-start"
+            min="1"
+            step="1"
+            value="1"
+            placeholder="1">
 
+    </div>
 
-                <!-- ==================================================
-                     TAX
-                     ================================================== -->
 
-                <div class="row g-3 mt-1">
+    <!-- ==============================================
+         UNIT PRICE
+    ============================================== -->
 
+    <div class="col-md-6">
 
-                    <!-- ==============================================
-                         TAX (+)
-                         ============================================== -->
+        <label
+            for="ap-detail-unit-price"
+            class="form-label">
 
-                    <div class="col-md-6">
+            Unit Price
+            <span class="text-danger">*</span>
 
-                        <label
-                            for="ap-detail-tax-input-rate"
-                            class="form-label">
+        </label>
 
-                            Tax (+)
 
-                        </label>
+        <input
+            type="text"
+            id="ap-detail-unit-price"
+            class="form-control text-start"
+            inputmode="numeric"
+            value="0"
+            placeholder="0">
 
+    </div>
 
-                        <select
-                            id="ap-detail-tax-input-rate"
-                            class="form-select">
+</div>
 
-                            <option value="0">
-                                No Tax
-                            </option>
 
-                            <option value="1.1">
-                                1,1%
-                            </option>
+<!-- ==================================================
+     TAX
+================================================== -->
 
-                            <option value="11">
-                                11%
-                            </option>
+<div class="row g-3 mt-1">
 
-                        </select>
 
-                    </div>
+    <!-- ==============================================
+         TAX (+)
+    ============================================== -->
 
+    <div class="col-md-6">
 
-                    <!-- ==============================================
-                         TAX (-)
-                         ============================================== -->
+        <label
+            for="ap-detail-tax-input-rate"
+            class="form-label">
 
-                    <div class="col-md-6">
+            Tax (+)
 
-                        <label
-                            for="ap-detail-withholding-tax-rate"
-                            class="form-label">
+        </label>
 
-                            Tax (-)
 
-                        </label>
+        <select
+            id="ap-detail-tax-input-rate"
+            class="form-select">
 
+            <option value="">
+                No Tax
+            </option>
 
-                        <select
-                            id="ap-detail-withholding-tax-rate"
-                            class="form-select">
+        </select>
 
-                            <option value="0">
-                                No Tax
-                            </option>
+    </div>
 
-                            <option value="2">
-                                2%
-                            </option>
 
-                            <option value="2.5">
-                                2,5%
-                            </option>
+    <!-- ==============================================
+         TAX (-)
+    ============================================== -->
 
-                            <option value="4">
-                                4%
-                            </option>
+    <div class="col-md-6">
 
-                            <option value="10">
-                                10%
-                            </option>
+        <label
+            for="ap-detail-withholding-tax-rate"
+            class="form-label">
 
-                        </select>
+            Tax (-)
 
-                    </div>
+        </label>
 
-                </div>
+
+        <select
+            id="ap-detail-withholding-tax-rate"
+            class="form-select">
+
+            <option value="">
+                No Tax
+            </option>
+
+        </select>
+
+    </div>
+
+</div>
 
 
                 <!-- ==================================================

@@ -1780,122 +1780,385 @@ exportExcel() {
     }
 
 
-    /*
-    ==================================================
-    SAVE
-    ==================================================
-    */
+   /*
+======================================================
+SAVE TAX
+======================================================
+*/
 
-    async save() {
+async save() {
 
-        try {
+    try {
 
-            const payload = {
+        /*
+        ==================================================
+        CHECK AUTH SESSION
+        ==================================================
+        */
 
-                tax_code:
-                    this.taxCode?.value
-                    ?.trim()
-                    || "",
+        const {
+            data: {
+                session
+            },
+            error: sessionError
+        } =
+            await supabase.auth.getSession();
 
-                tax_name:
-                    this.taxName?.value
-                    ?.trim()
-                    || "",
 
-                tax_type:
-                    this.taxTypeInput?.value
-                    || "",
+        if (sessionError) {
 
-                tax_rate:
-                    Number(
-                        this.taxRate?.value
-                        || 0
-                    ),
+            throw sessionError;
 
-                tax_account_id:
-                    Number(
-                        this.taxAccount?.value
-                        || 0
-                    ),
+        }
 
-                offset_account_id:
-                    Number(
-                        this.offsetAccount?.value
-                        || 0
-                    ),
 
-                description:
-                    this.description?.value
-                    ?.trim()
+        if (
+            !session
+            ||
+            !session.user
+        ) {
+
+            throw new Error(
+                "User session not found. Please login again."
+            );
+
+        }
+
+
+        console.log(
+            "TAX AUTH USER:",
+            session.user
+        );
+
+
+        console.log(
+            "TAX AUTH ROLE:",
+            session.user.role
+            || "authenticated"
+        );
+
+
+        /*
+        ==================================================
+        TAX TYPE
+        ==================================================
+        */
+
+        const taxType =
+            String(
+                this.taxTypeInput?.value
+                || ""
+            )
+            .trim()
+            .toUpperCase();
+
+
+        /*
+        ==================================================
+        TAX CODE
+        ==================================================
+        */
+
+        const taxCode =
+            String(
+                this.taxCode?.value
+                || ""
+            )
+            .trim()
+            .toUpperCase();
+
+
+        if (!taxCode) {
+
+            throw new Error(
+                "Tax Code is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        TAX NAME
+        ==================================================
+        */
+
+        const taxName =
+            String(
+                this.taxName?.value
+                || ""
+            )
+            .trim();
+
+
+        if (!taxName) {
+
+            throw new Error(
+                "Tax Name is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        TAX TYPE VALIDATION
+        ==================================================
+        */
+
+        if (
+            ![
+                "PLUS",
+                "MINUS"
+            ].includes(
+                taxType
+            )
+        ) {
+
+            throw new Error(
+                "Please select Tax Type PLUS or MINUS."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        TAX RATE
+        ==================================================
+        */
+
+        const taxRate =
+            Number(
+                this.taxRate?.value
+                || 0
+            );
+
+
+        if (
+            Number.isNaN(
+                taxRate
+            )
+            ||
+            taxRate < 0
+            ||
+            taxRate > 100
+        ) {
+
+            throw new Error(
+                "Tax Rate must be between 0 and 100."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        TAX ACCOUNT
+        REQUIRED
+        ==================================================
+        */
+
+        const taxAccountId =
+            String(
+                this.taxAccount?.value
+                || ""
+            )
+            .trim();
+
+
+        if (!taxAccountId) {
+
+            throw new Error(
+                "Tax Account is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        OFFSET ACCOUNT
+        OPTIONAL
+        ==================================================
+        */
+
+        const offsetAccountId =
+            String(
+                this.offsetAccount?.value
+                || ""
+            )
+            .trim();
+
+
+        /*
+        ==================================================
+        DESCRIPTION
+        ==================================================
+        */
+
+        const description =
+            String(
+                this.description?.value
+                || ""
+            )
+            .trim();
+
+
+        /*
+        ==================================================
+        PAYLOAD
+        ==================================================
+        */
+
+        const payload = {
+
+            tax_code:
+                taxCode,
+
+            tax_name:
+                taxName,
+
+            tax_type:
+                taxType,
+
+            tax_rate:
+                taxRate,
+
+            tax_account_id:
+                taxAccountId,
+
+            offset_account_id:
+                offsetAccountId
                     || null,
 
-                status:
-                    this.statusInput
-                        ? this.statusInput.checked
-                        : true
+            description:
+                description
+                    || null,
 
-            };
+            status:
+                this.statusInput
+                    ? this.statusInput.checked
+                    : true
 
-
-            if (
-                this.currentMode
-                ===
-                "edit"
-            ) {
-
-                await this.service.update(
-                    this.currentTaxId,
-                    payload
-                );
-
-            }
-            else {
-
-                await this.service.create(
-                    payload
-                );
-
-            }
+        };
 
 
-            const modal =
-                bootstrap.Modal.getInstance(
-                    this.taxModal
-                );
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "Tax.save payload:",
+            payload
+        );
 
 
-            modal?.hide();
+        /*
+        ==================================================
+        UPDATE
+        ==================================================
+        */
 
+        if (
+            this.currentMode
+            ===
+            "edit"
+        ) {
 
-            await this.loadData(false);
+            await this.service.update(
 
+                this.currentTaxId,
 
-            this.showSuccess(
-                this.currentMode
-                ===
-                "edit"
-                    ? "Tax updated successfully."
-                    : "Tax created successfully."
+                payload
+
             );
 
         }
 
-        catch (error) {
 
-            console.error(
-                "Tax.save:",
-                error
-            );
+        /*
+        ==================================================
+        CREATE
+        ==================================================
+        */
 
-            this.showError(
-                error.message
-                ||
-                "Failed to save Tax."
+        else {
+
+            await this.service.create(
+                payload
             );
 
         }
+
+
+        /*
+        ==================================================
+        CLOSE MODAL
+        ==================================================
+        */
+
+        const modal =
+            bootstrap.Modal.getInstance(
+                this.taxModal
+            );
+
+
+        modal?.hide();
+
+
+        /*
+        ==================================================
+        RELOAD DATA
+        ==================================================
+        */
+
+        await this.loadData(
+            false
+        );
+
+
+        /*
+        ==================================================
+        SUCCESS
+        ==================================================
+        */
+
+        this.showSuccess(
+
+            this.currentMode
+            ===
+            "edit"
+
+                ? "Tax updated successfully."
+
+                : "Tax created successfully."
+
+        );
 
     }
+
+    catch (error) {
+
+        console.error(
+            "Tax.save:",
+            error
+        );
+
+
+        this.showError(
+
+            error.message
+            ||
+            "Failed to save Tax."
+
+        );
+
+    }
+
+}
 
 
     /*

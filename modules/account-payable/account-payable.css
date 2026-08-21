@@ -621,8 +621,120 @@ tr.ap-row-void
     }
 
 }
+/* ==========================================================
+   AP TOM SELECT - COA SEARCHABLE DROPDOWN
+========================================================== */
+
+#accountPayableDetailModal
+.ts-wrapper {
+
+    width: 100%;
+
+}
 
 
 /* ==========================================================
-   END ACCOUNT PAYABLE CSS
+   TOM SELECT CONTROL
+   KEEP SEARCH INPUT ON SAME LINE
 ========================================================== */
+
+#accountPayableDetailModal
+.ts-control {
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    flex-wrap: nowrap !important;
+
+    width: 100% !important;
+
+    min-height: 38px;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   SELECTED COA
+========================================================== */
+
+#accountPayableDetailModal
+.ts-control
+.item {
+
+    flex: 0 1 auto !important;
+
+    min-width: 0;
+
+    max-width: calc(100% - 30px);
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+}
+
+
+/* ==========================================================
+   TOM SELECT SEARCH INPUT
+   IMPORTANT : DO NOT USE WIDTH 100%
+========================================================== */
+
+#accountPayableDetailModal
+.ts-control
+> input {
+
+    flex: 1 1 auto !important;
+
+    width: 1px !important;
+
+    min-width: 20px !important;
+
+    max-width: 100% !important;
+
+    height: auto !important;
+
+    min-height: 0 !important;
+
+    margin: 0 0 0 4px !important;
+
+    padding: 0 !important;
+
+    border: 0 !important;
+
+    box-shadow: none !important;
+
+    background: transparent !important;
+
+}
+
+
+/* ==========================================================
+   REMOVE FOCUS SHADOW FROM INTERNAL INPUT
+========================================================== */
+
+#accountPayableDetailModal
+.ts-control
+> input:focus {
+
+    outline: none !important;
+
+    box-shadow: none !important;
+
+}
+
+
+/* ==========================================================
+   DROPDOWN
+========================================================== */
+
+#accountPayableDetailModal
+.ts-dropdown {
+
+    width: 100%;
+
+}

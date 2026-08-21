@@ -24,6 +24,9 @@ import {
 import {
     GeneralJournalService
 } from "../../service/journal.service.js";
+import {
+    TaxService
+} from "../../service/tax-service.js";
 
 
 /*
@@ -63,6 +66,11 @@ export class AccountPayable {
 
         this.journalService =
         new GeneralJournalService();
+        this.taxService =
+    new TaxService();
+
+this.taxPlusData = [];
+this.taxMinusData = [];
 
         /*
         ==============================================
@@ -111,6 +119,7 @@ export class AccountPayable {
         this.pendingVoidId = null;
         this.apDetailUnitPrice = null;
         this.accountPayableCompleteModal = null;
+        this.apDetailCOASelect = null;
 
         this.pendingCompleteAPId = null;
 
@@ -176,6 +185,159 @@ export class AccountPayable {
         this.recordInfo = null;
 
     }
+    /*
+======================================================
+INITIALIZE SEARCHABLE DETAIL COA
+======================================================
+*/
+
+initializeDetailCOASearch() {
+
+    try {
+
+        /*
+        ==================================================
+        CHECK DOM
+        ==================================================
+        */
+
+        if (!this.apDetailCOA) {
+
+            console.warn(
+                "AP Detail COA element not found."
+            );
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        CHECK TOM SELECT
+        ==================================================
+        */
+
+        if (
+            typeof TomSelect
+            ===
+            "undefined"
+        ) {
+
+            console.error(
+                "TomSelect library is not loaded."
+            );
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        DESTROY EXISTING INSTANCE
+        ==================================================
+        */
+
+        if (
+            this.apDetailCOASelect
+        ) {
+
+            this.apDetailCOASelect.destroy();
+
+            this.apDetailCOASelect =
+                null;
+
+        }
+
+
+        /*
+        ==================================================
+        INITIALIZE TOM SELECT
+        ==================================================
+        */
+
+        this.apDetailCOASelect =
+            new TomSelect(
+                this.apDetailCOA,
+                {
+
+                    create:
+                        false,
+
+                    allowEmptyOption:
+                        true,
+
+                    placeholder:
+                        "Select Chart of Account",
+
+                    searchField: [
+                        "text"
+                    ],
+
+                    maxOptions:
+                        100,
+
+                    closeAfterSelect:
+                        true,
+
+                    hideSelected:
+                        false,
+
+                    selectOnTab:
+                        true,
+
+                    /*
+                    ======================================
+                    CLEAR SEARCH AFTER SELECT
+                    ======================================
+                    */
+
+                    onItemAdd() {
+
+                        this.setTextboxValue(
+                            ""
+                        );
+
+                    }
+
+                }
+            );
+
+
+        /*
+        ==================================================
+        CLEAR INITIAL VALUE
+        KEEP PLACEHOLDER ONLY
+        ==================================================
+        */
+
+        this.apDetailCOASelect.clear(
+            true
+        );
+
+
+        this.apDetailCOASelect.setTextboxValue(
+            ""
+        );
+
+
+        console.log(
+            "AP Searchable COA initialized."
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountPayable.initializeDetailCOASearch:",
+            error
+        );
+
+    }
+
+}
     /*
 ======================================================
 LOAD ACCOUNT PAYABLE MODAL
@@ -287,10 +449,312 @@ async loadModalHTML() {
     }
 
 }
+/*
+======================================================
+LOAD TAX MASTER
+======================================================
+*/
+
+async loadTaxMaster() {
+
+    try {
+
+        const [
+            plusTaxes,
+            minusTaxes
+        ] = await Promise.all([
+
+            this.taxService.getByType("PLUS"),
+
+            this.taxService.getByType("MINUS")
+
+        ]);
 
 
+        this.taxPlusData =
+            Array.isArray(plusTaxes)
+                ? plusTaxes
+                : [];
 
 
+        this.taxMinusData =
+            Array.isArray(minusTaxes)
+                ? minusTaxes
+                : [];
+
+
+        this.renderTaxMasterOptions();
+
+
+        console.log(
+            "AP TAX PLUS:",
+            this.taxPlusData
+        );
+
+        console.log(
+            "AP TAX MINUS:",
+            this.taxMinusData
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountPayable.loadTaxMaster:",
+            error
+        );
+
+        this.taxPlusData = [];
+        this.taxMinusData = [];
+
+        this.renderTaxMasterOptions();
+
+    }
+
+}
+
+
+/*
+======================================================
+RENDER TAX MASTER OPTIONS
+======================================================
+*/
+
+renderTaxMasterOptions() {
+
+    /*
+    ==================================================
+    TAX (+)
+    ==================================================
+    */
+
+    if (this.apDetailTaxInputRate) {
+
+        this.apDetailTaxInputRate.innerHTML = `
+            <option value="">
+                No Tax
+            </option>
+        `;
+
+
+        this.taxPlusData.forEach(
+            tax => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                /*
+                ==========================================
+                TAX MASTER ID
+                ==========================================
+                */
+
+                option.value =
+                    tax.id;
+
+
+                /*
+                ==========================================
+                TAX RATE
+                ==========================================
+                */
+
+                option.dataset.rate =
+                    Number(
+                        tax.tax_rate
+                        || 0
+                    );
+
+
+                /*
+                ==========================================
+                TAX CODE
+                INTERNAL ONLY
+                ==========================================
+                */
+
+                option.dataset.taxCode =
+                    tax.tax_code
+                    || "";
+
+
+                /*
+                ==========================================
+                TAX NAME
+                ==========================================
+                */
+
+                option.dataset.taxName =
+                    tax.tax_name
+                    || "";
+
+
+                /*
+                ==========================================
+                TAX ACCOUNT
+                ==========================================
+                */
+
+                option.dataset.accountId =
+                    tax.tax_account_id
+                    || "";
+
+
+                /*
+                ==========================================
+                OFFSET ACCOUNT
+                ==========================================
+                */
+
+                option.dataset.offsetAccountId =
+                    tax.offset_account_id
+                    || "";
+
+
+                /*
+                ==========================================
+                DISPLAY
+                ONLY TAX NAME
+                ==========================================
+                */
+
+                option.textContent =
+                    tax.tax_name
+                    || "";
+
+
+                this.apDetailTaxInputRate
+                    .appendChild(
+                        option
+                    );
+
+            }
+        );
+
+    }
+
+
+    /*
+    ==================================================
+    TAX (-)
+    ==================================================
+    */
+
+    if (
+        this.apDetailWithholdingTaxRate
+    ) {
+
+        this.apDetailWithholdingTaxRate.innerHTML = `
+            <option value="">
+                No Tax
+            </option>
+        `;
+
+
+        this.taxMinusData.forEach(
+            tax => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                /*
+                ==========================================
+                TAX MASTER ID
+                ==========================================
+                */
+
+                option.value =
+                    tax.id;
+
+
+                /*
+                ==========================================
+                TAX RATE
+                ==========================================
+                */
+
+                option.dataset.rate =
+                    Number(
+                        tax.tax_rate
+                        || 0
+                    );
+
+
+                /*
+                ==========================================
+                TAX CODE
+                INTERNAL ONLY
+                ==========================================
+                */
+
+                option.dataset.taxCode =
+                    tax.tax_code
+                    || "";
+
+
+                /*
+                ==========================================
+                TAX NAME
+                ==========================================
+                */
+
+                option.dataset.taxName =
+                    tax.tax_name
+                    || "";
+
+
+                /*
+                ==========================================
+                TAX ACCOUNT
+                ==========================================
+                */
+
+                option.dataset.accountId =
+                    tax.tax_account_id
+                    || "";
+
+
+                /*
+                ==========================================
+                OFFSET ACCOUNT
+                ==========================================
+                */
+
+                option.dataset.offsetAccountId =
+                    tax.offset_account_id
+                    || "";
+
+
+                /*
+                ==========================================
+                DISPLAY
+                ONLY TAX NAME
+                ==========================================
+                */
+
+                option.textContent =
+                    tax.tax_name
+                    || "";
+
+
+                this.apDetailWithholdingTaxRate
+                    .appendChild(
+                        option
+                    );
+
+            }
+        );
+
+    }
+
+}
 /*
 ======================================================
 INIT
@@ -328,6 +792,8 @@ async init() {
         */
 
         this.cacheDOM();
+
+        await this.loadTaxMaster();
 
         /*
         ==============================================
@@ -2160,7 +2626,7 @@ this.btnConfirmApDeleteInvoice =
     );
 
 }
-    /*
+   /*
 ======================================================
 LOAD DETAIL COA
 ======================================================
@@ -2183,6 +2649,25 @@ async loadDetailCOA() {
             );
 
             return;
+
+        }
+
+
+        /*
+        ==================================================
+        DESTROY EXISTING TOM SELECT
+        BEFORE REBUILD OPTIONS
+        ==================================================
+        */
+
+        if (
+            this.apDetailCOASelect
+        ) {
+
+            this.apDetailCOASelect.destroy();
+
+            this.apDetailCOASelect =
+                null;
 
         }
 
@@ -2214,19 +2699,14 @@ async loadDetailCOA() {
         RESET DROPDOWN
         ==================================================
         */
-
-        this.apDetailCOA.innerHTML = `
-
-            <option value="">
-                Select Chart of Account
-            </option>
-
-        `;
+this.apDetailCOA.innerHTML = `
+    <option value=""></option>
+`;
 
 
         /*
         ==================================================
-        EMPTY COA
+        EMPTY
         ==================================================
         */
 
@@ -2241,12 +2721,31 @@ async loadDetailCOA() {
 
         /*
         ==================================================
-        RENDER COA
+        RENDER OPTIONS
         ==================================================
         */
 
         this.currentCOA.forEach(
             account => {
+
+                /*
+                ==========================================
+                ONLY TRANSACTION ACCOUNT
+                ==========================================
+                */
+
+                if (
+                    account.is_header === true
+                    ||
+                    account.allow_transaction === false
+                    ||
+                    account.status === false
+                ) {
+
+                    return;
+
+                }
+
 
                 const option =
                     document.createElement(
@@ -2259,7 +2758,7 @@ async loadDetailCOA() {
 
 
                 option.textContent =
-                    `${account.account_code} :: ${account.account_name}`;
+                    `${account.account_code} - ${account.account_name}`;
 
 
                 this.apDetailCOA.appendChild(
@@ -2268,6 +2767,15 @@ async loadDetailCOA() {
 
             }
         );
+
+
+        /*
+        ==================================================
+        INITIALIZE SEARCHABLE DROPDOWN
+        ==================================================
+        */
+
+        this.initializeDetailCOASearch();
 
 
         console.log(
@@ -2284,7 +2792,10 @@ async loadDetailCOA() {
             error
         );
 
-        this.currentCOA = [];
+
+        this.currentCOA =
+            [];
+
 
         this.showError(
             "Failed to load Chart of Accounts."
@@ -3708,18 +4219,56 @@ saveInvoiceDetail() {
     );
 
 
-        const taxInputRate =
-            Number(
-                this.apDetailTaxInputRate?.value
-                || 0
-            );
+        /*
+==================================================
+TAX (+)
+FROM TAX MASTER
+==================================================
+*/
+
+const taxPlusId =
+    this.apDetailTaxInputRate?.value
+    || null;
 
 
-        const withholdingTaxRate =
-            Number(
-                this.apDetailWithholdingTaxRate?.value
-                || 0
-            );
+const taxPlusOption =
+    this.apDetailTaxInputRate
+        ?.selectedOptions?.[0];
+
+
+const taxInputRate =
+    Number(
+        taxPlusOption
+            ?.dataset
+            ?.rate
+        || 0
+    );
+
+
+        /*
+==================================================
+TAX (-)
+FROM TAX MASTER
+==================================================
+*/
+
+const taxMinusId =
+    this.apDetailWithholdingTaxRate?.value
+    || null;
+
+
+const taxMinusOption =
+    this.apDetailWithholdingTaxRate
+        ?.selectedOptions?.[0];
+
+
+const withholdingTaxRate =
+    Number(
+        taxMinusOption
+            ?.dataset
+            ?.rate
+        || 0
+    );
 
 
         /*
@@ -3840,13 +4389,7 @@ saveInvoiceDetail() {
             });
 
 
-        /*
-        ==================================================
-        CREATE DETAIL OBJECT
-        ==================================================
-        */
-
-        /*
+       /*
 ==================================================
 CREATE / UPDATE DETAIL
 ==================================================
@@ -3860,7 +4403,9 @@ const detail = {
         crypto.randomUUID(),
 
     charge_account_id:
-        Number(coaId),
+        Number(
+            coaId
+        ),
 
     account_code:
         coa?.account_code
@@ -3877,17 +4422,78 @@ const detail = {
     unit_price:
         unitPrice,
 
+
+    /*
+    ==============================================
+    TAX (+)
+    ==============================================
+    */
+
+    tax_plus_id:
+        taxPlusId
+            ? Number(taxPlusId)
+            : null,
+
+    tax_plus_code:
+        taxPlusOption?.dataset?.taxCode
+        || "",
+
+    tax_plus_name:
+        taxPlusOption?.dataset?.taxName
+        || "",
+
+    tax_plus_account_id:
+        taxPlusOption?.dataset?.accountId
+            ? Number(
+                taxPlusOption.dataset.accountId
+            )
+            : null,
+
     tax_input_rate:
         taxInputRate,
 
     tax_input_amount:
         calculated.tax_input_amount,
 
+
+    /*
+    ==============================================
+    TAX (-)
+    ==============================================
+    */
+
+    tax_minus_id:
+        taxMinusId
+            ? Number(taxMinusId)
+            : null,
+
+    tax_minus_code:
+        taxMinusOption?.dataset?.taxCode
+        || "",
+
+    tax_minus_name:
+        taxMinusOption?.dataset?.taxName
+        || "",
+
+    tax_minus_account_id:
+        taxMinusOption?.dataset?.accountId
+            ? Number(
+                taxMinusOption.dataset.accountId
+            )
+            : null,
+
     withholding_tax_rate:
         withholdingTaxRate,
 
     withholding_tax_amount:
         calculated.withholding_tax_amount,
+
+
+    /*
+    ==============================================
+    AMOUNT
+    ==============================================
+    */
 
     line_amount:
         calculated.line_amount,
@@ -3896,7 +4502,6 @@ const detail = {
         calculated.total_amount
 
 };
-
 
 /*
 ==================================================
@@ -5532,83 +6137,110 @@ resetInvoiceDetailForm() {
 
 
     fields.forEach(
-    id => {
+        id => {
 
-        const element =
-            document.getElementById(id);
+            const element =
+                document.getElementById(
+                    id
+                );
 
 
-        if (!element) {
+            if (!element) {
 
-            return;
+                return;
+
+            }
+
+
+            /*
+            ==========================================
+            QUANTITY
+            ==========================================
+            */
+
+            if (
+                id ===
+                "ap-detail-quantity"
+            ) {
+
+                element.value =
+                    "1";
+
+                return;
+
+            }
+
+
+            /*
+            ==========================================
+            UNIT PRICE
+            ==========================================
+            */
+
+            if (
+                id ===
+                "ap-detail-unit-price"
+            ) {
+
+                element.value =
+                    "0";
+
+                return;
+
+            }
+
+
+            /*
+            ==========================================
+            TAX (+)
+            DEFAULT = NO TAX
+            ==========================================
+            */
+
+            if (
+                id ===
+                "ap-detail-tax-input-rate"
+            ) {
+
+                element.value =
+                    "";
+
+                return;
+
+            }
+
+
+            /*
+            ==========================================
+            TAX (-)
+            DEFAULT = NO TAX
+            ==========================================
+            */
+
+            if (
+                id ===
+                "ap-detail-withholding-tax-rate"
+            ) {
+
+                element.value =
+                    "";
+
+                return;
+
+            }
+
+
+            /*
+            ==========================================
+            OTHER FIELD
+            ==========================================
+            */
+
+            element.value =
+                "";
 
         }
-
-
-        /*
-        ==========================================
-        QUANTITY
-        ==========================================
-        */
-
-        if (
-            id ===
-            "ap-detail-quantity"
-        ) {
-
-            element.value = "1";
-
-            return;
-
-        }
-
-
-        /*
-        ==========================================
-        TAX (+)
-        ==========================================
-        */
-
-        if (
-            id ===
-            "ap-detail-tax-input-rate"
-        ) {
-
-            element.value = "0";
-
-            return;
-
-        }
-
-
-        /*
-        ==========================================
-        TAX (-)
-        ==========================================
-        */
-
-        if (
-            id ===
-            "ap-detail-withholding-tax-rate"
-        ) {
-
-            element.value = "0";
-
-            return;
-
-        }
-
-
-        /*
-        ==========================================
-        OTHER FIELD
-        ==========================================
-        */
-
-        element.value = "";
-
-    }
-);
+    );
 
 
     /*
@@ -5617,15 +6249,25 @@ resetInvoiceDetailForm() {
     ==================================================
     */
 
-    const coa =
-        document.getElementById(
-            "ap-detail-coa"
+    if (
+        this.apDetailCOASelect
+    ) {
+
+        this.apDetailCOASelect.clear(
+            true
         );
 
+        this.apDetailCOASelect.setTextboxValue(
+            ""
+        );
 
-    if (coa) {
+    }
+    else if (
+        this.apDetailCOA
+    ) {
 
-        coa.value = "";
+        this.apDetailCOA.value =
+            "";
 
     }
 
@@ -5636,41 +6278,54 @@ resetInvoiceDetailForm() {
     ==================================================
     */
 
-    const amounts = [
+    if (
+        this.apDetailLineAmount
+    ) {
 
-        "ap-detail-line-amount",
+        this.apDetailLineAmount.textContent =
+            "0";
 
-        "ap-detail-tax-input-amount",
-
-        "ap-detail-withholding-tax-amount",
-
-        "ap-detail-total-amount"
-
-    ];
+    }
 
 
-    amounts.forEach(
-        id => {
+    if (
+        this.apDetailTaxInputAmount
+    ) {
 
-            const element =
-                document.getElementById(id);
+        this.apDetailTaxInputAmount.textContent =
+            "0";
+
+    }
 
 
-            if (element) {
+    if (
+        this.apDetailWithholdingTaxAmount
+    ) {
 
-                element.textContent = "0";
+        this.apDetailWithholdingTaxAmount.textContent =
+            "0";
 
-            }
+    }
 
-        }
-    );
+
+    if (
+        this.apDetailTotalAmount
+    ) {
+
+        this.apDetailTotalAmount.textContent =
+            "0";
+
+    }
+
+
     /*
-==================================================
-RESET CURRENT DETAIL ID
-==================================================
-*/
+    ==================================================
+    RESET DETAIL STATE
+    ==================================================
+    */
 
-this.currentDetailId = null;
+    this.currentDetailId =
+        null;
 
 }
     /*

@@ -468,13 +468,7 @@ export class TaxService {
             }
 
 
-            if (!offsetAccountId) {
-
-                throw new Error(
-                    "Offset Account is required."
-                );
-
-            }
+           
 
 
             /*
@@ -554,218 +548,379 @@ export class TaxService {
     }
 
 
-    /*
-    ==================================================
-    UPDATE TAX
-    ==================================================
-    */
-
-    async update(
-        id,
-        payload
-    ) {
-
-        try {
-
-            if (!id) {
-
-                throw new Error(
-                    "Tax ID is required."
-                );
-
-            }
-
-
-            if (!payload) {
-
-                throw new Error(
-                    "Tax data is required."
-                );
-
-            }
-
-
-            const updateData = {};
-
-
-            if (
-                payload.tax_code
-                !== undefined
-            ) {
-
-                updateData.tax_code =
-                    String(
-                        payload.tax_code
-                    )
-                    .trim()
-                    .toUpperCase();
-
-            }
-
-
-            if (
-                payload.tax_name
-                !== undefined
-            ) {
-
-                updateData.tax_name =
-                    String(
-                        payload.tax_name
-                    )
-                    .trim();
-
-            }
-
-
-            if (
-                payload.tax_type
-                !== undefined
-            ) {
-
-                const type =
-                    String(
-                        payload.tax_type
-                    )
-                    .trim()
-                    .toUpperCase();
-
-
-                if (
-                    ![
-                        "PLUS",
-                        "MINUS"
-                    ].includes(type)
-                ) {
-
-                    throw new Error(
-                        "Tax Type must be PLUS or MINUS."
-                    );
-
-                }
-
-
-                updateData.tax_type =
-                    type;
-
-            }
-
-
-            if (
-                payload.tax_rate
-                !== undefined
-            ) {
-
-                const rate =
-                    Number(
-                        payload.tax_rate
-                    );
-
-
-                if (
-                    rate < 0
-                    ||
-                    rate > 100
-                ) {
-
-                    throw new Error(
-                        "Tax Rate must be between 0 and 100."
-                    );
-
-                }
-
-
-                updateData.tax_rate =
-                    rate;
-
-            }
-
-
-          
- 
-
-
-            if (
-                payload.offset_account_id
-                !== undefined
-            ) {
-
-                updateData.offset_account_id =
-                payload.offset_account_id
-                || null;
-
-            }
-
-
-            if (
-                payload.description
-                !== undefined
-            ) {
-
-                updateData.description =
-                    payload.description
-                    || null;
-
-            }
-
-
-            if (
-                payload.status
-                !== undefined
-            ) {
-
-                updateData.status =
-                    Boolean(
-                        payload.status
-                    );
-
-            }
-
-
-            const {
-                data,
-                error
-            } = await supabase
-
-                .from(this.table)
-
-                .update(
-                    updateData
-                )
-
-                .eq(
-                    "id",
-                    id
-                )
-
-                .select()
-
-                .single();
-
-
-            if (error) {
-
-                throw error;
-
-            }
-
-
-            return data;
+   /*
+==================================================
+UPDATE TAX
+==================================================
+*/
+
+async update(
+    id,
+    payload
+) {
+
+    try {
+
+        /*
+        ==============================================
+        VALIDATE ID
+        ==============================================
+        */
+
+        if (!id) {
+
+            throw new Error(
+                "Tax ID is required."
+            );
 
         }
 
-        catch (error) {
 
-            console.error(
-                "TaxService.update:",
-                error
+        /*
+        ==============================================
+        VALIDATE PAYLOAD
+        ==============================================
+        */
+
+        if (!payload) {
+
+            throw new Error(
+                "Tax data is required."
             );
+
+        }
+
+
+        /*
+        ==============================================
+        UPDATE DATA
+        ==============================================
+        */
+
+        const updateData = {};
+
+
+        /*
+        ==============================================
+        TAX CODE
+        ==============================================
+        */
+
+        if (
+            payload.tax_code
+            !== undefined
+        ) {
+
+            const taxCode =
+                String(
+                    payload.tax_code
+                    || ""
+                )
+                .trim()
+                .toUpperCase();
+
+
+            if (!taxCode) {
+
+                throw new Error(
+                    "Tax Code is required."
+                );
+
+            }
+
+
+            updateData.tax_code =
+                taxCode;
+
+        }
+
+
+        /*
+        ==============================================
+        TAX NAME
+        ==============================================
+        */
+
+        if (
+            payload.tax_name
+            !== undefined
+        ) {
+
+            const taxName =
+                String(
+                    payload.tax_name
+                    || ""
+                )
+                .trim();
+
+
+            if (!taxName) {
+
+                throw new Error(
+                    "Tax Name is required."
+                );
+
+            }
+
+
+            updateData.tax_name =
+                taxName;
+
+        }
+
+
+        /*
+        ==============================================
+        TAX TYPE
+        ==============================================
+        */
+
+        if (
+            payload.tax_type
+            !== undefined
+        ) {
+
+            const type =
+                String(
+                    payload.tax_type
+                    || ""
+                )
+                .trim()
+                .toUpperCase();
+
+
+            if (
+                ![
+                    "PLUS",
+                    "MINUS"
+                ].includes(
+                    type
+                )
+            ) {
+
+                throw new Error(
+                    "Tax Type must be PLUS or MINUS."
+                );
+
+            }
+
+
+            updateData.tax_type =
+                type;
+
+        }
+
+
+        /*
+        ==============================================
+        TAX RATE
+        ==============================================
+        */
+
+        if (
+            payload.tax_rate
+            !== undefined
+        ) {
+
+            const rate =
+                Number(
+                    payload.tax_rate
+                );
+
+
+            if (
+                Number.isNaN(rate)
+                ||
+                rate < 0
+                ||
+                rate > 100
+            ) {
+
+                throw new Error(
+                    "Tax Rate must be between 0 and 100."
+                );
+
+            }
+
+
+            updateData.tax_rate =
+                rate;
+
+        }
+
+
+        /*
+        ==============================================
+        TAX ACCOUNT
+        REQUIRED
+        ==============================================
+        */
+
+        if (
+            payload.tax_account_id
+            !== undefined
+        ) {
+
+            const taxAccountId =
+                String(
+                    payload.tax_account_id
+                    || ""
+                )
+                .trim();
+
+
+            if (!taxAccountId) {
+
+                throw new Error(
+                    "Tax Account is required."
+                );
+
+            }
+
+
+            updateData.tax_account_id =
+                taxAccountId;
+
+        }
+
+
+        /*
+        ==============================================
+        OFFSET ACCOUNT
+        OPTIONAL
+        ==============================================
+        */
+
+        if (
+            payload.offset_account_id
+            !== undefined
+        ) {
+
+            const offsetAccountId =
+                String(
+                    payload.offset_account_id
+                    || ""
+                )
+                .trim();
+
+
+            updateData.offset_account_id =
+                offsetAccountId
+                    || null;
+
+        }
+
+
+        /*
+        ==============================================
+        DESCRIPTION
+        ==============================================
+        */
+
+        if (
+            payload.description
+            !== undefined
+        ) {
+
+            const description =
+                String(
+                    payload.description
+                    || ""
+                )
+                .trim();
+
+
+            updateData.description =
+                description
+                    || null;
+
+        }
+
+
+        /*
+        ==============================================
+        STATUS
+        ==============================================
+        */
+
+        if (
+            payload.status
+            !== undefined
+        ) {
+
+            updateData.status =
+                Boolean(
+                    payload.status
+                );
+
+        }
+
+
+        /*
+        ==============================================
+        UPDATE DATABASE
+        ==============================================
+        */
+
+        const {
+            data,
+            error
+        } = await supabase
+
+            .from(
+                this.table
+            )
+
+            .update(
+                updateData
+            )
+
+            .eq(
+                "id",
+                id
+            )
+
+            .select()
+
+            .single();
+
+
+        /*
+        ==============================================
+        ERROR
+        ==============================================
+        */
+
+        if (error) {
 
             throw error;
 
         }
 
+
+        /*
+        ==============================================
+        RETURN
+        ==============================================
+        */
+
+        return data;
+
     }
 
+    catch (error) {
+
+        console.error(
+            "TaxService.update:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
 
     /*
     ==================================================
