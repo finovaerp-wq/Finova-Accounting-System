@@ -399,15 +399,13 @@ export class TaxService {
 
 
             const taxAccountId =
-                Number(
-                    payload.tax_account_id || 0
-                );
+                payload.tax_account_id
+                || null;
 
 
             const offsetAccountId =
-                Number(
-                    payload.offset_account_id || 0
-                );
+                payload.offset_account_id
+                || null;
 
 
             /*
@@ -682,17 +680,8 @@ export class TaxService {
             }
 
 
-            if (
-                payload.tax_account_id
-                !== undefined
-            ) {
-
-                updateData.tax_account_id =
-                    Number(
-                        payload.tax_account_id
-                    );
-
-            }
+          
+ 
 
 
             if (
@@ -701,9 +690,8 @@ export class TaxService {
             ) {
 
                 updateData.offset_account_id =
-                    Number(
-                        payload.offset_account_id
-                    );
+                payload.offset_account_id
+                || null;
 
             }
 

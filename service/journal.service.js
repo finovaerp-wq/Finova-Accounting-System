@@ -396,14 +396,31 @@ async create(header, details = []) {
         }
 
         /*
-        ======================================================
-        DEFAULT STATUS
-        ======================================================
-        */
+======================================================
+DEFAULT STATUS
+======================================================
+*/
 
-        header.status ??= this.STATUS.DRAFT;
+header.status ??=
+    this.STATUS.DRAFT;
 
-        header.source_module ??= "GENERAL";
+
+/*
+======================================================
+DEFAULT SOURCE
+MANUAL GENERAL JOURNAL
+======================================================
+*/
+
+header.source_module ??=
+    "GLJ";
+
+
+header.source_document_type ??=
+    "MANUAL_JOURNAL";
+
+header.source_document_id ??=
+    null;
 
         /*
         ======================================================

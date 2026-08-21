@@ -2,61 +2,57 @@
    FINOVA ACCOUNTING SYSTEM
    MODULE : GENERAL JOURNAL
 
-   CSS RESPONSIBILITY
+   RESPONSIBILITY
    - Page layout
    - Filter layout
-   - General Journal specific controls
-   - Table layout/container only
+   - GL Journal table structure
    - Modal layout
 
-   GLOBAL RESPONSIBILITY
-   - Table visual       : global table.css
-   - Pagination         : global pagination.css
-   - Button visual      : global button.css
+   GLOBAL
+   - Table visual : table.css
+   - Pagination   : pagination.css
+   - Button       : button.css
 ========================================================== */
 
 
 /* ==========================================================
-   01. GENERAL JOURNAL PAGE
+   PAGE
 ========================================================== */
 
 .gl-journal-page {
 
     display: flex;
+
     flex-direction: column;
-
-    width: 100%;
-    height: 100%;
-
-    min-height: 0;
 
     flex: 1 1 auto;
 
-    gap: 12px;
+    min-height: 0;
 
-    box-sizing: border-box;
+    width: 100%;
+
 }
 
 
 /* ==========================================================
-   02. PAGE HEADER
+   PAGE HEADER
 ========================================================== */
 
 .gl-journal-page > .finova-page-header {
 
     width: 100%;
 
-    margin-bottom: 0 !important;
+    margin-bottom: 8px !important;
 
     flex-shrink: 0;
 
     box-sizing: border-box;
+
 }
 
 
 /* ==========================================================
-   03. FILTER CARD
-   SAME WIDTH AS TABLE
+   FILTER CARD
 ========================================================== */
 
 .gl-journal-page > .gl-journal-filter-card {
@@ -72,14 +68,12 @@
     box-sizing: border-box;
 
     border-radius: 12px;
+
 }
 
 
 /* ==========================================================
-   04. FILTER CARD BODY
-
-   IMPORTANT:
-   HTML menggunakan .finova-card-body
+   FILTER CARD BODY
 ========================================================== */
 
 .gl-journal-filter-card > .finova-card-body {
@@ -89,14 +83,12 @@
     padding: 12px 20px !important;
 
     box-sizing: border-box;
+
 }
 
 
 /* ==========================================================
-   05. FILTER ROW
-
-   USE BOOTSTRAP GRID
-   DO NOT USE CSS GRID HERE
+   FILTER ROW
 ========================================================== */
 
 .gl-journal-filter-card
@@ -112,16 +104,12 @@
     box-sizing: border-box;
 
     align-items: end !important;
+
 }
 
 
 /* ==========================================================
-   06. FILTER COLUMNS
-
-   Bootstrap:
-   xl-2 / xl-2 / xl-2 / xl-2 / xl-4
-
-   Total = 12
+   FILTER COLUMN
 ========================================================== */
 
 .gl-journal-filter-card
@@ -129,17 +117,17 @@
 > .row
 > [class*="col-"] {
 
-    box-sizing: border-box;
-
     min-width: 0;
 
     margin: 0;
+
+    box-sizing: border-box;
 
 }
 
 
 /* ==========================================================
-   07. FILTER LABEL
+   FILTER LABEL
 ========================================================== */
 
 .gl-journal-filter-card .form-label {
@@ -159,11 +147,12 @@
     line-height: 1.2;
 
     text-align: left;
+
 }
 
 
 /* ==========================================================
-   08. FILTER INPUT & SELECT
+   FILTER CONTROL
 ========================================================== */
 
 .gl-journal-filter-card .form-control,
@@ -190,11 +179,12 @@
     padding: 0 14px;
 
     box-shadow: none;
+
 }
 
 
 /* ==========================================================
-   09. DATE INPUT
+   DATE INPUT
 ========================================================== */
 
 .gl-journal-filter-card input[type="date"] {
@@ -204,11 +194,12 @@
     min-height: 46px !important;
 
     padding-right: 12px;
+
 }
 
 
 /* ==========================================================
-   10. FILTER FOCUS
+   FILTER FOCUS
 ========================================================== */
 
 .gl-journal-filter-card .form-control:focus,
@@ -220,11 +211,12 @@
         0 0 0 3px rgba(37, 99, 235, .10);
 
     outline: none;
+
 }
 
 
 /* ==========================================================
-   11. FIND INPUT GROUP
+   FIND INPUT GROUP
 ========================================================== */
 
 .gl-journal-filter-card .input-group {
@@ -240,11 +232,12 @@
     margin: 0 !important;
 
     box-sizing: border-box;
+
 }
 
 
 /* ==========================================================
-   12. KEYWORD INPUT
+   KEYWORD
 ========================================================== */
 
 .gl-journal-filter-card #filter-keyword {
@@ -260,11 +253,12 @@
     border-top-right-radius: 0 !important;
 
     border-bottom-right-radius: 0 !important;
+
 }
 
 
 /* ==========================================================
-   13. FIND BUTTON
+   FIND BUTTON
 ========================================================== */
 
 .gl-journal-filter-card #btn-find-journal {
@@ -292,12 +286,12 @@
     font-size: 14px;
 
     font-weight: 600;
+
 }
 
 
 /* ==========================================================
-   14. TABLE CARD
-   WIDTH FOLLOWS PAGE
+   TABLE CARD
 ========================================================== */
 
 .gl-journal-page > .finova-table-card {
@@ -306,20 +300,19 @@
 
     flex-direction: column;
 
-    width: 100% !important;
-
-    max-width: none !important;
+    flex: 1 1 auto;
 
     min-height: 0;
 
-    flex: 1 1 auto;
+    width: 100%;
 
-    box-sizing: border-box;
+    overflow: hidden;
+
 }
 
 
 /* ==========================================================
-   15. TABLE CARD BODY
+   TABLE CARD BODY
 ========================================================== */
 
 .gl-journal-page
@@ -330,127 +323,656 @@
 
     flex-direction: column;
 
-    width: 100%;
+    flex: 1 1 auto;
 
     min-height: 0;
-
-    flex: 1 1 auto;
 
     padding: 0;
 
     overflow: hidden;
 
-    box-sizing: border-box;
 }
 
 
 /* ==========================================================
-   16. TABLE CONTAINER
+   TABLE CONTAINER
 ========================================================== */
 
 .gl-journal-page
-.finova-table-card
-.finova-table-container {
+> .finova-table-card
+> .finova-card-body
+> .finova-table-container {
 
     display: flex;
 
     flex-direction: column;
 
-    width: 100%;
-
-    height: 100%;
+    flex: 1 1 0;
 
     min-height: 0;
 
-    flex: 1 1 auto;
+    width: 100%;
 
     overflow: hidden;
 
-    box-sizing: border-box;
 }
 
 
 /* ==========================================================
-   17. TABLE RESPONSIVE AREA
+   TABLE RESPONSIVE
 ========================================================== */
 
 .gl-journal-page
-.finova-table-container
-.table-responsive {
+> .finova-table-card
+> .finova-card-body
+> .finova-table-container
+> .table-responsive {
 
-    width: 100%;
+    display: block;
+
+    flex: 1 1 0;
 
     min-height: 0;
 
-    flex: 1 1 auto;
+    width: 100%;
 
-    overflow: auto;
+    overflow-x: hidden;
 
-    box-sizing: border-box;
+    overflow-y: auto;
+
 }
 
 
 /* ==========================================================
-   18. GL JOURNAL TABLE
-   VISUAL CONTROLLED BY GLOBAL TABLE CSS
+   GL JOURNAL TABLE
+   NO HORIZONTAL SCROLL
 ========================================================== */
 
 #gl-journal-table {
 
     width: 100%;
 
+    table-layout: fixed;
+
     margin-bottom: 0;
+
+}
+
+
+/* 1. NO */
+
+#gl-journal-table th:nth-child(1),
+#gl-journal-table td:nth-child(1) {
+
+    width: 45px;
+
+    text-align: center;
+
+}
+
+
+/* 2. ACCOUNTING DATE */
+
+#gl-journal-table th:nth-child(2),
+#gl-journal-table td:nth-child(2) {
+
+    width: 120px;
+
+    text-align: center;
+
+    white-space: nowrap;
+
+}
+
+
+/* 3. JOURNAL NO */
+
+#gl-journal-table th:nth-child(3),
+#gl-journal-table td:nth-child(3) {
+
+    width: 145px;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+}
+
+
+/* 4. SOURCE */
+
+#gl-journal-table th:nth-child(4),
+#gl-journal-table td:nth-child(4) {
+
+    width: 65px;
+
+    text-align: center;
+
+    white-space: nowrap;
+
+}
+
+
+/* 5. DESCRIPTION */
+
+#gl-journal-table th:nth-child(5),
+#gl-journal-table td:nth-child(5) {
+
+    width: auto;
+
+    min-width: 0;
+
+}
+
+
+/* 6. TOTAL DEBIT */
+
+#gl-journal-table th:nth-child(6),
+#gl-journal-table td:nth-child(6) {
+
+    width: 115px;
+
+    text-align: right;
+
+    white-space: nowrap;
+
+}
+
+
+/* 7. TOTAL CREDIT */
+
+#gl-journal-table th:nth-child(7),
+#gl-journal-table td:nth-child(7) {
+
+    width: 115px;
+
+    text-align: right;
+
+    white-space: nowrap;
+
+}
+
+
+/* 8. STATUS */
+
+#gl-journal-table th:nth-child(8),
+#gl-journal-table td:nth-child(8) {
+
+    width: 85px;
+
+    text-align: center;
+
+    white-space: nowrap;
+
 }
 
 
 /* ==========================================================
-   19. ACTION BUTTON GROUP
+   9. ACTION
 ========================================================== */
 
-#gl-journal-table .btn-group {
+#gl-journal-table th:nth-child(9),
+#gl-journal-table td:nth-child(9) {
 
-    display: inline-flex;
+    width: 180px;
 
-    align-items: center;
+    max-width: 180px;
 
-    vertical-align: middle;
+    padding-left: 6px !important;
+
+    padding-right: 6px !important;
+
+    text-align: center !important;
+
+    vertical-align: middle !important;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
 }
 
 
 /* ==========================================================
-   20. ACTION BUTTON
+   GL JOURNAL ACTION
+   PREMIUM COMPACT TOOLBAR
+========================================================== */
+
+/* CSS ACTION BARU YANG SAYA KIRIM TADI
+   MASUKKAN SEMUANYA DI SINI */
+
+
+/* ==========================================================
+   TABLE ROW
+========================================================== */
+
+#gl-journal-table tbody tr {
+
+    height: auto !important;
+
+}
+
+
+/* ==========================================================
+   GL JOURNAL ACTION
+   PREMIUM COMPACT TOOLBAR
 ========================================================== */
 
 #gl-journal-table
-.btn-group
-.btn {
+td:nth-child(9) {
 
-    display: inline-flex;
+    text-align: center !important;
+
+    vertical-align: middle !important;
+
+}
+
+
+/* ==========================================================
+   ACTION TOOLBAR
+   COMPACT - ALWAYS INSIDE CELL
+========================================================== */
+
+#gl-journal-table
+td:nth-child(9)
+.btn-group {
+
+    display: inline-flex !important;
 
     align-items: center;
 
     justify-content: center;
+
+    flex-wrap: nowrap;
+
+    width: auto;
+
+    max-width: 100%;
+
+    padding: 3px;
+
+    margin: 0 auto;
+
+    gap: 3px;
+
+    background: #F8FAFC;
+
+    border: 1px solid #E2E8F0;
+
+    border-radius: 9px;
+
+    box-sizing: border-box;
+
+    box-shadow:
+        0 1px 4px rgba(15, 23, 42, .06);
+
 }
 
 
 /* ==========================================================
-   21. PAGINATION
-   VISUAL CONTROLLED BY GLOBAL PAGINATION CSS
+   ACTION BUTTON
+========================================================== */
+
+#gl-journal-table
+td:nth-child(9)
+.btn-group
+.btn {
+
+    display: inline-flex !important;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex: 0 0 27px !important;
+
+    width: 27px !important;
+
+    min-width: 27px !important;
+
+    max-width: 27px !important;
+
+    height: 27px !important;
+
+    min-height: 27px !important;
+
+    padding: 0 !important;
+
+    margin: 0 !important;
+
+    border-radius: 6px !important;
+
+    line-height: 1;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   ACTION ICON
+========================================================== */
+
+#gl-journal-table
+td:nth-child(9)
+.btn-group
+.btn i {
+
+    width: auto;
+
+    height: auto;
+
+    margin: 0 !important;
+
+    font-size: 11px;
+
+    line-height: 1;
+
+}
+
+/* ==========================================================
+   EDIT
+========================================================== */
+
+#gl-journal-table
+.btn-edit-journal {
+
+    color: #2563EB;
+
+    background: #EFF6FF !important;
+
+    border-color: #BFDBFE !important;
+
+}
+
+
+#gl-journal-table
+.btn-edit-journal:hover {
+
+    color: #FFFFFF;
+
+    background: #2563EB !important;
+
+    border-color: #2563EB !important;
+
+}
+
+
+/* ==========================================================
+   DELETE
+========================================================== */
+
+#gl-journal-table
+.btn-delete-journal {
+
+    color: #DC2626;
+
+    background: #FEF2F2 !important;
+
+    border-color: #FECACA !important;
+
+}
+
+
+#gl-journal-table
+.btn-delete-journal:hover {
+
+    color: #FFFFFF;
+
+    background: #DC2626 !important;
+
+    border-color: #DC2626 !important;
+
+}
+
+
+/* ==========================================================
+   POST
+========================================================== */
+
+#gl-journal-table
+.btn-post-journal {
+
+    color: #16A34A;
+
+    background: #F0FDF4 !important;
+
+    border-color: #BBF7D0 !important;
+
+}
+
+
+#gl-journal-table
+.btn-post-journal:hover {
+
+    color: #FFFFFF;
+
+    background: #16A34A !important;
+
+    border-color: #16A34A !important;
+
+}
+
+
+/* ==========================================================
+   DUPLICATE
+========================================================== */
+
+#gl-journal-table
+.btn-duplicate-journal {
+
+    color: #64748B;
+
+    background: #F8FAFC !important;
+
+    border-color: #CBD5E1 !important;
+
+}
+
+
+#gl-journal-table
+.btn-duplicate-journal:hover {
+
+    color: #FFFFFF;
+
+    background: #64748B !important;
+
+    border-color: #64748B !important;
+
+}
+
+
+/* ==========================================================
+   VOUCHER
+========================================================== */
+
+#gl-journal-table
+.btn-voucher-journal {
+
+    color: #0891B2;
+
+    background: #ECFEFF !important;
+
+    border-color: #A5F3FC !important;
+
+}
+
+
+#gl-journal-table
+.btn-voucher-journal:hover {
+
+    color: #FFFFFF;
+
+    background: #0891B2 !important;
+
+    border-color: #0891B2 !important;
+
+}
+
+
+/* ==========================================================
+   VIEW
+========================================================== */
+
+#gl-journal-table
+.btn-view-journal {
+
+    color: #475569;
+
+    background: #F8FAFC !important;
+
+    border-color: #CBD5E1 !important;
+
+}
+
+
+#gl-journal-table
+.btn-view-journal:hover {
+
+    color: #FFFFFF;
+
+    background: #475569 !important;
+
+    border-color: #475569 !important;
+
+}
+
+
+/* ==========================================================
+   VOID
+========================================================== */
+
+#gl-journal-table
+.btn-void-journal {
+
+    color: #7C3AED;
+
+    background: #F5F3FF !important;
+
+    border-color: #DDD6FE !important;
+
+}
+
+
+#gl-journal-table
+.btn-void-journal:hover {
+
+    color: #FFFFFF;
+
+    background: #7C3AED !important;
+
+    border-color: #7C3AED !important;
+
+}
+
+
+/* ==========================================================
+   GENERAL HOVER
+========================================================== */
+
+#gl-journal-table
+td:nth-child(9)
+.btn-group
+.btn:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 5px 12px rgba(15, 23, 42, .14);
+
+}
+
+
+/* ==========================================================
+   ACTIVE
+========================================================== */
+
+#gl-journal-table
+td:nth-child(9)
+.btn-group
+.btn:active {
+
+    transform: translateY(0);
+
+    box-shadow:
+        0 1px 2px rgba(15, 23, 42, .08);
+
+}
+
+
+/* ==========================================================
+   FOCUS
+========================================================== */
+
+#gl-journal-table
+td:nth-child(9)
+.btn-group
+.btn:focus-visible {
+
+    outline: 2px solid #93C5FD;
+
+    outline-offset: 2px;
+
+}
+
+
+/* ==========================================================
+   DISABLED
+========================================================== */
+
+#gl-journal-table
+td:nth-child(9)
+.btn-group
+.btn:disabled,
+#gl-journal-table
+td:nth-child(9)
+.btn-group
+.btn.disabled {
+
+    opacity: .45;
+
+    pointer-events: none;
+
+    transform: none;
+
+    box-shadow: none;
+
+}
+
+/* ==========================================================
+   TABLE ROW
+========================================================== */
+
+#gl-journal-table tbody tr {
+
+    height: auto !important;
+
+}
+
+
+/* ==========================================================
+   PAGINATION
 ========================================================== */
 
 .gl-journal-page
-.finova-pagination-wrapper {
+> .finova-table-card
+> .finova-card-body
+> .finova-table-container
+> .finova-pagination-wrapper {
+
+    flex: 0 0 auto;
 
     width: 100%;
 
-    flex-shrink: 0;
+    margin-top: auto;
 
-    margin-top: 0;
 }
 
 
 /* ==========================================================
-   22. MODAL
+   JOURNAL MODAL CONTENT
 ========================================================== */
 
 #glJournalModal .modal-content {
@@ -460,11 +982,12 @@
     border: none;
 
     border-radius: 14px;
+
 }
 
 
 /* ==========================================================
-   23. MODAL HEADER
+   JOURNAL MODAL HEADER
 ========================================================== */
 
 #glJournalModal .modal-header {
@@ -474,11 +997,12 @@
     align-items: center;
 
     padding: 16px 24px;
+
 }
 
 
 /* ==========================================================
-   24. MODAL BODY
+   JOURNAL MODAL BODY
 ========================================================== */
 
 #glJournalModal .modal-body {
@@ -486,11 +1010,12 @@
     padding: 24px;
 
     background: #F8FAFC;
+
 }
 
 
 /* ==========================================================
-   25. MODAL FOOTER
+   JOURNAL MODAL FOOTER
 ========================================================== */
 
 #glJournalModal .modal-footer {
@@ -500,11 +1025,12 @@
     background: #FFFFFF;
 
     border-top: 1px solid #E5E7EB;
+
 }
 
 
 /* ==========================================================
-   26. MODAL CARD
+   JOURNAL MODAL CARD
 ========================================================== */
 
 #glJournalModal .card {
@@ -517,11 +1043,12 @@
 
     box-shadow:
         0 2px 10px rgba(15, 23, 42, .06);
+
 }
 
 
 /* ==========================================================
-   27. MODAL CARD HEADER
+   JOURNAL MODAL CARD HEADER
 ========================================================== */
 
 #glJournalModal .card-header {
@@ -539,21 +1066,23 @@
     background: #FFFFFF;
 
     border-bottom: 1px solid #EEF2F7;
+
 }
 
 
 /* ==========================================================
-   28. MODAL CARD BODY
+   JOURNAL MODAL CARD BODY
 ========================================================== */
 
 #glJournalModal .card-body {
 
     padding: 20px;
+
 }
 
 
 /* ==========================================================
-   29. MODAL FORM CONTROL
+   JOURNAL MODAL CONTROL
 ========================================================== */
 
 #glJournalModal .form-control,
@@ -566,21 +1095,23 @@
     border-radius: 8px;
 
     font-size: 14px;
+
 }
 
 
 /* ==========================================================
-   30. MODAL TEXTAREA
+   JOURNAL MODAL TEXTAREA
 ========================================================== */
 
 #glJournalModal textarea.form-control {
 
     height: auto;
+
 }
 
 
 /* ==========================================================
-   31. MODAL FOCUS
+   JOURNAL MODAL FOCUS
 ========================================================== */
 
 #glJournalModal .form-control:focus,
@@ -592,11 +1123,12 @@
         0 0 0 3px rgba(37, 99, 235, .12);
 
     outline: none;
+
 }
 
 
 /* ==========================================================
-   32. MODAL READ ONLY
+   READ ONLY
 ========================================================== */
 
 #glJournalModal input[readonly] {
@@ -606,11 +1138,12 @@
     color: #4B5563;
 
     cursor: not-allowed;
+
 }
 
 
 /* ==========================================================
-   33. JOURNAL STATUS
+   JOURNAL STATUS
 ========================================================== */
 
 #journal-header-status {
@@ -624,11 +1157,12 @@
     font-weight: 600;
 
     letter-spacing: .5px;
+
 }
 
 
 /* ==========================================================
-   34. JOURNAL SUMMARY
+   JOURNAL SUMMARY
 ========================================================== */
 
 #glJournalModal #summary-total-debit,
@@ -642,11 +1176,12 @@
     font-size: 15px;
 
     font-weight: 700;
+
 }
 
 
 /* ==========================================================
-   35. BALANCE STATUS
+   BALANCE STATUS
 ========================================================== */
 
 #summary-balance-status {
@@ -668,11 +1203,235 @@
     font-weight: 700;
 
     letter-spacing: .5px;
+
 }
 
 
 /* ==========================================================
-   36. TABLET
+   MODAL HEADER CONTENT
+   STATUS & ADD LINE RIGHT
+========================================================== */
+
+#glJournalModal .gl-journal-info-card
+> .card-header
+> .d-flex,
+
+#glJournalModal .gl-journal-detail-card
+> .card-header
+> .d-flex {
+
+    width: 100%;
+
+    flex: 1 1 auto;
+
+    min-width: 0;
+
+}
+
+
+/* ==========================================================
+   STATUS RIGHT
+========================================================== */
+
+#glJournalModal #journal-header-status {
+
+    margin-left: auto;
+
+    flex: 0 0 auto;
+
+}
+
+
+/* ==========================================================
+   ADD LINE RIGHT
+========================================================== */
+
+#glJournalModal .gl-journal-detail-card
+> .card-header
+> .d-flex
+> .d-flex {
+
+    margin-left: auto;
+
+    flex: 0 0 auto;
+
+}
+
+
+/* ==========================================================
+   DELETE JOURNAL MODAL
+========================================================== */
+
+#confirmDeleteJournalModal .modal-dialog {
+
+    width: calc(100% - 32px);
+
+    max-width: 500px;
+
+}
+
+
+/* ==========================================================
+   DELETE MODAL CONTENT
+========================================================== */
+
+#confirmDeleteJournalModal .modal-content {
+
+    width: 100%;
+
+    max-width: 100%;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   DELETE MODAL BODY
+========================================================== */
+
+#confirmDeleteJournalModal .modal-body {
+
+    width: 100%;
+
+    max-width: 100%;
+
+    min-width: 0;
+
+    overflow: hidden;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   DELETE JOURNAL TABLE
+========================================================== */
+
+#confirmDeleteJournalModal table {
+
+    width: 100% !important;
+
+    max-width: 100% !important;
+
+    table-layout: fixed !important;
+
+    margin: 0;
+
+}
+
+
+/* ==========================================================
+   DELETE JOURNAL TABLE CELL
+========================================================== */
+
+#confirmDeleteJournalModal table th,
+#confirmDeleteJournalModal table td {
+
+    min-width: 0 !important;
+
+    max-width: 100%;
+
+    white-space: normal !important;
+
+    overflow-wrap: anywhere !important;
+
+    word-break: break-word !important;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   DELETE JOURNAL LABEL
+========================================================== */
+
+#confirmDeleteJournalModal table th,
+#confirmDeleteJournalModal table td:first-child {
+
+    width: 95px;
+
+    min-width: 95px !important;
+
+    max-width: 95px !important;
+
+    font-weight: 600;
+
+}
+
+
+/* ==========================================================
+   DELETE JOURNAL VALUE
+========================================================== */
+
+#confirmDeleteJournalModal table td:nth-child(2) {
+
+    width: auto;
+
+    min-width: 0 !important;
+
+    overflow-wrap: anywhere !important;
+
+    word-break: break-word !important;
+
+}
+
+
+/* ==========================================================
+   DELETE DESCRIPTION
+========================================================== */
+
+#confirmDeleteJournalModal #delete-description {
+
+    display: table-cell;
+
+    max-width: 0;
+
+    white-space: normal !important;
+
+    overflow-wrap: anywhere !important;
+
+    word-break: break-word !important;
+
+}
+
+
+/* ==========================================================
+   DELETE WARNING
+========================================================== */
+
+#confirmDeleteJournalModal .alert {
+
+    width: 100%;
+
+    max-width: 100%;
+
+    box-sizing: border-box;
+
+    white-space: normal;
+
+}
+
+
+/* ==========================================================
+   DELETE MODAL FOOTER
+========================================================== */
+
+#confirmDeleteJournalModal .modal-footer {
+
+    width: 100%;
+
+    max-width: 100%;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   TABLET
 ========================================================== */
 
 @media (max-width: 1200px) {
@@ -681,6 +1440,7 @@
     > .finova-card-body {
 
         padding: 16px !important;
+
     }
 
 
@@ -689,13 +1449,14 @@
     > .row {
 
         row-gap: 16px;
+
     }
 
 }
 
 
 /* ==========================================================
-   37. MOBILE
+   MOBILE
 ========================================================== */
 
 @media (max-width: 768px) {
@@ -703,6 +1464,7 @@
     .gl-journal-page {
 
         gap: 16px;
+
     }
 
 
@@ -710,6 +1472,7 @@
     > .finova-card-body {
 
         padding: 16px !important;
+
     }
 
 
@@ -718,16 +1481,24 @@
     > .row {
 
         row-gap: 16px;
+
     }
 
 
-    .gl-journal-filter-card #btn-find-journal {
+    .gl-journal-filter-card
+    #btn-find-journal {
 
         flex: 0 0 75px !important;
 
         width: 75px !important;
 
         min-width: 75px !important;
+
     }
 
 }
+
+
+/* ==========================================================
+   END GENERAL JOURNAL CSS
+========================================================== */

@@ -1017,39 +1017,54 @@ async generateAPJournal(
         }
 
 
-        /*
-        ==================================================
-        GL HEADER
-        ==================================================
-        */
-
         const journalHeader = {
 
-            journal_no:
-                "",
+    journal_no:
+        "",
 
-            journal_date:
-                invoice.invoice_date,
+    journal_date:
+        invoice.invoice_date,
 
-            posting_period:
-                invoice.invoice_date
-                    ? invoice.invoice_date.substring(
-                        0,
-                        7
-                    )
-                    : "",
+    posting_period:
+        invoice.invoice_date
+            ? invoice.invoice_date.substring(
+                0,
+                7
+            )
+            : "",
 
-            description:
-                invoice?.description
-                || "",
+    description:
+        invoice?.description
+        || "",
 
-            source_module:
-                "ACCOUNT PAYABLE",
 
-            status:
-                "Draft"
+    /*
+    ==================================================
+    SOURCE DOCUMENT
+    ACCOUNT PAYABLE
+    ==================================================
+    */
 
-        };
+    source_module:
+        "AP",
+
+    source_document_type:
+        "AP_INVOICE",
+
+    source_document_id:
+        invoice.id,
+
+
+    /*
+    ==================================================
+    STATUS
+    ==================================================
+    */
+
+    status:
+        "Draft"
+
+};
 
 
         /*
@@ -3037,7 +3052,7 @@ detailBody?.addEventListener(
         );
 
     }
-    /*
+/*
 ======================================================
 EDIT INVOICE DETAIL
 ======================================================
@@ -3046,6 +3061,12 @@ EDIT INVOICE DETAIL
 async editInvoiceDetail(id) {
 
     try {
+
+        /*
+        ==================================================
+        FIND DETAIL
+        ==================================================
+        */
 
         const detail =
             this.invoiceDetails.find(
@@ -3088,7 +3109,7 @@ async editInvoiceDetail(id) {
 
         /*
         ==================================================
-        SET FORM VALUES
+        GET FORM ELEMENT
         ==================================================
         */
 
@@ -3097,11 +3118,18 @@ async editInvoiceDetail(id) {
                 "ap-detail-id"
             );
 
+
         const description =
             document.getElementById(
                 "ap-detail-description"
             );
 
+
+        /*
+        ==================================================
+        DETAIL ID
+        ==================================================
+        */
 
         if (detailId) {
 
@@ -3110,6 +3138,12 @@ async editInvoiceDetail(id) {
 
         }
 
+
+        /*
+        ==================================================
+        CHARGE ACCOUNT
+        ==================================================
+        */
 
         if (this.apDetailCOA) {
 
@@ -3122,6 +3156,12 @@ async editInvoiceDetail(id) {
         }
 
 
+        /*
+        ==================================================
+        DESCRIPTION
+        ==================================================
+        */
+
         if (description) {
 
             description.value =
@@ -3131,6 +3171,12 @@ async editInvoiceDetail(id) {
         }
 
 
+        /*
+        ==================================================
+        QUANTITY
+        ==================================================
+        */
+
         if (this.apDetailQuantity) {
 
             this.apDetailQuantity.value =
@@ -3139,6 +3185,12 @@ async editInvoiceDetail(id) {
 
         }
 
+
+        /*
+        ==================================================
+        UNIT PRICE
+        ==================================================
+        */
 
         if (this.apDetailUnitPrice) {
 
@@ -3153,6 +3205,12 @@ async editInvoiceDetail(id) {
         }
 
 
+        /*
+        ==================================================
+        TAX INPUT
+        ==================================================
+        */
+
         if (this.apDetailTaxInputRate) {
 
             this.apDetailTaxInputRate.value =
@@ -3163,6 +3221,12 @@ async editInvoiceDetail(id) {
 
         }
 
+
+        /*
+        ==================================================
+        WITHHOLDING TAX
+        ==================================================
+        */
 
         if (
             this.apDetailWithholdingTaxRate
@@ -3179,7 +3243,7 @@ async editInvoiceDetail(id) {
 
         /*
         ==================================================
-        CALCULATE
+        CALCULATE DETAIL
         ==================================================
         */
 
@@ -3188,43 +3252,53 @@ async editInvoiceDetail(id) {
 
         /*
         ==================================================
-        CHANGE BUTTON TEXT
+        CHANGE BUTTON TO UPDATE
         ==================================================
         */
 
         if (this.btnSaveAPDetail) {
 
             this.btnSaveAPDetail.innerHTML = `
+
                 <i class="fa-solid fa-floppy-disk me-1"></i>
+
                 Update Detail
+
             `;
 
         }
 
 
-       /*
-==================================================
-RESET MODAL TAB
-Selalu mulai dari Header Info
-==================================================
-*/
+        /*
+        ==================================================
+        VALIDATE DETAIL MODAL
+        ==================================================
+        */
 
-this.resetAPModalTab();
+        if (
+            !this.accountPayableDetailModal
+        ) {
 
+            throw new Error(
+                "Account Payable Detail Modal not found."
+            );
 
-/*
-==================================================
-SHOW MODAL
-==================================================
-*/
-
-const modal =
-    bootstrap.Modal.getOrCreateInstance(
-        this.accountPayableModal
-    );
+        }
 
 
-modal.show();
+        /*
+        ==================================================
+        SHOW DETAIL MODAL
+        ==================================================
+        */
+
+        const modal =
+            bootstrap.Modal.getOrCreateInstance(
+                this.accountPayableDetailModal
+            );
+
+
+        modal.show();
 
 
         console.log(
@@ -3240,6 +3314,7 @@ modal.show();
             "AccountPayable.editInvoiceDetail:",
             error
         );
+
 
         this.showError(
             error.message
@@ -4351,34 +4426,27 @@ renderInvoiceDetails() {
 
                                     <!-- EDIT -->
 
-                                    <button
-                                        type="button"
-                                        class="btn btn-outline-primary"
-                                        title="Edit Detail"
-                                        data-detail-action="edit"
-                                        data-detail-id="${detail.id}">
+                                   <button
+                                    type="button"
+                                    class="btn btn-outline-primary"
+                                    title="Edit Detail"
+                                    data-detail-action="edit"
+                                    data-detail-id="${detail.id}">
 
-                                        <i
-                                            class="fa-solid fa-pen">
-                                        </i>
+                                    <i class="fa-solid fa-pen"></i>
 
-                                    </button>
+                                </button>
 
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-danger"
+                                    title="Remove Detail"
+                                    data-detail-action="delete"
+                                    data-detail-id="${detail.id}">
 
-                                    <!-- DELETE -->
+                                    <i class="fa-solid fa-trash"></i>
 
-                                    <button
-                                        type="button"
-                                        class="btn btn-outline-danger"
-                                        title="Remove Detail"
-                                        data-detail-action="delete"
-                                        data-detail-id="${detail.id}">
-
-                                        <i
-                                            class="fa-solid fa-trash">
-                                        </i>
-
-                                    </button>
+                                </button>
 
                                 </div>
 
@@ -9432,51 +9500,81 @@ showVoidConfirmation() {
     
     
     /*
-    ======================================================
-    LOAD DATA
-    ======================================================
-    */
+======================================================
+LOAD DATA
+KEEP CURRENT PAGINATION
+======================================================
+*/
 
-    async loadData() {
+async loadData() {
 
-        try {
+    try {
 
-            const data =
-                await this.service.getAll();
-
-
-            this.data =
-                Array.isArray(data)
-                    ? data
-                    : [];
+        const data =
+            await this.service.getAll();
 
 
-            this.filteredData =
-                [...this.data];
+        this.data =
+            Array.isArray(data)
+                ? data
+                : [];
 
 
-            this.currentPage = 1;
+        this.filteredData =
+            [...this.data];
 
 
-            this.render();
+        /*
+        ==================================================
+        KEEP CURRENT PAGE
+        ==================================================
+        */
 
-        }
-
-        catch (error) {
-
-            console.error(
-                "AccountPayable.loadData:",
-                error
+        const totalPages =
+            Math.max(
+                1,
+                Math.ceil(
+                    this.filteredData.length /
+                    this.pageSize
+                )
             );
 
-            this.showError(
-                "Failed to load Account Payable."
+
+        this.currentPage =
+            Math.min(
+                Math.max(
+                    Number(this.currentPage) || 1,
+                    1
+                ),
+                totalPages
             );
 
-        }
+
+        /*
+        ==================================================
+        RENDER
+        ==================================================
+        */
+
+        this.render();
 
     }
 
+    catch (error) {
+
+        console.error(
+            "AccountPayable.loadData:",
+            error
+        );
+
+
+        this.showError(
+            "Failed to load Account Payable."
+        );
+
+    }
+
+}
 
     /*
     ======================================================
@@ -9634,108 +9732,75 @@ showVoidConfirmation() {
 
 
     /*
-    ======================================================
-    RENDER TABLE
-    ======================================================
-    */
-
-    renderTable() {
-
-        if (!this.tableBody) {
-
-            return;
-
-        }
-
-
-        const startIndex =
-            (
-                this.currentPage - 1
-            ) *
-            this.pageSize;
-
-
-        const endIndex =
-            startIndex +
-            this.pageSize;
-
-
-        const pageData =
-            this.filteredData.slice(
-                startIndex,
-                endIndex
-            );
-
-
-        if (!pageData.length) {
-
-            this.tableBody.innerHTML = `
-
-                <tr>
-
-                    <td
-                        colspan="8"
-                        class="text-center py-5 text-muted">
-
-                        No Account Payable found.
-
-                    </td>
-
-                </tr>
-
-            `;
-
-            return;
-
-        }
-
-
-        this.tableBody.innerHTML =
-            pageData.map(
-                (invoice, index) => {
-
-                    return this.createTableRow(
-                        invoice,
-                        startIndex + index + 1
-                    );
-
-                }
-            ).join("");
-          /*
 ======================================================
-ROW COLOR
-POSTED / COMPLETE
+RENDER TABLE
 ======================================================
 */
 
-this.tableBody
-    .querySelectorAll(
-        "tr.ap-row-posted, tr.ap-row-complete"
-    )
-    .forEach(row => {
+renderTable() {
 
-        row
-            .querySelectorAll("td")
-            .forEach(cell => {
+    if (!this.tableBody) {
 
-                cell.style.setProperty(
-                    "background-color",
-                    "#e9ecef",
-                    "important"
-                );
+        return;
 
-                cell.style.setProperty(
-                    "color",
-                    "#6c757d",
-                    "important"
-                );
-
-            });
-
-    });
     }
-    
 
+
+    const startIndex =
+        (
+            this.currentPage - 1
+        ) *
+        this.pageSize;
+
+
+    const endIndex =
+        startIndex +
+        this.pageSize;
+
+
+    const pageData =
+        this.filteredData.slice(
+            startIndex,
+            endIndex
+        );
+
+
+    if (!pageData.length) {
+
+        this.tableBody.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="8"
+                    class="text-center py-5 text-muted">
+
+                    No Account Payable found.
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    this.tableBody.innerHTML =
+        pageData.map(
+            (invoice, index) => {
+
+                return this.createTableRow(
+                    invoice,
+                    startIndex + index + 1
+                );
+
+            }
+        ).join("");
+
+}
 
     /*
     ======================================================
@@ -9963,82 +10028,12 @@ const outstandingAmount =
         this.getPaymentStatus(invoice);
 
 
-/*
-==================================================
-ROW CLASS
-==================================================
-*/
+/* ==================================================
+   ROW CLASS
+   SAME VISUAL BEHAVIOR AS GL JOURNAL
+================================================== */
 
-let rowClass = "";
-
-
-/*
-==================================================
-COMPLETE
-ABU-ABU
-==================================================
-*/
-
-if (
-    technicalStatus === "complete"
-) {
-
-    rowClass =
-        "ap-row-complete";
-
-}
-
-
-/*
-==================================================
-POSTED
-ABU-ABU
-LEGACY
-==================================================
-*/
-
-else if (
-    technicalStatus === "posted"
-) {
-
-    rowClass =
-        "ap-row-posted";
-
-}
-
-
-/*
-==================================================
-DRAFT
-NORMAL
-==================================================
-*/
-
-else if (
-    technicalStatus === "draft"
-) {
-
-    rowClass =
-        "ap-row-draft";
-
-}
-
-
-/*
-==================================================
-VOID
-NORMAL / LIGHT
-==================================================
-*/
-
-else if (
-    technicalStatus === "void"
-) {
-
-    rowClass =
-        "ap-row-void";
-
-}
+const rowClass = "";
     /*
     ==================================================
     RETURN ROW

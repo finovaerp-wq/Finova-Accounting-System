@@ -9,11 +9,12 @@ TABLE STANDARD :
 GLOBAL TABLE COMPONENT
 
 VISUAL STANDARD :
-TAX MASTER
+BUSINESS PARTNER / TAX MASTER
 
 NOTE :
 - Table visual controlled by Global Table CSS
-- Pagination remains controlled by COA
+- Pagination controlled by Global Pagination CSS
+- Filter position aligned with Business Partner
 - No table visual override here
 ==========================================================
 */
@@ -34,6 +35,147 @@ NOTE :
     min-height: 0;
 
     width: 100%;
+
+}
+
+
+/* ==========================================================
+   PAGE HEADER
+========================================================== */
+
+.coa-page > .finova-page-header {
+
+    width: 100%;
+
+    margin-bottom: 8px !important;
+
+    flex-shrink: 0;
+
+    box-sizing: border-box;
+
+}
+
+/* ==========================================================
+   FILTER CARD
+   SAME POSITION AS BUSINESS PARTNER
+========================================================== */
+
+.coa-page
+> .coa-filter-card {
+
+    width: 100% !important;
+
+    max-width: none !important;
+
+    margin: 0 !important;
+
+    flex: 0 0 auto;
+
+    box-sizing: border-box;
+
+    border-radius: 12px;
+
+}
+
+
+/* ==========================================================
+   FILTER CARD BODY
+========================================================== */
+
+.coa-filter-card
+> .finova-card-body {
+
+    width: 100%;
+
+    padding: 8px 20px 8px 20px !important;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   FILTER ROW
+========================================================== */
+
+.coa-filter-card
+> .finova-card-body
+> .row {
+
+    width: 100% !important;
+
+    margin: 0 !important;
+
+    padding: 0 !important;
+
+    box-sizing: border-box;
+
+    align-items: end !important;
+
+}
+
+
+/* ==========================================================
+   FILTER COLUMN
+========================================================== */
+
+.coa-filter-card
+> .finova-card-body
+> .row
+> [class*="col-"] {
+
+    box-sizing: border-box;
+
+    min-width: 0;
+
+    margin: 0;
+
+}
+
+
+/* ==========================================================
+   FILTER LABEL
+========================================================== */
+
+.coa-filter-card
+.form-label {
+
+    display: block;
+
+    margin-top: 0 !important;
+
+    margin-bottom: 6px !important;
+
+    color: #1F2937;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    line-height: 1.2;
+
+    text-align: left;
+
+}
+
+
+/* ==========================================================
+   FILTER INPUT & SELECT
+========================================================== */
+
+.coa-filter-card
+.form-control,
+
+.coa-filter-card
+.form-select {
+
+    width: 100% !important;
+
+    height: 46px !important;
+
+    min-height: 46px !important;
+
+    box-sizing: border-box;
 
 }
 
@@ -60,10 +202,11 @@ NOTE :
 
 
 /* ==========================================================
-   CARD BODY
+   TABLE CARD BODY
 ========================================================== */
 
-.coa-table-card .finova-card-body {
+.coa-table-card
+.finova-card-body {
 
     display: flex;
 
@@ -82,13 +225,10 @@ NOTE :
 
 /* ==========================================================
    TABLE CONTAINER
-
-   TABLE VISUAL :
-   GLOBAL FINOVA TABLE CSS
-
 ========================================================== */
 
-.coa-table-card .finova-table-container {
+.coa-table-card
+.finova-table-container {
 
     display: flex;
 
@@ -108,10 +248,14 @@ NOTE :
 
 
 /* ==========================================================
-   TABLE SCROLL
+   TABLE RESPONSIVE
 ========================================================== */
 
-.coa-table-card .table-responsive {
+.coa-table-card
+.finova-table-container
+.table-responsive {
+
+    display: block;
 
     flex: 1 1 auto;
 
@@ -125,19 +269,70 @@ NOTE :
 
 
 /* ==========================================================
-   PAGINATION
-
-   KEEP EXISTING COA PAGINATION.
-   NO LOGIC / DESIGN CHANGE.
+   TABLE
+   VISUAL CONTROLLED BY GLOBAL TABLE CSS
 ========================================================== */
 
-.coa-table-card .finova-pagination-wrapper {
-
-    flex-shrink: 0;
+.coa-table-card
+.finova-table {
 
     width: 100%;
 
-    margin-top: 0;
+    margin-bottom: 0;
+
+    vertical-align: middle;
+
+}
+
+
+/* ==========================================================
+   PAGINATION
+   SAME POSITION AS BUSINESS PARTNER
+========================================================== */
+
+.coa-table-card
+.finova-table-container
+.finova-pagination-wrapper {
+
+    flex: 0 0 auto;
+
+    width: 100%;
+
+    margin-top: auto;
+
+}
+
+
+/* ==========================================================
+   TABLET
+========================================================== */
+
+@media (max-width: 1200px) {
+
+    .coa-filter-card
+    > .finova-card-body {
+
+        padding-left: 16px !important;
+
+        padding-right: 16px !important;
+
+    }
+
+}
+
+
+/* ==========================================================
+   MOBILE
+========================================================== */
+
+@media (max-width: 768px) {
+
+    .coa-filter-card
+    > .finova-card-body {
+
+        padding: 8px 16px !important;
+
+    }
 
 }
 

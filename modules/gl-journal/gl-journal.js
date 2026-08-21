@@ -1849,32 +1849,42 @@ const result = await Promise.all(
                 [...this.journals];
 
             /*
-            ======================================================
-            PAGINATION
-            ======================================================
-            */
+======================================================
+PAGINATION
+======================================================
+*/
 
-            this.totalRows =
-                this.filteredJournals.length;
+this.totalRows =
+    this.filteredJournals.length;
 
-            this.totalPages =
-                Math.max(
-                    1,
-                    Math.ceil(
-                        this.totalRows /
-                        this.pageSize
-                    )
-                );
+this.totalPages =
+    Math.max(
+        1,
+        Math.ceil(
+            this.totalRows /
+            this.pageSize
+        )
+    );
 
-            this.currentPage = 1;
+/*
+======================================================
+KEEP CURRENT PAGE
+======================================================
+*/
 
-            /*
-            ======================================================
-            REFRESH VIEW
-            ======================================================
-            */
+this.currentPage =
+    Math.min(
+        Math.max(this.currentPage, 1),
+        this.totalPages
+    );
 
-            this.refreshView();
+/*
+======================================================
+REFRESH VIEW
+======================================================
+*/
+
+this.refreshView();
 
         }
 
@@ -2128,6 +2138,15 @@ createTableRow(
                 ${journal.journal_no ?? "-"}
 
             </td>
+            <!-- ==========================================
+                SOURCE
+            =========================================== -->
+
+            <td class="text-center">
+
+                ${this.renderSourceBadge(journal)}
+
+                </td>
 
 
             <!-- ==========================================
@@ -2209,6 +2228,102 @@ createTableRow(
     `;
 
 }
+/*
+==========================================================
+RENDER SOURCE BADGE
+==========================================================
+*/
+
+renderSourceBadge(journal) {
+
+    let source =
+        String(
+            journal?.source_module || ""
+        )
+        .trim()
+        .toUpperCase();
+
+
+    /*
+    ======================================================
+    LEGACY DATA
+    ======================================================
+    */
+
+    if (
+        source === "GENERAL"
+    ) {
+
+        source = "GLJ";
+
+    }
+
+
+    if (
+        source === "ACCOUNT PAYABLE"
+    ) {
+
+        source = "AP";
+
+    }
+
+
+    if (
+        source === "ACCOUNT RECEIVABLE"
+    ) {
+
+        source = "AR";
+
+    }
+
+
+    /*
+    ======================================================
+    AP
+    ======================================================
+    */
+
+    if (source === "AP") {
+
+        return `
+            <span class="badge bg-warning text-dark">
+                AP
+            </span>
+        `;
+
+    }
+
+
+    /*
+    ======================================================
+    AR
+    ======================================================
+    */
+
+    if (source === "AR") {
+
+        return `
+            <span class="badge bg-success">
+                AR
+            </span>
+        `;
+
+    }
+
+
+    /*
+    ======================================================
+    GL JOURNAL
+    ======================================================
+    */
+
+    return `
+        <span class="badge bg-primary">
+            GLJ
+        </span>
+    `;
+
+}
 
 /*
 ==========================================================
@@ -2267,6 +2382,7 @@ renderStatusBadge(status) {
             Draft
         </span>
     `;
+
 
 }
 /*
@@ -7246,8 +7362,29 @@ const header = {
     description:
         this.txtDescription.value.trim(),
 
+
+    /*
+    ======================================================
+    SOURCE DOCUMENT
+    MANUAL GENERAL JOURNAL
+    ======================================================
+    */
+
     source_module:
-        "GENERAL",
+    "GLJ",
+
+    source_document_type:
+        "MANUAL_JOURNAL",
+
+    source_document_id:
+        null,
+
+
+    /*
+    ======================================================
+    STATUS
+    ======================================================
+    */
 
     status
 

@@ -3,18 +3,18 @@
 FINOVA ACCOUNTING SYSTEM
 MODULE : ACCOUNT PAYABLE
 
-Version : 2.0 Enterprise
+Version : 2.1 Enterprise
 
 TABLE STANDARD :
 GLOBAL TABLE COMPONENT
 
 VISUAL STANDARD :
-TAX MASTER
+BP / COA / GL JOURNAL
 
 NOTE :
 - Table visual controlled by Global Table CSS
-- AP status behavior remains here
-- Pagination is NOT changed
+- Pagination visual controlled by Global Pagination CSS
+- AP business status behavior remains here
 ==========================================================
 */
 
@@ -29,7 +29,9 @@ NOTE :
 
     flex-direction: column;
 
-    gap: 20px;
+    flex: 1 1 auto;
+
+    min-height: 0;
 
     width: 100%;
 
@@ -40,201 +42,360 @@ NOTE :
    PAGE HEADER
 ========================================================== */
 
-.account-payable-header {
+.account-payable-page
+> .finova-page-header {
 
-    display: flex;
+    width: 100%;
 
-    justify-content: space-between;
+    margin-bottom: 8px !important;
 
-    align-items: center;
+    flex-shrink: 0;
 
-    gap: 24px;
-
-    padding: 24px 28px;
-
-    background: #FFFFFF;
-
-    border: 1px solid #E9EEF5;
-
-    border-radius: 18px;
-
-    box-shadow:
-        0 6px 20px rgba(15, 23, 42, .05);
+    box-sizing: border-box;
 
 }
 
 
 /* ==========================================================
-   HEADER LEFT
+   FILTER CARD
 ========================================================== */
 
-.account-payable-header-left {
+.account-payable-page
+> .account-payable-filter-card {
 
-    flex: 1;
+    width: 100% !important;
+
+    max-width: none !important;
+
+    margin: 0 !important;
+
+    flex: 0 0 auto;
+
+    box-sizing: border-box;
+
+    border-radius: 12px;
 
 }
 
 
 /* ==========================================================
-   TITLE
+   FILTER CARD BODY
 ========================================================== */
 
-.account-payable-title {
+.account-payable-filter-card
+> .finova-card-body {
+
+    width: 100%;
+
+    padding: 8px 20px !important;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   FILTER ROW
+========================================================== */
+
+.account-payable-filter-card
+> .finova-card-body
+> .row {
+
+    width: 100% !important;
+
+    margin: 0 !important;
+
+    padding: 0 !important;
+
+    box-sizing: border-box;
+
+    align-items: end !important;
+
+}
+
+
+/* ==========================================================
+   FILTER COLUMN
+========================================================== */
+
+.account-payable-filter-card
+> .finova-card-body
+> .row
+> [class*="col-"] {
+
+    min-width: 0;
 
     margin: 0;
 
-    font-size: 30px;
-
-    font-weight: 700;
-
-    line-height: 1.15;
-
-    letter-spacing: -.6px;
-
-    color: #0F172A;
+    box-sizing: border-box;
 
 }
 
 
 /* ==========================================================
-   BREADCRUMB
+   FILTER LABEL
 ========================================================== */
 
-.account-payable-breadcrumb {
+.account-payable-filter-card
+.form-label {
 
-    display: flex;
+    display: block;
 
-    align-items: center;
+    margin-top: 0 !important;
 
-    flex-wrap: wrap;
+    margin-bottom: 6px !important;
 
-    gap: 6px;
-
-    margin-top: 8px;
-
-    font-size: 13px;
-
-    font-weight: 500;
-
-    line-height: 1.5;
-
-    color: #64748B;
-
-}
-
-
-/* ==========================================================
-   HEADER RIGHT
-========================================================== */
-
-.account-payable-header-right {
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: flex-end;
-
-    gap: 12px;
-
-    flex-wrap: wrap;
-
-}
-
-
-/* ==========================================================
-   HEADER BUTTON
-========================================================== */
-
-.account-payable-header-right .btn {
-
-    display: inline-flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    gap: 8px;
-
-    height: 40px;
-
-    padding: 0 16px;
+    color: #1F2937;
 
     font-size: 14px;
 
     font-weight: 600;
 
-    border-radius: 8px;
+    line-height: 1.2;
 
 }
 
 
 /* ==========================================================
-   HEADER BUTTON HOVER
+   FILTER CONTROL
 ========================================================== */
 
-.account-payable-header-right .btn:hover {
+.account-payable-filter-card
+.form-control,
 
-    transform: translateY(-2px);
+.account-payable-filter-card
+.form-select {
 
-    box-shadow:
-        0 8px 20px rgba(15, 23, 42, .12);
+    height: 46px !important;
+
+    min-height: 46px !important;
+
+    box-sizing: border-box;
 
 }
 
 
 /* ==========================================================
-   HEADER BUTTON ICON
+   NORMAL FILTER CONTROL
 ========================================================== */
 
-.account-payable-header-right .btn i {
+.account-payable-filter-card
+> .finova-card-body
+> .row
+> [class*="col-"]
+> .form-control,
 
-    font-size: 14px;
+.account-payable-filter-card
+> .finova-card-body
+> .row
+> [class*="col-"]
+> .form-select {
+
+    width: 100%;
 
 }
 
 
 /* ==========================================================
-   BUTTON WIDTH
+   FILTER INPUT GROUP
 ========================================================== */
 
-#btn-add-ap {
+.account-payable-filter-card
+.input-group {
 
-    min-width: 140px;
+    display: flex !important;
 
-}
+    flex-wrap: nowrap !important;
 
+    align-items: stretch;
 
-#btn-download-ap {
+    width: 100% !important;
 
-    min-width: 165px;
+    height: 46px !important;
 
-}
+    margin: 0 !important;
 
-
-#btn-refresh-ap {
-
-    min-width: 120px;
+    box-sizing: border-box;
 
 }
 
 
 /* ==========================================================
-   ACCOUNT PAYABLE TABLE
-==========================================================
-
-   IMPORTANT :
-
-   Table visual styling is controlled by:
-
-   .finova-table
-   .finova-table-container table
-
-   from Global Table CSS.
-
-   DO NOT ADD TABLE VISUAL OVERRIDES HERE.
-
+   KEYWORD INPUT
 ========================================================== */
+
+.account-payable-filter-card
+.input-group
+#ap-keyword {
+
+    flex: 1 1 auto !important;
+
+    width: 1% !important;
+
+    min-width: 0 !important;
+
+    height: 46px !important;
+
+    border-top-right-radius: 0 !important;
+
+    border-bottom-right-radius: 0 !important;
+
+}
+
+
+/* ==========================================================
+   FIND BUTTON
+========================================================== */
+
+.account-payable-filter-card
+.input-group
+#btn-find-ap {
+
+    display: inline-flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    flex: 0 0 80px !important;
+
+    width: 80px !important;
+
+    min-width: 80px !important;
+
+    height: 46px !important;
+
+    padding: 0 12px !important;
+
+    white-space: nowrap;
+
+    border-top-left-radius: 0 !important;
+
+    border-bottom-left-radius: 0 !important;
+
+}
+
+
+/* ==========================================================
+   TABLE CARD
+========================================================== */
+
+.account-payable-table-card {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    width: 100%;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   TABLE CARD BODY
+========================================================== */
+
+.account-payable-table-card
+.finova-card-body {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    padding: 0;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   TABLE CONTAINER
+========================================================== */
+
+.account-payable-table-card
+.finova-table-container {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 0;
+
+    min-height: 0;
+
+    width: 100%;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   TABLE RESPONSIVE
+========================================================== */
+
+.account-payable-table-card
+.finova-table-container
+.table-responsive {
+
+    display: block;
+
+    flex: 1 1 0;
+
+    min-height: 0;
+
+    width: 100%;
+
+    overflow-x: auto;
+
+    overflow-y: auto;
+
+}
+
+
+/* ==========================================================
+   TABLE
+========================================================== */
+
+.account-payable-table-card
+.finova-table {
+
+    width: 100%;
+
+    margin-bottom: 0;
+
+    vertical-align: middle;
+
+}
+
+
+/* ==========================================================
+   PAGINATION
+========================================================== */
+
+.account-payable-table-card
+.finova-table-container
+.finova-pagination-wrapper {
+
+    flex: 0 0 auto;
+
+    width: 100%;
+
+    margin-top: auto;
+
+}
 
 
 /* ==========================================================
@@ -250,35 +411,16 @@ NOTE :
 
 /* ==========================================================
    AP ROW STATUS
+   KEEP STATUS BADGE & ACTION BUTTON STYLE
 ========================================================== */
 
 
 /* ==========================================================
-   POSTED
+   DEFAULT ROW
 ========================================================== */
 
-.ap-row-posted {
-
-    opacity: 1;
-
-}
-
-
-/* ==========================================================
-   DRAFT
-========================================================== */
-
-.ap-row-draft {
-
-    opacity: 1;
-
-}
-
-
-/* ==========================================================
-   COMPLETE
-========================================================== */
-
+.ap-row-posted,
+.ap-row-draft,
 .ap-row-complete {
 
     opacity: 1;
@@ -287,112 +429,58 @@ NOTE :
 
 
 /* ==========================================================
-   VOID
+   AP ROW STATUS
+   SAME VISUAL BEHAVIOR AS GL JOURNAL
 ========================================================== */
 
+.ap-row-posted,
+.ap-row-draft,
+.ap-row-complete,
 .ap-row-void {
 
-    opacity: .45;
+    opacity: 1;
 
 }
 
 
 /* ==========================================================
-   COMPLETE ROW
-==========================================================
-
-   Business behavior:
-   Completed AP is visually muted.
-
+   ALL AP STATUS ROW
+   KEEP NORMAL TABLE BACKGROUND
 ========================================================== */
 
-#ap-table-body tr[data-status="complete"] > td,
-#ap-table-body tr.ap-row-complete > td {
+#ap-table-body
+tr[data-status="draft"]
+> td,
 
-    background-color: #E9ECEF !important;
+#ap-table-body
+tr[data-status="posted"]
+> td,
 
-    color: #6C757D !important;
+#ap-table-body
+tr[data-status="complete"]
+> td,
 
-}
+#ap-table-body
+tr[data-status="void"]
+> td,
 
+#ap-table-body
+tr.ap-row-draft
+> td,
 
-/* ==========================================================
-   COMPLETE ROW CONTENT
-========================================================== */
+#ap-table-body
+tr.ap-row-posted
+> td,
 
-#ap-table-body tr[data-status="complete"] > td *,
-#ap-table-body tr.ap-row-complete > td * {
+#ap-table-body
+tr.ap-row-complete
+> td,
 
-    color: #6C757D !important;
-
-}
-
-
-/* ==========================================================
-   COMPLETE ACTION BUTTON
-========================================================== */
-
-#ap-table-body tr[data-status="complete"]
-    > td .btn {
-
-    color: #6C757D !important;
-
-    border-color: #ADB5BD !important;
-
-}
-
-
-/* ==========================================================
-   POSTED ROW
-==========================================================
-
-   Business behavior:
-   Posted AP is visually muted.
-
-========================================================== */
-
-#ap-table-body tr[data-status="posted"] > td {
-
-    background-color: #E9ECEF !important;
-
-    color: #6C757D !important;
-
-}
-
-
-/* ==========================================================
-   POSTED ROW CONTENT
-========================================================== */
-
-#ap-table-body tr[data-status="posted"] > td * {
-
-    color: #6C757D !important;
-
-}
-
-
-/* ==========================================================
-   DRAFT ROW
-==========================================================
-
-   Draft follows normal Global Table appearance.
-
-========================================================== */
-
-#ap-table-body tr[data-status="draft"] > td {
+#ap-table-body
+tr.ap-row-void
+> td {
 
     background-color: #FFFFFF !important;
-
-    color: #495057 !important;
-
-}
-
-
-/* ==========================================================
-   DRAFT ROW CONTENT
-========================================================== */
-
-#ap-table-body tr[data-status="draft"] > td * {
 
     color: inherit;
 
@@ -400,43 +488,144 @@ NOTE :
 
 
 /* ==========================================================
-   VOID ROW
-==========================================================
-
-   Void follows normal table background,
-   but entire row is visually muted through opacity.
-
+   STATUS BADGE
+   KEEP GLOBAL BADGE STYLE
 ========================================================== */
 
-#ap-table-body tr[data-status="void"] > td {
+#ap-table-body
+.badge {
+
+    opacity: 1;
+
+}
+
+
+/* ==========================================================
+   ACTION BUTTON
+   KEEP GLOBAL BUTTON STYLE
+========================================================== */
+
+#ap-table-body
+.btn {
+
+    opacity: 1;
+
+}
+
+
+/* ==========================================================
+   TABLET
+========================================================== */
+
+@media (max-width: 1200px) {
+
+    .account-payable-filter-card
+    > .finova-card-body {
+
+        padding-left: 16px !important;
+
+        padding-right: 16px !important;
+
+    }
+
+}
+/* ==========================================================
+   AP TABLE NUMBER
+   CENTER ALIGNMENT
+========================================================== */
+
+.account-payable-table-card
+.finova-table
+th:first-child,
+
+.account-payable-table-card
+.finova-table
+td:first-child {
+
+    text-align: center !important;
+
+    vertical-align: middle !important;
+
+}
+
+
+/* ==========================================================
+   MOBILE
+========================================================== */
+
+@media (max-width: 768px) {
+
+    .account-payable-filter-card
+    > .finova-card-body {
+
+        padding: 8px 16px !important;
+
+    }
+
+}
+
+/* ==========================================================
+   FINAL AP ROW BACKGROUND OVERRIDE
+   SAME AS GL JOURNAL
+========================================================== */
+
+#ap-table-body
+tr.ap-row-complete
+> td,
+
+#ap-table-body
+tr[data-status="complete"]
+> td,
+
+#ap-table-body
+tr.ap-row-posted
+> td,
+
+#ap-table-body
+tr[data-status="posted"]
+> td,
+
+#ap-table-body
+tr.ap-row-draft
+> td,
+
+#ap-table-body
+tr[data-status="draft"]
+> td,
+
+#ap-table-body
+tr.ap-row-void
+> td,
+
+#ap-table-body
+tr[data-status="void"]
+> td {
+
+    background: #FFFFFF !important;
 
     background-color: #FFFFFF !important;
 
-}
-
-
-/* ==========================================================
-   VOID ROW CONTENT
-========================================================== */
-
-#ap-table-body tr[data-status="void"] > td * {
-
-    color: inherit;
+    color: inherit !important;
 
 }
 
 
 /* ==========================================================
-   VOID ROW
+   REMOVE ROW OPACITY
 ========================================================== */
 
-#ap-table-body tr.ap-row-void {
+#ap-table-body
+tr.ap-row-complete,
 
-    opacity: .45;
+#ap-table-body
+tr.ap-row-posted,
+
+#ap-table-body
+tr.ap-row-draft,
+
+#ap-table-body
+tr.ap-row-void {
+
+    opacity: 1 !important;
 
 }
-
-
-/* ==========================================================
-   END ACCOUNT PAYABLE CSS
-========================================================== */

@@ -9,11 +9,12 @@ TABLE STANDARD :
 GLOBAL TABLE COMPONENT
 
 VISUAL STANDARD :
-TAX MASTER
+GL JOURNAL / TAX MASTER
 
 NOTE :
 - Table visual controlled by Global Table CSS
-- Pagination remains controlled by Business Partner
+- Pagination controlled by Global Pagination CSS
+- Filter position aligned with GL Journal
 - No table cell visual override here
 ==========================================================
 */
@@ -34,6 +35,148 @@ NOTE :
     min-height: 0;
 
     width: 100%;
+
+}
+
+
+/* ==========================================================
+   PAGE HEADER
+========================================================== */
+
+.business-partner-page > .finova-page-header {
+
+    width: 100%;
+
+    margin-bottom: 8px !important;
+
+    flex-shrink: 0;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   FILTER CARD
+   SAME POSITION STANDARD AS GL JOURNAL
+========================================================== */
+
+.business-partner-page
+> .business-partner-filter-card {
+
+    width: 100% !important;
+
+    max-width: none !important;
+
+    margin: 0 !important;
+
+    flex: 0 0 auto;
+
+    box-sizing: border-box;
+
+    border-radius: 12px;
+
+}
+
+
+/* ==========================================================
+   FILTER CARD BODY
+========================================================== */
+
+.business-partner-filter-card
+> .finova-card-body {
+
+    width: 100%;
+
+    padding: 10px 20px 6px 20px !important;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   FILTER ROW
+========================================================== */
+
+.business-partner-filter-card
+> .finova-card-body
+> .row {
+
+    width: 100% !important;
+
+    margin: 0 !important;
+
+    padding: 0 !important;
+
+    box-sizing: border-box;
+
+    align-items: end !important;
+
+}
+
+
+/* ==========================================================
+   FILTER COLUMN
+========================================================== */
+
+.business-partner-filter-card
+> .finova-card-body
+> .row
+> [class*="col-"] {
+
+    box-sizing: border-box;
+
+    min-width: 0;
+
+    margin: 0;
+
+}
+
+
+/* ==========================================================
+   FILTER LABEL
+========================================================== */
+
+.business-partner-filter-card
+.form-label {
+
+    display: block;
+
+    margin-top: 0 !important;
+
+    margin-bottom: 6px !important;
+
+    color: #1F2937;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    line-height: 1.2;
+
+    text-align: left;
+
+}
+
+
+/* ==========================================================
+   FILTER INPUT & SELECT
+========================================================== */
+
+.business-partner-filter-card
+.form-control,
+
+.business-partner-filter-card
+.form-select {
+
+    width: 100% !important;
+
+    height: 46px !important;
+
+    min-height: 46px !important;
+
+    box-sizing: border-box;
 
 }
 
@@ -60,10 +203,11 @@ NOTE :
 
 
 /* ==========================================================
-   CARD BODY
+   TABLE CARD BODY
 ========================================================== */
 
-.business-partner-table-card .finova-card-body {
+.business-partner-table-card
+.finova-card-body {
 
     display: flex;
 
@@ -82,10 +226,6 @@ NOTE :
 
 /* ==========================================================
    TABLE CONTAINER
-
-   VISUAL :
-   GLOBAL FINOVA TABLE CSS
-
 ========================================================== */
 
 .business-partner-table-card
@@ -131,10 +271,7 @@ NOTE :
 
 /* ==========================================================
    TABLE
-
-   VISUAL TABLE STYLING :
-   GLOBAL TABLE CSS
-
+   VISUAL CONTROLLED BY GLOBAL TABLE CSS
 ========================================================== */
 
 .business-partner-table-card
@@ -150,44 +287,66 @@ NOTE :
 
 
 /* ==========================================================
-   TABLE FOOTER
-
-   KEEP EXISTING BUSINESS PARTNER FOOTER
-========================================================== */
-
-.business-partner-table-card
-.card-footer {
-
-    flex-shrink: 0;
-
-    background: #FFFFFF;
-
-    border: 0;
-
-    border-top: 1px solid #EEF2F7;
-
-}
-
-
-/* ==========================================================
    PAGINATION
-
-   KEEP EXISTING BUSINESS PARTNER PAGINATION.
-   NO LOGIC / DESIGN CHANGE.
 ========================================================== */
 
 .business-partner-table-card
+.finova-table-container
 .finova-pagination-wrapper {
 
-    flex-shrink: 0;
+    flex: 0 0 auto;
 
     width: 100%;
 
-    margin-top: 0;
+    margin-top: auto;
 
 }
 
 
 /* ==========================================================
-   END BUSINESS PARTNER CSS
+   TABLET
 ========================================================== */
+
+@media (max-width: 1200px) {
+
+    .business-partner-filter-card
+    > .finova-card-body {
+
+        padding-left: 16px !important;
+
+        padding-right: 16px !important;
+
+    }
+
+}
+
+
+/* ==========================================================
+   MOBILE
+========================================================== */
+
+@media (max-width: 768px) {
+
+    .business-partner-filter-card
+    > .finova-card-body {
+
+        padding: 8px 16px 12px 16px !important;
+
+    }
+
+}
+
+/* ==========================================================
+   PAGE HEADER ACTION POSITION
+   SAME AS ACCOUNT PAYABLE
+========================================================== */
+
+.business-partner-page
+> .finova-page-header
+> .finova-page-header-right {
+
+    position: relative;
+
+    top: 0px;
+
+}
