@@ -1,114 +1,155 @@
 /* ==========================================================
    FINOVA ACCOUNTING SYSTEM
    GLOBAL TABLE COMPONENT
-   Version : 1.2.0
+   ==========================================================
+
+   STANDARD DESIGN :
+   TAX MASTER
+
+   APPLIES TO :
+   TAX MASTER
+   BUSINESS PARTNER
+   CHART OF ACCOUNTS
+   ACCOUNT PAYABLE
+   GENERAL JOURNAL
+
+   IMPORTANT :
+   - VISUAL TABLE ONLY
+   - NO PAGINATION CONTROL
+   - NO JAVASCRIPT CONTROL
+   - NO DATA / LOGIC CONTROL
+
 ========================================================== */
 
 
 /* ==========================================================
-   TABLE CARD STRUCTURE
+   TABLE CARD
 ========================================================== */
 
-.finova-table-card{
+.finova-table-card {
 
-    display:flex;
+    display: flex;
 
-    flex-direction:column;
+    flex-direction: column;
 
-    flex:1 1 auto;
+    flex: 1 1 auto;
 
-    min-height:0;
+    min-height: 0;
 
-}
-
-
-/* ==========================================================
-   CARD BODY TABLE MODE
-========================================================== */
-
-.finova-table-card .finova-card-body{
-
-    display:flex;
-
-    flex-direction:column;
-
-    flex:1;
-
-    min-height:0;
-
-    overflow:hidden;
-
-}
-
-
-.finova-table-container{
-
-    display:flex;
-
-    flex-direction:column;
-
-    flex:1 1 auto;
-
-    min-height:0;
-
-    width:100%;
-
-    height:100%;
-
-    background:#FFFFFF;
-
-    border:1px solid #D7DBE0;
-
-    border-radius:6px;
-
-    box-shadow:var(--shadow-sm);
-
-    overflow:hidden;
+    width: 100%;
 
 }
 
 
 /* ==========================================================
-   TABLE RESPONSIVE AREA
+   TABLE CARD BODY
 ========================================================== */
 
-.finova-table-container .table-responsive{
+.finova-table-card .finova-card-body {
 
-    flex:1 1 auto;
+    display: flex;
 
-    min-height:0;
+    flex-direction: column;
 
-    width:100%;
+    flex: 1 1 auto;
 
-    overflow:auto;
+    min-height: 0;
+
+    padding: 0;
+
+    overflow: hidden;
 
 }
 
 
 /* ==========================================================
-   TABLE
+   TABLE CONTAINER
 ========================================================== */
 
-.finova-table{
+.finova-table-container {
 
-    width:100%;
+    display: flex;
 
-    margin-bottom:0;
+    flex-direction: column;
 
-    vertical-align:middle;
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    width: 100%;
+
+    height: 100%;
+
+    background: #FFFFFF;
+
+    overflow: hidden;
 
 }
 
 
-.finova-table-container table{
+/* ==========================================================
+   RESPONSIVE TABLE AREA
+========================================================== */
 
-    width:100%;
+.finova-table-container .table-responsive {
 
-    margin-bottom:0;
+    flex: 1 1 auto;
 
-    border-collapse:separate;
+    min-height: 0;
 
-    border-spacing:0;
+    width: 100%;
+
+    overflow: auto;
+
+}
+
+
+/* ==========================================================
+   BASE TABLE
+========================================================== */
+
+.finova-table,
+.finova-table-container table {
+
+    width: 100%;
+
+    margin-bottom: 0;
+
+    vertical-align: middle;
+
+    border-collapse: collapse;
+
+    border-spacing: 0;
+
+    background: #FFFFFF;
+
+}
+
+
+/* ==========================================================
+   TABLE BORDER
+========================================================== */
+
+.finova-table,
+.finova-table-container table {
+
+    border: 1px solid #DEE2E6;
+
+}
+
+
+/* ==========================================================
+   ALL TABLE CELLS
+========================================================== */
+
+.finova-table th,
+.finova-table td,
+.finova-table-container table th,
+.finova-table-container table td {
+
+    border: 1px solid #DEE2E6;
+
+    vertical-align: middle;
 
 }
 
@@ -117,79 +158,59 @@
    TABLE HEADER
 ========================================================== */
 
-.finova-table thead{
+.finova-table thead,
+.finova-table-container table thead {
 
-    background:#F5F7FA;
-
-}
-
-
-.finova-table thead th{
-
-    position:relative;
-
-    padding:14px 16px;
-
-    background:#F5F7FA;
-
-    border-top:1px solid #FFFFFF;
-
-    border-bottom:1px solid #D1D5DB;
-
-    font-size:13px;
-
-    font-weight:600;
-
-    color:#111827;
-
-    white-space:nowrap;
-
-    vertical-align:middle;
-
-    box-shadow:
-        inset 0 -1px 0 rgba(255,255,255,.75);
+    background: #F8F9FA;
 
 }
 
 
 /* ==========================================================
-   HEADER SEPARATOR
+   TABLE HEADER CELL
+   TAX MASTER STANDARD
 ========================================================== */
 
-.finova-table thead th + th{
+.finova-table thead th,
+.finova-table-container table thead th {
 
-    border-left:1px solid #E5E7EB;
+    padding: 12px 16px;
+
+    height: 48px;
+
+    background: #F8F9FA;
+
+    color: #212529;
+
+    font-size: 13px;
+
+    font-weight: 700;
+
+    line-height: 1.5;
+
+    text-align: left;
+
+    vertical-align: middle;
+
+    white-space: nowrap;
+
+    border: 1px solid #DEE2E6;
 
 }
 
 
 /* ==========================================================
-   HEADER FIRST COLUMN
+   STICKY HEADER
 ========================================================== */
 
-.finova-table thead th:first-child{
+.finova-table thead th,
+.finova-table-container table thead th {
 
-    border-top-left-radius:5px;
+    position: sticky;
 
-}
+    top: 0;
 
-
-/* ==========================================================
-   HEADER LAST COLUMN
-========================================================== */
-
-.finova-table thead th:last-child{
-
-    border-top-right-radius:5px;
-
-}
-/* ==========================================================
-   HEADER → BODY SPACE
-========================================================== */
-
-.finova-table tbody tr:first-child td{
-
-    border-top:4px solid #FFFFFF;
+    z-index: 10;
 
 }
 
@@ -198,9 +219,10 @@
    TABLE BODY
 ========================================================== */
 
-.finova-table tbody{
+.finova-table tbody,
+.finova-table-container table tbody {
 
-    background:#FFFFFF;
+    background: #FFFFFF;
 
 }
 
@@ -209,106 +231,126 @@
    TABLE ROW
 ========================================================== */
 
-.finova-table tbody tr{
+.finova-table tbody tr,
+.finova-table-container table tbody tr {
 
-    position:relative;
-
-    background:#FFFFFF;
-
-    border-bottom:1px solid #EEF2F7;
+    background: #FFFFFF;
 
     transition:
-        background-color .20s ease,
-        box-shadow .20s ease;
+        background-color .15s ease-in-out;
 
 }
 
 
 /* ==========================================================
-   TABLE CELL
+   TABLE BODY CELL
+   TAX MASTER / BP STANDARD
 ========================================================== */
 
-.finova-table tbody td{
+.finova-table tbody td,
+.finova-table-container table tbody td {
 
-    position:relative;
+    padding: 12px 16px;
 
-    padding:14px 16px;
+    height: 52px;
 
-    height:56px;
+    font-size: 13px;
 
-    vertical-align:middle;
+    font-weight: 400;
 
-    border-bottom:1px solid #EEF2F7;
+    line-height: 1.5;
 
-    font-size:13px;
+    color: #495057;
 
-    line-height:1.45;
+    vertical-align: middle;
 
-    color:var(--text-secondary);
+    background: #FFFFFF;
 
-    background:#FFFFFF;
-
-    transition:
-        background-color .20s ease,
-        color .20s ease;
+    border: 1px solid #DEE2E6;
 
 }
 
 
 /* ==========================================================
-   STRIPED
+   TABLE HOVER
 ========================================================== */
 
-.finova-table.finova-table-striped tbody tr:nth-child(even){
+.finova-table.table-hover tbody tr:hover,
+.finova-table-container table.table-hover tbody tr:hover {
 
-    background:#FCFCFD;
+    background-color: rgba(0, 0, 0, .075);
 
 }
 
 
-.finova-table.finova-table-striped tbody tr:nth-child(even) td{
+.finova-table.table-hover tbody tr:hover > td,
+.finova-table-container table.table-hover tbody tr:hover > td {
 
-    background:#FCFCFD;
+    background-color: rgba(0, 0, 0, .075);
 
 }
 
 
 /* ==========================================================
-   HOVER
+   DEFAULT HOVER SUPPORT
+   FOR FINOVA TABLE
 ========================================================== */
 
-.finova-table.table-hover tbody tr:hover{
+.finova-table.finova-table-hover tbody tr:hover > td {
 
-    background:#F7FAFF;
-
-    box-shadow:
-        inset 3px 0 0 rgba(59,130,246,.75);
-
-}
-
-
-.finova-table.table-hover tbody tr:hover td{
-
-    background:#F7FAFF;
+    background-color: rgba(0, 0, 0, .075);
 
 }
 
 
 /* ==========================================================
-   FIRST CELL
-   PRIMARY INFORMATION
+   STRIPED TABLE
 ========================================================== */
 
-.finova-table tbody td:first-child{
+.finova-table.finova-table-striped tbody tr:nth-of-type(odd) > td,
+.finova-table-container table.finova-table-striped tbody tr:nth-of-type(odd) > td {
 
-    font-weight:500;
+    background-color: rgba(0, 0, 0, .025);
 
 }
 
 
-.finova-table.table-hover tbody tr:hover td:first-child{
+/* ==========================================================
+   BOOTSTRAP STRIPED TABLE SUPPORT
+========================================================== */
 
-    color:#111827;
+.finova-table.table-striped tbody tr:nth-of-type(odd) > td,
+.finova-table-container table.table-striped tbody tr:nth-of-type(odd) > td {
+
+    background-color: rgba(0, 0, 0, .025);
+
+}
+
+
+/* ==========================================================
+   FIRST CELL SPACING
+========================================================== */
+
+.finova-table thead th:first-child,
+.finova-table tbody td:first-child,
+.finova-table-container table thead th:first-child,
+.finova-table-container table tbody td:first-child {
+
+    padding-left: 16px;
+
+}
+
+
+/* ==========================================================
+   LAST CELL SPACING
+========================================================== */
+
+.finova-table thead th:last-child,
+.finova-table tbody td:last-child,
+.finova-table-container table thead th:last-child,
+.finova-table-container table tbody td:last-child {
+
+    padding-right: 16px;
 
 }
 
@@ -317,11 +359,12 @@
    PRIMARY TEXT
 ========================================================== */
 
-.finova-table tbody .finova-table-primary{
+.finova-table .finova-table-primary,
+.finova-table-container .finova-table-primary {
 
-    color:#111827;
+    color: #212529;
 
-    font-weight:600;
+    font-weight: 600;
 
 }
 
@@ -330,45 +373,12 @@
    SECONDARY TEXT
 ========================================================== */
 
-.finova-table tbody .finova-table-secondary{
+.finova-table .finova-table-secondary,
+.finova-table-container .finova-table-secondary {
 
-    color:#6B7280;
+    color: #6C757D;
 
-    font-size:12px;
-
-}
-
-
-/* ==========================================================
-   CODE / NUMBER
-========================================================== */
-
-.finova-table tbody .finova-table-code{
-
-    color:#374151;
-
-    font-weight:600;
-
-    letter-spacing:.1px;
-
-}
-
-
-/* ==========================================================
-   NUMERIC VALUE
-========================================================== */
-
-.finova-table tbody .finova-table-number{
-
-    text-align:right;
-
-    color:#111827;
-
-    font-weight:500;
-
-    font-variant-numeric:tabular-nums;
-
-    font-feature-settings:"tnum";
+    font-size: 12px;
 
 }
 
@@ -377,22 +387,218 @@
    EMPTY VALUE
 ========================================================== */
 
-.finova-table tbody .finova-table-empty{
+.finova-table .finova-table-empty,
+.finova-table-container .finova-table-empty {
 
-    color:#9CA3AF;
+    color: #6C757D;
 
 }
 
 
 /* ==========================================================
-   ACTION CELL
+   INDEX / NUMBERING
 ========================================================== */
 
-.finova-table tbody .finova-table-action{
+.finova-table .finova-table-index,
+.finova-table-container .finova-table-index {
 
-    white-space:nowrap;
+    text-align: center !important;
 
-    text-align:center;
+    white-space: nowrap;
+
+    color: #6C757D;
+
+    font-variant-numeric: tabular-nums;
+
+}
+
+
+/* ==========================================================
+   CODE
+========================================================== */
+
+.finova-table .finova-table-code,
+.finova-table-container .finova-table-code {
+
+    text-align: left !important;
+
+    white-space: nowrap;
+
+    color: #212529;
+
+    font-weight: 500;
+
+}
+
+
+/* ==========================================================
+   NAME
+========================================================== */
+
+.finova-table .finova-table-name,
+.finova-table-container .finova-table-name {
+
+    text-align: left !important;
+
+    color: #212529;
+
+    font-weight: 500;
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION
+========================================================== */
+
+.finova-table .finova-table-description,
+.finova-table-container .finova-table-description {
+
+    text-align: left !important;
+
+    color: #6C757D;
+
+}
+
+
+/* ==========================================================
+   DATE
+========================================================== */
+
+.finova-table .finova-table-date,
+.finova-table-container .finova-table-date {
+
+    text-align: center !important;
+
+    white-space: nowrap;
+
+    color: #495057;
+
+    font-variant-numeric: tabular-nums;
+
+}
+
+
+/* ==========================================================
+   STATUS
+========================================================== */
+
+.finova-table .finova-table-status,
+.finova-table-container .finova-table-status {
+
+    text-align: center !important;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   QUANTITY
+========================================================== */
+
+.finova-table .finova-table-quantity,
+.finova-table-container .finova-table-quantity {
+
+    text-align: right !important;
+
+    white-space: nowrap;
+
+    font-variant-numeric: tabular-nums;
+
+}
+
+
+/* ==========================================================
+   PERCENT
+========================================================== */
+
+.finova-table .finova-table-percent,
+.finova-table-container .finova-table-percent {
+
+    text-align: right !important;
+
+    white-space: nowrap;
+
+    font-variant-numeric: tabular-nums;
+
+}
+
+
+/* ==========================================================
+   NUMBER / AMOUNT
+========================================================== */
+
+.finova-table .finova-table-number,
+.finova-table-container .finova-table-number {
+
+    text-align: right !important;
+
+    white-space: nowrap;
+
+    color: #212529;
+
+    font-weight: 500;
+
+    font-variant-numeric: tabular-nums;
+
+    font-feature-settings: "tnum";
+
+}
+
+
+/* ==========================================================
+   STANDARD BOOTSTRAP ALIGNMENT
+========================================================== */
+
+.finova-table .text-center,
+.finova-table-container .text-center {
+
+    text-align: center !important;
+
+}
+
+
+.finova-table .text-start,
+.finova-table-container .text-start {
+
+    text-align: left !important;
+
+}
+
+
+.finova-table .text-end,
+.finova-table-container .text-end {
+
+    text-align: right !important;
+
+}
+
+
+/* ==========================================================
+   ACTION COLUMN
+========================================================== */
+
+.finova-table .finova-table-action,
+.finova-table-container .finova-table-action {
+
+    text-align: center !important;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   ACTION BUTTON GROUP
+========================================================== */
+
+.finova-table .btn-group,
+.finova-table-container .btn-group {
+
+    display: inline-flex;
+
+    vertical-align: middle;
 
 }
 
@@ -401,23 +607,34 @@
    ACTION BUTTON
 ========================================================== */
 
-.finova-table tbody .finova-table-action button{
+.finova-table .finova-table-action .btn,
+.finova-table-container .finova-table-action .btn {
 
-    transition:
-        transform .16s ease,
-        background-color .16s ease,
-        box-shadow .16s ease;
+    vertical-align: middle;
 
 }
 
 
 /* ==========================================================
-   ACTION BUTTON HOVER
+   EMPTY / LOADING STATE
 ========================================================== */
 
-.finova-table tbody .finova-table-action button:hover{
+.finova-table tbody .finova-empty-row td,
+.finova-table tbody .finova-table-empty-row td,
+.finova-table-container table tbody .finova-empty-row td,
+.finova-table-container table tbody .finova-table-empty-row td {
 
-    transform:translateY(-1px);
+    height: auto;
+
+    padding-top: 24px;
+
+    padding-bottom: 24px;
+
+    text-align: center;
+
+    color: #6C757D;
+
+    background: #FFFFFF;
 
 }
 
@@ -426,19 +643,10 @@
    ROW ACTIVE
 ========================================================== */
 
-.finova-table tbody tr.finova-row-active{
+.finova-table tbody tr.finova-row-active > td,
+.finova-table-container table tbody tr.finova-row-active > td {
 
-    background:#F5F9FF;
-
-    box-shadow:
-        inset 3px 0 0 #3B82F6;
-
-}
-
-
-.finova-table tbody tr.finova-row-active td{
-
-    background:#F5F9FF;
+    background: #F8F9FA;
 
 }
 
@@ -447,213 +655,63 @@
    ROW SELECTED
 ========================================================== */
 
-.finova-table tbody tr.finova-row-selected{
+.finova-table tbody tr.finova-row-selected > td,
+.finova-table-container table tbody tr.finova-row-selected > td {
 
-    background:#EFF6FF;
-
-    box-shadow:
-        inset 3px 0 0 #2563EB;
-
-}
-
-
-.finova-table tbody tr.finova-row-selected td{
-
-    background:#EFF6FF;
+    background: #E9ECEF;
 
 }
 
 
 /* ==========================================================
-   LAST ROW
+   TABLE BORDERED
+   STANDARD BP / TAX / COA / AP / GL
 ========================================================== */
 
-.finova-table tbody tr:last-child td{
+.finova-table-bordered,
+.finova-table-container table.finova-table-bordered {
 
-    border-bottom:0;
+    border: 1px solid #DEE2E6;
 
 }
-/* ==========================================================
-   FINOVA ACCOUNTING SYSTEM
-   GLOBAL TABLE COMPONENT
-   TABLE ACTION — PREMIUM
-   Version : 1.3.0
-========================================================== */
 
 
-/* ==========================================================
-   ACTION COLUMN
-========================================================== */
+.finova-table-bordered > :not(caption) > * > *,
+.finova-table-container table.finova-table-bordered > :not(caption) > * > * {
 
-.finova-table tbody td:last-child{
-
-    width:1%;
-
-    white-space:nowrap;
-
-    text-align:center;
-
-    padding-left:12px;
-
-    padding-right:12px;
+    border-color: #DEE2E6;
 
 }
 
 
 /* ==========================================================
-   ACTION GROUP
+   RESPONSIVE — TABLE
 ========================================================== */
 
-.finova-table tbody td:last-child .btn-group{
+@media (max-width: 768px) {
 
-    display:inline-flex;
+    .finova-table thead th,
+    .finova-table-container table thead th {
 
-    align-items:center;
+        padding: 10px 12px;
 
-    justify-content:center;
+        font-size: 12px;
 
-    gap:4px;
+    }
+
+
+    .finova-table tbody td,
+    .finova-table-container table tbody td {
+
+        padding: 10px 12px;
+
+        font-size: 12px;
+
+    }
 
 }
 
 
 /* ==========================================================
-   ACTION BUTTON BASE
+   END — FINOVA GLOBAL TABLE COMPONENT
 ========================================================== */
-
-.finova-table tbody td:last-child .btn-group .btn{
-
-    display:inline-flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    width:32px;
-
-    height:32px;
-
-    padding:0;
-
-    border-radius:5px !important;
-
-    font-size:12px;
-
-    line-height:1;
-
-    transition:
-        color .18s ease,
-        background-color .18s ease,
-        border-color .18s ease,
-        box-shadow .18s ease,
-        transform .18s ease;
-
-}
-
-
-/* ==========================================================
-   EDIT BUTTON
-========================================================== */
-
-.finova-table tbody td:last-child
-.btn-outline-primary{
-
-    color:#2563EB;
-
-    background:#FFFFFF;
-
-    border-color:#BFDBFE;
-
-}
-
-
-.finova-table tbody td:last-child
-.btn-outline-primary:hover{
-
-    color:#1D4ED8;
-
-    background:#EFF6FF;
-
-    border-color:#93C5FD;
-
-    transform:translateY(-1px);
-
-    box-shadow:
-        0 2px 5px rgba(37,99,235,.12);
-
-}
-
-
-/* ==========================================================
-   DELETE BUTTON
-========================================================== */
-
-.finova-table tbody td:last-child
-.btn-outline-danger{
-
-    color:#DC2626;
-
-    background:#FFFFFF;
-
-    border-color:#FECACA;
-
-}
-
-
-.finova-table tbody td:last-child
-.btn-outline-danger:hover{
-
-    color:#B91C1C;
-
-    background:#FEF2F2;
-
-    border-color:#FCA5A5;
-
-    transform:translateY(-1px);
-
-    box-shadow:
-        0 2px 5px rgba(220,38,38,.12);
-
-}
-
-
-/* ==========================================================
-   ACTION ICON
-========================================================== */
-
-.finova-table tbody td:last-child
-.btn-group .btn i{
-
-    font-size:12px;
-
-}
-
-
-/* ==========================================================
-   ACTION ACTIVE
-========================================================== */
-
-.finova-table tbody td:last-child
-.btn-group .btn:active{
-
-    transform:translateY(0);
-
-    box-shadow:
-        inset 0 1px 2px rgba(0,0,0,.08);
-
-}
-
-
-/* ==========================================================
-   ACTION FOCUS
-========================================================== */
-
-.finova-table tbody td:last-child
-.btn-group .btn:focus-visible{
-
-    outline:none;
-
-    box-shadow:
-        0 0 0 3px rgba(59,130,246,.12);
-
-}

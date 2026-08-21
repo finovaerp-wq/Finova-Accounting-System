@@ -3,180 +3,242 @@
    GLOBAL BUTTON COMPONENT
 ========================================================== */
 
+
 /* ==========================================================
    BASE BUTTON
 ========================================================== */
 
-.btn-finova{
+.btn-finova {
 
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:8px;
+    display: inline-flex;
 
-    border:none;
-    border-radius:8px;
+    align-items: center;
 
-    padding:8px 16px;
+    justify-content: center;
 
-    font-size:14px;
-    font-weight:500;
+    gap: 8px;
 
-    cursor:pointer;
+    padding: 8px 16px;
 
-    transition:all .2s ease;
+    border: none;
+
+    border-radius: 8px;
+
+    font-size: 14px;
+
+    font-weight: 500;
+
+    line-height: 1.5;
+
+    cursor: pointer;
+
+    box-sizing: border-box;
+
+    transition:
+        background-color .2s ease,
+        color .2s ease,
+        border-color .2s ease,
+        transform .2s ease;
 
 }
 
-.btn-finova i{
 
-    font-size:13px;
+/* ==========================================================
+   BUTTON ICON
+========================================================== */
+
+.btn-finova i {
+
+    font-size: 13px;
+
+    line-height: 1;
 
 }
 
-.btn-finova:hover{
 
-    transform:translateY(-1px);
+/* ==========================================================
+   BASE HOVER
+========================================================== */
+
+.btn-finova:hover {
+
+    transform: translateY(-1px);
 
 }
+
 
 /* ==========================================================
    PRIMARY
 ========================================================== */
 
-.btn-primary{
+.btn-primary {
 
-    background:#0D6EFD;
-    color:#FFFFFF;
+    background: #0D6EFD;
+
+    color: #FFFFFF;
+
+}
+
+
+.btn-primary:hover {
+
+    background: #0B5ED7;
 
 }
 
-.btn-primary:hover{
-
-    background:#0B5ED7;
-
-}
 
 /* ==========================================================
    SUCCESS
 ========================================================== */
 
-.btn-success{
+.btn-success {
 
-    background:#198754;
-    color:#FFFFFF;
+    background: #198754;
+
+    color: #FFFFFF;
+
+}
+
+
+.btn-success:hover {
+
+    background: #157347;
 
 }
 
-.btn-success:hover{
-
-    background:#157347;
-
-}
 
 /* ==========================================================
    DANGER
 ========================================================== */
 
-.btn-danger{
+.btn-danger {
 
-    background:#DC3545;
-    color:#FFFFFF;
+    background: #DC3545;
+
+    color: #FFFFFF;
+
+}
+
+
+.btn-danger:hover {
+
+    background: #BB2D3B;
 
 }
 
-.btn-danger:hover{
-
-    background:#BB2D3B;
-
-}
 
 /* ==========================================================
    SECONDARY
 ========================================================== */
 
-.btn-secondary{
+.btn-secondary {
 
-    background:#6C757D;
-    color:#FFFFFF;
+    background: #6C757D;
+
+    color: #FFFFFF;
+
+}
+
+
+.btn-secondary:hover {
+
+    background: #5C636A;
 
 }
 
-.btn-secondary:hover{
-
-    background:#5C636A;
-
-}
 
 /* ==========================================================
    ACTION BUTTON
 ========================================================== */
 
-.btn-action{
+.btn-action {
 
-    width:34px;
-    height:34px;
+    width: 34px;
 
-    padding:0;
+    height: 34px;
 
-    border:none;
+    padding: 0;
 
-    border-radius:8px;
+    border: none;
 
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
+    border-radius: 8px;
 
-    cursor:pointer;
+    display: inline-flex;
 
-    transition:all .2s ease;
+    align-items: center;
+
+    justify-content: center;
+
+    cursor: pointer;
+
+    box-sizing: border-box;
+
+    transition:
+        background-color .2s ease,
+        color .2s ease,
+        transform .2s ease;
+
+}
+
+
+/* ==========================================================
+   ACTION ICON
+========================================================== */
+
+.btn-action i {
+
+    font-size: 13px;
+
+    line-height: 1;
 
 }
 
-.btn-action i{
 
-    font-size:13px;
+/* ==========================================================
+   ACTION HOVER
+========================================================== */
+
+.btn-action:hover {
+
+    transform: translateY(-1px);
 
 }
 
-.btn-action:hover{
-
-    transform:translateY(-1px);
-
-}
 
 /* ==========================================================
    EDIT
 ========================================================== */
 
-.btn-action-edit{
+.btn-action-edit {
 
-    background:#E8F2FF;
+    background: #E8F2FF;
 
-    color:#2563EB;
+    color: #2563EB;
 
 }
+
 
 /* ==========================================================
    DELETE
 ========================================================== */
 
-.btn-action-delete{
+.btn-action-delete {
 
-    background:#FDECEC;
+    background: #FDECEC;
 
-    color:#DC3545;
+    color: #DC3545;
 
 }
+
 
 /* ==========================================================
    VIEW
 ========================================================== */
 
-.btn-action-view{
+.btn-action-view {
 
-    background:#EAF7EF;
+    background: #EAF7EF;
 
-    color:#198754;
+    color: #198754;
 
 }

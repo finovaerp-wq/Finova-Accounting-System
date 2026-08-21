@@ -1,8 +1,20 @@
 /*
 ==========================================================
 FINOVA ACCOUNTING SYSTEM
-Account Payable
+MODULE : ACCOUNT PAYABLE
+
 Version : 2.0 Enterprise
+
+TABLE STANDARD :
+GLOBAL TABLE COMPONENT
+
+VISUAL STANDARD :
+TAX MASTER
+
+NOTE :
+- Table visual controlled by Global Table CSS
+- AP status behavior remains here
+- Pagination is NOT changed
 ==========================================================
 */
 
@@ -11,15 +23,15 @@ Version : 2.0 Enterprise
    ACCOUNT PAYABLE PAGE
 ========================================================== */
 
-.account-payable-page{
+.account-payable-page {
 
-    display:flex;
+    display: flex;
 
-    flex-direction:column;
+    flex-direction: column;
 
-    gap:20px;
+    gap: 20px;
 
-    width:100%;
+    width: 100%;
 
 }
 
@@ -28,26 +40,26 @@ Version : 2.0 Enterprise
    PAGE HEADER
 ========================================================== */
 
-.account-payable-header{
+.account-payable-header {
 
-    display:flex;
+    display: flex;
 
-    justify-content:space-between;
+    justify-content: space-between;
 
-    align-items:center;
+    align-items: center;
 
-    gap:24px;
+    gap: 24px;
 
-    padding:24px 28px;
+    padding: 24px 28px;
 
-    background:#FFFFFF;
+    background: #FFFFFF;
 
-    border:1px solid #E9EEF5;
+    border: 1px solid #E9EEF5;
 
-    border-radius:18px;
+    border-radius: 18px;
 
     box-shadow:
-        0 6px 20px rgba(15,23,42,.05);
+        0 6px 20px rgba(15, 23, 42, .05);
 
 }
 
@@ -56,9 +68,9 @@ Version : 2.0 Enterprise
    HEADER LEFT
 ========================================================== */
 
-.account-payable-header-left{
+.account-payable-header-left {
 
-    flex:1;
+    flex: 1;
 
 }
 
@@ -67,19 +79,19 @@ Version : 2.0 Enterprise
    TITLE
 ========================================================== */
 
-.account-payable-title{
+.account-payable-title {
 
-    margin:0;
+    margin: 0;
 
-    font-size:30px;
+    font-size: 30px;
 
-    font-weight:700;
+    font-weight: 700;
 
-    line-height:1.15;
+    line-height: 1.15;
 
-    letter-spacing:-0.6px;
+    letter-spacing: -.6px;
 
-    color:#0F172A;
+    color: #0F172A;
 
 }
 
@@ -88,25 +100,25 @@ Version : 2.0 Enterprise
    BREADCRUMB
 ========================================================== */
 
-.account-payable-breadcrumb{
+.account-payable-breadcrumb {
 
-    display:flex;
+    display: flex;
 
-    align-items:center;
+    align-items: center;
 
-    flex-wrap:wrap;
+    flex-wrap: wrap;
 
-    gap:6px;
+    gap: 6px;
 
-    margin-top:8px;
+    margin-top: 8px;
 
-    font-size:13px;
+    font-size: 13px;
 
-    font-weight:500;
+    font-weight: 500;
 
-    line-height:1.5;
+    line-height: 1.5;
 
-    color:#64748B;
+    color: #64748B;
 
 }
 
@@ -115,31 +127,17 @@ Version : 2.0 Enterprise
    HEADER RIGHT
 ========================================================== */
 
-.account-payable-header-right{
+.account-payable-header-right {
 
-    display:flex;
+    display: flex;
 
-    align-items:center;
+    align-items: center;
 
-    justify-content:flex-end;
+    justify-content: flex-end;
 
-    gap:12px;
+    gap: 12px;
 
-    flex-wrap:wrap;
-
-}
-
-
-/* ==========================================================
-   HEADER BUTTON HOVER
-========================================================== */
-
-.account-payable-header-right .btn:hover{
-
-    transform:translateY(-2px);
-
-    box-shadow:
-        0 8px 20px rgba(15,23,42,.12);
+    flex-wrap: wrap;
 
 }
 
@@ -148,25 +146,39 @@ Version : 2.0 Enterprise
    HEADER BUTTON
 ========================================================== */
 
-.account-payable-header-right .btn{
+.account-payable-header-right .btn {
 
-    display:inline-flex;
+    display: inline-flex;
 
-    align-items:center;
+    align-items: center;
 
-    justify-content:center;
+    justify-content: center;
 
-    gap:8px;
+    gap: 8px;
 
-    height:40px;
+    height: 40px;
 
-    padding:0 16px;
+    padding: 0 16px;
 
-    font-size:14px;
+    font-size: 14px;
 
-    font-weight:600;
+    font-weight: 600;
 
-    border-radius:8px;
+    border-radius: 8px;
+
+}
+
+
+/* ==========================================================
+   HEADER BUTTON HOVER
+========================================================== */
+
+.account-payable-header-right .btn:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 8px 20px rgba(15, 23, 42, .12);
 
 }
 
@@ -175,9 +187,9 @@ Version : 2.0 Enterprise
    HEADER BUTTON ICON
 ========================================================== */
 
-.account-payable-header-right .btn i{
+.account-payable-header-right .btn i {
 
-    font-size:14px;
+    font-size: 14px;
 
 }
 
@@ -186,85 +198,79 @@ Version : 2.0 Enterprise
    BUTTON WIDTH
 ========================================================== */
 
-#btn-add-ap{
+#btn-add-ap {
 
-    min-width:140px;
-
-}
-
-
-#btn-download-ap{
-
-    min-width:165px;
+    min-width: 140px;
 
 }
 
 
-#btn-refresh-ap{
+#btn-download-ap {
 
-    min-width:120px;
+    min-width: 165px;
 
 }
 
- /*
-==========================================================
-ACCOUNT PAYABLE ROW STATUS
-==========================================================
-*/
+
+#btn-refresh-ap {
+
+    min-width: 120px;
+
+}
 
 
-/*
+/* ==========================================================
+   ACCOUNT PAYABLE TABLE
 ==========================================================
-POSTED
-Normal / Strong
-==========================================================
-*/
+
+   IMPORTANT :
+
+   Table visual styling is controlled by:
+
+   .finova-table
+   .finova-table-container table
+
+   from Global Table CSS.
+
+   DO NOT ADD TABLE VISUAL OVERRIDES HERE.
+
+========================================================== */
+
+
+/* ==========================================================
+   AP TABLE BODY
+========================================================== */
+
+#ap-table-body {
+
+    background: #FFFFFF;
+
+}
+
+
+/* ==========================================================
+   AP ROW STATUS
+========================================================== */
+
+
+/* ==========================================================
+   POSTED
+========================================================== */
 
 .ap-row-posted {
 
-    opacity:1;
+    opacity: 1;
 
 }
 
 
-/*
-==========================================================
-DRAFT
-Normal
-==========================================================
-*/
+/* ==========================================================
+   DRAFT
+========================================================== */
 
 .ap-row-draft {
 
-    opacity:1;
-
-}
-
-
-/*
-==========================================================
-COMPLETE
-Abu-abu
-==========================================================
-*/
-
-.ap-row-complete {
-
-    opacity:1;
-
-}
-
-
-/*
-==========================================================
-VOID
-Lighter
-==========================================================
-*/
-
-.ap-row-void {
-
-    opacity:0.45;
+    opacity: 1;
 
 }
 
@@ -273,37 +279,9 @@ Lighter
    COMPLETE
 ========================================================== */
 
-#ap-table-body tr[data-status="complete"] td {
+.ap-row-complete {
 
-    background-color:#e9ecef !important;
-
-    color:#6c757d !important;
-
-}
-
-
-/*
-==========================================================
-COMPLETE - TEXT / ICON / LINK
-==========================================================
-*/
-
-#ap-table-body tr[data-status="complete"] td * {
-
-    color:#6c757d !important;
-
-}
-
-
-/* ==========================================================
-   DRAFT
-========================================================== */
-
-#ap-table-body tr[data-status="draft"] td {
-
-    background-color:transparent !important;
-
-    color:inherit !important;
+    opacity: 1;
 
 }
 
@@ -312,69 +290,153 @@ COMPLETE - TEXT / ICON / LINK
    VOID
 ========================================================== */
 
-#ap-table-body tr[data-status="void"] td {
+.ap-row-void {
 
-    background-color:transparent !important;
+    opacity: .45;
 
-    color:inherit !important;
-
-}
-/* ==========================================================
-   ACCOUNT PAYABLE - POSTED ROW
-========================================================== */
-
-#ap-table-body tr[data-status="posted"] td {
-    background-color: #e9ecef !important;
-    color: #6c757d !important;
 }
 
 
 /* ==========================================================
-   POSTED - LINKS / TEXT
-========================================================== */
-
-#ap-table-body tr[data-status="posted"] td *,
-#ap-table-body tr[data-status="posted"] td .fw-semibold {
-    color: #6c757d !important;
-}
-
-
-/* ==========================================================
-   DRAFT
-========================================================== */
-
-#ap-table-body tr[data-status="draft"] td {
-    background-color: transparent !important;
-    color: inherit !important;
-}
-
-
-/* ==========================================================
-   VOID
-========================================================== */
-
-#ap-table-body tr[data-status="void"] td {
-    background-color: transparent !important;
-    color: inherit !important;
-}
-
-/*
+   COMPLETE ROW
 ==========================================================
-ACCOUNT PAYABLE - COMPLETE ROW
-==========================================================
-*/
 
+   Business behavior:
+   Completed AP is visually muted.
+
+========================================================== */
+
+#ap-table-body tr[data-status="complete"] > td,
 #ap-table-body tr.ap-row-complete > td {
-    background-color: #e9ecef !important;
-    color: #6c757d !important;
+
+    background-color: #E9ECEF !important;
+
+    color: #6C757D !important;
+
 }
 
+
+/* ==========================================================
+   COMPLETE ROW CONTENT
+========================================================== */
+
+#ap-table-body tr[data-status="complete"] > td *,
 #ap-table-body tr.ap-row-complete > td * {
-    color: #6c757d !important;
+
+    color: #6C757D !important;
+
 }
 
-#ap-table-body tr.ap-row-complete > td .btn {
-    color: #6c757d !important;
-    border-color: #adb5bd !important;
+
+/* ==========================================================
+   COMPLETE ACTION BUTTON
+========================================================== */
+
+#ap-table-body tr[data-status="complete"]
+    > td .btn {
+
+    color: #6C757D !important;
+
+    border-color: #ADB5BD !important;
+
 }
 
+
+/* ==========================================================
+   POSTED ROW
+==========================================================
+
+   Business behavior:
+   Posted AP is visually muted.
+
+========================================================== */
+
+#ap-table-body tr[data-status="posted"] > td {
+
+    background-color: #E9ECEF !important;
+
+    color: #6C757D !important;
+
+}
+
+
+/* ==========================================================
+   POSTED ROW CONTENT
+========================================================== */
+
+#ap-table-body tr[data-status="posted"] > td * {
+
+    color: #6C757D !important;
+
+}
+
+
+/* ==========================================================
+   DRAFT ROW
+==========================================================
+
+   Draft follows normal Global Table appearance.
+
+========================================================== */
+
+#ap-table-body tr[data-status="draft"] > td {
+
+    background-color: #FFFFFF !important;
+
+    color: #495057 !important;
+
+}
+
+
+/* ==========================================================
+   DRAFT ROW CONTENT
+========================================================== */
+
+#ap-table-body tr[data-status="draft"] > td * {
+
+    color: inherit;
+
+}
+
+
+/* ==========================================================
+   VOID ROW
+==========================================================
+
+   Void follows normal table background,
+   but entire row is visually muted through opacity.
+
+========================================================== */
+
+#ap-table-body tr[data-status="void"] > td {
+
+    background-color: #FFFFFF !important;
+
+}
+
+
+/* ==========================================================
+   VOID ROW CONTENT
+========================================================== */
+
+#ap-table-body tr[data-status="void"] > td * {
+
+    color: inherit;
+
+}
+
+
+/* ==========================================================
+   VOID ROW
+========================================================== */
+
+#ap-table-body tr.ap-row-void {
+
+    opacity: .45;
+
+}
+
+
+/* ==========================================================
+   END ACCOUNT PAYABLE CSS
+========================================================== */

@@ -1988,6 +1988,7 @@ renderTable() {
 
     }
 
+
     /*
     ======================================================
     CLEAR TABLE
@@ -1996,6 +1997,7 @@ renderTable() {
 
     this.tableBody.innerHTML = "";
 
+
     /*
     ======================================================
     PAGINATION
@@ -2003,11 +2005,16 @@ renderTable() {
     */
 
     const start =
-        (this.currentPage - 1) *
+        (this.currentPage - 1)
+        *
         this.pageSize;
 
+
     const end =
-        start + this.pageSize;
+        start
+        +
+        this.pageSize;
+
 
     const journals =
         this.filteredJournals.slice(
@@ -2015,20 +2022,22 @@ renderTable() {
             end
         );
 
+
     /*
     ======================================================
     EMPTY DATA
     ======================================================
     */
 
-    if (journals.length === 0) {
+    if (!journals.length) {
 
         this.tableBody.innerHTML = `
 
-            <tr>
+            <tr class="finova-empty-row">
 
-                <td colspan="8"
-                    class="text-center text-muted py-5">
+                <td
+                    colspan="8"
+                    class="text-center text-muted py-4">
 
                     No General Journal found.
 
@@ -2042,6 +2051,7 @@ renderTable() {
 
     }
 
+
     /*
     ======================================================
     RENDER ROW
@@ -2050,34 +2060,38 @@ renderTable() {
 
     journals.forEach(
 
-    (journal, index) => {
+        (journal, index) => {
 
-        this.tableBody.insertAdjacentHTML(
+            this.tableBody.insertAdjacentHTML(
 
-            "beforeend",
+                "beforeend",
 
-            this.createTableRow(
+                this.createTableRow(
 
-                journal,
+                    journal,
 
-                start + index + 1
+                    start + index + 1
 
-            )
+                )
 
-        );
+            );
 
-    }
+        }
 
-);
+    );
 
 }
 /*
 ==========================================================
 CREATE TABLE ROW
+GLOBAL TABLE STANDARD
 ==========================================================
 */
 
-createTableRow(journal, rowNumber) {
+createTableRow(
+    journal,
+    rowNumber
+) {
 
     return `
 
@@ -2087,47 +2101,51 @@ createTableRow(journal, rowNumber) {
                  NO
             =========================================== -->
 
-            <td class="text-center">
+            <td class="finova-table-index">
 
                 ${rowNumber}
 
             </td>
 
+
             <!-- ==========================================
                  ACCOUNTING DATE
             =========================================== -->
 
-            <td>
+            <td class="finova-table-date">
 
                 ${journal.journal_date ?? "-"}
 
             </td>
 
+
             <!-- ==========================================
                  JOURNAL NO
             =========================================== -->
 
-            <td>
+            <td class="finova-table-code">
 
                 ${journal.journal_no ?? "-"}
 
             </td>
 
+
             <!-- ==========================================
                  DESCRIPTION
             =========================================== -->
 
-            <td class="gl-journal-description">
+            <td class="finova-table-description">
 
                 ${journal.description ?? "-"}
 
             </td>
 
+
             <!-- ==========================================
                  TOTAL DEBIT
             =========================================== -->
 
-            <td class="text-end">
+            <td class="finova-table-number">
 
                 ${this.formatCurrency(
 
@@ -2139,11 +2157,12 @@ createTableRow(journal, rowNumber) {
 
             </td>
 
+
             <!-- ==========================================
                  TOTAL CREDIT
             =========================================== -->
 
-            <td class="text-end">
+            <td class="finova-table-number">
 
                 ${this.formatCurrency(
 
@@ -2155,11 +2174,12 @@ createTableRow(journal, rowNumber) {
 
             </td>
 
+
             <!-- ==========================================
                  STATUS
             =========================================== -->
 
-            <td class="text-center">
+            <td class="finova-table-status">
 
                 ${this.renderStatusBadge(
 
@@ -2169,11 +2189,12 @@ createTableRow(journal, rowNumber) {
 
             </td>
 
+
             <!-- ==========================================
                  ACTION
             =========================================== -->
 
-            <td class="text-center">
+            <td class="finova-table-action">
 
                 ${this.renderActionButtons(
 
@@ -4894,109 +4915,7 @@ deleteDetailLine(index) {
     this.refreshDetailView();
 
 }
-/*
-==========================================================
-RENDER TABLE
-==========================================================
-*/
 
-renderTable() {
-
-    /*
-    ======================================================
-    VALIDATION
-    ======================================================
-    */
-
-    if (!this.tableBody) {
-
-        return;
-
-    }
-
-    /*
-    ======================================================
-    CLEAR TABLE
-    ======================================================
-    */
-
-    this.tableBody.innerHTML = "";
-
-    /*
-    ======================================================
-    PAGINATION
-    ======================================================
-    */
-
-    const start =
-        (this.currentPage - 1) *
-        this.pageSize;
-
-    const end =
-        start + this.pageSize;
-
-    const journals =
-        this.filteredJournals.slice(
-            start,
-            end
-        );
-
-    /*
-    ======================================================
-    EMPTY DATA
-    ======================================================
-    */
-
-    if (journals.length === 0) {
-
-        this.tableBody.innerHTML = `
-
-            <tr>
-
-                <td colspan="8"
-                    class="text-center text-muted py-5">
-
-                    No General Journal found.
-
-                </td>
-
-            </tr>
-
-        `;
-
-        return;
-
-    }
-
-    /*
-    ======================================================
-    RENDER ROW
-    ======================================================
-    */
-
-    journals.forEach(
-
-        (journal, index) => {
-
-            this.tableBody.insertAdjacentHTML(
-
-                "beforeend",
-
-                this.createTableRow(
-
-                    journal,
-
-                    start + index + 1
-
-                )
-
-            );
-
-        }
-
-    );
-
-}
 /*
 ==========================================================
 FORMAT CURRENCY

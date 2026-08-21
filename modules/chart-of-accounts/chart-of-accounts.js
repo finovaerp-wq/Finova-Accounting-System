@@ -832,29 +832,37 @@ preview() {
 
             <tr>
 
-                <td>
-                <strong style="color: #000000;">
-                    ${item.account_code ?? "-"}
-                </strong>
-            </td>
+               <td class="finova-table-code">
+    ${item.account_code}
+</td>
 
-            <td>
-                <strong style="color: #000000;">
-                    ${item.account_name ?? "-"}
-                </strong>
-            </td>
+<td class="finova-table-name">
+    ${item.account_name}
+</td>
 
-                <td>${item.parent_name ?? "-"}</td>
+<td class="finova-table-name">
+    ${item.parent_name ?? "-"}
+</td>
 
-                <td>${item.currency ?? "-"}</td>
+<td>
+    ${item.currency ?? "-"}
+</td>
 
-                <td>${item.normal_balance ?? "-"}</td>
+<td>
+    ${item.normal_balance ?? "-"}
+</td>
 
-                <td>${item.posting_type ?? "-"}</td>
+<td>
+    ${item.posting_type ?? "-"}
+</td>
 
-                <td>${item.is_header ? "Yes" : "No"}</td>
+<td class="finova-table-status">
+    ${item.is_header ? "Yes" : "No"}
+</td>
 
-                <td>${item.status ? "Active" : "Inactive"}</td>
+<td class="finova-table-status">
+    ${item.status ? "Active" : "Inactive"}
+</td>
 
             </tr>
 

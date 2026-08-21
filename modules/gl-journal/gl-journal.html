@@ -82,7 +82,7 @@ Version : 2.0 Enterprise
          FILTER CARD
     =========================================================== -->
 
-    <div class="finova-card">
+    <div class="finova-card gl-journal-filter-card">
 
     <div class="finova-card-body">
 
@@ -248,7 +248,7 @@ Version : 2.0 Enterprise
 
 </div> <!-- End Filter Card -->
 
-    <!-- ==========================================================
+<!-- ==========================================================
      TABLE CARD
 ========================================================== -->
 
@@ -267,59 +267,45 @@ Version : 2.0 Enterprise
                 class="table-responsive">
 
                 <table
-                    id="gl-journal-table"
-                    class="table finova-table table-hover align-middle">
+                id="gl-journal-table"
+                
+  
+                class="table finova-table finova-table-bordered table-hover">
 
                     <thead>
 
                         <tr>
 
-                            <th style="width:70px;">
+                            <th class="finova-table-index">
                                 No
                             </th>
 
-                            <th style="width:150px;">
+                            <th class="finova-table-date">
                                 Accounting Date
                             </th>
 
-                            <th style="width:180px;">
+                            <th class="finova-table-code">
                                 Journal No
                             </th>
 
-                            <th>
+                            <th class="finova-table-description">
                                 Description
                             </th>
 
-                            <th
-                                class="text-end"
-                                style="width:170px;">
-
+                            <th class="finova-table-number">
                                 Total Debit
-
                             </th>
 
-                            <th
-                                class="text-end"
-                                style="width:170px;">
-
+                            <th class="finova-table-number">
                                 Total Credit
-
                             </th>
 
-                            <th
-                                class="text-center"
-                                style="width:130px;">
-
+                            <th class="finova-table-status">
                                 Status
-
                             </th>
 
-                            <th
-                                class="text-center"
-                                style="width:90px;">
-
+                            <th class="finova-table-action">
                                 Action
-
                             </th>
 
                         </tr>
@@ -335,7 +321,6 @@ Version : 2.0 Enterprise
                 </table>
 
             </div>
-
 
             <!-- ==================================================
                  PAGINATION

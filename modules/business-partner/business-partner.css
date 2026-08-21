@@ -1,8 +1,20 @@
 /*
 ==========================================================
 FINOVA ACCOUNTING SYSTEM
-Business Partner
+MODULE : BUSINESS PARTNER
+
 Version : 2.1 Enterprise
+
+TABLE STANDARD :
+GLOBAL TABLE COMPONENT
+
+VISUAL STANDARD :
+TAX MASTER
+
+NOTE :
+- Table visual controlled by Global Table CSS
+- Pagination remains controlled by Business Partner
+- No table cell visual override here
 ==========================================================
 */
 
@@ -11,17 +23,17 @@ Version : 2.1 Enterprise
    BUSINESS PARTNER PAGE
 ========================================================== */
 
-.business-partner-page{
+.business-partner-page {
 
-    display:flex;
+    display: flex;
 
-    flex-direction:column;
+    flex-direction: column;
 
-    flex:1;
+    flex: 1 1 auto;
 
-    min-height:0;
+    min-height: 0;
 
-    width:100%;
+    width: 100%;
 
 }
 
@@ -30,17 +42,19 @@ Version : 2.1 Enterprise
    TABLE CARD
 ========================================================== */
 
-.business-partner-table-card{
+.business-partner-table-card {
 
-    display:flex;
+    display: flex;
 
-    flex-direction:column;
+    flex-direction: column;
 
-    flex:1 1 auto;
+    flex: 1 1 auto;
 
-    min-height:0;
+    min-height: 0;
 
-    overflow:hidden;
+    width: 100%;
+
+    overflow: hidden;
 
 }
 
@@ -49,54 +63,47 @@ Version : 2.1 Enterprise
    CARD BODY
 ========================================================== */
 
-.business-partner-table-card .finova-card-body{
+.business-partner-table-card .finova-card-body {
 
-    display:flex;
+    display: flex;
 
-    flex-direction:column;
+    flex-direction: column;
 
-    flex:1 1 auto;
+    flex: 1 1 auto;
 
-    min-height:0;
+    min-height: 0;
 
-    padding:0;
+    padding: 0;
 
-    overflow:hidden;
+    overflow: hidden;
 
 }
 
 
 /* ==========================================================
    TABLE CONTAINER
-   FOLLOW GLOBAL TABLE
+
+   VISUAL :
+   GLOBAL FINOVA TABLE CSS
+
 ========================================================== */
 
 .business-partner-table-card
-.finova-table-container{
+.finova-table-container {
 
-    display:flex;
+    display: flex;
 
-    flex-direction:column;
+    flex-direction: column;
 
-    flex:1 1 auto;
+    flex: 1 1 auto;
 
-    min-height:0;
+    min-height: 0;
 
-    width:100%;
+    width: 100%;
 
-    height:100%;
+    height: 100%;
 
-    background:#FFFFFF;
-
-    border:1px solid #D7DBE0;
-
-    border-radius:6px;
-
-    box-shadow:
-        0 1px 2px rgba(0,0,0,.05),
-        0 4px 10px rgba(0,0,0,.04);
-
-    overflow:hidden;
+    overflow: hidden;
 
 }
 
@@ -107,80 +114,80 @@ Version : 2.1 Enterprise
 
 .business-partner-table-card
 .finova-table-container
-.table-responsive{
+.table-responsive {
 
-    display:block;
+    display: block;
 
-    flex:1 1 auto;
+    flex: 1 1 auto;
 
-    min-height:0;
+    min-height: 0;
 
-    width:100%;
+    width: 100%;
 
-    overflow:auto;
+    overflow: auto;
 
 }
 
 
 /* ==========================================================
    TABLE
+
+   VISUAL TABLE STYLING :
+   GLOBAL TABLE CSS
+
 ========================================================== */
 
 .business-partner-table-card
-.finova-table{
+.finova-table {
 
-    width:100%;
+    width: 100%;
 
-    margin-bottom:0;
+    margin-bottom: 0;
 
-    vertical-align:middle;
+    vertical-align: middle;
 
 }
 
 
 /* ==========================================================
-   TABLE FOOTER / PAGINATION
+   TABLE FOOTER
+
+   KEEP EXISTING BUSINESS PARTNER FOOTER
 ========================================================== */
 
 .business-partner-table-card
-.card-footer{
+.card-footer {
 
-    flex-shrink:0;
+    flex-shrink: 0;
 
-    background:#FFFFFF;
+    background: #FFFFFF;
 
-    border:0;
+    border: 0;
 
-    border-top:1px solid #EEF2F7;
+    border-top: 1px solid #EEF2F7;
 
 }
 
 
 /* ==========================================================
    PAGINATION
+
+   KEEP EXISTING BUSINESS PARTNER PAGINATION.
+   NO LOGIC / DESIGN CHANGE.
 ========================================================== */
 
 .business-partner-table-card
-.finova-pagination-wrapper{
+.finova-pagination-wrapper {
 
-    flex-shrink:0;
+    flex-shrink: 0;
 
-    margin-top:0;
+    width: 100%;
+
+    margin-top: 0;
 
 }
 
 
 /* ==========================================================
-   TABLE CARD SHADOW
-   LIGHT PREMIUM DEPTH
+   END BUSINESS PARTNER CSS
 ========================================================== */
-
-.business-partner-table-card{
-
-    border-radius:10px;
-
-    box-shadow:
-        0 1px 2px rgba(15,23,42,.04),
-        0 4px 12px rgba(15,23,42,.04);
-
-}

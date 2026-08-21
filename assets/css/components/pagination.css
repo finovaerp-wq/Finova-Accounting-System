@@ -5,20 +5,29 @@
 
 
 /* ==========================================================
-   TABLE LAYOUT
+   TABLE CARD
 ========================================================== */
 
-.finova-table-card{
+.finova-table-card {
 
-    display:flex;
+    display: flex;
 
-    flex-direction:column;
+    flex-direction: column;
 
-    height:100%;
+    width: 100%;
 
-    min-height:0;
+    height: 100%;
+
+    min-height: 0;
+
+    overflow: hidden;
+
 }
 
+
+/* ==========================================================
+   TABLE CONTAINER
+========================================================== */
 
 .finova-table-container {
 
@@ -26,56 +35,74 @@
 
     flex-direction: column;
 
-    flex: 1;
+    flex: 1 1 auto;
 
     min-height: 0;
 
+    width: 100%;
+
+    overflow: hidden;
+
 }
+
+
+/* ==========================================================
+   TABLE SCROLL AREA
+========================================================== */
 
 .finova-table-container .table-responsive {
 
-    flex: 1;
+    flex: 1 1 auto;
 
     min-height: 0;
 
-    overflow: auto;
+    width: 100%;
 
-}
-.finova-table-container{
+    overflow-x: auto;
 
-    overflow:hidden;
+    overflow-y: auto;
+
 }
 
 
 /* ==========================================================
    PAGINATION WRAPPER
+   - SELALU DI BAGIAN PALING BAWAH TABLE CARD
+   - TIDAK IKUT SCROLL TABLE
 ========================================================== */
 
-.finova-pagination-wrapper{
+.finova-pagination-wrapper {
 
-    position: sticky;
-    bottom: 0;
+    position: relative;
 
-    display:flex;
+    display: flex;
 
-    justify-content:space-between;
-    align-items:center;
+    align-items: center;
 
-    width:100%;
+    justify-content: space-between;
 
-    min-height:52px;
+    width: 100%;
 
-    padding:10px 16px;
+    min-height: 52px;
 
-    margin-top:auto;
+    height: 52px;
 
-    background:var(--card-bg);
+    padding: 10px 16px;
 
-    border-top:1px solid var(--border-color);
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0
 
-    z-index:20;
+    box-sizing: border-box;
 
-    flex-shrink:0;
+    flex: 0 0 52px;
+
+    background: var(--card-bg);
+
+    border-top: 1px solid var(--border-color);
+
+    z-index: 20;
+
 }
 
 
@@ -97,7 +124,7 @@
 
 
 /* ==========================================================
-   BUTTON
+   PAGINATION BUTTON
 ========================================================== */
 
 .finova-pagination-btn,
@@ -113,6 +140,8 @@
 
     justify-content: center;
 
+    flex-shrink: 0;
+
     border: 1px solid var(--border-color);
 
     border-radius: 6px;
@@ -123,7 +152,10 @@
 
     cursor: pointer;
 
-    transition: all .2s ease;
+    transition:
+        background .2s ease,
+        border-color .2s ease,
+        color .2s ease;
 
 }
 
@@ -156,11 +188,13 @@
 
     cursor: not-allowed;
 
+    border-color: var(--border-color);
+
 }
 
 
 /* ==========================================================
-   LABEL
+   PAGINATION LABEL
 ========================================================== */
 
 .finova-pagination-label {
@@ -175,7 +209,7 @@
 
 
 /* ==========================================================
-   INPUT
+   PAGINATION INPUT
 ========================================================== */
 
 .finova-pagination-input {
@@ -183,6 +217,10 @@
     width: 40px;
 
     height: 30px;
+
+    padding: 0 4px;
+
+    box-sizing: border-box;
 
     font-size: 12px;
 
@@ -246,41 +284,6 @@
 
 
 /* ==========================================================
-   RESPONSIVE
-========================================================== */
-
-@media (max-width: 768px) {
-
-    .finova-pagination-wrapper {
-
-        flex-wrap: wrap;
-
-        gap: 10px;
-
-    }
-
-    .finova-pagination-left {
-
-        flex-wrap: wrap;
-
-        gap: 6px;
-
-    }
-
-    .finova-pagination-info {
-
-        width: 100%;
-
-        margin-left: 0;
-
-        text-align: right;
-
-    }
-
-}
-
-
-/* ==========================================================
    EMPTY ROW
 ========================================================== */
 
@@ -294,8 +297,52 @@
 
 }
 
+
 .finova-empty-row:hover td {
 
     background: #FFFFFF;
+
+}
+
+
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+@media (max-width: 768px) {
+
+    .finova-pagination-wrapper {
+
+        min-height: auto;
+
+        height: auto;
+
+        flex-wrap: wrap;
+
+        gap: 10px;
+
+        padding: 10px 12px;
+
+    }
+
+
+    .finova-pagination-left {
+
+        flex-wrap: wrap;
+
+        gap: 6px;
+
+    }
+
+
+    .finova-pagination-info {
+
+        width: 100%;
+
+        margin-left: 0;
+
+        text-align: right;
+
+    }
 
 }
