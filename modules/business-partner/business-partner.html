@@ -73,96 +73,111 @@ Version : 2.0.0
     </div>
 
     <!-- ==========================================
-         TOOLBAR
-    =========================================== -->
+     TOOLBAR
+=========================================== -->
 
-    <div class="finova-card business-partner-filter-card mb-1">
+<div class="finova-card business-partner-filter-card mb-1">
 
-        <div class="finova-card-body">
+    <div class="finova-card-body">
 
-            <div class="row align-items-end g-3">
+        <div class="row align-items-end g-3">
 
-                <!-- Search -->
+            <!-- SEARCH -->
 
-                <div class="col-lg-5">
+            <div class="col-lg-8">
 
-                    <label class="form-label">
-                        Search
-                    </label>
+                <label
+                    for="bp-search"
+                    class="form-label">
 
-                    <input
-                        id="bp-search"
-                        type="text"
-                        class="form-control finova-control"
-                        placeholder="Search Business Partner Name">
+                    Search
 
-                </div>
+                </label>
 
-                <!-- Type -->
+                <input
+                    id="bp-search"
+                    type="text"
+                    class="form-control finova-control"
+                    placeholder="Search Business Partner Name"
+                    autocomplete="off">
 
-                <div class="col-lg-2">
+            </div>
 
-                    <label class="form-label">
-                        Type
-                    </label>
 
-                    <select
-                        id="bp-type"
-                        class="form-select finova-control">
+            <!-- TYPE -->
 
-                        <option value="">
-                            All Type
-                        </option>
+            <div class="col-lg-2">
 
-                        <option value="Customer">
-                            Customer
-                        </option>
+                <label
+                    for="bp-type"
+                    class="form-label">
 
-                        <option value="Vendor">
-                            Vendor
-                        </option>
+                    Type
 
-                        <option value="Employee">
-                            Employee
-                        </option>
+                </label>
 
-                    </select>
+                <select
+                    id="bp-type"
+                    class="form-select finova-control">
 
-                </div>
+                    <option value="">
+                        All Type
+                    </option>
 
-                <!-- Status -->
+                    <option value="Customer">
+                        Customer
+                    </option>
 
-                <div class="col-lg-2">
+                    <option value="Vendor">
+                        Vendor
+                    </option>
 
-                    <label class="form-label">
-                        Status
-                    </label>
+                    <option value="Employee">
+                        Employee
+                    </option>
 
-                    <select
-                        id="bp-status"
-                        class="form-select finova-control">
+                </select>
 
-                        <option value="">
-                            All Status
-                        </option>
+            </div>
 
-                        <option value="true">
-                            Active
-                        </option>
 
-                        <option value="false">
-                            Inactive
-                        </option>
+            <!-- STATUS -->
 
-                    </select>
+            <div class="col-lg-2">
 
-                </div>
+                <label
+                    for="bp-status"
+                    class="form-label">
+
+                    Status
+
+                </label>
+
+                <select
+                    id="bp-status"
+                    class="form-select finova-control">
+
+                    <option value="">
+                        All Status
+                    </option>
+
+                    <option value="true">
+                        Active
+                    </option>
+
+                    <option value="false">
+                        Inactive
+                    </option>
+
+                </select>
 
             </div>
 
         </div>
 
     </div>
+
+</div>
 
     <!-- ==========================================
      DATA TABLE

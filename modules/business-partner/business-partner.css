@@ -9,13 +9,13 @@ TABLE STANDARD :
 GLOBAL TABLE COMPONENT
 
 VISUAL STANDARD :
-GL JOURNAL / TAX MASTER
+CHART OF ACCOUNTS
 
 NOTE :
+- Header aligned with COA
+- Filter aligned with COA
 - Table visual controlled by Global Table CSS
 - Pagination controlled by Global Pagination CSS
-- Filter position aligned with GL Journal
-- No table cell visual override here
 ==========================================================
 */
 
@@ -41,9 +41,11 @@ NOTE :
 
 /* ==========================================================
    PAGE HEADER
+   SAME AS COA
 ========================================================== */
 
-.business-partner-page > .finova-page-header {
+.business-partner-page
+> .finova-page-header {
 
     width: 100%;
 
@@ -58,7 +60,7 @@ NOTE :
 
 /* ==========================================================
    FILTER CARD
-   SAME POSITION STANDARD AS GL JOURNAL
+   SAME AS COA
 ========================================================== */
 
 .business-partner-page
@@ -81,6 +83,7 @@ NOTE :
 
 /* ==========================================================
    FILTER CARD BODY
+   SAME AS COA
 ========================================================== */
 
 .business-partner-filter-card
@@ -88,71 +91,9 @@ NOTE :
 
     width: 100%;
 
-    padding: 10px 20px 6px 20px !important;
+    padding: 8px 20px 8px 20px !important;
 
     box-sizing: border-box;
-
-}
-/* ==========================================================
-   TABLE HEADER
-   ALL COLUMN HEADERS BOLD
-========================================================== */
-
-.business-partner-table-card
-.finova-table
-thead
-th {
-
-    font-weight: 700 !important;
-
-    color: #111827 !important;
-
-}
-
-
-/* ==========================================================
-   TABLE BODY
-   NORMAL WEIGHT - STRONGER TEXT
-========================================================== */
-
-.business-partner-table-card
-.finova-table
-tbody
-td {
-
-    font-weight: 400 !important;
-
-    color: #1F2937 !important;
-
-}
-
-
-/* ==========================================================
-   TABLE BODY CONTENT
-   FORCE NORMAL WEIGHT
-========================================================== */
-
-.business-partner-table-card
-.finova-table
-tbody
-td strong,
-
-.business-partner-table-card
-.finova-table
-tbody
-td b,
-
-.business-partner-table-card
-.finova-table
-tbody
-td .fw-bold,
-
-.business-partner-table-card
-.finova-table
-tbody
-td .fw-semibold {
-
-    font-weight: 400 !important;
 
 }
 
@@ -187,17 +128,18 @@ td .fw-semibold {
 > .row
 > [class*="col-"] {
 
-    box-sizing: border-box;
-
     min-width: 0;
 
     margin: 0;
+
+    box-sizing: border-box;
 
 }
 
 
 /* ==========================================================
    FILTER LABEL
+   SAME AS COA
 ========================================================== */
 
 .business-partner-filter-card
@@ -224,6 +166,7 @@ td .fw-semibold {
 
 /* ==========================================================
    FILTER INPUT & SELECT
+   SAME AS COA
 ========================================================== */
 
 .business-partner-filter-card
@@ -279,7 +222,7 @@ td .fw-semibold {
 
     min-height: 0;
 
-    padding: 0;
+    padding: 0 !important;
 
     overflow: hidden;
 
@@ -333,7 +276,6 @@ td .fw-semibold {
 
 /* ==========================================================
    TABLE
-   VISUAL CONTROLLED BY GLOBAL TABLE CSS
 ========================================================== */
 
 .business-partner-table-card
@@ -350,7 +292,6 @@ td .fw-semibold {
 
 /* ==========================================================
    TABLE HEADER
-   ALL COLUMN HEADERS BOLD
 ========================================================== */
 
 .business-partner-table-card
@@ -367,7 +308,6 @@ th {
 
 /* ==========================================================
    TABLE BODY
-   NORMAL WEIGHT - STRONGER TEXT
 ========================================================== */
 
 .business-partner-table-card
@@ -383,14 +323,28 @@ td {
 
 
 /* ==========================================================
-   TABLE BODY CONTENT
-   FORCE NORMAL WEIGHT
+   REMOVE UNWANTED BOLD IN BODY
 ========================================================== */
 
 .business-partner-table-card
 .finova-table
 tbody
-td * {
+td strong,
+
+.business-partner-table-card
+.finova-table
+tbody
+td b,
+
+.business-partner-table-card
+.finova-table
+tbody
+td .fw-bold,
+
+.business-partner-table-card
+.finova-table
+tbody
+td .fw-semibold {
 
     font-weight: 400 !important;
 
@@ -399,6 +353,7 @@ td * {
 
 /* ==========================================================
    PAGINATION
+   SAME AS COA
 ========================================================== */
 
 .business-partner-table-card
@@ -415,17 +370,51 @@ td * {
 
 
 /* ==========================================================
-   PAGE HEADER ACTION POSITION
-   SAME AS ACCOUNT PAYABLE
+   PAGINATION LEFT
 ========================================================== */
 
-.business-partner-page
-> .finova-page-header
-> .finova-page-header-right {
+.business-partner-table-card
+.finova-pagination-left {
 
-    position: relative;
+    display: flex;
 
-    top: 0;
+    align-items: center;
+
+    gap: 8px;
+
+}
+
+
+/* ==========================================================
+   PAGINATION LABEL
+========================================================== */
+
+.business-partner-table-card
+.finova-pagination-label {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   PAGINATION TOTAL
+========================================================== */
+
+.business-partner-table-card
+.finova-pagination-total {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    min-width: 18px;
+
+    margin-left: 2px;
 
 }
 
@@ -457,7 +446,7 @@ td * {
     .business-partner-filter-card
     > .finova-card-body {
 
-        padding: 8px 16px 12px 16px !important;
+        padding: 8px 16px !important;
 
     }
 

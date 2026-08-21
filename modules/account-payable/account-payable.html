@@ -78,170 +78,147 @@ VERSION : 1.0.0
 </div>
 
     <!-- ==================================================
-         FILTER CARD
-    =================================================== -->
+     FILTER CARD
+=================================================== -->
 
-    <div class="finova-card account-payable-filter-card mb-1">
+<div class="finova-card account-payable-filter-card mb-1">
 
-        <div class="finova-card-body">
+    <div class="finova-card-body">
 
-            <div class="row g-3 align-items-end">
+        <div class="row align-items-end g-3">
+
+            <!-- INVOICE DATE FROM -->
+
+            <div class="col-md-2">
+
+                <label
+                    for="ap-date-from"
+                    class="form-label">
+
+                    Invoice Date From
+
+                </label>
+
+                <input
+                    type="date"
+                    id="ap-date-from"
+                    class="form-control finova-control">
+
+            </div>
 
 
-                <!-- ======================================
-                     INVOICE DATE FROM
-                ======================================= -->
+            <!-- INVOICE DATE TO -->
 
-                <div class="col-md-2">
+            <div class="col-md-2">
 
-                    <label
-                        for="ap-date-from"
-                        class="form-label fw-semibold">
+                <label
+                    for="ap-date-to"
+                    class="form-label">
 
-                        Invoice Date From
+                    Invoice Date To
 
-                    </label>
+                </label>
+
+                <input
+                    type="date"
+                    id="ap-date-to"
+                    class="form-control finova-control">
+
+            </div>
+
+
+            <!-- SHOW -->
+
+            <div class="col-md-2">
+
+                <label
+                    for="ap-status-filter"
+                    class="form-label">
+
+                    Show
+
+                </label>
+
+                <select
+                    id="ap-status-filter"
+                    class="form-select finova-control">
+
+                    <option value="all">
+                        Show All Data
+                    </option>
+
+                    <option value="not_completed">
+                        Show Not Completed Only
+                    </option>
+
+                    <option value="completed">
+                        Show Completed Only
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- FIND BY -->
+
+            <div class="col-md-2">
+
+                <label
+                    for="ap-find-by"
+                    class="form-label">
+
+                    Find By
+
+                </label>
+
+                <select
+                    id="ap-find-by"
+                    class="form-select finova-control">
+
+                    <option value="invoice_no">
+                        Invoice No
+                    </option>
+
+                    <option value="vendor">
+                        Vendor
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- KEYWORD -->
+
+            <div class="col-md-4">
+
+                <label
+                    for="ap-keyword"
+                    class="form-label">
+
+                    Keyword
+
+                </label>
+
+                <div class="input-group">
 
                     <input
-                        type="date"
-                        id="ap-date-from"
-                        class="form-control">
+                        type="text"
+                        id="ap-keyword"
+                        class="form-control finova-control"
+                        placeholder="Search Invoice No or Vendor...">
 
-                </div>
+                    <button
+                        type="button"
+                        id="btn-find-ap"
+                        class="btn btn-primary">
 
+                        <i class="fa-solid fa-magnifying-glass me-1"></i>
 
-                <!-- ======================================
-                     INVOICE DATE TO
-                ======================================= -->
+                        Find
 
-                <div class="col-md-2">
-
-                    <label
-                        for="ap-date-to"
-                        class="form-label fw-semibold">
-
-                        Invoice Date To
-
-                    </label>
-
-                    <input
-                        type="date"
-                        id="ap-date-to"
-                        class="form-control">
-
-                </div>
-
-
-                <!-- ======================================
-                     SHOW
-                ======================================= -->
-
-                <div class="col-md-2">
-
-                    <label
-                        for="ap-status-filter"
-                        class="form-label fw-semibold">
-
-                        Show
-
-                    </label>
-
-                    <select
-                        id="ap-status-filter"
-                        class="form-select">
-
-                        <option value="all">
-
-                            Show All Data
-
-                        </option>
-
-                        <option value="not_completed">
-
-                            Show Not Completed Only
-
-                        </option>
-
-                        <option value="completed">
-
-                            Show Completed Only
-
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-                <!-- ======================================
-                     FIND BY
-                ======================================= -->
-
-                <div class="col-md-2">
-
-                    <label
-                        for="ap-find-by"
-                        class="form-label fw-semibold">
-
-                        Find By
-
-                    </label>
-
-                    <select
-                        id="ap-find-by"
-                        class="form-select">
-
-                        <option value="invoice_no">
-
-                            Invoice No
-
-                        </option>
-
-                        <option value="vendor">
-
-                            Vendor
-
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-                <!-- ======================================
-                     KEYWORD
-                ======================================= -->
-
-                <div class="col-md-4">
-
-                    <label
-                        for="ap-keyword"
-                        class="form-label fw-semibold">
-
-                        Keyword
-
-                    </label>
-
-                    <div class="input-group">
-
-                        <input
-                            type="text"
-                            id="ap-keyword"
-                            class="form-control"
-                            placeholder="Search Invoice No or Vendor...">
-
-                        <button
-                            type="button"
-                            id="btn-find-ap"
-                            class="btn btn-primary">
-
-                            <i class="fa-solid fa-magnifying-glass me-1"></i>
-
-                            Find
-
-                        </button>
-
-                    </div>
+                    </button>
 
                 </div>
 
@@ -250,6 +227,8 @@ VERSION : 1.0.0
         </div>
 
     </div>
+
+</div>
 
 
     <!-- ==================================================

@@ -9,11 +9,13 @@ TABLE STANDARD :
 GLOBAL TABLE COMPONENT
 
 VISUAL STANDARD :
-BP / COA / GL JOURNAL
+BUSINESS PARTNER / CHART OF ACCOUNTS
 
 NOTE :
+- Header aligned with BP / COA
+- Filter aligned with BP / COA
 - Table visual controlled by Global Table CSS
-- Pagination visual controlled by Global Pagination CSS
+- Pagination controlled by Global Pagination CSS
 - AP business status behavior remains here
 ==========================================================
 */
@@ -40,6 +42,7 @@ NOTE :
 
 /* ==========================================================
    PAGE HEADER
+   SAME AS BP / COA
 ========================================================== */
 
 .account-payable-page
@@ -58,6 +61,7 @@ NOTE :
 
 /* ==========================================================
    FILTER CARD
+   SAME AS BP / COA
 ========================================================== */
 
 .account-payable-page
@@ -80,6 +84,7 @@ NOTE :
 
 /* ==========================================================
    FILTER CARD BODY
+   SAME AS BP / COA
 ========================================================== */
 
 .account-payable-filter-card
@@ -87,7 +92,7 @@ NOTE :
 
     width: 100%;
 
-    padding: 8px 20px !important;
+    padding: 8px 20px 8px 20px !important;
 
     box-sizing: border-box;
 
@@ -135,6 +140,7 @@ NOTE :
 
 /* ==========================================================
    FILTER LABEL
+   SAME AS BP / COA
 ========================================================== */
 
 .account-payable-filter-card
@@ -154,11 +160,14 @@ NOTE :
 
     line-height: 1.2;
 
+    text-align: left;
+
 }
 
 
 /* ==========================================================
-   FILTER CONTROL
+   FILTER INPUT & SELECT
+   SAME AS BP / COA
 ========================================================== */
 
 .account-payable-filter-card
@@ -167,32 +176,13 @@ NOTE :
 .account-payable-filter-card
 .form-select {
 
+    width: 100%;
+
     height: 46px !important;
 
     min-height: 46px !important;
 
     box-sizing: border-box;
-
-}
-
-
-/* ==========================================================
-   NORMAL FILTER CONTROL
-========================================================== */
-
-.account-payable-filter-card
-> .finova-card-body
-> .row
-> [class*="col-"]
-> .form-control,
-
-.account-payable-filter-card
-> .finova-card-body
-> .row
-> [class*="col-"]
-> .form-select {
-
-    width: 100%;
 
 }
 
@@ -313,7 +303,7 @@ NOTE :
 
     min-height: 0;
 
-    padding: 0;
+    padding: 0 !important;
 
     overflow: hidden;
 
@@ -331,11 +321,13 @@ NOTE :
 
     flex-direction: column;
 
-    flex: 1 1 0;
+    flex: 1 1 auto;
 
     min-height: 0;
 
     width: 100%;
+
+    height: 100%;
 
     overflow: hidden;
 
@@ -352,7 +344,7 @@ NOTE :
 
     display: block;
 
-    flex: 1 1 0;
+    flex: 1 1 auto;
 
     min-height: 0;
 
@@ -380,9 +372,9 @@ NOTE :
 
 }
 
+
 /* ==========================================================
    TABLE HEADER
-   ALL COLUMN HEADERS BOLD
 ========================================================== */
 
 .account-payable-table-card
@@ -395,6 +387,43 @@ th {
     color: #111827 !important;
 
 }
+
+
+/* ==========================================================
+   TABLE BODY
+========================================================== */
+
+.account-payable-table-card
+.finova-table
+tbody
+td {
+
+    font-weight: 400 !important;
+
+    color: #1F2937 !important;
+
+}
+
+
+/* ==========================================================
+   TABLE NUMBER
+   CENTER ALIGNMENT
+========================================================== */
+
+.account-payable-table-card
+.finova-table
+th:first-child,
+
+.account-payable-table-card
+.finova-table
+td:first-child {
+
+    text-align: center !important;
+
+    vertical-align: middle !important;
+
+}
+
 
 /* ==========================================================
    PAGINATION
@@ -414,6 +443,57 @@ th {
 
 
 /* ==========================================================
+   PAGINATION LEFT
+   SAME AS BP / COA
+========================================================== */
+
+.account-payable-table-card
+.finova-pagination-left {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+}
+
+
+/* ==========================================================
+   PAGINATION LABEL
+========================================================== */
+
+.account-payable-table-card
+.finova-pagination-label {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   PAGINATION TOTAL
+========================================================== */
+
+.account-payable-table-card
+.finova-pagination-total {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    min-width: 18px;
+
+    margin-left: 2px;
+
+}
+
+
+/* ==========================================================
    AP TABLE BODY
 ========================================================== */
 
@@ -426,26 +506,7 @@ th {
 
 /* ==========================================================
    AP ROW STATUS
-   KEEP STATUS BADGE & ACTION BUTTON STYLE
-========================================================== */
-
-
-/* ==========================================================
-   DEFAULT ROW
-========================================================== */
-
-.ap-row-posted,
-.ap-row-draft,
-.ap-row-complete {
-
-    opacity: 1;
-
-}
-
-
-/* ==========================================================
-   AP ROW STATUS
-   SAME VISUAL BEHAVIOR AS GL JOURNAL
+   KEEP NORMAL TABLE APPEARANCE
 ========================================================== */
 
 .ap-row-posted,
@@ -453,14 +514,14 @@ th {
 .ap-row-complete,
 .ap-row-void {
 
-    opacity: 1;
+    opacity: 1 !important;
 
 }
 
 
 /* ==========================================================
    ALL AP STATUS ROW
-   KEEP NORMAL TABLE BACKGROUND
+   NO GREY BACKGROUND
 ========================================================== */
 
 #ap-table-body
@@ -495,16 +556,17 @@ tr.ap-row-complete
 tr.ap-row-void
 > td {
 
+    background: #FFFFFF !important;
+
     background-color: #FFFFFF !important;
 
-    color: inherit;
+    color: inherit !important;
 
 }
 
 
 /* ==========================================================
    STATUS BADGE
-   KEEP GLOBAL BADGE STYLE
 ========================================================== */
 
 #ap-table-body
@@ -517,7 +579,6 @@ tr.ap-row-void
 
 /* ==========================================================
    ACTION BUTTON
-   KEEP GLOBAL BUTTON STYLE
 ========================================================== */
 
 #ap-table-body
@@ -544,24 +605,6 @@ tr.ap-row-void
     }
 
 }
-/* ==========================================================
-   AP TABLE NUMBER
-   CENTER ALIGNMENT
-========================================================== */
-
-.account-payable-table-card
-.finova-table
-th:first-child,
-
-.account-payable-table-card
-.finova-table
-td:first-child {
-
-    text-align: center !important;
-
-    vertical-align: middle !important;
-
-}
 
 
 /* ==========================================================
@@ -579,68 +622,7 @@ td:first-child {
 
 }
 
-/* ==========================================================
-   FINAL AP ROW BACKGROUND OVERRIDE
-   SAME AS GL JOURNAL
-========================================================== */
-
-#ap-table-body
-tr.ap-row-complete
-> td,
-
-#ap-table-body
-tr[data-status="complete"]
-> td,
-
-#ap-table-body
-tr.ap-row-posted
-> td,
-
-#ap-table-body
-tr[data-status="posted"]
-> td,
-
-#ap-table-body
-tr.ap-row-draft
-> td,
-
-#ap-table-body
-tr[data-status="draft"]
-> td,
-
-#ap-table-body
-tr.ap-row-void
-> td,
-
-#ap-table-body
-tr[data-status="void"]
-> td {
-
-    background: #FFFFFF !important;
-
-    background-color: #FFFFFF !important;
-
-    color: inherit !important;
-
-}
-
 
 /* ==========================================================
-   REMOVE ROW OPACITY
+   END ACCOUNT PAYABLE CSS
 ========================================================== */
-
-#ap-table-body
-tr.ap-row-complete,
-
-#ap-table-body
-tr.ap-row-posted,
-
-#ap-table-body
-tr.ap-row-draft,
-
-#ap-table-body
-tr.ap-row-void {
-
-    opacity: 1 !important;
-
-}
