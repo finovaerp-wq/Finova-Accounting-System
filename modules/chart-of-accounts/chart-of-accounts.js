@@ -1403,7 +1403,7 @@ renderPagination() {
     }
 
 
-    /*
+ /*
 ======================================================
 TOTAL PAGES
 ======================================================
@@ -1412,7 +1412,7 @@ TOTAL PAGES
 if (totalPagesElement) {
 
     totalPagesElement.textContent =
-        `of ${totalPages}`;
+        totalPages;
 
 }
 

@@ -951,9 +951,7 @@ renderTable(data) {
        UPDATE UI
     ========================================== */
 
-    this.renderPagination();
-
-    this.updatePaginationInfo();
+    this.updatePagination();
 
 }
 /*
@@ -1367,25 +1365,21 @@ renderRow(item, index) {
 
         <tr>
 
-            <td>${index + 1}</td>
+           <td>${index + 1}</td>
 
-            <td style="font-weight: 700; color: #000000;">
+<td>
     ${item.bp_code}
 </td>
 
 <td
     class="bp-name-link"
     data-id="${item.id}"
-    style="
-        font-weight: 700 !important;
-        color: #000000 !important;
-        cursor: pointer;
-    "
+    style="cursor: pointer;"
 >
     ${item.bp_name}
 </td>
 
-            <td>${item.bp_type}</td>
+<td>${item.bp_type}</td>
 
             <td>${item.phone || "-"}</td>
 

@@ -5169,17 +5169,17 @@ updatePagination() {
     }
 
     /*
-    ======================================================
-    TOTAL PAGE LABEL
-    ======================================================
-    */
+======================================================
+TOTAL PAGE LABEL
+======================================================
+*/
 
-    if (this.totalPageLabel) {
+if (this.totalPageLabel) {
 
-        this.totalPageLabel.textContent =
-            `of ${this.totalPages}`;
+    this.totalPageLabel.textContent =
+        this.totalPages;
 
-    }
+}
 
     /*
     ======================================================

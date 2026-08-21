@@ -950,7 +950,34 @@ td:nth-child(9)
     height: auto !important;
 
 }
+/* ==========================================================
+   TABLE HEADER
+   ALL COLUMN HEADERS BOLD
+========================================================== */
 
+#gl-journal-table
+thead
+th {
+
+    font-weight: 700 !important;
+
+    color: #111827 !important;
+
+}
+/* ==========================================================
+   TABLE BODY
+   NORMAL WEIGHT - STRONGER TEXT
+========================================================== */
+
+#gl-journal-table
+tbody
+td {
+
+    font-weight: 400 !important;
+
+    color: #1F2937 !important;
+
+}
 
 /* ==========================================================
    PAGINATION

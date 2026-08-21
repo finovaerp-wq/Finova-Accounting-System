@@ -380,6 +380,21 @@ NOTE :
 
 }
 
+/* ==========================================================
+   TABLE HEADER
+   ALL COLUMN HEADERS BOLD
+========================================================== */
+
+.account-payable-table-card
+.finova-table
+thead
+th {
+
+    font-weight: 700 !important;
+
+    color: #111827 !important;
+
+}
 
 /* ==========================================================
    PAGINATION

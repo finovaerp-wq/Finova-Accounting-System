@@ -283,6 +283,62 @@ NOTE :
     vertical-align: middle;
 
 }
+/* ==========================================================
+   TABLE HEADER
+   ALL COLUMN HEADERS BOLD
+========================================================== */
+
+.coa-table-card
+.finova-table
+thead
+th {
+
+    font-weight: 700 !important;
+
+}
+/* ==========================================================
+   TABLE BODY
+   NORMAL WEIGHT - STRONGER TEXT
+========================================================== */
+
+.coa-table-card
+.finova-table
+tbody
+td {
+
+    font-weight: 400 !important;
+
+    color: #1F2937 !important;
+
+}
+/* ==========================================================
+   TABLE BODY CONTENT
+   REMOVE UNWANTED BOLD
+========================================================== */
+
+.coa-table-card
+.finova-table
+tbody
+td strong,
+
+.coa-table-card
+.finova-table
+tbody
+td b,
+
+.coa-table-card
+.finova-table
+tbody
+td .fw-bold,
+
+.coa-table-card
+.finova-table
+tbody
+td .fw-semibold {
+
+    font-weight: 400 !important;
+
+}
 
 
 /* ==========================================================
@@ -336,7 +392,52 @@ NOTE :
 
 }
 
+/* ==========================================================
+   COA PAGINATION
+   SPACING SAME AS BUSINESS PARTNER
+========================================================== */
+
+.coa-table-card
+.finova-pagination-left {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+}
+
 
 /* ==========================================================
-   END CHART OF ACCOUNTS CSS
+   PAGINATION LABEL
 ========================================================== */
+
+.coa-table-card
+.finova-pagination-label {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   TOTAL PAGE
+========================================================== */
+
+.coa-table-card
+.finova-pagination-total {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    min-width: 18px;
+
+    margin-left: 2px;
+
+}
