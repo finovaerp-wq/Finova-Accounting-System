@@ -2,21 +2,7 @@
 ==========================================================
 FINOVA ACCOUNTING SYSTEM
 MODULE : GENERAL JOURNAL
-
-Version : 2.1 Enterprise
-
-TABLE STANDARD :
-GLOBAL TABLE COMPONENT
-
-VISUAL STANDARD :
-BUSINESS PARTNER / CHART OF ACCOUNTS
-
-NOTE :
-- Header aligned with BP / COA
-- Filter aligned with BP / COA
-- Table visual controlled by Global Table CSS
-- Pagination controlled by Global Pagination CSS
-- GL Journal Action remains module specific
+Version : 2.2 Enterprise
 ==========================================================
 */
 
@@ -42,7 +28,6 @@ NOTE :
 
 /* ==========================================================
    PAGE HEADER
-   SAME AS BP / COA
 ========================================================== */
 
 .gl-journal-page
@@ -61,7 +46,6 @@ NOTE :
 
 /* ==========================================================
    FILTER CARD
-   SAME AS BP / COA
 ========================================================== */
 
 .gl-journal-page
@@ -84,7 +68,6 @@ NOTE :
 
 /* ==========================================================
    FILTER CARD BODY
-   SAME AS BP / COA
 ========================================================== */
 
 .gl-journal-filter-card
@@ -140,7 +123,6 @@ NOTE :
 
 /* ==========================================================
    FILTER LABEL
-   SAME AS BP / COA
 ========================================================== */
 
 .gl-journal-filter-card
@@ -167,7 +149,6 @@ NOTE :
 
 /* ==========================================================
    FILTER INPUT & SELECT
-   SAME AS BP / COA
 ========================================================== */
 
 .gl-journal-filter-card
@@ -456,7 +437,7 @@ td:nth-child(3) {
 
 
 /* ==========================================================
-   4. SOURCE
+   4. AP INVOICE NO
 ========================================================== */
 
 #gl-journal-table
@@ -464,6 +445,48 @@ th:nth-child(4),
 
 #gl-journal-table
 td:nth-child(4) {
+
+    width: 135px;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+}
+
+
+/* ==========================================================
+   5. PO NO
+========================================================== */
+
+#gl-journal-table
+th:nth-child(5),
+
+#gl-journal-table
+td:nth-child(5) {
+
+    width: 140px;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+}
+
+
+/* ==========================================================
+   6. SOURCE
+========================================================== */
+
+#gl-journal-table
+th:nth-child(6),
+
+#gl-journal-table
+td:nth-child(6) {
 
     width: 65px;
 
@@ -475,43 +498,7 @@ td:nth-child(4) {
 
 
 /* ==========================================================
-   5. DESCRIPTION
-========================================================== */
-
-#gl-journal-table
-th:nth-child(5),
-
-#gl-journal-table
-td:nth-child(5) {
-
-    width: auto;
-
-    min-width: 0;
-
-}
-
-
-/* ==========================================================
-   6. TOTAL DEBIT
-========================================================== */
-
-#gl-journal-table
-th:nth-child(6),
-
-#gl-journal-table
-td:nth-child(6) {
-
-    width: 115px;
-
-    text-align: right;
-
-    white-space: nowrap;
-
-}
-
-
-/* ==========================================================
-   7. TOTAL CREDIT
+   7. DESCRIPTION
 ========================================================== */
 
 #gl-journal-table
@@ -520,6 +507,29 @@ th:nth-child(7),
 #gl-journal-table
 td:nth-child(7) {
 
+    width: auto;
+
+    min-width: 0;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   8. TOTAL DEBIT
+========================================================== */
+
+#gl-journal-table
+th:nth-child(8),
+
+#gl-journal-table
+td:nth-child(8) {
+
     width: 115px;
 
     text-align: right;
@@ -530,14 +540,33 @@ td:nth-child(7) {
 
 
 /* ==========================================================
-   8. STATUS
+   9. TOTAL CREDIT
 ========================================================== */
 
 #gl-journal-table
-th:nth-child(8),
+th:nth-child(9),
 
 #gl-journal-table
-td:nth-child(8) {
+td:nth-child(9) {
+
+    width: 115px;
+
+    text-align: right;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   10. STATUS
+========================================================== */
+
+#gl-journal-table
+th:nth-child(10),
+
+#gl-journal-table
+td:nth-child(10) {
 
     width: 85px;
 
@@ -549,14 +578,14 @@ td:nth-child(8) {
 
 
 /* ==========================================================
-   9. ACTION
+   11. ACTION
 ========================================================== */
 
 #gl-journal-table
-th:nth-child(9),
+th:nth-child(11),
 
 #gl-journal-table
-td:nth-child(9) {
+td:nth-child(11) {
 
     width: 180px;
 
@@ -579,7 +608,6 @@ td:nth-child(9) {
 
 /* ==========================================================
    TABLE HEADER
-   SAME AS BP / COA
 ========================================================== */
 
 #gl-journal-table
@@ -595,7 +623,6 @@ th {
 
 /* ==========================================================
    TABLE BODY
-   SAME AS BP / COA
 ========================================================== */
 
 #gl-journal-table
@@ -627,7 +654,7 @@ tr {
 ========================================================== */
 
 #gl-journal-table
-td:nth-child(9) {
+td:nth-child(11) {
 
     text-align: center !important;
 
@@ -641,7 +668,7 @@ td:nth-child(9) {
 ========================================================== */
 
 #gl-journal-table
-td:nth-child(9)
+td:nth-child(11)
 .btn-group {
 
     display: inline-flex !important;
@@ -681,7 +708,7 @@ td:nth-child(9)
 ========================================================== */
 
 #gl-journal-table
-td:nth-child(9)
+td:nth-child(11)
 .btn-group
 .btn {
 
@@ -721,7 +748,7 @@ td:nth-child(9)
 ========================================================== */
 
 #gl-journal-table
-td:nth-child(9)
+td:nth-child(11)
 .btn-group
 .btn i {
 
@@ -939,7 +966,7 @@ td:nth-child(9)
 ========================================================== */
 
 #gl-journal-table
-td:nth-child(9)
+td:nth-child(11)
 .btn-group
 .btn:hover {
 
@@ -956,7 +983,7 @@ td:nth-child(9)
 ========================================================== */
 
 #gl-journal-table
-td:nth-child(9)
+td:nth-child(11)
 .btn-group
 .btn:active {
 
@@ -973,7 +1000,7 @@ td:nth-child(9)
 ========================================================== */
 
 #gl-journal-table
-td:nth-child(9)
+td:nth-child(11)
 .btn-group
 .btn:focus-visible {
 
@@ -989,12 +1016,12 @@ td:nth-child(9)
 ========================================================== */
 
 #gl-journal-table
-td:nth-child(9)
+td:nth-child(11)
 .btn-group
 .btn:disabled,
 
 #gl-journal-table
-td:nth-child(9)
+td:nth-child(11)
 .btn-group
 .btn.disabled {
 
@@ -1011,7 +1038,6 @@ td:nth-child(9)
 
 /* ==========================================================
    PAGINATION
-   SAME AS BP / COA
 ========================================================== */
 
 .gl-journal-page
@@ -1123,58 +1149,64 @@ td:nth-child(9)
     }
 
 }
+
+
 /* ==========================================================
    DELETE JOURNAL CONFIRMATION
    FIX LONG DESCRIPTION OVERFLOW
 ========================================================== */
 
-/*
-MODAL CONTENT
-*/
+.modal
+.modal-content {
 
-.modal .modal-content {
     min-width: 0;
+
     max-width: 100%;
+
 }
 
 
-/*
-TABLE INSIDE CONFIRMATION MODAL
-*/
+.modal
+.modal-body
+table {
 
-.modal .modal-body table {
     width: 100% !important;
+
     max-width: 100% !important;
 
     table-layout: fixed !important;
 
     margin: 0 !important;
+
 }
 
 
-/*
-LABEL COLUMN
-*/
+.modal
+.modal-body
+table th,
 
-.modal .modal-body table th,
-.modal .modal-body table td:first-child {
+.modal
+.modal-body
+table td:first-child {
 
     width: 92px !important;
+
     max-width: 92px !important;
 
     white-space: normal !important;
 
     vertical-align: top !important;
+
 }
 
 
-/*
-VALUE COLUMN
-*/
-
-.modal .modal-body table td:not(:first-child) {
+.modal
+.modal-body
+table
+td:not(:first-child) {
 
     width: auto !important;
+
     max-width: 0 !important;
 
     white-space: normal !important;
@@ -1188,14 +1220,15 @@ VALUE COLUMN
     word-break: break-all !important;
 
     vertical-align: top !important;
+
 }
 
 
-/*
-FORCE ALL TEXT INSIDE VALUE CELL TO WRAP
-*/
-
-.modal .modal-body table td:not(:first-child) * {
+.modal
+.modal-body
+table
+td:not(:first-child)
+* {
 
     max-width: 100% !important;
 
@@ -1204,14 +1237,15 @@ FORCE ALL TEXT INSIDE VALUE CELL TO WRAP
     overflow-wrap: anywhere !important;
 
     word-break: break-all !important;
+
 }
 
 
-/*
-DESCRIPTION ROW
-*/
-
-.modal .modal-body table tr:last-child td {
+.modal
+.modal-body
+table
+tr:last-child
+td {
 
     white-space: normal !important;
 
@@ -1222,13 +1256,11 @@ DESCRIPTION ROW
 }
 
 
-/*
-MODAL BODY
-*/
-
-.modal .modal-body {
+.modal
+.modal-body {
 
     min-width: 0;
 
     overflow-x: hidden !important;
+
 }

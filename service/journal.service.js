@@ -419,7 +419,23 @@ header.source_module ??=
 header.source_document_type ??=
     "MANUAL_JOURNAL";
 
+
 header.source_document_id ??=
+    null;
+
+
+/*
+======================================================
+SOURCE DOCUMENT REFERENCE
+AP / AR / OTHER MODULE
+======================================================
+*/
+
+header.source_invoice_no ??=
+    null;
+
+
+header.source_po_no ??=
     null;
 
         /*
