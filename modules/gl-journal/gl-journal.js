@@ -2138,43 +2138,47 @@ createTableRow(
                 ${journal.journal_no ?? "-"}
 
             </td>
+
+
             <!-- ==========================================
-AP INVOICE NO
-=========================================== -->
+                 AP INVOICE NO
+            =========================================== -->
 
-<td>
+            <td>
 
-    ${
-        journal.source_module === "AP"
-            ? journal.source_invoice_no || "-"
-            : "-"
-    }
+                ${
+                    journal.source_module === "AP"
+                        ? journal.source_invoice_no || "-"
+                        : "-"
+                }
 
-</td>
+            </td>
 
 
-<!-- ==========================================
-PO NO
-=========================================== -->
-
-<td>
-
-    ${
-        journal.source_module === "AP"
-            ? journal.source_po_no || "-"
-            : "-"
-    }
-
-</td>
             <!-- ==========================================
-                SOURCE
+                 PO NO
+            =========================================== -->
+
+            <td>
+
+                ${
+                    journal.source_module === "AP"
+                        ? journal.source_po_no || "-"
+                        : "-"
+                }
+
+            </td>
+
+
+            <!-- ==========================================
+                 SOURCE
             =========================================== -->
 
             <td class="text-center">
 
                 ${this.renderSourceBadge(journal)}
 
-                </td>
+            </td>
 
 
             <!-- ==========================================
@@ -2195,11 +2199,9 @@ PO NO
             <td class="finova-table-number">
 
                 ${this.formatCurrency(
-
                     Number(
                         journal.total_debit ?? 0
                     )
-
                 )}
 
             </td>
@@ -2212,11 +2214,9 @@ PO NO
             <td class="finova-table-number">
 
                 ${this.formatCurrency(
-
                     Number(
                         journal.total_credit ?? 0
                     )
-
                 )}
 
             </td>
@@ -2229,9 +2229,7 @@ PO NO
             <td class="finova-table-status">
 
                 ${this.renderStatusBadge(
-
                     journal.status
-
                 )}
 
             </td>
@@ -2243,11 +2241,31 @@ PO NO
 
             <td class="finova-table-action">
 
-                ${this.renderActionButtons(
+                <div class="dropdown gl-action-dropdown">
 
-                    journal
+                    <button
+                        type="button"
+                        class="btn btn-sm btn-outline-secondary gl-action-trigger"
+                        data-bs-toggle="dropdown"
+                        data-bs-auto-close="outside"
+                        aria-expanded="false"
+                        title="Actions">
 
-                )}
+                        <i class="fa-solid fa-gear"></i>
+
+                    </button>
+
+
+                    <div
+                        class="dropdown-menu dropdown-menu-end gl-action-menu">
+
+                        ${this.renderActionButtons(
+                            journal
+                        )}
+
+                    </div>
+
+                </div>
 
             </td>
 
@@ -2416,16 +2434,20 @@ renderStatusBadge(status) {
 /*
 ==========================================================
 RENDER ACTION BUTTONS
+DROPDOWN MENU
 ==========================================================
 */
 
 renderActionButtons(journal) {
 
     const status =
-        (journal.status || "")
-            .toString()
-            .trim()
-            .toLowerCase();
+        String(
+            journal.status
+            || ""
+        )
+        .trim()
+        .toLowerCase();
+
 
     /*
     ======================================================
@@ -2433,68 +2455,78 @@ renderActionButtons(journal) {
     ======================================================
     */
 
-    if (status === "draft") {
+    if (
+        status === "draft"
+    ) {
 
         return `
 
-            <div class="btn-group btn-group-sm">
+            <button
+                type="button"
+                class="dropdown-item btn-edit-journal"
+                data-id="${journal.id}">
 
-                <button
-                    type="button"
-                    class="btn btn-outline-primary btn-edit-journal"
-                    data-id="${journal.id}"
-                    title="Edit">
+                <i class="fa-solid fa-pen me-2"></i>
 
-                    <i class="fa-solid fa-pen"></i>
+                Edit
 
-                </button>
+            </button>
 
-                <button
-                    type="button"
-                    class="btn btn-outline-danger btn-delete-journal"
-                    data-id="${journal.id}"
-                    title="Delete">
 
-                    <i class="fa-solid fa-trash"></i>
+            <button
+                type="button"
+                class="dropdown-item btn-post-journal"
+                data-id="${journal.id}">
 
-                </button>
+                <i class="fa-solid fa-upload me-2"></i>
 
-                <button
-                    type="button"
-                    class="btn btn-outline-success btn-post-journal"
-                    data-id="${journal.id}"
-                    title="Post">
+                Post
 
-                    <i class="fa-solid fa-upload"></i>
+            </button>
 
-                </button>
 
-                <button
-                    type="button"
-                    class="btn btn-outline-secondary btn-duplicate-journal"
-                    data-id="${journal.id}"
-                    title="Duplicate">
+            <button
+                type="button"
+                class="dropdown-item btn-voucher-journal"
+                data-id="${journal.id}">
 
-                    <i class="fa-solid fa-copy"></i>
+                <i class="fa-solid fa-file-lines me-2"></i>
 
-                </button>
-                </button>
+                Voucher
 
-                <button
-                    type="button"
-                    class="btn btn-outline-info btn-voucher-journal"
-                    data-id="${journal.id}"
-                    title="Voucher">
+            </button>
 
-                    <i class="fa-solid fa-file-lines"></i>
 
-                </button>
+            <button
+                type="button"
+                class="dropdown-item btn-duplicate-journal"
+                data-id="${journal.id}">
 
-            </div>
+                <i class="fa-solid fa-copy me-2"></i>
+
+                Duplicate
+
+            </button>
+
+
+            <div class="dropdown-divider"></div>
+
+
+            <button
+                type="button"
+                class="dropdown-item text-danger btn-delete-journal"
+                data-id="${journal.id}">
+
+                <i class="fa-solid fa-trash me-2"></i>
+
+                Delete
+
+            </button>
 
         `;
 
     }
+
 
     /*
     ======================================================
@@ -2502,129 +2534,167 @@ renderActionButtons(journal) {
     ======================================================
     */
 
-    if (status === "posted") {
+    if (
+        status === "posted"
+    ) {
 
         return `
 
-            <div class="btn-group btn-group-sm">
+            <button
+                type="button"
+                class="dropdown-item btn-view-journal"
+                data-id="${journal.id}">
 
-                <button
-                    type="button"
-                    class="btn btn-outline-secondary btn-view-journal"
-                    data-id="${journal.id}"
-                    title="View">
+                <i class="fa-solid fa-eye me-2"></i>
 
-                    <i class="fa-solid fa-eye"></i>
+                View
 
-                </button>
+            </button>
 
-                <button
-                    type="button"
-                    class="btn btn-outline-info btn-voucher-journal"
-                    data-id="${journal.id}"
-                    title="Voucher">
 
-                    <i class="fa-solid fa-file-lines"></i>
+            <button
+                type="button"
+                class="dropdown-item btn-voucher-journal"
+                data-id="${journal.id}">
 
-                </button>
+                <i class="fa-solid fa-file-lines me-2"></i>
 
-                <button
-                    type="button"
-                    class="btn btn-outline-dark btn-void-journal"
-                    data-id="${journal.id}"
-                    title="Void">
+                Voucher
 
-                    <i class="fa-solid fa-ban"></i>
+            </button>
 
-                </button>
 
-                <button
-                    type="button"
-                    class="btn btn-outline-secondary btn-duplicate-journal"
-                    data-id="${journal.id}"
-                    title="Duplicate">
+            <button
+                type="button"
+                class="dropdown-item btn-duplicate-journal"
+                data-id="${journal.id}">
 
-                    <i class="fa-solid fa-copy"></i>
+                <i class="fa-solid fa-copy me-2"></i>
 
-                </button>
+                Duplicate
 
-            </div>
+            </button>
+
+
+            <div class="dropdown-divider"></div>
+
+
+            <button
+                type="button"
+                class="dropdown-item text-danger btn-void-journal"
+                data-id="${journal.id}">
+
+                <i class="fa-solid fa-ban me-2"></i>
+
+                Void
+
+            </button>
 
         `;
 
     }
 
-    /*
-==========================================================
-VOID
-SAME ACTION AS DRAFT
-==========================================================
-*/
 
-if (status === "void") {
+    /*
+    ======================================================
+    VOID
+    ======================================================
+    */
+
+    if (
+        status === "void"
+    ) {
+
+        return `
+
+            <button
+                type="button"
+                class="dropdown-item btn-edit-journal"
+                data-id="${journal.id}">
+
+                <i class="fa-solid fa-pen me-2"></i>
+
+                Edit
+
+            </button>
+
+
+            <button
+                type="button"
+                class="dropdown-item btn-post-journal"
+                data-id="${journal.id}">
+
+                <i class="fa-solid fa-upload me-2"></i>
+
+                Post
+
+            </button>
+
+
+            <button
+                type="button"
+                class="dropdown-item btn-voucher-journal"
+                data-id="${journal.id}">
+
+                <i class="fa-solid fa-file-lines me-2"></i>
+
+                Voucher
+
+            </button>
+
+
+            <button
+                type="button"
+                class="dropdown-item btn-duplicate-journal"
+                data-id="${journal.id}">
+
+                <i class="fa-solid fa-copy me-2"></i>
+
+                Duplicate
+
+            </button>
+
+
+            <div class="dropdown-divider"></div>
+
+
+            <button
+                type="button"
+                class="dropdown-item text-danger btn-delete-journal"
+                data-id="${journal.id}">
+
+                <i class="fa-solid fa-trash me-2"></i>
+
+                Delete
+
+            </button>
+
+        `;
+
+    }
+
+
+    /*
+    ======================================================
+    FALLBACK
+    ======================================================
+    */
 
     return `
-        <div class="btn-group btn-group-sm">
 
-            <!-- EDIT -->
-            <button
-                type="button"
-                class="btn btn-outline-primary btn-edit-journal"
-                data-id="${journal.id}"
-                title="Edit">
+        <button
+            type="button"
+            class="dropdown-item btn-view-journal"
+            data-id="${journal.id}">
 
-                <i class="fa-solid fa-pen"></i>
+            <i class="fa-solid fa-eye me-2"></i>
 
-            </button>
+            View
 
-            <!-- DELETE -->
-            <button
-                type="button"
-                class="btn btn-outline-danger btn-delete-journal"
-                data-id="${journal.id}"
-                title="Delete">
+        </button>
 
-                <i class="fa-solid fa-trash"></i>
-
-            </button>
-
-            <!-- POST -->
-            <button
-                type="button"
-                class="btn btn-outline-success btn-post-journal"
-                data-id="${journal.id}"
-                title="Post">
-
-                <i class="fa-solid fa-upload"></i>
-
-            </button>
-
-            <!-- DUPLICATE -->
-            <button
-                type="button"
-                class="btn btn-outline-secondary btn-duplicate-journal"
-                data-id="${journal.id}"
-                title="Duplicate">
-
-                <i class="fa-solid fa-copy"></i>
-
-            </button>
-
-            <!-- VOUCHER -->
-            <button
-                type="button"
-                class="btn btn-outline-info btn-voucher-journal"
-                data-id="${journal.id}"
-                title="Voucher">
-
-                <i class="fa-solid fa-file-lines"></i>
-
-            </button>
-
-        </div>
     `;
 
-}
 }
 /*
 ==========================================================

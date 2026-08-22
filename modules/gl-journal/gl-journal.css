@@ -2,7 +2,7 @@
 ==========================================================
 FINOVA ACCOUNTING SYSTEM
 MODULE : GENERAL JOURNAL
-Version : 2.2 Enterprise
+Version : 2.3 Enterprise
 ==========================================================
 */
 
@@ -502,20 +502,46 @@ td:nth-child(6) {
 ========================================================== */
 
 #gl-journal-table
-th:nth-child(7),
+th:nth-child(7) {
+
+    width: auto;
+
+    min-width: 180px;
+
+    text-align: left;
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION BODY
+   SHOW FULL DESCRIPTION
+========================================================== */
 
 #gl-journal-table
 td:nth-child(7) {
 
     width: auto;
 
-    min-width: 0;
+    min-width: 180px;
 
-    overflow: hidden;
+    text-align: left;
 
-    text-overflow: ellipsis;
+    white-space: normal !important;
 
-    white-space: nowrap;
+    overflow: visible !important;
+
+    text-overflow: clip !important;
+
+    overflow-wrap: anywhere !important;
+
+    word-wrap: break-word !important;
+
+    word-break: break-word !important;
+
+    line-height: 1.45 !important;
+
+    vertical-align: middle !important;
 
 }
 
@@ -587,9 +613,9 @@ th:nth-child(11),
 #gl-journal-table
 td:nth-child(11) {
 
-    width: 180px;
+    width: 70px;
 
-    max-width: 180px;
+    max-width: 70px;
 
     padding-left: 6px !important;
 
@@ -601,7 +627,7 @@ td:nth-child(11) {
 
     white-space: nowrap;
 
-    overflow: hidden;
+    overflow: visible !important;
 
 }
 
@@ -629,9 +655,13 @@ th {
 tbody
 td {
 
+    height: auto !important;
+
     font-weight: 400 !important;
 
     color: #1F2937 !important;
+
+    vertical-align: middle;
 
 }
 
@@ -646,6 +676,8 @@ tr {
 
     height: auto !important;
 
+    min-height: 0 !important;
+
 }
 
 
@@ -656,6 +688,8 @@ tr {
 #gl-journal-table
 td:nth-child(11) {
 
+    position: relative;
+
     text-align: center !important;
 
     vertical-align: middle !important;
@@ -664,101 +698,64 @@ td:nth-child(11) {
 
 
 /* ==========================================================
-   ACTION TOOLBAR
+   ACTION DROPDOWN
 ========================================================== */
 
 #gl-journal-table
-td:nth-child(11)
-.btn-group {
+.gl-action-dropdown {
 
-    display: inline-flex !important;
+    position: relative;
 
-    align-items: center;
-
-    justify-content: center;
-
-    flex-wrap: nowrap;
-
-    width: auto;
-
-    max-width: 100%;
-
-    padding: 3px;
-
-    margin: 0 auto;
-
-    gap: 3px;
-
-    background: #F8FAFC;
-
-    border: 1px solid #E2E8F0;
-
-    border-radius: 9px;
-
-    box-sizing: border-box;
-
-    box-shadow:
-        0 1px 4px rgba(15, 23, 42, .06);
+    display: inline-block;
 
 }
 
 
 /* ==========================================================
-   ACTION BUTTON
+   ACTION TRIGGER
 ========================================================== */
 
 #gl-journal-table
-td:nth-child(11)
-.btn-group
-.btn {
+.gl-action-trigger {
 
     display: inline-flex !important;
 
-    align-items: center;
+    align-items: center !important;
 
-    justify-content: center;
+    justify-content: center !important;
 
-    flex: 0 0 27px !important;
+    width: 32px !important;
 
-    width: 27px !important;
+    min-width: 32px !important;
 
-    min-width: 27px !important;
+    max-width: 32px !important;
 
-    max-width: 27px !important;
+    height: 32px !important;
 
-    height: 27px !important;
-
-    min-height: 27px !important;
+    min-height: 32px !important;
 
     padding: 0 !important;
 
     margin: 0 !important;
 
-    border-radius: 6px !important;
+    border-radius: 7px !important;
 
     line-height: 1;
-
-    box-sizing: border-box;
 
 }
 
 
 /* ==========================================================
-   ACTION ICON
+   ACTION TRIGGER ICON
 ========================================================== */
 
 #gl-journal-table
-td:nth-child(11)
-.btn-group
-.btn i {
-
-    width: auto;
-
-    height: auto;
+.gl-action-trigger
+i {
 
     margin: 0 !important;
 
-    font-size: 11px;
+    font-size: 13px;
 
     line-height: 1;
 
@@ -766,272 +763,225 @@ td:nth-child(11)
 
 
 /* ==========================================================
-   EDIT
+   ACTION MENU
 ========================================================== */
 
 #gl-journal-table
+.gl-action-menu {
+
+    min-width: 165px;
+
+    padding: 6px;
+
+    border-radius: 9px;
+
+    border: 1px solid #E2E8F0;
+
+    box-shadow:
+        0 10px 24px rgba(15, 23, 42, .14);
+
+}
+
+
+/* ==========================================================
+   ACTION MENU ITEM
+========================================================== */
+
+#gl-journal-table
+.gl-action-menu
+.dropdown-item {
+
+    display: flex;
+
+    align-items: center;
+
+    width: 100%;
+
+    min-height: 36px;
+
+    padding: 7px 10px;
+
+    border: 0;
+
+    border-radius: 6px;
+
+    background: transparent;
+
+    font-size: 13px;
+
+    font-weight: 500;
+
+    text-align: left;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   ACTION MENU ICON
+========================================================== */
+
+#gl-journal-table
+.gl-action-menu
+.dropdown-item
+i {
+
+    flex: 0 0 18px;
+
+    width: 18px;
+
+    margin-right: 8px !important;
+
+    text-align: center;
+
+}
+
+
+/* ==========================================================
+   ACTION DIVIDER
+========================================================== */
+
+#gl-journal-table
+.gl-action-menu
+.dropdown-divider {
+
+    margin: 5px 0;
+
+}
+
+
+/* ==========================================================
+   DROPDOWN ACTION COLORS
+========================================================== */
+
+#gl-journal-table
+.gl-action-menu
 .btn-edit-journal {
 
     color: #2563EB;
 
-    background: #EFF6FF !important;
-
-    border-color: #BFDBFE !important;
-
 }
 
 
 #gl-journal-table
-.btn-edit-journal:hover {
-
-    color: #FFFFFF;
-
-    background: #2563EB !important;
-
-    border-color: #2563EB !important;
-
-}
-
-
-/* ==========================================================
-   DELETE
-========================================================== */
-
-#gl-journal-table
-.btn-delete-journal {
-
-    color: #DC2626;
-
-    background: #FEF2F2 !important;
-
-    border-color: #FECACA !important;
-
-}
-
-
-#gl-journal-table
-.btn-delete-journal:hover {
-
-    color: #FFFFFF;
-
-    background: #DC2626 !important;
-
-    border-color: #DC2626 !important;
-
-}
-
-
-/* ==========================================================
-   POST
-========================================================== */
-
-#gl-journal-table
+.gl-action-menu
 .btn-post-journal {
 
     color: #16A34A;
 
-    background: #F0FDF4 !important;
-
-    border-color: #BBF7D0 !important;
-
 }
 
 
 #gl-journal-table
-.btn-post-journal:hover {
-
-    color: #FFFFFF;
-
-    background: #16A34A !important;
-
-    border-color: #16A34A !important;
-
-}
-
-
-/* ==========================================================
-   DUPLICATE
-========================================================== */
-
-#gl-journal-table
-.btn-duplicate-journal {
-
-    color: #64748B;
-
-    background: #F8FAFC !important;
-
-    border-color: #CBD5E1 !important;
-
-}
-
-
-#gl-journal-table
-.btn-duplicate-journal:hover {
-
-    color: #FFFFFF;
-
-    background: #64748B !important;
-
-    border-color: #64748B !important;
-
-}
-
-
-/* ==========================================================
-   VOUCHER
-========================================================== */
-
-#gl-journal-table
+.gl-action-menu
 .btn-voucher-journal {
 
     color: #0891B2;
 
-    background: #ECFEFF !important;
-
-    border-color: #A5F3FC !important;
-
 }
 
 
 #gl-journal-table
-.btn-voucher-journal:hover {
-
-    color: #FFFFFF;
-
-    background: #0891B2 !important;
-
-    border-color: #0891B2 !important;
-
-}
-
-
-/* ==========================================================
-   VIEW
-========================================================== */
-
-#gl-journal-table
+.gl-action-menu
 .btn-view-journal {
 
     color: #475569;
 
+}
+
+
+#gl-journal-table
+.gl-action-menu
+.btn-duplicate-journal {
+
+    color: #64748B;
+
+}
+
+
+#gl-journal-table
+.gl-action-menu
+.btn-void-journal,
+
+#gl-journal-table
+.gl-action-menu
+.btn-delete-journal {
+
+    color: #DC2626 !important;
+
+}
+
+
+/* ==========================================================
+   ACTION ITEM HOVER
+========================================================== */
+
+#gl-journal-table
+.gl-action-menu
+.dropdown-item:hover {
+
     background: #F8FAFC !important;
 
-    border-color: #CBD5E1 !important;
-
-}
-
-
-#gl-journal-table
-.btn-view-journal:hover {
-
-    color: #FFFFFF;
-
-    background: #475569 !important;
-
-    border-color: #475569 !important;
-
 }
 
 
 /* ==========================================================
-   VOID
+   ACTION DANGER HOVER
 ========================================================== */
 
 #gl-journal-table
-.btn-void-journal {
-
-    color: #7C3AED;
-
-    background: #F5F3FF !important;
-
-    border-color: #DDD6FE !important;
-
-}
-
+.gl-action-menu
+.btn-delete-journal:hover,
 
 #gl-journal-table
+.gl-action-menu
 .btn-void-journal:hover {
 
-    color: #FFFFFF;
+    color: #DC2626 !important;
 
-    background: #7C3AED !important;
-
-    border-color: #7C3AED !important;
+    background: #FEF2F2 !important;
 
 }
 
 
 /* ==========================================================
-   ACTION GENERAL HOVER
+   ACTION TRIGGER HOVER
 ========================================================== */
 
 #gl-journal-table
-td:nth-child(11)
-.btn-group
-.btn:hover {
+.gl-action-trigger:hover {
 
-    transform: translateY(-2px);
+    transform: translateY(-1px);
 
     box-shadow:
-        0 5px 12px rgba(15, 23, 42, .14);
+        0 4px 10px rgba(15, 23, 42, .12);
 
 }
 
 
 /* ==========================================================
-   ACTION ACTIVE
+   ACTION TRIGGER ACTIVE
 ========================================================== */
 
 #gl-journal-table
-td:nth-child(11)
-.btn-group
-.btn:active {
+.gl-action-trigger:active {
 
     transform: translateY(0);
 
-    box-shadow:
-        0 1px 2px rgba(15, 23, 42, .08);
-
 }
 
 
 /* ==========================================================
-   ACTION FOCUS
+   ACTION TRIGGER FOCUS
 ========================================================== */
 
 #gl-journal-table
-td:nth-child(11)
-.btn-group
-.btn:focus-visible {
+.gl-action-trigger:focus-visible {
 
     outline: 2px solid #93C5FD;
 
     outline-offset: 2px;
-
-}
-
-
-/* ==========================================================
-   ACTION DISABLED
-========================================================== */
-
-#gl-journal-table
-td:nth-child(11)
-.btn-group
-.btn:disabled,
-
-#gl-journal-table
-td:nth-child(11)
-.btn-group
-.btn.disabled {
-
-    opacity: .45;
-
-    pointer-events: none;
-
-    transform: none;
-
-    box-shadow: none;
 
 }
 
