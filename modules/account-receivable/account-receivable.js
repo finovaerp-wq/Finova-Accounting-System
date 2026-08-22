@@ -2191,12 +2191,21 @@ async savePayment() {
 
 
     /*
-    ======================================================
-    SEARCHABLE COA
-    ======================================================
-    */
+======================================================
+INITIALIZE DETAIL COA SEARCH
+SAFE TOM SELECT INITIALIZATION
+======================================================
+*/
 
-    initializeDetailCOASearch() {
+initializeDetailCOASearch() {
+
+    try {
+
+        /*
+        ==================================================
+        VALIDATE ELEMENT
+        ==================================================
+        */
 
         if (
             !this.arDetailCOA
@@ -2206,6 +2215,12 @@ async savePayment() {
 
         }
 
+
+        /*
+        ==================================================
+        VALIDATE TOM SELECT
+        ==================================================
+        */
 
         if (
             typeof TomSelect
@@ -2221,17 +2236,95 @@ async savePayment() {
         }
 
 
+        /*
+        ==================================================
+        DESTROY EXISTING INSTANCE FROM CLASS
+        ==================================================
+        */
+
         if (
             this.arDetailCOASelect
         ) {
 
-            this.arDetailCOASelect.destroy();
+            try {
+
+                this.arDetailCOASelect.destroy();
+
+            }
+
+            catch (error) {
+
+                console.warn(
+                    "Failed to destroy previous AR COA TomSelect:",
+                    error
+                );
+
+            }
+
 
             this.arDetailCOASelect =
                 null;
 
         }
 
+
+        /*
+        ==================================================
+        DESTROY INSTANCE ATTACHED TO DOM ELEMENT
+
+        IMPORTANT:
+        Tom Select stores instance in element.tomselect
+        ==================================================
+        */
+
+        if (
+            this.arDetailCOA.tomselect
+        ) {
+
+            try {
+
+                this.arDetailCOA.tomselect.destroy();
+
+            }
+
+            catch (error) {
+
+                console.warn(
+                    "Failed to destroy existing TomSelect from DOM:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        /*
+        ==================================================
+        RE-CHECK ELEMENT
+        ==================================================
+        */
+
+        this.arDetailCOA =
+            document.getElementById(
+                "ar-detail-coa"
+            );
+
+
+        if (
+            !this.arDetailCOA
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        INITIALIZE
+        ==================================================
+        */
 
         this.arDetailCOASelect =
             new TomSelect(
@@ -2245,7 +2338,7 @@ async savePayment() {
                         true,
 
                     placeholder:
-                        "Select Revenue Account",
+                        "Select Credit Account",
 
                     searchField: [
                         "text"
@@ -2258,13 +2351,346 @@ async savePayment() {
                         true,
 
                     hideSelected:
+                        false,
+
+                    persist:
                         false
 
                 }
             );
 
+
+        console.log(
+            "AR Detail COA TomSelect initialized."
+        );
+
     }
 
+    catch (error) {
+
+        console.error(
+            "AccountReceivable.initializeDetailCOASearch:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
+/*
+======================================================
+HANDLE CUSTOMER CHANGE
+======================================================
+*/
+
+async handleCustomerChange() {
+
+    try {
+
+        const customerId =
+            this.arFormCustomer?.value;
+
+
+        /*
+        ==================================================
+        EMPTY CUSTOMER
+        ==================================================
+        */
+
+        if (!customerId) {
+
+            if (
+                this.arFormTop
+            ) {
+
+                this.arFormTop.value =
+                    "";
+
+            }
+
+
+            if (
+                this.arFormDueDate
+            ) {
+
+                this.arFormDueDate.value =
+                    "";
+
+            }
+
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        GET CUSTOMER
+        ==================================================
+        */
+
+        const customer =
+            await this.service.getCustomerById(
+                customerId
+            );
+
+
+        if (!customer) {
+
+            throw new Error(
+                "Customer not found."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        TERM OF PAYMENT
+        ==================================================
+        */
+
+        const top =
+            customer.mst_term_of_payment;
+
+
+        if (
+            this.arFormTop
+        ) {
+
+            if (top) {
+
+                this.arFormTop.value =
+                    `${
+                        top.top_code
+                        || ""
+                    } - ${
+                        top.top_name
+                        || ""
+                    }`;
+
+            }
+
+            else {
+
+                this.arFormTop.value =
+                    "";
+
+            }
+
+        }
+
+
+        /*
+        ==================================================
+        CALCULATE DUE DATE
+        ==================================================
+        */
+
+        this.calculateARDueDate();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountReceivable.handleCustomerChange:",
+            error
+        );
+
+
+        if (
+            this.arFormTop
+        ) {
+
+            this.arFormTop.value =
+                "";
+
+        }
+
+
+        if (
+            this.arFormDueDate
+        ) {
+
+            this.arFormDueDate.value =
+                "";
+
+        }
+
+    }
+
+}
+
+/*
+======================================================
+CALCULATE AR DUE DATE
+======================================================
+*/
+
+async calculateARDueDate() {
+
+    try {
+
+        const customerId =
+            this.arFormCustomer?.value;
+
+
+        const dateReceived =
+            this.arFormDateReceived?.value;
+
+
+        /*
+        ==================================================
+        VALIDATE
+        ==================================================
+        */
+
+        if (
+            !customerId
+            ||
+            !dateReceived
+        ) {
+
+            if (
+                this.arFormDueDate
+            ) {
+
+                this.arFormDueDate.value =
+                    "";
+
+            }
+
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        GET CUSTOMER + TOP
+        ==================================================
+        */
+
+        const customer =
+            await this.service.getCustomerById(
+                customerId
+            );
+
+
+        if (!customer) {
+
+            throw new Error(
+                "Customer not found."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        CALCULATE FROM SERVICE
+        ==================================================
+        */
+
+        const dueDate =
+            this.service.calculateDueDate(
+                dateReceived,
+                customer
+            );
+
+
+        /*
+        ==================================================
+        SET DUE DATE
+        ==================================================
+        */
+
+        if (
+            this.arFormDueDate
+        ) {
+
+            this.arFormDueDate.value =
+                dueDate
+                || "";
+
+        }
+
+
+        /*
+        ==================================================
+        TOP DISPLAY
+        ==================================================
+        */
+
+        const top =
+            customer.mst_term_of_payment;
+
+
+        if (
+            this.arFormTop
+        ) {
+
+            this.arFormTop.value =
+                top
+                    ? `${
+                        top.top_code
+                        || ""
+                    } - ${
+                        top.top_name
+                        || ""
+                    }`
+                    : "";
+
+        }
+
+
+        console.log(
+            "AR DUE DATE:",
+            {
+                customer_id:
+                    customerId,
+
+                date_received:
+                    dateReceived,
+
+                top_days:
+                    Number(
+                        top?.days
+                        || 0
+                    ),
+
+                due_date:
+                    dueDate
+            }
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountReceivable.calculateARDueDate:",
+            error
+        );
+
+
+        if (
+            this.arFormDueDate
+        ) {
+
+            this.arFormDueDate.value =
+                "";
+
+        }
+
+    }
+
+}
 
     /*
     ======================================================
@@ -5977,6 +6403,36 @@ updateInvoiceSummary() {
 
             }
         );
+        /*
+==================================================
+CUSTOMER CHANGE
+==================================================
+*/
+
+this.arFormCustomer?.addEventListener(
+    "change",
+    async () => {
+
+        await this.handleCustomerChange();
+
+    }
+);
+
+
+/*
+==================================================
+DATE RECEIVED CHANGE
+==================================================
+*/
+
+this.arFormDateReceived?.addEventListener(
+    "change",
+    async () => {
+
+        await this.calculateARDueDate();
+
+    }
+);
         /*
 ==================================================
 DOWNLOAD EXCEL

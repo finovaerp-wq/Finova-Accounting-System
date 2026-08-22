@@ -1,26 +1,1196 @@
-<!--
-==========================================================
-FINOVA ACCOUNTING SYSTEM
-MODULE  : ACCOUNT RECEIVABLE
-FILE    : account-receivable-modal.html
-VERSION : 1.0.0
-==========================================================
--->
+<!-- ==========================================================
+     FINOVA ACCOUNTING SYSTEM
+     MODULE : ACCOUNT RECEIVABLE
+     FILE   : account-receivable-modal.html
+=========================================================== -->
 
+
+<!-- ==========================================================
+     ACCOUNT RECEIVABLE MODAL
+=========================================================== -->
 
 <div
     class="modal fade"
     id="accountReceivableModal"
     tabindex="-1"
+    aria-labelledby="accountReceivableModalLabel"
+    aria-hidden="true"
     data-bs-backdrop="static"
-    data-bs-keyboard="false"
-    aria-hidden="true">
+    data-bs-keyboard="false">
 
 
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div
+        class="modal-dialog modal-xl modal-dialog-scrollable">
 
 
         <div class="modal-content">
+
+
+            <!-- ==================================================
+                 MODAL HEADER
+            =================================================== -->
+
+            <div class="modal-header">
+
+                <div>
+
+                    <h5
+                        class="modal-title fw-semibold"
+                        id="accountReceivableModalLabel">
+
+                        <i
+                            class="fa-solid fa-file-invoice-dollar me-2">
+                        </i>
+
+                        Add Account Receivable
+
+                    </h5>
+
+
+                    <div
+                        class="text-muted small">
+
+                        Create new Account Receivable
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close">
+                </button>
+
+            </div>
+
+
+            <!-- ==================================================
+                 MODAL BODY
+            =================================================== -->
+
+            <div class="modal-body p-0">
+
+
+                <!-- ==================================================
+                     AR MODAL TABS
+                =================================================== -->
+
+                <ul
+                    class="nav nav-tabs nav-fill"
+                    id="ar-modal-tabs"
+                    role="tablist">
+
+
+                    <!-- ==============================================
+                         HEADER INFO TAB
+                    =============================================== -->
+
+                    <li
+                        class="nav-item"
+                        role="presentation">
+
+                        <button
+                            class="nav-link active"
+                            id="ar-header-info-tab"
+                            data-bs-toggle="tab"
+                            data-bs-target="#ar-header-info-pane"
+                            type="button"
+                            role="tab"
+                            aria-controls="ar-header-info-pane"
+                            aria-selected="true">
+
+                            Header Info
+
+                        </button>
+
+                    </li>
+
+
+                    <!-- ==============================================
+                         INVOICE DETAILS TAB
+                    =============================================== -->
+
+                    <li
+                        class="nav-item"
+                        role="presentation">
+
+                        <button
+                            class="nav-link"
+                            id="ar-invoice-details-tab"
+                            data-bs-toggle="tab"
+                            data-bs-target="#ar-invoice-details-pane"
+                            type="button"
+                            role="tab"
+                            aria-controls="ar-invoice-details-pane"
+                            aria-selected="false">
+
+                            Invoice Details
+
+                        </button>
+
+                    </li>
+
+
+                    <!-- ==============================================
+                         TAX PLUS TAB
+                    =============================================== -->
+
+                    <li
+                        class="nav-item"
+                        role="presentation">
+
+                        <button
+                            class="nav-link"
+                            id="ar-tax-plus-tab"
+                            data-bs-toggle="tab"
+                            data-bs-target="#ar-tax-plus-pane"
+                            type="button"
+                            role="tab"
+                            aria-controls="ar-tax-plus-pane"
+                            aria-selected="false">
+
+                            Tax (+)
+
+                        </button>
+
+                    </li>
+
+
+                    <!-- ==============================================
+                         TAX MINUS TAB
+                    =============================================== -->
+
+                    <li
+                        class="nav-item"
+                        role="presentation">
+
+                        <button
+                            class="nav-link"
+                            id="ar-tax-minus-tab"
+                            data-bs-toggle="tab"
+                            data-bs-target="#ar-tax-minus-pane"
+                            type="button"
+                            role="tab"
+                            aria-controls="ar-tax-minus-pane"
+                            aria-selected="false">
+
+                            Tax (-)
+
+                        </button>
+
+                    </li>
+
+                </ul>
+
+
+                <!-- ==================================================
+                     TAB CONTENT
+                =================================================== -->
+
+                <div
+                    class="tab-content"
+                    id="ar-modal-tab-content">
+
+
+                    <!-- ==================================================
+                         TAB 1 : HEADER INFO
+                    =================================================== -->
+
+                    <div
+                        class="tab-pane fade show active"
+                        id="ar-header-info-pane"
+                        role="tabpanel"
+                        aria-labelledby="ar-header-info-tab"
+                        tabindex="0">
+
+
+                        <div class="p-4">
+
+
+                            <div class="finova-card">
+
+
+                                <div class="finova-card-body">
+
+
+                                    <input
+                                        type="hidden"
+                                        id="ar-form-id">
+
+
+                                    <div class="row g-3">
+
+
+                                        <!-- ==================================
+                                             CUSTOMER
+                                        =================================== -->
+
+                                        <div class="col-md-6">
+
+                                            <label
+                                                for="ar-form-customer"
+                                                class="form-label">
+
+                                                Customer
+                                                <span class="text-danger">*</span>
+
+                                            </label>
+
+
+                                            <select
+                                                id="ar-form-customer"
+                                                class="form-select">
+
+                                                <option value="">
+                                                    Select Customer
+                                                </option>
+
+                                            </select>
+
+                                        </div>
+
+
+                                        <!-- ==================================
+                                             PO NO
+                                        =================================== -->
+
+                                        <div class="col-md-6">
+
+                                            <label
+                                                for="ar-form-po-no"
+                                                class="form-label">
+
+                                                PO No
+
+                                            </label>
+
+
+                                            <input
+                                                type="text"
+                                                id="ar-form-po-no"
+                                                class="form-control"
+                                                placeholder="Enter PO number">
+
+                                        </div>
+
+
+                                        <!-- ==================================
+                                             INVOICE NO
+                                        =================================== -->
+
+                                        <div class="col-md-6">
+
+                                            <label
+                                                for="ar-form-invoice-no"
+                                                class="form-label">
+
+                                                Invoice No
+                                                <span class="text-danger">*</span>
+
+                                            </label>
+
+
+                                            <input
+                                                type="text"
+                                                id="ar-form-invoice-no"
+                                                class="form-control"
+                                                placeholder="Enter invoice number">
+
+                                        </div>
+
+
+                                        <!-- ==================================
+                                             NO JOURNAL
+                                        =================================== -->
+
+                                        <div class="col-md-6">
+
+                                            <label
+                                                for="ar-form-journal-no"
+                                                class="form-label">
+
+                                                No. Journal
+
+                                            </label>
+
+
+                                            <input
+                                                type="text"
+                                                id="ar-form-journal-no"
+                                                name="journal_no"
+                                                class="form-control"
+                                                placeholder="AUTO"
+                                                readonly>
+
+                                        </div>
+
+
+                                        <!-- ==================================
+                                             INVOICE DATE
+                                        =================================== -->
+
+                                        <div class="col-md-6">
+
+                                            <label
+                                                for="ar-form-invoice-date"
+                                                class="form-label">
+
+                                                Invoice Date
+                                                <span class="text-danger">*</span>
+
+                                            </label>
+
+
+                                            <input
+                                                type="date"
+                                                id="ar-form-invoice-date"
+                                                class="form-control">
+
+                                        </div>
+
+
+                                        <!-- ==================================
+                                             DATE RECEIVED
+                                        =================================== -->
+
+                                        <div class="col-md-6">
+
+                                            <label
+                                                for="ar-form-date-received"
+                                                class="form-label">
+
+                                                Date Received
+                                                <span class="text-danger">*</span>
+
+                                            </label>
+
+
+                                            <input
+                                                type="date"
+                                                id="ar-form-date-received"
+                                                class="form-control">
+
+                                        </div>
+
+
+                                        <!-- ==================================
+                                             TERM OF PAYMENT
+                                        =================================== -->
+
+                                        <div class="col-md-6">
+
+                                            <label
+                                                for="ar-form-top"
+                                                class="form-label">
+
+                                                Term of Payment
+
+                                            </label>
+
+
+                                            <input
+                                                type="text"
+                                                id="ar-form-top"
+                                                class="form-control"
+                                                readonly
+                                                placeholder="Auto from Customer">
+
+                                        </div>
+
+
+                                        <!-- ==================================
+                                             DUE DATE
+                                        =================================== -->
+
+                                        <div class="col-md-6">
+
+                                            <label
+                                                for="ar-form-due-date"
+                                                class="form-label">
+
+                                                Due Date
+
+                                            </label>
+
+
+                                            <input
+                                                type="date"
+                                                id="ar-form-due-date"
+                                                class="form-control"
+                                                readonly>
+
+                                        </div>
+
+
+                                        <!-- ==================================
+                                             STATUS
+                                        =================================== -->
+
+                                        <div class="col-md-6">
+
+                                            <label
+                                                for="ar-form-status"
+                                                class="form-label">
+
+                                                Status
+
+                                            </label>
+
+
+                                            <input
+                                                type="text"
+                                                id="ar-form-status"
+                                                class="form-control"
+                                                value="Draft"
+                                                readonly>
+
+                                        </div>
+
+
+                                        <!-- ==================================
+                                             DESCRIPTION
+                                        =================================== -->
+
+                                        <div class="col-12">
+
+                                            <label
+                                                for="ar-form-description"
+                                                class="form-label">
+
+                                                Description
+
+                                            </label>
+
+
+                                            <textarea
+                                                id="ar-form-description"
+                                                class="form-control"
+                                                rows="2"
+                                                placeholder="Enter description">
+                                            </textarea>
+
+                                        </div>
+
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ==================================================
+                         TAB 2 : INVOICE DETAILS
+                    =================================================== -->
+
+                    <div
+                        class="tab-pane fade"
+                        id="ar-invoice-details-pane"
+                        role="tabpanel"
+                        aria-labelledby="ar-invoice-details-tab"
+                        tabindex="0">
+
+
+                        <div class="p-4">
+
+
+                            <div class="finova-card">
+
+
+                                <div class="finova-card-body">
+
+
+                                    <!-- ======================================
+                                         DETAIL HEADER
+                                    ======================================= -->
+
+                                    <div
+                                        class="d-flex
+                                               justify-content-between
+                                               align-items-center
+                                               mb-3">
+
+
+                                        <div>
+
+                                            <div class="fw-semibold">
+
+                                                Invoice Details
+
+                                            </div>
+
+
+                                            <div class="text-muted small">
+
+                                                Add account receivable detail
+
+                                            </div>
+
+                                        </div>
+
+
+                                        <button
+                                            type="button"
+                                            class="btn btn-sm btn-primary"
+                                            id="btn-add-ar-detail">
+
+                                            <i
+                                                class="fa-solid fa-plus me-1">
+                                            </i>
+
+                                            Add Detail
+
+                                        </button>
+
+                                    </div>
+
+
+                                    <!-- ======================================
+                                         DETAIL TABLE
+                                    ======================================= -->
+
+                                    <div class="table-responsive">
+
+
+                                        <table
+                                            class="table
+                                                   table-sm
+                                                   table-hover
+                                                   align-middle
+                                                   mb-0">
+
+
+                                            <thead>
+
+                                                <tr>
+
+                                                    <th>
+                                                        No
+                                                    </th>
+
+                                                    <th>
+                                                        Account
+                                                    </th>
+
+                                                    <th>
+                                                        Description
+                                                    </th>
+
+                                                    <th class="text-end">
+                                                        Qty
+                                                    </th>
+
+                                                    <th class="text-end">
+                                                        Unit Price
+                                                    </th>
+
+                                                    <th class="text-end">
+                                                        Tax
+                                                    </th>
+
+                                                    <th class="text-end">
+                                                        WHT
+                                                    </th>
+
+                                                    <th class="text-end">
+                                                        Amount
+                                                    </th>
+
+                                                    <th class="text-center">
+                                                        Action
+                                                    </th>
+
+                                                </tr>
+
+                                            </thead>
+
+
+                                            <tbody id="ar-detail-body">
+
+                                                <tr id="ar-detail-empty">
+
+                                                    <td
+                                                        colspan="9"
+                                                        class="text-center
+                                                               text-muted
+                                                               py-4">
+
+                                                        No detail added.
+
+                                                    </td>
+
+                                                </tr>
+
+                                            </tbody>
+
+
+                                        </table>
+
+                                    </div>
+
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ==================================================
+                         TAB 3 : TAX PLUS
+                    =================================================== -->
+
+                    <div
+                        class="tab-pane fade"
+                        id="ar-tax-plus-pane"
+                        role="tabpanel"
+                        aria-labelledby="ar-tax-plus-tab"
+                        tabindex="0">
+
+
+                        <div class="p-4">
+
+
+                            <div class="finova-card">
+
+
+                                <div class="finova-card-body">
+
+
+                                    <div class="mb-3">
+
+                                        <div class="fw-semibold">
+
+                                            Tax (+)
+
+                                        </div>
+
+
+                                        <div class="text-muted small">
+
+                                            Automatically generated from Invoice Details
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="table-responsive">
+
+
+                                        <table
+                                            class="table
+                                                   table-sm
+                                                   table-hover
+                                                   align-middle
+                                                   mb-0">
+
+
+                                            <thead>
+
+                                                <tr>
+
+                                                    <th>
+                                                        No
+                                                    </th>
+
+                                                    <th>
+                                                        Tax Code
+                                                    </th>
+
+                                                    <th>
+                                                        Tax Name
+                                                    </th>
+
+                                                    <th>
+                                                        Tax Account
+                                                    </th>
+
+                                                    <th class="text-end">
+                                                        Tax Base
+                                                    </th>
+
+                                                    <th class="text-end">
+                                                        Rate
+                                                    </th>
+
+                                                    <th class="text-end">
+                                                        Tax Amount
+                                                    </th>
+
+                                                </tr>
+
+                                            </thead>
+
+
+                                            <tbody id="ar-tax-plus-body">
+
+                                                <tr id="ar-tax-plus-empty">
+
+                                                    <td
+                                                        colspan="7"
+                                                        class="text-center
+                                                               text-muted
+                                                               py-4">
+
+                                                        No Tax (+) found from Invoice Details.
+
+                                                    </td>
+
+                                                </tr>
+
+                                            </tbody>
+
+
+                                        </table>
+
+                                    </div>
+
+
+                                    <!-- ======================================
+                                         TAX PLUS JOURNAL INFO
+                                    ======================================= -->
+
+                                    <div
+                                        class="alert
+                                               alert-light
+                                               border
+                                               mt-3
+                                               mb-0">
+
+
+                                        <div class="ar-tax-journal-preview"></div>
+
+
+                                        <div class="fw-semibold mb-1">
+
+                                            Journal Preview
+
+                                        </div>
+
+
+                                        <div class="small text-muted">
+
+                                            Debit:
+
+                                            <strong
+                                                id="ar-tax-plus-preview-debit">
+
+                                                PIUTANG USAHA
+
+                                            </strong>
+
+
+                                            <span class="mx-2">
+                                                |
+                                            </span>
+
+
+                                            Credit:
+
+                                            <strong
+                                                id="ar-tax-plus-preview-credit">
+
+                                                -
+
+                                            </strong>
+
+                                        </div>
+
+                                    </div>
+
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ==================================================
+                         TAB 4 : TAX MINUS
+                    =================================================== -->
+
+                    <div
+                        class="tab-pane fade"
+                        id="ar-tax-minus-pane"
+                        role="tabpanel"
+                        aria-labelledby="ar-tax-minus-tab"
+                        tabindex="0">
+
+
+                        <div class="p-4">
+
+
+                            <div class="finova-card">
+
+
+                                <div class="finova-card-body">
+
+
+                                    <div class="mb-3">
+
+                                        <div class="fw-semibold">
+
+                                            Tax (-)
+
+                                        </div>
+
+
+                                        <div class="text-muted small">
+
+                                            Automatically generated from Invoice Details
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="table-responsive">
+
+
+                                        <table
+                                            class="table
+                                                   table-sm
+                                                   table-hover
+                                                   align-middle
+                                                   mb-0">
+
+
+                                            <thead>
+
+                                                <tr>
+
+                                                    <th>
+                                                        No
+                                                    </th>
+
+                                                    <th>
+                                                        Tax Code
+                                                    </th>
+
+                                                    <th>
+                                                        Tax Name
+                                                    </th>
+
+                                                    <th>
+                                                        Tax Account
+                                                    </th>
+
+                                                    <th class="text-end">
+                                                        Tax Base
+                                                    </th>
+
+                                                    <th class="text-end">
+                                                        Rate
+                                                    </th>
+
+                                                    <th class="text-end">
+                                                        Tax Amount
+                                                    </th>
+
+                                                </tr>
+
+                                            </thead>
+
+
+                                            <tbody id="ar-tax-minus-body">
+
+                                                <tr id="ar-tax-minus-empty">
+
+                                                    <td
+                                                        colspan="7"
+                                                        class="text-center
+                                                               text-muted
+                                                               py-4">
+
+                                                        No Tax (-) found from Invoice Details.
+
+                                                    </td>
+
+                                                </tr>
+
+                                            </tbody>
+
+
+                                        </table>
+
+                                    </div>
+
+
+                                    <!-- ======================================
+                                         TAX MINUS JOURNAL INFO
+                                    ======================================= -->
+
+                                    <div
+                                        class="alert
+                                               alert-light
+                                               border
+                                               mt-3
+                                               mb-0">
+
+
+                                        <div class="fw-semibold mb-1">
+
+                                            Journal Preview
+
+                                        </div>
+
+
+                                        <div class="small text-muted">
+
+                                            Debit:
+
+                                            <strong
+                                                id="ar-tax-minus-preview-debit">
+
+                                                -
+
+                                            </strong>
+
+
+                                            <span class="mx-2">
+                                                |
+                                            </span>
+
+
+                                            Credit:
+
+                                            <strong
+                                                id="ar-tax-minus-preview-credit">
+
+                                                PIUTANG USAHA
+
+                                            </strong>
+
+                                        </div>
+
+                                    </div>
+
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- ==================================================
+                     TOTAL SUMMARY
+                =================================================== -->
+
+                <div class="border-top p-4">
+
+
+                    <div class="d-flex justify-content-end">
+
+
+                        <div
+                            class="finova-card"
+                            style="
+                                width: 420px;
+                                max-width: 100%;
+                            ">
+
+
+                            <div class="finova-card-body">
+
+
+                                <!-- ======================================
+                                     SUBTOTAL
+                                ======================================= -->
+
+                                <div
+                                    class="d-flex
+                                           justify-content-between
+                                           align-items-center
+                                           mb-2">
+
+                                    <span>
+
+                                        Subtotal
+
+                                    </span>
+
+
+                                    <strong id="ar-form-subtotal">
+
+                                        0
+
+                                    </strong>
+
+                                </div>
+
+
+                                <!-- ======================================
+                                     TAX PLUS
+                                ======================================= -->
+
+                                <div
+                                    class="d-flex
+                                           justify-content-between
+                                           align-items-center
+                                           mb-2">
+
+                                    <span>
+
+                                        Tax (+)
+
+                                    </span>
+
+
+                                    <strong id="ar-form-tax">
+
+                                        0
+
+                                    </strong>
+
+                                </div>
+
+
+                                <!-- ======================================
+                                     TAX MINUS
+                                ======================================= -->
+
+                                <div
+                                    class="d-flex
+                                           justify-content-between
+                                           align-items-center
+                                           mb-2">
+
+                                    <span>
+
+                                        Tax (-)
+
+                                    </span>
+
+
+                                    <strong id="ar-form-wht">
+
+                                        0
+
+                                    </strong>
+
+                                </div>
+
+
+                                <hr>
+
+
+                                <!-- ======================================
+                                     TOTAL RECEIVABLE
+                                ======================================= -->
+
+                                <div
+                                    class="d-flex
+                                           justify-content-between
+                                           align-items-center">
+
+                                    <span class="fw-semibold">
+
+                                        Total Receivable
+
+                                    </span>
+
+
+                                    <strong
+                                        id="ar-form-total"
+                                        class="fs-5">
+
+                                        0
+
+                                    </strong>
+
+                                </div>
+
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- ==================================================
+                 MODAL FOOTER
+            =================================================== -->
+
+            <div class="modal-footer">
+
+
+                <button
+                    type="button"
+                    class="btn btn-light border"
+                    data-bs-dismiss="modal">
+
+                    Cancel
+
+                </button>
+
+
+                <button
+                    type="button"
+                    id="btn-save-ar-draft"
+                    class="btn btn-primary">
+
+                    <i
+                        class="fa-solid fa-floppy-disk me-1">
+                    </i>
+
+                    Save Draft
+
+                </button>
+
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- ==========================================================
+     DELETE INVOICE DETAIL CONFIRMATION
+=========================================================== -->
+
+<div
+    class="modal fade"
+    id="arDeleteDetailModal"
+    tabindex="-1"
+    aria-labelledby="arDeleteDetailModalLabel"
+    aria-hidden="true">
+
+
+    <div
+        class="modal-dialog modal-dialog-centered">
+
+
+        <div class="modal-content shadow-lg">
 
 
             <!-- ==================================================
@@ -30,25 +1200,17 @@ VERSION : 1.0.0
             <div class="modal-header">
 
 
-                <div>
+                <h5
+                    class="modal-title fw-semibold"
+                    id="arDeleteDetailModalLabel">
 
-                    <h5
-                        class="modal-title"
-                        id="account-receivable-modal-title">
+                    <i
+                        class="fa-solid fa-trash text-danger me-2">
+                    </i>
 
-                        Add Account Receivable
+                    Remove Invoice Detail
 
-                    </h5>
-
-
-                    <div
-                        class="modal-subtitle text-muted small">
-
-                        Create Account Receivable Invoice
-
-                    </div>
-
-                </div>
+                </h5>
 
 
                 <button
@@ -69,1022 +1231,472 @@ VERSION : 1.0.0
             <div class="modal-body">
 
 
-                <form
-                    id="account-receivable-form"
-                    autocomplete="off">
+                <div class="text-center py-2">
 
 
-                    <!-- ==========================================
-                         HIDDEN ID
-                    =========================================== -->
+                    <div class="mb-3">
 
-                    <input
-                        type="hidden"
-                        id="ar-form-id">
+                        <i
+                            class="fa-solid fa-circle-exclamation text-danger"
+                            style="font-size: 42px;">
+                        </i>
 
+                    </div>
 
-                    <!-- ==================================================
-                         NAVIGATION TABS
-                    =================================================== -->
 
-                    <ul
-                        class="nav nav-tabs mb-3"
-                        id="ar-modal-tabs"
-                        role="tablist">
+                    <div class="fw-semibold mb-2">
 
+                        Remove this invoice detail?
 
-                        <!-- HEADER INFO -->
+                    </div>
 
-                        <li
-                            class="nav-item"
-                            role="presentation">
 
-                            <button
-                                class="nav-link active"
-                                id="ar-header-tab"
-                                data-bs-toggle="tab"
-                                data-bs-target="#ar-header-pane"
-                                type="button"
-                                role="tab"
-                                aria-controls="ar-header-pane"
-                                aria-selected="true">
+                    <div class="text-muted">
 
-                                <i class="fa-solid fa-file-invoice me-1"></i>
+                        You are about to remove:
 
-                                Header Info
+                    </div>
 
-                            </button>
 
-                        </li>
+                    <div
+                        id="ar-delete-detail-name"
+                        class="fw-semibold mt-2">
 
+                        -
 
-                        <!-- INVOICE DETAIL -->
+                    </div>
 
-                        <li
-                            class="nav-item"
-                            role="presentation">
 
-                            <button
-                                class="nav-link"
-                                id="ar-detail-tab"
-                                data-bs-toggle="tab"
-                                data-bs-target="#ar-detail-pane"
-                                type="button"
-                                role="tab"
-                                aria-controls="ar-detail-pane"
-                                aria-selected="false">
+                    <div class="text-muted small mt-2">
 
-                                <i class="fa-solid fa-list me-1"></i>
+                        This action cannot be undone.
 
-                                Invoice Details
+                    </div>
 
-                            </button>
 
-                        </li>
+                </div>
 
+            </div>
 
-                        <!-- TAX PLUS -->
 
-                        <li
-                            class="nav-item"
-                            role="presentation">
+            <!-- ==================================================
+                 FOOTER
+            =================================================== -->
 
-                            <button
-                                class="nav-link"
-                                id="ar-tax-plus-tab"
-                                data-bs-toggle="tab"
-                                data-bs-target="#ar-tax-plus-pane"
-                                type="button"
-                                role="tab"
-                                aria-controls="ar-tax-plus-pane"
-                                aria-selected="false">
+            <div class="modal-footer">
 
-                                <i class="fa-solid fa-plus me-1"></i>
 
-                                Tax (+)
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
 
-                            </button>
+                    Cancel
 
-                        </li>
+                </button>
 
 
-                        <!-- TAX MINUS -->
+                <button
+                    type="button"
+                    class="btn btn-danger"
+                    id="btn-confirm-ar-delete-detail">
 
-                        <li
-                            class="nav-item"
-                            role="presentation">
+                    <i
+                        class="fa-solid fa-trash me-1">
+                    </i>
 
-                            <button
-                                class="nav-link"
-                                id="ar-tax-minus-tab"
-                                data-bs-toggle="tab"
-                                data-bs-target="#ar-tax-minus-pane"
-                                type="button"
-                                role="tab"
-                                aria-controls="ar-tax-minus-pane"
-                                aria-selected="false">
+                    Delete
 
-                                <i class="fa-solid fa-minus me-1"></i>
+                </button>
 
-                                Tax (-)
 
-                            </button>
+            </div>
 
-                        </li>
 
+        </div>
 
-                    </ul>
+    </div>
 
+</div>
 
-                    <!-- ==================================================
-                         TAB CONTENT
-                    =================================================== -->
 
-                    <div class="tab-content">
 
+<!-- ==========================================================
+     DELETE ACCOUNT RECEIVABLE CONFIRMATION
+=========================================================== -->
 
-                        <!-- ==================================================
-                             HEADER INFO
-                        =================================================== -->
+<div
+    class="modal fade"
+    id="arDeleteInvoiceModal"
+    tabindex="-1"
+    aria-labelledby="arDeleteInvoiceModalLabel"
+    aria-hidden="true">
 
-                        <div
-                            class="tab-pane fade show active"
-                            id="ar-header-pane"
-                            role="tabpanel"
-                            aria-labelledby="ar-header-tab"
-                            tabindex="0">
 
+    <div
+        class="modal-dialog modal-dialog-centered">
 
-                            <div class="row g-3">
 
+        <div class="modal-content shadow-lg">
 
-                                <!-- ======================================
-                                     CUSTOMER
-                                ======================================= -->
 
-                                <div class="col-lg-6">
+            <!-- ==================================================
+                 HEADER
+            =================================================== -->
 
-                                    <label
-                                        for="ar-form-customer"
-                                        class="form-label">
+            <div class="modal-header">
 
-                                        Customer
-                                        <span class="text-danger">*</span>
 
-                                    </label>
+                <h5
+                    class="modal-title fw-semibold"
+                    id="arDeleteInvoiceModalLabel">
 
+                    <i
+                        class="fa-solid fa-trash text-danger me-2">
+                    </i>
 
-                                    <select
-                                        id="ar-form-customer"
-                                        class="form-select">
+                    Confirm Delete Account Receivable
 
-                                        <option value="">
-                                            Select Customer
-                                        </option>
+                </h5>
 
-                                    </select>
 
-                                </div>
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close">
+                </button>
 
 
-                                <!-- ======================================
-                                     TERM OF PAYMENT
-                                ======================================= -->
+            </div>
 
-                                <div class="col-lg-6">
 
-                                    <label
-                                        for="ar-form-top"
-                                        class="form-label">
+            <!-- ==================================================
+                 BODY
+            =================================================== -->
 
-                                        Term of Payment
+            <div class="modal-body">
 
-                                    </label>
 
+                <div class="text-center">
 
-                                    <input
-                                        type="text"
-                                        id="ar-form-top"
-                                        class="form-control"
-                                        value=""
-                                        readonly>
 
-                                </div>
+                    <!-- ==============================================
+                         DELETE ICON
+                    =============================================== -->
 
+                    <div class="mb-3">
 
-                                <!-- ======================================
-                                     INVOICE NO
-                                ======================================= -->
+                        <i
+                            class="fa-solid fa-trash-can text-danger"
+                            style="font-size: 48px;">
+                        </i>
 
-                                <div class="col-lg-6">
+                    </div>
 
-                                    <label
-                                        for="ar-form-invoice-no"
-                                        class="form-label">
+
+                    <!-- ==============================================
+                         QUESTION
+                    =============================================== -->
+
+                    <div
+                        class="mb-3"
+                        style="font-size: 16px;">
+
+                        Apakah Anda yakin ingin
+
+                        <strong>
+                            menghapus Account Receivable ini?
+                        </strong>
+
+                    </div>
+
+
+                    <!-- ==============================================
+                         INVOICE INFORMATION
+                    =============================================== -->
+
+                    <div
+                        class="table-responsive
+                               text-start
+                               mb-3">
+
+
+                        <table
+                            class="table
+                                   table-sm
+                                   table-bordered
+                                   mb-0">
+
+
+                            <tbody>
+
+
+                                <tr>
+
+                                    <th
+                                        style="width: 150px;">
 
                                         Invoice No
-                                        <span class="text-danger">*</span>
 
-                                    </label>
+                                    </th>
+
+                                    <td
+                                        id="ar-delete-invoice-no">
+
+                                        -
+
+                                    </td>
+
+                                </tr>
 
 
-                                    <input
-                                        type="text"
-                                        id="ar-form-invoice-no"
-                                        class="form-control"
-                                        placeholder="Enter invoice number">
+                                <tr>
 
-                                </div>
+                                    <th>
+
+                                        Customer
+
+                                    </th>
+
+                                    <td
+                                        id="ar-delete-customer">
+
+                                        -
+
+                                    </td>
+
+                                </tr>
 
 
-                                <!-- ======================================
-                                     PO NO
-                                ======================================= -->
+                                <tr>
 
-                                <div class="col-lg-6">
-
-                                    <label
-                                        for="ar-form-po-no"
-                                        class="form-label">
+                                    <th>
 
                                         PO No
 
-                                    </label>
+                                    </th>
 
-
-                                    <input
-                                        type="text"
-                                        id="ar-form-po-no"
-                                        class="form-control"
-                                        placeholder="Enter PO number">
-
-                                </div>
-
-
-                                <!-- ======================================
-                                     INVOICE DATE
-                                ======================================= -->
-
-                                <div class="col-lg-4">
-
-                                    <label
-                                        for="ar-form-invoice-date"
-                                        class="form-label">
-
-                                        Invoice Date
-                                        <span class="text-danger">*</span>
-
-                                    </label>
-
-
-                                    <input
-                                        type="date"
-                                        id="ar-form-invoice-date"
-                                        class="form-control">
-
-                                </div>
-
-
-                                <!-- ======================================
-                                     DATE RECEIVED
-                                ======================================= -->
-
-                                <div class="col-lg-4">
-
-                                    <label
-                                        for="ar-form-date-received"
-                                        class="form-label">
-
-                                        Date Received
-
-                                    </label>
-
-
-                                    <input
-                                        type="date"
-                                        id="ar-form-date-received"
-                                        class="form-control">
-
-                                </div>
-
-
-                                <!-- ======================================
-                                     DUE DATE
-                                ======================================= -->
-
-                                <div class="col-lg-4">
-
-                                    <label
-                                        for="ar-form-due-date"
-                                        class="form-label">
-
-                                        Due Date
-                                        <span class="text-danger">*</span>
-
-                                    </label>
-
-
-                                    <input
-                                        type="date"
-                                        id="ar-form-due-date"
-                                        class="form-control">
-
-                                </div>
-
-
-                                <!-- ======================================
-                                     GL JOURNAL NO
-                                ======================================= -->
-
-                                <div class="col-lg-6">
-
-                                    <label
-                                        for="ar-form-journal-no"
-                                        class="form-label">
-
-                                        GL Journal No
-
-                                    </label>
-
-
-                                    <input
-                                        type="text"
-                                        id="ar-form-journal-no"
-                                        class="form-control"
-                                        placeholder="-"
-                                        readonly>
-
-                                </div>
-
-
-                                <!-- ======================================
-                                     STATUS
-                                ======================================= -->
-
-                                <div class="col-lg-6">
-
-                                    <label
-                                        for="ar-form-status"
-                                        class="form-label">
-
-                                        Status
-
-                                    </label>
-
-
-                                    <input
-                                        type="text"
-                                        id="ar-form-status"
-                                        class="form-control"
-                                        value="Draft"
-                                        readonly>
-
-                                </div>
-
-
-                                <!-- ======================================
-                                     DESCRIPTION
-                                ======================================= -->
-
-                                <div class="col-12">
-
-                                    <label
-                                        for="ar-form-description"
-                                        class="form-label">
-
-                                        Description
-
-                                    </label>
-
-
-                                    <textarea
-                                        id="ar-form-description"
-                                        class="form-control"
-                                        rows="3"
-                                        placeholder="Enter description"></textarea>
-
-                                </div>
-
-
-                            </div>
-
-
-                        </div>
-
-
-                        <!-- ==================================================
-                             INVOICE DETAILS
-                        =================================================== -->
-
-                        <div
-                            class="tab-pane fade"
-                            id="ar-detail-pane"
-                            role="tabpanel"
-                            aria-labelledby="ar-detail-tab"
-                            tabindex="0">
-
-
-                            <!-- ==========================================
-                                 DETAIL TOOLBAR
-                            =========================================== -->
-
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-
-
-                                <div>
-
-                                    <div class="fw-semibold">
-
-                                        Invoice Details
-
-                                    </div>
-
-
-                                    <div class="small text-muted">
-
-                                        Revenue / sales transaction details
-
-                                    </div>
-
-                                </div>
-
-
-                                <button
-                                    type="button"
-                                    id="btn-add-ar-detail"
-                                    class="btn btn-primary btn-sm">
-
-                                    <i class="fa-solid fa-plus me-1"></i>
-
-                                    Add Detail
-
-                                </button>
-
-
-                            </div>
-
-
-                            <!-- ==========================================
-                                 DETAIL TABLE
-                            =========================================== -->
-
-                            <div class="table-responsive">
-
-
-                                <table
-                                    id="ar-detail-table"
-                                    class="table table-bordered align-middle mb-0">
-
-
-                                    <thead>
-
-                                        <tr>
-
-
-                                            <th style="width:55px">
-                                                No
-                                            </th>
-
-
-                                            <th style="width:220px">
-                                                Revenue Account
-                                            </th>
-
-
-                                            <th>
-                                                Description
-                                            </th>
-
-
-                                            <th
-                                                class="text-end"
-                                                style="width:90px">
-
-                                                Qty
-
-                                            </th>
-
-
-                                            <th
-                                                class="text-end"
-                                                style="width:140px">
-
-                                                Unit Price
-
-                                            </th>
-
-
-                                            <th
-                                                class="text-end"
-                                                style="width:140px">
-
-                                                Line Amount
-
-                                            </th>
-
-
-                                            <th
-                                                class="text-center"
-                                                style="width:110px">
-
-                                                Tax (+)
-
-                                            </th>
-
-
-                                            <th
-                                                class="text-center"
-                                                style="width:110px">
-
-                                                Tax (-)
-
-                                            </th>
-
-
-                                            <th
-                                                class="text-end"
-                                                style="width:140px">
-
-                                                Total
-
-                                            </th>
-
-
-                                            <th
-                                                class="text-center"
-                                                style="width:100px">
-
-                                                Action
-
-                                            </th>
-
-
-                                        </tr>
-
-                                    </thead>
-
-
-                                    <tbody id="ar-detail-body">
-
-
-                                        <tr
-                                            id="ar-detail-empty-row">
-
-                                            <td
-                                                colspan="10"
-                                                class="text-center text-muted py-4">
-
-                                                No invoice detail.
-
-                                            </td>
-
-                                        </tr>
-
-
-                                    </tbody>
-
-
-                                </table>
-
-
-                            </div>
-
-
-                        </div>
-
-
-                        <!-- ==================================================
-                             TAX (+)
-                        =================================================== -->
-
-                        <div
-                            class="tab-pane fade"
-                            id="ar-tax-plus-pane"
-                            role="tabpanel"
-                            aria-labelledby="ar-tax-plus-tab"
-                            tabindex="0">
-
-
-                            <div class="mb-3">
-
-                                <div class="fw-semibold">
-
-                                    Tax (+)
-
-                                </div>
-
-
-                                <div class="small text-muted">
-
-                                    Tax output generated automatically from invoice details.
-
-                                </div>
-
-                            </div>
-
-
-                            <div class="table-responsive">
-
-
-                                <table
-                                    id="ar-tax-plus-table"
-                                    class="table table-bordered align-middle mb-0">
-
-
-                                    <thead>
-
-                                        <tr>
-
-                                            <th style="width:55px">
-                                                No
-                                            </th>
-
-                                            <th style="width:140px">
-                                                Tax Code
-                                            </th>
-
-                                            <th>
-                                                Tax Name
-                                            </th>
-
-                                            <th>
-                                                Tax Account
-                                            </th>
-
-                                            <th
-                                                class="text-end"
-                                                style="width:140px">
-
-                                                Tax Base
-
-                                            </th>
-
-                                            <th
-                                                class="text-end"
-                                                style="width:100px">
-
-                                                Rate
-
-                                            </th>
-
-                                            <th
-                                                class="text-end"
-                                                style="width:150px">
-
-                                                Tax Amount
-
-                                            </th>
-
-                                        </tr>
-
-                                    </thead>
-
-
-                                    <tbody id="ar-tax-plus-body">
-
-
-                                        <tr
-                                            id="ar-tax-plus-empty">
-
-                                            <td
-                                                colspan="7"
-                                                class="text-center text-muted py-4">
-
-                                                No Tax (+) found from Invoice Details.
-
-                                            </td>
-
-                                        </tr>
-
-
-                                    </tbody>
-
-
-                                </table>
-
-
-                            </div>
-
-
-                            <!-- ==========================================
-                                 JOURNAL PREVIEW
-                            =========================================== -->
-
-                            <div class="alert alert-light border mt-3 mb-0">
-
-
-                                <div class="fw-semibold mb-1">
-
-                                    Journal Preview
-
-                                </div>
-
-
-                                <div class="small text-muted">
-
-
-                                    Debit:
-
-                                    <strong
-                                        id="ar-tax-plus-preview-debit">
-
-                                        PIUTANG USAHA
-
-                                    </strong>
-
-
-                                    <span class="mx-2">
-                                        |
-                                    </span>
-
-
-                                    Credit:
-
-                                    <strong
-                                        id="ar-tax-plus-preview-credit">
+                                    <td
+                                        id="ar-delete-po-no">
 
                                         -
 
-                                    </strong>
+                                    </td>
 
+                                </tr>
 
-                                </div>
 
+                            </tbody>
 
-                            </div>
 
-
-                        </div>
-
-
-                        <!-- ==================================================
-                             TAX (-)
-                        =================================================== -->
-
-                        <div
-                            class="tab-pane fade"
-                            id="ar-tax-minus-pane"
-                            role="tabpanel"
-                            aria-labelledby="ar-tax-minus-tab"
-                            tabindex="0">
-
-
-                            <div class="mb-3">
-
-                                <div class="fw-semibold">
-
-                                    Tax (-)
-
-                                </div>
-
-
-                                <div class="small text-muted">
-
-                                    Withholding tax generated automatically from invoice details.
-
-                                </div>
-
-                            </div>
-
-
-                            <div class="table-responsive">
-
-
-                                <table
-                                    id="ar-tax-minus-table"
-                                    class="table table-bordered align-middle mb-0">
-
-
-                                    <thead>
-
-                                        <tr>
-
-                                            <th style="width:55px">
-                                                No
-                                            </th>
-
-                                            <th style="width:140px">
-                                                Tax Code
-                                            </th>
-
-                                            <th>
-                                                Tax Name
-                                            </th>
-
-                                            <th>
-                                                Tax Account
-                                            </th>
-
-                                            <th
-                                                class="text-end"
-                                                style="width:140px">
-
-                                                Tax Base
-
-                                            </th>
-
-                                            <th
-                                                class="text-end"
-                                                style="width:100px">
-
-                                                Rate
-
-                                            </th>
-
-                                            <th
-                                                class="text-end"
-                                                style="width:150px">
-
-                                                Tax Amount
-
-                                            </th>
-
-                                        </tr>
-
-                                    </thead>
-
-
-                                    <tbody id="ar-tax-minus-body">
-
-
-                                        <tr
-                                            id="ar-tax-minus-empty">
-
-                                            <td
-                                                colspan="7"
-                                                class="text-center text-muted py-4">
-
-                                                No Tax (-) found from Invoice Details.
-
-                                            </td>
-
-                                        </tr>
-
-
-                                    </tbody>
-
-
-                                </table>
-
-
-                            </div>
-
-
-                            <!-- ==========================================
-                                 JOURNAL PREVIEW
-                            =========================================== -->
-
-                            <div class="alert alert-light border mt-3 mb-0">
-
-
-                                <div class="fw-semibold mb-1">
-
-                                    Journal Preview
-
-                                </div>
-
-
-                                <div class="small text-muted">
-
-
-                                    Debit:
-
-                                    <strong
-                                        id="ar-tax-minus-preview-debit">
-
-                                        -
-
-                                    </strong>
-
-
-                                    <span class="mx-2">
-                                        |
-                                    </span>
-
-
-                                    Credit:
-
-                                    <strong
-                                        id="ar-tax-minus-preview-credit">
-
-                                        PIUTANG USAHA
-
-                                    </strong>
-
-
-                                </div>
-
-
-                            </div>
-
-
-                        </div>
-
+                        </table>
 
                     </div>
 
 
-                    <!-- ==================================================
-                         SUMMARY
-                    =================================================== -->
+                    <!-- ==============================================
+                         WARNING
+                    =============================================== -->
 
-                    <div class="row justify-content-end mt-4">
+                    <div
+                        class="alert
+                               alert-danger
+                               text-start
+                               mb-0">
 
+                        <i
+                            class="fa-solid fa-triangle-exclamation me-2">
+                        </i>
 
-                        <div class="col-lg-5 col-xl-4">
-
-
-                            <div class="border rounded p-3">
-
-
-                                <!-- SUBTOTAL -->
-
-                                <div class="d-flex justify-content-between mb-2">
-
-                                    <span>
-                                        Subtotal
-                                    </span>
-
-                                    <strong
-                                        id="ar-form-subtotal">
-
-                                        0
-
-                                    </strong>
-
-                                </div>
-
-
-                                <!-- TAX PLUS -->
-
-                                <div class="d-flex justify-content-between mb-2">
-
-                                    <span>
-                                        Tax (+)
-                                    </span>
-
-                                    <strong
-                                        id="ar-form-tax">
-
-                                        0
-
-                                    </strong>
-
-                                </div>
-
-
-                                <!-- TAX MINUS -->
-
-                                <div class="d-flex justify-content-between mb-2">
-
-                                    <span>
-                                        Tax (-)
-                                    </span>
-
-                                    <strong
-                                        id="ar-form-wht">
-
-                                        0
-
-                                    </strong>
-
-                                </div>
-
-
-                                <hr>
-
-
-                                <!-- TOTAL -->
-
-                                <div class="d-flex justify-content-between">
-
-                                    <span class="fw-semibold">
-
-                                        Total Receivable
-
-                                    </span>
-
-                                    <strong
-                                        id="ar-form-total"
-                                        class="fs-6">
-
-                                        0
-
-                                    </strong>
-
-                                </div>
-
-
-                            </div>
-
-
-                        </div>
-
+                        Account Receivable yang dihapus
+                        tidak dapat dikembalikan.
 
                     </div>
 
 
-                </form>
+                </div>
+
+            </div>
+
+
+            <!-- ==================================================
+                 FOOTER
+            =================================================== -->
+
+            <div class="modal-footer">
+
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+
+                    <i
+                        class="fa-solid fa-xmark me-1">
+                    </i>
+
+                    Batal
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="btn btn-danger"
+                    id="btn-confirm-ar-delete-invoice">
+
+                    <i
+                        class="fa-solid fa-trash me-1">
+                    </i>
+
+                    Ya, Hapus
+
+                </button>
+
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- ======================================================
+     CONFIRM VOID ACCOUNT RECEIVABLE
+====================================================== -->
+
+<div
+    class="modal fade"
+    id="ar-void-confirm-modal"
+    tabindex="-1"
+    aria-hidden="true">
+
+
+    <div
+        class="modal-dialog modal-dialog-centered">
+
+
+        <div class="modal-content">
+
+
+            <!-- ==================================================
+                 HEADER
+            =================================================== -->
+
+            <div class="modal-header">
+
+
+                <h5 class="modal-title">
+
+                    <i
+                        class="fa-solid fa-ban
+                               text-danger
+                               me-2">
+                    </i>
+
+                    Confirm Void Account Receivable
+
+                </h5>
+
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close">
+                </button>
+
+
+            </div>
+
+
+            <!-- ==================================================
+                 BODY
+            =================================================== -->
+
+            <div class="modal-body">
+
+
+                <div class="text-center mb-3">
+
+
+                    <div
+                        class="d-inline-flex
+                               align-items-center
+                               justify-content-center
+                               rounded-circle
+                               bg-danger"
+                        style="
+                            width: 56px;
+                            height: 56px;
+                        ">
+
+                        <i
+                            class="fa-solid
+                                   fa-question
+                                   text-white
+                                   fs-3">
+                        </i>
+
+                    </div>
+
+                </div>
+
+
+                <p
+                    class="text-center
+                           mb-3
+                           text-secondary">
+
+                    Apakah Anda yakin ingin
+
+                    <strong>
+                        VOID Account Receivable
+                    </strong>
+
+                    ini?
+
+                </p>
+
+
+                <div class="alert alert-danger">
+
+                    <i
+                        class="fa-solid
+                               fa-triangle-exclamation
+                               me-2">
+                    </i>
+
+                    Account Receivable yang sudah memiliki
+                    pembayaran tidak dapat di-VOID.
+
+                </div>
+
+
+                <div class="mb-0">
+
+                    <label
+                        for="ar-void-reason"
+                        class="form-label fw-semibold">
+
+                        Alasan Void
+
+                    </label>
+
+
+                    <textarea
+                        id="ar-void-reason"
+                        class="form-control"
+                        rows="3"
+                        placeholder="Masukkan alasan Void...">
+                    </textarea>
+
+                </div>
 
 
             </div>
@@ -1099,22 +1711,32 @@ VERSION : 1.0.0
 
                 <button
                     type="button"
-                    class="btn btn-outline-secondary"
+                    class="btn btn-secondary"
                     data-bs-dismiss="modal">
 
-                    Cancel
+                    <i
+                        class="fa-solid
+                               fa-xmark
+                               me-1">
+                    </i>
+
+                    Batal
 
                 </button>
 
 
                 <button
                     type="button"
-                    id="btn-save-ar-draft"
-                    class="btn btn-primary">
+                    class="btn btn-danger"
+                    id="ar-confirm-void-btn">
 
-                    <i class="fa-solid fa-floppy-disk me-1"></i>
+                    <i
+                        class="fa-solid
+                               fa-ban
+                               me-1">
+                    </i>
 
-                    Save Draft
+                    Ya, Void
 
                 </button>
 
@@ -1124,8 +1746,142 @@ VERSION : 1.0.0
 
         </div>
 
-
     </div>
 
+</div>
+
+
+
+<!-- ==========================================================
+     ACCOUNT RECEIVABLE COMPLETE CONFIRMATION MODAL
+=========================================================== -->
+
+<div
+    class="modal fade"
+    id="accountReceivableCompleteModal"
+    tabindex="-1"
+    aria-hidden="true">
+
+
+    <div
+        class="modal-dialog modal-dialog-centered">
+
+
+        <div class="modal-content">
+
+
+            <!-- ==================================================
+                 HEADER
+            =================================================== -->
+
+            <div class="modal-header">
+
+
+                <h5 class="modal-title">
+
+                    Complete Account Receivable
+
+                </h5>
+
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close">
+                </button>
+
+
+            </div>
+
+
+            <!-- ==================================================
+                 BODY
+            =================================================== -->
+
+            <div class="modal-body">
+
+
+                <div class="text-center">
+
+
+                    <i
+                        class="fa-solid
+                               fa-circle-check
+                               text-success"
+                        style="font-size: 48px;">
+                    </i>
+
+
+                    <div class="mt-3">
+
+
+                        <h5>
+
+                            Complete Account Receivable?
+
+                        </h5>
+
+
+                        <p class="text-muted mb-0">
+
+                            Account Receivable ini akan
+                            dibuatkan GL Journal sebagai
+
+                            <strong>
+                                Draft
+                            </strong>.
+
+                        </p>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+            <!-- ==================================================
+                 FOOTER
+            =================================================== -->
+
+            <div class="modal-footer">
+
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+
+                    Cancel
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="btn btn-success"
+                    id="btn-confirm-complete-ar">
+
+                    <i
+                        class="fa-solid
+                               fa-check
+                               me-1">
+                    </i>
+
+                    Complete
+
+                </button>
+
+
+            </div>
+
+
+        </div>
+
+    </div>
 
 </div>

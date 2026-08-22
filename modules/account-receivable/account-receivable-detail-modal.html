@@ -1,26 +1,29 @@
-<!--
-==========================================================
-FINOVA ACCOUNTING SYSTEM
-MODULE  : ACCOUNT RECEIVABLE
-FILE    : account-receivable-detail-modal.html
-VERSION : 1.0.0
-==========================================================
--->
+<!-- ======================================================
+     FINOVA ACCOUNTING SYSTEM
+     MODULE : ACCOUNT RECEIVABLE
+     COMPONENT : INVOICE DETAIL MODAL
+====================================================== -->
 
+
+<!-- ======================================================
+     ACCOUNT RECEIVABLE DETAIL MODAL
+====================================================== -->
 
 <div
     class="modal fade"
     id="accountReceivableDetailModal"
     tabindex="-1"
+    aria-labelledby="accountReceivableDetailModalLabel"
+    aria-hidden="true"
     data-bs-backdrop="static"
-    data-bs-keyboard="false"
-    aria-hidden="true">
+    data-bs-keyboard="false">
 
 
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div
+        class="modal-dialog modal-lg modal-dialog-centered">
 
 
-        <div class="modal-content">
+        <div class="modal-content shadow-lg">
 
 
             <!-- ==================================================
@@ -29,22 +32,25 @@ VERSION : 1.0.0
 
             <div class="modal-header">
 
-
                 <div>
 
                     <h5
-                        class="modal-title"
-                        id="account-receivable-detail-modal-title">
+                        class="modal-title fw-semibold"
+                        id="accountReceivableDetailModalLabel">
 
-                        Add AR Detail
+                        <i
+                            class="fa-solid fa-file-invoice-dollar me-2">
+                        </i>
+
+                        Add Invoice Detail
 
                     </h5>
 
 
                     <div
-                        class="modal-subtitle text-muted small">
+                        class="text-muted small mt-1">
 
-                        Account Receivable Invoice Detail
+                        Add account receivable invoice detail
 
                     </div>
 
@@ -58,7 +64,6 @@ VERSION : 1.0.0
                     aria-label="Close">
                 </button>
 
-
             </div>
 
 
@@ -70,39 +75,69 @@ VERSION : 1.0.0
 
 
                 <!-- ==================================================
-                     HIDDEN DETAIL ID
+                     ACCOUNT
                 =================================================== -->
 
-                <input
-                    type="hidden"
-                    id="ar-detail-id">
+                <div class="row g-3">
 
 
-                <!-- ==================================================
-                     REVENUE ACCOUNT
-                =================================================== -->
+                    <!-- ==============================================
+                         DEBIT ACCOUNT
+                         PIUTANG USAHA
+                    =============================================== -->
 
-                <div class="mb-3">
+                    <div class="col-md-6">
 
-                    <label
-                        for="ar-detail-coa"
-                        class="form-label">
+                        <label
+                            for="ar-detail-debit-account"
+                            class="form-label">
 
-                        Revenue Account
-                        <span class="text-danger">*</span>
+                            Debit Account
 
-                    </label>
+                        </label>
 
 
-                    <select
-                        id="ar-detail-coa"
-                        class="form-select">
+                        <input
+                            type="text"
+                            id="ar-detail-debit-account"
+                            class="form-control"
+                            value="1-11041 - PIUTANG USAHA"
+                            readonly>
 
-                        <option value="">
-                            Select Revenue Account
-                        </option>
 
-                    </select>
+                        <input
+                            type="hidden"
+                            id="ar-detail-debit-account-id"
+                            value="155">
+
+                    </div>
+
+
+                    <!-- ==============================================
+                         CREDIT / REVENUE ACCOUNT
+                    =============================================== -->
+
+                    <div class="col-md-6">
+
+                        <label
+                            for="ar-detail-coa"
+                            class="form-label">
+
+                            Credit Account
+                            <span class="text-danger">*</span>
+
+                        </label>
+
+
+                        <select
+                            id="ar-detail-coa"
+                            class="form-select">
+
+                            <option value=""></option>
+
+                        </select>
+
+                    </div>
 
                 </div>
 
@@ -111,7 +146,7 @@ VERSION : 1.0.0
                      DESCRIPTION
                 =================================================== -->
 
-                <div class="mb-3">
+                <div class="mb-3 mt-3">
 
                     <label
                         for="ar-detail-description"
@@ -192,7 +227,6 @@ VERSION : 1.0.0
 
                     </div>
 
-
                 </div>
 
 
@@ -205,6 +239,7 @@ VERSION : 1.0.0
 
                     <!-- ==============================================
                          TAX (+)
+                         OUTPUT TAX
                     =============================================== -->
 
                     <div class="col-md-6">
@@ -233,6 +268,7 @@ VERSION : 1.0.0
 
                     <!-- ==============================================
                          TAX (-)
+                         WITHHOLDING TAX
                     =============================================== -->
 
                     <div class="col-md-6">
@@ -258,7 +294,6 @@ VERSION : 1.0.0
 
                     </div>
 
-
                 </div>
 
 
@@ -266,202 +301,140 @@ VERSION : 1.0.0
                      CALCULATION SUMMARY
                 =================================================== -->
 
-                <div class="border rounded p-3 mt-4">
+                <div
+                    class="card mt-4 bg-light border-0">
 
 
-                    <div class="row g-3">
+                    <div class="card-body">
 
 
                         <!-- ==========================================
                              LINE AMOUNT
                         =========================================== -->
 
-                        <div class="col-md-6">
+                        <div
+                            class="d-flex
+                                   justify-content-between
+                                   align-items-center
+                                   mb-2">
 
-                            <label
-                                for="ar-detail-line-amount"
-                                class="form-label">
+                            <span class="text-muted">
 
                                 Line Amount
 
-                            </label>
+                            </span>
 
 
-                            <input
-                                type="text"
+                            <span
                                 id="ar-detail-line-amount"
-                                class="form-control text-end"
-                                value="0"
-                                readonly>
+                                class="fw-semibold">
+
+                                0
+
+                            </span>
 
                         </div>
 
 
                         <!-- ==========================================
-                             TAX (+) AMOUNT
+                             TAX (+)
                         =========================================== -->
 
-                        <div class="col-md-6">
+                        <div
+                            class="d-flex
+                                   justify-content-between
+                                   align-items-center
+                                   mb-2">
 
-                            <label
-                                for="ar-detail-tax-output-amount"
-                                class="form-label">
+                            <span class="text-muted">
 
-                                Tax (+) Amount
+                                Tax (+)
 
-                            </label>
+                            </span>
 
 
-                            <input
-                                type="text"
+                            <span
                                 id="ar-detail-tax-output-amount"
-                                class="form-control text-end"
-                                value="0"
-                                readonly>
+                                class="fw-semibold">
+
+                                0
+
+                            </span>
 
                         </div>
 
 
                         <!-- ==========================================
-                             TAX (-) AMOUNT
+                             TAX (-)
                         =========================================== -->
 
-                        <div class="col-md-6">
+                        <div
+                            class="d-flex
+                                   justify-content-between
+                                   align-items-center
+                                   mb-2">
 
-                            <label
-                                for="ar-detail-withholding-tax-amount"
-                                class="form-label">
+                            <span class="text-muted">
 
-                                Tax (-) Amount
+                                Tax (-)
 
-                            </label>
+                            </span>
 
 
-                            <input
-                                type="text"
+                            <span
                                 id="ar-detail-withholding-tax-amount"
-                                class="form-control text-end"
-                                value="0"
-                                readonly>
+                                class="fw-semibold">
+
+                                0
+
+                            </span>
 
                         </div>
 
 
                         <!-- ==========================================
-                             TOTAL AMOUNT
+                             TOTAL
                         =========================================== -->
 
-                        <div class="col-md-6">
+                        <div
+                            class="border-top
+                                   pt-2
+                                   mt-2
+                                   d-flex
+                                   justify-content-between
+                                   align-items-center">
 
-                            <label
-                                for="ar-detail-total-amount"
-                                class="form-label">
+                            <span class="fw-semibold">
 
                                 Total Amount
 
-                            </label>
+                            </span>
 
 
-                            <input
-                                type="text"
+                            <span
                                 id="ar-detail-total-amount"
-                                class="form-control text-end fw-semibold"
-                                value="0"
-                                readonly>
+                                class="fw-bold">
+
+                                0
+
+                            </span>
 
                         </div>
 
 
                     </div>
-
 
                 </div>
 
 
                 <!-- ==================================================
-                     JOURNAL PREVIEW
+                     HIDDEN DETAIL ID
                 =================================================== -->
 
-                <div class="alert alert-light border mt-3 mb-0">
-
-
-                    <div class="fw-semibold mb-2">
-
-                        Journal Preview
-
-                    </div>
-
-
-                    <!-- ==============================================
-                         BASE JOURNAL
-                    =============================================== -->
-
-                    <div class="small text-muted mb-1">
-
-                        Base:
-
-                        <strong>
-                            DR PIUTANG USAHA
-                        </strong>
-
-                        <span class="mx-2">
-                            |
-                        </span>
-
-                        <strong>
-                            CR REVENUE ACCOUNT
-                        </strong>
-
-                    </div>
-
-
-                    <!-- ==============================================
-                         TAX PLUS
-                    =============================================== -->
-
-                    <div class="small text-muted mb-1">
-
-                        Tax (+):
-
-                        <strong>
-                            DR PIUTANG USAHA
-                        </strong>
-
-                        <span class="mx-2">
-                            |
-                        </span>
-
-                        <strong>
-                            CR TAX OUTPUT
-                        </strong>
-
-                    </div>
-
-
-                    <!-- ==============================================
-                         TAX MINUS
-                    =============================================== -->
-
-                    <div class="small text-muted">
-
-                        Tax (-):
-
-                        <strong>
-                            DR WITHHOLDING TAX RECEIVABLE
-                        </strong>
-
-                        <span class="mx-2">
-                            |
-                        </span>
-
-                        <strong>
-                            CR PIUTANG USAHA
-                        </strong>
-
-                    </div>
-
-
-                </div>
+                <input
+                    type="hidden"
+                    id="ar-detail-id"
+                    value="">
 
 
             </div>
@@ -474,22 +447,36 @@ VERSION : 1.0.0
             <div class="modal-footer">
 
 
+                <!-- ==============================================
+                     CANCEL
+                =============================================== -->
+
                 <button
                     type="button"
-                    class="btn btn-outline-secondary"
+                    class="btn btn-secondary"
                     data-bs-dismiss="modal">
+
+                    <i
+                        class="fa-solid fa-xmark me-1">
+                    </i>
 
                     Cancel
 
                 </button>
 
 
+                <!-- ==============================================
+                     SAVE DETAIL
+                =============================================== -->
+
                 <button
                     type="button"
-                    id="btn-save-ar-detail"
-                    class="btn btn-primary">
+                    class="btn btn-primary"
+                    id="btn-save-ar-detail">
 
-                    <i class="fa-solid fa-floppy-disk me-1"></i>
+                    <i
+                        class="fa-solid fa-check me-1">
+                    </i>
 
                     Save Detail
 
@@ -501,8 +488,6 @@ VERSION : 1.0.0
 
         </div>
 
-
     </div>
-
 
 </div>
