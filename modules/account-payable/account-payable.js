@@ -1386,41 +1386,139 @@ async generateAPJournal(
         }
 
 
-       
+        /*
+        ==================================================
+        ACCOUNT PAYABLE
+        HUTANG USAHA
+        ==================================================
+        */
 
+        const payableAccountId =
+            39;
+
+
+        if (!payableAccountId) {
+
+            throw new Error(
+                "Account Payable account is not configured."
+            );
+
+        }
 
 
         /*
         ==================================================
-        BUILD JOURNAL DETAILS
+        BUSINESS PARTNER
         ==================================================
         */
 
-        const journalDetails = [];
+        const businessPartnerId =
+            invoice.vendor_id
+                ? Number(
+                    invoice.vendor_id
+                )
+                : null;
 
+
+        /*
+        ==================================================
+        IMPORTANT
+        FORCE RELOAD TAX MASTER FROM DATABASE
+
+        DO NOT RELY ON OLD CACHE
+        ==================================================
+        */
+
+        await this.loadTaxMaster();
+
+
+        /*
+        ==================================================
+        DEBUG TAX MASTER
+        ==================================================
+        */
+
+        console.log(
+            "AP JOURNAL TAX PLUS MASTER:",
+            JSON.stringify(
+                this.taxPlusData,
+                null,
+                2
+            )
+        );
+
+
+        console.log(
+            "AP JOURNAL TAX MINUS MASTER:",
+            JSON.stringify(
+                this.taxMinusData,
+                null,
+                2
+            )
+        );
+
+
+        /*
+        ==================================================
+        JOURNAL DETAILS
+        ==================================================
+        */
+
+        const journalDetails =
+            [];
+
+
+        /*
+        ==================================================
+        LOOP AP DETAILS
+        ==================================================
+        */
 
         for (
             const detail
             of details
         ) {
 
-            const debitAccountId =
+            /*
+            ==============================================
+            DEBUG CURRENT DETAIL
+            ==============================================
+            */
+
+            console.log(
+                "AP JOURNAL CURRENT DETAIL:",
+                JSON.stringify(
+                    detail,
+                    null,
+                    2
+                )
+            );
+
+
+            /*
+            ==============================================
+            BASE TRANSACTION
+            ==============================================
+            */
+
+            const chargeAccountId =
                 Number(
                     detail.charge_account_id
+                    || 0
                 );
 
 
-            const amount =
+            const lineAmount =
                 Number(
                     detail.line_amount
                     || 0
                 );
 
 
-            if (!debitAccountId) {
+            if (!chargeAccountId) {
 
                 throw new Error(
-                    `Account is missing on AP detail: ${
+                    `Debit Account is missing on AP detail: ${
                         detail.description
                         || ""
                     }`
@@ -1429,46 +1527,636 @@ async generateAPJournal(
             }
 
 
+            /*
+            ==============================================
+            BASE JOURNAL
+
+            DR CHARGE ACCOUNT
+            CR HUTANG USAHA
+            ==============================================
+            */
+
             if (
-                amount <= 0
+                lineAmount > 0
             ) {
 
-                continue;
+                journalDetails.push({
+
+                    debit_account_id:
+                        chargeAccountId,
+
+                    credit_account_id:
+                        payableAccountId,
+
+                    business_partner_id:
+                        businessPartnerId,
+
+                    description:
+                        detail.description
+                        ||
+                        invoice.invoice_no
+                        ||
+                        "AP Invoice",
+
+                    amount:
+                        lineAmount
+
+                });
 
             }
 
 
-            journalDetails.push({
+            /*
+            ==================================================
+            TAX (+)
+            ==================================================
+            */
 
-                debit_account_id:
-                    debitAccountId,
+            const taxPlusAmount =
+                Number(
+                    detail.tax_input_amount
+                    || 0
+                );
 
-                credit_account_id:
-                    39,
 
-                business_partner_id:
-                    invoice.vendor_id
-                    ? Number(
-                        invoice.vendor_id
+            const taxPlusRate =
+                Number(
+                    detail.tax_input_rate
+                    || 0
+                );
+
+
+            let taxPlusId =
+                detail.tax_plus_id
+                || null;
+
+
+            let taxPlusAccountId =
+                Number(
+                    detail.tax_plus_account_id
+                    || 0
+                );
+
+
+            let taxPlusName =
+                detail.tax_plus_name
+                || "Tax (+)";
+
+
+            /*
+            ==============================================
+            TAX (+)
+            FIND MASTER BY TAX ID
+            ==============================================
+            */
+
+            let taxPlusMaster =
+                null;
+
+
+            if (
+                taxPlusId
+            ) {
+
+                taxPlusMaster =
+                    this.taxPlusData.find(
+                        tax =>
+                            String(tax.id)
+                            ===
+                            String(taxPlusId)
                     )
-                    : null,
+                    || null;
 
-                description:
-                    detail.description
+            }
+
+
+            /*
+            ==============================================
+            TAX (+)
+            FALLBACK BY RATE
+
+            OLD AP DATA SUPPORT
+            ==============================================
+            */
+
+            if (
+                !taxPlusMaster
+                &&
+                taxPlusRate > 0
+            ) {
+
+                taxPlusMaster =
+                    this.taxPlusData.find(
+                        tax =>
+                            Number(
+                                tax.tax_rate
+                                || 0
+                            )
+                            ===
+                            taxPlusRate
+                    )
+                    || null;
+
+            }
+
+
+            /*
+            ==============================================
+            TAX (+)
+            USE TAX MASTER
+            ==============================================
+            */
+
+            if (
+                taxPlusMaster
+            ) {
+
+                taxPlusId =
+                    taxPlusMaster.id
+                    || taxPlusId;
+
+
+                /*
+                ==========================================
+                IMPORTANT
+
+                TAX MASTER IS SOURCE OF TRUTH
+                ==========================================
+                */
+
+                taxPlusAccountId =
+                    Number(
+                        taxPlusMaster.tax_account_id
+                        ||
+                        taxPlusAccountId
+                        ||
+                        0
+                    );
+
+
+                taxPlusName =
+                    taxPlusMaster.tax_name
                     ||
-                    invoice.invoice_no,
+                    taxPlusName;
 
-                amount:
-                    amount
+            }
 
-            });
+
+            /*
+            ==============================================
+            TAX (+)
+            LAST FALLBACK DIRECT DATABASE BY ID
+            ==============================================
+            */
+
+            if (
+                taxPlusAmount > 0
+                &&
+                !taxPlusAccountId
+                &&
+                taxPlusId
+            ) {
+
+                const freshTax =
+                    await this.taxService.getById(
+                        taxPlusId
+                    );
+
+
+                if (freshTax) {
+
+                    taxPlusAccountId =
+                        Number(
+                            freshTax.tax_account_id
+                            || 0
+                        );
+
+
+                    taxPlusName =
+                        freshTax.tax_name
+                        || taxPlusName;
+
+                }
+
+            }
+
+
+            /*
+            ==============================================
+            TAX (+)
+            DEBUG FINAL RESOLUTION
+            ==============================================
+            */
+
+            console.log(
+                "AP TAX (+) FINAL RESOLUTION:",
+                {
+
+                    detail_tax_plus_id:
+                        detail.tax_plus_id,
+
+                    resolved_tax_plus_id:
+                        taxPlusId,
+
+                    rate:
+                        taxPlusRate,
+
+                    amount:
+                        taxPlusAmount,
+
+                    account_id:
+                        taxPlusAccountId,
+
+                    tax_name:
+                        taxPlusName,
+
+                    master:
+                        taxPlusMaster
+
+                }
+            );
+
+
+            /*
+            ==============================================
+            TAX (+)
+            VALIDATION
+            ==============================================
+            */
+
+            if (
+                taxPlusAmount > 0
+                &&
+                !taxPlusAccountId
+            ) {
+
+                console.error(
+                    "AP TAX (+) ACCOUNT RESOLUTION FAILED:",
+                    {
+
+                        detail,
+
+                        tax_plus_id:
+                            taxPlusId,
+
+                        tax_input_rate:
+                            taxPlusRate,
+
+                        tax_input_amount:
+                            taxPlusAmount,
+
+                        tax_plus_account_id:
+                            taxPlusAccountId,
+
+                        tax_master:
+                            taxPlusMaster,
+
+                        taxPlusData:
+                            this.taxPlusData
+
+                    }
+                );
+
+
+                throw new Error(
+                    `Tax (+) Account is missing for ${taxPlusName}. Check Tax Master configuration.`
+                );
+
+            }
+
+
+            /*
+            ==============================================
+            TAX (+) JOURNAL
+
+            DR PPN MASUKAN
+            CR HUTANG USAHA
+            ==============================================
+            */
+
+            if (
+                taxPlusAmount > 0
+            ) {
+
+                journalDetails.push({
+
+                    debit_account_id:
+                        taxPlusAccountId,
+
+                    credit_account_id:
+                        payableAccountId,
+
+                    business_partner_id:
+                        businessPartnerId,
+
+                    description:
+                        `${taxPlusName} - ${
+                            invoice.invoice_no
+                            || ""
+                        }`,
+
+                    amount:
+                        taxPlusAmount
+
+                });
+
+            }
+
+
+            /*
+            ==================================================
+            TAX (-)
+            ==================================================
+            */
+
+            const taxMinusAmount =
+                Number(
+                    detail.withholding_tax_amount
+                    || 0
+                );
+
+
+            const taxMinusRate =
+                Number(
+                    detail.withholding_tax_rate
+                    || 0
+                );
+
+
+            let taxMinusId =
+                detail.tax_minus_id
+                || null;
+
+
+            let taxMinusAccountId =
+                Number(
+                    detail.tax_minus_account_id
+                    || 0
+                );
+
+
+            let taxMinusName =
+                detail.tax_minus_name
+                || "Tax (-)";
+
+
+            /*
+            ==============================================
+            TAX (-)
+            FIND MASTER BY TAX ID
+            ==============================================
+            */
+
+            let taxMinusMaster =
+                null;
+
+
+            if (
+                taxMinusId
+            ) {
+
+                taxMinusMaster =
+                    this.taxMinusData.find(
+                        tax =>
+                            String(tax.id)
+                            ===
+                            String(taxMinusId)
+                    )
+                    || null;
+
+            }
+
+
+            /*
+            ==============================================
+            TAX (-)
+            FALLBACK BY RATE
+
+            OLD AP DATA SUPPORT
+            ==============================================
+            */
+
+            if (
+                !taxMinusMaster
+                &&
+                taxMinusRate > 0
+            ) {
+
+                taxMinusMaster =
+                    this.taxMinusData.find(
+                        tax =>
+                            Number(
+                                tax.tax_rate
+                                || 0
+                            )
+                            ===
+                            taxMinusRate
+                    )
+                    || null;
+
+            }
+
+
+            /*
+            ==============================================
+            TAX (-)
+            USE TAX MASTER
+            ==============================================
+            */
+
+            if (
+                taxMinusMaster
+            ) {
+
+                taxMinusId =
+                    taxMinusMaster.id
+                    || taxMinusId;
+
+
+                taxMinusAccountId =
+                    Number(
+                        taxMinusMaster.tax_account_id
+                        ||
+                        taxMinusAccountId
+                        ||
+                        0
+                    );
+
+
+                taxMinusName =
+                    taxMinusMaster.tax_name
+                    ||
+                    taxMinusName;
+
+            }
+
+
+            /*
+            ==============================================
+            TAX (-)
+            LAST FALLBACK DIRECT DATABASE BY ID
+            ==============================================
+            */
+
+            if (
+                taxMinusAmount > 0
+                &&
+                !taxMinusAccountId
+                &&
+                taxMinusId
+            ) {
+
+                const freshTax =
+                    await this.taxService.getById(
+                        taxMinusId
+                    );
+
+
+                if (freshTax) {
+
+                    taxMinusAccountId =
+                        Number(
+                            freshTax.tax_account_id
+                            || 0
+                        );
+
+
+                    taxMinusName =
+                        freshTax.tax_name
+                        || taxMinusName;
+
+                }
+
+            }
+
+
+            /*
+            ==============================================
+            TAX (-)
+            DEBUG FINAL RESOLUTION
+            ==============================================
+            */
+
+            console.log(
+                "AP TAX (-) FINAL RESOLUTION:",
+                {
+
+                    detail_tax_minus_id:
+                        detail.tax_minus_id,
+
+                    resolved_tax_minus_id:
+                        taxMinusId,
+
+                    rate:
+                        taxMinusRate,
+
+                    amount:
+                        taxMinusAmount,
+
+                    account_id:
+                        taxMinusAccountId,
+
+                    tax_name:
+                        taxMinusName,
+
+                    master:
+                        taxMinusMaster
+
+                }
+            );
+
+
+            /*
+            ==============================================
+            TAX (-)
+            VALIDATION
+            ==============================================
+            */
+
+            if (
+                taxMinusAmount > 0
+                &&
+                !taxMinusAccountId
+            ) {
+
+                console.error(
+                    "AP TAX (-) ACCOUNT RESOLUTION FAILED:",
+                    {
+
+                        detail,
+
+                        tax_minus_id:
+                            taxMinusId,
+
+                        withholding_tax_rate:
+                            taxMinusRate,
+
+                        withholding_tax_amount:
+                            taxMinusAmount,
+
+                        tax_minus_account_id:
+                            taxMinusAccountId,
+
+                        tax_master:
+                            taxMinusMaster,
+
+                        taxMinusData:
+                            this.taxMinusData
+
+                    }
+                );
+
+
+                throw new Error(
+                    `Tax (-) Account is missing for ${taxMinusName}. Check Tax Master configuration.`
+                );
+
+            }
+
+
+            /*
+            ==============================================
+            TAX (-) JOURNAL
+
+            DR HUTANG USAHA
+            CR HUTANG PPH
+            ==============================================
+            */
+
+            if (
+                taxMinusAmount > 0
+            ) {
+
+                journalDetails.push({
+
+                    debit_account_id:
+                        payableAccountId,
+
+                    credit_account_id:
+                        taxMinusAccountId,
+
+                    business_partner_id:
+                        businessPartnerId,
+
+                    description:
+                        `${taxMinusName} - ${
+                            invoice.invoice_no
+                            || ""
+                        }`,
+
+                    amount:
+                        taxMinusAmount
+
+                });
+
+            }
 
         }
 
 
         /*
         ==================================================
-        VALIDATE DETAIL
+        VALIDATE JOURNAL DETAIL
         ==================================================
         */
 
@@ -1483,66 +2171,81 @@ async generateAPJournal(
         }
 
 
+        /*
+        ==================================================
+        JOURNAL HEADER
+        ==================================================
+        */
+
         const journalHeader = {
 
-    journal_no:
-        "",
+            journal_no:
+                "",
 
-    journal_date:
-        invoice.invoice_date,
+            journal_date:
+                invoice.invoice_date,
 
-    posting_period:
-        invoice.invoice_date
-            ? invoice.invoice_date.substring(
-                0,
-                7
-            )
-            : "",
+            posting_period:
+                invoice.invoice_date
+                    ? invoice.invoice_date.substring(
+                        0,
+                        7
+                    )
+                    : "",
 
-    description:
-        invoice?.description
-        || "",
+            description:
+                invoice.description
+                ||
+                `AP Invoice ${
+                    invoice.invoice_no
+                    || ""
+                }`,
 
+            source_module:
+                "AP",
 
-    /*
-    ==================================================
-    SOURCE DOCUMENT
-    ACCOUNT PAYABLE
-    ==================================================
-    */
+            source_document_type:
+                "AP_INVOICE",
 
-    source_module:
-        "AP",
+            source_document_id:
+                invoice.id,
 
-    source_document_type:
-        "AP_INVOICE",
+            status:
+                "Draft"
 
-    source_document_id:
-        invoice.id,
-
-
-    /*
-    ==================================================
-    STATUS
-    ==================================================
-    */
-
-    status:
-        "Draft"
-
-};
+        };
 
 
         /*
         ==================================================
-        CREATE GL
+        DEBUG FINAL JOURNAL
+        ==================================================
+        */
+
+        console.log(
+            "AP JOURNAL HEADER:",
+            journalHeader
+        );
+
+
+        console.table(
+            journalDetails
+        );
+
+
+        /*
+        ==================================================
+        CREATE GL JOURNAL
         ==================================================
         */
 
         const journal =
             await this.journalService.create(
+
                 journalHeader,
+
                 journalDetails
+
             );
 
 
@@ -1555,6 +2258,12 @@ async generateAPJournal(
         }
 
 
+        /*
+        ==================================================
+        SUCCESS
+        ==================================================
+        */
+
         console.log(
             "AP GL JOURNAL CREATED:",
             journal
@@ -1564,12 +2273,14 @@ async generateAPJournal(
         return journal;
 
     }
+
     catch (error) {
 
         console.error(
             "AccountPayable.generateAPJournal:",
             error
         );
+
 
         throw error;
 
@@ -3575,6 +4286,21 @@ async editInvoiceDetail(id) {
 
         /*
         ==================================================
+        VALIDATION
+        ==================================================
+        */
+
+        if (!id) {
+
+            throw new Error(
+                "Invoice Detail ID is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
         FIND DETAIL
         ==================================================
         */
@@ -3601,7 +4327,7 @@ async editInvoiceDetail(id) {
 
         /*
         ==================================================
-        SET EDIT DETAIL
+        SET EDIT DETAIL STATE
         ==================================================
         */
 
@@ -3612,10 +4338,33 @@ async editInvoiceDetail(id) {
         /*
         ==================================================
         LOAD COA
+        REBUILD TOM SELECT
         ==================================================
         */
 
         await this.loadDetailCOA();
+
+
+        /*
+        ==================================================
+        ENSURE TAX MASTER READY
+        ==================================================
+        */
+
+        if (
+            !Array.isArray(this.taxPlusData)
+            ||
+            !Array.isArray(this.taxMinusData)
+        ) {
+
+            await this.loadTaxMaster();
+
+        }
+        else {
+
+            this.renderTaxMasterOptions();
+
+        }
 
 
         /*
@@ -3645,24 +4394,47 @@ async editInvoiceDetail(id) {
         if (detailId) {
 
             detailId.value =
-                detail.id || "";
+                detail.id
+                || "";
 
         }
 
 
         /*
         ==================================================
-        CHARGE ACCOUNT
+        DEBIT / CHARGE ACCOUNT
+        TOM SELECT
         ==================================================
         */
 
-        if (this.apDetailCOA) {
+        const selectedCOAId =
+            String(
+                detail.charge_account_id
+                || ""
+            );
+
+
+        if (
+            this.apDetailCOASelect
+        ) {
+
+            this.apDetailCOASelect.setValue(
+                selectedCOAId,
+                true
+            );
+
+
+            this.apDetailCOASelect.setTextboxValue(
+                ""
+            );
+
+        }
+        else if (
+            this.apDetailCOA
+        ) {
 
             this.apDetailCOA.value =
-                String(
-                    detail.charge_account_id
-                    || ""
-                );
+                selectedCOAId;
 
         }
 
@@ -3688,11 +4460,15 @@ async editInvoiceDetail(id) {
         ==================================================
         */
 
-        if (this.apDetailQuantity) {
+        if (
+            this.apDetailQuantity
+        ) {
 
             this.apDetailQuantity.value =
-                detail.quantity
-                ?? 1;
+                Number(
+                    detail.quantity
+                    || 1
+                );
 
         }
 
@@ -3703,13 +4479,16 @@ async editInvoiceDetail(id) {
         ==================================================
         */
 
-        if (this.apDetailUnitPrice) {
+        if (
+            this.apDetailUnitPrice
+        ) {
 
             this.apDetailUnitPrice.value =
                 Number(
                     detail.unit_price
                     || 0
-                ).toLocaleString(
+                )
+                .toLocaleString(
                     "id-ID"
                 );
 
@@ -3718,24 +4497,229 @@ async editInvoiceDetail(id) {
 
         /*
         ==================================================
-        TAX INPUT
+        TAX (+)
+        FIND TAX MASTER ID
         ==================================================
         */
 
-        if (this.apDetailTaxInputRate) {
+        let taxPlusId =
+            detail.tax_plus_id
+            || null;
 
-            this.apDetailTaxInputRate.value =
-                Number(
-                    detail.tax_input_rate
-                    || 0
+
+        /*
+        ==================================================
+        FALLBACK FOR OLD AP DATA
+        ==================================================
+        */
+
+        if (
+            !taxPlusId
+            &&
+            Number(
+                detail.tax_input_rate
+                || 0
+            ) > 0
+        ) {
+
+            const taxPlus =
+                this.taxPlusData.find(
+                    tax => {
+
+                        /*
+                        ==================================
+                        PRIORITY NAME
+                        ==================================
+                        */
+
+                        if (
+                            detail.tax_plus_name
+                            &&
+                            String(tax.tax_name)
+                            ===
+                            String(
+                                detail.tax_plus_name
+                            )
+                        ) {
+
+                            return true;
+
+                        }
+
+
+                        /*
+                        ==================================
+                        PRIORITY CODE
+                        ==================================
+                        */
+
+                        if (
+                            detail.tax_plus_code
+                            &&
+                            String(tax.tax_code)
+                            ===
+                            String(
+                                detail.tax_plus_code
+                            )
+                        ) {
+
+                            return true;
+
+                        }
+
+
+                        /*
+                        ==================================
+                        FALLBACK RATE
+                        ==================================
+                        */
+
+                        return (
+                            Number(
+                                tax.tax_rate
+                                || 0
+                            )
+                            ===
+                            Number(
+                                detail.tax_input_rate
+                                || 0
+                            )
+                        );
+
+                    }
                 );
+
+
+            taxPlusId =
+                taxPlus?.id
+                || null;
 
         }
 
 
         /*
         ==================================================
-        WITHHOLDING TAX
+        SET TAX (+)
+        ==================================================
+        */
+
+        if (
+            this.apDetailTaxInputRate
+        ) {
+
+            this.apDetailTaxInputRate.value =
+                taxPlusId
+                    ? String(taxPlusId)
+                    : "";
+
+        }
+
+
+        /*
+        ==================================================
+        TAX (-)
+        FIND TAX MASTER ID
+        ==================================================
+        */
+
+        let taxMinusId =
+            detail.tax_minus_id
+            || null;
+
+
+        /*
+        ==================================================
+        FALLBACK FOR OLD AP DATA
+        ==================================================
+        */
+
+        if (
+            !taxMinusId
+            &&
+            Number(
+                detail.withholding_tax_rate
+                || 0
+            ) > 0
+        ) {
+
+            const taxMinus =
+                this.taxMinusData.find(
+                    tax => {
+
+                        /*
+                        ==================================
+                        PRIORITY NAME
+                        ==================================
+                        */
+
+                        if (
+                            detail.tax_minus_name
+                            &&
+                            String(tax.tax_name)
+                            ===
+                            String(
+                                detail.tax_minus_name
+                            )
+                        ) {
+
+                            return true;
+
+                        }
+
+
+                        /*
+                        ==================================
+                        PRIORITY CODE
+                        ==================================
+                        */
+
+                        if (
+                            detail.tax_minus_code
+                            &&
+                            String(tax.tax_code)
+                            ===
+                            String(
+                                detail.tax_minus_code
+                            )
+                        ) {
+
+                            return true;
+
+                        }
+
+
+                        /*
+                        ==================================
+                        FALLBACK RATE
+                        ==================================
+                        */
+
+                        return (
+                            Number(
+                                tax.tax_rate
+                                || 0
+                            )
+                            ===
+                            Number(
+                                detail.withholding_tax_rate
+                                || 0
+                            )
+                        );
+
+                    }
+                );
+
+
+            taxMinusId =
+                taxMinus?.id
+                || null;
+
+        }
+
+
+        /*
+        ==================================================
+        SET TAX (-)
         ==================================================
         */
 
@@ -3744,10 +4728,9 @@ async editInvoiceDetail(id) {
         ) {
 
             this.apDetailWithholdingTaxRate.value =
-                Number(
-                    detail.withholding_tax_rate
-                    || 0
-                );
+                taxMinusId
+                    ? String(taxMinusId)
+                    : "";
 
         }
 
@@ -3767,14 +4750,13 @@ async editInvoiceDetail(id) {
         ==================================================
         */
 
-        if (this.btnSaveAPDetail) {
+        if (
+            this.btnSaveAPDetail
+        ) {
 
             this.btnSaveAPDetail.innerHTML = `
-
                 <i class="fa-solid fa-floppy-disk me-1"></i>
-
                 Update Detail
-
             `;
 
         }
@@ -3812,9 +4794,29 @@ async editInvoiceDetail(id) {
         modal.show();
 
 
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
         console.log(
             "AP Edit Detail:",
-            detail
+            {
+                id:
+                    detail.id,
+
+                charge_account_id:
+                    detail.charge_account_id,
+
+                tax_plus_id:
+                    taxPlusId,
+
+                tax_minus_id:
+                    taxMinusId,
+
+                detail
+            }
         );
 
     }
@@ -3829,7 +4831,8 @@ async editInvoiceDetail(id) {
 
         this.showError(
             error.message
-            || "Failed to edit invoice detail."
+            ||
+            "Failed to edit invoice detail."
         );
 
     }
@@ -5117,12 +6120,30 @@ renderTaxPlus() {
 
         const taxDetails =
             (this.invoiceDetails || [])
-            .filter(
-                detail =>
-                    Number(
-                        detail.tax_input_amount
-                        || 0
-                    ) > 0
+                .filter(
+                    detail =>
+                        Number(
+                            detail.tax_input_amount
+                            || 0
+                        ) > 0
+                );
+
+
+        /*
+        ==================================================
+        JOURNAL PREVIEW ELEMENTS
+        ==================================================
+        */
+
+        const previewDebit =
+            document.getElementById(
+                "ap-tax-plus-preview-debit"
+            );
+
+
+        const previewCredit =
+            document.getElementById(
+                "ap-tax-plus-preview-credit"
             );
 
 
@@ -5137,21 +6158,42 @@ renderTaxPlus() {
         ) {
 
             body.innerHTML = `
+
                 <tr
                     id="ap-tax-plus-empty">
 
                     <td
                         colspan="7"
-                        class="text-center
-                               text-muted
-                               py-4">
+                        class="text-center text-muted py-4">
 
                         No Tax (+) found from Invoice Details.
 
                     </td>
 
                 </tr>
+
             `;
+
+
+            if (
+                previewDebit
+            ) {
+
+                previewDebit.textContent =
+                    "-";
+
+            }
+
+
+            if (
+                previewCredit
+            ) {
+
+                previewCredit.textContent =
+                    "-";
+
+            }
+
 
             return;
 
@@ -5166,114 +6208,427 @@ renderTaxPlus() {
 
         body.innerHTML =
             taxDetails
-            .map(
-                (
-                    detail,
-                    index
-                ) => {
+                .map(
+                    (
+                        detail,
+                        index
+                    ) => {
 
-                    const taxBase =
-                        Number(
-                            detail.line_amount
-                            || 0
-                        );
+                        /*
+                        ==========================================
+                        TAX BASE
+                        ==========================================
+                        */
 
-
-                    const taxRate =
-                        Number(
-                            detail.tax_input_rate
-                            || 0
-                        );
-
-
-                    const taxAmount =
-                        Number(
-                            detail.tax_input_amount
-                            || 0
-                        );
+                        const taxBase =
+                            Number(
+                                detail.line_amount
+                                || 0
+                            );
 
 
-                    return `
+                        /*
+                        ==========================================
+                        TAX RATE
+                        ==========================================
+                        */
 
-                        <tr>
-
-                            <!-- NO -->
-
-                            <td>
-
-                                ${index + 1}
-
-                            </td>
-
-
-                            <!-- TAX CODE -->
-
-                            <td>
-
-                                TAX (+)
-
-                            </td>
+                        const taxRate =
+                            Number(
+                                detail.tax_input_rate
+                                || 0
+                            );
 
 
-                            <!-- TAX NAME -->
+                        /*
+                        ==========================================
+                        TAX AMOUNT
+                        ==========================================
+                        */
 
-                            <td>
-
-                                Tax Input
-
-                            </td>
-
-
-                            <!-- TAX ACCOUNT -->
-
-                            <td>
-
-                                PIUTANG PPN
-
-                            </td>
+                        const taxAmount =
+                            Number(
+                                detail.tax_input_amount
+                                || 0
+                            );
 
 
-                            <!-- TAX BASE -->
+                        /*
+                        ==========================================
+                        FIND TAX MASTER
+                        PRIORITY 1 : TAX ID
+                        ==========================================
+                        */
 
-                            <td
-                                class="text-end">
-
-                                ${this.formatCurrency(
-                                    taxBase
-                                )}
-
-                            </td>
-
-
-                            <!-- RATE -->
-
-                            <td
-                                class="text-end">
-
-                                ${taxRate}%
-
-                            </td>
+                        let taxMaster =
+                            null;
 
 
-                            <!-- TAX AMOUNT -->
+                        if (
+                            detail.tax_plus_id
+                            &&
+                            Array.isArray(
+                                this.taxPlusData
+                            )
+                        ) {
 
-                            <td
-                                class="text-end
-                                       fw-semibold">
+                            taxMaster =
+                                this.taxPlusData.find(
+                                    tax =>
+                                        String(
+                                            tax.id
+                                        )
+                                        ===
+                                        String(
+                                            detail.tax_plus_id
+                                        )
+                                )
+                                || null;
 
-                                ${this.formatCurrency(
-                                    taxAmount
-                                )}
+                        }
 
-                            </td>
 
-                        </tr>
+                        /*
+                        ==========================================
+                        FALLBACK TAX MASTER BY RATE
+                        ==========================================
+                        */
 
-                    `;
+                        if (
+                            !taxMaster
+                            &&
+                            Array.isArray(
+                                this.taxPlusData
+                            )
+                        ) {
 
-                }
+                            taxMaster =
+                                this.taxPlusData.find(
+                                    tax =>
+                                        Number(
+                                            tax.tax_rate
+                                            || 0
+                                        )
+                                        ===
+                                        taxRate
+                                )
+                                || null;
+
+                        }
+
+
+                        /*
+                        ==========================================
+                        TAX CODE
+                        ==========================================
+                        */
+
+                        const taxCode =
+                            detail.tax_plus_code
+                            ||
+                            taxMaster?.tax_code
+                            ||
+                            "TAX (+)";
+
+
+                        /*
+                        ==========================================
+                        TAX NAME
+                        ==========================================
+                        */
+
+                        const taxName =
+                            detail.tax_plus_name
+                            ||
+                            taxMaster?.tax_name
+                            ||
+                            "Tax Input";
+
+
+                        /*
+                        ==========================================
+                        TAX ACCOUNT ID
+                        ==========================================
+                        */
+
+                        const taxAccountId =
+                            Number(
+                                detail.tax_plus_account_id
+                                ||
+                                taxMaster?.tax_account_id
+                                ||
+                                0
+                            );
+
+
+                        /*
+                        ==========================================
+                        FIND TAX COA
+                        ==========================================
+                        */
+
+                        const taxCOA =
+                            Array.isArray(
+                                this.currentCOA
+                            )
+                                ? this.currentCOA.find(
+                                    account =>
+                                        Number(
+                                            account.id
+                                        )
+                                        ===
+                                        taxAccountId
+                                )
+                                : null;
+
+
+                        /*
+                        ==========================================
+                        TAX ACCOUNT NAME
+                        ==========================================
+                        */
+
+                        const taxAccountName =
+                            taxCOA?.account_name
+                            ||
+                            "PPN MASUKAN";
+
+
+                        /*
+                        ==========================================
+                        RENDER ROW
+                        ==========================================
+                        */
+
+                        return `
+
+                            <tr>
+
+                                <td>
+                                    ${index + 1}
+                                </td>
+
+                                <td>
+                                    ${taxCode}
+                                </td>
+
+                                <td>
+                                    ${taxName}
+                                </td>
+
+                                <td>
+                                    ${taxAccountName}
+                                </td>
+
+                                <td class="text-end">
+
+                                    ${this.formatCurrency(
+                                        taxBase
+                                    )}
+
+                                </td>
+
+                                <td class="text-end">
+
+                                    ${taxRate}%
+
+                                </td>
+
+                                <td
+                                    class="text-end fw-semibold">
+
+                                    ${this.formatCurrency(
+                                        taxAmount
+                                    )}
+
+                                </td>
+
+                            </tr>
+
+                        `;
+
+                    }
+                )
+                .join("");
+
+
+        /*
+        ==================================================
+        JOURNAL PREVIEW
+        ==================================================
+        */
+
+        const firstDetail =
+            taxDetails[0];
+
+
+        const firstTaxRate =
+            Number(
+                firstDetail.tax_input_rate
+                || 0
+            );
+
+
+        let previewTaxMaster =
+            null;
+
+
+        /*
+        ==================================================
+        FIND TAX MASTER BY ID
+        ==================================================
+        */
+
+        if (
+            firstDetail.tax_plus_id
+            &&
+            Array.isArray(
+                this.taxPlusData
             )
-            .join("");
+        ) {
+
+            previewTaxMaster =
+                this.taxPlusData.find(
+                    tax =>
+                        String(
+                            tax.id
+                        )
+                        ===
+                        String(
+                            firstDetail.tax_plus_id
+                        )
+                )
+                || null;
+
+        }
+
+
+        /*
+        ==================================================
+        FALLBACK BY RATE
+        ==================================================
+        */
+
+        if (
+            !previewTaxMaster
+            &&
+            Array.isArray(
+                this.taxPlusData
+            )
+        ) {
+
+            previewTaxMaster =
+                this.taxPlusData.find(
+                    tax =>
+                        Number(
+                            tax.tax_rate
+                            || 0
+                        )
+                        ===
+                        firstTaxRate
+                )
+                || null;
+
+        }
+
+
+        /*
+        ==================================================
+        TAX ACCOUNT ID
+        ==================================================
+        */
+
+        const previewTaxAccountId =
+            Number(
+                firstDetail.tax_plus_account_id
+                ||
+                previewTaxMaster?.tax_account_id
+                ||
+                0
+            );
+
+
+        /*
+        ==================================================
+        FIND TAX COA
+        ==================================================
+        */
+
+        const previewTaxCOA =
+            Array.isArray(
+                this.currentCOA
+            )
+                ? this.currentCOA.find(
+                    account =>
+                        Number(
+                            account.id
+                        )
+                        ===
+                        previewTaxAccountId
+                )
+                : null;
+
+
+        /*
+        ==================================================
+        TAX ACCOUNT NAME
+        ==================================================
+        */
+
+        const previewTaxAccountName =
+            previewTaxCOA?.account_name
+            ||
+            "PPN MASUKAN";
+
+
+        /*
+        ==================================================
+        SET JOURNAL PREVIEW
+        ==================================================
+        */
+
+        if (
+            previewDebit
+        ) {
+
+            previewDebit.textContent =
+                previewTaxAccountName;
+
+        }
+
+
+        if (
+            previewCredit
+        ) {
+
+            previewCredit.textContent =
+                "HUTANG USAHA";
+
+        }
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "AP TAX (+) JOURNAL PREVIEW:",
+            {
+                debit:
+                    previewTaxAccountName,
+
+                credit:
+                    "HUTANG USAHA",
+
+                tax_account_id:
+                    previewTaxAccountId,
+
+                tax_master:
+                    previewTaxMaster
+            }
+        );
 
     }
 
@@ -6020,7 +7375,7 @@ calculateDetail() {
     }
 
 }
-    /*
+   /*
 ======================================================
 ADD INVOICE DETAIL
 ======================================================
@@ -6056,29 +7411,215 @@ async addInvoiceDetail() {
 
         /*
         ==================================================
-        RESET FORM
+        RESET DETAIL MODE
         ==================================================
         */
 
-        this.resetInvoiceDetailForm();
-        
-        if (this.btnSaveAPDetail) {
-
-    this.btnSaveAPDetail.innerHTML = `
-        <i class="fa-solid fa-floppy-disk me-1"></i>
-        Save Detail
-    `;
-
-}
+        this.currentDetailId =
+            null;
 
 
         /*
         ==================================================
-        LOAD COA
+        LOAD / REBUILD COA FIRST
         ==================================================
         */
 
         await this.loadDetailCOA();
+
+
+        /*
+        ==================================================
+        RESET FORM AFTER COA READY
+        ==================================================
+        */
+
+        this.resetInvoiceDetailForm();
+
+
+        /*
+        ==================================================
+        FORCE COA EMPTY
+        ==================================================
+        */
+
+        if (
+            this.apDetailCOASelect
+        ) {
+
+            this.apDetailCOASelect.clear(
+                true
+            );
+
+
+            this.apDetailCOASelect.setTextboxValue(
+                ""
+            );
+
+
+            this.apDetailCOASelect.refreshOptions(
+                false
+            );
+
+        }
+        else if (
+            this.apDetailCOA
+        ) {
+
+            this.apDetailCOA.value =
+                "";
+
+        }
+
+
+        /*
+        ==================================================
+        TAX (+)
+        DEFAULT NO TAX
+        ==================================================
+        */
+
+        if (
+            this.apDetailTaxInputRate
+        ) {
+
+            this.apDetailTaxInputRate.value =
+                "";
+
+        }
+
+
+        /*
+        ==================================================
+        TAX (-)
+        DEFAULT NO TAX
+        ==================================================
+        */
+
+        if (
+            this.apDetailWithholdingTaxRate
+        ) {
+
+            this.apDetailWithholdingTaxRate.value =
+                "";
+
+        }
+
+
+        /*
+        ==================================================
+        RESET DESCRIPTION
+        ==================================================
+        */
+
+        const description =
+            document.getElementById(
+                "ap-detail-description"
+            );
+
+
+        if (description) {
+
+            description.value =
+                "";
+
+        }
+
+
+        /*
+        ==================================================
+        RESET QUANTITY
+        ==================================================
+        */
+
+        if (
+            this.apDetailQuantity
+        ) {
+
+            this.apDetailQuantity.value =
+                "1";
+
+        }
+
+
+        /*
+        ==================================================
+        RESET UNIT PRICE
+        ==================================================
+        */
+
+        if (
+            this.apDetailUnitPrice
+        ) {
+
+            this.apDetailUnitPrice.value =
+                "0";
+
+        }
+
+
+        /*
+        ==================================================
+        RESET CALCULATION
+        ==================================================
+        */
+
+        if (
+            this.apDetailLineAmount
+        ) {
+
+            this.apDetailLineAmount.textContent =
+                "0";
+
+        }
+
+
+        if (
+            this.apDetailTaxInputAmount
+        ) {
+
+            this.apDetailTaxInputAmount.textContent =
+                "0";
+
+        }
+
+
+        if (
+            this.apDetailWithholdingTaxAmount
+        ) {
+
+            this.apDetailWithholdingTaxAmount.textContent =
+                "0";
+
+        }
+
+
+        if (
+            this.apDetailTotalAmount
+        ) {
+
+            this.apDetailTotalAmount.textContent =
+                "0";
+
+        }
+
+
+        /*
+        ==================================================
+        SAVE BUTTON
+        ==================================================
+        */
+
+        if (
+            this.btnSaveAPDetail
+        ) {
+
+            this.btnSaveAPDetail.innerHTML = `
+                <i class="fa-solid fa-floppy-disk me-1"></i>
+                Save Detail
+            `;
+
+        }
 
 
         /*
@@ -6095,6 +7636,11 @@ async addInvoiceDetail() {
 
         modal.show();
 
+
+        console.log(
+            "AP New Detail form reset."
+        );
+
     }
 
     catch (error) {
@@ -6103,6 +7649,7 @@ async addInvoiceDetail() {
             "AccountPayable.addInvoiceDetail:",
             error
         );
+
 
         this.showError(
             "Failed to open Invoice Detail."
@@ -6686,102 +8233,69 @@ resetAddForm() {
     ==================================================
     */
 
-    this.currentInvoiceId = null;
+    this.currentInvoiceId =
+        null;
 
-    this.currentMode = "add";
+    this.currentMode =
+        "add";
 
-    this.currentDetailId = null;
+    this.currentDetailId =
+        null;
 
-    this.pendingDeleteDetailId = null;
+    this.pendingDeleteDetailId =
+        null;
 
-   /*
-==================================================
-DETAIL
-==================================================
-*/
+    this.pendingCompleteAPId =
+        null;
 
-this.invoiceDetails = [];
+    this.pendingPostId =
+        null;
 
-
-/*
-==================================================
-RESET TAX (+) / TAX (-)
-==================================================
-*/
-
-this.resetAPTaxTables();
+    this.pendingVoidId =
+        null;
 
 
-if (this.apDetailBody) {
+    /*
+    ==================================================
+    RESET SELECTED VENDOR / TOP
+    ==================================================
+    */
 
-    this.apDetailBody.innerHTML = `
+    this.selectedVendor =
+        null;
 
-        <tr>
+    this.selectedTopId =
+        null;
 
-            <td
-                colspan="9"
-                class="text-center
-                       text-muted
-                       py-4">
 
-                No detail added.
+    /*
+    ==================================================
+    VENDOR
+    ==================================================
+    */
 
-            </td>
+    if (
+        this.apFormVendor
+    ) {
 
-        </tr>
+        this.apFormVendor.value =
+            "";
 
-    `;
+    }
 
-}
+
     /*
     ==================================================
     TERM OF PAYMENT
     ==================================================
     */
 
-    this.selectedTopId = null;
+    if (
+        this.apFormTop
+    ) {
 
-    if (this.apFormTop) {
-
-        this.apFormTop.value = "";
-
-    }
-    /*
-==================================================
-JOURNAL NO
-==================================================
-*/
-
-if (this.apFormJournalNo) {
-
-    this.apFormJournalNo.value =
-        "";
-
-}
-
-
-    /*
-    ==================================================
-    DATE RECEIVED
-    ==================================================
-    */
-
-    if (this.apFormDateReceived) {
-
-        this.apFormDateReceived.value = "";
-
-    }
-
-
-    /*
-    ==================================================
-    DUE DATE
-    ==================================================
-    */
-
-    if (this.apFormDueDate) {
-
-        this.apFormDueDate.value = "";
+        this.apFormTop.value =
+            "";
 
     }
 
@@ -6792,9 +8306,12 @@ if (this.apFormJournalNo) {
     ==================================================
     */
 
-    if (this.apFormPoNo) {
+    if (
+        this.apFormPoNo
+    ) {
 
-        this.apFormPoNo.value = "";
+        this.apFormPoNo.value =
+            "";
 
     }
 
@@ -6805,9 +8322,28 @@ if (this.apFormJournalNo) {
     ==================================================
     */
 
-    if (this.apFormInvoiceNo) {
+    if (
+        this.apFormInvoiceNo
+    ) {
 
-        this.apFormInvoiceNo.value = "";
+        this.apFormInvoiceNo.value =
+            "";
+
+    }
+
+
+    /*
+    ==================================================
+    JOURNAL NUMBER
+    ==================================================
+    */
+
+    if (
+        this.apFormJournalNo
+    ) {
+
+        this.apFormJournalNo.value =
+            "";
 
     }
 
@@ -6818,9 +8354,44 @@ if (this.apFormJournalNo) {
     ==================================================
     */
 
-    if (this.apFormInvoiceDate) {
+    if (
+        this.apFormInvoiceDate
+    ) {
 
-        this.apFormInvoiceDate.value = "";
+        this.apFormInvoiceDate.value =
+            "";
+
+    }
+
+
+    /*
+    ==================================================
+    DATE RECEIVED
+    ==================================================
+    */
+
+    if (
+        this.apFormDateReceived
+    ) {
+
+        this.apFormDateReceived.value =
+            "";
+
+    }
+
+
+    /*
+    ==================================================
+    DUE DATE
+    ==================================================
+    */
+
+    if (
+        this.apFormDueDate
+    ) {
+
+        this.apFormDueDate.value =
+            "";
 
     }
 
@@ -6831,22 +8402,44 @@ if (this.apFormJournalNo) {
     ==================================================
     */
 
-    if (this.apFormDescription) {
+    if (
+        this.apFormDescription
+    ) {
 
-        this.apFormDescription.value = "";
+        this.apFormDescription.value =
+            "";
 
     }
 
 
-        /*
+    /*
     ==================================================
-    DETAIL
+    RESET INVOICE DETAIL ARRAY
     ==================================================
     */
 
-    
+    this.invoiceDetails =
+        [];
 
-    if (this.apDetailBody) {
+
+    /*
+    ==================================================
+    RESET DETAIL FORM
+    ==================================================
+    */
+
+    this.resetInvoiceDetailForm();
+
+
+    /*
+    ==================================================
+    RESET INVOICE DETAIL TABLE
+    ==================================================
+    */
+
+    if (
+        this.apDetailBody
+    ) {
 
         this.apDetailBody.innerHTML = `
 
@@ -6854,9 +8447,7 @@ if (this.apFormJournalNo) {
 
                 <td
                     colspan="9"
-                    class="text-center
-                        text-muted
-                        py-4">
+                    class="text-center text-muted py-4">
 
                     No detail added.
 
@@ -6868,13 +8459,25 @@ if (this.apFormJournalNo) {
 
     }
 
+
     /*
     ==================================================
-    TOTAL
+    RESET TAX (+) / TAX (-)
     ==================================================
     */
 
-    if (this.apFormSubtotal) {
+    this.resetAPTaxTables();
+
+
+    /*
+    ==================================================
+    RESET TOTAL
+    ==================================================
+    */
+
+    if (
+        this.apFormSubtotal
+    ) {
 
         this.apFormSubtotal.textContent =
             "0";
@@ -6882,7 +8485,9 @@ if (this.apFormJournalNo) {
     }
 
 
-    if (this.apFormTax) {
+    if (
+        this.apFormTax
+    ) {
 
         this.apFormTax.textContent =
             "0";
@@ -6890,7 +8495,9 @@ if (this.apFormJournalNo) {
     }
 
 
-    if (this.apFormWht) {
+    if (
+        this.apFormWht
+    ) {
 
         this.apFormWht.textContent =
             "0";
@@ -6898,15 +8505,73 @@ if (this.apFormJournalNo) {
     }
 
 
-    if (this.apFormTotal) {
+    if (
+        this.apFormTotal
+    ) {
 
         this.apFormTotal.textContent =
             "0";
 
     }
 
-}
 
+    /*
+    ==================================================
+    RESET SAVE BUTTON
+    ==================================================
+    */
+
+    if (
+        this.btnSaveDraft
+    ) {
+
+        this.btnSaveDraft.innerHTML = `
+
+            <i class="fa-solid fa-floppy-disk me-1"></i>
+
+            Save Draft
+
+        `;
+
+    }
+
+
+    /*
+    ==================================================
+    RESET MODAL TITLE
+    ==================================================
+    */
+
+    const modalTitle =
+        document.querySelector(
+            "#accountPayableModal .modal-title"
+        );
+
+
+    if (
+        modalTitle
+    ) {
+
+        modalTitle.textContent =
+            "Add Account Payable";
+
+    }
+
+
+    /*
+    ==================================================
+    RESET MODAL TAB
+    ==================================================
+    */
+
+    this.resetAPModalTab();
+
+
+    console.log(
+        "AP Add Form completely reset."
+    );
+
+}
 /*
 ======================================================
 RESET AP TAX TABLES
@@ -7097,7 +8762,7 @@ resetAPModalTab() {
     }
 
 }
-   /*
+  /*
 ======================================================
 SAVE DRAFT
 ======================================================
@@ -7109,21 +8774,6 @@ async saveDraft() {
 
         console.log(
             "SAVE DRAFT CLICKED"
-        );
-
-        console.log(
-            "AP VENDOR ELEMENT:",
-            this.apFormVendor
-        );
-
-        console.log(
-            "AP VENDOR VALUE:",
-            this.apFormVendor?.value
-        );
-
-        console.log(
-            "AP VENDOR SELECTED:",
-            this.apFormVendor?.selectedOptions?.[0]
         );
 
 
@@ -7187,7 +8837,10 @@ async saveDraft() {
 
 
         if (
-            !this.invoiceDetails ||
+            !Array.isArray(
+                this.invoiceDetails
+            )
+            ||
             !this.invoiceDetails.length
         ) {
 
@@ -7211,11 +8864,12 @@ async saveDraft() {
 
             po_no:
                 this.apFormPoNo?.value
-                ?.trim() || null,
+                    ?.trim()
+                || null,
 
             invoice_no:
                 this.apFormInvoiceNo.value
-                .trim(),
+                    .trim(),
 
             invoice_date:
                 this.apFormInvoiceDate.value,
@@ -7227,9 +8881,9 @@ async saveDraft() {
                 this.apFormDueDate.value,
 
             description:
-                this.apFormDescription
-                    ?.value
-                    ?.trim() || null,
+                this.apFormDescription?.value
+                    ?.trim()
+                || null,
 
             status:
                 "Draft"
@@ -7237,151 +8891,247 @@ async saveDraft() {
         };
 
 
+        /*
+        ==================================================
+        DETAILS
+        ONLY DATABASE COLUMNS
+        ==================================================
+        */
+
+        const details =
+            this.invoiceDetails.map(
+                item => {
+
+                    const chargeAccountId =
+                        Number(
+                            item.account_id
+                            ||
+                            item.charge_account_id
+                            ||
+                            0
+                        );
+
+
+                    return {
+
+                        /*
+                        ======================================
+                        CHARGE ACCOUNT
+                        ======================================
+                        */
+
+                        charge_account_id:
+                            chargeAccountId,
+
+
+                        /*
+                        ======================================
+                        DESCRIPTION
+                        ======================================
+                        */
+
+                        description:
+                            item.description
+                            || null,
+
+
+                        /*
+                        ======================================
+                        QUANTITY
+                        ======================================
+                        */
+
+                        quantity:
+                            Number(
+                                item.quantity
+                                || 1
+                            ),
+
+
+                        /*
+                        ======================================
+                        UNIT PRICE
+                        ======================================
+                        */
+
+                        unit_price:
+                            Number(
+                                item.unit_price
+                                || 0
+                            ),
+
+
+                        /*
+                        ======================================
+                        TAX (+)
+                        ======================================
+                        */
+
+                        tax_plus_id:
+                            item.tax_plus_id
+                                ? Number(
+                                    item.tax_plus_id
+                                )
+                                : null,
+
+                        tax_plus_account_id:
+                            item.tax_plus_account_id
+                                ? Number(
+                                    item.tax_plus_account_id
+                                )
+                                : null,
+
+                        tax_input_rate:
+                            Number(
+                                item.tax_input_rate
+                                || 0
+                            ),
+
+                        tax_input_amount:
+                            Number(
+                                item.tax_input_amount
+                                || 0
+                            ),
+
+
+                        /*
+                        ======================================
+                        TAX (-)
+                        ======================================
+                        */
+
+                        tax_minus_id:
+                            item.tax_minus_id
+                                ? Number(
+                                    item.tax_minus_id
+                                )
+                                : null,
+
+                        tax_minus_account_id:
+                            item.tax_minus_account_id
+                                ? Number(
+                                    item.tax_minus_account_id
+                                )
+                                : null,
+
+                        withholding_tax_rate:
+                            Number(
+                                item.withholding_tax_rate
+                                || 0
+                            ),
+
+                        withholding_tax_amount:
+                            Number(
+                                item.withholding_tax_amount
+                                || 0
+                            ),
+
+
+                        /*
+                        ======================================
+                        AMOUNT
+                        ======================================
+                        */
+
+                        line_amount:
+                            Number(
+                                item.line_amount
+                                || 0
+                            ),
+
+                        total_amount:
+                            Number(
+                                item.total_amount
+                                || 0
+                            )
+
+                    };
+
+                }
+            );
+
+
+        /*
+        ==================================================
+        VALIDATE COA
+        ==================================================
+        */
+
+        const invalidDetail =
+            details.find(
+                detail =>
+                    !Number.isInteger(
+                        detail.charge_account_id
+                    )
+                    ||
+                    detail.charge_account_id <= 0
+            );
+
+
+        if (
+            invalidDetail
+        ) {
+
+            console.error(
+                "INVALID AP DETAIL:",
+                invalidDetail
+            );
+
+
+            return this.showError(
+                "Chart of Account is required for every detail."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
         console.log(
-            "AP HEADER:",
+            "AP SAVE DRAFT HEADER:",
             header
         );
 
 
-        /*
-==================================================
-DETAILS
-==================================================
-*/
-
-const details =
-    this.invoiceDetails.map(
-        item => {
-
-            const chargeAccountId =
-                Number(
-                    item.account_id
-                    || item.charge_account_id
-                    || 0
-                );
-
-
-            return {
-
-                charge_account_id:
-                    chargeAccountId,
-
-                description:
-                    item.description
-                    || null,
-
-                quantity:
-                    Number(
-                        item.quantity || 1
-                    ),
-
-                unit_price:
-                    Number(
-                        item.unit_price || 0
-                    ),
-
-                tax_input_rate:
-                    Number(
-                        item.tax_input_rate || 0
-                    ),
-
-                withholding_tax_rate:
-                    Number(
-                        item.withholding_tax_rate || 0
-                    )
-
-            };
-
-        }
-    );
-
-
-/*
-==================================================
-DEBUG DETAILS
-==================================================
-*/
-
-console.log(
-    "AP DETAILS BEFORE SAVE:",
-    JSON.stringify(
-        details,
-        null,
-        2
-    )
-);
-
-
-/*
-==================================================
-VALIDATE COA
-==================================================
-*/
-
-const invalidDetail =
-    details.find(
-        detail =>
-            !Number.isInteger(
-                detail.charge_account_id
+        console.log(
+            "AP SAVE DRAFT DETAILS:",
+            JSON.stringify(
+                details,
+                null,
+                2
             )
-            ||
-            detail.charge_account_id <= 0
-    );
+        );
 
 
-if (invalidDetail) {
+        /*
+        ==================================================
+        CHECK SUPABASE SESSION
+        ==================================================
+        */
 
-    console.error(
-        "INVALID AP DETAIL:",
-        invalidDetail
-    );
+        const {
+            data: {
+                session
+            }
+        } =
+            await supabase.auth.getSession();
 
-    return this.showError(
-        "Chart of Account is required for every detail."
-    );
 
-}
-/*
-==================================================
-CHECK SUPABASE SESSION
-==================================================
-*/
+        console.log(
+            "AP SAVE SESSION:",
+            session
+        );
 
-const {
-    data: {
-        session
-    }
-} = await supabase.auth.getSession();
-const {
-    data: {
-        user
-    }
-} = await supabase.auth.getUser();
 
-console.log(
-    "SUPABASE SESSION:",
-    session
-);
+        console.log(
+            "AP SAVE ROLE:",
+            session?.user?.role
+        );
 
-console.log(
-    "SUPABASE USER:",
-    user
-);
-
-console.log(
-    "AP SAVE SESSION:",
-    session
-);
-
-console.log(
-    "AP SAVE USER:",
-    session?.user
-);
-
-console.log(
-    "AP SAVE ROLE:",
-    session?.user?.role
-);
 
         /*
         ==================================================
@@ -7391,9 +9141,23 @@ console.log(
 
         const result =
             await this.service.create(
+
                 header,
+
                 details
+
             );
+
+
+        if (
+            !result
+        ) {
+
+            throw new Error(
+                "Failed to create Account Payable."
+            );
+
+        }
 
 
         console.log(
@@ -7414,61 +9178,61 @@ console.log(
             );
 
 
-        if (modalElement) {
+        if (
+            modalElement
+        ) {
 
-            const modal =
-                bootstrap.Modal
-                    .getInstance(
-                        modalElement
-                    );
-
-            modal?.hide();
+            bootstrap.Modal
+                .getInstance(
+                    modalElement
+                )
+                ?.hide();
 
         }
 
 
         /*
-==================================================
-RELOAD DATA
-==================================================
-*/
+        ==================================================
+        RELOAD DATA
+        ==================================================
+        */
 
-await this.loadData();
-
-
-/*
-==================================================
-RESET FORM AFTER SUCCESS
-==================================================
-*/
-
-this.resetAddForm();
+        await this.loadData();
 
 
-/*
-==================================================
-SUCCESS
-==================================================
-*/
+        /*
+        ==================================================
+        RESET FORM
+        ==================================================
+        */
 
-if (
-    typeof this.showSuccess ===
-    "function"
-) {
+        this.resetAddForm();
 
-    this.showSuccess(
-        "Account Payable saved as Draft."
-    );
 
-}
+        /*
+        ==================================================
+        SUCCESS
+        ==================================================
+        */
 
-else {
+        if (
+            typeof this.showSuccess
+            ===
+            "function"
+        ) {
 
-    alert(
-        "Account Payable saved as Draft."
-    );
+            this.showSuccess(
+                "Account Payable saved as Draft."
+            );
 
-}
+        }
+        else {
+
+            alert(
+                "Account Payable saved as Draft."
+            );
+
+        }
 
     }
 
@@ -7481,21 +9245,23 @@ else {
 
 
         if (
-            typeof this.showError ===
+            typeof this.showError
+            ===
             "function"
         ) {
 
             this.showError(
-                error.message ||
+                error.message
+                ||
                 "Failed to save Account Payable."
             );
 
         }
-
         else {
 
             alert(
-                error.message ||
+                error.message
+                ||
                 "Failed to save Account Payable."
             );
 
@@ -7577,7 +9343,9 @@ async saveEdit() {
 
 
         if (
-            !Array.isArray(this.invoiceDetails)
+            !Array.isArray(
+                this.invoiceDetails
+            )
             ||
             !this.invoiceDetails.length
         ) {
@@ -7590,142 +9358,287 @@ async saveEdit() {
 
 
         /*
-==================================================
-GET CURRENT DOCUMENT STATUS
-==================================================
-*/
+        ==================================================
+        GET CURRENT DOCUMENT STATUS
+        ==================================================
+        */
 
-const currentInvoice =
-    this.data.find(
-        item =>
-            String(item.id)
-            ===
-            String(this.currentInvoiceId)
-    );
-
-
-const currentStatus =
-    String(
-        currentInvoice?.status
-        || "Draft"
-    )
-    .trim();
+        const currentInvoice =
+            this.data.find(
+                item =>
+                    String(item.id)
+                    ===
+                    String(
+                        this.currentInvoiceId
+                    )
+            );
 
 
-/*
-==================================================
-PRESERVE VOID STATUS
-==================================================
-
-Draft  → tetap Draft
-Void   → tetap Void
-*/
-
-const editStatus =
-    currentStatus === "Void"
-        ? "Void"
-        : "Draft";
+        const currentStatus =
+            String(
+                currentInvoice?.status
+                || "Draft"
+            )
+            .trim();
 
 
-/*
-==================================================
-HEADER
-==================================================
-*/
+        /*
+        ==================================================
+        PRESERVE VOID STATUS
+        ==================================================
+        */
 
-const header = {
+        const editStatus =
+            currentStatus === "Void"
+                ? "Void"
+                : "Draft";
 
-    vendor_id:
-        this.apFormVendor.value,
 
-    po_no:
-        this.apFormPoNo?.value
-            ?.trim()
-        || null,
+        /*
+        ==================================================
+        HEADER
+        ==================================================
+        */
 
-    invoice_no:
-        this.apFormInvoiceNo.value
-            .trim(),
+        const header = {
 
-    invoice_date:
-        this.apFormInvoiceDate.value,
+            vendor_id:
+                this.apFormVendor.value,
 
-    date_received:
-        this.apFormDateReceived.value,
+            po_no:
+                this.apFormPoNo?.value
+                    ?.trim()
+                || null,
 
-    due_date:
-        this.apFormDueDate.value,
+            invoice_no:
+                this.apFormInvoiceNo.value
+                    .trim(),
 
-    description:
-        this.apFormDescription?.value
-            ?.trim()
-        || null,
+            invoice_date:
+                this.apFormInvoiceDate.value,
 
-    status:
-        editStatus
+            date_received:
+                this.apFormDateReceived.value,
 
-};  
+            due_date:
+                this.apFormDueDate.value,
+
+            description:
+                this.apFormDescription?.value
+                    ?.trim()
+                || null,
+
+            status:
+                editStatus
+
+        };
 
 
         /*
         ==================================================
         DETAILS
+        ONLY DATABASE COLUMNS
         ==================================================
         */
 
         const details =
             this.invoiceDetails.map(
-                item => ({
+                item => {
 
-                    charge_account_id:
+                    const chargeAccountId =
                         Number(
                             item.account_id
                             ||
                             item.charge_account_id
                             ||
                             0
-                        ),
+                        );
 
-                    description:
-                        item.description
-                        || null,
 
-                    quantity:
-                        Number(
-                            item.quantity
-                            || 1
-                        ),
+                    return {
 
-                    unit_price:
-                        Number(
-                            item.unit_price
-                            || 0
-                        ),
+                        /*
+                        ======================================
+                        CHARGE ACCOUNT
+                        ======================================
+                        */
 
-                    tax_input_rate:
-                        Number(
-                            item.tax_input_rate
-                            || 0
-                        ),
+                        charge_account_id:
+                            chargeAccountId,
 
-                    withholding_tax_rate:
-                        Number(
-                            item.withholding_tax_rate
-                            || 0
-                        )
 
-                })
+                        /*
+                        ======================================
+                        DESCRIPTION
+                        ======================================
+                        */
+
+                        description:
+                            item.description
+                            || null,
+
+
+                        /*
+                        ======================================
+                        QUANTITY
+                        ======================================
+                        */
+
+                        quantity:
+                            Number(
+                                item.quantity
+                                || 1
+                            ),
+
+
+                        /*
+                        ======================================
+                        UNIT PRICE
+                        ======================================
+                        */
+
+                        unit_price:
+                            Number(
+                                item.unit_price
+                                || 0
+                            ),
+
+
+                        /*
+                        ======================================
+                        TAX (+)
+                        ======================================
+                        */
+
+                        tax_plus_id:
+                            item.tax_plus_id
+                                ? Number(
+                                    item.tax_plus_id
+                                )
+                                : null,
+
+                        tax_plus_account_id:
+                            item.tax_plus_account_id
+                                ? Number(
+                                    item.tax_plus_account_id
+                                )
+                                : null,
+
+                        tax_input_rate:
+                            Number(
+                                item.tax_input_rate
+                                || 0
+                            ),
+
+                        tax_input_amount:
+                            Number(
+                                item.tax_input_amount
+                                || 0
+                            ),
+
+
+                        /*
+                        ======================================
+                        TAX (-)
+                        ======================================
+                        */
+
+                        tax_minus_id:
+                            item.tax_minus_id
+                                ? Number(
+                                    item.tax_minus_id
+                                )
+                                : null,
+
+                        tax_minus_account_id:
+                            item.tax_minus_account_id
+                                ? Number(
+                                    item.tax_minus_account_id
+                                )
+                                : null,
+
+                        withholding_tax_rate:
+                            Number(
+                                item.withholding_tax_rate
+                                || 0
+                            ),
+
+                        withholding_tax_amount:
+                            Number(
+                                item.withholding_tax_amount
+                                || 0
+                            ),
+
+
+                        /*
+                        ======================================
+                        AMOUNT
+                        ======================================
+                        */
+
+                        line_amount:
+                            Number(
+                                item.line_amount
+                                || 0
+                            ),
+
+                        total_amount:
+                            Number(
+                                item.total_amount
+                                || 0
+                            )
+
+                    };
+
+                }
             );
 
+
+        /*
+        ==================================================
+        VALIDATE CHARGE ACCOUNT
+        ==================================================
+        */
+
+        const invalidDetail =
+            details.find(
+                detail =>
+                    !Number.isInteger(
+                        detail.charge_account_id
+                    )
+                    ||
+                    detail.charge_account_id <= 0
+            );
+
+
+        if (invalidDetail) {
+
+            return this.showError(
+                "Chart of Account is required for every detail."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
 
         console.log(
             "AP UPDATE HEADER:",
             header
         );
 
+
         console.log(
             "AP UPDATE DETAILS:",
-            details
+            JSON.stringify(
+                details,
+                null,
+                2
+            )
         );
 
 
@@ -7737,16 +9650,23 @@ const header = {
 
         const result =
             await this.service.update(
+
                 this.currentInvoiceId,
+
                 header,
+
                 details
+
             );
 
 
-        console.log(
-            "AP UPDATED:",
-            result
-        );
+        if (!result) {
+
+            throw new Error(
+                "Failed to update Account Payable."
+            );
+
+        }
 
 
         /*
@@ -7784,6 +9704,9 @@ const header = {
         this.currentMode =
             "add";
 
+        this.currentDetailId =
+            null;
+
 
         /*
         ==================================================
@@ -7791,7 +9714,9 @@ const header = {
         ==================================================
         */
 
-        if (this.btnSaveDraft) {
+        if (
+            this.btnSaveDraft
+        ) {
 
             this.btnSaveDraft.innerHTML = `
                 <i class="fa-solid fa-floppy-disk me-1"></i>
@@ -7816,8 +9741,8 @@ const header = {
         ==================================================
         */
 
-        console.log(
-            "Account Payable draft updated successfully."
+        this.showSuccess(
+            "Account Payable updated successfully."
         );
 
     }
@@ -7829,9 +9754,11 @@ const header = {
             error
         );
 
+
         this.showError(
             error.message
-            || "Failed to update Account Payable."
+            ||
+            "Failed to update Account Payable."
         );
 
     }
@@ -8058,7 +9985,7 @@ async postInvoice(id) {
 
 }
 
-      /*
+     /*
 ======================================================
 VIEW ACCOUNT PAYABLE
 READ ONLY
@@ -8086,7 +10013,7 @@ async viewInvoice(id) {
 
         /*
         ==================================================
-        LOAD MODAL
+        LOAD MODALS
         ==================================================
         */
 
@@ -8106,6 +10033,184 @@ async viewInvoice(id) {
 
         /*
         ==================================================
+        RESET PREVIOUS VIEW STATE
+        IMPORTANT
+        ==================================================
+        */
+
+        this.currentInvoiceId =
+            null;
+
+        this.currentDetailId =
+            null;
+
+        this.currentMode =
+            "view";
+
+        this.invoiceDetails =
+            [];
+
+        this.selectedVendor =
+            null;
+
+        this.selectedTopId =
+            null;
+
+
+        /*
+        ==================================================
+        CLEAR HEADER FORM
+        ==================================================
+        */
+
+        if (this.apFormVendor) {
+
+            this.apFormVendor.value =
+                "";
+
+        }
+
+
+        if (this.apFormPoNo) {
+
+            this.apFormPoNo.value =
+                "";
+
+        }
+
+
+        if (this.apFormInvoiceNo) {
+
+            this.apFormInvoiceNo.value =
+                "";
+
+        }
+
+
+        if (this.apFormJournalNo) {
+
+            this.apFormJournalNo.value =
+                "";
+
+        }
+
+
+        if (this.apFormInvoiceDate) {
+
+            this.apFormInvoiceDate.value =
+                "";
+
+        }
+
+
+        if (this.apFormDateReceived) {
+
+            this.apFormDateReceived.value =
+                "";
+
+        }
+
+
+        if (this.apFormTop) {
+
+            this.apFormTop.value =
+                "";
+
+        }
+
+
+        if (this.apFormDueDate) {
+
+            this.apFormDueDate.value =
+                "";
+
+        }
+
+
+        if (this.apFormDescription) {
+
+            this.apFormDescription.value =
+                "";
+
+        }
+
+
+        /*
+        ==================================================
+        CLEAR DETAIL TABLE
+        ==================================================
+        */
+
+        if (this.apDetailBody) {
+
+            this.apDetailBody.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="9"
+                        class="text-center text-muted py-4">
+
+                        Loading...
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        }
+
+
+        /*
+        ==================================================
+        RESET TAX TABLE
+        ==================================================
+        */
+
+        this.resetAPTaxTables?.();
+
+
+        /*
+        ==================================================
+        RESET TOTAL
+        ==================================================
+        */
+
+        if (this.apFormSubtotal) {
+
+            this.apFormSubtotal.textContent =
+                "0";
+
+        }
+
+
+        if (this.apFormTax) {
+
+            this.apFormTax.textContent =
+                "0";
+
+        }
+
+
+        if (this.apFormWht) {
+
+            this.apFormWht.textContent =
+                "0";
+
+        }
+
+
+        if (this.apFormTotal) {
+
+            this.apFormTotal.textContent =
+                "0";
+
+        }
+
+
+        /*
+        ==================================================
         LOAD VENDORS
         ==================================================
         */
@@ -8121,6 +10226,8 @@ async viewInvoice(id) {
             await this.loadVendors();
 
         }
+
+
         /*
         ==================================================
         LOAD CHART OF ACCOUNTS
@@ -8132,7 +10239,17 @@ async viewInvoice(id) {
 
         /*
         ==================================================
+        LOAD TAX MASTER
+        ==================================================
+        */
+
+        await this.loadTaxMaster();
+
+
+        /*
+        ==================================================
         LOAD ACCOUNT PAYABLE
+        ALWAYS USE CURRENT CLICKED ID
         ==================================================
         */
 
@@ -8154,178 +10271,266 @@ async viewInvoice(id) {
         const header =
             result.header;
 
+
         const details =
             Array.isArray(
                 result.details
             )
                 ? result.details
                 : [];
-        /*
-==================================================
-GL JOURNAL REFERENCE
-==================================================
-*/
-
-const journalId =
-    header?.gl_journal_id
-    || null;
 
 
-/*
-==================================================
-LOAD JOURNAL NO
-==================================================
-*/
+        if (!header) {
 
-let journalNo = "";
-
-if (journalId) {
-
-    journalNo =
-        await this.getAPJournalNo(
-            journalId
-        );
-
-}
-
-
-/*
-==================================================
-SET JOURNAL NO
-==================================================
-*/
-
-if (this.apFormJournalNo) {
-
-    this.apFormJournalNo.value =
-        journalNo
-        || "";
-
-}
-
-        /*
-==================================================
-SET VIEW STATE
-==================================================
-*/
-
-this.currentInvoiceId =
-    id;
-
-this.currentMode =
-    "view";
-
-
-/*
-==================================================
-MAP INVOICE DETAILS
-==================================================
-*/
-
-this.invoiceDetails =
-    details.map(
-        detail => {
-
-            const coa =
-                detail.mst_chart_of_accounts
-                || {};
-
-
-            return {
-
-                id:
-                    detail.id
-                    ||
-                    crypto.randomUUID(),
-
-                charge_account_id:
-                    Number(
-                        detail.charge_account_id
-                        ||
-                        coa.id
-                        ||
-                        0
-                    ),
-
-                account_code:
-                    detail.account_code
-                    ||
-                    coa.account_code
-                    ||
-                    "",
-
-                account_name:
-                    detail.account_name
-                    ||
-                    coa.account_name
-                    ||
-                    "",
-
-                description:
-                    detail.description
-                    || "",
-
-                quantity:
-                    Number(
-                        detail.quantity
-                        || 0
-                    ),
-
-                unit_price:
-                    Number(
-                        detail.unit_price
-                        || 0
-                    ),
-
-                tax_input_rate:
-                    Number(
-                        detail.tax_input_rate
-                        || 0
-                    ),
-
-                tax_input_amount:
-                    Number(
-                        detail.tax_input_amount
-                        || 0
-                    ),
-
-                withholding_tax_rate:
-                    Number(
-                        detail.withholding_tax_rate
-                        || 0
-                    ),
-
-                withholding_tax_amount:
-                    Number(
-                        detail.withholding_tax_amount
-                        || 0
-                    ),
-
-                line_amount:
-                    Number(
-                        detail.line_amount
-                        || 0
-                    ),
-
-                total_amount:
-                    Number(
-                        detail.total_amount
-                        || 0
-                    )
-
-            };
+            throw new Error(
+                "Account Payable header not found."
+            );
 
         }
-    );
 
 
         /*
         ==================================================
-        HEADER
+        SET CURRENT VIEW ID
+        ONLY AFTER DATA SUCCESSFULLY LOADED
         ==================================================
         */
 
-        if (this.apFormVendor) {
+        this.currentInvoiceId =
+            id;
+
+
+        /*
+        ==================================================
+        GL JOURNAL REFERENCE
+        ==================================================
+        */
+
+        const journalId =
+            header.gl_journal_id
+            || null;
+
+
+        let journalNo =
+            "";
+
+
+        if (
+            journalId
+        ) {
+
+            journalNo =
+                await this.getAPJournalNo(
+                    journalId
+                );
+
+        }
+
+
+        if (
+            this.apFormJournalNo
+        ) {
+
+            this.apFormJournalNo.value =
+                journalNo;
+
+        }
+
+
+        /*
+        ==================================================
+        MAP INVOICE DETAILS
+        ==================================================
+        */
+
+        this.invoiceDetails =
+            details.map(
+                detail => {
+
+                    /*
+                    ==========================================
+                    COA RELATION
+                    ==========================================
+                    */
+
+                    const relationCOA =
+                        detail.charge_account
+                        || {};
+
+
+                    /*
+                    ==========================================
+                    FALLBACK COA MASTER
+                    ==========================================
+                    */
+
+                    const masterCOA =
+                        Array.isArray(
+                            this.currentCOA
+                        )
+                            ? this.currentCOA.find(
+                                account =>
+                                    String(account.id)
+                                    ===
+                                    String(
+                                        detail.charge_account_id
+                                    )
+                            )
+                            : null;
+
+
+                    return {
+
+                        id:
+                            detail.id
+                            ||
+                            crypto.randomUUID(),
+
+                        charge_account_id:
+                            Number(
+                                detail.charge_account_id
+                                ||
+                                relationCOA.id
+                                ||
+                                masterCOA?.id
+                                ||
+                                0
+                            ),
+
+                        account_code:
+                            detail.account_code
+                            ||
+                            relationCOA.account_code
+                            ||
+                            masterCOA?.account_code
+                            ||
+                            "",
+
+                        account_name:
+                            detail.account_name
+                            ||
+                            relationCOA.account_name
+                            ||
+                            masterCOA?.account_name
+                            ||
+                            "",
+
+                        description:
+                            detail.description
+                            || "",
+
+                        quantity:
+                            Number(
+                                detail.quantity
+                                || 0
+                            ),
+
+                        unit_price:
+                            Number(
+                                detail.unit_price
+                                || 0
+                            ),
+
+
+                        /*
+                        ======================================
+                        TAX (+)
+                        ======================================
+                        */
+
+                        tax_plus_id:
+                            detail.tax_plus_id
+                                ? Number(
+                                    detail.tax_plus_id
+                                )
+                                : null,
+
+                        tax_plus_account_id:
+                            detail.tax_plus_account_id
+                                ? Number(
+                                    detail.tax_plus_account_id
+                                )
+                                : null,
+
+                        tax_input_rate:
+                            Number(
+                                detail.tax_input_rate
+                                || 0
+                            ),
+
+                        tax_input_amount:
+                            Number(
+                                detail.tax_input_amount
+                                || 0
+                            ),
+
+
+                        /*
+                        ======================================
+                        TAX (-)
+                        ======================================
+                        */
+
+                        tax_minus_id:
+                            detail.tax_minus_id
+                                ? Number(
+                                    detail.tax_minus_id
+                                )
+                                : null,
+
+                        tax_minus_account_id:
+                            detail.tax_minus_account_id
+                                ? Number(
+                                    detail.tax_minus_account_id
+                                )
+                                : null,
+
+                        withholding_tax_rate:
+                            Number(
+                                detail.withholding_tax_rate
+                                || 0
+                            ),
+
+                        withholding_tax_amount:
+                            Number(
+                                detail.withholding_tax_amount
+                                || 0
+                            ),
+
+
+                        /*
+                        ======================================
+                        AMOUNT
+                        ======================================
+                        */
+
+                        line_amount:
+                            Number(
+                                detail.line_amount
+                                || 0
+                            ),
+
+                        total_amount:
+                            Number(
+                                detail.total_amount
+                                || 0
+                            )
+
+                    };
+
+                }
+            );
+
+
+        /*
+        ==================================================
+        VENDOR
+        ==================================================
+        */
+
+        if (
+            this.apFormVendor
+        ) {
 
             this.apFormVendor.value =
                 String(
@@ -8350,13 +10555,17 @@ this.invoiceDetails =
                     String(
                         header.vendor_id
                     )
-            );
+            )
+            || null;
 
 
-        if (vendor) {
+        if (
+            vendor
+        ) {
 
             this.selectedVendor =
                 vendor;
+
 
             this.renderVendorTOP(
                 vendor
@@ -8366,6 +10575,12 @@ this.invoiceDetails =
         else if (
             this.apFormTop
         ) {
+
+            this.selectedVendor =
+                null;
+
+            this.selectedTopId =
+                null;
 
             this.apFormTop.value =
                 "No Term of Payment";
@@ -8379,7 +10594,9 @@ this.invoiceDetails =
         ==================================================
         */
 
-        if (this.apFormPoNo) {
+        if (
+            this.apFormPoNo
+        ) {
 
             this.apFormPoNo.value =
                 header.po_no
@@ -8394,14 +10611,15 @@ this.invoiceDetails =
         ==================================================
         */
 
-        if (this.apFormInvoiceNo) {
+        if (
+            this.apFormInvoiceNo
+        ) {
 
             this.apFormInvoiceNo.value =
                 header.invoice_no
                 || "";
 
         }
-
 
 
         /*
@@ -8483,6 +10701,33 @@ this.invoiceDetails =
 
         /*
         ==================================================
+        RENDER TAX (+)
+        ==================================================
+        */
+
+        this.renderTaxPlus();
+
+
+        /*
+        ==================================================
+        RENDER TAX (-)
+        ==================================================
+        */
+
+        this.renderTaxMinus();
+
+
+        /*
+        ==================================================
+        UPDATE SUMMARY
+        ==================================================
+        */
+
+        this.updateInvoiceSummary();
+
+
+        /*
+        ==================================================
         READ ONLY
         ==================================================
         */
@@ -8490,19 +10735,12 @@ this.invoiceDetails =
         const viewFields = [
 
             this.apFormVendor,
-
             this.apFormPoNo,
-
             this.apFormInvoiceNo,
-
             this.apFormInvoiceDate,
-
             this.apFormDateReceived,
-
             this.apFormTop,
-
             this.apFormDueDate,
-
             this.apFormDescription
 
         ];
@@ -8511,15 +10749,19 @@ this.invoiceDetails =
         viewFields.forEach(
             field => {
 
-                if (field) {
+                if (!field) {
 
-                    field.disabled =
-                        true;
-
-                    field.readOnly =
-                        true;
+                    return;
 
                 }
+
+
+                field.disabled =
+                    true;
+
+
+                field.readOnly =
+                    true;
 
             }
         );
@@ -8579,6 +10821,15 @@ this.invoiceDetails =
 
         /*
         ==================================================
+        RESET TAB TO HEADER
+        ==================================================
+        */
+
+        this.resetAPModalTab();
+
+
+        /*
+        ==================================================
         MODAL TITLE
         ==================================================
         */
@@ -8595,7 +10846,9 @@ this.invoiceDetails =
             );
 
 
-        if (titleElement) {
+        if (
+            titleElement
+        ) {
 
             titleElement.innerHTML = `
                 <i class="fa-solid fa-eye me-2"></i>
@@ -8611,7 +10864,9 @@ this.invoiceDetails =
             );
 
 
-        if (subtitleElement) {
+        if (
+            subtitleElement
+        ) {
 
             subtitleElement.textContent =
                 "View Account Payable";
@@ -8625,31 +10880,53 @@ this.invoiceDetails =
         ==================================================
         */
 
-        if (modalElement) {
+        if (
+            modalElement
+        ) {
 
             const modal =
-                bootstrap.Modal
-                    .getOrCreateInstance(
-                        modalElement
-                    );
+                bootstrap.Modal.getOrCreateInstance(
+                    modalElement
+                );
+
 
             modal.show();
 
         }
 
 
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
         console.log(
-            "View Account Payable:",
-            id
+            "AP VIEW LOADED:",
+            {
+                requested_id:
+                    id,
+
+                loaded_id:
+                    header.id,
+
+                invoice_no:
+                    header.invoice_no,
+
+                detail_count:
+                    this.invoiceDetails.length
+            }
         );
 
     }
+
     catch (error) {
 
         console.error(
             "AccountPayable.viewInvoice:",
             error
         );
+
 
         this.showError(
             error.message
@@ -8658,10 +10935,8 @@ this.invoiceDetails =
         );
 
     }
-    
 
 }
-
 /*
 ======================================================
 GET GL JOURNAL NUMBER
@@ -8728,7 +11003,7 @@ async getAPJournalNo(
 
 /*
 ======================================================
-EDIT
+EDIT ACCOUNT PAYABLE
 ======================================================
 */
 
@@ -8753,7 +11028,7 @@ async editInvoice(id) {
 
         /*
         ==================================================
-        LOAD MODAL
+        LOAD MODALS
         ==================================================
         */
 
@@ -8778,7 +11053,9 @@ async editInvoice(id) {
         */
 
         if (
-            !Array.isArray(this.vendorData)
+            !Array.isArray(
+                this.vendorData
+            )
             ||
             !this.vendorData.length
         ) {
@@ -8790,12 +11067,33 @@ async editInvoice(id) {
 
         /*
         ==================================================
-        LOAD INVOICE
+        LOAD COA
+        REQUIRED FOR ACCOUNT DISPLAY / EDIT DETAIL
+        ==================================================
+        */
+
+        await this.loadDetailCOA();
+
+
+        /*
+        ==================================================
+        LOAD TAX MASTER
+        ==================================================
+        */
+
+        await this.loadTaxMaster();
+
+
+        /*
+        ==================================================
+        LOAD ACCOUNT PAYABLE
         ==================================================
         */
 
         const result =
-            await this.service.getById(id);
+            await this.service.getById(
+                id
+            );
 
 
         if (!result) {
@@ -8808,64 +11106,58 @@ async editInvoice(id) {
 
 
         const header =
-    result.header;
-    
+            result.header;
 
-const details =
-    Array.isArray(result.details)
-        ? result.details
-        : [];
+
+        const details =
+            Array.isArray(
+                result.details
+            )
+                ? result.details
+                : [];
+
+
         /*
-==================================================
-GL JOURNAL REFERENCE
-==================================================
-*/
+        ==================================================
+        VALIDATE HEADER
+        ==================================================
+        */
 
-const journalId =
-    header.gl_journal_id;
-/*
-==================================================
-LOAD JOURNAL NO
-==================================================
-*/
+        if (!header) {
 
-let journalNo = "";
+            throw new Error(
+                "Account Payable header not found."
+            );
 
-if (journalId) {
-
-    journalNo =
-        await this.getAPJournalNo(
-            journalId
-        );
-
-}
+        }
 
 
-/*
-==================================================
-CHECK CURRENT STATUS
-Draft / Void CAN BE EDITED
-==================================================
-*/
+        /*
+        ==================================================
+        CHECK CURRENT STATUS
+        Draft / Void CAN BE EDITED
+        ==================================================
+        */
 
-const currentStatus =
-    String(
-        header?.status || "Draft"
-    )
-    .trim();
+        const currentStatus =
+            String(
+                header.status
+                || "Draft"
+            )
+            .trim();
 
 
-if (
-    currentStatus !== "Draft"
-    &&
-    currentStatus !== "Void"
-) {
+        if (
+            currentStatus !== "Draft"
+            &&
+            currentStatus !== "Void"
+        ) {
 
-    throw new Error(
-        "Only Draft or Void Account Payable can be edited."
-    );
+            throw new Error(
+                "Only Draft or Void Account Payable can be edited."
+            );
 
-}
+        }
 
 
         /*
@@ -8877,17 +11169,28 @@ if (
         this.currentInvoiceId =
             id;
 
+
         this.currentMode =
             "edit";
-       
+
+
+        this.currentDetailId =
+            null;
+
+
+        this.pendingDeleteDetailId =
+            null;
+
 
         /*
         ==================================================
-        HEADER FORM
+        VENDOR
         ==================================================
         */
 
-        if (this.apFormVendor) {
+        if (
+            this.apFormVendor
+        ) {
 
             this.apFormVendor.value =
                 String(
@@ -8899,56 +11202,62 @@ if (
 
 
         /*
-==================================================
-TERM OF PAYMENT
-==================================================
-*/
+        ==================================================
+        FIND VENDOR
+        ==================================================
+        */
 
-const editVendor =
-    this.vendorData.find(
-        item =>
-            String(item.id)
-            ===
-            String(header.vendor_id)
-    );
-
-
-if (editVendor) {
-
-    /*
-    ==============================================
-    STORE SELECTED VENDOR
-    ==============================================
-    */
-
-    this.selectedVendor =
-        editVendor;
+        const editVendor =
+            this.vendorData.find(
+                item =>
+                    String(item.id)
+                    ===
+                    String(
+                        header.vendor_id
+                    )
+            )
+            || null;
 
 
-    /*
-    ==============================================
-    RENDER VENDOR TERM OF PAYMENT
-    ==============================================
-    */
+        /*
+        ==================================================
+        TERM OF PAYMENT
+        ==================================================
+        */
 
-    this.renderVendorTOP(
-        editVendor
-    );
+        if (
+            editVendor
+        ) {
 
-}
-else {
+            this.selectedVendor =
+                editVendor;
 
-    if (this.apFormTop) {
 
-        this.apFormTop.value =
-            "No Term of Payment";
+            this.renderVendorTOP(
+                editVendor
+            );
 
-    }
+        }
+        else {
 
-    this.selectedTopId =
-        null;
+            this.selectedVendor =
+                null;
 
-}
+
+            this.selectedTopId =
+                null;
+
+
+            if (
+                this.apFormTop
+            ) {
+
+                this.apFormTop.value =
+                    "No Term of Payment";
+
+            }
+
+        }
 
 
         /*
@@ -8957,7 +11266,9 @@ else {
         ==================================================
         */
 
-        if (this.apFormPoNo) {
+        if (
+            this.apFormPoNo
+        ) {
 
             this.apFormPoNo.value =
                 header.po_no
@@ -8972,26 +11283,53 @@ else {
         ==================================================
         */
 
-        if (this.apFormInvoiceNo) {
+        if (
+            this.apFormInvoiceNo
+        ) {
 
             this.apFormInvoiceNo.value =
                 header.invoice_no
                 || "";
 
         }
+
+
         /*
-==================================================
-JOURNAL NO
-==================================================
-*/
+        ==================================================
+        GL JOURNAL NO
+        ==================================================
+        */
 
-if (this.apFormJournalNo) {
+        const journalId =
+            header.gl_journal_id
+            || null;
 
-    this.apFormJournalNo.value =
-        header.journal_no
-        || "";
 
-}
+        let journalNo =
+            "";
+
+
+        if (
+            journalId
+        ) {
+
+            journalNo =
+                await this.getAPJournalNo(
+                    journalId
+                );
+
+        }
+
+
+        if (
+            this.apFormJournalNo
+        ) {
+
+            this.apFormJournalNo.value =
+                journalNo
+                || "";
+
+        }
 
 
         /*
@@ -9000,7 +11338,9 @@ if (this.apFormJournalNo) {
         ==================================================
         */
 
-        if (this.apFormInvoiceDate) {
+        if (
+            this.apFormInvoiceDate
+        ) {
 
             this.apFormInvoiceDate.value =
                 header.invoice_date
@@ -9015,7 +11355,9 @@ if (this.apFormJournalNo) {
         ==================================================
         */
 
-        if (this.apFormDateReceived) {
+        if (
+            this.apFormDateReceived
+        ) {
 
             this.apFormDateReceived.value =
                 header.date_received
@@ -9030,7 +11372,9 @@ if (this.apFormJournalNo) {
         ==================================================
         */
 
-        if (this.apFormDueDate) {
+        if (
+            this.apFormDueDate
+        ) {
 
             this.apFormDueDate.value =
                 header.due_date
@@ -9045,7 +11389,9 @@ if (this.apFormJournalNo) {
         ==================================================
         */
 
-        if (this.apFormDescription) {
+        if (
+            this.apFormDescription
+        ) {
 
             this.apFormDescription.value =
                 header.description
@@ -9056,7 +11402,7 @@ if (this.apFormJournalNo) {
 
         /*
         ==================================================
-        DETAILS
+        MAP DETAILS
         ==================================================
         */
 
@@ -9064,35 +11410,115 @@ if (this.apFormJournalNo) {
             details.map(
                 detail => {
 
-                    const coa =
-                        detail.mst_chart_of_accounts
+                    /*
+                    ==========================================
+                    COA FROM EXPLICIT RELATION
+                    ==========================================
+                    */
+
+                    const relationCOA =
+                        detail.charge_account
                         || {};
+
+
+                    /*
+                    ==========================================
+                    FALLBACK COA FROM MASTER
+                    ==========================================
+                    */
+
+                    const masterCOA =
+                        this.currentCOA.find(
+                            account =>
+                                String(account.id)
+                                ===
+                                String(
+                                    detail.charge_account_id
+                                )
+                        )
+                        || {};
+
+
+                    /*
+                    ==========================================
+                    FINAL COA
+                    ==========================================
+                    */
+
+                    const accountCode =
+                        detail.account_code
+                        ||
+                        relationCOA.account_code
+                        ||
+                        masterCOA.account_code
+                        ||
+                        "";
+
+
+                    const accountName =
+                        detail.account_name
+                        ||
+                        relationCOA.account_name
+                        ||
+                        masterCOA.account_name
+                        ||
+                        "";
+
 
                     return {
 
+                        /*
+                        ======================================
+                        ID
+                        ======================================
+                        */
+
                         id:
                             detail.id
-                            || crypto.randomUUID(),
+                            ||
+                            crypto.randomUUID(),
+
+
+                        /*
+                        ======================================
+                        CHARGE ACCOUNT
+                        ======================================
+                        */
 
                         charge_account_id:
                             Number(
                                 detail.charge_account_id
-                                || 0
+                                ||
+                                relationCOA.id
+                                ||
+                                masterCOA.id
+                                ||
+                                0
                             ),
 
                         account_code:
-                            detail.account_code
-                            || coa.account_code
-                            || "",
+                            accountCode,
 
                         account_name:
-                            detail.account_name
-                            || coa.account_name
-                            || "",
+                            accountName,
+
+
+                        /*
+                        ======================================
+                        DESCRIPTION
+                        ======================================
+                        */
 
                         description:
                             detail.description
                             || "",
+
+
+                        /*
+                        ======================================
+                        QUANTITY
+                        ======================================
+                        */
 
                         quantity:
                             Number(
@@ -9100,11 +11526,47 @@ if (this.apFormJournalNo) {
                                 || 1
                             ),
 
+
+                        /*
+                        ======================================
+                        UNIT PRICE
+                        ======================================
+                        */
+
                         unit_price:
                             Number(
                                 detail.unit_price
                                 || 0
                             ),
+
+
+                        /*
+                        ======================================
+                        TAX (+)
+                        ======================================
+                        */
+
+                        tax_plus_id:
+                            detail.tax_plus_id
+                                ? Number(
+                                    detail.tax_plus_id
+                                )
+                                : null,
+
+                        tax_plus_code:
+                            detail.tax_plus_code
+                            || "",
+
+                        tax_plus_name:
+                            detail.tax_plus_name
+                            || "",
+
+                        tax_plus_account_id:
+                            detail.tax_plus_account_id
+                                ? Number(
+                                    detail.tax_plus_account_id
+                                )
+                                : null,
 
                         tax_input_rate:
                             Number(
@@ -9118,6 +11580,35 @@ if (this.apFormJournalNo) {
                                 || 0
                             ),
 
+
+                        /*
+                        ======================================
+                        TAX (-)
+                        ======================================
+                        */
+
+                        tax_minus_id:
+                            detail.tax_minus_id
+                                ? Number(
+                                    detail.tax_minus_id
+                                )
+                                : null,
+
+                        tax_minus_code:
+                            detail.tax_minus_code
+                            || "",
+
+                        tax_minus_name:
+                            detail.tax_minus_name
+                            || "",
+
+                        tax_minus_account_id:
+                            detail.tax_minus_account_id
+                                ? Number(
+                                    detail.tax_minus_account_id
+                                )
+                                : null,
+
                         withholding_tax_rate:
                             Number(
                                 detail.withholding_tax_rate
@@ -9129,6 +11620,13 @@ if (this.apFormJournalNo) {
                                 detail.withholding_tax_amount
                                 || 0
                             ),
+
+
+                        /*
+                        ======================================
+                        AMOUNT
+                        ======================================
+                        */
 
                         line_amount:
                             Number(
@@ -9150,15 +11648,61 @@ if (this.apFormJournalNo) {
 
         /*
         ==================================================
+        DEBUG MAPPED DETAILS
+        ==================================================
+        */
+
+        console.log(
+            "AP EDIT DETAILS MAPPED:",
+            JSON.stringify(
+                this.invoiceDetails,
+                null,
+                2
+            )
+        );
+
+
+        /*
+        ==================================================
         RENDER DETAILS
         ==================================================
         */
 
-        
         this.renderInvoiceDetails();
+
+
+        /*
+        ==================================================
+        RENDER TAX (+)
+        ==================================================
+        */
+
+        this.renderTaxPlus();
+
+
+        /*
+        ==================================================
+        RENDER TAX (-)
+        ==================================================
+        */
+
+        this.renderTaxMinus();
+
+
+        /*
+        ==================================================
+        RESET DETAIL FORM
+        PREVENT PREVIOUS EDIT DETAIL HISTORY
+        ==================================================
+        */
+
+        this.resetInvoiceDetailForm();
+
+
         /*
         ==================================================
         RESET TAB
+        START FROM HEADER INFO
         ==================================================
         */
 
@@ -9171,7 +11715,9 @@ if (this.apFormJournalNo) {
         ==================================================
         */
 
-        if (this.btnSaveDraft) {
+        if (
+            this.btnSaveDraft
+        ) {
 
             this.btnSaveDraft.innerHTML = `
                 <i class="fa-solid fa-floppy-disk me-1"></i>
@@ -9188,19 +11734,28 @@ if (this.apFormJournalNo) {
         */
 
         const modal =
-    bootstrap.Modal.getOrCreateInstance(
-        this.accountPayableModal
-    );
+            bootstrap.Modal.getOrCreateInstance(
+                this.accountPayableModal
+            );
 
 
+        modal.show();
 
 
-modal.show();
-
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
 
         console.log(
             "AP EDIT LOADED:",
-            result
+            {
+                id,
+                header,
+                details:
+                    this.invoiceDetails
+            }
         );
 
     }
@@ -9212,15 +11767,16 @@ modal.show();
             error
         );
 
+
         this.showError(
             error.message
-            || "Failed to load Account Payable."
+            ||
+            "Failed to load Account Payable."
         );
 
     }
 
 }
-
 
 
   /*

@@ -124,199 +124,322 @@ get STATUS() {
 
 
     /*
-    ======================================================
-    GET BY ID
-    ======================================================
-    */
+======================================================
+GET BY ID
+======================================================
+*/
 
-    async getById(id) {
+async getById(id) {
 
-        try {
+    try {
 
-            if (!id) {
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
 
-                throw new Error(
-                    "Account Payable ID is required."
-                );
+        if (!id) {
 
-            }
+            throw new Error(
+                "Account Payable ID is required."
+            );
+
+        }
 
 
-            /*
-            ==================================================
-            HEADER
-            ==================================================
-            */
+        /*
+        ==================================================
+        HEADER
+        ==================================================
+        */
+
+        const {
+
+            data: header,
+
+            error: headerError
+
+        } = await supabase
+
+            .from(
+                this.table
+            )
+
+            .select(`
+                *,
+                mst_business_partner (
+                    id,
+                    bp_code,
+                    bp_name,
+                    bp_type,
+                    top_id,
+                    is_active
+                )
+            `)
+
+            .eq(
+                "id",
+                id
+            )
+
+            .single();
+
+
+        if (headerError) {
+
+            console.error(
+                "AP GET BY ID HEADER ERROR:",
+                {
+                    message:
+                        headerError.message,
+
+                    details:
+                        headerError.details,
+
+                    hint:
+                        headerError.hint,
+
+                    code:
+                        headerError.code
+                }
+            );
+
+
+            throw headerError;
+
+        }
+
+
+        /*
+        ==================================================
+        GL JOURNAL
+        ==================================================
+        */
+
+        let glJournal =
+            null;
+
+
+        if (
+            header?.gl_journal_id
+        ) {
 
             const {
 
-                data: header,
+                data,
 
-                error: headerError
+                error
 
             } = await supabase
 
-                .from(this.table)
+                .from(
+                    TABLE.GL_JOURNAL
+                )
 
                 .select(`
-                    *,
-                    mst_business_partner (
-                        id,
-                        bp_code,
-                        bp_name,
-                        bp_type,
-                        top_id,
-                        is_active
-                    )
+                    id,
+                    journal_no,
+                    journal_date,
+                    description,
+                    status
                 `)
 
                 .eq(
                     "id",
-                    id
+                    header.gl_journal_id
                 )
 
-                .single();
+                .maybeSingle();
 
 
-            if (headerError) {
+            if (error) {
 
-                throw headerError;
+                console.error(
+                    "AP GET BY ID GL JOURNAL ERROR:",
+                    {
+                        message:
+                            error.message,
+
+                        details:
+                            error.details,
+
+                        hint:
+                            error.hint,
+
+                        code:
+                            error.code
+                    }
+                );
+
+
+                throw error;
 
             }
 
-            /*
-==================================================
-GL JOURNAL
-==================================================
-*/
 
-let glJournal = null;
+            glJournal =
+                data
+                || null;
 
-
-if (
-    header?.gl_journal_id
-) {
-
-    const {
-
-        data,
-        error
-
-    } = await supabase
-
-        .from(
-            TABLE.GL_JOURNAL
-        )
-
-        .select(`
-            id,
-            journal_no,
-            journal_date,
-            description,
-            status
-        `)
-
-        .eq(
-            "id",
-            header.gl_journal_id
-        )
-
-        .maybeSingle();
+        }
 
 
-    if (error) {
+        /*
+        ==================================================
+        DETAIL
+        ==================================================
+
+        IMPORTANT:
+        DO NOT EMBED mst_chart_of_accounts HERE.
+
+        trx_account_payable_detail now has multiple
+        references to mst_chart_of_accounts:
+
+        - charge_account_id
+        - tax_plus_account_id
+        - tax_minus_account_id
+
+        Using:
+
+        mst_chart_of_accounts (...)
+
+        can become ambiguous in PostgREST.
+        ==================================================
+        */
+
+        const {
+
+            data: details,
+
+            error: detailError
+
+        } = await supabase
+
+            .from(
+                this.detailTable
+            )
+
+            .select(
+                "*"
+            )
+
+            .eq(
+                "account_payable_id",
+                id
+            )
+
+            .order(
+                "created_at",
+                {
+                    ascending:
+                        true
+                }
+            );
+
+
+        if (detailError) {
+
+            console.error(
+                "AP GET BY ID DETAIL ERROR:",
+                {
+                    message:
+                        detailError.message,
+
+                    details:
+                        detailError.details,
+
+                    hint:
+                        detailError.hint,
+
+                    code:
+                        detailError.code
+                }
+            );
+
+
+            throw detailError;
+
+        }
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "AP GET BY ID HEADER:",
+            header
+        );
+
+
+        console.log(
+            "AP GET BY ID GL JOURNAL:",
+            glJournal
+        );
+
+
+        console.log(
+            "AP GET BY ID DETAILS:",
+            details
+        );
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
+
+        return {
+
+            header: {
+
+                ...header,
+
+                gl_journal:
+                    glJournal
+
+            },
+
+            details:
+                details
+                || []
+
+        };
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountPayableService.getById ERROR:",
+            {
+                message:
+                    error?.message,
+
+                details:
+                    error?.details,
+
+                hint:
+                    error?.hint,
+
+                code:
+                    error?.code,
+
+                raw:
+                    error
+            }
+        );
+
 
         throw error;
 
     }
 
-
-    glJournal =
-        data
-        || null;
-
 }
-            /*
-            ==================================================
-            DETAIL
-            ==================================================
-            */
-
-            const {
-
-                data: details,
-
-                error: detailError
-
-            } = await supabase
-
-                .from(this.detailTable)
-
-                .select(`
-                    *,
-                    mst_chart_of_accounts (
-                        id,
-                        account_code,
-                        account_name,
-                        parent_id,
-                        level,
-                        normal_balance,
-                        is_header,
-                        allow_transaction,
-                        status
-                    )
-                `)
-
-                .eq(
-                    "account_payable_id",
-                    id
-                )
-
-                .order(
-                    "created_at",
-                    {
-                        ascending: true
-                    }
-                );
-
-
-            if (detailError) {
-
-                throw detailError;
-
-            }
-
-
-            return {
-
-    header: {
-
-        ...header,
-
-        gl_journal:
-            glJournal
-
-    },
-
-    details:
-        details || []
-
-};
-
-        }
-
-        catch (error) {
-
-            console.error(
-                "AccountPayableService.getById:",
-                error
-            );
-
-            throw error;
-
-        }
-
-    }
    /*
 ======================================================
 COMPLETE ACCOUNT PAYABLE

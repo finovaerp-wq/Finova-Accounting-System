@@ -1123,3 +1123,112 @@ td:nth-child(9)
     }
 
 }
+/* ==========================================================
+   DELETE JOURNAL CONFIRMATION
+   FIX LONG DESCRIPTION OVERFLOW
+========================================================== */
+
+/*
+MODAL CONTENT
+*/
+
+.modal .modal-content {
+    min-width: 0;
+    max-width: 100%;
+}
+
+
+/*
+TABLE INSIDE CONFIRMATION MODAL
+*/
+
+.modal .modal-body table {
+    width: 100% !important;
+    max-width: 100% !important;
+
+    table-layout: fixed !important;
+
+    margin: 0 !important;
+}
+
+
+/*
+LABEL COLUMN
+*/
+
+.modal .modal-body table th,
+.modal .modal-body table td:first-child {
+
+    width: 92px !important;
+    max-width: 92px !important;
+
+    white-space: normal !important;
+
+    vertical-align: top !important;
+}
+
+
+/*
+VALUE COLUMN
+*/
+
+.modal .modal-body table td:not(:first-child) {
+
+    width: auto !important;
+    max-width: 0 !important;
+
+    white-space: normal !important;
+
+    overflow: hidden !important;
+
+    overflow-wrap: anywhere !important;
+
+    word-wrap: break-word !important;
+
+    word-break: break-all !important;
+
+    vertical-align: top !important;
+}
+
+
+/*
+FORCE ALL TEXT INSIDE VALUE CELL TO WRAP
+*/
+
+.modal .modal-body table td:not(:first-child) * {
+
+    max-width: 100% !important;
+
+    white-space: normal !important;
+
+    overflow-wrap: anywhere !important;
+
+    word-break: break-all !important;
+}
+
+
+/*
+DESCRIPTION ROW
+*/
+
+.modal .modal-body table tr:last-child td {
+
+    white-space: normal !important;
+
+    overflow-wrap: anywhere !important;
+
+    word-break: break-all !important;
+
+}
+
+
+/*
+MODAL BODY
+*/
+
+.modal .modal-body {
+
+    min-width: 0;
+
+    overflow-x: hidden !important;
+}

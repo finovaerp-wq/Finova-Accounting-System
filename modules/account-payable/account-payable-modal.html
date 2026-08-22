@@ -14,7 +14,9 @@
     id="accountPayableModal"
     tabindex="-1"
     aria-labelledby="accountPayableModalLabel"
-    aria-hidden="true">
+    aria-hidden="true"
+    data-bs-backdrop="static"
+    data-bs-keyboard="false">
 
     <div
         class="modal-dialog modal-xl modal-dialog-scrollable">
@@ -651,6 +653,11 @@
                         <!-- TAX PLUS JOURNAL INFO -->
 
                         <div class="alert alert-light border mt-3 mb-0">
+                        <!-- ==================================================
+                            JOURNAL PREVIEW
+                        =================================================== -->
+
+                        <div class="ap-tax-journal-preview"></div>
 
                             <div class="fw-semibold mb-1">
                                 Journal Preview
@@ -659,12 +666,26 @@
                             <div class="small text-muted">
 
                                 Debit:
-                                <strong>PIUTANG PPN</strong>
 
-                                <span class="mx-2">|</span>
+                                <strong
+                                    id="ap-tax-plus-preview-debit">
+
+                                    -
+
+                                </strong>
+
+                                <span class="mx-2">
+                                    |
+                                </span>
 
                                 Credit:
-                                <strong>HUTANG USAHA</strong>
+
+                                <strong
+                                    id="ap-tax-plus-preview-credit">
+
+                                    HUTANG USAHA
+
+                                </strong>
 
                             </div>
 

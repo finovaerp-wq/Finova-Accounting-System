@@ -693,9 +693,7 @@ async update(
                 ![
                     "PLUS",
                     "MINUS"
-                ].includes(
-                    type
-                )
+                ].includes(type)
             ) {
 
                 throw new Error(
@@ -762,14 +760,19 @@ async update(
         ) {
 
             const taxAccountId =
-                String(
+                Number(
                     payload.tax_account_id
-                    || ""
+                    || 0
+                );
+
+
+            if (
+                !Number.isInteger(
+                    taxAccountId
                 )
-                .trim();
-
-
-            if (!taxAccountId) {
+                ||
+                taxAccountId <= 0
+            ) {
 
                 throw new Error(
                     "Tax Account is required."
@@ -797,16 +800,16 @@ async update(
         ) {
 
             const offsetAccountId =
-                String(
+                Number(
                     payload.offset_account_id
-                    || ""
-                )
-                .trim();
+                    || 0
+                );
 
 
             updateData.offset_account_id =
-                offsetAccountId
-                    || null;
+                offsetAccountId > 0
+                    ? offsetAccountId
+                    : null;
 
         }
 
@@ -854,6 +857,37 @@ async update(
                 );
 
         }
+
+
+        /*
+        ==============================================
+        VALIDATE UPDATE DATA
+        ==============================================
+        */
+
+        if (
+            !Object.keys(
+                updateData
+            ).length
+        ) {
+
+            throw new Error(
+                "No Tax data to update."
+            );
+
+        }
+
+
+        /*
+        ==============================================
+        DEBUG
+        ==============================================
+        */
+
+        console.log(
+            "TaxService.update DATA:",
+            updateData
+        );
 
 
         /*
