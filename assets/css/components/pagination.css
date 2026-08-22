@@ -50,7 +50,8 @@
    TABLE SCROLL AREA
 ========================================================== */
 
-.finova-table-container .table-responsive {
+.finova-table-container
+.table-responsive {
 
     flex: 1 1 auto;
 
@@ -89,9 +90,13 @@
 
     padding: 10px 16px;
 
+    margin-top: 0;
+
     margin-right: 0;
+
     margin-bottom: 0;
-    margin-left: 0
+
+    margin-left: 0;
 
     box-sizing: border-box;
 
@@ -124,23 +129,47 @@
 
 
 /* ==========================================================
+   PAGINATION RIGHT
+========================================================== */
+
+.finova-pagination-right {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
    PAGINATION BUTTON
 ========================================================== */
 
 .finova-pagination-btn,
+
 .finova-pagination-refresh {
 
     width: 30px;
 
+    min-width: 30px;
+
     height: 30px;
 
-    display: flex;
+    min-height: 30px;
+
+    display: inline-flex;
 
     align-items: center;
 
     justify-content: center;
 
     flex-shrink: 0;
+
+    padding: 0;
 
     border: 1px solid var(--border-color);
 
@@ -165,6 +194,7 @@
 ========================================================== */
 
 .finova-pagination-btn:hover,
+
 .finova-pagination-refresh:hover {
 
     background: #EFF6FF;
@@ -216,7 +246,11 @@
 
     width: 40px;
 
+    min-width: 40px;
+
     height: 30px;
+
+    min-height: 30px;
 
     padding: 0 4px;
 
@@ -236,6 +270,7 @@
 ========================================================== */
 
 .finova-pagination-input::-webkit-inner-spin-button,
+
 .finova-pagination-input::-webkit-outer-spin-button {
 
     -webkit-appearance: none;
@@ -265,6 +300,23 @@
 
 
 /* ==========================================================
+   PAGE TEXT
+========================================================== */
+
+.finova-pagination-page-text {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 4px;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
    RECORD INFO
 ========================================================== */
 
@@ -287,7 +339,8 @@
    EMPTY ROW
 ========================================================== */
 
-.finova-empty-row td {
+.finova-empty-row
+td {
 
     height: 56px;
 
@@ -298,7 +351,12 @@
 }
 
 
-.finova-empty-row:hover td {
+/* ==========================================================
+   EMPTY ROW HOVER
+========================================================== */
+
+.finova-empty-row:hover
+td {
 
     background: #FFFFFF;
 
@@ -327,6 +385,15 @@
 
 
     .finova-pagination-left {
+
+        flex-wrap: wrap;
+
+        gap: 6px;
+
+    }
+
+
+    .finova-pagination-right {
 
         flex-wrap: wrap;
 

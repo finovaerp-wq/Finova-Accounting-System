@@ -82,32 +82,87 @@ DATABASE TABLE
 
 export const TABLE = {
 
-    USERS: "mst_users",
+    /*
+    =======================================
+    MASTER
+    =======================================
+    */
 
-    BUSINESS_PARTNER: "mst_business_partner",
+    USERS:
+        "mst_users",
 
-    BUSINESS_PARTNER_BANK: "mst_business_partner_bank",
+    BUSINESS_PARTNER:
+        "mst_business_partner",
 
-    TERM_OF_PAYMENT: "mst_term_of_payment",
+    BUSINESS_PARTNER_BANK:
+        "mst_business_partner_bank",
 
-    BANK: "mst_bank",
+    TERM_OF_PAYMENT:
+        "mst_term_of_payment",
 
-    CHART_OF_ACCOUNTS: "mst_chart_of_accounts",
-    TAX: "mst_taxes",
+    BANK:
+        "mst_bank",
 
-    GL_JOURNAL: "trx_gl_journal",
+    CHART_OF_ACCOUNTS:
+        "mst_chart_of_accounts",
 
-    GL_JOURNAL_DETAIL: "trx_gl_journal_detail",
+    TAX:
+        "mst_taxes",
 
-    ACCOUNT_PAYABLE: "trx_account_payable",
 
-    ACCOUNT_PAYABLE_DETAIL: "trx_account_payable_detail",
+    /*
+    =======================================
+    GENERAL LEDGER
+    =======================================
+    */
 
-    ACCOUNT_RECEIVABLE: "trx_account_receivable",
+    GL_JOURNAL:
+        "trx_gl_journal",
 
-    AP_PAYMENT: "trx_ap_payment",
+    GL_JOURNAL_DETAIL:
+        "trx_gl_journal_detail",
 
-    AR_PAYMENT: "trx_ar_payment"
+
+    /*
+    =======================================
+    ACCOUNT PAYABLE
+    =======================================
+    */
+
+    ACCOUNT_PAYABLE:
+        "trx_account_payable",
+
+    ACCOUNT_PAYABLE_DETAIL:
+        "trx_account_payable_detail",
+
+
+    /*
+    =======================================
+    ACCOUNT RECEIVABLE
+    =======================================
+    */
+
+    ACCOUNT_RECEIVABLE:
+        "trx_account_receivable",
+
+    ACCOUNT_RECEIVABLE_DETAIL:
+        "trx_account_receivable_detail",
+
+    ACCOUNT_RECEIVABLE_PAYMENT:
+        "trx_account_receivable_payment",
+
+
+    /*
+    =======================================
+    PAYMENT MODULE
+    =======================================
+    */
+
+    AP_PAYMENT:
+        "trx_ap_payment",
+
+    AR_PAYMENT:
+        "trx_ar_payment"
 
 };
 /*

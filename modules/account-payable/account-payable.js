@@ -27,6 +27,14 @@ import {
 import {
     TaxService
 } from "../../service/tax-service.js";
+import {
+    ExcelExportService
+} from "../../service/excel-export.service.js";
+
+
+import {
+    PreviewService
+} from "../../service/preview.service.js";
 
 
 /*
@@ -9843,102 +9851,936 @@ async saveEdit() {
 
 }
     /*
-    ======================================================
-    HANDLE TABLE ACTION
-    ======================================================
-    */
+======================================================
+HANDLE TABLE ACTION
+======================================================
+*/
 
-    async handleTableAction(
-        action,
-        id
-    ) {
+async handleTableAction(
+    action,
+    id
+) {
 
-        try {
+    try {
 
-            switch (action) {
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
 
-                case "view":
+        if (!id) {
 
-                    await this.viewInvoice(id);
-
-                    break;
-
-
-                case "edit":
-
-                    await this.editInvoice(id);
-
-                    break;
-
-
-                case "delete":
-
-                    await this.deleteInvoice(id);
-
-                    break;
-
-
-                case "complete":
-
-    this.showCompleteConfirmation(id);
-
-    break;
-
-
-                case "payment":
-
-                    await this.createPayment(id);
-
-                    break;
-
-
-                case "payment-history":
-
-                    await this.paymentHistory(id);
-
-                    break;
-
-
-                case "void":
-
-                    await this.voidInvoice(id);
-
-                    break;
-
-
-                case "duplicate":
-
-                    await this.duplicateInvoice(id);
-
-                    break;
-
-
-                default:
-
-                    console.warn(
-                        "Unknown AP action:",
-                        action
-                    );
-
-            }
+            throw new Error(
+                "Account Payable ID is required."
+            );
 
         }
 
-        catch (error) {
 
-            console.error(
-                "AccountPayable.handleTableAction:",
-                error
-            );
+        /*
+        ==================================================
+        ACTION
+        ==================================================
+        */
 
-            this.showError(
-                error.message
-                || "Action failed."
-            );
+        switch (action) {
+
+
+            /*
+            ==============================================
+            VIEW
+            ==============================================
+            */
+
+            case "view":
+
+                await this.viewInvoice(
+                    id
+                );
+
+                break;
+
+
+            /*
+            ==============================================
+            EDIT
+            ==============================================
+            */
+
+            case "edit":
+
+                await this.editInvoice(
+                    id
+                );
+
+                break;
+
+
+            /*
+            ==============================================
+            DELETE
+            ==============================================
+            */
+
+            case "delete":
+
+                await this.deleteInvoice(
+                    id
+                );
+
+                break;
+
+
+            /*
+            ==============================================
+            COMPLETE
+            ==============================================
+            */
+
+            case "complete":
+
+                this.showCompleteConfirmation(
+                    id
+                );
+
+                break;
+
+
+            /*
+            ==============================================
+            PRINT INVOICE
+            ==============================================
+            */
+
+            case "print":
+
+                await this.printInvoice(
+                    id
+                );
+
+                break;
+
+
+            /*
+            ==============================================
+            PAYMENT
+            ==============================================
+            */
+
+            case "payment":
+
+                await this.createPayment(
+                    id
+                );
+
+                break;
+
+
+            /*
+            ==============================================
+            PAYMENT HISTORY
+            ==============================================
+            */
+
+            case "payment-history":
+
+                await this.paymentHistory(
+                    id
+                );
+
+                break;
+
+
+            /*
+            ==============================================
+            VOID
+            ==============================================
+            */
+
+            case "void":
+
+                await this.voidInvoice(
+                    id
+                );
+
+                break;
+
+
+            /*
+            ==============================================
+            DUPLICATE
+            ==============================================
+            */
+
+            case "duplicate":
+
+                await this.duplicateInvoice(
+                    id
+                );
+
+                break;
+
+
+            /*
+            ==============================================
+            UNKNOWN
+            ==============================================
+            */
+
+            default:
+
+                console.warn(
+                    "Unknown AP action:",
+                    action
+                );
+
+                break;
 
         }
 
     }
+
+    catch (error) {
+
+        console.error(
+            "AccountPayable.handleTableAction:",
+            error
+        );
+
+
+        this.showError(
+            error.message
+            ||
+            "Action failed."
+        );
+
+    }
+
+}
+/*
+======================================================
+PRINT ACCOUNT PAYABLE INVOICE
+======================================================
+*/
+
+async printInvoice(id) {
+
+    try {
+
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
+
+        if (!id) {
+
+            throw new Error(
+                "Account Payable ID is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        LOAD DATA
+        ==================================================
+        */
+
+        const result =
+            await this.service.getById(
+                id
+            );
+
+
+        if (
+            !result
+            ||
+            !result.header
+        ) {
+
+            throw new Error(
+                "Account Payable not found."
+            );
+
+        }
+
+
+        const header =
+            result.header;
+
+
+        const details =
+            Array.isArray(
+                result.details
+            )
+                ? result.details
+                : [];
+
+
+        /*
+        ==================================================
+        STATUS VALIDATION
+        ==================================================
+        */
+
+        const status =
+            String(
+                header.status
+                || ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        if (
+            status === "draft"
+        ) {
+
+            throw new Error(
+                "Draft Account Payable cannot be printed."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        VENDOR
+        ==================================================
+        */
+
+        const vendorName =
+            header.mst_business_partner
+                ?.bp_name
+            ||
+            header.vendor_name
+            ||
+            "-";
+
+
+        /*
+        ==================================================
+        CALCULATE TOTAL
+        ==================================================
+        */
+
+        const subtotal =
+            details.reduce(
+                (
+                    total,
+                    item
+                ) => {
+
+                    return total
+                        +
+                        Number(
+                            item.line_amount
+                            || 0
+                        );
+
+                },
+                0
+            );
+
+
+        const taxPlus =
+            details.reduce(
+                (
+                    total,
+                    item
+                ) => {
+
+                    return total
+                        +
+                        Number(
+                            item.tax_input_amount
+                            || 0
+                        );
+
+                },
+                0
+            );
+
+
+        const taxMinus =
+            details.reduce(
+                (
+                    total,
+                    item
+                ) => {
+
+                    return total
+                        +
+                        Number(
+                            item.withholding_tax_amount
+                            || 0
+                        );
+
+                },
+                0
+            );
+
+
+        const totalPayable =
+            subtotal
+            +
+            taxPlus
+            -
+            taxMinus;
+
+
+        /*
+        ==================================================
+        DETAIL ROW
+        ==================================================
+        */
+
+        const detailRows =
+            details
+            .map(
+                (
+                    item,
+                    index
+                ) => {
+
+                    const coa =
+                        item.charge_account
+                        ||
+                        item.mst_chart_of_accounts
+                        ||
+                        {};
+
+
+                    const accountCode =
+                        item.account_code
+                        ||
+                        coa.account_code
+                        ||
+                        "";
+
+
+                    const accountName =
+                        item.account_name
+                        ||
+                        coa.account_name
+                        ||
+                        "";
+
+
+                    return `
+
+                        <tr>
+
+                            <td class="text-center">
+                                ${index + 1}
+                            </td>
+
+                            <td>
+
+                                ${
+                                    accountCode
+                                        ? `${accountCode} - ${accountName}`
+                                        : accountName || "-"
+                                }
+
+                            </td>
+
+                            <td>
+
+                                ${item.description || "-"}
+
+                            </td>
+
+                            <td class="text-end">
+
+                                ${Number(
+                                    item.quantity
+                                    || 0
+                                ).toLocaleString(
+                                    "id-ID"
+                                )}
+
+                            </td>
+
+                            <td class="text-end">
+
+                                ${this.formatCurrency(
+                                    Number(
+                                        item.unit_price
+                                        || 0
+                                    )
+                                )}
+
+                            </td>
+
+                            <td class="text-end">
+
+                                ${this.formatCurrency(
+                                    Number(
+                                        item.line_amount
+                                        || 0
+                                    )
+                                )}
+
+                            </td>
+
+                        </tr>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+
+        /*
+        ==================================================
+        OPEN PRINT WINDOW
+        ==================================================
+        */
+
+        const printWindow =
+            window.open(
+                "",
+                "_blank",
+                "width=1100,height=750"
+            );
+
+
+        if (!printWindow) {
+
+            throw new Error(
+                "Print window blocked by browser."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        PRINT HTML
+        ==================================================
+        */
+
+        printWindow.document.write(`
+
+            <!DOCTYPE html>
+
+            <html>
+
+            <head>
+
+                <meta charset="UTF-8">
+
+                <title>
+                    ${header.invoice_no || "Account Payable"}
+                </title>
+
+
+                <style>
+
+                    * {
+                        box-sizing: border-box;
+                    }
+
+                    body {
+
+                        font-family:
+                            Arial,
+                            sans-serif;
+
+                        padding: 30px;
+
+                        color: #111827;
+
+                        font-size: 12px;
+
+                    }
+
+
+                    h1 {
+
+                        margin: 0;
+
+                        text-align: center;
+
+                        font-size: 20px;
+
+                    }
+
+
+                    h2 {
+
+                        margin: 4px 0 25px;
+
+                        text-align: center;
+
+                        font-size: 15px;
+
+                    }
+
+
+                    .info {
+
+                        width: 100%;
+
+                        margin-bottom: 20px;
+
+                        border-collapse: collapse;
+
+                    }
+
+
+                    .info td {
+
+                        padding: 4px 6px;
+
+                        vertical-align: top;
+
+                    }
+
+
+                    .label {
+
+                        width: 120px;
+
+                        font-weight: bold;
+
+                    }
+
+
+                    .detail {
+
+                        width: 100%;
+
+                        border-collapse: collapse;
+
+                    }
+
+
+                    .detail th,
+                    .detail td {
+
+                        border: 1px solid #CBD5E1;
+
+                        padding: 8px;
+
+                    }
+
+
+                    .detail th {
+
+                        background: #F8FAFC;
+
+                    }
+
+
+                    .text-center {
+                        text-align: center;
+                    }
+
+
+                    .text-end {
+                        text-align: right;
+                    }
+
+
+                    .summary {
+
+                        width: 320px;
+
+                        margin-left: auto;
+
+                        margin-top: 20px;
+
+                        border-collapse: collapse;
+
+                    }
+
+
+                    .summary td {
+
+                        padding: 6px 8px;
+
+                    }
+
+
+                    .summary-total td {
+
+                        border-top: 1px solid #94A3B8;
+
+                        font-weight: bold;
+
+                        font-size: 14px;
+
+                        padding-top: 10px;
+
+                    }
+
+
+                    @media print {
+
+                        body {
+                            padding: 0;
+                        }
+
+                    }
+
+                </style>
+
+            </head>
+
+
+            <body>
+
+                <h1>
+                    FINOVA ACCOUNTING SYSTEM
+                </h1>
+
+                <h2>
+                    ACCOUNT PAYABLE INVOICE
+                </h2>
+
+
+                <table class="info">
+
+                    <tr>
+
+                        <td class="label">
+                            Invoice No
+                        </td>
+
+                        <td>
+                            : ${header.invoice_no || "-"}
+                        </td>
+
+                        <td class="label">
+                            Invoice Date
+                        </td>
+
+                        <td>
+                            : ${header.invoice_date || "-"}
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td class="label">
+                            Vendor
+                        </td>
+
+                        <td>
+                            : ${vendorName}
+                        </td>
+
+                        <td class="label">
+                            Due Date
+                        </td>
+
+                        <td>
+                            : ${header.due_date || "-"}
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td class="label">
+                            PO No
+                        </td>
+
+                        <td>
+                            : ${header.po_no || "-"}
+                        </td>
+
+                        <td class="label">
+                            Status
+                        </td>
+
+                        <td>
+                            : ${header.status || "-"}
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td class="label">
+                            Description
+                        </td>
+
+                        <td colspan="3">
+                            : ${header.description || "-"}
+                        </td>
+
+                    </tr>
+
+                </table>
+
+
+                <table class="detail">
+
+                    <thead>
+
+                        <tr>
+
+                            <th style="width:45px">
+                                No
+                            </th>
+
+                            <th>
+                                Account
+                            </th>
+
+                            <th>
+                                Description
+                            </th>
+
+                            <th style="width:80px">
+                                Qty
+                            </th>
+
+                            <th style="width:130px">
+                                Unit Price
+                            </th>
+
+                            <th style="width:140px">
+                                Amount
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        ${detailRows}
+
+                    </tbody>
+
+                </table>
+
+
+                <table class="summary">
+
+                    <tr>
+
+                        <td>
+                            Subtotal
+                        </td>
+
+                        <td class="text-end">
+
+                            ${this.formatCurrency(
+                                subtotal
+                            )}
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+                            Tax (+)
+                        </td>
+
+                        <td class="text-end">
+
+                            ${this.formatCurrency(
+                                taxPlus
+                            )}
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+                            Tax (-)
+                        </td>
+
+                        <td class="text-end">
+
+                            ${this.formatCurrency(
+                                taxMinus
+                            )}
+
+                        </td>
+
+                    </tr>
+
+
+                    <tr class="summary-total">
+
+                        <td>
+                            Total Payable
+                        </td>
+
+                        <td class="text-end">
+
+                            ${this.formatCurrency(
+                                totalPayable
+                            )}
+
+                        </td>
+
+                    </tr>
+
+                </table>
+
+
+                <script>
+
+                    window.onload = () => {
+
+                        window.focus();
+
+                        window.print();
+
+                    };
+
+                <\/script>
+
+            </body>
+
+            </html>
+
+        `);
+
+
+        printWindow.document.close();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountPayable.printInvoice:",
+            error
+        );
+
+
+        this.showError(
+            error.message
+            ||
+            "Failed to print Account Payable."
+        );
+
+    }
+
+}
     /*
 ======================================================
 POST ACCOUNT PAYABLE

@@ -1,0 +1,626 @@
+<!--
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+MODULE  : ACCOUNT RECEIVABLE
+FILE    : account-receivable.html
+VERSION : 1.0.0
+==========================================================
+-->
+
+
+<div class="finova-page account-receivable-page">
+
+
+    <!-- ==================================================
+         PAGE HEADER
+    =================================================== -->
+
+    <div class="finova-page-header">
+
+
+        <!-- ==============================================
+             LEFT
+        =============================================== -->
+
+        <div class="finova-page-header-left">
+
+            <h1 class="finova-page-title">
+
+                Account Receivable
+
+            </h1>
+
+
+            <p class="finova-page-subtitle">
+
+                Accounting / Account Receivable
+
+            </p>
+
+        </div>
+
+
+        <!-- ==============================================
+             RIGHT
+        =============================================== -->
+
+        <div class="finova-page-header-right">
+
+
+            <!-- ADD AR -->
+
+            <button
+                type="button"
+                id="btn-add-ar"
+                class="btn btn-primary finova-btn">
+
+                <i class="fa-solid fa-plus"></i>
+
+                Add AR
+
+            </button>
+
+
+            <!-- DOWNLOAD EXCEL -->
+
+            <button
+                type="button"
+                id="btn-download-excel-ar"
+                class="btn btn-outline-success finova-btn">
+
+                <i class="fa-solid fa-file-excel"></i>
+
+                Download Excel
+
+            </button>
+
+
+            <!-- PREVIEW HTML -->
+
+            <button
+                type="button"
+                id="btn-preview-html-ar"
+                class="btn btn-outline-primary finova-btn">
+
+                <i class="fa-solid fa-print"></i>
+
+                Preview HTML
+
+            </button>
+
+
+            <!-- REFRESH -->
+
+            <button
+                type="button"
+                id="btn-refresh-ar"
+                class="btn btn-outline-secondary finova-btn">
+
+                <i class="fa-solid fa-rotate"></i>
+
+                Refresh
+
+            </button>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         FILTER CARD
+    =================================================== -->
+
+    <div class="finova-card account-receivable-filter-card mb-1">
+
+        <div class="finova-card-body">
+
+
+            <div class="row g-3 align-items-end">
+
+
+                <!-- ======================================
+                     INVOICE DATE FROM
+                ======================================= -->
+
+                <div class="col-lg-2 col-md-6">
+
+                    <label
+                        for="ar-date-from"
+                        class="form-label">
+
+                        Invoice Date From
+
+                    </label>
+
+
+                    <input
+                        type="date"
+                        id="ar-date-from"
+                        class="form-control finova-control">
+
+                </div>
+
+
+                <!-- ======================================
+                     INVOICE DATE TO
+                ======================================= -->
+
+                <div class="col-lg-2 col-md-6">
+
+                    <label
+                        for="ar-date-to"
+                        class="form-label">
+
+                        Invoice Date To
+
+                    </label>
+
+
+                    <input
+                        type="date"
+                        id="ar-date-to"
+                        class="form-control finova-control">
+
+                </div>
+
+
+                <!-- ======================================
+                     STATUS
+                ======================================= -->
+
+                <div class="col-lg-2 col-md-6">
+
+                    <label
+                        for="ar-status"
+                        class="form-label">
+
+                        Status
+
+                    </label>
+
+
+                    <select
+                        id="ar-status"
+                        class="form-select finova-control">
+
+                        <option value="">
+                            All Status
+                        </option>
+
+                        <option value="Draft">
+                            Draft
+                        </option>
+
+                        <option value="Unpaid">
+                            Unpaid
+                        </option>
+
+                        <option value="Paid">
+                            Paid
+                        </option>
+
+                        <option value="Void">
+                            Void
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- ======================================
+                     FIND BY
+                ======================================= -->
+
+                <div class="col-lg-2 col-md-6">
+
+                    <label
+                        for="ar-find-by"
+                        class="form-label">
+
+                        Find By
+
+                    </label>
+
+
+                    <select
+                        id="ar-find-by"
+                        class="form-select finova-control">
+
+                        <option value="invoice_no">
+                            Invoice No
+                        </option>
+
+                        <option value="customer">
+                            Customer
+                        </option>
+
+                        <option value="po_no">
+                            PO No
+                        </option>
+
+                        <option value="description">
+                            Description
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- ======================================
+                     KEYWORD
+                ======================================= -->
+
+                <div class="col-lg-4 col-md-12">
+
+                    <label
+                        for="ar-keyword"
+                        class="form-label">
+
+                        Keyword
+
+                    </label>
+
+
+                    <div class="input-group">
+
+                        <input
+                            type="text"
+                            id="ar-keyword"
+                            class="form-control finova-control"
+                            placeholder="Search Account Receivable"
+                            autocomplete="off">
+
+
+                        <button
+                            type="button"
+                            id="btn-ar-find"
+                            class="btn btn-primary">
+
+                            <i class="fa-solid fa-magnifying-glass"></i>
+
+                            Find
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         TABLE CARD
+    =================================================== -->
+
+    <div class="finova-card finova-table-card">
+
+
+        <div class="finova-card-body">
+
+
+            <div class="finova-table-container">
+
+
+                <!-- ==========================================
+                     TABLE RESPONSIVE
+                =========================================== -->
+
+                <div class="table-responsive">
+
+
+                    <table
+                        id="account-receivable-table"
+                        class="table finova-table align-middle">
+
+
+                        <!-- ==================================
+                             TABLE HEADER
+                        =================================== -->
+
+                        <thead class="finova-table-header">
+
+                            <tr>
+
+
+                                <!-- NO -->
+
+                                <th
+                                    class="finova-table-index"
+                                    style="width:60px">
+
+                                    No
+
+                                </th>
+
+
+                                <!-- INVOICE DATE -->
+
+                                <th
+                                    class="finova-table-date"
+                                    style="width:135px">
+
+                                    Invoice Date
+
+                                </th>
+
+
+                                <!-- INVOICE NO -->
+
+                                <th
+                                    class="finova-table-code"
+                                    style="width:150px">
+
+                                    Invoice No
+
+                                </th>
+
+
+                                <!-- CUSTOMER -->
+
+                                <th
+                                    style="width:220px">
+
+                                    Customer
+
+                                </th>
+
+
+                                <!-- PO NO -->
+
+                                <th
+                                    style="width:150px">
+
+                                    PO No
+
+                                </th>
+
+
+                                <!-- DUE DATE -->
+
+                                <th
+                                    class="finova-table-date"
+                                    style="width:135px">
+
+                                    Due Date
+
+                                </th>
+
+
+                                <!-- TOTAL -->
+
+                                <th
+                                    class="finova-table-number"
+                                    style="width:145px">
+
+                                    Total Amount
+
+                                </th>
+
+
+                                <!-- PAID -->
+
+                                <th
+                                    class="finova-table-number"
+                                    style="width:145px">
+
+                                    Paid Amount
+
+                                </th>
+
+
+                                <!-- OUTSTANDING -->
+
+                                <th
+                                    class="finova-table-number"
+                                    style="width:145px">
+
+                                    Outstanding
+
+                                </th>
+
+
+                                <!-- STATUS -->
+
+                                <th
+                                    class="finova-table-status"
+                                    style="width:110px">
+
+                                    Status
+
+                                </th>
+
+
+                                <!-- ACTION -->
+
+                                <th
+                                    class="finova-table-action"
+                                    style="width:190px">
+
+                                    Action
+
+                                </th>
+
+
+                            </tr>
+
+                        </thead>
+
+
+                        <!-- ==================================
+                             TABLE BODY
+                        =================================== -->
+
+                        <tbody id="account-receivable-table-body">
+
+
+                            <tr>
+
+                                <td
+                                    colspan="11"
+                                    class="text-center text-muted py-4">
+
+                                    No Account Receivable data.
+
+                                </td>
+
+                            </tr>
+
+
+                        </tbody>
+
+
+                    </table>
+
+                </div>
+
+
+                <!-- ==========================================
+                     PAGINATION
+                =========================================== -->
+
+                <div class="finova-pagination-wrapper">
+
+
+                    <!-- ======================================
+                         LEFT
+                    ======================================= -->
+
+                    <div class="finova-pagination-left">
+
+
+                        <span class="finova-pagination-label">
+
+                            Total Record:
+
+                        </span>
+
+
+                        <span
+                            id="ar-record-info"
+                            class="finova-pagination-total">
+
+                            0
+
+                        </span>
+
+
+                    </div>
+
+
+                    <!-- ======================================
+                         RIGHT
+                    ======================================= -->
+
+                    <div class="finova-pagination-right">
+
+
+                        <!-- FIRST -->
+
+                        <button
+                            type="button"
+                            id="ar-page-first"
+                            class="btn btn-sm btn-outline-secondary"
+                            title="First Page">
+
+                            <i class="fa-solid fa-angles-left"></i>
+
+                        </button>
+
+
+                        <!-- PREVIOUS -->
+
+                        <button
+                            type="button"
+                            id="ar-page-prev"
+                            class="btn btn-sm btn-outline-secondary"
+                            title="Previous Page">
+
+                            <i class="fa-solid fa-angle-left"></i>
+
+                        </button>
+
+
+                        <!-- CURRENT PAGE -->
+
+                        <input
+                            type="number"
+                            id="ar-current-page"
+                            class="form-control form-control-sm finova-pagination-input"
+                            min="1"
+                            value="1">
+
+
+                        <!-- TOTAL PAGE -->
+
+                        <span class="finova-pagination-page-text">
+
+                            /
+
+                            <span id="ar-total-pages">
+                                1
+                            </span>
+
+                        </span>
+
+
+                        <!-- NEXT -->
+
+                        <button
+                            type="button"
+                            id="ar-page-next"
+                            class="btn btn-sm btn-outline-secondary"
+                            title="Next Page">
+
+                            <i class="fa-solid fa-angle-right"></i>
+
+                        </button>
+
+
+                        <!-- LAST -->
+
+                        <button
+                            type="button"
+                            id="ar-page-last"
+                            class="btn btn-sm btn-outline-secondary"
+                            title="Last Page">
+
+                            <i class="fa-solid fa-angles-right"></i>
+
+                        </button>
+
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         MODAL CONTAINERS
+    =================================================== -->
+
+    <div id="account-receivable-modal-container"></div>
+
+    <div id="account-receivable-detail-modal-container"></div>
+
+    <div id="account-receivable-confirmation-modal-container"></div>
+
+
+</div>

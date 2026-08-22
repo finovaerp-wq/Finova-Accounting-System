@@ -1,0 +1,742 @@
+/*
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+MODULE : ACCOUNT RECEIVABLE
+
+Version : 2.1 Enterprise
+
+TABLE STANDARD :
+GLOBAL TABLE COMPONENT
+
+VISUAL STANDARD :
+BUSINESS PARTNER / CHART OF ACCOUNTS
+
+NOTE :
+- Header aligned with BP / COA
+- Filter aligned with BP / COA
+- Table visual controlled by Global Table CSS
+- Pagination controlled by Global Pagination CSS
+- AR business status behavior remains here
+==========================================================
+*/
+
+
+/* ==========================================================
+   ACCOUNT RECEIVABLE PAGE
+========================================================== */
+
+.account-receivable-page {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    width: 100%;
+
+}
+
+
+/* ==========================================================
+   PAGE HEADER
+   SAME AS BP / COA
+========================================================== */
+
+.account-receivable-page
+> .finova-page-header {
+
+    width: 100%;
+
+    margin-bottom: 8px !important;
+
+    flex-shrink: 0;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   FILTER CARD
+   SAME AS BP / COA
+========================================================== */
+
+.account-receivable-page
+> .account-receivable-filter-card {
+
+    width: 100% !important;
+
+    max-width: none !important;
+
+    margin: 0 !important;
+
+    flex: 0 0 auto;
+
+    box-sizing: border-box;
+
+    border-radius: 12px;
+
+}
+
+
+/* ==========================================================
+   FILTER CARD BODY
+   SAME AS BP / COA
+========================================================== */
+
+.account-receivable-filter-card
+> .finova-card-body {
+
+    width: 100%;
+
+    padding: 8px 20px 8px 20px !important;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   FILTER ROW
+========================================================== */
+
+.account-receivable-filter-card
+> .finova-card-body
+> .row {
+
+    width: 100% !important;
+
+    margin: 0 !important;
+
+    padding: 0 !important;
+
+    box-sizing: border-box;
+
+    align-items: end !important;
+
+}
+
+
+/* ==========================================================
+   FILTER COLUMN
+========================================================== */
+
+.account-receivable-filter-card
+> .finova-card-body
+> .row
+> [class*="col-"] {
+
+    min-width: 0;
+
+    margin: 0;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   FILTER LABEL
+   SAME AS BP / COA
+========================================================== */
+
+.account-receivable-filter-card
+.form-label {
+
+    display: block;
+
+    margin-top: 0 !important;
+
+    margin-bottom: 6px !important;
+
+    color: #1F2937;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    line-height: 1.2;
+
+    text-align: left;
+
+}
+
+
+/* ==========================================================
+   FILTER INPUT & SELECT
+   SAME AS BP / COA
+========================================================== */
+
+.account-receivable-filter-card
+.form-control,
+
+.account-receivable-filter-card
+.form-select {
+
+    width: 100%;
+
+    height: 46px !important;
+
+    min-height: 46px !important;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   FILTER INPUT GROUP
+========================================================== */
+
+.account-receivable-filter-card
+.input-group {
+
+    display: flex !important;
+
+    flex-wrap: nowrap !important;
+
+    align-items: stretch;
+
+    width: 100% !important;
+
+    height: 46px !important;
+
+    margin: 0 !important;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   KEYWORD INPUT
+========================================================== */
+
+.account-receivable-filter-card
+.input-group
+#ar-keyword {
+
+    flex: 1 1 auto !important;
+
+    width: 1% !important;
+
+    min-width: 0 !important;
+
+    height: 46px !important;
+
+    border-top-right-radius: 0 !important;
+
+    border-bottom-right-radius: 0 !important;
+
+}
+
+
+/* ==========================================================
+   FIND BUTTON
+========================================================== */
+
+.account-receivable-filter-card
+.input-group
+#btn-ar-find {
+
+    display: inline-flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    flex: 0 0 80px !important;
+
+    width: 80px !important;
+
+    min-width: 80px !important;
+
+    height: 46px !important;
+
+    padding: 0 12px !important;
+
+    white-space: nowrap;
+
+    border-top-left-radius: 0 !important;
+
+    border-bottom-left-radius: 0 !important;
+
+}
+
+
+/* ==========================================================
+   TABLE CARD
+========================================================== */
+
+.account-receivable-table-card {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    width: 100%;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   TABLE CARD BODY
+========================================================== */
+
+.account-receivable-table-card
+.finova-card-body {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    padding: 0 !important;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   TABLE CONTAINER
+========================================================== */
+
+.account-receivable-table-card
+.finova-table-container {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    width: 100%;
+
+    height: 100%;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   TABLE RESPONSIVE
+========================================================== */
+
+.account-receivable-table-card
+.finova-table-container
+.table-responsive {
+
+    display: block;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    width: 100%;
+
+    overflow-x: auto;
+
+    overflow-y: auto;
+
+}
+
+
+/* ==========================================================
+   TABLE
+========================================================== */
+
+.account-receivable-table-card
+.finova-table {
+
+    width: 100%;
+
+    margin-bottom: 0;
+
+    vertical-align: middle;
+
+}
+
+
+/* ==========================================================
+   TABLE HEADER
+========================================================== */
+
+.account-receivable-table-card
+.finova-table
+thead
+th {
+
+    font-weight: 700 !important;
+
+    color: #111827 !important;
+
+}
+
+
+/* ==========================================================
+   TABLE BODY
+========================================================== */
+
+.account-receivable-table-card
+.finova-table
+tbody
+td {
+
+    font-weight: 400 !important;
+
+    color: #1F2937 !important;
+
+}
+
+
+/* ==========================================================
+   TABLE NUMBER
+   CENTER ALIGNMENT
+========================================================== */
+
+.account-receivable-table-card
+.finova-table
+th:first-child,
+
+.account-receivable-table-card
+.finova-table
+td:first-child {
+
+    text-align: center !important;
+
+    vertical-align: middle !important;
+
+}
+
+
+/* ==========================================================
+   PAGINATION
+========================================================== */
+
+.account-receivable-table-card
+.finova-table-container
+.finova-pagination-wrapper {
+
+    flex: 0 0 auto;
+
+    width: 100%;
+
+    margin-top: auto;
+
+}
+
+
+/* ==========================================================
+   PAGINATION LEFT
+   SAME AS BP / COA
+========================================================== */
+
+.account-receivable-table-card
+.finova-pagination-left {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+}
+
+
+/* ==========================================================
+   PAGINATION LABEL
+========================================================== */
+
+.account-receivable-table-card
+.finova-pagination-label {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   PAGINATION TOTAL
+========================================================== */
+
+.account-receivable-table-card
+.finova-pagination-total {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    min-width: 18px;
+
+    margin-left: 2px;
+
+}
+
+
+/* ==========================================================
+   AR TABLE BODY
+========================================================== */
+
+#account-receivable-table-body {
+
+    background: #FFFFFF;
+
+}
+
+
+/* ==========================================================
+   AR ROW STATUS
+   KEEP NORMAL TABLE APPEARANCE
+========================================================== */
+
+.ar-row-draft,
+.ar-row-unpaid,
+.ar-row-paid,
+.ar-row-void {
+
+    opacity: 1 !important;
+
+}
+
+
+/* ==========================================================
+   ALL AR STATUS ROW
+   NO GREY BACKGROUND
+========================================================== */
+
+#account-receivable-table-body
+tr[data-status="draft"]
+> td,
+
+#account-receivable-table-body
+tr[data-status="unpaid"]
+> td,
+
+#account-receivable-table-body
+tr[data-status="paid"]
+> td,
+
+#account-receivable-table-body
+tr[data-status="void"]
+> td,
+
+#account-receivable-table-body
+tr.ar-row-draft
+> td,
+
+#account-receivable-table-body
+tr.ar-row-unpaid
+> td,
+
+#account-receivable-table-body
+tr.ar-row-paid
+> td,
+
+#account-receivable-table-body
+tr.ar-row-void
+> td {
+
+    background: #FFFFFF !important;
+
+    background-color: #FFFFFF !important;
+
+    color: inherit !important;
+
+}
+
+
+/* ==========================================================
+   STATUS BADGE
+========================================================== */
+
+#account-receivable-table-body
+.badge {
+
+    opacity: 1;
+
+}
+
+
+/* ==========================================================
+   ACTION BUTTON
+========================================================== */
+
+#account-receivable-table-body
+.btn {
+
+    opacity: 1;
+
+}
+
+
+/* ==========================================================
+   TABLET
+========================================================== */
+
+@media (max-width: 1200px) {
+
+    .account-receivable-filter-card
+    > .finova-card-body {
+
+        padding-left: 16px !important;
+
+        padding-right: 16px !important;
+
+    }
+
+}
+
+
+/* ==========================================================
+   MOBILE
+========================================================== */
+
+@media (max-width: 768px) {
+
+    .account-receivable-filter-card
+    > .finova-card-body {
+
+        padding: 8px 16px !important;
+
+    }
+
+}
+
+
+/* ==========================================================
+   AR TOM SELECT - COA SEARCHABLE DROPDOWN
+========================================================== */
+
+#accountReceivableDetailModal
+.ts-wrapper {
+
+    width: 100%;
+
+}
+
+
+/* ==========================================================
+   TOM SELECT CONTROL
+   KEEP SEARCH INPUT ON SAME LINE
+========================================================== */
+
+#accountReceivableDetailModal
+.ts-control {
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    flex-wrap: nowrap !important;
+
+    width: 100% !important;
+
+    min-height: 38px;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   SELECTED COA
+========================================================== */
+
+#accountReceivableDetailModal
+.ts-control
+.item {
+
+    flex: 0 1 auto !important;
+
+    min-width: 0;
+
+    max-width: calc(100% - 30px);
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+}
+
+
+/* ==========================================================
+   TOM SELECT SEARCH INPUT
+   IMPORTANT : DO NOT USE WIDTH 100%
+========================================================== */
+
+#accountReceivableDetailModal
+.ts-control
+> input {
+
+    flex: 1 1 auto !important;
+
+    width: 1px !important;
+
+    min-width: 20px !important;
+
+    max-width: 100% !important;
+
+    height: auto !important;
+
+    min-height: 0 !important;
+
+    margin: 0 0 0 4px !important;
+
+    padding: 0 !important;
+
+    border: 0 !important;
+
+    box-shadow: none !important;
+
+    background: transparent !important;
+
+}
+
+
+/* ==========================================================
+   REMOVE FOCUS SHADOW FROM INTERNAL INPUT
+========================================================== */
+
+#accountReceivableDetailModal
+.ts-control
+> input:focus {
+
+    outline: none !important;
+
+    box-shadow: none !important;
+
+}
+
+
+/* ==========================================================
+   DROPDOWN
+========================================================== */
+
+#accountReceivableDetailModal
+.ts-dropdown {
+
+    width: 100%;
+
+}
