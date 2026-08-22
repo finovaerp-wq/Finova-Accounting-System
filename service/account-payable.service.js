@@ -22,23 +22,40 @@ ACCOUNT PAYABLE SERVICE
 export class AccountPayableService {
 
 
+   constructor() {
+
     /*
-    ======================================================
-    CONSTRUCTOR
-    ======================================================
+    ==============================================
+    ACCOUNT PAYABLE HEADER
+    ==============================================
     */
 
-    constructor() {
-
-        this.table = TABLE.ACCOUNT_PAYABLE;
-
-        this.detailTable =
-            TABLE.ACCOUNT_PAYABLE_DETAIL;
-
-    }
+    this.table =
+        TABLE.ACCOUNT_PAYABLE;
 
 
     /*
+    ==============================================
+    ACCOUNT PAYABLE DETAIL
+    ==============================================
+    */
+
+    this.detailTable =
+        TABLE.ACCOUNT_PAYABLE_DETAIL;
+
+
+    /*
+    ==============================================
+    ACCOUNT PAYABLE PAYMENT
+    ==============================================
+    */
+
+    this.paymentTable =
+        TABLE.AP_PAYMENT;
+
+}
+
+   /*
 ======================================================
 STATUS
 ======================================================
@@ -48,11 +65,36 @@ get STATUS() {
 
     return {
 
+        /*
+        ==============================================
+        ACTIVE AP STATUS
+        ==============================================
+        */
+
         DRAFT:
             "Draft",
 
         COMPLETE:
-            "Complete"
+            "Complete",
+
+        PARTIAL_PAID:
+            "Partial Paid",
+
+        PAID:
+            "Paid",
+
+        VOID:
+            "Void",
+
+
+        /*
+        ==============================================
+        LEGACY STATUS
+        ==============================================
+        */
+
+        POSTED:
+            "Posted"
 
     };
 
@@ -1377,209 +1419,426 @@ async linkGLJournal(
 
 
     /*
-    ======================================================
-    CREATE
-    ======================================================
-    */
+======================================================
+CREATE ACCOUNT PAYABLE
+======================================================
+*/
 
-    async create(
-        header,
-        details = []
-    ) {
+async create(
+    header,
+    details = []
+) {
 
-        try {
+    try {
 
-            if (!header) {
+        /*
+        ==================================================
+        VALIDATE HEADER
+        ==================================================
+        */
 
-                throw new Error(
-                    "Account Payable header is required."
-                );
+        if (!header) {
 
-            }
+            throw new Error(
+                "Account Payable header is required."
+            );
 
-
-            if (!header.vendor_id) {
-
-                throw new Error(
-                    "Vendor is required."
-                );
-
-            }
+        }
 
 
-            if (!header.invoice_no) {
+        if (!header.vendor_id) {
 
-                throw new Error(
-                    "Document No. is required."
-                );
+            throw new Error(
+                "Vendor is required."
+            );
 
-            }
-
-
-            if (!header.invoice_date) {
-
-                throw new Error(
-                    "Invoice Date is required."
-                );
-
-            }
+        }
 
 
-            if (!header.date_received) {
+        if (!header.invoice_no) {
 
-                throw new Error(
-                    "Date Received is required."
-                );
+            throw new Error(
+                "Document No. is required."
+            );
 
-            }
-
-
-            if (!details.length) {
-
-                throw new Error(
-                    "At least one invoice detail is required."
-                );
-
-            }
+        }
 
 
-            /*
-            ==================================================
-            CALCULATE DETAILS
-            ==================================================
-            */
+        if (!header.invoice_date) {
 
-            const calculatedDetails =
+            throw new Error(
+                "Invoice Date is required."
+            );
 
-                details.map(
-                    detail => {
-
-                        const calculated =
-
-                            this.calculateDetailAmount(
-                                detail
-                            );
+        }
 
 
-                        return {
+        if (!header.date_received) {
 
-                            ...detail,
+            throw new Error(
+                "Date Received is required."
+            );
 
-                            ...calculated
-
-                        };
-
-                    }
-                );
+        }
 
 
-            /*
-            ==================================================
-            CALCULATE HEADER
-            ==================================================
-            */
+        if (
+            !Array.isArray(details)
+            ||
+            !details.length
+        ) {
 
-            const totals =
+            throw new Error(
+                "At least one invoice detail is required."
+            );
 
-                this.calculateTotals(
-                    calculatedDetails
-                );
-
-
-            /*
-            ==================================================
-            INSERT HEADER
-            ==================================================
-            */
-
-            const {
-
-                data: invoice,
-
-                error: invoiceError
-
-            } = await supabase
-
-                .from(this.table)
-
-                .insert({
-
-                    ...header,
-
-                    ...totals,
-
-                    status:
-                        header.status
-                        || this.STATUS.DRAFT
-
-                })
-
-                .select()
-
-                .single();
+        }
 
 
-            if (invoiceError) {
+        /*
+        ==================================================
+        CALCULATE DETAILS
+        ==================================================
+        */
 
-                throw invoiceError;
+        const calculatedDetails =
+            details.map(
+                detail => {
 
-            }
+                    const calculated =
+                        this.calculateDetailAmount(
+                            detail
+                        );
 
 
-            /*
-            ==================================================
-            PREPARE DETAILS
-            ==================================================
-            */
+                    return {
 
-            const detailRows =
+                        ...detail,
 
-                calculatedDetails.map(
-                    detail => ({
+                        ...calculated
+
+                    };
+
+                }
+            );
+
+
+        /*
+        ==================================================
+        CALCULATE HEADER TOTAL
+        ==================================================
+        */
+
+        const totals =
+            this.calculateTotals(
+                calculatedDetails
+            );
+
+
+        /*
+        ==================================================
+        PREPARE HEADER PAYLOAD
+        ==================================================
+        */
+
+        const headerPayload = {
+
+            ...header,
+
+            subtotal:
+                Number(
+                    totals.subtotal
+                    || 0
+                ),
+
+            tax_input_amount:
+                Number(
+                    totals.tax_input_amount
+                    || 0
+                ),
+
+            withholding_tax_amount:
+                Number(
+                    totals.withholding_tax_amount
+                    || 0
+                ),
+
+            total_amount:
+                Number(
+                    totals.total_amount
+                    || 0
+                ),
+
+            paid_amount:
+                0,
+
+            outstanding_amount:
+                Number(
+                    totals.total_amount
+                    || 0
+                ),
+
+            status:
+                header.status
+                ||
+                this.STATUS.DRAFT
+
+        };
+
+
+        /*
+        ==================================================
+        REMOVE UNSAFE / EMPTY HEADER VALUES
+        ==================================================
+        */
+
+        if (
+            headerPayload.id == null
+            ||
+            headerPayload.id === ""
+        ) {
+
+            delete headerPayload.id;
+
+        }
+
+
+        if (
+            headerPayload.gl_journal_id === ""
+        ) {
+
+            headerPayload.gl_journal_id =
+                null;
+
+        }
+
+
+        /*
+        ==================================================
+        DEBUG HEADER
+        ==================================================
+        */
+
+        console.log(
+            "========== AP CREATE HEADER =========="
+        );
+
+
+        console.log(
+            headerPayload
+        );
+
+
+        console.log(
+            "======================================"
+        );
+
+
+        /*
+        ==================================================
+        INSERT HEADER
+        ==================================================
+        */
+
+        const {
+
+            data: invoice,
+
+            error: invoiceError
+
+        } = await supabase
+
+            .from(
+                this.table
+            )
+
+            .insert(
+                headerPayload
+            )
+
+            .select()
+
+            .single();
+
+
+        /*
+        ==================================================
+        HEADER ERROR
+        ==================================================
+        */
+
+        if (invoiceError) {
+
+            console.error(
+                "========== AP HEADER INSERT ERROR =========="
+            );
+
+
+            console.error(
+                "MESSAGE:",
+                invoiceError.message
+            );
+
+
+            console.error(
+                "DETAILS:",
+                invoiceError.details
+            );
+
+
+            console.error(
+                "HINT:",
+                invoiceError.hint
+            );
+
+
+            console.error(
+                "CODE:",
+                invoiceError.code
+            );
+
+
+            console.error(
+                "FULL ERROR:",
+                invoiceError
+            );
+
+
+            console.error(
+                "============================================"
+            );
+
+
+            throw invoiceError;
+
+        }
+
+
+        if (
+            !invoice?.id
+        ) {
+
+            throw new Error(
+                "Account Payable header was created but ID is missing."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        PREPARE DETAILS
+        ==================================================
+        */
+
+        const detailRows =
+            calculatedDetails.map(
+                detail => {
+
+                    const row = {
 
                         ...detail,
 
                         account_payable_id:
                             invoice.id
 
-                    })
-                );
+                    };
 
 
-            /*
-            ==================================================
-            INSERT DETAILS
-            ==================================================
-            */
+                    /*
+                    ==========================================
+                    REMOVE TEMP / EMPTY ID
+                    ==========================================
+                    */
 
-            const {
+                    if (
+                        row.id == null
+                        ||
+                        row.id === ""
+                    ) {
 
-                data: insertedDetails,
+                        delete row.id;
 
-                error: detailError
-
-            } = await supabase
-
-                .from(this.detailTable)
-
-                .insert(
-                    detailRows
-                )
-
-                .select();
+                    }
 
 
-            if (detailError) {
+                    /*
+                    ==========================================
+                    NORMALIZE OPTIONAL TAX REFERENCES
+                    ==========================================
+                    */
+
+                    row.tax_plus_id =
+                        row.tax_plus_id
+                        || null;
+
+
+                    row.tax_plus_account_id =
+                        row.tax_plus_account_id
+                        ? Number(
+                            row.tax_plus_account_id
+                        )
+                        : null;
+
+
+                    row.tax_minus_id =
+                        row.tax_minus_id
+                        || null;
+
+
+                    row.tax_minus_account_id =
+                        row.tax_minus_account_id
+                        ? Number(
+                            row.tax_minus_account_id
+                        )
+                        : null;
+
+
+                    /*
+                    ==========================================
+                    NORMALIZE ACCOUNT
+                    ==========================================
+                    */
+
+                    row.charge_account_id =
+                        Number(
+                            row.charge_account_id
+                            || 0
+                        );
+
+
+                    return row;
+
+                }
+            );
+
+
+        /*
+        ==================================================
+        VALIDATE DETAIL ACCOUNT
+        ==================================================
+        */
+
+        for (
+            const detail
+            of detailRows
+        ) {
+
+            if (
+                !detail.charge_account_id
+            ) {
 
                 /*
                 ==============================================
-                CLEAN HEADER IF DETAIL INSERT FAILS
+                ROLLBACK HEADER
                 ==============================================
                 */
 
                 await supabase
 
-                    .from(this.table)
+                    .from(
+                        this.table
+                    )
 
                     .delete()
 
@@ -1589,36 +1848,200 @@ async linkGLJournal(
                     );
 
 
-                throw detailError;
+                throw new Error(
+                    "Charge Account is required on every Account Payable detail."
+                );
+
+            }
+
+        }
+
+
+        /*
+        ==================================================
+        DEBUG DETAIL
+        ==================================================
+        */
+
+        console.log(
+            "========== AP CREATE DETAILS =========="
+        );
+
+
+        console.table(
+            detailRows
+        );
+
+
+        console.log(
+            "========================================"
+        );
+
+
+        /*
+        ==================================================
+        INSERT DETAILS
+        ==================================================
+        */
+
+        const {
+
+            data: insertedDetails,
+
+            error: detailError
+
+        } = await supabase
+
+            .from(
+                this.detailTable
+            )
+
+            .insert(
+                detailRows
+            )
+
+            .select();
+
+
+        /*
+        ==================================================
+        DETAIL ERROR
+        ==================================================
+        */
+
+        if (detailError) {
+
+            console.error(
+                "========== AP DETAIL INSERT ERROR =========="
+            );
+
+
+            console.error(
+                "MESSAGE:",
+                detailError.message
+            );
+
+
+            console.error(
+                "DETAILS:",
+                detailError.details
+            );
+
+
+            console.error(
+                "HINT:",
+                detailError.hint
+            );
+
+
+            console.error(
+                "CODE:",
+                detailError.code
+            );
+
+
+            console.error(
+                "FULL ERROR:",
+                detailError
+            );
+
+
+            console.error(
+                "============================================"
+            );
+
+
+            /*
+            ==================================================
+            ROLLBACK HEADER
+            ==================================================
+            */
+
+            const {
+
+                error: rollbackError
+
+            } = await supabase
+
+                .from(
+                    this.table
+                )
+
+                .delete()
+
+                .eq(
+                    "id",
+                    invoice.id
+                );
+
+
+            if (rollbackError) {
+
+                console.error(
+                    "AP CREATE ROLLBACK ERROR:",
+                    rollbackError
+                );
 
             }
 
 
-            return {
-
-                ...invoice,
-
-                details:
-                    insertedDetails || []
-
-            };
+            throw detailError;
 
         }
 
-        catch (error) {
 
-            console.error(
-                "AccountPayableService.create:",
-                error
-            );
+        /*
+        ==================================================
+        SUCCESS
+        ==================================================
+        */
 
-            throw error;
+        console.log(
+            "ACCOUNT PAYABLE CREATED:",
+            {
 
-        }
+                header:
+                    invoice,
+
+                detail_count:
+                    insertedDetails?.length
+                    || 0
+
+            }
+        );
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
+
+        return {
+
+            ...invoice,
+
+            details:
+                insertedDetails
+                || []
+
+        };
 
     }
 
+    catch (error) {
 
+        console.error(
+            "AccountPayableService.create:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
     /*
     ======================================================
     UPDATE
@@ -2267,8 +2690,878 @@ async linkGLJournal(
         throw error;
 
     }
+}
+
+
+/*
+======================================================
+CREATE AP PAYMENT
+======================================================
+*/
+
+async createPayment(
+    payment
+) {
+
+    try {
+
+        /*
+        ==================================================
+        VALIDATE PAYMENT OBJECT
+        ==================================================
+        */
+
+        if (!payment) {
+
+            throw new Error(
+                "AP Payment data is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        VALIDATE ACCOUNT PAYABLE
+        ==================================================
+        */
+
+        if (
+            !payment.account_payable_id
+        ) {
+
+            throw new Error(
+                "Account Payable ID is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        VALIDATE PAYMENT DATE
+        ==================================================
+        */
+
+        if (
+            !payment.payment_date
+        ) {
+
+            throw new Error(
+                "Payment Date is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        VALIDATE BANK ACCOUNT
+        ==================================================
+        */
+
+        const bankAccountId =
+            Number(
+                payment.bank_account_id
+                || 0
+            );
+
+
+        if (!bankAccountId) {
+
+            throw new Error(
+                "Bank Account is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        PAYMENT COMPONENT
+        ==================================================
+        */
+
+        const dppAmount =
+            Number(
+                payment.dpp_amount
+                || 0
+            );
+
+
+        const taxPlusAmount =
+            Number(
+                payment.tax_plus_amount
+                || 0
+            );
+
+
+        const taxMinusAmount =
+            Number(
+                payment.tax_minus_amount
+                || 0
+            );
+
+
+        const paymentAmount =
+            Number(
+                payment.payment_amount
+                || 0
+            );
+
+
+        /*
+        ==================================================
+        VALIDATE PAYMENT AMOUNT
+        ==================================================
+        */
+
+        if (
+            paymentAmount <= 0
+        ) {
+
+            throw new Error(
+                "Payment Amount must be greater than 0."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        VALIDATE GL JOURNAL
+        ==================================================
+        */
+
+        if (
+            !payment.gl_journal_id
+        ) {
+
+            throw new Error(
+                "AP Payment GL Journal ID is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        INSERT PAYMENT
+        ==================================================
+        */
+
+        const {
+
+            data,
+
+            error
+
+        } = await supabase
+
+            .from(
+                this.paymentTable
+            )
+
+            .insert({
+
+                account_payable_id:
+                    payment.account_payable_id,
+
+                payment_date:
+                    payment.payment_date,
+
+                bank_account_id:
+                    bankAccountId,
+
+                dpp_amount:
+                    dppAmount,
+
+                tax_plus_amount:
+                    taxPlusAmount,
+
+                tax_minus_amount:
+                    taxMinusAmount,
+
+                payment_amount:
+                    paymentAmount,
+
+                reference_no:
+                    payment.reference_no
+                    || null,
+
+                description:
+                    payment.description
+                    || null,
+
+                gl_journal_id:
+                    payment.gl_journal_id
+
+            })
+
+            .select()
+
+            .single();
+
+
+        /*
+        ==================================================
+        DATABASE ERROR
+        ==================================================
+        */
+
+        if (error) {
+
+            console.error(
+                "AP PAYMENT INSERT ERROR:",
+                {
+                    message:
+                        error.message,
+
+                    details:
+                        error.details,
+
+                    hint:
+                        error.hint,
+
+                    code:
+                        error.code
+                }
+            );
+
+
+            throw error;
+
+        }
+
+
+        /*
+        ==================================================
+        VALIDATE RESULT
+        ==================================================
+        */
+
+        if (!data) {
+
+            throw new Error(
+                "AP Payment was not created."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "AP PAYMENT CREATED:",
+            data
+        );
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
+
+        return data;
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountPayableService.createPayment:",
+            error
+        );
+
+
+        throw error;
+
+    }
 
 }
+
+/*
+======================================================
+GET AP PAYMENT TOTAL
+ONLY ACTIVE PAYMENT
+======================================================
+*/
+
+async getPaymentTotal(
+    accountPayableId
+) {
+
+    try {
+
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
+
+        if (!accountPayableId) {
+
+            throw new Error(
+                "Account Payable ID is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        GET ACTIVE PAYMENT
+
+        ACTIVE PAYMENT =
+        gl_journal_id IS NOT NULL
+        ==================================================
+        */
+
+        const {
+
+            data,
+
+            error
+
+        } = await supabase
+
+            .from(
+                this.paymentTable
+            )
+
+            .select(`
+                payment_amount,
+                gl_journal_id
+            `)
+
+            .eq(
+                "account_payable_id",
+                accountPayableId
+            )
+
+            .not(
+                "gl_journal_id",
+                "is",
+                null
+            );
+
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        /*
+        ==================================================
+        CALCULATE TOTAL PAID
+        ==================================================
+        */
+
+        const totalPaid =
+            (data || [])
+                .reduce(
+                    (
+                        total,
+                        payment
+                    ) => {
+
+                        return (
+                            total
+                            +
+                            Number(
+                                payment.payment_amount
+                                || 0
+                            )
+                        );
+
+                    },
+                    0
+                );
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "AP ACTIVE PAYMENT TOTAL:",
+            {
+                account_payable_id:
+                    accountPayableId,
+
+                payment_count:
+                    data?.length
+                    || 0,
+
+                total_paid:
+                    totalPaid,
+
+                payments:
+                    data
+            }
+        );
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
+
+        return Number(
+            totalPaid.toFixed(
+                2
+            )
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountPayableService.getPaymentTotal:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
+/*
+======================================================
+GET ACTIVE AP PAYMENT
+======================================================
+*/
+
+async getActivePayment(
+    accountPayableId
+) {
+
+    try {
+
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
+
+        if (!accountPayableId) {
+
+            throw new Error(
+                "Account Payable ID is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        ACTIVE PAYMENT
+
+        Payment is active only when it still has
+        GL Journal reference.
+        ==================================================
+        */
+
+        const {
+
+            data,
+
+            error
+
+        } = await supabase
+
+            .from(
+                this.paymentTable
+            )
+
+            .select(`
+                id,
+                account_payable_id,
+                payment_date,
+                bank_account_id,
+                payment_amount,
+                gl_journal_id,
+                created_at
+            `)
+
+            .eq(
+                "account_payable_id",
+                accountPayableId
+            )
+
+            .not(
+                "gl_journal_id",
+                "is",
+                null
+            )
+
+            .order(
+                "created_at",
+                {
+                    ascending:
+                        false
+                }
+            )
+
+            .limit(
+                1
+            )
+
+            .maybeSingle();
+
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        return data
+            || null;
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountPayableService.getActivePayment:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
+/*
+======================================================
+UPDATE AP PAYMENT STATUS
+======================================================
+*/
+
+async updatePaymentStatus(
+    accountPayableId
+) {
+
+    try {
+
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
+
+        if (!accountPayableId) {
+
+            throw new Error(
+                "Account Payable ID is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        GET ACCOUNT PAYABLE
+        ==================================================
+        */
+
+        const result =
+            await this.getById(
+                accountPayableId
+            );
+
+
+        const invoice =
+            result?.header;
+
+
+        if (!invoice) {
+
+            throw new Error(
+                "Account Payable not found."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        TOTAL INVOICE
+        ==================================================
+        */
+
+        const totalAmount =
+            Number(
+                invoice.total_amount
+                || 0
+            );
+
+
+        if (
+            totalAmount <= 0
+        ) {
+
+            throw new Error(
+                "Account Payable Total Amount is invalid."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        TOTAL PAYMENT
+        ==================================================
+        */
+
+        const paidAmount =
+            Number(
+                await this.getPaymentTotal(
+                    accountPayableId
+                )
+                || 0
+            );
+
+
+        /*
+        ==================================================
+        PREVENT OVERPAYMENT
+        ==================================================
+        */
+
+        if (
+            paidAmount > totalAmount
+        ) {
+
+            throw new Error(
+                "Total payment cannot exceed Account Payable Total Amount."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        OUTSTANDING
+        ==================================================
+        */
+
+        const outstandingAmount =
+            Math.max(
+                Number(
+                    (
+                        totalAmount
+                        -
+                        paidAmount
+                    ).toFixed(2)
+                ),
+                0
+            );
+
+
+        /*
+        ==================================================
+        DETERMINE STATUS
+        ==================================================
+        */
+
+        let status =
+            this.STATUS.COMPLETE;
+
+
+        /*
+        ==============================================
+        PARTIAL PAID
+        ==============================================
+        */
+
+        if (
+            paidAmount > 0
+            &&
+            paidAmount < totalAmount
+        ) {
+
+            status =
+                this.STATUS.PARTIAL_PAID;
+
+        }
+
+
+        /*
+        ==============================================
+        FULLY PAID
+        ==============================================
+        */
+
+        if (
+            paidAmount >= totalAmount
+            &&
+            totalAmount > 0
+        ) {
+
+            status =
+                this.STATUS.PAID;
+
+        }
+
+
+        /*
+        ==================================================
+        UPDATE ACCOUNT PAYABLE
+        ==================================================
+        */
+
+        const {
+
+            data,
+
+            error
+
+        } = await supabase
+
+            .from(
+                this.table
+            )
+
+            .update({
+
+                paid_amount:
+                    Number(
+                        paidAmount.toFixed(2)
+                    ),
+
+                outstanding_amount:
+                    outstandingAmount,
+
+                status:
+                    status
+
+            })
+
+            .eq(
+                "id",
+                accountPayableId
+            )
+
+            .select()
+
+            .single();
+
+
+        /*
+        ==================================================
+        DATABASE ERROR
+        ==================================================
+        */
+
+        if (error) {
+
+            console.error(
+                "AP PAYMENT STATUS UPDATE ERROR:",
+                {
+                    message:
+                        error.message,
+
+                    details:
+                        error.details,
+
+                    hint:
+                        error.hint,
+
+                    code:
+                        error.code
+                }
+            );
+
+
+            throw error;
+
+        }
+
+
+        /*
+        ==================================================
+        VALIDATE RESULT
+        ==================================================
+        */
+
+        if (!data) {
+
+            throw new Error(
+                "Account Payable payment status was not updated."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "AP PAYMENT STATUS UPDATED:",
+            {
+
+                account_payable_id:
+                    accountPayableId,
+
+                total_amount:
+                    totalAmount,
+
+                paid_amount:
+                    paidAmount,
+
+                outstanding_amount:
+                    outstandingAmount,
+
+                status:
+                    status
+
+            }
+        );
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
+
+        return data;
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountPayableService.updatePaymentStatus:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
+
 /*
 ======================================================
 RECOVER ACCOUNT PAYABLE TOTALS
