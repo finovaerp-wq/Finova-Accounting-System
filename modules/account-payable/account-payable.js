@@ -9970,6 +9970,168 @@ resetAddForm() {
 
     /*
     ==================================================
+    IMPORTANT
+    RESTORE ADD MODE
+
+    View mode sebelumnya mengubah field menjadi:
+    disabled = true
+    readOnly = true
+
+    Saat Add AP dibuka kembali semua field harus
+    dikembalikan ke kondisi editable.
+    ==================================================
+    */
+
+    const editableFields = [
+
+        this.apFormVendor,
+
+        this.apFormPoNo,
+
+        this.apFormInvoiceNo,
+
+        this.apFormInvoiceDate,
+
+        this.apFormDateReceived,
+
+        this.apFormDescription
+
+    ];
+
+
+    editableFields.forEach(
+
+        field => {
+
+            if (!field) {
+
+                return;
+
+            }
+
+
+            field.disabled =
+                false;
+
+            field.readOnly =
+                false;
+
+        }
+
+    );
+
+
+    /*
+    ==================================================
+    TERM OF PAYMENT
+    AUTO FROM VENDOR
+    ==================================================
+    */
+
+    if (
+        this.apFormTop
+    ) {
+
+        this.apFormTop.disabled =
+            false;
+
+        this.apFormTop.readOnly =
+            true;
+
+        this.apFormTop.value =
+            "";
+
+    }
+
+
+    /*
+    ==================================================
+    DUE DATE
+    AUTO CALCULATED
+    ==================================================
+    */
+
+    if (
+        this.apFormDueDate
+    ) {
+
+        this.apFormDueDate.disabled =
+            false;
+
+        this.apFormDueDate.readOnly =
+            true;
+
+        this.apFormDueDate.value =
+            "";
+
+    }
+
+
+    /*
+    ==================================================
+    JOURNAL NUMBER
+    AUTO GENERATED
+    ==================================================
+    */
+
+    if (
+        this.apFormJournalNo
+    ) {
+
+        this.apFormJournalNo.disabled =
+            false;
+
+        this.apFormJournalNo.readOnly =
+            true;
+
+        this.apFormJournalNo.value =
+            "";
+
+    }
+
+
+    /*
+    ==================================================
+    ENABLE ADD DETAIL BUTTON
+    ==================================================
+    */
+
+    if (
+        this.btnAddDetail
+    ) {
+
+        this.btnAddDetail.disabled =
+            false;
+
+    }
+
+
+    /*
+    ==================================================
+    ENABLE SAVE DRAFT BUTTON
+    ==================================================
+    */
+
+    if (
+        this.btnSaveDraft
+    ) {
+
+        this.btnSaveDraft.disabled =
+            false;
+
+        this.btnSaveDraft.innerHTML = `
+
+            <i class="fa-solid fa-floppy-disk me-1"></i>
+
+            Save Draft
+
+        `;
+
+    }
+
+
+    /*
+    ==================================================
     VENDOR
     ==================================================
     */
@@ -9979,22 +10141,6 @@ resetAddForm() {
     ) {
 
         this.apFormVendor.value =
-            "";
-
-    }
-
-
-    /*
-    ==================================================
-    TERM OF PAYMENT
-    ==================================================
-    */
-
-    if (
-        this.apFormTop
-    ) {
-
-        this.apFormTop.value =
             "";
 
     }
@@ -10034,22 +10180,6 @@ resetAddForm() {
 
     /*
     ==================================================
-    JOURNAL NUMBER
-    ==================================================
-    */
-
-    if (
-        this.apFormJournalNo
-    ) {
-
-        this.apFormJournalNo.value =
-            "";
-
-    }
-
-
-    /*
-    ==================================================
     INVOICE DATE
     ==================================================
     */
@@ -10075,22 +10205,6 @@ resetAddForm() {
     ) {
 
         this.apFormDateReceived.value =
-            "";
-
-    }
-
-
-    /*
-    ==================================================
-    DUE DATE
-    ==================================================
-    */
-
-    if (
-        this.apFormDueDate
-    ) {
-
-        this.apFormDueDate.value =
             "";
 
     }
@@ -10217,27 +10331,6 @@ resetAddForm() {
 
     /*
     ==================================================
-    RESET SAVE BUTTON
-    ==================================================
-    */
-
-    if (
-        this.btnSaveDraft
-    ) {
-
-        this.btnSaveDraft.innerHTML = `
-
-            <i class="fa-solid fa-floppy-disk me-1"></i>
-
-            Save Draft
-
-        `;
-
-    }
-
-
-    /*
-    ==================================================
     RESET MODAL TITLE
     ==================================================
     */
@@ -10260,6 +10353,28 @@ resetAddForm() {
 
     /*
     ==================================================
+    RESET MODAL SUBTITLE
+    ==================================================
+    */
+
+    const modalSubtitle =
+        document.querySelector(
+            "#accountPayableModal .modal-subtitle"
+        );
+
+
+    if (
+        modalSubtitle
+    ) {
+
+        modalSubtitle.textContent =
+            "Create new Account Payable";
+
+    }
+
+
+    /*
+    ==================================================
     RESET MODAL TAB
     ==================================================
     */
@@ -10267,8 +10382,14 @@ resetAddForm() {
     this.resetAPModalTab();
 
 
+    /*
+    ==================================================
+    DEBUG
+    ==================================================
+    */
+
     console.log(
-        "AP Add Form completely reset."
+        "AP Add Form completely reset to ADD MODE."
     );
 
 }
