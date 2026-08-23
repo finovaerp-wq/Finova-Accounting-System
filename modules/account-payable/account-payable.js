@@ -3890,35 +3890,52 @@ this.btnConfirmApDeleteInvoice =
         );
 
 
-    this.statusFilter =
-        document.getElementById(
-            "ap-status"
-        );
+   /*
+==================================================
+STATUS FILTER
+==================================================
+*/
+
+this.statusFilter =
+    document.getElementById(
+        "ap-status-filter"
+    );
 
 
-    this.findBy =
-        document.getElementById(
-            "ap-find-by"
-        );
+/*
+==================================================
+FIND BY
+==================================================
+*/
+
+this.findBy =
+    document.getElementById(
+        "ap-find-by"
+    );
 
 
-    this.keyword =
-        document.getElementById(
-            "ap-keyword"
-        );
+/*
+==================================================
+KEYWORD
+==================================================
+*/
+
+this.keyword =
+    document.getElementById(
+        "ap-keyword"
+    );
 
 
-    /*
-    ==================================================
-    TOOLBAR
-    ==================================================
-    */
+/*
+==================================================
+FIND BUTTON
+==================================================
+*/
 
-    this.btnFind =
-        document.getElementById(
-            "btn-ap-find"
-        );
-
+this.btnFind =
+    document.getElementById(
+        "btn-find-ap"
+    );
 
     this.btnAdd =
         document.getElementById(
@@ -15938,65 +15955,77 @@ async loadData() {
     }
 
 }
-    /*
-    ======================================================
-    SEARCH
-    ======================================================
-    */
+/*
+======================================================
+SEARCH ACCOUNT PAYABLE
+======================================================
+*/
 
-    async search() {
+async search() {
 
-        try {
+    try {
 
-            const filters = {
+        const filters = {
 
-                dateFrom:
-                    this.dateFrom?.value
-                    || "",
+            dateFrom:
+                this.dateFrom?.value
+                || "",
 
-                dateTo:
-                    this.dateTo?.value
-                    || "",
+            dateTo:
+                this.dateTo?.value
+                || "",
 
-                status:
-                    this.statusFilter?.value
-                    || "all",
+            status:
+                this.statusFilter?.value
+                || "all",
 
-                keyword:
-                    this.keyword?.value
-                    || ""
+            findBy:
+                this.findBy?.value
+                || "invoice_no",
 
-            };
+            keyword:
+                this.keyword?.value
+                    ?.trim()
+                || ""
 
-
-            this.filteredData =
-                await this.service.search(
-                    filters
-                );
-
-
-            this.currentPage = 1;
+        };
 
 
-            this.render();
+        console.log(
+            "AP SEARCH FILTER:",
+            filters
+        );
 
-        }
 
-        catch (error) {
-
-            console.error(
-                "AccountPayable.search:",
-                error
+        this.filteredData =
+            await this.service.search(
+                filters
             );
 
-            this.showError(
-                "Failed to search Account Payable."
-            );
 
-        }
+        this.currentPage =
+            1;
+
+
+        this.render();
 
     }
 
+    catch (error) {
+
+        console.error(
+            "AccountPayable.search:",
+            error
+        );
+
+
+        this.showError(
+            "Failed to search Account Payable."
+        );
+
+    }
+
+}
 
     /*
     ======================================================
@@ -16271,13 +16300,18 @@ renderTable() {
         }
 
     }
-      /*
+     /*
 ======================================================
 CREATE TABLE ROW
+ACCOUNT PAYABLE
+NEW COMPACT BODY LAYOUT
 ======================================================
 */
 
-createTableRow(invoice, number) {
+createTableRow(
+    invoice,
+    number
+) {
 
     /*
     ==================================================
@@ -16288,25 +16322,15 @@ createTableRow(invoice, number) {
     const vendor =
         invoice?.mst_business_partner;
 
+
     const vendorName =
         vendor?.bp_name
         || "-";
-    
-    console.log(
-    "AP ROW:",
-    invoice?.invoice_no,
-    "STATUS:",
-    invoice?.status,
-    "TOTAL:",
-    invoice?.total_amount,
-    "OUTSTANDING:",
-    invoice?.outstanding_amount
-);    
 
 
     /*
     ==================================================
-    HEADER DATA
+    DOCUMENT DATA
     ==================================================
     */
 
@@ -16320,8 +16344,48 @@ createTableRow(invoice, number) {
         || "-";
 
 
+    /*
+    ==================================================
+    JOURNAL NO
+    ==================================================
+    */
+
+    const journalNo =
+        invoice?.trx_gl_journal?.journal_no
+        ||
+        invoice?.journal_no
+        ||
+        (
+            invoice?.gl_journal_id
+                ? "Linked"
+                : "Not Set"
+        );
+
+
+    /*
+    ==================================================
+    DESCRIPTION
+    ==================================================
+    */
+
+    const description =
+        invoice?.description
+        || "-";
+
+
+    /*
+    ==================================================
+    DATE DATA
+    ==================================================
+    */
+
     const invoiceDate =
         invoice?.invoice_date
+        || "-";
+
+
+    const dateReceived =
+        invoice?.date_received
         || "-";
 
 
@@ -16331,49 +16395,53 @@ createTableRow(invoice, number) {
 
 
     /*
-==================================================
-AMOUNT
-==================================================
-*/
+    ==================================================
+    AMOUNT
+    ==================================================
+    */
 
-const totalValue =
-    Number(
-        invoice?.total_amount
-        ?? invoice?.total
-        ?? 0
-    );
-
-
-const outstandingValue =
-    Number(
-        invoice?.outstanding_amount
-        ?? invoice?.outstanding
-        ?? totalValue
-    );
+    const totalValue =
+        Number(
+            invoice?.total_amount
+            ??
+            invoice?.total
+            ??
+            0
+        );
 
 
-const totalAmount =
-    this.formatCurrency(
-        totalValue
-    );
+    const outstandingValue =
+        Number(
+            invoice?.outstanding_amount
+            ??
+            invoice?.outstanding
+            ??
+            totalValue
+        );
 
 
-const outstandingAmount =
-    this.formatCurrency(
-        outstandingValue
-    );
+    const totalAmount =
+        this.formatCurrency(
+            totalValue
+        );
+
+
+    const outstandingAmount =
+        this.formatCurrency(
+            outstandingValue
+        );
 
 
     /*
     ==================================================
-    TECHNICAL DOCUMENT STATUS
-    Draft / Posted / Void
+    TECHNICAL STATUS
     ==================================================
     */
 
     const technicalStatus =
         String(
-            invoice?.status || "Draft"
+            invoice?.status
+            || "Draft"
         )
         .trim()
         .toLowerCase();
@@ -16382,20 +16450,48 @@ const outstandingAmount =
     /*
     ==================================================
     PAYMENT STATUS
-    Unpaid / Partial Paid / Less Paid / Paid
     ==================================================
     */
 
     const paymentStatus =
-        this.getPaymentStatus(invoice);
+        this.getPaymentStatus(
+            invoice
+        );
 
 
-/* ==================================================
-   ROW CLASS
-   SAME VISUAL BEHAVIOR AS GL JOURNAL
-================================================== */
+    /*
+    ==================================================
+    DEBUG
+    ==================================================
+    */
 
-const rowClass = "";
+    console.log(
+        "AP ROW:",
+        {
+            invoice_no:
+                invoiceNo,
+
+            vendor:
+                vendorName,
+
+            status:
+                invoice?.status,
+
+            payment_status:
+                paymentStatus,
+
+            total:
+                totalValue,
+
+            outstanding:
+                outstandingValue,
+
+            journal:
+                journalNo
+        }
+    );
+
+
     /*
     ==================================================
     RETURN ROW
@@ -16404,24 +16500,125 @@ const rowClass = "";
 
     return `
 
-    <tr
-        class="${rowClass}"
-        data-status="${technicalStatus}">
-
-        <td>
-            ${number}
-        </td>
+        <tr
+            class="ap-data-row"
+            data-status="${technicalStatus}"
+            data-id="${invoice?.id || ""}">
 
 
             <!-- ======================================
-                 INVOICE NO
+                 NO
             ======================================= -->
 
-            <td>
+            <td class="finova-table-index ap-cell-no">
 
-                <div class="fw-semibold">
+                ${number}
 
-                    ${invoiceNo}
+            </td>
+
+
+            <!-- ======================================
+                 DOCUMENT
+            ======================================= -->
+
+            <td class="ap-cell-document">
+
+                <div class="ap-document-wrap">
+
+
+                    <!-- TYPE BADGE -->
+
+                    <div class="ap-document-badges">
+
+                        <span class="ap-document-badge ap-document-badge-payable">
+
+                            PAYABLE
+
+                        </span>
+
+                        <span class="ap-document-badge ap-document-badge-invoice">
+
+                            INV
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- INVOICE NO -->
+
+                    <div class="ap-info-line">
+
+                        <span class="ap-info-label">
+
+                            Inv No
+
+                        </span>
+
+                        <span class="ap-info-separator">
+
+                            :
+
+                        </span>
+
+                        <span class="ap-info-value fw-semibold">
+
+                            ${invoiceNo}
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- PO NO -->
+
+                    <div class="ap-info-line">
+
+                        <span class="ap-info-label">
+
+                            PO No
+
+                        </span>
+
+                        <span class="ap-info-separator">
+
+                            :
+
+                        </span>
+
+                        <span class="ap-info-value">
+
+                            ${poNo}
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- JOURNAL -->
+
+                    <div class="ap-info-line">
+
+                        <span class="ap-info-label">
+
+                            Journal
+
+                        </span>
+
+                        <span class="ap-info-separator">
+
+                            :
+
+                        </span>
+
+                        <span class="ap-info-value">
+
+                            ${journalNo}
+
+                        </span>
+
+                    </div>
+
 
                 </div>
 
@@ -16429,14 +16626,47 @@ const rowClass = "";
 
 
             <!-- ======================================
-                 VENDOR
+                 VENDOR / DESCRIPTION
             ======================================= -->
 
-            <td>
+            <td class="ap-cell-vendor">
 
-                <div class="fw-semibold">
+                <div class="ap-vendor-wrap">
 
-                    ${vendorName}
+
+                    <!-- VENDOR -->
+
+                    <div class="ap-vendor-name">
+
+                        ${vendorName}
+
+                    </div>
+
+
+                    <!-- DESCRIPTION -->
+
+                    <div class="ap-description-line">
+
+                        <span class="ap-info-label">
+
+                            Description
+
+                        </span>
+
+                        <span class="ap-info-separator">
+
+                            :
+
+                        </span>
+
+                        <span class="ap-description-value">
+
+                            ${description}
+
+                        </span>
+
+                    </div>
+
 
                 </div>
 
@@ -16444,67 +16674,181 @@ const rowClass = "";
 
 
             <!-- ======================================
-                 PO NO
+                 DATE INFORMATION
             ======================================= -->
 
-            <td>
+            <td class="ap-cell-date-info">
 
-                ${poNo}
+                <div class="ap-date-wrap">
+
+
+                    <!-- INVOICE DATE -->
+
+                    <div class="ap-info-line">
+
+                        <span class="ap-info-label">
+
+                            Inv Date
+
+                        </span>
+
+                        <span class="ap-info-separator">
+
+                            :
+
+                        </span>
+
+                        <span class="ap-info-value">
+
+                            ${invoiceDate}
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- RECEIVED -->
+
+                    <div class="ap-info-line">
+
+                        <span class="ap-info-label">
+
+                            Received
+
+                        </span>
+
+                        <span class="ap-info-separator">
+
+                            :
+
+                        </span>
+
+                        <span class="ap-info-value">
+
+                            ${dateReceived}
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- DUE DATE -->
+
+                    <div class="ap-info-line">
+
+                        <span class="ap-info-label">
+
+                            Due Date
+
+                        </span>
+
+                        <span class="ap-info-separator">
+
+                            :
+
+                        </span>
+
+                        <span class="ap-info-value">
+
+                            ${dueDate}
+
+                        </span>
+
+                    </div>
+
+
+                </div>
 
             </td>
 
 
             <!-- ======================================
-                 INVOICE DATE
+                 AMOUNT / STATUS
             ======================================= -->
 
-            <td>
+            <td class="ap-cell-amount-status">
 
-                ${invoiceDate}
-
-            </td>
+                <div class="ap-amount-wrap">
 
 
-            <!-- ======================================
-                 DUE DATE
-            ======================================= -->
+                    <!-- TOTAL -->
 
-            <td>
+                    <div class="ap-info-line">
 
-                ${dueDate}
+                        <span class="ap-info-label">
 
-            </td>
+                            Total
 
+                        </span>
 
-            <!-- ======================================
-                 TOTAL AMOUNT
-            ======================================= -->
+                        <span class="ap-info-separator">
 
-            <td class="text-end">
+                            :
 
-                ${totalAmount}
+                        </span>
 
-            </td>
+                        <span class="ap-info-value ap-amount-value">
 
+                            ${totalAmount}
 
-            <!-- ======================================
-                 OUTSTANDING
-            ======================================= -->
+                        </span>
 
-            <td class="text-end">
-
-                ${outstandingAmount}
-
-            </td>
+                    </div>
 
 
-            <!-- ======================================
-                 STATUS
-            ======================================= -->
+                    <!-- OUTSTANDING -->
 
-            <td class="text-center">
+                    <div class="ap-info-line">
 
-                ${this.renderStatus(paymentStatus)}
+                        <span class="ap-info-label">
+
+                            Outstanding
+
+                        </span>
+
+                        <span class="ap-info-separator">
+
+                            :
+
+                        </span>
+
+                        <span class="ap-info-value ap-amount-value">
+
+                            ${outstandingAmount}
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- STATUS -->
+
+                    <div class="ap-info-line ap-status-line">
+
+                        <span class="ap-info-label">
+
+                            Status
+
+                        </span>
+
+                        <span class="ap-info-separator">
+
+                            :
+
+                        </span>
+
+                        <span class="ap-info-value">
+
+                            ${this.renderStatus(
+                                paymentStatus
+                            )}
+
+                        </span>
+
+                    </div>
+
+
+                </div>
 
             </td>
 
@@ -16513,11 +16857,14 @@ const rowClass = "";
                  ACTION
             ======================================= -->
 
-            <td class="text-center">
+            <td class="finova-table-action ap-cell-action">
 
-                ${this.renderActionButtons(invoice)}
+                ${this.renderActionButtons(
+                    invoice
+                )}
 
             </td>
+
 
         </tr>
 

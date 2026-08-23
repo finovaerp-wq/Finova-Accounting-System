@@ -100,71 +100,107 @@ get STATUS() {
 
 }
 
-    /*
-    ======================================================
-    GET ALL
-    ======================================================
-    */
+   /*
+======================================================
+GET ALL
+======================================================
+*/
 
-    async getAll() {
+async getAll() {
 
-        try {
+    try {
 
-            const {
+        const {
 
-                data,
+            data,
 
-                error
+            error
 
-            } = await supabase
+        } = await supabase
 
-                .from(this.table)
+            .from(
+                this.table
+            )
 
-                .select(`
-                    *,
-                    mst_business_partner (
-                        id,
-                        bp_code,
-                        bp_name,
-                        bp_type,
-                        top_id,
-                        is_active
-                    )
-                `)
+            .select(`
 
-                .order(
-                    "invoice_date",
-                    {
-                        ascending: false
-                    }
-                );
+                *,
+
+                mst_business_partner (
+                    id,
+                    bp_code,
+                    bp_name,
+                    bp_type,
+                    top_id,
+                    is_active
+                ),
+
+                trx_gl_journal (
+                    id,
+                    journal_no,
+                    journal_date,
+                    status
+                )
+
+            `)
+
+            .order(
+                "invoice_date",
+                {
+                    ascending:
+                        false
+                }
+            );
 
 
-            if (error) {
-
-                throw error;
-
-            }
-
-
-            return data || [];
-
-        }
-
-        catch (error) {
+        if (error) {
 
             console.error(
-                "AccountPayableService.getAll:",
-                error
+                "ACCOUNT PAYABLE GET ALL ERROR:",
+                {
+                    message:
+                        error.message,
+
+                    details:
+                        error.details,
+
+                    hint:
+                        error.hint,
+
+                    code:
+                        error.code
+                }
             );
+
 
             throw error;
 
         }
 
+
+        console.log(
+            "ACCOUNT PAYABLE GET ALL:",
+            data
+        );
+
+
+        return data || [];
+
     }
 
+    catch (error) {
 
+        console.error(
+            "AccountPayableService.getAll:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
     /*
 ======================================================
 GET BY ID
@@ -692,217 +728,330 @@ async linkGLJournal(
 
 
     /*
-    ======================================================
-    SEARCH
-    ======================================================
-    */
+======================================================
+SEARCH
+======================================================
+*/
 
-    async search(filters = {}) {
+async search(filters = {}) {
 
-        try {
+    try {
 
-            let query = supabase
+        /*
+        ==================================================
+        BASE QUERY
+        ==================================================
+        */
 
-                .from(this.table)
+        let query = supabase
 
-                .select(`
-                    *,
-                    mst_business_partner (
-                        id,
-                        bp_code,
-                        bp_name,
-                        bp_type,
-                        top_id,
-                        is_active
-                    )
-                `);
+            .from(this.table)
 
+            .select(`
+                *,
 
-            /*
-            ==================================================
-            DATE FROM
-            ==================================================
-            */
+                mst_business_partner (
+                    id,
+                    bp_code,
+                    bp_name,
+                    bp_type,
+                    top_id,
+                    is_active
+                ),
 
-            if (
-                filters.dateFrom
-            ) {
-
-                query = query.gte(
-                    "invoice_date",
-                    filters.dateFrom
-                );
-
-            }
+                trx_gl_journal (
+                    id,
+                    journal_no,
+                    journal_date,
+                    status
+                )
+            `);
 
 
-            /*
-            ==================================================
-            DATE TO
-            ==================================================
-            */
+        /*
+        ==================================================
+        DATE FROM
+        ==================================================
+        */
 
-            if (
-                filters.dateTo
-            ) {
+        if (
+            filters.dateFrom
+        ) {
 
-                query = query.lte(
-                    "invoice_date",
-                    filters.dateTo
-                );
-
-            }
-
-
-            /*
-            ==================================================
-            STATUS
-            ==================================================
-            */
-
-            if (
-                filters.status &&
-                filters.status !== "all"
-            ) {
-
-                if (
-                    filters.status ===
-                    "not_completed"
-                ) {
-
-                    query = query.in(
-                        "status",
-                        [
-                            this.STATUS.DRAFT,
-                            this.STATUS.POSTED,
-                            this.STATUS.PARTIAL_PAID
-                        ]
-                    );
-
-                }
-
-                else if (
-                    filters.status ===
-                    "completed"
-                ) {
-
-                    query = query.eq(
-                        "status",
-                        this.STATUS.PAID
-                    );
-
-                }
-
-                else {
-
-                    query = query.eq(
-                        "status",
-                        filters.status
-                    );
-
-                }
-
-            }
-
-
-            /*
-            ==================================================
-            ORDER
-            ==================================================
-            */
-
-            query = query.order(
+            query = query.gte(
                 "invoice_date",
-                {
-                    ascending: false
-                }
+                filters.dateFrom
             );
 
+        }
+
+
+        /*
+        ==================================================
+        DATE TO
+        ==================================================
+        */
+
+        if (
+            filters.dateTo
+        ) {
+
+            query = query.lte(
+                "invoice_date",
+                filters.dateTo
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        STATUS
+        ==================================================
+        */
+
+        if (
+            filters.status
+            &&
+            filters.status !== "all"
+        ) {
 
             /*
-            ==================================================
-            EXECUTE
-            ==================================================
+            ==============================================
+            NOT COMPLETED
+            ==============================================
             */
 
-            const {
+            if (
+                filters.status ===
+                "not_completed"
+            ) {
 
-                data,
-
-                error
-
-            } = await query;
-
-
-            if (error) {
-
-                throw error;
+                query = query.in(
+                    "status",
+                    [
+                        this.STATUS.DRAFT,
+                        this.STATUS.POSTED,
+                        this.STATUS.PARTIAL_PAID
+                    ]
+                );
 
             }
 
 
-            let result = data || [];
+            /*
+            ==============================================
+            COMPLETED
+            ==============================================
+            */
+
+            else if (
+                filters.status ===
+                "completed"
+            ) {
+
+                query = query.eq(
+                    "status",
+                    this.STATUS.PAID
+                );
+
+            }
 
 
             /*
-            ==================================================
-            KEYWORD
-            ==================================================
+            ==============================================
+            OTHER STATUS
+            ==============================================
             */
 
-            if (
-                filters.keyword &&
-                filters.keyword.trim()
-            ) {
+            else {
 
-                const keyword =
+                query = query.eq(
+                    "status",
+                    filters.status
+                );
 
+            }
+
+        }
+
+
+        /*
+        ==================================================
+        ORDER
+        ==================================================
+        */
+
+        query = query.order(
+            "invoice_date",
+            {
+                ascending: false
+            }
+        );
+
+
+        /*
+        ==================================================
+        EXECUTE
+        ==================================================
+        */
+
+        const {
+
+            data,
+
+            error
+
+        } = await query;
+
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        /*
+        ==================================================
+        RESULT
+        ==================================================
+        */
+
+        let result =
+            data || [];
+
+
+        /*
+        ==================================================
+        KEYWORD
+        FOLLOW FIND BY
+        ==================================================
+        */
+
+        if (
+            filters.keyword
+            &&
+            filters.keyword.trim()
+        ) {
+
+            /*
+            ==============================================
+            KEYWORD
+            ==============================================
+            */
+
+            const keyword =
+                String(
                     filters.keyword
+                )
+                .trim()
+                .toLowerCase();
+
+
+            /*
+            ==============================================
+            FIND BY
+            ==============================================
+            */
+
+            const findBy =
+                String(
+                    filters.findBy
+                    || "invoice_no"
+                )
+                .trim()
+                .toLowerCase();
+
+
+            /*
+            ==============================================
+            FILTER RESULT
+            ==============================================
+            */
+
+            result = result.filter(
+                invoice => {
+
+                    /*
+                    ======================================
+                    INVOICE NO
+                    ======================================
+                    */
+
+                    const invoiceNo =
+                        String(
+                            invoice?.invoice_no
+                            || ""
+                        )
                         .trim()
                         .toLowerCase();
 
 
-                result = result.filter(
-                    invoice => {
+                    /*
+                    ======================================
+                    VENDOR NAME
+                    ======================================
+                    */
 
-                        const invoiceNo =
-
-                            String(
-                                invoice.invoice_no
-                                || ""
-                            )
-                            .toLowerCase();
-
-
-                        const vendorName =
-
-                            String(
-                                invoice
-                                    .mst_business_partner
-                                    ?.bp_name
-                                || ""
-                            )
-                            .toLowerCase();
+                    const vendorName =
+                        String(
+                            invoice
+                                ?.mst_business_partner
+                                ?.bp_name
+                            || ""
+                        )
+                        .trim()
+                        .toLowerCase();
 
 
-                        const vendorCode =
+                    /*
+                    ======================================
+                    VENDOR CODE
+                    ======================================
+                    */
 
-                            String(
-                                invoice
-                                    .mst_business_partner
-                                    ?.bp_code
-                                || ""
-                            )
-                            .toLowerCase();
+                    const vendorCode =
+                        String(
+                            invoice
+                                ?.mst_business_partner
+                                ?.bp_code
+                            || ""
+                        )
+                        .trim()
+                        .toLowerCase();
 
+
+                    /*
+                    ======================================
+                    FIND BY : INVOICE NO
+                    ======================================
+                    */
+
+                    if (
+                        findBy ===
+                        "invoice_no"
+                    ) {
+
+                        return invoiceNo.includes(
+                            keyword
+                        );
+
+                    }
+
+
+                    /*
+                    ======================================
+                    FIND BY : VENDOR
+                    ======================================
+                    */
+
+                    if (
+                        findBy ===
+                        "vendor"
+                    ) {
 
                         return (
-
-                            invoiceNo.includes(
-                                keyword
-                            )
-
-                            ||
 
                             vendorName.includes(
                                 keyword
@@ -917,28 +1066,66 @@ async linkGLJournal(
                         );
 
                     }
-                );
-
-            }
 
 
-            return result;
+                    /*
+                    ======================================
+                    UNKNOWN FIND BY
+                    ======================================
+                    */
 
-        }
+                    return false;
 
-        catch (error) {
-
-            console.error(
-                "AccountPayableService.search:",
-                error
+                }
             );
 
-            throw error;
-
         }
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "ACCOUNT PAYABLE SEARCH:",
+            {
+                filters:
+                    filters,
+
+                result_count:
+                    result.length,
+
+                result:
+                    result
+            }
+        );
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
+
+        return result;
 
     }
 
+    catch (error) {
+
+        console.error(
+            "AccountPayableService.search:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
 
     /*
     ======================================================

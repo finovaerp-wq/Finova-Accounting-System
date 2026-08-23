@@ -738,3 +738,960 @@ tr.ap-row-void
     width: 100%;
 
 }
+/*
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+ACCOUNT PAYABLE
+COMPACT BODY TABLE LAYOUT
+==========================================================
+*/
+
+
+/*
+==========================================================
+TABLE HEADER WIDTH
+==========================================================
+*/
+
+.account-payable-table-card .ap-col-no {
+
+    width: 54px;
+
+    min-width: 54px;
+
+    max-width: 54px;
+
+}
+
+
+.account-payable-table-card .ap-col-document {
+
+    width: 245px;
+
+    min-width: 245px;
+
+}
+
+
+.account-payable-table-card .ap-col-vendor {
+
+    width: 360px;
+
+    min-width: 320px;
+
+}
+
+
+.account-payable-table-card .ap-col-date-info {
+
+    width: 210px;
+
+    min-width: 210px;
+
+}
+
+
+.account-payable-table-card .ap-col-amount-status {
+
+    width: 230px;
+
+    min-width: 230px;
+
+}
+
+
+.account-payable-table-card .ap-col-action {
+
+    width: 105px;
+
+    min-width: 105px;
+
+    max-width: 105px;
+
+}
+
+
+/*
+==========================================================
+TABLE ROW
+==========================================================
+*/
+
+.account-payable-table-card
+.finova-table
+tbody
+.ap-data-row {
+
+    min-height: 108px;
+
+}
+
+
+/*
+==========================================================
+TABLE CELL
+==========================================================
+*/
+
+.account-payable-table-card
+.finova-table
+tbody
+.ap-data-row
+> td {
+
+    padding: 12px 14px;
+
+    vertical-align: top;
+
+    font-size: 12px;
+
+    line-height: 1.45;
+
+    background: #FFFFFF;
+
+}
+
+
+/*
+==========================================================
+ROW HOVER
+==========================================================
+*/
+
+.account-payable-table-card
+.finova-table
+tbody
+.ap-data-row:hover
+> td {
+
+    background: #F8FAFC;
+
+}
+
+
+/*
+==========================================================
+NO
+==========================================================
+*/
+
+.account-payable-table-card
+.ap-cell-no {
+
+    text-align: center;
+
+    vertical-align: middle !important;
+
+    font-weight: 600;
+
+    color: var(--text-secondary);
+
+}
+
+
+/*
+==========================================================
+DOCUMENT CELL
+==========================================================
+*/
+
+.ap-document-wrap {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+
+    width: 100%;
+
+}
+
+
+/*
+==========================================================
+DOCUMENT BADGES
+==========================================================
+*/
+
+.ap-document-badges {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    margin-bottom: 3px;
+
+}
+
+
+.ap-document-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-height: 21px;
+
+    padding: 2px 8px;
+
+    border-radius: 4px;
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+    line-height: 1;
+
+    letter-spacing: .25px;
+
+    white-space: nowrap;
+
+}
+
+
+.ap-document-badge-payable {
+
+    background: #EAF2FF;
+
+    border: 1px solid #C8DAFA;
+
+    color: #315D9A;
+
+}
+
+
+.ap-document-badge-invoice {
+
+    background: #F3F4F6;
+
+    border: 1px solid #D9DEE5;
+
+    color: #56606D;
+
+}
+
+
+/*
+==========================================================
+GLOBAL INFO LINE
+==========================================================
+*/
+
+.ap-info-line {
+
+    display: grid;
+
+    grid-template-columns: 82px 10px minmax(0, 1fr);
+
+    align-items: start;
+
+    min-width: 0;
+
+    gap: 2px;
+
+}
+
+
+/*
+==========================================================
+INFO LABEL
+==========================================================
+*/
+
+.ap-info-label {
+
+    color: var(--text-secondary);
+
+    font-size: 11px;
+
+    font-weight: 500;
+
+    white-space: nowrap;
+
+}
+
+
+/*
+==========================================================
+INFO SEPARATOR
+==========================================================
+*/
+
+.ap-info-separator {
+
+    color: #94A3B8;
+
+    text-align: center;
+
+}
+
+
+/*
+==========================================================
+INFO VALUE
+==========================================================
+*/
+
+.ap-info-value {
+
+    min-width: 0;
+
+    color: var(--text-primary);
+
+    font-size: 11.5px;
+
+    font-weight: 500;
+
+    overflow-wrap: anywhere;
+
+}
+
+
+/*
+==========================================================
+DOCUMENT VALUE
+==========================================================
+*/
+
+.ap-cell-document
+.ap-info-value {
+
+    font-weight: 500;
+
+}
+
+
+/*
+==========================================================
+VENDOR CELL
+==========================================================
+*/
+
+.ap-vendor-wrap {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 6px;
+
+    min-width: 0;
+
+}
+
+
+/*
+==========================================================
+VENDOR NAME
+==========================================================
+*/
+
+.ap-vendor-name {
+
+    color: var(--text-primary);
+
+    font-size: 12.5px;
+
+    font-weight: 600;
+
+    line-height: 1.4;
+
+    word-break: break-word;
+
+}
+
+
+/*
+==========================================================
+DESCRIPTION
+==========================================================
+*/
+
+.ap-description-line {
+
+    display: grid;
+
+    grid-template-columns: 82px 10px minmax(0, 1fr);
+
+    align-items: start;
+
+    gap: 2px;
+
+    min-width: 0;
+
+}
+
+
+.ap-description-value {
+
+    color: var(--text-secondary);
+
+    font-size: 11.5px;
+
+    font-weight: 400;
+
+    line-height: 1.5;
+
+    white-space: normal;
+
+    word-break: break-word;
+
+}
+
+
+/*
+==========================================================
+DATE CELL
+==========================================================
+*/
+
+.ap-date-wrap {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+
+    width: 100%;
+
+}
+
+
+.ap-cell-date-info
+.ap-info-line {
+
+    grid-template-columns: 72px 10px minmax(0, 1fr);
+
+}
+
+
+/*
+==========================================================
+AMOUNT / STATUS CELL
+==========================================================
+*/
+
+.ap-amount-wrap {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+
+    width: 100%;
+
+}
+
+
+.ap-cell-amount-status
+.ap-info-line {
+
+    grid-template-columns: 86px 10px minmax(0, 1fr);
+
+}
+
+
+/*
+==========================================================
+AMOUNT VALUE
+==========================================================
+*/
+
+.ap-amount-value {
+
+    font-weight: 600;
+
+    text-align: left;
+
+    white-space: nowrap;
+
+}
+
+
+/*
+==========================================================
+STATUS LINE
+==========================================================
+*/
+
+.ap-status-line {
+
+    margin-top: 2px;
+
+}
+
+
+.ap-status-line
+.ap-info-value {
+
+    display: flex;
+
+    align-items: center;
+
+}
+
+
+/*
+==========================================================
+STATUS BADGE
+==========================================================
+*/
+
+.ap-status-line .badge {
+
+    min-width: 74px;
+
+    padding: 5px 8px;
+
+    border-radius: 4px;
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+    line-height: 1;
+
+}
+
+
+/*
+==========================================================
+ACTION CELL
+==========================================================
+*/
+
+.account-payable-table-card
+.ap-cell-action {
+
+    vertical-align: middle !important;
+
+    text-align: center;
+
+}
+
+
+/*
+==========================================================
+ACTION BUTTON GROUP
+==========================================================
+*/
+
+.account-payable-table-card
+.ap-cell-action
+.btn-group {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 3px;
+
+}
+
+
+/*
+==========================================================
+ACTION BUTTON
+==========================================================
+*/
+
+.account-payable-table-card
+.ap-cell-action
+.btn {
+
+    width: 30px;
+
+    height: 30px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 0;
+
+    border-radius: 5px;
+
+}
+
+
+/*
+==========================================================
+ACTION ICON
+==========================================================
+*/
+
+.account-payable-table-card
+.ap-cell-action
+.btn i {
+
+    font-size: 11px;
+
+}
+
+
+/*
+==========================================================
+HEADER ALIGNMENT
+==========================================================
+*/
+
+.account-payable-table-card
+.finova-table
+thead
+th {
+
+    vertical-align: middle;
+
+}
+
+
+.account-payable-table-card
+.finova-table
+thead
+.ap-col-no {
+
+    text-align: center;
+
+}
+
+
+.account-payable-table-card
+.finova-table
+thead
+.ap-col-document,
+
+.account-payable-table-card
+.finova-table
+thead
+.ap-col-vendor,
+
+.account-payable-table-card
+.finova-table
+thead
+.ap-col-date-info,
+
+.account-payable-table-card
+.finova-table
+thead
+.ap-col-amount-status {
+
+    text-align: left;
+
+}
+
+
+.account-payable-table-card
+.finova-table
+thead
+.ap-col-action {
+
+    text-align: center;
+
+}
+
+
+/*
+==========================================================
+DESCRIPTION FULL BODY
+==========================================================
+*/
+
+.ap-cell-vendor {
+
+    white-space: normal;
+
+}
+
+
+.ap-description-value {
+
+    display: block;
+
+    max-width: 100%;
+
+}
+
+
+/*
+==========================================================
+PREVENT COLUMN CONTENT OVERFLOW
+==========================================================
+*/
+
+.ap-cell-document,
+
+.ap-cell-vendor,
+
+.ap-cell-date-info,
+
+.ap-cell-amount-status {
+
+    min-width: 0;
+
+    overflow: hidden;
+
+}
+
+
+/*
+==========================================================
+RESPONSIVE
+==========================================================
+*/
+
+@media (max-width: 1200px) {
+
+    .account-payable-table-card .ap-col-document {
+
+        min-width: 220px;
+
+    }
+
+
+    .account-payable-table-card .ap-col-vendor {
+
+        min-width: 300px;
+
+    }
+
+
+    .account-payable-table-card .ap-col-date-info {
+
+        min-width: 195px;
+
+    }
+
+
+    .account-payable-table-card .ap-col-amount-status {
+
+        min-width: 215px;
+
+    }
+
+}
+
+
+/*
+==========================================================
+SMALL SCREEN
+KEEP HORIZONTAL TABLE SCROLL
+==========================================================
+*/
+
+@media (max-width: 768px) {
+
+    .account-payable-table-card
+    .finova-table {
+
+        min-width: 1180px;
+
+    }
+
+}
+/*
+==========================================================
+ACCOUNT PAYABLE
+BODY FONT SIZE ENHANCEMENT
+==========================================================
+*/
+
+
+/*
+==========================================================
+BASE BODY
+==========================================================
+*/
+
+.account-payable-table-card
+.finova-table
+tbody
+.ap-data-row
+> td {
+
+    font-size: 14px;
+
+    line-height: 1.55;
+
+}
+
+
+/*
+==========================================================
+DOCUMENT BADGE
+PAYABLE / INV
+==========================================================
+*/
+
+.ap-document-badge {
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    min-height: 23px;
+
+    padding: 3px 9px;
+
+}
+
+
+/*
+==========================================================
+LABEL
+Inv No
+PO No
+Journal
+Description
+Inv Date
+Received
+Due Date
+Total
+Outstanding
+Status
+==========================================================
+*/
+
+.ap-info-label {
+
+    font-size: 13px;
+
+    font-weight: 500;
+
+}
+
+
+/*
+==========================================================
+SEPARATOR :
+==========================================================
+*/
+
+.ap-info-separator {
+
+    font-size: 13px;
+
+}
+
+
+/*
+==========================================================
+VALUE
+==========================================================
+*/
+
+.ap-info-value {
+
+    font-size: 13px;
+
+    font-weight: 500;
+
+}
+
+
+/*
+==========================================================
+VENDOR NAME
+==========================================================
+*/
+
+.ap-vendor-name {
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    line-height: 1.5;
+
+}
+
+
+/*
+==========================================================
+DESCRIPTION VALUE
+==========================================================
+*/
+
+.ap-description-value {
+
+    font-size: 13px;
+
+    line-height: 1.55;
+
+}
+
+
+/*
+==========================================================
+AMOUNT
+==========================================================
+*/
+
+.ap-amount-value {
+
+    font-size: 13.5px;
+
+    font-weight: 600;
+
+}
+
+
+/*
+==========================================================
+STATUS BADGE
+==========================================================
+*/
+
+.ap-status-line .badge {
+
+    font-size: 11.5px;
+
+    font-weight: 600;
+
+    min-width: 80px;
+
+    padding: 6px 9px;
+
+}
+
+
+/*
+==========================================================
+ACTION BUTTON
+==========================================================
+*/
+
+.account-payable-table-card
+.ap-cell-action
+.btn {
+
+    width: 32px;
+
+    height: 32px;
+
+}
+
+
+/*
+==========================================================
+ACTION ICON
+==========================================================
+*/
+
+.account-payable-table-card
+.ap-cell-action
+.btn i {
+
+    font-size: 13px;
+
+}
