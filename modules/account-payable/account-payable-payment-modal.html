@@ -66,6 +66,10 @@
             <div class="modal-body">
 
 
+                <!-- ==================================================
+                     ACCOUNT PAYABLE ID
+                =================================================== -->
+
                 <input
                     type="hidden"
                     id="ap-payment-ap-id">
@@ -78,10 +82,18 @@
                 <div class="row g-3">
 
 
+                    <!-- ==========================================
+                         INVOICE NO
+                    =========================================== -->
+
                     <div class="col-md-6">
 
-                        <label class="form-label">
+                        <label
+                            for="ap-payment-invoice-no"
+                            class="form-label">
+
                             Invoice No
+
                         </label>
 
                         <input
@@ -93,10 +105,18 @@
                     </div>
 
 
+                    <!-- ==========================================
+                         VENDOR
+                    =========================================== -->
+
                     <div class="col-md-6">
 
-                        <label class="form-label">
+                        <label
+                            for="ap-payment-vendor"
+                            class="form-label">
+
                             Vendor
+
                         </label>
 
                         <input
@@ -107,6 +127,10 @@
 
                     </div>
 
+
+                    <!-- ==========================================
+                         PAYMENT DATE
+                    =========================================== -->
 
                     <div class="col-md-6">
 
@@ -126,6 +150,10 @@
 
                     </div>
 
+
+                    <!-- ==========================================
+                         BANK ACCOUNT
+                    =========================================== -->
 
                     <div class="col-md-6">
 
@@ -163,6 +191,10 @@
                     <div class="card-body">
 
 
+                        <!-- ==========================================
+                             DPP
+                        =========================================== -->
+
                         <div
                             class="d-flex
                                    justify-content-between
@@ -170,15 +202,23 @@
                                    mb-2">
 
                             <span class="text-muted">
+
                                 DPP
+
                             </span>
 
                             <strong id="ap-payment-dpp">
+
                                 0
+
                             </strong>
 
                         </div>
 
+
+                        <!-- ==========================================
+                             TAX (+)
+                        =========================================== -->
 
                         <div
                             class="d-flex
@@ -187,28 +227,40 @@
                                    mb-2">
 
                             <span class="text-muted">
+
                                 Tax (+)
+
                             </span>
 
                             <strong id="ap-payment-tax-plus">
+
                                 0
+
                             </strong>
 
                         </div>
 
 
+                        <!-- ==========================================
+                             TAX (-)
+                        =========================================== -->
+
                         <div
                             class="d-flex
                                    justify-content-between
                                    align-items-center
-                                   mb-2">
+                                   mb-3">
 
                             <span class="text-muted">
+
                                 Tax (-)
+
                             </span>
 
                             <strong id="ap-payment-tax-minus">
+
                                 0
+
                             </strong>
 
                         </div>
@@ -217,24 +269,47 @@
                         <hr>
 
 
-                        <div
-                            class="d-flex
-                                   justify-content-between
-                                   align-items-center">
+                        <!-- ==========================================
+                             PAYMENT AMOUNT
+                             EDITABLE FOR PARTIAL PAYMENT
+                        =========================================== -->
 
-                            <span class="fw-semibold">
+                        <div class="row align-items-center g-3">
 
-                                Payment Amount
+                            <div class="col-md-6">
 
-                            </span>
+                                <label
+                                    for="ap-payment-amount"
+                                    class="form-label fw-semibold mb-0">
 
-                            <strong
-                                id="ap-payment-amount"
-                                class="fs-5">
+                                    Payment Amount
 
-                                0
+                                    <span class="text-danger">
+                                        *
+                                    </span>
 
-                            </strong>
+                                </label>
+
+                                <div class="small text-muted mt-1">
+
+                                    Maximum payment is current outstanding.
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-md-6">
+
+                                <input
+                                    type="text"
+                                    id="ap-payment-amount"
+                                    class="form-control text-end fw-semibold fs-5"
+                                    inputmode="numeric"
+                                    autocomplete="off"
+                                    placeholder="0">
+
+                            </div>
 
                         </div>
 
@@ -245,11 +320,15 @@
 
 
                 <!-- ==============================================
-                     REFERENCE
+                     REFERENCE / DESCRIPTION
                 =============================================== -->
 
                 <div class="row g-3 mt-1">
 
+
+                    <!-- ==========================================
+                         REFERENCE NO
+                    =========================================== -->
 
                     <div class="col-md-6">
 
@@ -269,6 +348,11 @@
 
                     </div>
 
+
+                    <!-- ==========================================
+                         DESCRIPTION
+                         DEFAULT FROM AP HEADER
+                    =========================================== -->
 
                     <div class="col-md-6">
 
@@ -311,34 +395,52 @@
                     </div>
 
 
+                    <!-- ==========================================
+                         DPP JOURNAL
+                    =========================================== -->
+
                     <div class="small text-muted">
 
                         DPP:
 
                         <strong>
+
                             HUTANG USAHA → BANK
+
                         </strong>
 
                     </div>
 
+
+                    <!-- ==========================================
+                         TAX (+) JOURNAL
+                    =========================================== -->
 
                     <div class="small text-muted">
 
                         Tax (+):
 
                         <strong>
+
                             HUTANG USAHA → BANK
+
                         </strong>
 
                     </div>
 
+
+                    <!-- ==========================================
+                         TAX (-) JOURNAL
+                    =========================================== -->
 
                     <div class="small text-muted">
 
                         Tax (-):
 
                         <strong>
+
                             BANK → HUTANG USAHA
+
                         </strong>
 
                     </div>
@@ -357,6 +459,10 @@
             <div class="modal-footer">
 
 
+                <!-- ==========================================
+                     CANCEL
+                =========================================== -->
+
                 <button
                     type="button"
                     class="btn btn-secondary"
@@ -366,6 +472,10 @@
 
                 </button>
 
+
+                <!-- ==========================================
+                     PAY
+                =========================================== -->
 
                 <button
                     type="button"

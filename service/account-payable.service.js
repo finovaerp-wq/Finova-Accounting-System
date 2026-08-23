@@ -144,13 +144,13 @@ async getAll() {
 
             `)
 
-            .order(
-                "invoice_date",
-                {
-                    ascending:
-                        false
-                }
-            );
+            
+.order(
+    "created_at",
+    {
+        ascending: true
+    }
+);
 
 
         if (error) {
@@ -877,17 +877,18 @@ async search(filters = {}) {
 
 
         /*
-        ==================================================
-        ORDER
-        ==================================================
-        */
+==================================================
+ORDER
+NEWEST CREATED AP AT THE BOTTOM
+==================================================
+*/
 
-        query = query.order(
-            "invoice_date",
-            {
-                ascending: false
-            }
-        );
+query = query.order(
+    "created_at",
+    {
+        ascending: true
+    }
+);
 
 
         /*

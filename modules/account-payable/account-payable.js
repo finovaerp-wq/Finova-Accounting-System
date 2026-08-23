@@ -2509,6 +2509,7 @@ const journalHeader = {
 /*
 ======================================================
 GENERATE AP PAYMENT GL JOURNAL
+SUPPORT FULL / PARTIAL PAYMENT
 ======================================================
 */
 
@@ -2522,7 +2523,7 @@ async generateAPPaymentJournal(
 
         /*
         ==================================================
-        VALIDATION
+        VALIDATE INVOICE
         ==================================================
         */
 
@@ -2535,18 +2536,11 @@ async generateAPPaymentJournal(
         }
 
 
-        if (
-            !Array.isArray(details)
-            ||
-            !details.length
-        ) {
-
-            throw new Error(
-                "Account Payable detail cannot be empty."
-            );
-
-        }
-
+        /*
+        ==================================================
+        VALIDATE PAYMENT
+        ==================================================
+        */
 
         if (!payment) {
 
@@ -2567,6 +2561,17 @@ async generateAPPaymentJournal(
             39;
 
 
+        if (
+            !payableAccountId
+        ) {
+
+            throw new Error(
+                "Account Payable account is not configured."
+            );
+
+        }
+
+
         /*
         ==================================================
         BANK ACCOUNT
@@ -2580,7 +2585,9 @@ async generateAPPaymentJournal(
             );
 
 
-        if (!bankAccountId) {
+        if (
+            !bankAccountId
+        ) {
 
             throw new Error(
                 "Bank Account is required."
@@ -2605,6 +2612,135 @@ async generateAPPaymentJournal(
 
         /*
         ==================================================
+        PAYMENT COMPONENT
+
+        THESE VALUES HAVE ALREADY BEEN ALLOCATED
+        BY saveAPPayment()
+        ==================================================
+        */
+
+        const dppAmount =
+            Number(
+                payment.dpp_amount
+                || 0
+            );
+
+
+        const taxPlusAmount =
+            Number(
+                payment.tax_plus_amount
+                || 0
+            );
+
+
+        const taxMinusAmount =
+            Number(
+                payment.tax_minus_amount
+                || 0
+            );
+
+
+        const paymentAmount =
+            Number(
+                payment.amount
+                || 0
+            );
+
+
+        /*
+        ==================================================
+        PAYMENT DATE
+        ==================================================
+        */
+
+        const paymentDate =
+            payment.payment_date
+            || "";
+
+
+        if (
+            !paymentDate
+        ) {
+
+            throw new Error(
+                "Payment Date is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        PAYMENT AMOUNT
+        ==================================================
+        */
+
+        if (
+            paymentAmount <= 0
+        ) {
+
+            throw new Error(
+                "Payment Amount must be greater than 0."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        VALIDATE COMPONENT TOTAL
+
+        DPP + TAX (+) - TAX (-)
+        MUST EQUAL PAYMENT AMOUNT
+        ==================================================
+        */
+
+        const componentTotal =
+            Number(
+                (
+                    dppAmount
+                    +
+                    taxPlusAmount
+                    -
+                    taxMinusAmount
+                ).toFixed(2)
+            );
+
+
+        if (
+            Math.abs(
+                componentTotal
+                -
+                paymentAmount
+            ) > 0.01
+        ) {
+
+            throw new Error(
+                "AP Payment journal components do not match Payment Amount."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        DESCRIPTION
+        ==================================================
+        */
+
+        const description =
+            payment.description
+            ||
+            invoice.description
+            ||
+            `AP Payment ${
+                invoice.invoice_no
+                || ""
+            }`;
+
+
+        /*
+        ==================================================
         JOURNAL DETAILS
         ==================================================
         */
@@ -2615,166 +2751,105 @@ async generateAPPaymentJournal(
 
         /*
         ==================================================
-        LOOP AP DETAIL
+        DPP PAYMENT
+
+        DR HUTANG USAHA
+        CR BANK
         ==================================================
         */
 
-        for (
-            const detail
-            of details
+        if (
+            dppAmount > 0
         ) {
 
-            /*
-            ==============================================
-            DPP
-            ==============================================
-            */
+            journalDetails.push({
 
-            const dpp =
-                Number(
-                    detail.line_amount
-                    || 0
-                );
+                debit_account_id:
+                    payableAccountId,
 
+                credit_account_id:
+                    bankAccountId,
 
-            /*
-            ==============================================
-            TAX (+)
-            ==============================================
-            */
+                business_partner_id:
+                    businessPartnerId,
 
-            const taxPlus =
-                Number(
-                    detail.tax_input_amount
-                    || 0
-                );
+                description:
+                    `${description} - DPP`,
+
+                amount:
+                    dppAmount
+
+            });
+
+        }
 
 
-            /*
-            ==============================================
-            TAX (-)
-            ==============================================
-            */
+        /*
+        ==================================================
+        TAX (+) PAYMENT
 
-            const taxMinus =
-                Number(
-                    detail.withholding_tax_amount
-                    || 0
-                );
+        DR HUTANG USAHA
+        CR BANK
+        ==================================================
+        */
 
+        if (
+            taxPlusAmount > 0
+        ) {
 
-            /*
-            ==============================================
-            DPP PAYMENT
+            journalDetails.push({
 
-            DR HUTANG USAHA
-            CR BANK
-            ==============================================
-            */
+                debit_account_id:
+                    payableAccountId,
 
-            if (
-                dpp > 0
-            ) {
+                credit_account_id:
+                    bankAccountId,
 
-                journalDetails.push({
+                business_partner_id:
+                    businessPartnerId,
 
-                    debit_account_id:
-                        payableAccountId,
+                description:
+                    `${description} - Tax (+)`,
 
-                    credit_account_id:
-                        bankAccountId,
+                amount:
+                    taxPlusAmount
 
-                    business_partner_id:
-                        businessPartnerId,
+            });
 
-                    description:
-                        `Payment DPP - ${
-                            invoice.invoice_no
-                            || ""
-                        }`,
-
-                    amount:
-                        dpp
-
-                });
-
-            }
+        }
 
 
-            /*
-            ==============================================
-            TAX (+) PAYMENT
+        /*
+        ==================================================
+        TAX (-) PAYMENT
 
-            DR HUTANG USAHA
-            CR BANK
-            ==============================================
-            */
+        DR BANK
+        CR HUTANG USAHA
+        ==================================================
+        */
 
-            if (
-                taxPlus > 0
-            ) {
+        if (
+            taxMinusAmount > 0
+        ) {
 
-                journalDetails.push({
+            journalDetails.push({
 
-                    debit_account_id:
-                        payableAccountId,
+                debit_account_id:
+                    bankAccountId,
 
-                    credit_account_id:
-                        bankAccountId,
+                credit_account_id:
+                    payableAccountId,
 
-                    business_partner_id:
-                        businessPartnerId,
+                business_partner_id:
+                    businessPartnerId,
 
-                    description:
-                        `Payment Tax (+) - ${
-                            invoice.invoice_no
-                            || ""
-                        }`,
+                description:
+                    `${description} - Tax (-)`,
 
-                    amount:
-                        taxPlus
+                amount:
+                    taxMinusAmount
 
-                });
-
-            }
-
-
-            /*
-            ==============================================
-            TAX (-) PAYMENT
-
-            DR BANK
-            CR HUTANG USAHA
-            ==============================================
-            */
-
-            if (
-                taxMinus > 0
-            ) {
-
-                journalDetails.push({
-
-                    debit_account_id:
-                        bankAccountId,
-
-                    credit_account_id:
-                        payableAccountId,
-
-                    business_partner_id:
-                        businessPartnerId,
-
-                    description:
-                        `Payment Tax (-) - ${
-                            invoice.invoice_no
-                            || ""
-                        }`,
-
-                    amount:
-                        taxMinus
-
-                });
-
-            }
+            });
 
         }
 
@@ -2799,28 +2874,14 @@ async generateAPPaymentJournal(
         /*
         ==================================================
         JOURNAL HEADER
-        NEW JOURNAL NUMBER WILL BE AUTO GENERATED
         ==================================================
         */
-
-        const paymentDate =
-            payment.payment_date;
-
-
-        if (!paymentDate) {
-
-            throw new Error(
-                "Payment Date is required."
-            );
-
-        }
-
 
         const journalHeader = {
 
             /*
             ==============================================
-            AUTO JOURNAL NO
+            AUTO JOURNAL NUMBER
             ==============================================
             */
 
@@ -2858,25 +2919,34 @@ async generateAPPaymentJournal(
             */
 
             description:
-                payment.description
-                ||
-                `AP Payment ${
-                    invoice.invoice_no
-                    || ""
-                }`,
+                description,
 
 
             /*
             ==============================================
-            SOURCE
+            SOURCE MODULE
             ==============================================
             */
 
             source_module:
                 "AP",
 
+
+            /*
+            ==============================================
+            SOURCE DOCUMENT TYPE
+            ==============================================
+            */
+
             source_document_type:
                 "AP_PAYMENT",
+
+
+            /*
+            ==============================================
+            SOURCE DOCUMENT ID
+            ==============================================
+            */
 
             source_document_id:
                 invoice.id,
@@ -2918,7 +2988,44 @@ async generateAPPaymentJournal(
 
         /*
         ==================================================
-        CREATE GL JOURNAL
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "AP PAYMENT JOURNAL HEADER:",
+            journalHeader
+        );
+
+
+        console.log(
+            "AP PAYMENT JOURNAL COMPONENT:",
+            {
+
+                dpp_amount:
+                    dppAmount,
+
+                tax_plus_amount:
+                    taxPlusAmount,
+
+                tax_minus_amount:
+                    taxMinusAmount,
+
+                payment_amount:
+                    paymentAmount
+
+            }
+        );
+
+
+        console.table(
+            journalDetails
+        );
+
+
+        /*
+        ==================================================
+        CREATE JOURNAL
         ==================================================
         */
 
@@ -2929,7 +3036,11 @@ async generateAPPaymentJournal(
             );
 
 
-        if (!journal) {
+        if (
+            !journal
+            ||
+            !journal.id
+        ) {
 
             throw new Error(
                 "Failed to create AP Payment GL Journal."
@@ -2937,6 +3048,12 @@ async generateAPPaymentJournal(
 
         }
 
+
+        /*
+        ==================================================
+        SUCCESS
+        ==================================================
+        */
 
         console.log(
             "AP PAYMENT GL JOURNAL CREATED:",
@@ -5066,7 +5183,7 @@ this.bindTableActions();
   /*
 ======================================================
 SAVE AP PAYMENT
-FINAL
+FULL / PARTIAL PAYMENT
 ======================================================
 */
 
@@ -5074,8 +5191,7 @@ async saveAPPayment() {
 
     /*
     ==================================================
-    PREVENT DUPLICATE PAYMENT EXECUTION
-    GLOBAL DOM LOCK
+    PREVENT DUPLICATE EXECUTION
     ==================================================
     */
 
@@ -5098,7 +5214,7 @@ async saveAPPayment() {
 
     /*
     ==================================================
-    LOCK PAYMENT BUTTON
+    LOCK BUTTON
     ==================================================
     */
 
@@ -5119,7 +5235,7 @@ async saveAPPayment() {
 
         /*
         ==================================================
-        ACCOUNT PAYABLE ID
+        AP ID
         ==================================================
         */
 
@@ -5149,7 +5265,9 @@ async saveAPPayment() {
             || "";
 
 
-        if (!paymentDate) {
+        if (
+            !paymentDate
+        ) {
 
             throw new Error(
                 "Payment Date is required."
@@ -5171,10 +5289,36 @@ async saveAPPayment() {
             );
 
 
-        if (!bankAccountId) {
+        if (
+            !bankAccountId
+        ) {
 
             throw new Error(
                 "Bank Account is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        PAYMENT AMOUNT
+        FROM USER INPUT
+        ==================================================
+        */
+
+        const paymentAmount =
+            this.parseAPPaymentAmount(
+                this.apPaymentAmount?.value
+            );
+
+
+        if (
+            paymentAmount <= 0
+        ) {
+
+            throw new Error(
+                "Payment Amount must be greater than 0."
             );
 
         }
@@ -5231,23 +5375,9 @@ async saveAPPayment() {
         }
 
 
-        /*
-        ==================================================
-        HEADER
-        IMPORTANT:
-        MUST EXIST BEFORE USING invoice
-        ==================================================
-        */
-
         const invoice =
             result.header;
 
-
-        /*
-        ==================================================
-        DETAILS
-        ==================================================
-        */
 
         const details =
             Array.isArray(
@@ -5257,46 +5387,13 @@ async saveAPPayment() {
                 : [];
 
 
-        if (
-            !details.length
-        ) {
-
-            throw new Error(
-                "Account Payable detail cannot be empty."
-            );
-
-        }
-
-
-        /*
-        ==================================================
-        CHECK EXISTING ACTIVE PAYMENT
-        ==================================================
-        */
-
-        const existingPayment =
-            await this.service.getActivePayment(
-                id
-            );
-
-
-        if (
-            existingPayment
-        ) {
-
-            throw new Error(
-                `Account Payable ${
-                    invoice.invoice_no
-                    || ""
-                } already has an active payment.`
-            );
-
-        }
-
-
         /*
         ==================================================
         STATUS VALIDATION
+
+        ALLOW:
+        Complete
+        Partial Paid
         ==================================================
         */
 
@@ -5310,10 +5407,12 @@ async saveAPPayment() {
 
         if (
             currentStatus !== "Complete"
+            &&
+            currentStatus !== "Partial Paid"
         ) {
 
             throw new Error(
-                `Account Payable status is "${currentStatus}". Only Complete Account Payable can be paid.`
+                `Account Payable status is "${currentStatus}". Payment is only allowed for Complete or Partial Paid Account Payable.`
             );
 
         }
@@ -5352,7 +5451,7 @@ async saveAPPayment() {
         const outstandingAmount =
             Number(
                 invoice.outstanding_amount
-                || totalAmount
+                ?? totalAmount
             );
 
 
@@ -5362,66 +5461,6 @@ async saveAPPayment() {
 
             throw new Error(
                 "Account Payable is already fully paid."
-            );
-
-        }
-
-
-        /*
-        ==================================================
-        CALCULATE PAYMENT COMPONENT
-        ==================================================
-        */
-
-        const dpp =
-            Number(
-                invoice.subtotal
-                || 0
-            );
-
-
-        const taxPlus =
-            Number(
-                invoice.tax_input_amount
-                || 0
-            );
-
-
-        const taxMinus =
-            Number(
-                invoice.withholding_tax_amount
-                || 0
-            );
-
-
-        /*
-        ==================================================
-        PAYMENT AMOUNT
-
-        DPP
-        + TAX (+)
-        - TAX (-)
-        ==================================================
-        */
-
-        const paymentAmount =
-            Number(
-                (
-                    dpp
-                    +
-                    taxPlus
-                    -
-                    taxMinus
-                ).toFixed(2)
-            );
-
-
-        if (
-            paymentAmount <= 0
-        ) {
-
-            throw new Error(
-                "Payment Amount must be greater than 0."
             );
 
         }
@@ -5440,7 +5479,9 @@ async saveAPPayment() {
         ) {
 
             throw new Error(
-                "Payment Amount cannot exceed Outstanding Amount."
+                `Payment Amount cannot exceed Outstanding Amount (${this.formatCurrency(
+                    outstandingAmount
+                )}).`
             );
 
         }
@@ -5448,7 +5489,145 @@ async saveAPPayment() {
 
         /*
         ==================================================
-        DEBUG PAYMENT
+        ORIGINAL INVOICE COMPONENT
+        ==================================================
+        */
+
+        const originalDPP =
+            Number(
+                invoice.subtotal
+                || 0
+            );
+
+
+        const originalTaxPlus =
+            Number(
+                invoice.tax_input_amount
+                || 0
+            );
+
+
+        const originalTaxMinus =
+            Number(
+                invoice.withholding_tax_amount
+                || 0
+            );
+
+
+        /*
+        ==================================================
+        PAYMENT RATIO
+
+        Example:
+        Invoice     = 10.900.000
+        Payment     = 5.450.000
+        Ratio       = 50%
+        ==================================================
+        */
+
+        const paymentRatio =
+            paymentAmount
+            /
+            totalAmount;
+
+
+        /*
+        ==================================================
+        ALLOCATE TAX (+)
+        ==================================================
+        */
+
+        const paymentTaxPlus =
+            Number(
+                (
+                    originalTaxPlus
+                    *
+                    paymentRatio
+                ).toFixed(2)
+            );
+
+
+        /*
+        ==================================================
+        ALLOCATE TAX (-)
+        ==================================================
+        */
+
+        const paymentTaxMinus =
+            Number(
+                (
+                    originalTaxMinus
+                    *
+                    paymentRatio
+                ).toFixed(2)
+            );
+
+
+        /*
+        ==================================================
+        ALLOCATE DPP
+
+        FORCE:
+        DPP + TAX(+) - TAX(-)
+        = EXACT PAYMENT AMOUNT
+
+        This prevents rounding differences.
+        ==================================================
+        */
+
+        const paymentDPP =
+            Number(
+                (
+                    paymentAmount
+                    -
+                    paymentTaxPlus
+                    +
+                    paymentTaxMinus
+                ).toFixed(2)
+            );
+
+
+        /*
+        ==================================================
+        VALIDATE COMPONENT
+        ==================================================
+        */
+
+        if (
+            paymentDPP < 0
+            ||
+            paymentTaxPlus < 0
+            ||
+            paymentTaxMinus < 0
+        ) {
+
+            throw new Error(
+                "Invalid AP Payment allocation."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        FINAL DESCRIPTION
+        ==================================================
+        */
+
+        const paymentDescription =
+            description
+            ||
+            invoice.description
+            ||
+            `Payment AP ${
+                invoice.invoice_no
+                || ""
+            }`;
+
+
+        /*
+        ==================================================
+        DEBUG
         ==================================================
         */
 
@@ -5459,35 +5638,40 @@ async saveAPPayment() {
 
         console.log(
             {
+
                 account_payable_id:
                     id,
 
                 invoice_no:
                     invoice.invoice_no,
 
+                status:
+                    currentStatus,
+
                 total_amount:
                     totalAmount,
 
-                outstanding_amount:
+                outstanding_before:
                     outstandingAmount,
-
-                dpp_amount:
-                    dpp,
-
-                tax_plus_amount:
-                    taxPlus,
-
-                tax_minus_amount:
-                    taxMinus,
 
                 payment_amount:
                     paymentAmount,
 
-                bank_account_id:
-                    bankAccountId,
+                payment_ratio:
+                    paymentRatio,
 
-                payment_date:
-                    paymentDate
+                dpp_amount:
+                    paymentDPP,
+
+                tax_plus_amount:
+                    paymentTaxPlus,
+
+                tax_minus_amount:
+                    paymentTaxMinus,
+
+                description:
+                    paymentDescription
+
             }
         );
 
@@ -5500,18 +5684,6 @@ async saveAPPayment() {
         /*
         ==================================================
         GENERATE PAYMENT GL JOURNAL
-
-        DPP
-        DR HUTANG USAHA
-        CR BANK
-
-        TAX (+)
-        DR HUTANG USAHA
-        CR BANK
-
-        TAX (-)
-        DR BANK
-        CR HUTANG USAHA
         ==================================================
         */
 
@@ -5530,16 +5702,20 @@ async saveAPPayment() {
                     amount:
                         paymentAmount,
 
+                    dpp_amount:
+                        paymentDPP,
+
+                    tax_plus_amount:
+                        paymentTaxPlus,
+
+                    tax_minus_amount:
+                        paymentTaxMinus,
+
                     reference_no:
                         referenceNo,
 
                     description:
-                        description
-                        ||
-                        `Payment AP ${
-                            invoice.invoice_no
-                            || ""
-                        }`
+                        paymentDescription
 
                 }
             );
@@ -5564,19 +5740,6 @@ async saveAPPayment() {
         }
 
 
-        console.log(
-            "AP PAYMENT GL JOURNAL CREATED:",
-            {
-                id:
-                    journal.id,
-
-                journal_no:
-                    journal.journal_no
-                    || null
-            }
-        );
-
-
         /*
         ==================================================
         PAYMENT DATA
@@ -5595,13 +5758,13 @@ async saveAPPayment() {
                 bankAccountId,
 
             dpp_amount:
-                dpp,
+                paymentDPP,
 
             tax_plus_amount:
-                taxPlus,
+                paymentTaxPlus,
 
             tax_minus_amount:
-                taxMinus,
+                paymentTaxMinus,
 
             payment_amount:
                 paymentAmount,
@@ -5610,12 +5773,7 @@ async saveAPPayment() {
                 referenceNo,
 
             description:
-                description
-                ||
-                `Payment AP ${
-                    invoice.invoice_no
-                    || ""
-                }`,
+                paymentDescription,
 
             gl_journal_id:
                 journal.id
@@ -5625,8 +5783,7 @@ async saveAPPayment() {
 
         /*
         ==================================================
-        SAVE PAYMENT
-        trx_ap_payment
+        INSERT PAYMENT
         ==================================================
         */
 
@@ -5642,15 +5799,13 @@ async saveAPPayment() {
 
         }
 
-        catch (paymentError) {
+        catch (
+            paymentError
+        ) {
 
             /*
             ==================================================
-            PAYMENT INSERT FAILED
-
-            IMPORTANT:
-            REMOVE JOURNAL THAT WAS JUST CREATED
-            TO PREVENT ORPHAN PAYMENT JOURNAL
+            ROLLBACK GL JOURNAL
             ==================================================
             */
 
@@ -5660,34 +5815,40 @@ async saveAPPayment() {
             );
 
 
-            try {
+            const {
 
-                await supabase
+                error: rollbackError
 
-                    .from(
-                        "trx_gl_journal"
-                    )
+            } = await supabase
 
-                    .delete()
+                .from(
+                    "trx_gl_journal"
+                )
 
-                    .eq(
-                        "id",
-                        journal.id
-                    );
+                .delete()
 
-
-                console.log(
-                    "AP PAYMENT JOURNAL ROLLBACK SUCCESS:",
+                .eq(
+                    "id",
                     journal.id
                 );
 
-            }
 
-            catch (rollbackError) {
+            if (
+                rollbackError
+            ) {
 
                 console.error(
                     "AP PAYMENT JOURNAL ROLLBACK ERROR:",
                     rollbackError
+                );
+
+            }
+
+            else {
+
+                console.log(
+                    "AP PAYMENT JOURNAL ROLLBACK SUCCESS:",
+                    journal.id
                 );
 
             }
@@ -5700,7 +5861,7 @@ async saveAPPayment() {
 
         /*
         ==================================================
-        VALIDATE PAYMENT
+        VALIDATE PAYMENT INSERT
         ==================================================
         */
 
@@ -5717,19 +5878,9 @@ async saveAPPayment() {
         }
 
 
-        console.log(
-            "AP PAYMENT CREATED:",
-            payment
-        );
-
-
         /*
         ==================================================
-        UPDATE AP PAYMENT STATUS
-
-        Complete
-            ↓
-        Paid
+        UPDATE PAYMENT STATUS
         ==================================================
         */
 
@@ -5750,15 +5901,9 @@ async saveAPPayment() {
         }
 
 
-        console.log(
-            "AP PAYMENT STATUS UPDATED:",
-            paymentStatus
-        );
-
-
         /*
         ==================================================
-        VERIFY ACCOUNT PAYABLE
+        VERIFY RESULT
         ==================================================
         */
 
@@ -5773,7 +5918,9 @@ async saveAPPayment() {
             || null;
 
 
-        if (!updatedInvoice) {
+        if (
+            !updatedInvoice
+        ) {
 
             throw new Error(
                 "Failed to verify Account Payable after payment."
@@ -5784,7 +5931,7 @@ async saveAPPayment() {
 
         /*
         ==================================================
-        VERIFY PAYMENT RESULT
+        DEBUG RESULT
         ==================================================
         */
 
@@ -5795,6 +5942,7 @@ async saveAPPayment() {
 
         console.log(
             {
+
                 account_payable_id:
                     id,
 
@@ -5822,6 +5970,7 @@ async saveAPPayment() {
                 journal_no:
                     journal.journal_no
                     || null
+
             }
         );
 
@@ -5833,7 +5982,7 @@ async saveAPPayment() {
 
         /*
         ==================================================
-        CLOSE PAYMENT MODAL
+        CLOSE MODAL
         ==================================================
         */
 
@@ -5858,7 +6007,7 @@ async saveAPPayment() {
 
         /*
         ==================================================
-        CLEAR PAYMENT STATE
+        CLEAR STATE
         ==================================================
         */
 
@@ -5871,6 +6020,16 @@ async saveAPPayment() {
         ) {
 
             this.apPaymentAPId.value =
+                "";
+
+        }
+
+
+        if (
+            this.apPaymentAmount
+        ) {
+
+            this.apPaymentAmount.value =
                 "";
 
         }
@@ -5898,7 +6057,7 @@ async saveAPPayment() {
 
         /*
         ==================================================
-        RELOAD ACCOUNT PAYABLE TABLE
+        RELOAD TABLE
         ==================================================
         */
 
@@ -5917,6 +6076,22 @@ async saveAPPayment() {
 
             this.showSuccess(
                 "Account Payable successfully paid."
+            );
+
+        }
+
+        else if (
+            updatedInvoice.status ===
+            "Partial Paid"
+        ) {
+
+            this.showSuccess(
+                `Partial payment successfully saved. Outstanding: ${this.formatCurrency(
+                    Number(
+                        updatedInvoice.outstanding_amount
+                        || 0
+                    )
+                )}`
             );
 
         }
@@ -11030,12 +11205,43 @@ async saveDraft() {
 
 
         /*
-        ==================================================
-        RELOAD DATA
-        ==================================================
-        */
+==================================================
+RELOAD DATA
+==================================================
+*/
 
-        await this.loadData();
+await this.loadData();
+
+
+/*
+==================================================
+MOVE TO LAST PAGE
+SHOW NEW AP
+==================================================
+*/
+
+const totalPages =
+    Math.max(
+        1,
+        Math.ceil(
+            this.filteredData.length
+            /
+            this.pageSize
+        )
+    );
+
+
+this.currentPage =
+    totalPages;
+
+
+/*
+==================================================
+RENDER LAST PAGE
+==================================================
+*/
+
+this.render();
 
 
         /*
@@ -14731,16 +14937,120 @@ async deleteInvoice(id) {
     }
 
 }
-
-
-    /*
+/*
 ======================================================
-CREATE AP PAYMENT
-OPEN PAYMENT MODAL
+PARSE AP PAYMENT AMOUNT
 ======================================================
 */
 
-async createPayment(id) {
+parseAPPaymentAmount(
+    value
+) {
+
+    /*
+    ==================================================
+    NORMALIZE VALUE
+    EXAMPLE:
+    10.900.000
+    →
+    10900000
+    ==================================================
+    */
+
+    const normalized =
+        String(
+            value
+            || ""
+        )
+        .replace(
+            /[^\d]/g,
+            ""
+        );
+
+
+    return Number(
+        normalized
+        || 0
+    );
+
+}
+/*
+======================================================
+FORMAT AP PAYMENT AMOUNT INPUT
+======================================================
+*/
+
+formatAPPaymentAmount() {
+
+    /*
+    ==================================================
+    CHECK DOM
+    ==================================================
+    */
+
+    if (
+        !this.apPaymentAmount
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+    ==================================================
+    GET RAW VALUE
+    ==================================================
+    */
+
+    const amount =
+        this.parseAPPaymentAmount(
+            this.apPaymentAmount.value
+        );
+
+
+    /*
+    ==================================================
+    EMPTY
+    ==================================================
+    */
+
+    if (
+        amount <= 0
+    ) {
+
+        this.apPaymentAmount.value =
+            "";
+
+        return;
+
+    }
+
+
+    /*
+    ==================================================
+    FORMAT
+    ==================================================
+    */
+
+    this.apPaymentAmount.value =
+        this.formatCurrency(
+            amount
+        );
+
+}
+
+   /*
+======================================================
+CREATE AP PAYMENT
+OPEN PAYMENT MODAL
+SUPPORT PARTIAL PAYMENT
+======================================================
+*/
+
+async createPayment(
+    id
+) {
 
     try {
 
@@ -14761,7 +15071,7 @@ async createPayment(id) {
 
         /*
         ==================================================
-        LOAD AP
+        LOAD ACCOUNT PAYABLE
         ==================================================
         */
 
@@ -14784,6 +15094,12 @@ async createPayment(id) {
         }
 
 
+        /*
+        ==================================================
+        HEADER
+        ==================================================
+        */
+
         const invoice =
             result.header;
 
@@ -14791,6 +15107,10 @@ async createPayment(id) {
         /*
         ==================================================
         STATUS VALIDATION
+
+        PAYMENT ALLOWED:
+        Complete
+        Partial Paid
         ==================================================
         */
 
@@ -14804,10 +15124,61 @@ async createPayment(id) {
 
         if (
             status !== "Complete"
+            &&
+            status !== "Partial Paid"
         ) {
 
             throw new Error(
-                "Only Complete Account Payable can be paid."
+                `Account Payable status is "${status}". Payment is only allowed for Complete or Partial Paid Account Payable.`
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        TOTAL AMOUNT
+        ==================================================
+        */
+
+        const totalAmount =
+            Number(
+                invoice.total_amount
+                || 0
+            );
+
+
+        if (
+            totalAmount <= 0
+        ) {
+
+            throw new Error(
+                "Account Payable Total Amount is invalid."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        OUTSTANDING
+        DEFAULT PAYMENT AMOUNT
+        ==================================================
+        */
+
+        const outstandingAmount =
+            Number(
+                invoice.outstanding_amount
+                ?? totalAmount
+            );
+
+
+        if (
+            outstandingAmount <= 0
+        ) {
+
+            throw new Error(
+                "Account Payable is already fully paid."
             );
 
         }
@@ -14825,9 +15196,8 @@ async createPayment(id) {
 
         /*
         ==================================================
-        BASIC AMOUNT
-
-        DPP + TAX(+) - TAX(-)
+        ORIGINAL AP COMPONENTS
+        INFORMATION ONLY
         ==================================================
         */
 
@@ -14852,17 +15222,9 @@ async createPayment(id) {
             );
 
 
-        const paymentAmount =
-            dpp
-            +
-            taxPlus
-            -
-            taxMinus;
-
-
         /*
         ==================================================
-        SET DOM
+        AP ID
         ==================================================
         */
 
@@ -14876,6 +15238,12 @@ async createPayment(id) {
         }
 
 
+        /*
+        ==================================================
+        INVOICE NO
+        ==================================================
+        */
+
         if (
             this.apPaymentInvoiceNo
         ) {
@@ -14886,6 +15254,12 @@ async createPayment(id) {
 
         }
 
+
+        /*
+        ==================================================
+        VENDOR
+        ==================================================
+        */
 
         if (
             this.apPaymentVendor
@@ -14899,6 +15273,12 @@ async createPayment(id) {
 
         }
 
+
+        /*
+        ==================================================
+        PAYMENT DATE
+        ==================================================
+        */
 
         if (
             this.apPaymentDate
@@ -14915,6 +15295,13 @@ async createPayment(id) {
         }
 
 
+        /*
+        ==================================================
+        DPP
+        ORIGINAL INVOICE INFORMATION
+        ==================================================
+        */
+
         if (
             this.apPaymentDPP
         ) {
@@ -14926,6 +15313,13 @@ async createPayment(id) {
 
         }
 
+
+        /*
+        ==================================================
+        TAX (+)
+        ORIGINAL INVOICE INFORMATION
+        ==================================================
+        */
 
         if (
             this.apPaymentTaxPlus
@@ -14939,6 +15333,13 @@ async createPayment(id) {
         }
 
 
+        /*
+        ==================================================
+        TAX (-)
+        ORIGINAL INVOICE INFORMATION
+        ==================================================
+        */
+
         if (
             this.apPaymentTaxMinus
         ) {
@@ -14951,17 +15352,49 @@ async createPayment(id) {
         }
 
 
+        /*
+        ==================================================
+        PAYMENT AMOUNT
+
+        DEFAULT = CURRENT OUTSTANDING
+        USER MAY CHANGE FOR PARTIAL PAYMENT
+        ==================================================
+        */
+
         if (
             this.apPaymentAmount
         ) {
 
-            this.apPaymentAmount.textContent =
+            this.apPaymentAmount.value =
                 this.formatCurrency(
-                    paymentAmount
+                    outstandingAmount
                 );
+
+
+            /*
+            ==============================================
+            FORMAT WHILE USER TYPES
+
+            using .oninput prevents duplicate listener
+            when modal is opened repeatedly.
+            ==============================================
+            */
+
+            this.apPaymentAmount.oninput =
+                () => {
+
+                    this.formatAPPaymentAmount();
+
+                };
 
         }
 
+
+        /*
+        ==================================================
+        REFERENCE NO
+        ==================================================
+        */
 
         if (
             this.apPaymentReferenceNo
@@ -14973,22 +15406,26 @@ async createPayment(id) {
         }
 
 
+        /*
+        ==================================================
+        DESCRIPTION
+        GET FROM AP HEADER
+        ==================================================
+        */
+
         if (
             this.apPaymentDescription
         ) {
 
             this.apPaymentDescription.value =
-                `Payment AP ${
-                    invoice.invoice_no
-                    || ""
-                }`;
+                invoice.description
+                || "";
 
         }
 
 
         /*
         ==================================================
-        TODO
         LOAD BANK ACCOUNTS
         ==================================================
         */
@@ -14998,9 +15435,69 @@ async createPayment(id) {
 
         /*
         ==================================================
+        RESET BANK
+        ==================================================
+        */
+
+        if (
+            this.apPaymentBankAccount
+        ) {
+
+            this.apPaymentBankAccount.value =
+                "";
+
+        }
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "AP PAYMENT MODAL:",
+            {
+
+                id:
+                    id,
+
+                invoice_no:
+                    invoice.invoice_no,
+
+                status:
+                    status,
+
+                total_amount:
+                    totalAmount,
+
+                outstanding_amount:
+                    outstandingAmount,
+
+                description:
+                    invoice.description
+                    || ""
+
+            }
+        );
+
+
+        /*
+        ==================================================
         SHOW MODAL
         ==================================================
         */
+
+        if (
+            !this.accountPayablePaymentModal
+        ) {
+
+            throw new Error(
+                "Account Payable Payment Modal not found."
+            );
+
+        }
+
 
         bootstrap.Modal
             .getOrCreateInstance(
