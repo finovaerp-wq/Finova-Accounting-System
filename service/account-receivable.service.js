@@ -52,100 +52,111 @@ export class AccountReceivableService {
 
 
     /*
-    ======================================================
-    STATUS
-    ======================================================
-    */
+======================================================
+STATUS
+======================================================
+*/
 
-    get STATUS() {
+get STATUS() {
 
-        return {
+    return {
 
-            DRAFT:
-                "Draft",
+        DRAFT:
+            "Draft",
 
-            UNPAID:
-                "Unpaid",
+        COMPLETE:
+            "Complete",
 
-            PAID:
-                "Paid",
+        PARTIAL_PAID:
+            "Partial Paid",
 
-            VOID:
-                "Void"
+        PAID:
+            "Paid",
 
-        };
+        VOID:
+            "Void"
 
-    }
+    };
+
+}
 
 
     /*
-    ======================================================
-    GET ALL
-    ======================================================
-    */
+======================================================
+GET ALL
+======================================================
+*/
 
-    async getAll() {
+async getAll() {
 
-        try {
+    try {
 
-            const {
+        const {
 
-                data,
+            data,
 
-                error
+            error
 
-            } = await supabase
+        } = await supabase
 
-                .from(
-                    this.table
+            .from(
+                this.table
+            )
+
+            .select(`
+
+                *,
+
+                mst_business_partner (
+                    id,
+                    bp_code,
+                    bp_name,
+                    bp_type,
+                    top_id,
+                    is_active
+                ),
+
+                trx_gl_journal (
+                    id,
+                    journal_no,
+                    journal_date,
+                    status
                 )
 
-                .select(`
-                    *,
-                    mst_business_partner (
-                        id,
-                        bp_code,
-                        bp_name,
-                        bp_type,
-                        top_id,
-                        is_active
-                    )
-                `)
+            `)
 
-                .order(
-                    "invoice_date",
-                    {
-                        ascending:
-                            false
-                    }
-                );
-
-
-            if (error) {
-
-                throw error;
-
-            }
-
-
-            return data || [];
-
-        }
-
-        catch (error) {
-
-            console.error(
-                "AccountReceivableService.getAll:",
-                error
+            .order(
+                "created_at",
+                {
+                    ascending: true
+                }
             );
 
+
+        if (error) {
 
             throw error;
 
         }
 
+
+        return data || [];
+
     }
 
+    catch (error) {
+
+        console.error(
+            "AccountReceivableService.getAll:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
 
     /*
     ======================================================
@@ -460,98 +471,144 @@ export class AccountReceivableService {
 
 
     /*
-    ======================================================
-    COMPLETE ACCOUNT RECEIVABLE
-    Draft -> Unpaid
-    ======================================================
-    */
+======================================================
+COMPLETE ACCOUNT RECEIVABLE
+DRAFT -> COMPLETE
+======================================================
+*/
 
-    async completeInvoice(id) {
+async completeInvoice(
+    id
+) {
 
-        try {
+    try {
 
-            if (!id) {
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
 
-                throw new Error(
-                    "Account Receivable ID is required."
-                );
+        if (!id) {
 
-            }
-
-
-            const {
-
-                data,
-
-                error
-
-            } = await supabase
-
-                .from(
-                    this.table
-                )
-
-                .update({
-
-                    status:
-                        this.STATUS.UNPAID
-
-                })
-
-                .eq(
-                    "id",
-                    id
-                )
-
-                .eq(
-                    "status",
-                    this.STATUS.DRAFT
-                )
-
-                .select();
-
-
-            if (error) {
-
-                throw error;
-
-            }
-
-
-            if (
-                !Array.isArray(
-                    data
-                )
-                ||
-                data.length === 0
-            ) {
-
-                throw new Error(
-                    "Account Receivable could not be completed. The document is no longer in Draft status."
-                );
-
-            }
-
-
-            return data[0];
+            throw new Error(
+                "Account Receivable ID is required."
+            );
 
         }
 
-        catch (error) {
 
-            console.error(
-                "AccountReceivableService.completeInvoice:",
-                error
-            );
+        /*
+        ==================================================
+        UPDATE STATUS
+        ==================================================
+        */
 
+        const {
+
+            data,
+
+            error
+
+        } = await supabase
+
+            .from(
+                this.table
+            )
+
+            .update({
+
+                status:
+                    this.STATUS.COMPLETE
+
+            })
+
+            .eq(
+                "id",
+                id
+            )
+
+            .eq(
+                "status",
+                this.STATUS.DRAFT
+            )
+
+            .select();
+
+
+        /*
+        ==================================================
+        DATABASE ERROR
+        ==================================================
+        */
+
+        if (error) {
 
             throw error;
 
         }
 
+
+        /*
+        ==================================================
+        VALIDATE RESULT
+        ==================================================
+        */
+
+        if (
+            !Array.isArray(
+                data
+            )
+            ||
+            data.length === 0
+        ) {
+
+            throw new Error(
+                "Account Receivable could not be completed. The document is no longer in Draft status."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
+
+        return data[0];
+
     }
 
+    catch (error) {
 
+        console.error(
+            "AccountReceivableService.completeInvoice:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
+/*
+======================================================
+COMPLETE
+COMPATIBILITY ALIAS
+======================================================
+*/
+
+async complete(
+    id
+) {
+
+    return this.completeInvoice(
+        id
+    );
+
+}
     /*
     ======================================================
     LINK GL JOURNAL
@@ -2518,161 +2575,423 @@ exportExcel() {
         }
 
     }
-
-
     /*
-    ======================================================
-    MARK PAID / UPDATE PAYMENT TOTAL
-    ======================================================
-    */
+======================================================
+GET PAYMENT TOTAL
+======================================================
+*/
 
-    async markPaid(
-        id,
-        paidAmount
-    ) {
+async getPaymentTotal(
+    accountReceivableId
+) {
 
-        try {
+    try {
 
-            if (!id) {
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
 
-                throw new Error(
-                    "Account Receivable ID is required."
-                );
+        if (
+            !accountReceivableId
+        ) {
 
-            }
-
-
-            const current =
-                await this.getById(
-                    id
-                );
-
-
-            const invoice =
-                current?.header;
-
-
-            if (!invoice) {
-
-                throw new Error(
-                    "Account Receivable not found."
-                );
-
-            }
-
-
-            const totalAmount =
-                Number(
-                    invoice.total_amount
-                    || 0
-                );
-
-
-            const paid =
-                Number(
-                    paidAmount
-                    || 0
-                );
-
-
-            if (
-                paid < 0
-            ) {
-
-                throw new Error(
-                    "Paid Amount cannot be negative."
-                );
-
-            }
-
-
-            if (
-                paid
-                >
-                totalAmount
-            ) {
-
-                throw new Error(
-                    "Paid Amount cannot exceed Total Amount."
-                );
-
-            }
-
-
-            const outstanding =
-                Math.max(
-                    totalAmount
-                    -
-                    paid,
-                    0
-                );
-
-
-            const status =
-                outstanding <= 0
-                    ? this.STATUS.PAID
-                    : this.STATUS.UNPAID;
-
-
-            const {
-
-                data,
-
-                error
-
-            } = await supabase
-
-                .from(
-                    this.table
-                )
-
-                .update({
-
-                    paid_amount:
-                        paid,
-
-                    outstanding_amount:
-                        outstanding,
-
-                    status:
-                        status
-
-                })
-
-                .eq(
-                    "id",
-                    id
-                )
-
-                .select()
-
-                .single();
-
-
-            if (error) {
-
-                throw error;
-
-            }
-
-
-            return data;
+            throw new Error(
+                "Account Receivable ID is required."
+            );
 
         }
 
-        catch (error) {
 
-            console.error(
-                "AccountReceivableService.markPaid:",
-                error
+        /*
+        ==================================================
+        GET PAYMENTS
+        ==================================================
+        */
+
+        const {
+
+            data,
+
+            error
+
+        } = await supabase
+
+            .from(
+                this.paymentTable
+            )
+
+            .select(`
+                amount
+            `)
+
+            .eq(
+                "account_receivable_id",
+                accountReceivableId
             );
 
+
+        /*
+        ==================================================
+        ERROR
+        ==================================================
+        */
+
+        if (error) {
 
             throw error;
 
         }
 
+
+        /*
+        ==================================================
+        SUM PAYMENT
+        ==================================================
+        */
+
+        const total =
+            (
+                data
+                ||
+                []
+            )
+            .reduce(
+                (
+                    sum,
+                    payment
+                ) => {
+
+                    return (
+                        sum
+                        +
+                        Number(
+                            payment.amount
+                            ||
+                            0
+                        )
+                    );
+
+                },
+                0
+            );
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
+
+        return Number(
+            total.toFixed(
+                2
+            )
+        );
+
     }
+
+    catch (error) {
+
+        console.error(
+            "AccountReceivableService.getPaymentTotal:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
+/*
+======================================================
+UPDATE AR PAYMENT STATUS
+SAME LOGIC AS ACCOUNT PAYABLE
+======================================================
+*/
+
+async updatePaymentStatus(
+    accountReceivableId
+) {
+
+    try {
+
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
+
+        if (
+            !accountReceivableId
+        ) {
+
+            throw new Error(
+                "Account Receivable ID is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        GET ACCOUNT RECEIVABLE
+        ==================================================
+        */
+
+        const result =
+            await this.getById(
+                accountReceivableId
+            );
+
+
+        const invoice =
+            result?.header;
+
+
+        if (!invoice) {
+
+            throw new Error(
+                "Account Receivable not found."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        TOTAL AMOUNT
+        ==================================================
+        */
+
+        const totalAmount =
+            Number(
+                invoice.total_amount
+                ||
+                0
+            );
+
+
+        if (
+            totalAmount <= 0
+        ) {
+
+            throw new Error(
+                "Account Receivable Total Amount is invalid."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        TOTAL PAYMENT
+        ==================================================
+        */
+
+        const paidAmount =
+            await this.getPaymentTotal(
+                accountReceivableId
+            );
+
+
+        /*
+        ==================================================
+        OUTSTANDING
+        ==================================================
+        */
+
+        const outstandingAmount =
+            Math.max(
+                totalAmount
+                -
+                paidAmount,
+                0
+            );
+
+
+        /*
+        ==================================================
+        DEFAULT STATUS
+        NO PAYMENT YET
+        ==================================================
+        */
+
+        let status =
+            this.STATUS.COMPLETE;
+
+
+        /*
+        ==================================================
+        PARTIAL PAYMENT
+        ==================================================
+        */
+
+        if (
+            paidAmount > 0
+            &&
+            outstandingAmount > 0
+        ) {
+
+            status =
+                this.STATUS.PARTIAL_PAID;
+
+        }
+
+
+        /*
+        ==================================================
+        FULL PAYMENT
+        ==================================================
+        */
+
+        if (
+            paidAmount >=
+            totalAmount
+        ) {
+
+            status =
+                this.STATUS.PAID;
+
+        }
+
+
+        /*
+        ==================================================
+        UPDATE ACCOUNT RECEIVABLE
+        ==================================================
+        */
+
+        const {
+
+            data,
+
+            error
+
+        } = await supabase
+
+            .from(
+                this.table
+            )
+
+            .update({
+
+                paid_amount:
+                    paidAmount,
+
+                outstanding_amount:
+                    outstandingAmount,
+
+                status:
+                    status
+
+            })
+
+            .eq(
+                "id",
+                accountReceivableId
+            )
+
+            .select()
+
+            .single();
+
+
+        /*
+        ==================================================
+        ERROR
+        ==================================================
+        */
+
+        if (error) {
+
+            throw error;
+
+        }
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "AR PAYMENT STATUS UPDATED:",
+            {
+
+                account_receivable_id:
+                    accountReceivableId,
+
+                total_amount:
+                    totalAmount,
+
+                paid_amount:
+                    paidAmount,
+
+                outstanding_amount:
+                    outstandingAmount,
+
+                status:
+                    status
+
+            }
+        );
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
+
+        return data;
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountReceivableService.updatePaymentStatus:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
+
+    /*
+======================================================
+MARK PAID
+COMPATIBILITY ALIAS
+======================================================
+*/
+
+async markPaid(
+    id,
+    paidAmount = null
+) {
+
+    /*
+    ==================================================
+    IMPORTANT
+
+    paidAmount parameter kept only for compatibility.
+    Actual total payment is always calculated from
+    trx_account_receivable_payment.
+    ==================================================
+    */
+
+    return this.updatePaymentStatus(
+        id
+    );
+
+}
 
 
     /*

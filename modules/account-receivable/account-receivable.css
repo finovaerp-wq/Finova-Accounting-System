@@ -740,3 +740,755 @@ tr.ar-row-void
     width: 100%;
 
 }
+/*
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+ACCOUNT RECEIVABLE
+COMPACT BODY TABLE LAYOUT
+MATCH ACCOUNT PAYABLE
+==========================================================
+*/
+
+
+/*
+==========================================================
+TABLE HEADER WIDTH
+==========================================================
+*/
+
+.account-receivable-table-card .ar-col-no {
+
+    width: 54px;
+
+    min-width: 54px;
+
+    max-width: 54px;
+
+}
+
+
+.account-receivable-table-card .ar-col-document {
+
+    width: 245px;
+
+    min-width: 245px;
+
+}
+
+
+.account-receivable-table-card .ar-col-customer {
+
+    width: 360px;
+
+    min-width: 320px;
+
+}
+
+
+.account-receivable-table-card .ar-col-date-info {
+
+    width: 210px;
+
+    min-width: 210px;
+
+}
+
+
+.account-receivable-table-card .ar-col-amount-status {
+
+    width: 245px;
+
+    min-width: 245px;
+
+}
+
+
+.account-receivable-table-card .ar-col-action {
+
+    width: 120px;
+
+    min-width: 120px;
+
+    max-width: 120px;
+
+}
+
+
+/*
+==========================================================
+TABLE ROW
+==========================================================
+*/
+
+.account-receivable-table-card
+.finova-table
+tbody
+.ar-data-row {
+
+    min-height: 108px;
+
+}
+
+
+/*
+==========================================================
+TABLE CELL
+==========================================================
+*/
+
+.account-receivable-table-card
+.finova-table
+tbody
+.ar-data-row
+> td {
+
+    padding: 12px 14px;
+
+    vertical-align: top;
+
+    font-size: 14px;
+
+    line-height: 1.55;
+
+    background: #FFFFFF;
+
+}
+
+
+/*
+==========================================================
+ROW HOVER
+==========================================================
+*/
+
+.account-receivable-table-card
+.finova-table
+tbody
+.ar-data-row:hover
+> td {
+
+    background: #F8FAFC;
+
+}
+
+
+/*
+==========================================================
+NO
+==========================================================
+*/
+
+.account-receivable-table-card
+.ar-cell-no {
+
+    text-align: center;
+
+    vertical-align: middle !important;
+
+    font-weight: 600;
+
+    color: var(--text-secondary);
+
+}
+
+
+/*
+==========================================================
+DOCUMENT CELL
+==========================================================
+*/
+
+.ar-document-wrap {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+
+    width: 100%;
+
+}
+
+
+/*
+==========================================================
+DOCUMENT BADGES
+==========================================================
+*/
+
+.ar-document-badges {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    margin-bottom: 3px;
+
+}
+
+
+.ar-document-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-height: 23px;
+
+    padding: 3px 9px;
+
+    border-radius: 4px;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    line-height: 1;
+
+    letter-spacing: .25px;
+
+    white-space: nowrap;
+
+}
+
+
+.ar-document-badge-receivable {
+
+    background: #EAF2FF;
+
+    border: 1px solid #C8DAFA;
+
+    color: #315D9A;
+
+}
+
+
+.ar-document-badge-invoice {
+
+    background: #F3F4F6;
+
+    border: 1px solid #D9DEE5;
+
+    color: #56606D;
+
+}
+
+
+/*
+==========================================================
+GLOBAL INFO LINE
+==========================================================
+*/
+
+.ar-info-line {
+
+    display: grid;
+
+    grid-template-columns: 82px 10px minmax(0, 1fr);
+
+    align-items: start;
+
+    min-width: 0;
+
+    gap: 2px;
+
+}
+
+
+/*
+==========================================================
+INFO LABEL
+==========================================================
+*/
+
+.ar-info-label {
+
+    color: var(--text-secondary);
+
+    font-size: 13px;
+
+    font-weight: 500;
+
+    white-space: nowrap;
+
+}
+
+
+/*
+==========================================================
+INFO SEPARATOR
+==========================================================
+*/
+
+.ar-info-separator {
+
+    color: #94A3B8;
+
+    font-size: 13px;
+
+    text-align: center;
+
+}
+
+
+/*
+==========================================================
+INFO VALUE
+==========================================================
+*/
+
+.ar-info-value {
+
+    min-width: 0;
+
+    color: var(--text-primary);
+
+    font-size: 13px;
+
+    font-weight: 500;
+
+    overflow-wrap: anywhere;
+
+}
+
+
+/*
+==========================================================
+CUSTOMER CELL
+==========================================================
+*/
+
+.ar-customer-wrap {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 6px;
+
+    min-width: 0;
+
+}
+
+
+/*
+==========================================================
+CUSTOMER NAME
+==========================================================
+*/
+
+.ar-customer-name {
+
+    color: var(--text-primary);
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    line-height: 1.5;
+
+    word-break: break-word;
+
+}
+
+
+/*
+==========================================================
+DESCRIPTION
+==========================================================
+*/
+
+.ar-description-line {
+
+    display: grid;
+
+    grid-template-columns: 82px 10px minmax(0, 1fr);
+
+    align-items: start;
+
+    gap: 2px;
+
+    min-width: 0;
+
+}
+
+
+.ar-description-value {
+
+    color: var(--text-secondary);
+
+    font-size: 13px;
+
+    font-weight: 400;
+
+    line-height: 1.55;
+
+    white-space: normal;
+
+    word-break: break-word;
+
+}
+
+
+/*
+==========================================================
+DATE CELL
+==========================================================
+*/
+
+.ar-date-wrap {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+
+    width: 100%;
+
+}
+
+
+.ar-cell-date-info
+.ar-info-line {
+
+    grid-template-columns: 72px 10px minmax(0, 1fr);
+
+}
+
+
+/*
+==========================================================
+AMOUNT / STATUS CELL
+==========================================================
+*/
+
+.ar-amount-wrap {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+
+    width: 100%;
+
+}
+
+
+.ar-cell-amount-status
+.ar-info-line {
+
+    grid-template-columns: 86px 10px minmax(0, 1fr);
+
+}
+
+
+/*
+==========================================================
+AMOUNT VALUE
+==========================================================
+*/
+
+.ar-amount-value {
+
+    font-size: 13.5px;
+
+    font-weight: 600;
+
+    text-align: left;
+
+    white-space: nowrap;
+
+}
+
+
+/*
+==========================================================
+STATUS LINE
+==========================================================
+*/
+
+.ar-status-line {
+
+    margin-top: 2px;
+
+}
+
+
+.ar-status-line
+.ar-info-value {
+
+    display: flex;
+
+    align-items: center;
+
+}
+
+
+/*
+==========================================================
+STATUS BADGE
+==========================================================
+*/
+
+.ar-status-line .badge {
+
+    min-width: 80px;
+
+    padding: 6px 9px;
+
+    border-radius: 4px;
+
+    font-size: 11.5px;
+
+    font-weight: 600;
+
+    line-height: 1;
+
+}
+
+
+/*
+==========================================================
+ACTION CELL
+==========================================================
+*/
+
+.account-receivable-table-card
+.ar-cell-action {
+
+    vertical-align: middle !important;
+
+    text-align: center;
+
+}
+
+
+/*
+==========================================================
+ACTION BUTTON GROUP
+==========================================================
+*/
+
+.account-receivable-table-card
+.ar-cell-action
+.btn-group {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 3px;
+
+}
+
+
+/*
+==========================================================
+ACTION BUTTON
+==========================================================
+*/
+
+.account-receivable-table-card
+.ar-cell-action
+.btn {
+
+    width: 32px;
+
+    height: 32px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 0;
+
+    border-radius: 5px;
+
+}
+
+
+/*
+==========================================================
+ACTION ICON
+==========================================================
+*/
+
+.account-receivable-table-card
+.ar-cell-action
+.btn i {
+
+    font-size: 13px;
+
+}
+
+
+/*
+==========================================================
+HEADER ALIGNMENT
+==========================================================
+*/
+
+.account-receivable-table-card
+.finova-table
+thead
+th {
+
+    vertical-align: middle;
+
+}
+
+
+.account-receivable-table-card
+.finova-table
+thead
+.ar-col-no {
+
+    text-align: center;
+
+}
+
+
+.account-receivable-table-card
+.finova-table
+thead
+.ar-col-document,
+
+.account-receivable-table-card
+.finova-table
+thead
+.ar-col-customer,
+
+.account-receivable-table-card
+.finova-table
+thead
+.ar-col-date-info,
+
+.account-receivable-table-card
+.finova-table
+thead
+.ar-col-amount-status {
+
+    text-align: left;
+
+}
+
+
+.account-receivable-table-card
+.finova-table
+thead
+.ar-col-action {
+
+    text-align: center;
+
+}
+
+
+/*
+==========================================================
+DESCRIPTION FULL BODY
+==========================================================
+*/
+
+.ar-cell-customer {
+
+    white-space: normal;
+
+}
+
+
+.ar-description-value {
+
+    display: block;
+
+    max-width: 100%;
+
+}
+
+
+/*
+==========================================================
+PREVENT COLUMN CONTENT OVERFLOW
+==========================================================
+*/
+
+.ar-cell-document,
+
+.ar-cell-customer,
+
+.ar-cell-date-info,
+
+.ar-cell-amount-status {
+
+    min-width: 0;
+
+    overflow: hidden;
+
+}
+
+
+/*
+==========================================================
+RESPONSIVE
+==========================================================
+*/
+
+@media (max-width: 1200px) {
+
+    .account-receivable-table-card .ar-col-document {
+
+        min-width: 220px;
+
+    }
+
+
+    .account-receivable-table-card .ar-col-customer {
+
+        min-width: 300px;
+
+    }
+
+
+    .account-receivable-table-card .ar-col-date-info {
+
+        min-width: 195px;
+
+    }
+
+
+    .account-receivable-table-card .ar-col-amount-status {
+
+        min-width: 225px;
+
+    }
+
+}
+
+
+/*
+==========================================================
+SMALL SCREEN
+KEEP HORIZONTAL TABLE SCROLL
+==========================================================
+*/
+
+@media (max-width: 768px) {
+
+    .account-receivable-table-card
+    .finova-table {
+
+        min-width: 1200px;
+
+    }
+
+}

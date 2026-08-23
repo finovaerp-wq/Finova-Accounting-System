@@ -3,7 +3,7 @@
 FINOVA ACCOUNTING SYSTEM
 MODULE  : ACCOUNT RECEIVABLE
 FILE    : account-receivable.html
-VERSION : 1.0.0
+VERSION : 2.0.0
 ==========================================================
 -->
 
@@ -302,7 +302,10 @@ VERSION : 1.0.0
          TABLE CARD
     =================================================== -->
 
-    <div class="finova-card finova-table-card">
+    <div
+        class="finova-card
+               finova-table-card
+               account-receivable-table-card">
 
 
         <div class="finova-card-body">
@@ -332,119 +335,72 @@ VERSION : 1.0.0
                             <tr>
 
 
-                                <!-- NO -->
+                                <!-- ==========================
+                                     NO
+                                =========================== -->
 
                                 <th
-                                    class="finova-table-index"
-                                    style="width:60px">
+                                    class="finova-table-index ar-col-no">
 
                                     No
 
                                 </th>
 
 
-                                <!-- INVOICE DATE -->
+                                <!-- ==========================
+                                     DOCUMENT
+                                =========================== -->
 
                                 <th
-                                    class="finova-table-date"
-                                    style="width:135px">
+                                    class="finova-table-name ar-col-document">
 
-                                    Invoice Date
+                                    Document
 
                                 </th>
 
 
-                                <!-- INVOICE NO -->
+                                <!-- ==========================
+                                     CUSTOMER / DESCRIPTION
+                                =========================== -->
 
                                 <th
-                                    class="finova-table-code"
-                                    style="width:150px">
+                                    class="finova-table-name ar-col-customer">
 
-                                    Invoice No
+                                    Customer / Description
 
                                 </th>
 
 
-                                <!-- CUSTOMER -->
+                                <!-- ==========================
+                                     DATE INFORMATION
+                                =========================== -->
 
                                 <th
-                                    style="width:220px">
+                                    class="finova-table-name ar-col-date-info">
 
-                                    Customer
+                                    Date Information
 
                                 </th>
 
 
-                                <!-- PO NO -->
+                                <!-- ==========================
+                                     AMOUNT / STATUS
+                                =========================== -->
 
                                 <th
-                                    style="width:150px">
+                                    class="finova-table-name ar-col-amount-status">
 
-                                    PO No
+                                    Amount / Status
 
                                 </th>
 
 
-                                <!-- DUE DATE -->
+                                <!-- ==========================
+                                     ACTION
+                                =========================== -->
 
                                 <th
-                                    class="finova-table-date"
-                                    style="width:135px">
-
-                                    Due Date
-
-                                </th>
-
-
-                                <!-- TOTAL -->
-
-                                <th
-                                    class="finova-table-number"
-                                    style="width:145px">
-
-                                    Total Amount
-
-                                </th>
-
-
-                                <!-- PAID -->
-
-                                <th
-                                    class="finova-table-number"
-                                    style="width:145px">
-
-                                    Paid Amount
-
-                                </th>
-
-
-                                <!-- OUTSTANDING -->
-
-                                <th
-                                    class="finova-table-number"
-                                    style="width:145px">
-
-                                    Outstanding
-
-                                </th>
-
-
-                                <!-- STATUS -->
-
-                                <th
-                                    class="finova-table-status"
-                                    style="width:110px">
-
-                                    Status
-
-                                </th>
-
-
-                                <!-- ACTION -->
-
-                                <th
-                                    class="finova-table-action"
-                                    style="width:190px">
+                                    class="finova-table-action ar-col-action">
 
                                     Action
 
@@ -466,7 +422,7 @@ VERSION : 1.0.0
                             <tr>
 
                                 <td
-                                    colspan="11"
+                                    colspan="6"
                                     class="text-center text-muted py-4">
 
                                     No Account Receivable data.
@@ -567,7 +523,9 @@ VERSION : 1.0.0
                             /
 
                             <span id="ar-total-pages">
+
                                 1
+
                             </span>
 
                         </span>

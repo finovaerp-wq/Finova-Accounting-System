@@ -16264,14 +16264,69 @@ showVoidConfirmation() {
    /*
 ======================================================
 LOAD DATA
-KEEP CURRENT PAGINATION
-SYNC PAYMENT STATUS
+SHOW LOADING WHILE FETCHING
 ======================================================
 */
 
 async loadData() {
 
     try {
+
+        /*
+        ==================================================
+        SHOW LOADING
+        ==================================================
+        */
+
+        if (
+            this.tableBody
+        ) {
+
+            this.tableBody.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="6"
+                        class="text-center py-5">
+
+                        <div
+                            class="
+                                d-flex
+                                flex-column
+                                align-items-center
+                                justify-content-center
+                                gap-2
+                            ">
+
+                            <div
+                                class="spinner-border text-primary"
+                                role="status">
+
+                                <span class="visually-hidden">
+                                    Loading...
+                                </span>
+
+                            </div>
+
+
+                            <div
+                                class="text-muted small">
+
+                                Loading Account Payable...
+
+                            </div>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        }
+
 
         /*
         ==================================================
@@ -16292,17 +16347,6 @@ async loadData() {
         /*
         ==================================================
         SYNC PAYMENT STATUS
-
-        Complete
-            → cek payment
-            → bisa menjadi Paid
-
-        Paid
-            → cek payment/journal
-            → bisa kembali Complete
-
-        Partial Paid
-            → hitung ulang outstanding
         ==================================================
         */
 
@@ -16318,12 +16362,6 @@ async loadData() {
                 )
                 .trim();
 
-
-            /*
-            ==============================================
-            PAYMENT RELATED STATUS
-            ==============================================
-            */
 
             if (
                 currentStatus === "Complete"
@@ -16371,9 +16409,6 @@ async loadData() {
         /*
         ==================================================
         RELOAD AFTER STATUS SYNC
-
-        IMPORTANT:
-        GET FRESH VALUE FROM DATABASE
         ==================================================
         */
 
@@ -16417,10 +16452,7 @@ async loadData() {
         this.currentPage =
             Math.min(
                 Math.max(
-                    Number(
-                        this.currentPage
-                    )
-                    || 1,
+                    this.currentPage,
                     1
                 ),
                 totalPages
@@ -16443,6 +16475,43 @@ async loadData() {
             "AccountPayable.loadData:",
             error
         );
+
+
+        /*
+        ==================================================
+        ERROR ROW
+        ==================================================
+        */
+
+        if (
+            this.tableBody
+        ) {
+
+            this.tableBody.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="6"
+                        class="text-center text-danger py-5">
+
+                        <i
+                            class="
+                                fa-solid
+                                fa-circle-exclamation
+                                me-2
+                            ">
+                        </i>
+
+                        Failed to load Account Payable.
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        }
 
 
         this.showError(
@@ -16893,7 +16962,7 @@ createTableRow(
 
     /*
     ==================================================
-    AMOUNT
+    TOTAL AMOUNT
     ==================================================
     */
 
@@ -16907,6 +16976,26 @@ createTableRow(
         );
 
 
+    /*
+    ==================================================
+    PAID AMOUNT
+    ==================================================
+    */
+
+    const paidValue =
+        Number(
+            invoice?.paid_amount
+            ??
+            0
+        );
+
+
+    /*
+    ==================================================
+    OUTSTANDING AMOUNT
+    ==================================================
+    */
+
     const outstandingValue =
         Number(
             invoice?.outstanding_amount
@@ -16917,9 +17006,21 @@ createTableRow(
         );
 
 
+    /*
+    ==================================================
+    FORMAT AMOUNT
+    ==================================================
+    */
+
     const totalAmount =
         this.formatCurrency(
             totalValue
+        );
+
+
+    const paidAmount =
+        this.formatCurrency(
+            paidValue
         );
 
 
@@ -16980,6 +17081,9 @@ createTableRow(
             total:
                 totalValue,
 
+            paid:
+                paidValue,
+
             outstanding:
                 outstandingValue,
 
@@ -17027,13 +17131,22 @@ createTableRow(
 
                     <div class="ap-document-badges">
 
-                        <span class="ap-document-badge ap-document-badge-payable">
+                        <span
+                            class="
+                                ap-document-badge
+                                ap-document-badge-payable
+                            ">
 
                             PAYABLE
 
                         </span>
 
-                        <span class="ap-document-badge ap-document-badge-invoice">
+
+                        <span
+                            class="
+                                ap-document-badge
+                                ap-document-badge-invoice
+                            ">
 
                             INV
 
@@ -17052,13 +17165,19 @@ createTableRow(
 
                         </span>
 
+
                         <span class="ap-info-separator">
 
                             :
 
                         </span>
 
-                        <span class="ap-info-value fw-semibold">
+
+                        <span
+                            class="
+                                ap-info-value
+                                fw-semibold
+                            ">
 
                             ${invoiceNo}
 
@@ -17077,11 +17196,13 @@ createTableRow(
 
                         </span>
 
+
                         <span class="ap-info-separator">
 
                             :
 
                         </span>
+
 
                         <span class="ap-info-value">
 
@@ -17102,11 +17223,13 @@ createTableRow(
 
                         </span>
 
+
                         <span class="ap-info-separator">
 
                             :
 
                         </span>
+
 
                         <span class="ap-info-value">
 
@@ -17150,11 +17273,13 @@ createTableRow(
 
                         </span>
 
+
                         <span class="ap-info-separator">
 
                             :
 
                         </span>
+
 
                         <span class="ap-description-value">
 
@@ -17189,11 +17314,13 @@ createTableRow(
 
                         </span>
 
+
                         <span class="ap-info-separator">
 
                             :
 
                         </span>
+
 
                         <span class="ap-info-value">
 
@@ -17214,11 +17341,13 @@ createTableRow(
 
                         </span>
 
+
                         <span class="ap-info-separator">
 
                             :
 
                         </span>
+
 
                         <span class="ap-info-value">
 
@@ -17239,11 +17368,13 @@ createTableRow(
 
                         </span>
 
+
                         <span class="ap-info-separator">
 
                             :
 
                         </span>
+
 
                         <span class="ap-info-value">
 
@@ -17278,15 +17409,52 @@ createTableRow(
 
                         </span>
 
+
                         <span class="ap-info-separator">
 
                             :
 
                         </span>
 
-                        <span class="ap-info-value ap-amount-value">
+
+                        <span
+                            class="
+                                ap-info-value
+                                ap-amount-value
+                            ">
 
                             ${totalAmount}
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- PAID -->
+
+                    <div class="ap-info-line">
+
+                        <span class="ap-info-label">
+
+                            Paid
+
+                        </span>
+
+
+                        <span class="ap-info-separator">
+
+                            :
+
+                        </span>
+
+
+                        <span
+                            class="
+                                ap-info-value
+                                ap-amount-value
+                            ">
+
+                            ${paidAmount}
 
                         </span>
 
@@ -17303,13 +17471,19 @@ createTableRow(
 
                         </span>
 
+
                         <span class="ap-info-separator">
 
                             :
 
                         </span>
 
-                        <span class="ap-info-value ap-amount-value">
+
+                        <span
+                            class="
+                                ap-info-value
+                                ap-amount-value
+                            ">
 
                             ${outstandingAmount}
 
@@ -17320,7 +17494,11 @@ createTableRow(
 
                     <!-- STATUS -->
 
-                    <div class="ap-info-line ap-status-line">
+                    <div
+                        class="
+                            ap-info-line
+                            ap-status-line
+                        ">
 
                         <span class="ap-info-label">
 
@@ -17328,11 +17506,13 @@ createTableRow(
 
                         </span>
 
+
                         <span class="ap-info-separator">
 
                             :
 
                         </span>
+
 
                         <span class="ap-info-value">
 
@@ -17354,7 +17534,11 @@ createTableRow(
                  ACTION
             ======================================= -->
 
-            <td class="finova-table-action ap-cell-action">
+            <td
+                class="
+                    finova-table-action
+                    ap-cell-action
+                ">
 
                 ${this.renderActionButtons(
                     invoice
