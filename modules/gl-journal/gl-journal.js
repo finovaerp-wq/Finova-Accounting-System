@@ -5159,6 +5159,75 @@ showSuccess(message) {
 }
 /*
 ==========================================================
+SHOW ERROR
+==========================================================
+*/
+
+showError(message) {
+
+    const modalElement =
+        document.getElementById(
+            "finovaErrorModal"
+        );
+
+
+    /*
+    ==================================================
+    FALLBACK
+    ==================================================
+    */
+
+    if (!modalElement) {
+
+        console.error(
+            "ERROR:",
+            message
+        );
+
+        return;
+
+    }
+
+
+    /*
+    ==================================================
+    MESSAGE ELEMENT
+    ==================================================
+    */
+
+    const messageElement =
+        modalElement.querySelector(
+            ".finova-error-message"
+        );
+
+
+    if (
+        messageElement
+    ) {
+
+        messageElement.textContent =
+            message
+            ||
+            "An error occurred.";
+
+    }
+
+
+    /*
+    ==================================================
+    SHOW MODAL
+    ==================================================
+    */
+
+    bootstrap.Modal
+        .getOrCreateInstance(
+            modalElement
+        )
+        .show();
+
+}
+/*
+==========================================================
 OPEN ADD LINE
 ==========================================================
 */

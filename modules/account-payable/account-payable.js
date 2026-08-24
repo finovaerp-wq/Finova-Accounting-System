@@ -969,7 +969,9 @@ async init() {
         ==============================================
         */
 
-        await this.loadData();
+        await this.loadData(
+    true
+);
 
         console.log("AccountPayable: INIT COMPLETE");
 
@@ -1200,7 +1202,9 @@ await this.service.postInvoice(
                 ==========================================
                 */
 
-                await this.loadData();
+                await this.loadData(
+    false
+);
 
 
                 /*
@@ -1362,7 +1366,9 @@ if (confirmVoidButton) {
                 ==========================================
                 */
 
-                await this.loadData();
+                await this.loadData(
+    false
+);
 
 
                 /*
@@ -3544,7 +3550,9 @@ async completeInvoice(id) {
         ==================================================
         */
 
-        await this.loadData();
+        await this.loadData(
+    false
+);
 
 
         /*
@@ -5611,7 +5619,9 @@ async saveAPPayment() {
             );
 
 
-            await this.loadData();
+            await this.loadData(
+    false
+);
 
 
             throw new Error(
@@ -6115,9 +6125,11 @@ async saveAPPayment() {
 
         else {
 
-            await this.loadData();
+    await this.loadData(
+        false
+    );
 
-        }
+}
 
 
         /*
@@ -6370,8 +6382,8 @@ async saveAPPayment() {
             try {
 
                 await this.service.updatePaymentStatus(
-                    currentAPId
-                );
+    currentAPId
+);
 
 
                 /*
@@ -6380,7 +6392,9 @@ async saveAPPayment() {
                 ==============================================
                 */
 
-                await this.loadData();
+                await this.loadData(
+    false
+);
 
             }
 
@@ -11492,7 +11506,9 @@ RELOAD DATA
 ==================================================
 */
 
-await this.loadData();
+await this.loadData(
+    false
+);
 
 
 /*
@@ -12058,7 +12074,10 @@ async saveEdit() {
         ==================================================
         */
 
-        await this.loadData();
+        
+await this.loadData(
+    false
+);
 
 
         /*
@@ -16198,7 +16217,10 @@ async voidInvoice(id) {
         ==================================================
         */
 
-        await this.loadData();
+        
+await this.loadData(
+    false
+);
 
 
         /*
@@ -16631,25 +16653,22 @@ showVoidConfirmation() {
 
     
     
-   /*
+  /*
 ======================================================
 LOAD DATA
-ALWAYS USE ACTIVE DOM
-SYNC PAYMENT STATUS
+OPTIONAL LOADING
 ======================================================
 */
 
-async loadData() {
+async loadData(
+    showLoading = true
+) {
 
     try {
 
         /*
         ==================================================
         RE-CACHE ACTIVE TABLE BODY
-
-        IMPORTANT:
-        Router SPA bisa mengganti DOM module.
-        Jangan gunakan referensi tbody lama.
         ==================================================
         */
 
@@ -16675,53 +16694,60 @@ async loadData() {
         /*
         ==================================================
         SHOW LOADING
+        ONLY WHEN REQUESTED
         ==================================================
         */
 
-        this.tableBody.innerHTML = `
+        if (
+            showLoading
+        ) {
 
-            <tr>
+            this.tableBody.innerHTML = `
 
-                <td
-                    colspan="6"
-                    class="text-center py-5">
+                <tr>
 
-                    <div
-                        class="
-                            d-flex
-                            flex-column
-                            align-items-center
-                            justify-content-center
-                            gap-2
-                        ">
+                    <td
+                        colspan="6"
+                        class="text-center py-5">
 
                         <div
-                            class="spinner-border text-primary"
-                            role="status">
+                            class="
+                                d-flex
+                                flex-column
+                                align-items-center
+                                justify-content-center
+                                gap-2
+                            ">
 
-                            <span class="visually-hidden">
+                            <div
+                                class="spinner-border text-primary"
+                                role="status">
 
-                                Loading...
+                                <span class="visually-hidden">
 
-                            </span>
+                                    Loading...
+
+                                </span>
+
+                            </div>
+
+
+                            <div
+                                class="text-muted small">
+
+                                Loading Account Payable...
+
+                            </div>
 
                         </div>
 
+                    </td>
 
-                        <div
-                            class="text-muted small">
+                </tr>
 
-                            Loading Account Payable...
+            `;
 
-                        </div>
-
-                    </div>
-
-                </td>
-
-            </tr>
-
-        `;
+        }
 
 
         /*
@@ -16762,12 +16788,6 @@ async loadData() {
                 .trim();
 
 
-            /*
-            ==============================================
-            ONLY PAYMENT-AWARE STATUS
-            ==============================================
-            */
-
             if (
                 currentStatus === "Complete"
                 ||
@@ -16791,21 +16811,7 @@ async loadData() {
 
                     console.error(
                         "AP PAYMENT STATUS SYNC ERROR:",
-                        {
-
-                            id:
-                                invoice.id,
-
-                            invoice_no:
-                                invoice.invoice_no,
-
-                            current_status:
-                                currentStatus,
-
-                            error:
-                                syncError
-
-                        }
+                        syncError
                     );
 
                 }
@@ -16818,8 +16824,6 @@ async loadData() {
         /*
         ==================================================
         RELOAD AFTER STATUS SYNC
-
-        SOURCE OF TRUTH = DATABASE
         ==================================================
         */
 
@@ -16837,7 +16841,7 @@ async loadData() {
 
         /*
         ==================================================
-        STORE FRESH DATA
+        STORE DATA
         ==================================================
         */
 
@@ -16853,7 +16857,7 @@ async loadData() {
 
         /*
         ==================================================
-        KEEP CURRENT PAGE VALID
+        KEEP CURRENT PAGE
         ==================================================
         */
 
@@ -16884,9 +16888,7 @@ async loadData() {
 
         /*
         ==================================================
-        RE-CACHE ACTIVE DOM AGAIN
-
-        DOM mungkin berubah selama async request.
+        RE-CACHE ACTIVE BODY
         ==================================================
         */
 
@@ -16896,51 +16898,9 @@ async loadData() {
             );
 
 
-        if (
-            !this.tableBody
-        ) {
-
-            console.warn(
-                "AP TABLE BODY DISAPPEARED BEFORE RENDER."
-            );
-
-            return;
-
-        }
-
-
         /*
         ==================================================
-        DEBUG
-        ==================================================
-        */
-
-        console.log(
-            "AP LOAD DATA FINAL:",
-            this.data.map(
-                invoice => ({
-                    id:
-                        invoice.id,
-
-                    invoice_no:
-                        invoice.invoice_no,
-
-                    status:
-                        invoice.status,
-
-                    paid_amount:
-                        invoice.paid_amount,
-
-                    outstanding_amount:
-                        invoice.outstanding_amount
-                })
-            )
-        );
-
-
-        /*
-        ==================================================
-        RENDER ACTIVE PAGE
+        RENDER
         ==================================================
         */
 
@@ -16954,53 +16914,6 @@ async loadData() {
             "AccountPayable.loadData:",
             error
         );
-
-
-        /*
-        ==================================================
-        GET ACTIVE BODY AGAIN
-        ==================================================
-        */
-
-        this.tableBody =
-            document.getElementById(
-                "ap-table-body"
-            );
-
-
-        if (
-            this.tableBody
-        ) {
-
-            this.tableBody.innerHTML = `
-
-                <tr>
-
-                    <td
-                        colspan="6"
-                        class="
-                            text-center
-                            text-danger
-                            py-5
-                        ">
-
-                        <i
-                            class="
-                                fa-solid
-                                fa-circle-exclamation
-                                me-2
-                            ">
-                        </i>
-
-                        Failed to load Account Payable.
-
-                    </td>
-
-                </tr>
-
-            `;
-
-        }
 
 
         this.showError(
@@ -17083,50 +16996,85 @@ async search() {
 }
 
     /*
-    ======================================================
-    REFRESH
-    ======================================================
-    */
+======================================================
+REFRESH
+WITH LOADING
+======================================================
+*/
 
-    async refresh() {
+async refresh() {
 
-        try {
+    try {
 
-            await this.loadData();
-
-        }
-
-        catch (error) {
-
-            console.error(
-                "AccountPayable.refresh:",
-                error
-            );
-
-        }
-
-    }
-
-
-    /*
-    ======================================================
-    GET TOTAL PAGES
-    ======================================================
-    */
-
-    getTotalPages() {
-
-        return Math.max(
-            1,
-            Math.ceil(
-                this.filteredData.length /
-                this.pageSize
-            )
+        await this.loadData(
+            true
         );
 
     }
 
+    catch (error) {
 
+        console.error(
+            "AccountPayable.refresh:",
+            error
+        );
+
+    }
+
+}
+
+/*
+======================================================
+GET TOTAL PAGES
+======================================================
+*/
+
+getTotalPages() {
+
+    /*
+    ==================================================
+    TOTAL RECORDS
+    ==================================================
+    */
+
+    const totalRecords =
+        Array.isArray(
+            this.filteredData
+        )
+            ? this.filteredData.length
+            : 0;
+
+
+    /*
+    ==================================================
+    PAGE SIZE
+    ==================================================
+    */
+
+    const pageSize =
+        Number(
+            this.pageSize
+        )
+        || 20;
+
+
+    /*
+    ==================================================
+    TOTAL PAGES
+    MINIMUM = 1
+    ==================================================
+    */
+
+    return Math.max(
+        1,
+        Math.ceil(
+            totalRecords
+            /
+            pageSize
+        )
+    );
+
+}
     /*
     ======================================================
     GO TO PAGE

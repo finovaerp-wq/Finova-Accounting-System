@@ -725,6 +725,286 @@ async linkGLJournal(
     }
 
 }
+/*
+======================================================
+RESET AP AFTER GL JOURNAL DELETE
+GL JOURNAL AP_INVOICE DELETED
+======================================================
+*/
+
+async resetAfterJournalDelete(
+    accountPayableId
+) {
+
+    try {
+
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
+
+        if (
+            !accountPayableId
+        ) {
+
+            throw new Error(
+                "Account Payable ID is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        GET ACCOUNT PAYABLE
+        ==================================================
+        */
+
+        const {
+
+            data: invoice,
+
+            error: findError
+
+        } = await supabase
+
+            .from(
+                this.table
+            )
+
+            .select(`
+                id,
+                invoice_no,
+                status,
+                total_amount,
+                paid_amount,
+                outstanding_amount,
+                gl_journal_id
+            `)
+
+            .eq(
+                "id",
+                accountPayableId
+            )
+
+            .maybeSingle();
+
+
+        if (
+            findError
+        ) {
+
+            throw findError;
+
+        }
+
+
+        if (
+            !invoice
+        ) {
+
+            throw new Error(
+                "Account Payable not found."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        ACTIVE PAYMENT CHECK
+        ==================================================
+        */
+
+        const paidAmount =
+            Number(
+                await this.getPaymentTotal(
+                    accountPayableId
+                )
+                || 0
+            );
+
+
+        /*
+        ==================================================
+        PREVENT RESET IF PAYMENT EXISTS
+        ==================================================
+        */
+
+        if (
+            paidAmount > 0
+        ) {
+
+            throw new Error(
+                "Account Payable GL Journal cannot be deleted because an active payment already exists."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        TOTAL AMOUNT
+        ==================================================
+        */
+
+        const totalAmount =
+            Number(
+                invoice.total_amount
+                || 0
+            );
+
+
+        /*
+        ==================================================
+        RESET AP TO DRAFT
+        ==================================================
+        */
+
+        const {
+
+            data,
+
+            error
+
+        } = await supabase
+
+            .from(
+                this.table
+            )
+
+            .update({
+
+                status:
+                    this.STATUS.DRAFT,
+
+                gl_journal_id:
+                    null,
+
+                paid_amount:
+                    0,
+
+                outstanding_amount:
+                    totalAmount
+
+            })
+
+            .eq(
+                "id",
+                accountPayableId
+            )
+
+            .select()
+
+            .single();
+
+
+        /*
+        ==================================================
+        DATABASE ERROR
+        ==================================================
+        */
+
+        if (
+            error
+        ) {
+
+            console.error(
+                "AP RESET AFTER JOURNAL DELETE ERROR:",
+                {
+                    message:
+                        error.message,
+
+                    details:
+                        error.details,
+
+                    hint:
+                        error.hint,
+
+                    code:
+                        error.code
+                }
+            );
+
+
+            throw error;
+
+        }
+
+
+        /*
+        ==================================================
+        VALIDATE RESULT
+        ==================================================
+        */
+
+        if (
+            !data
+        ) {
+
+            throw new Error(
+                "Account Payable could not be reset after GL Journal deletion."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "AP RESET AFTER JOURNAL DELETE:",
+            {
+
+                account_payable_id:
+                    accountPayableId,
+
+                invoice_no:
+                    data.invoice_no,
+
+                status:
+                    data.status,
+
+                gl_journal_id:
+                    data.gl_journal_id,
+
+                paid_amount:
+                    data.paid_amount,
+
+                outstanding_amount:
+                    data.outstanding_amount
+
+            }
+        );
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
+
+        return data;
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountPayableService.resetAfterJournalDelete:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
 
 
     /*
