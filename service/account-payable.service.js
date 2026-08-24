@@ -2884,6 +2884,7 @@ async linkGLJournal(
 /*
 ======================================================
 CREATE AP PAYMENT
+FINAL
 ======================================================
 */
 
@@ -2910,12 +2911,17 @@ async createPayment(
 
         /*
         ==================================================
-        VALIDATE ACCOUNT PAYABLE
+        ACCOUNT PAYABLE ID
         ==================================================
         */
 
+        const accountPayableId =
+            payment.account_payable_id
+            || null;
+
+
         if (
-            !payment.account_payable_id
+            !accountPayableId
         ) {
 
             throw new Error(
@@ -2927,12 +2933,20 @@ async createPayment(
 
         /*
         ==================================================
-        VALIDATE PAYMENT DATE
+        PAYMENT DATE
         ==================================================
         */
 
+        const paymentDate =
+            String(
+                payment.payment_date
+                || ""
+            )
+            .trim();
+
+
         if (
-            !payment.payment_date
+            !paymentDate
         ) {
 
             throw new Error(
@@ -2944,7 +2958,7 @@ async createPayment(
 
         /*
         ==================================================
-        VALIDATE BANK ACCOUNT
+        BANK ACCOUNT
         ==================================================
         */
 
@@ -2955,7 +2969,13 @@ async createPayment(
             );
 
 
-        if (!bankAccountId) {
+        if (
+            !Number.isFinite(
+                bankAccountId
+            )
+            ||
+            bankAccountId <= 0
+        ) {
 
             throw new Error(
                 "Bank Account is required."
@@ -3005,6 +3025,10 @@ async createPayment(
         */
 
         if (
+            !Number.isFinite(
+                paymentAmount
+            )
+            ||
             paymentAmount <= 0
         ) {
 
@@ -3017,12 +3041,44 @@ async createPayment(
 
         /*
         ==================================================
-        VALIDATE GL JOURNAL
+        VALIDATE COMPONENT
         ==================================================
         */
 
         if (
-            !payment.gl_journal_id
+            !Number.isFinite(
+                dppAmount
+            )
+            ||
+            !Number.isFinite(
+                taxPlusAmount
+            )
+            ||
+            !Number.isFinite(
+                taxMinusAmount
+            )
+        ) {
+
+            throw new Error(
+                "AP Payment component is invalid."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        GL JOURNAL ID
+        ==================================================
+        */
+
+        const glJournalId =
+            payment.gl_journal_id
+            || null;
+
+
+        if (
+            !glJournalId
         ) {
 
             throw new Error(
@@ -3030,6 +3086,135 @@ async createPayment(
             );
 
         }
+
+
+        /*
+        ==================================================
+        REFERENCE
+        ==================================================
+        */
+
+        const referenceNo =
+            payment.reference_no
+                ? String(
+                    payment.reference_no
+                )
+                .trim()
+                : null;
+
+
+        /*
+        ==================================================
+        DESCRIPTION
+        ==================================================
+        */
+
+        const description =
+            payment.description
+                ? String(
+                    payment.description
+                )
+                .trim()
+                : null;
+
+
+        /*
+        ==================================================
+        PREPARE PAYLOAD
+        ==================================================
+        */
+
+        const payload = {
+
+            account_payable_id:
+                accountPayableId,
+
+            payment_date:
+                paymentDate,
+
+            bank_account_id:
+                bankAccountId,
+
+            dpp_amount:
+                Number(
+                    dppAmount.toFixed(
+                        2
+                    )
+                ),
+
+            tax_plus_amount:
+                Number(
+                    taxPlusAmount.toFixed(
+                        2
+                    )
+                ),
+
+            tax_minus_amount:
+                Number(
+                    taxMinusAmount.toFixed(
+                        2
+                    )
+                ),
+
+            payment_amount:
+                Number(
+                    paymentAmount.toFixed(
+                        2
+                    )
+                ),
+
+            reference_no:
+                referenceNo
+                || null,
+
+            description:
+                description
+                || null,
+
+            gl_journal_id:
+                glJournalId
+
+        };
+
+
+        /*
+        ==================================================
+        DEBUG BEFORE INSERT
+        ==================================================
+        */
+
+        console.log(
+            "========== AP PAYMENT INSERT =========="
+        );
+
+
+        console.log(
+            "PAYLOAD:",
+            payload
+        );
+
+
+        console.log(
+            "ACCOUNT PAYABLE ID:",
+            accountPayableId
+        );
+
+
+        console.log(
+            "GL JOURNAL ID:",
+            glJournalId
+        );
+
+
+        console.log(
+            "PAYMENT AMOUNT:",
+            paymentAmount
+        );
+
+
+        console.log(
+            "======================================="
+        );
 
 
         /*
@@ -3050,43 +3235,25 @@ async createPayment(
                 this.paymentTable
             )
 
-            .insert({
+            .insert(
+                payload
+            )
 
-                account_payable_id:
-                    payment.account_payable_id,
-
-                payment_date:
-                    payment.payment_date,
-
-                bank_account_id:
-                    bankAccountId,
-
-                dpp_amount:
-                    dppAmount,
-
-                tax_plus_amount:
-                    taxPlusAmount,
-
-                tax_minus_amount:
-                    taxMinusAmount,
-
-                payment_amount:
-                    paymentAmount,
-
-                reference_no:
-                    payment.reference_no
-                    || null,
-
-                description:
-                    payment.description
-                    || null,
-
-                gl_journal_id:
-                    payment.gl_journal_id
-
-            })
-
-            .select()
+            .select(`
+                id,
+                account_payable_id,
+                payment_date,
+                bank_account_id,
+                dpp_amount,
+                tax_plus_amount,
+                tax_minus_amount,
+                payment_amount,
+                reference_no,
+                description,
+                gl_journal_id,
+                created_at,
+                updated_at
+            `)
 
             .single();
 
@@ -3097,23 +3264,47 @@ async createPayment(
         ==================================================
         */
 
-        if (error) {
+        if (
+            error
+        ) {
 
             console.error(
-                "AP PAYMENT INSERT ERROR:",
-                {
-                    message:
-                        error.message,
+                "========== AP PAYMENT INSERT ERROR =========="
+            );
 
-                    details:
-                        error.details,
 
-                    hint:
-                        error.hint,
+            console.error(
+                "MESSAGE:",
+                error.message
+            );
 
-                    code:
-                        error.code
-                }
+
+            console.error(
+                "DETAILS:",
+                error.details
+            );
+
+
+            console.error(
+                "HINT:",
+                error.hint
+            );
+
+
+            console.error(
+                "CODE:",
+                error.code
+            );
+
+
+            console.error(
+                "FULL ERROR:",
+                error
+            );
+
+
+            console.error(
+                "============================================"
             );
 
 
@@ -3128,7 +3319,11 @@ async createPayment(
         ==================================================
         */
 
-        if (!data) {
+        if (
+            !data
+            ||
+            !data.id
+        ) {
 
             throw new Error(
                 "AP Payment was not created."
@@ -3139,13 +3334,91 @@ async createPayment(
 
         /*
         ==================================================
-        DEBUG
+        VERIFY ACCOUNT PAYABLE LINK
+        ==================================================
+        */
+
+        if (
+            String(
+                data.account_payable_id
+            )
+            !==
+            String(
+                accountPayableId
+            )
+        ) {
+
+            throw new Error(
+                "AP Payment Account Payable link is invalid."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        VERIFY GL JOURNAL LINK
+        ==================================================
+        */
+
+        if (
+            !data.gl_journal_id
+        ) {
+
+            throw new Error(
+                "AP Payment was created without GL Journal link."
+            );
+
+        }
+
+
+        if (
+            String(
+                data.gl_journal_id
+            )
+            !==
+            String(
+                glJournalId
+            )
+        ) {
+
+            throw new Error(
+                "AP Payment GL Journal link is invalid."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        DEBUG SUCCESS
         ==================================================
         */
 
         console.log(
-            "AP PAYMENT CREATED:",
-            data
+            "========== AP PAYMENT CREATED =========="
+        );
+
+
+        console.log(
+            {
+                payment_id:
+                    data.id,
+
+                account_payable_id:
+                    data.account_payable_id,
+
+                payment_amount:
+                    data.payment_amount,
+
+                gl_journal_id:
+                    data.gl_journal_id
+            }
+        );
+
+
+        console.log(
+            "========================================"
         );
 
 
@@ -3192,7 +3465,9 @@ async getPaymentTotal(
         ==================================================
         */
 
-        if (!accountPayableId) {
+        if (
+            !accountPayableId
+        ) {
 
             throw new Error(
                 "Account Payable ID is required."
@@ -3223,6 +3498,7 @@ async getPaymentTotal(
             )
 
             .select(`
+                id,
                 payment_amount,
                 gl_journal_id
             `)
@@ -3239,7 +3515,33 @@ async getPaymentTotal(
             );
 
 
-        if (error) {
+        /*
+        ==================================================
+        DATABASE ERROR
+        ==================================================
+        */
+
+        if (
+            error
+        ) {
+
+            console.error(
+                "AP PAYMENT TOTAL ERROR:",
+                {
+                    message:
+                        error.message,
+
+                    details:
+                        error.details,
+
+                    hint:
+                        error.hint,
+
+                    code:
+                        error.code
+                }
+            );
+
 
             throw error;
 
@@ -3253,25 +3555,54 @@ async getPaymentTotal(
         */
 
         const totalPaid =
-            (data || [])
-                .reduce(
-                    (
-                        total,
-                        payment
-                    ) => {
+            (
+                data
+                ||
+                []
+            )
+            .reduce(
+                (
+                    total,
+                    payment
+                ) => {
 
-                        return (
-                            total
-                            +
-                            Number(
-                                payment.payment_amount
-                                || 0
-                            )
+                    const amount =
+                        Number(
+                            payment?.payment_amount
+                            ||
+                            0
                         );
 
-                    },
-                    0
-                );
+
+                    return (
+                        total
+                        +
+                        (
+                            Number.isFinite(
+                                amount
+                            )
+                                ? amount
+                                : 0
+                        )
+                    );
+
+                },
+                0
+            );
+
+
+        /*
+        ==================================================
+        NORMALIZE TOTAL
+        ==================================================
+        */
+
+        const normalizedTotalPaid =
+            Number(
+                totalPaid.toFixed(
+                    2
+                )
+            );
 
 
         /*
@@ -3283,6 +3614,7 @@ async getPaymentTotal(
         console.log(
             "AP ACTIVE PAYMENT TOTAL:",
             {
+
                 account_payable_id:
                     accountPayableId,
 
@@ -3291,10 +3623,12 @@ async getPaymentTotal(
                     || 0,
 
                 total_paid:
-                    totalPaid,
+                    normalizedTotalPaid,
 
                 payments:
                     data
+                    || []
+
             }
         );
 
@@ -3305,11 +3639,7 @@ async getPaymentTotal(
         ==================================================
         */
 
-        return Number(
-            totalPaid.toFixed(
-                2
-            )
-        );
+        return normalizedTotalPaid;
 
     }
 
@@ -3329,6 +3659,7 @@ async getPaymentTotal(
 /*
 ======================================================
 GET ACTIVE AP PAYMENT
+ONLY PAYMENT WITH GL JOURNAL
 ======================================================
 */
 
@@ -3344,7 +3675,9 @@ async getActivePayment(
         ==================================================
         */
 
-        if (!accountPayableId) {
+        if (
+            !accountPayableId
+        ) {
 
             throw new Error(
                 "Account Payable ID is required."
@@ -3355,10 +3688,10 @@ async getActivePayment(
 
         /*
         ==================================================
-        ACTIVE PAYMENT
+        GET LATEST ACTIVE PAYMENT
 
-        Payment is active only when it still has
-        GL Journal reference.
+        ACTIVE PAYMENT =
+        gl_journal_id IS NOT NULL
         ==================================================
         */
 
@@ -3379,9 +3712,15 @@ async getActivePayment(
                 account_payable_id,
                 payment_date,
                 bank_account_id,
+                dpp_amount,
+                tax_plus_amount,
+                tax_minus_amount,
                 payment_amount,
+                reference_no,
+                description,
                 gl_journal_id,
-                created_at
+                created_at,
+                updated_at
             `)
 
             .eq(
@@ -3410,15 +3749,130 @@ async getActivePayment(
             .maybeSingle();
 
 
-        if (error) {
+        /*
+        ==================================================
+        DATABASE ERROR
+        ==================================================
+        */
+
+        if (
+            error
+        ) {
+
+            console.error(
+                "AP ACTIVE PAYMENT ERROR:",
+                {
+
+                    message:
+                        error.message,
+
+                    details:
+                        error.details,
+
+                    hint:
+                        error.hint,
+
+                    code:
+                        error.code
+
+                }
+            );
+
 
             throw error;
 
         }
 
 
-        return data
-            || null;
+        /*
+        ==================================================
+        NO ACTIVE PAYMENT
+        ==================================================
+        */
+
+        if (
+            !data
+        ) {
+
+            console.log(
+                "AP ACTIVE PAYMENT:",
+                {
+
+                    account_payable_id:
+                        accountPayableId,
+
+                    payment:
+                        null
+
+                }
+            );
+
+
+            return null;
+
+        }
+
+
+        /*
+        ==================================================
+        VERIFY GL JOURNAL LINK
+        ==================================================
+        */
+
+        if (
+            !data.gl_journal_id
+        ) {
+
+            console.warn(
+                "AP ACTIVE PAYMENT WITHOUT GL JOURNAL:",
+                data
+            );
+
+
+            return null;
+
+        }
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "AP ACTIVE PAYMENT:",
+            {
+
+                account_payable_id:
+                    accountPayableId,
+
+                payment_id:
+                    data.id,
+
+                payment_amount:
+                    Number(
+                        data.payment_amount
+                        || 0
+                    ),
+
+                gl_journal_id:
+                    data.gl_journal_id,
+
+                payment_date:
+                    data.payment_date
+
+            }
+        );
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
+
+        return data;
 
     }
 
@@ -3453,7 +3907,9 @@ async updatePaymentStatus(
         ==================================================
         */
 
-        if (!accountPayableId) {
+        if (
+            !accountPayableId
+        ) {
 
             throw new Error(
                 "Account Payable ID is required."
@@ -3475,10 +3931,13 @@ async updatePaymentStatus(
 
 
         const invoice =
-            result?.header;
+            result?.header
+            || null;
 
 
-        if (!invoice) {
+        if (
+            !invoice
+        ) {
 
             throw new Error(
                 "Account Payable not found."
@@ -3496,11 +3955,16 @@ async updatePaymentStatus(
         const totalAmount =
             Number(
                 invoice.total_amount
-                || 0
+                ||
+                0
             );
 
 
         if (
+            !Number.isFinite(
+                totalAmount
+            )
+            ||
             totalAmount <= 0
         ) {
 
@@ -3513,7 +3977,7 @@ async updatePaymentStatus(
 
         /*
         ==================================================
-        TOTAL PAYMENT
+        TOTAL ACTIVE PAYMENT
         ==================================================
         */
 
@@ -3522,8 +3986,24 @@ async updatePaymentStatus(
                 await this.getPaymentTotal(
                     accountPayableId
                 )
-                || 0
+                ||
+                0
             );
+
+
+        if (
+            !Number.isFinite(
+                paidAmount
+            )
+            ||
+            paidAmount < 0
+        ) {
+
+            throw new Error(
+                "Account Payable Paid Amount is invalid."
+            );
+
+        }
 
 
         /*
@@ -3533,7 +4013,9 @@ async updatePaymentStatus(
         */
 
         if (
-            paidAmount > totalAmount
+            paidAmount
+            >
+            totalAmount
         ) {
 
             throw new Error(
@@ -3556,7 +4038,10 @@ async updatePaymentStatus(
                         totalAmount
                         -
                         paidAmount
-                    ).toFixed(2)
+                    )
+                    .toFixed(
+                        2
+                    )
                 ),
                 0
             );
@@ -3630,7 +4115,9 @@ async updatePaymentStatus(
 
                 paid_amount:
                     Number(
-                        paidAmount.toFixed(2)
+                        paidAmount.toFixed(
+                            2
+                        )
                     ),
 
                 outstanding_amount:
@@ -3657,7 +4144,9 @@ async updatePaymentStatus(
         ==================================================
         */
 
-        if (error) {
+        if (
+            error
+        ) {
 
             console.error(
                 "AP PAYMENT STATUS UPDATE ERROR:",
@@ -3688,10 +4177,75 @@ async updatePaymentStatus(
         ==================================================
         */
 
-        if (!data) {
+        if (
+            !data
+        ) {
 
             throw new Error(
                 "Account Payable payment status was not updated."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        VERIFY RESULT
+        ==================================================
+        */
+
+        if (
+            Number(
+                data.paid_amount
+                ||
+                0
+            )
+            !==
+            Number(
+                paidAmount.toFixed(
+                    2
+                )
+            )
+        ) {
+
+            throw new Error(
+                "Account Payable Paid Amount verification failed."
+            );
+
+        }
+
+
+        if (
+            Number(
+                data.outstanding_amount
+                ||
+                0
+            )
+            !==
+            outstandingAmount
+        ) {
+
+            throw new Error(
+                "Account Payable Outstanding Amount verification failed."
+            );
+
+        }
+
+
+        if (
+            String(
+                data.status
+                ||
+                ""
+            )
+            !==
+            String(
+                status
+            )
+        ) {
+
+            throw new Error(
+                "Account Payable payment status verification failed."
             );
 
         }
@@ -3749,7 +4303,6 @@ async updatePaymentStatus(
     }
 
 }
-
 /*
 ======================================================
 RECOVER ACCOUNT PAYABLE TOTALS

@@ -4480,9 +4480,11 @@ updateJournalHeaderStatus(status = "Draft") {
 
 }
 
+
 /*
 ==========================================================
 DELETE JOURNAL
+HANDLE AP INVOICE / AP PAYMENT
 ==========================================================
 */
 
@@ -4494,11 +4496,575 @@ async deleteJournal(id) {
 
     }
 
+
     try {
+
+        /*
+        ==================================================
+        GET JOURNAL BEFORE DELETE
+        ==================================================
+        */
+
+        const journal =
+            await this.service.getById(
+                id
+            );
+
+
+        if (
+            !journal
+        ) {
+
+            throw new Error(
+                "GL Journal not found."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        NORMALIZE JOURNAL HEADER
+        ==================================================
+        */
+
+        const journalHeader =
+            journal?.header
+            ||
+            journal;
+
+
+        const sourceModule =
+            String(
+                journalHeader?.source_module
+                ||
+                ""
+            )
+            .trim();
+
+
+        const sourceDocumentType =
+            String(
+                journalHeader?.source_document_type
+                ||
+                ""
+            )
+            .trim();
+
+
+        const sourceDocumentId =
+            journalHeader?.source_document_id
+            ||
+            null;
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "========== DELETE GL JOURNAL =========="
+        );
+
+
+        console.log(
+            {
+                journal_id:
+                    id,
+
+                journal_no:
+                    journalHeader?.journal_no,
+
+                source_module:
+                    sourceModule,
+
+                source_document_type:
+                    sourceDocumentType,
+
+                source_document_id:
+                    sourceDocumentId
+            }
+        );
+
+
+        console.log(
+            "======================================="
+        );
+
+
+        /*
+        ==================================================
+        AP PAYMENT
+        GET PAYMENT BEFORE DELETE
+        ==================================================
+        */
+
+        let apPayment =
+            null;
+
+
+        if (
+            sourceModule === "AP"
+            &&
+            sourceDocumentType === "AP_PAYMENT"
+        ) {
+
+            const {
+
+                data,
+
+                error
+
+            } = await supabase
+
+                .from(
+                    "trx_ap_payment"
+                )
+
+                .select(`
+                    id,
+                    account_payable_id,
+                    payment_amount,
+                    gl_journal_id
+                `)
+
+                .eq(
+                    "gl_journal_id",
+                    id
+                )
+
+                .maybeSingle();
+
+
+            if (
+                error
+            ) {
+
+                throw error;
+
+            }
+
+
+            apPayment =
+                data
+                ||
+                null;
+
+        }
+
+
+        /*
+        ==================================================
+        DELETE GL JOURNAL
+        ==================================================
+        */
 
         await this.service.delete(
             id
         );
+
+
+        /*
+        ==================================================
+        AP INVOICE
+        RETURN TO DRAFT
+        ==================================================
+        */
+
+        if (
+            sourceModule === "AP"
+            &&
+            sourceDocumentType === "AP_INVOICE"
+            &&
+            sourceDocumentId
+        ) {
+
+            /*
+            ==============================================
+            GET AP INVOICE
+            ==============================================
+            */
+
+            const {
+
+                data: apInvoice,
+
+                error: apInvoiceError
+
+            } = await supabase
+
+                .from(
+                    "trx_account_payable"
+                )
+
+                .select(`
+                    id,
+                    total_amount,
+                    paid_amount
+                `)
+
+                .eq(
+                    "id",
+                    sourceDocumentId
+                )
+
+                .maybeSingle();
+
+
+            if (
+                apInvoiceError
+            ) {
+
+                throw apInvoiceError;
+
+            }
+
+
+            /*
+            ==============================================
+            DO NOT ALLOW DELETE IF PAYMENT EXISTS
+            ==============================================
+            */
+
+            if (
+                Number(
+                    apInvoice?.paid_amount
+                    ||
+                    0
+                ) > 0
+            ) {
+
+                throw new Error(
+                    "AP invoice journal cannot be deleted because payment already exists."
+                );
+
+            }
+
+
+            /*
+            ==============================================
+            RESET AP
+            ==============================================
+            */
+
+            const totalAmount =
+                Number(
+                    apInvoice?.total_amount
+                    ||
+                    0
+                );
+
+
+            const {
+
+                error: resetAPError
+
+            } = await supabase
+
+                .from(
+                    "trx_account_payable"
+                )
+
+                .update({
+
+                    status:
+                        "Draft",
+
+                    gl_journal_id:
+                        null,
+
+                    paid_amount:
+                        0,
+
+                    outstanding_amount:
+                        totalAmount
+
+                })
+
+                .eq(
+                    "id",
+                    sourceDocumentId
+                );
+
+
+            if (
+                resetAPError
+            ) {
+
+                throw resetAPError;
+
+            }
+
+        }
+
+
+        /*
+        ==================================================
+        AP PAYMENT
+        DELETE PAYMENT RECORD
+        THEN RECALCULATE AP STATUS
+        ==================================================
+        */
+
+        if (
+            sourceModule === "AP"
+            &&
+            sourceDocumentType === "AP_PAYMENT"
+            &&
+            apPayment
+        ) {
+
+            /*
+            ==============================================
+            DELETE PAYMENT RECORD
+            ==============================================
+            */
+
+            const {
+
+                error: deletePaymentError
+
+            } = await supabase
+
+                .from(
+                    "trx_ap_payment"
+                )
+
+                .delete()
+
+                .eq(
+                    "id",
+                    apPayment.id
+                );
+
+
+            if (
+                deletePaymentError
+            ) {
+
+                throw deletePaymentError;
+
+            }
+
+
+            /*
+            ==============================================
+            RECALCULATE AP PAYMENT STATUS
+            ==============================================
+            */
+
+            const apService =
+                window.apService;
+
+
+            if (
+                apService
+                &&
+                typeof apService.updatePaymentStatus
+                ===
+                "function"
+            ) {
+
+                await apService.updatePaymentStatus(
+                    apPayment.account_payable_id
+                );
+
+            }
+
+            else {
+
+                /*
+                ==========================================
+                FALLBACK MANUAL RECALCULATION
+                ==========================================
+                */
+
+                const {
+
+                    data: apInvoice,
+
+                    error: apInvoiceError
+
+                } = await supabase
+
+                    .from(
+                        "trx_account_payable"
+                    )
+
+                    .select(`
+                        id,
+                        total_amount
+                    `)
+
+                    .eq(
+                        "id",
+                        apPayment.account_payable_id
+                    )
+
+                    .maybeSingle();
+
+
+                if (
+                    apInvoiceError
+                ) {
+
+                    throw apInvoiceError;
+
+                }
+
+
+                const {
+
+                    data: remainingPayments,
+
+                    error: remainingPaymentsError
+
+                } = await supabase
+
+                    .from(
+                        "trx_ap_payment"
+                    )
+
+                    .select(`
+                        payment_amount,
+                        gl_journal_id
+                    `)
+
+                    .eq(
+                        "account_payable_id",
+                        apPayment.account_payable_id
+                    )
+
+                    .not(
+                        "gl_journal_id",
+                        "is",
+                        null
+                    );
+
+
+                if (
+                    remainingPaymentsError
+                ) {
+
+                    throw remainingPaymentsError;
+
+                }
+
+
+                const totalAmount =
+                    Number(
+                        apInvoice?.total_amount
+                        ||
+                        0
+                    );
+
+
+                const paidAmount =
+                    (
+                        remainingPayments
+                        ||
+                        []
+                    )
+                    .reduce(
+                        (
+                            total,
+                            payment
+                        ) => {
+
+                            return (
+                                total
+                                +
+                                Number(
+                                    payment.payment_amount
+                                    ||
+                                    0
+                                )
+                            );
+
+                        },
+                        0
+                    );
+
+
+                const outstandingAmount =
+                    Math.max(
+                        totalAmount
+                        -
+                        paidAmount,
+                        0
+                    );
+
+
+                let status =
+                    "Complete";
+
+
+                if (
+                    paidAmount > 0
+                    &&
+                    paidAmount < totalAmount
+                ) {
+
+                    status =
+                        "Partial Paid";
+
+                }
+
+
+                if (
+                    totalAmount > 0
+                    &&
+                    paidAmount >= totalAmount
+                ) {
+
+                    status =
+                        "Paid";
+
+                }
+
+
+                const {
+
+                    error: updateAPError
+
+                } = await supabase
+
+                    .from(
+                        "trx_account_payable"
+                    )
+
+                    .update({
+
+                        paid_amount:
+                            paidAmount,
+
+                        outstanding_amount:
+                            outstandingAmount,
+
+                        status:
+                            status
+
+                    })
+
+                    .eq(
+                        "id",
+                        apPayment.account_payable_id
+                    );
+
+
+                if (
+                    updateAPError
+                ) {
+
+                    throw updateAPError;
+
+                }
+
+            }
+
+        }
 
 
         /*
@@ -4518,7 +5084,7 @@ async deleteJournal(id) {
 
         /*
         ==================================================
-        SUCCESS BOOTSTRAP
+        SUCCESS
         ==================================================
         */
 
@@ -4544,9 +5110,11 @@ async deleteJournal(id) {
             error
         );
 
+
         this.showError(
             error.message
-            || "Failed to delete journal."
+            ||
+            "Failed to delete journal."
         );
 
     }

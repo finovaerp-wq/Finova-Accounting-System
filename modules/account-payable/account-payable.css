@@ -519,50 +519,7 @@ td:first-child {
 }
 
 
-/* ==========================================================
-   ALL AP STATUS ROW
-   NO GREY BACKGROUND
-========================================================== */
 
-#ap-table-body
-tr[data-status="draft"]
-> td,
-
-#ap-table-body
-tr[data-status="posted"]
-> td,
-
-#ap-table-body
-tr[data-status="complete"]
-> td,
-
-#ap-table-body
-tr[data-status="void"]
-> td,
-
-#ap-table-body
-tr.ap-row-draft
-> td,
-
-#ap-table-body
-tr.ap-row-posted
-> td,
-
-#ap-table-body
-tr.ap-row-complete
-> td,
-
-#ap-table-body
-tr.ap-row-void
-> td {
-
-    background: #FFFFFF !important;
-
-    background-color: #FFFFFF !important;
-
-    color: inherit !important;
-
-}
 
 
 /* ==========================================================
@@ -1693,5 +1650,455 @@ ACTION ICON
 .btn i {
 
     font-size: 13px;
+
+}
+/*
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+ACCOUNT PAYABLE MODAL TABS
+FINAL CLEAN SEGMENTED DESIGN
+==========================================================
+*/
+
+
+/*
+==========================================================
+TAB WRAPPER
+==========================================================
+*/
+
+#accountPayableModal
+.ap-modern-tabs-wrapper {
+
+    width: 100%;
+
+    padding: 6px;
+
+    background: #F1F3F6;
+
+    border-top: 1px solid #E1E5EA;
+
+    border-bottom: 1px solid #DDE2E8;
+
+}
+
+
+/*
+==========================================================
+TAB CONTAINER
+==========================================================
+*/
+
+#accountPayableModal
+#ap-modal-tabs {
+
+    display: grid !important;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 5px;
+
+    width: 100%;
+
+    margin: 0 !important;
+
+    padding: 0 !important;
+
+    background: transparent !important;
+
+    border: 0 !important;
+
+}
+
+
+/*
+==========================================================
+TAB ITEM
+==========================================================
+*/
+
+#accountPayableModal
+#ap-modal-tabs
+.nav-item {
+
+    width: 100%;
+
+    min-width: 0;
+
+    margin: 0 !important;
+
+    flex: none !important;
+
+}
+
+
+/*
+==========================================================
+TAB BUTTON
+==========================================================
+*/
+
+#accountPayableModal
+#ap-modal-tabs
+.nav-link {
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    width: 100%;
+
+    min-height: 42px;
+
+    margin: 0 !important;
+
+    padding: 8px 16px !important;
+
+    background: transparent !important;
+
+    border: 1px solid transparent !important;
+
+    border-radius: 8px !important;
+
+    color: #344054 !important;
+
+    font-family: inherit;
+
+    font-size: 13.5px !important;
+
+    font-weight: 600 !important;
+
+    line-height: 1.2;
+
+    letter-spacing: .1px;
+
+    text-align: center;
+
+    box-shadow: none;
+
+    transition:
+        background-color .18s ease,
+        border-color .18s ease,
+        color .18s ease,
+        box-shadow .18s ease;
+
+}
+
+
+/*
+==========================================================
+HIDE ICON AND SUBTITLE
+KEEP CLEAN DESIGN
+==========================================================
+*/
+
+#accountPayableModal
+#ap-modal-tabs
+.ap-tab-icon,
+
+#accountPayableModal
+#ap-modal-tabs
+.ap-tab-subtitle {
+
+    display: none !important;
+
+}
+
+
+/*
+==========================================================
+TAB CONTENT
+==========================================================
+*/
+
+#accountPayableModal
+#ap-modal-tabs
+.ap-tab-content {
+
+    display: block;
+
+    width: 100%;
+
+}
+
+
+/*
+==========================================================
+TAB TITLE
+==========================================================
+*/
+
+#accountPayableModal
+#ap-modal-tabs
+.ap-tab-title {
+
+    display: block;
+
+    width: 100%;
+
+    color: inherit !important;
+
+    font-size: 13.5px !important;
+
+    font-weight: 600 !important;
+
+    line-height: 1.2;
+
+    letter-spacing: .1px;
+
+    text-align: center;
+
+    white-space: nowrap;
+
+}
+
+
+/*
+==========================================================
+REMOVE BOOTSTRAP TAB DECORATION
+==========================================================
+*/
+
+#accountPayableModal
+#ap-modal-tabs
+.nav-link::before,
+
+#accountPayableModal
+#ap-modal-tabs
+.nav-link::after {
+
+    display: none !important;
+
+}
+
+
+/*
+==========================================================
+HOVER
+==========================================================
+*/
+
+#accountPayableModal
+#ap-modal-tabs
+.nav-link:hover {
+
+    background: rgba(
+        255,
+        255,
+        255,
+        .72
+    ) !important;
+
+    border-color: #DCE2E9 !important;
+
+    color: #0D6EFD !important;
+
+}
+
+
+/*
+==========================================================
+ACTIVE TAB
+==========================================================
+*/
+
+#accountPayableModal
+#ap-modal-tabs
+.nav-link.active {
+
+    background: #FFFFFF !important;
+
+    border-color: #CFD7E2 !important;
+
+    color: #0B5ED7 !important;
+
+    font-weight: 700 !important;
+
+    box-shadow:
+        0 2px 7px rgba(15, 23, 42, .11),
+        0 1px 2px rgba(15, 23, 42, .05),
+        0 0 0 1px rgba(13, 110, 253, .025) !important;
+
+}
+
+
+/*
+==========================================================
+ACTIVE TITLE
+==========================================================
+*/
+
+#accountPayableModal
+#ap-modal-tabs
+.nav-link.active
+.ap-tab-title {
+
+    color: #0B5ED7 !important;
+
+    font-size: 13.5px !important;
+
+    font-weight: 700 !important;
+
+    letter-spacing: .15px;
+
+    text-shadow:
+        0 0 8px rgba(13, 110, 253, .16);
+
+}
+
+
+/*
+==========================================================
+FOCUS
+==========================================================
+*/
+
+#accountPayableModal
+#ap-modal-tabs
+.nav-link:focus {
+
+    outline: none !important;
+
+}
+
+
+/*
+==========================================================
+TAB CONTENT AREA
+==========================================================
+*/
+
+#accountPayableModal
+#ap-modal-tab-content {
+
+    background: #FFFFFF;
+
+    border: 0;
+
+}
+
+
+/*
+==========================================================
+RESPONSIVE
+==========================================================
+*/
+
+@media (max-width: 768px) {
+
+    #accountPayableModal
+    #ap-modal-tabs {
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+    }
+
+}
+/* ==========================================================
+   ACCOUNT PAYABLE
+   COMPLETE / NOT COMPLETE ROW
+   FINAL
+========================================================== */
+
+
+/* ==========================================================
+   NOT COMPLETED
+   Draft
+========================================================== */
+
+#ap-table-body
+tr.ap-data-row.ap-row-not-completed
+> td {
+
+    background: #FFFFFF !important;
+
+    background-color: #FFFFFF !important;
+
+}
+
+
+/* ==========================================================
+   COMPLETED
+   Complete / Partial Paid / Paid
+========================================================== */
+
+#ap-table-body
+tr.ap-data-row.ap-row-completed
+> td {
+
+    background: #EEF1F4 !important;
+
+    background-color: #EEF1F4 !important;
+
+}
+
+
+/* ==========================================================
+   NOT COMPLETED HOVER
+========================================================== */
+
+#ap-table-body
+tr.ap-data-row.ap-row-not-completed:hover
+> td {
+
+    background: #F8FAFC !important;
+
+    background-color: #F8FAFC !important;
+
+}
+
+
+/* ==========================================================
+   COMPLETED HOVER
+========================================================== */
+
+#ap-table-body
+tr.ap-data-row.ap-row-completed:hover
+> td {
+
+    background: #E3E7EB !important;
+
+    background-color: #E3E7EB !important;
+
+}
+/* ==========================================================
+   AP JOURNAL STATUS
+========================================================== */
+
+.ap-journal-status {
+
+    margin-top: 5px;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    line-height: 1.4;
+
+}
+
+
+/* ==========================================================
+   JOURNAL NOT POSTED
+========================================================== */
+
+.ap-journal-not-posted {
+
+    color: #DC3545;
+
+}
+
+
+/* ==========================================================
+   JOURNAL POSTED
+========================================================== */
+
+.ap-journal-posted {
+
+    color: #198754;
 
 }
