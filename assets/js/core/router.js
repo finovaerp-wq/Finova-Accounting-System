@@ -184,13 +184,52 @@ export class FinovaRouter {
 
     async loadHTML(route) {
 
-        const response = await fetch(route.html);
+    const url =
+        new URL(
+            route.html,
+            window.location.origin + "/"
+        );
 
-        const html = await response.text();
 
-        document.getElementById("finova-content").innerHTML = html;
+    url.searchParams.set(
+        "v",
+        Date.now().toString()
+    );
+
+
+    const response =
+        await fetch(
+            url.href,
+            {
+                cache:
+                    "no-store"
+            }
+        );
+
+
+    if (
+        !response.ok
+    ) {
+
+        throw new Error(
+            `Failed to load HTML: ${route.html}`
+        );
 
     }
+
+
+    const html =
+        await response.text();
+
+
+    document
+        .getElementById(
+            "finova-content"
+        )
+        .innerHTML =
+            html;
+
+}
 
 async loadModule(route) {
 
@@ -226,6 +265,20 @@ async loadModule(route) {
                 route.js,
                 window.location.origin + "/"
             );
+
+
+        /*
+        ==============================================
+        CACHE BUSTER
+
+        Prevent old JS module from browser / Vercel cache
+        ==============================================
+        */
+
+        url.searchParams.set(
+            "v",
+            Date.now().toString()
+        );
 
 
         console.log(
@@ -324,22 +377,29 @@ async loadModule(route) {
             "MODULE LOAD ERROR"
         );
 
+
         console.error(
             "Module :",
             route.js
         );
+
 
         console.error(
             "Class :",
             route.className
         );
 
+
         console.error(
             "Error :",
             error
         );
 
+
         console.groupEnd();
+
+
+        throw error;
 
     }
 
