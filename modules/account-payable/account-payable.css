@@ -2102,3 +2102,184 @@ tr.ap-data-row.ap-row-completed:hover
     color: #198754;
 
 }
+/* ==========================================================
+   AP PAYMENT HISTORY
+   JOURNAL COLUMN
+========================================================== */
+
+.ap-payment-journal-cell {
+
+    min-width: 170px;
+
+    vertical-align: middle !important;
+
+}
+
+
+/* ==========================================================
+   JOURNAL WRAPPER
+========================================================== */
+
+.ap-payment-journal-wrap {
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 6px;
+
+    width: 100%;
+
+}
+
+
+/* ==========================================================
+   JOURNAL NUMBER
+========================================================== */
+
+.ap-payment-journal-no {
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    line-height: 1.35;
+
+    white-space: nowrap;
+
+    color: var(--text-primary);
+
+}
+
+
+/* ==========================================================
+   JOURNAL STATUS
+========================================================== */
+
+.ap-payment-journal-status {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-width: 64px;
+
+    padding: 5px 10px;
+
+    border-radius: 6px;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    line-height: 1;
+
+    white-space: nowrap;
+
+}
+/* ==========================================================
+   AP PAYMENT HISTORY
+   DESCRIPTION ROW
+========================================================== */
+
+.ap-payment-description-row {
+
+    background: #FAFBFC;
+
+}
+
+
+.ap-payment-description-row:hover {
+
+    background: #FAFBFC !important;
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION CELL
+========================================================== */
+
+.ap-payment-description-cell {
+
+    padding: 8px 12px !important;
+
+    vertical-align: top !important;
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION WRAPPER
+========================================================== */
+
+.ap-payment-description-wrap {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    width: 100%;
+
+    gap: 8px;
+
+    font-size: 13px;
+
+    line-height: 1.5;
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION LABEL
+========================================================== */
+
+.ap-payment-description-label {
+
+    flex: 0 0 auto;
+
+    font-weight: 600;
+
+    color: var(--text-secondary);
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION SEPARATOR
+========================================================== */
+
+.ap-payment-description-separator {
+
+    flex: 0 0 auto;
+
+    color: var(--text-secondary);
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION VALUE
+========================================================== */
+
+.ap-payment-description-value {
+
+    flex: 1;
+
+    min-width: 0;
+
+    color: var(--text-primary);
+
+    white-space: normal;
+
+    overflow-wrap: anywhere;
+
+    word-break: break-word;
+
+}

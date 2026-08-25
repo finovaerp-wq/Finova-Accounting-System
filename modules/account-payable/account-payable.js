@@ -905,7 +905,10 @@ async init() {
 
     try {
 
-        console.log("AccountPayable: INIT START");
+        console.log(
+            "AccountPayable: INIT START"
+        );
+
 
         /*
         ==============================================
@@ -914,7 +917,9 @@ async init() {
         */
 
         await this.loadModalHTML();
+
         await this.loadPaymentModalHTML();
+
 
         /*
         ==============================================
@@ -923,8 +928,9 @@ async init() {
         */
 
         await this.loadDetailModalHTML();
+
         await this.loadCompleteModalHTML();
-        
+
 
         /*
         ==============================================
@@ -934,7 +940,15 @@ async init() {
 
         this.cacheDOM();
 
+
+        /*
+        ==============================================
+        LOAD TAX MASTER
+        ==============================================
+        */
+
         await this.loadTaxMaster();
+
 
         /*
         ==============================================
@@ -946,7 +960,9 @@ async init() {
 
             await this.loadVendors();
 
-        } catch (error) {
+        }
+
+        catch (error) {
 
             console.error(
                 "AccountPayable - loadVendors:",
@@ -955,452 +971,2461 @@ async init() {
 
         }
 
+
         /*
         ==============================================
-        BIND EVENTS
+        BIND MAIN EVENTS
         ==============================================
         */
 
         this.bindEvents();
 
+
+        /*
+        ==============================================
+        BIND REPORT EVENTS
+        DOWNLOAD EXCEL / PREVIEW HTML
+        ==============================================
+        */
+
+        this.bindReportEvents();
+
+
         /*
         ==============================================
         LOAD ACCOUNT PAYABLE
+        INITIAL LOADING
         ==============================================
         */
 
         await this.loadData(
-    true
-);
+            true
+        );
 
-        console.log("AccountPayable: INIT COMPLETE");
 
-    } catch (error) {
+        console.log(
+            "AccountPayable: INIT COMPLETE"
+        );
+
+    }
+
+    catch (error) {
 
         console.error(
             "AccountPayable - INIT ERROR:",
             error
         );
 
+
         this.showError(
             "Failed to initialize Account Payable."
         );
 
     }
-    
+
+
     /*
-======================================================
-CONFIRM POSTING BUTTON
-======================================================
-*/
+    ======================================================
+    CONFIRM POSTING BUTTON
+    ======================================================
+    */
 
-const confirmPostButton =
-    document.getElementById(
-        "ap-confirm-post-btn"
-    );
-
-
-if (confirmPostButton) {
-
-    confirmPostButton.addEventListener(
-        "click",
-        async () => {
-
-            try {
-
-                const id =
-                    this.pendingPostId;
-
-
-                if (!id) {
-
-                    throw new Error(
-                        "Account Payable ID for posting is missing."
-                    );
-
-                }
-
-
-                /*
-                ==========================================
-                CLOSE MODAL
-                ==========================================
-                */
-
-                const modalElement =
-                    document.getElementById(
-                        "ap-post-confirm-modal"
-                    );
-
-
-                const modal =
-                    bootstrap.Modal.getInstance(
-                        modalElement
-                    );
-
-
-                if (modal) {
-
-                    modal.hide();
-
-                }
-
-
-                /*
-==================================================
-GET ACCOUNT PAYABLE
-==================================================
-*/
-
-const result =
-    await this.service.getById(
-        id
-    );
-
-
-if (!result) {
-
-    throw new Error(
-        "Account Payable not found."
-    );
-
-}
-
-
-const invoice =
-    result.header;
-
-const details =
-    Array.isArray(
-        result.details
-    )
-        ? result.details
-        : [];
-
-
-/*
-==================================================
-CHECK / GENERATE GL JOURNAL
-==================================================
-*/
-
-let journalId =
-    invoice.gl_journal_id;
-
-
-/*
-==================================================
-GENERATE GL ONLY IF NOT EXISTS
-==================================================
-*/
-
-if (!journalId) {
-
-    const journal =
-        await this.generateAPJournal(
-            invoice,
-            details
+    const confirmPostButton =
+        document.getElementById(
+            "ap-confirm-post-btn"
         );
 
 
-    if (!journal) {
+    if (
+        confirmPostButton
+    ) {
 
-        throw new Error(
-            "Failed to generate GL Journal."
+        confirmPostButton.addEventListener(
+            "click",
+            async () => {
+
+                try {
+
+                    const id =
+                        this.pendingPostId;
+
+
+                    if (
+                        !id
+                    ) {
+
+                        throw new Error(
+                            "Account Payable ID for posting is missing."
+                        );
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    CLOSE MODAL
+                    ==========================================
+                    */
+
+                    const modalElement =
+                        document.getElementById(
+                            "ap-post-confirm-modal"
+                        );
+
+
+                    const modal =
+                        bootstrap.Modal.getInstance(
+                            modalElement
+                        );
+
+
+                    if (
+                        modal
+                    ) {
+
+                        modal.hide();
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    GET ACCOUNT PAYABLE
+                    ==========================================
+                    */
+
+                    const result =
+                        await this.service.getById(
+                            id
+                        );
+
+
+                    if (
+                        !result
+                    ) {
+
+                        throw new Error(
+                            "Account Payable not found."
+                        );
+
+                    }
+
+
+                    const invoice =
+                        result.header;
+
+
+                    const details =
+                        Array.isArray(
+                            result.details
+                        )
+                            ? result.details
+                            : [];
+
+
+                    /*
+                    ==========================================
+                    CHECK / GENERATE GL JOURNAL
+                    ==========================================
+                    */
+
+                    let journalId =
+                        invoice.gl_journal_id;
+
+
+                    if (
+                        !journalId
+                    ) {
+
+                        const journal =
+                            await this.generateAPJournal(
+                                invoice,
+                                details
+                            );
+
+
+                        if (
+                            !journal
+                        ) {
+
+                            throw new Error(
+                                "Failed to generate GL Journal."
+                            );
+
+                        }
+
+
+                        journalId =
+                            journal.id;
+
+
+                        await this.service.linkGLJournal(
+                            id,
+                            journalId
+                        );
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    COMPLETE ACCOUNT PAYABLE
+                    ==========================================
+                    */
+
+                    await this.service.completeInvoice(
+                        id
+                    );
+
+
+                    /*
+                    ==========================================
+                    GENERATE GL JOURNAL
+                    ==========================================
+                    */
+
+                    const journal =
+                        await this.generateAPJournal(
+                            invoice,
+                            details
+                        );
+
+
+                    if (
+                        !journal
+                    ) {
+
+                        throw new Error(
+                            "Failed to generate GL Journal."
+                        );
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    LINK GL JOURNAL
+                    ==========================================
+                    */
+
+                    await this.service.linkGLJournal(
+                        id,
+                        journal.id
+                    );
+
+
+                    /*
+                    ==========================================
+                    POST ACCOUNT PAYABLE
+                    ==========================================
+                    */
+
+                    await this.service.postInvoice(
+                        id
+                    );
+
+
+                    /*
+                    ==========================================
+                    CLEAR STATE
+                    ==========================================
+                    */
+
+                    this.pendingPostId =
+                        null;
+
+
+                    /*
+                    ==========================================
+                    RELOAD
+                    NO LOADING
+                    ==========================================
+                    */
+
+                    await this.loadData(
+                        false
+                    );
+
+
+                    /*
+                    ==========================================
+                    SUCCESS
+                    ==========================================
+                    */
+
+                    this.showSuccess(
+                        "Account Payable successfully posted."
+                    );
+
+                }
+
+                catch (error) {
+
+                    console.error(
+                        "AccountPayable.confirmPost:",
+                        error
+                    );
+
+
+                    this.showError(
+                        error.message
+                        ||
+                        "Failed to post Account Payable."
+                    );
+
+                }
+
+            }
         );
 
     }
 
 
-    journalId =
-        journal.id;
+    /*
+    ======================================================
+    CONFIRM VOID BUTTON
+    ======================================================
+    */
+
+    const confirmVoidButton =
+        document.getElementById(
+            "ap-confirm-void-btn"
+        );
+
+
+    if (
+        confirmVoidButton
+    ) {
+
+        confirmVoidButton.addEventListener(
+            "click",
+            async () => {
+
+                try {
+
+                    const id =
+                        this.pendingVoidId;
+
+
+                    if (
+                        !id
+                    ) {
+
+                        throw new Error(
+                            "Account Payable ID for Void is missing."
+                        );
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    GET VOID REASON
+                    ==========================================
+                    */
+
+                    const reasonElement =
+                        document.getElementById(
+                            "ap-void-reason"
+                        );
+
+
+                    const reason =
+                        reasonElement
+                            ?.value
+                            ?.trim();
+
+
+                    if (
+                        !reason
+                    ) {
+
+                        reasonElement?.focus();
+
+
+                        this.showError(
+                            "Void reason is required."
+                        );
+
+
+                        return;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    CLOSE MODAL
+                    ==========================================
+                    */
+
+                    const modalElement =
+                        document.getElementById(
+                            "ap-void-confirm-modal"
+                        );
+
+
+                    const modal =
+                        bootstrap.Modal.getInstance(
+                            modalElement
+                        );
+
+
+                    if (
+                        modal
+                    ) {
+
+                        modal.hide();
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    EXECUTE VOID
+                    ==========================================
+                    */
+
+                    await this.service.voidInvoice(
+                        id,
+                        reason
+                    );
+
+
+                    /*
+                    ==========================================
+                    CLEAR STATE
+                    ==========================================
+                    */
+
+                    this.pendingVoidId =
+                        null;
+
+
+                    /*
+                    ==========================================
+                    RELOAD DATA
+                    NO LOADING
+                    ==========================================
+                    */
+
+                    await this.loadData(
+                        false
+                    );
+
+
+                    /*
+                    ==========================================
+                    SUCCESS
+                    ==========================================
+                    */
+
+                    this.showSuccess(
+                        "Account Payable successfully voided."
+                    );
+
+                }
+
+                catch (error) {
+
+                    console.error(
+                        "AccountPayable.confirmVoid:",
+                        error
+                    );
+
+
+                    this.showError(
+                        error.message
+                        ||
+                        "Failed to void Account Payable."
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+}
+/*
+======================================================
+BIND REPORT EVENTS
+DOWNLOAD EXCEL
+PREVIEW HTML
+======================================================
+*/
+
+bindReportEvents() {
+
+    /*
+    ==================================================
+    DOWNLOAD EXCEL
+    ==================================================
+    */
+
+    this.btnDownloadExcel?.addEventListener(
+        "click",
+        event => {
+
+            event.preventDefault();
+
+            this.downloadExcel();
+
+        }
+    );
 
 
     /*
-    ==============================================
-    LINK GL JOURNAL
-    ==============================================
+    ==================================================
+    PREVIEW HTML
+    OPEN NEW BROWSER TAB
+    ==================================================
     */
 
-    await this.service.linkGLJournal(
-        id,
-        journalId
-    );
-
-}
-
-
-/*
-==================================================
-COMPLETE ACCOUNT PAYABLE
-==================================================
-*/
-
-await this.service.completeInvoice(
-    id
-);
-
-
-/*
-==================================================
-GENERATE GL JOURNAL
-==================================================
-*/
-
-const journal =
-    await this.generateAPJournal(
-        invoice,
-        details
-    );
-
-
-if (!journal) {
-
-    throw new Error(
-        "Failed to generate GL Journal."
-    );
-
-}
-
-
-/*
-==================================================
-LINK GL JOURNAL TO ACCOUNT PAYABLE
-==================================================
-*/
-
-await this.service.linkGLJournal(
-    id,
-    journal.id
-);
-
-
-/*
-==================================================
-POST ACCOUNT PAYABLE
-==================================================
-*/
-
-await this.service.postInvoice(
-    id
-);
-
-
-                /*
-                ==========================================
-                CLEAR STATE
-                ==========================================
-                */
-
-                this.pendingPostId =
-                    null;
-
-
-                /*
-                ==========================================
-                RELOAD
-                ==========================================
-                */
-
-                await this.loadData(
-    false
-);
-
-
-                /*
-                ==========================================
-                SUCCESS
-                ==========================================
-                */
-
-                this.showSuccess(
-                    "Account Payable successfully posted."
-                );
-
-            }
-
-            catch (error) {
-
-                console.error(
-                    "AccountPayable.confirmPost:",
-                    error
-                );
-
-
-                this.showError(
-                    error.message
-                    || "Failed to post Account Payable."
-                );
-
-            }
-
-        }
-    );
-
-}
-/*
-======================================================
-CONFIRM VOID BUTTON
-======================================================
-*/
-
-const confirmVoidButton =
-    document.getElementById(
-        "ap-confirm-void-btn"
-    );
-
-
-if (confirmVoidButton) {
-
-    confirmVoidButton.addEventListener(
+    this.btnPreviewHTML?.addEventListener(
         "click",
-        async () => {
+        event => {
 
-            try {
+            event.preventDefault();
 
-                /*
-                ==========================================
-                GET PENDING ID
-                ==========================================
-                */
-
-                const id =
-                    this.pendingVoidId;
-
-
-                if (!id) {
-
-                    throw new Error(
-                        "Account Payable ID for Void is missing."
-                    );
-
-                }
-
-
-                /*
-                ==========================================
-                GET VOID REASON
-                ==========================================
-                */
-
-                const reasonElement =
-                    document.getElementById(
-                        "ap-void-reason"
-                    );
-
-
-                const reason =
-                    reasonElement?.value
-                        ?.trim();
-
-
-                /*
-                ==========================================
-                VALIDATE REASON
-                ==========================================
-                */
-
-                if (!reason) {
-
-                    reasonElement?.focus();
-
-                    this.showError(
-                        "Void reason is required."
-                    );
-
-                    return;
-
-                }
-
-
-                /*
-                ==========================================
-                CLOSE MODAL
-                ==========================================
-                */
-
-                const modalElement =
-                    document.getElementById(
-                        "ap-void-confirm-modal"
-                    );
-
-
-                const modal =
-                    bootstrap.Modal.getInstance(
-                        modalElement
-                    );
-
-
-                if (modal) {
-
-                    modal.hide();
-
-                }
-
-
-                /*
-                ==========================================
-                EXECUTE VOID
-                ==========================================
-                */
-
-                await this.service.voidInvoice(
-                    id,
-                    reason
-                );
-
-
-                /*
-                ==========================================
-                CLEAR STATE
-                ==========================================
-                */
-
-                this.pendingVoidId =
-                    null;
-
-
-                /*
-                ==========================================
-                RELOAD DATA
-                ==========================================
-                */
-
-                await this.loadData(
-    false
-);
-
-
-                /*
-                ==========================================
-                SUCCESS
-                ==========================================
-                */
-
-                this.showSuccess(
-                    "Account Payable successfully voided."
-                );
-
-            }
-
-            catch (error) {
-
-                console.error(
-                    "AccountPayable.confirmVoid:",
-                    error
-                );
-
-                this.showError(
-                    error.message
-                    || "Failed to void Account Payable."
-                );
-
-            }
+            this.previewHTML();
 
         }
     );
 
 }
+/*
+======================================================
+DOWNLOAD ACCOUNT PAYABLE EXCEL
+======================================================
+*/
+
+downloadExcel() {
+
+    try {
+
+        /*
+        ==================================================
+        GET CURRENT FILTERED DATA
+        ==================================================
+        */
+
+        const invoices =
+            Array.isArray(
+                this.filteredData
+            )
+                ? this.filteredData
+                : [];
+
+
+        /*
+        ==================================================
+        VALIDATE DATA
+        ==================================================
+        */
+
+        if (
+            invoices.length === 0
+        ) {
+
+            this.showError(
+                "No Account Payable data available to export."
+            );
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        PREPARE EXCEL DATA
+        ==================================================
+        */
+
+        const data =
+            invoices.map(
+                (
+                    invoice,
+                    index
+                ) => {
+
+                    const vendor =
+                        invoice?.mst_business_partner
+                        || {};
+
+
+                    const journal =
+                        invoice?.trx_gl_journal
+                        || {};
+
+
+                    const totalAmount =
+                        Number(
+                            invoice?.total_amount
+                            || 0
+                        );
+
+
+                    const paidAmount =
+                        Number(
+                            invoice?.paid_amount
+                            || 0
+                        );
+
+
+                    const outstandingAmount =
+                        Number(
+                            invoice?.outstanding_amount
+                            ??
+                            totalAmount
+                        );
+
+
+                    const journalStatus =
+                        String(
+                            journal?.status
+                            || ""
+                        )
+                        .trim();
+
+
+                    const paymentStatus =
+                        this.getPaymentStatus(
+                            invoice
+                        );
+
+
+                    return {
+
+                        "No":
+                            index + 1,
+
+                        "Invoice No":
+                            invoice?.invoice_no
+                            || "",
+
+                        "PO No":
+                            invoice?.po_no
+                            || "",
+
+                        "Vendor":
+                            vendor?.bp_name
+                            || "",
+
+                        "Invoice Date":
+                            invoice?.invoice_date
+                            || "",
+
+                        "Received Date":
+                            invoice?.date_received
+                            || "",
+
+                        "Due Date":
+                            invoice?.due_date
+                            || "",
+
+                        "Description":
+                            invoice?.description
+                            || "",
+
+                        "Total":
+                            totalAmount,
+
+                        "Paid":
+                            paidAmount,
+
+                        "Outstanding":
+                            outstandingAmount,
+
+                        "Payment Status":
+                            paymentStatus,
+
+                        "AP Status":
+                            invoice?.status
+                            || "",
+
+                        "Journal No":
+                            journal?.journal_no
+                            ||
+                            invoice?.journal_no
+                            ||
+                            "",
+
+                        "Journal Status":
+                            journalStatus
+                            || "Not Posted"
+
+                    };
+
+                }
+            );
+
+
+        /*
+        ==================================================
+        EXPORT
+        ==================================================
+        */
+
+        ExcelExportService.export(
+
+            data,
+
+            "Account Payable",
+
+            "Account Payable"
+
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountPayable.downloadExcel:",
+            error
+        );
+
+
+        this.showError(
+            error.message
+            ||
+            "Failed to download Account Payable Excel."
+        );
+
+    }
+
+}
+/*
+======================================================
+PREVIEW ACCOUNT PAYABLE HTML
+NEW TAB
+TAHOMA FONT
+NO TOOLBAR
+NO LOGO
+DESCRIPTION LAST COLUMN
+LONG TEXT NO WRAP
+
+FINAL :
+- FIXED HORIZONTAL SCROLLBAR
+- ALWAYS AVAILABLE AT BOTTOM OF BROWSER
+- SYNCHRONIZED WITH TABLE
+======================================================
+*/
+
+previewHTML() {
+
+    try {
+
+        /*
+        ==================================================
+        CURRENT FILTERED DATA
+        ==================================================
+        */
+
+        const invoices =
+            Array.isArray(
+                this.filteredData
+            )
+                ? this.filteredData
+                : [];
+
+
+        /*
+        ==================================================
+        VALIDATE DATA
+        ==================================================
+        */
+
+        if (
+            invoices.length === 0
+        ) {
+
+            this.showError(
+                "No Account Payable data available to preview."
+            );
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        OPEN NEW TAB
+        ==================================================
+        */
+
+        const previewWindow =
+            window.open(
+                "",
+                "_blank"
+            );
+
+
+        if (
+            !previewWindow
+        ) {
+
+            this.showError(
+                "Preview tab was blocked by the browser."
+            );
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        PREVIEW DATE
+        ==================================================
+        */
+
+        const previewDate =
+            new Date()
+                .toLocaleString(
+                    "id-ID"
+                );
+
+
+        /*
+        ==================================================
+        ESCAPE HTML
+        ==================================================
+        */
+
+        const escapeHTML =
+            value => {
+
+                return String(
+                    value ?? ""
+                )
+                    .replaceAll(
+                        "&",
+                        "&amp;"
+                    )
+                    .replaceAll(
+                        "<",
+                        "&lt;"
+                    )
+                    .replaceAll(
+                        ">",
+                        "&gt;"
+                    )
+                    .replaceAll(
+                        '"',
+                        "&quot;"
+                    )
+                    .replaceAll(
+                        "'",
+                        "&#039;"
+                    );
+
+            };
+
+
+        /*
+        ==================================================
+        TABLE ROWS
+        ==================================================
+        */
+
+        const rows =
+            invoices
+                .map(
+                    (
+                        invoice,
+                        index
+                    ) => {
+
+                        /*
+                        ======================================
+                        VENDOR
+                        ======================================
+                        */
+
+                        const vendor =
+                            invoice
+                                ?.mst_business_partner
+                            ||
+                            {};
+
+
+                        /*
+                        ======================================
+                        JOURNAL
+                        ======================================
+                        */
+
+                        const journal =
+                            invoice
+                                ?.trx_gl_journal
+                            ||
+                            {};
+
+
+                        /*
+                        ======================================
+                        AMOUNT
+                        ======================================
+                        */
+
+                        const totalAmount =
+                            Number(
+                                invoice?.total_amount
+                                ||
+                                0
+                            );
+
+
+                        const paidAmount =
+                            Number(
+                                invoice?.paid_amount
+                                ||
+                                0
+                            );
+
+
+                        const outstandingAmount =
+                            Number(
+                                invoice?.outstanding_amount
+                                ??
+                                totalAmount
+                            );
+
+
+                        /*
+                        ======================================
+                        PAYMENT STATUS
+                        ======================================
+                        */
+
+                        const paymentStatus =
+                            this.getPaymentStatus(
+                                invoice
+                            );
+
+
+                        /*
+                        ======================================
+                        JOURNAL NO
+                        ======================================
+                        */
+
+                        const journalNo =
+                            journal?.journal_no
+                            ||
+                            invoice?.journal_no
+                            ||
+                            "-";
+
+
+                        /*
+                        ======================================
+                        PO NO
+                        ======================================
+                        */
+
+                        const poNo =
+                            invoice?.po_no
+                            ||
+                            "-";
+
+
+                        /*
+                        ======================================
+                        DESCRIPTION
+                        ======================================
+                        */
+
+                        const description =
+                            invoice?.description
+                            ||
+                            "-";
+
+
+                        /*
+                        ======================================
+                        RETURN ROW
+                        ======================================
+                        */
+
+                        return `
+
+                            <tr>
+
+
+                                <!-- NO -->
+
+                                <td class="center">
+
+                                    ${index + 1}
+
+                                </td>
+
+
+                                <!-- INVOICE NO -->
+
+                                <td>
+
+                                    ${
+                                        escapeHTML(
+                                            invoice?.invoice_no
+                                            ||
+                                            "-"
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <!-- PO NO -->
+
+                                <td>
+
+                                    ${
+                                        escapeHTML(
+                                            poNo
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <!-- VENDOR -->
+
+                                <td>
+
+                                    ${
+                                        escapeHTML(
+                                            vendor?.bp_name
+                                            ||
+                                            "-"
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <!-- INVOICE DATE -->
+
+                                <td class="center">
+
+                                    ${
+                                        escapeHTML(
+                                            invoice?.invoice_date
+                                            ||
+                                            "-"
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <!-- DUE DATE -->
+
+                                <td class="center">
+
+                                    ${
+                                        escapeHTML(
+                                            invoice?.due_date
+                                            ||
+                                            "-"
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <!-- TOTAL -->
+
+                                <td class="amount">
+
+                                    ${
+                                        this.formatCurrency(
+                                            totalAmount
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <!-- PAID -->
+
+                                <td class="amount">
+
+                                    ${
+                                        this.formatCurrency(
+                                            paidAmount
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <!-- OUTSTANDING -->
+
+                                <td class="amount">
+
+                                    ${
+                                        this.formatCurrency(
+                                            outstandingAmount
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <!-- STATUS -->
+
+                                <td class="center">
+
+                                    ${
+                                        escapeHTML(
+                                            paymentStatus
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <!-- JOURNAL -->
+
+                                <td>
+
+                                    ${
+                                        escapeHTML(
+                                            journalNo
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <!-- DESCRIPTION -->
+
+                                <td class="description">
+
+                                    ${
+                                        escapeHTML(
+                                            description
+                                        )
+                                    }
+
+                                </td>
+
+
+                            </tr>
+
+                        `;
+
+                    }
+                )
+                .join("");
+
+
+        /*
+        ==================================================
+        HTML
+        ==================================================
+        */
+
+        const html = `
+
+            <!DOCTYPE html>
+
+            <html lang="id">
+
+            <head>
+
+                <meta charset="UTF-8">
+
+                <meta
+                    name="viewport"
+                    content="
+                        width=device-width,
+                        initial-scale=1.0
+                    "
+                >
+
+
+                <title>
+                    Account Payable - Preview
+                </title>
+
+
+                <style>
+
+                    /*
+                    ==========================================
+                    RESET
+                    ==========================================
+                    */
+
+                    * {
+
+                        box-sizing:
+                            border-box;
+
+                    }
+
+
+                    html,
+                    body {
+
+                        margin:
+                            0;
+
+                        padding:
+                            0;
+
+                        width:
+                            100%;
+
+                        min-height:
+                            100%;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    BODY
+                    ==========================================
+                    */
+
+                    body {
+
+                        padding:
+                            28px 32px 42px 32px;
+
+                        background:
+                            #ffffff;
+
+                        color:
+                            #1f2937;
+
+                        font-family:
+                            Tahoma,
+                            Arial,
+                            sans-serif;
+
+                        font-size:
+                            12px;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    REPORT
+                    ==========================================
+                    */
+
+                    .report {
+
+                        display:
+                            block;
+
+                        width:
+                            100%;
+
+                        max-width:
+                            100%;
+
+                        margin:
+                            0;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    HEADER
+                    ==========================================
+                    */
+
+                    .report-header {
+
+                        width:
+                            100%;
+
+                        padding-bottom:
+                            16px;
+
+                        margin-bottom:
+                            20px;
+
+                        border-bottom:
+                            2px solid #244494;
+
+                    }
+
+
+                    .report-title {
+
+                        margin:
+                            0;
+
+                        font-size:
+                            22px;
+
+                        font-weight:
+                            700;
+
+                    }
+
+
+                    .report-subtitle {
+
+                        margin-top:
+                            6px;
+
+                        font-size:
+                            16px;
+
+                        font-weight:
+                            700;
+
+                        color:
+                            #244494;
+
+                    }
+
+
+                    .report-description {
+
+                        margin-top:
+                            5px;
+
+                        color:
+                            #6b7280;
+
+                    }
+
+
+                    .report-date {
+
+                        margin-top:
+                            6px;
+
+                        font-size:
+                            11px;
+
+                        color:
+                            #6b7280;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    TABLE CONTAINER
+                    ==========================================
+                    */
+
+                    .table-container {
+
+                        display:
+                            block;
+
+                        width:
+                            100%;
+
+                        max-width:
+                            100%;
+
+                        border:
+                            1px solid #d1d5db;
+
+                        border-radius:
+                            4px;
+
+                        overflow:
+                            hidden;
+
+                        background:
+                            #ffffff;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    TABLE WRAPPER
+                    ORIGINAL SCROLLBAR HIDDEN
+                    ==========================================
+                    */
+
+                    .table-wrapper {
+
+                        display:
+                            block;
+
+                        width:
+                            100%;
+
+                        max-width:
+                            100%;
+
+                        overflow-x:
+                            auto;
+
+                        overflow-y:
+                            visible;
+
+                        scrollbar-width:
+                            none;
+
+                    }
+
+
+                    .table-wrapper::-webkit-scrollbar {
+
+                        display:
+                            none;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    TABLE
+                    ==========================================
+                    */
+
+                    table {
+
+                        width:
+                            max-content;
+
+                        min-width:
+                            100%;
+
+                        margin:
+                            0;
+
+                        border-collapse:
+                            collapse;
+
+                        border-spacing:
+                            0;
+
+                        table-layout:
+                            auto;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    TABLE HEADER
+                    ==========================================
+                    */
+
+                    thead th {
+
+                        padding:
+                            10px 9px;
+
+                        background:
+                            #244494;
+
+                        color:
+                            #ffffff;
+
+                        border-right:
+                            1px solid #d1d5db;
+
+                        border-bottom:
+                            1px solid #d1d5db;
+
+                        font-size:
+                            11px;
+
+                        font-weight:
+                            700;
+
+                        text-align:
+                            center;
+
+                        vertical-align:
+                            middle;
+
+                        white-space:
+                            nowrap;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    TABLE BODY
+                    ==========================================
+                    */
+
+                    tbody td {
+
+                        padding:
+                            9px;
+
+                        border-right:
+                            1px solid #d1d5db;
+
+                        border-bottom:
+                            1px solid #d1d5db;
+
+                        vertical-align:
+                            middle;
+
+                        background:
+                            #ffffff;
+
+                        color:
+                            #1f2937;
+
+                        font-size:
+                            12px;
+
+                        font-weight:
+                            400;
+
+                        white-space:
+                            nowrap;
+
+                    }
+
+
+                    thead th:last-child,
+                    tbody td:last-child {
+
+                        border-right:
+                            0;
+
+                    }
+
+
+                    tbody tr:last-child td {
+
+                        border-bottom:
+                            0;
+
+                    }
+
+
+                    tbody tr:nth-child(even) td {
+
+                        background:
+                            #f8fafc;
+
+                    }
+
+
+                    tbody tr:hover td {
+
+                        background:
+                            #f1f5f9;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    ALIGNMENT
+                    ==========================================
+                    */
+
+                    .center {
+
+                        text-align:
+                            center;
+
+                    }
+
+
+                    .amount {
+
+                        text-align:
+                            right;
+
+                        white-space:
+                            nowrap;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    DESCRIPTION
+                    LAST + WIDE
+                    ==========================================
+                    */
+
+                    .description {
+
+                        min-width:
+                            420px;
+
+                        text-align:
+                            left;
+
+                        white-space:
+                            nowrap;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    COLUMN WIDTH
+                    ==========================================
+                    */
+
+                    .col-no {
+
+                        width:
+                            45px;
+
+                        min-width:
+                            45px;
+
+                    }
+
+
+                    .col-invoice {
+
+                        min-width:
+                            145px;
+
+                    }
+
+
+                    .col-po {
+
+                        min-width:
+                            160px;
+
+                    }
+
+
+                    .col-vendor {
+
+                        min-width:
+                            220px;
+
+                    }
+
+
+                    .col-date {
+
+                        min-width:
+                            105px;
+
+                    }
+
+
+                    .col-amount {
+
+                        min-width:
+                            120px;
+
+                    }
+
+
+                    .col-status {
+
+                        min-width:
+                            100px;
+
+                    }
+
+
+                    .col-journal {
+
+                        min-width:
+                            155px;
+
+                    }
+
+
+                    .col-description {
+
+                        min-width:
+                            420px;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    FOOTER
+                    ==========================================
+                    */
+
+                    .report-footer {
+
+                        display:
+                            flex;
+
+                        justify-content:
+                            space-between;
+
+                        align-items:
+                            center;
+
+                        width:
+                            100%;
+
+                        margin-top:
+                            18px;
+
+                        padding-top:
+                            12px;
+
+                        border-top:
+                            1px solid #e5e7eb;
+
+                        color:
+                            #6b7280;
+
+                        font-size:
+                            11px;
+
+                        white-space:
+                            nowrap;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    FIXED BOTTOM SCROLLBAR
+                    ==========================================
+                    */
+
+                    .fixed-horizontal-scroll {
+
+                        position:
+                            fixed;
+
+                        left:
+                            0;
+
+                        right:
+                            0;
+
+                        bottom:
+                            0;
+
+                        z-index:
+                            99999;
+
+                        width:
+                            100%;
+
+                        height:
+                            22px;
+
+                        padding:
+                            0 32px;
+
+                        overflow:
+                            hidden;
+
+                        background:
+                            #f8fafc;
+
+                        border-top:
+                            1px solid #d1d5db;
+
+                        box-shadow:
+                            0 -2px 6px
+                            rgba(
+                                0,
+                                0,
+                                0,
+                                0.08
+                            );
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    FIXED SCROLL INNER
+                    ==========================================
+                    */
+
+                    .fixed-horizontal-scroll-inner {
+
+                        width:
+                            100%;
+
+                        height:
+                            21px;
+
+                        overflow-x:
+                            auto;
+
+                        overflow-y:
+                            hidden;
+
+                        scrollbar-width:
+                            auto;
+
+                        scrollbar-color:
+                            #9aa5b3
+                            #eef1f4;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    FAKE CONTENT WIDTH
+                    ==========================================
+                    */
+
+                    .fixed-horizontal-scroll-content {
+
+                        width:
+                            100%;
+
+                        height:
+                            1px;
+
+                        min-height:
+                            1px;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    CHROME / EDGE
+                    ==========================================
+                    */
+
+                    .fixed-horizontal-scroll-inner::-webkit-scrollbar {
+
+                        height:
+                            16px;
+
+                    }
+
+
+                    .fixed-horizontal-scroll-inner::-webkit-scrollbar-track {
+
+                        background:
+                            #eef1f4;
+
+                    }
+
+
+                    .fixed-horizontal-scroll-inner::-webkit-scrollbar-thumb {
+
+                        background:
+                            #9aa5b3;
+
+                        border-radius:
+                            10px;
+
+                        border:
+                            3px solid #eef1f4;
+
+                    }
+
+
+                    .fixed-horizontal-scroll-inner::-webkit-scrollbar-thumb:hover {
+
+                        background:
+                            #7e8997;
+
+                    }
+
+                </style>
+
+            </head>
+
+
+            <body>
+
+
+                <div class="report">
+
+
+                    <!-- ==================================
+                         HEADER
+                    =================================== -->
+
+                    <div class="report-header">
+
+                        <h1 class="report-title">
+
+                            FINOVA ACCOUNTING SYSTEM
+
+                        </h1>
+
+
+                        <div class="report-subtitle">
+
+                            Account Payable
+
+                        </div>
+
+
+                        <div class="report-description">
+
+                            Account Payable Transaction Report
+
+                        </div>
+
+
+                        <div class="report-date">
+
+                            Preview Date :
+                            ${previewDate}
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ==================================
+                         TABLE
+                    =================================== -->
+
+                    <div class="table-container">
+
+
+                        <div
+                            class="table-wrapper"
+                            id="ap-table-scroll"
+                        >
+
+
+                            <table
+                                id="ap-preview-table"
+                            >
+
+
+                                <colgroup>
+
+                                    <col class="col-no">
+
+                                    <col class="col-invoice">
+
+                                    <col class="col-po">
+
+                                    <col class="col-vendor">
+
+                                    <col class="col-date">
+
+                                    <col class="col-date">
+
+                                    <col class="col-amount">
+
+                                    <col class="col-amount">
+
+                                    <col class="col-amount">
+
+                                    <col class="col-status">
+
+                                    <col class="col-journal">
+
+                                    <col class="col-description">
+
+                                </colgroup>
+
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th>
+                                            No
+                                        </th>
+
+                                        <th>
+                                            Invoice No
+                                        </th>
+
+                                        <th>
+                                            PO No
+                                        </th>
+
+                                        <th>
+                                            Vendor
+                                        </th>
+
+                                        <th>
+                                            Invoice Date
+                                        </th>
+
+                                        <th>
+                                            Due Date
+                                        </th>
+
+                                        <th>
+                                            Total
+                                        </th>
+
+                                        <th>
+                                            Paid
+                                        </th>
+
+                                        <th>
+                                            Outstanding
+                                        </th>
+
+                                        <th>
+                                            Status
+                                        </th>
+
+                                        <th>
+                                            Journal
+                                        </th>
+
+                                        <th>
+                                            Description
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+
+                                <tbody>
+
+                                    ${rows}
+
+                                </tbody>
+
+
+                            </table>
+
+
+                        </div>
+
+
+                    </div>
+
+
+                    <!-- ==================================
+                         FOOTER
+                    =================================== -->
+
+                    <div class="report-footer">
+
+                        <div>
+
+                            Total Record :
+                            ${invoices.length}
+
+                        </div>
+
+
+                        <div>
+
+                            Generated by FINOVA Accounting System
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- ==================================
+                     FIXED BOTTOM SCROLLBAR
+                =================================== -->
+
+                <div
+                    class="fixed-horizontal-scroll"
+                    id="ap-fixed-scroll-container"
+                >
+
+                    <div
+                        class="fixed-horizontal-scroll-inner"
+                        id="ap-fixed-scroll"
+                    >
+
+                        <div
+                            class="fixed-horizontal-scroll-content"
+                            id="ap-fixed-scroll-content"
+                        >
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+            </body>
+
+            </html>
+
+        `;
+
+
+        /*
+        ==================================================
+        WRITE NEW TAB
+        ==================================================
+        */
+
+        previewWindow.document.open();
+
+        previewWindow.document.write(
+            html
+        );
+
+        previewWindow.document.close();
+
+
+        /*
+        ==================================================
+        TAB TITLE
+        ==================================================
+        */
+
+        previewWindow.document.title =
+            "Account Payable - Preview";
+
+
+        /*
+        ==================================================
+        SETUP FIXED BOTTOM SCROLLBAR
+        ==================================================
+        */
+
+        const setupScrollSync = () => {
+
+            const doc =
+                previewWindow.document;
+
+
+            /*
+            ==============================================
+            ELEMENTS
+            ==============================================
+            */
+
+            const tableScroll =
+                doc.getElementById(
+                    "ap-table-scroll"
+                );
+
+
+            const table =
+                doc.getElementById(
+                    "ap-preview-table"
+                );
+
+
+            const fixedScrollContainer =
+                doc.getElementById(
+                    "ap-fixed-scroll-container"
+                );
+
+
+            const fixedScroll =
+                doc.getElementById(
+                    "ap-fixed-scroll"
+                );
+
+
+            const fixedScrollContent =
+                doc.getElementById(
+                    "ap-fixed-scroll-content"
+                );
+
+
+            /*
+            ==============================================
+            VALIDATE
+            ==============================================
+            */
+
+            if (
+                !tableScroll
+                ||
+                !table
+                ||
+                !fixedScrollContainer
+                ||
+                !fixedScroll
+                ||
+                !fixedScrollContent
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+            ==============================================
+            UPDATE SCROLL WIDTH
+            ==============================================
+            */
+
+            const updateScrollWidth = () => {
+
+                const tableWidth =
+                    Math.max(
+                        table.scrollWidth,
+                        table.offsetWidth
+                    );
+
+
+                fixedScrollContent.style.width =
+                    `${tableWidth}px`;
+
+
+                /*
+                ==========================================
+                SHOW ONLY WHEN NEEDED
+                ==========================================
+                */
+
+                if (
+                    tableWidth <=
+                    tableScroll.clientWidth
+                ) {
+
+                    fixedScrollContainer.style.display =
+                        "none";
+
+                }
+
+                else {
+
+                    fixedScrollContainer.style.display =
+                        "block";
+
+                }
+
+            };
+
+
+            /*
+            ==============================================
+            SYNC STATE
+            ==============================================
+            */
+
+            let syncingFixed =
+                false;
+
+            let syncingTable =
+                false;
+
+
+            /*
+            ==============================================
+            FIXED SCROLL -> TABLE
+            ==============================================
+            */
+
+            fixedScroll.addEventListener(
+                "scroll",
+                () => {
+
+                    if (
+                        syncingTable
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    syncingFixed =
+                        true;
+
+
+                    tableScroll.scrollLeft =
+                        fixedScroll.scrollLeft;
+
+
+                    requestAnimationFrame(
+                        () => {
+
+                            syncingFixed =
+                                false;
+
+                        }
+                    );
+
+                }
+            );
+
+
+            /*
+            ==============================================
+            TABLE -> FIXED SCROLL
+            ==============================================
+            */
+
+            tableScroll.addEventListener(
+                "scroll",
+                () => {
+
+                    if (
+                        syncingFixed
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    syncingTable =
+                        true;
+
+
+                    fixedScroll.scrollLeft =
+                        tableScroll.scrollLeft;
+
+
+                    requestAnimationFrame(
+                        () => {
+
+                            syncingTable =
+                                false;
+
+                        }
+                    );
+
+                }
+            );
+
+
+            /*
+            ==============================================
+            INITIAL WIDTH
+            ==============================================
+            */
+
+            updateScrollWidth();
+
+
+            requestAnimationFrame(
+                () => {
+
+                    updateScrollWidth();
+
+                }
+            );
+
+
+            /*
+            ==============================================
+            WINDOW RESIZE
+            ==============================================
+            */
+
+            previewWindow.addEventListener(
+                "resize",
+                updateScrollWidth
+            );
+
+
+            /*
+            ==============================================
+            RESIZE OBSERVER
+            ==============================================
+            */
+
+            if (
+                typeof previewWindow.ResizeObserver
+                !==
+                "undefined"
+            ) {
+
+                const resizeObserver =
+                    new previewWindow.ResizeObserver(
+                        () => {
+
+                            updateScrollWidth();
+
+                        }
+                    );
+
+
+                resizeObserver.observe(
+                    table
+                );
+
+
+                resizeObserver.observe(
+                    tableScroll
+                );
+
+            }
+
+        };
+
+
+        /*
+        ==================================================
+        RUN SCROLL SETUP
+        ==================================================
+        */
+
+        if (
+            previewWindow.document.readyState ===
+            "complete"
+        ) {
+
+            setupScrollSync();
+
+        }
+
+        else {
+
+            previewWindow.addEventListener(
+                "load",
+                setupScrollSync,
+                {
+                    once:
+                        true
+                }
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        FOCUS
+        ==================================================
+        */
+
+        previewWindow.focus();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountPayable.previewHTML:",
+            error
+        );
+
+
+        this.showError(
+            error?.message
+            ||
+            "Failed to preview Account Payable."
+        );
+
+    }
 
 }
 /*
@@ -5620,8 +7645,8 @@ async saveAPPayment() {
 
 
             await this.loadData(
-    false
-);
+                false
+            );
 
 
             throw new Error(
@@ -6125,11 +8150,11 @@ async saveAPPayment() {
 
         else {
 
-    await this.loadData(
-        false
-    );
+            await this.loadData(
+                false
+            );
 
-}
+        }
 
 
         /*
@@ -6209,45 +8234,14 @@ async saveAPPayment() {
 
         /*
         ==================================================
-        SUCCESS
+        REFRESH ACCOUNT PAYABLE
+        NO LOADING
         ==================================================
         */
 
-        if (
-            updatedInvoice.status ===
-            "Paid"
-        ) {
-
-            this.showSuccess(
-                "Account Payable successfully paid."
-            );
-
-        }
-
-        else if (
-            updatedInvoice.status ===
-            "Partial Paid"
-        ) {
-
-            this.showSuccess(
-                `Partial payment successfully saved. Outstanding: ${this.formatCurrency(
-                    Number(
-                        updatedInvoice.outstanding_amount
-                        ||
-                        0
-                    )
-                )}`
-            );
-
-        }
-
-        else {
-
-            this.showSuccess(
-                "Account Payable payment successfully saved."
-            );
-
-        }
+        await this.loadData(
+            false
+        );
 
 
         /*
@@ -6382,8 +8376,8 @@ async saveAPPayment() {
             try {
 
                 await this.service.updatePaymentStatus(
-    currentAPId
-);
+                    currentAPId
+                );
 
 
                 /*
@@ -6393,8 +8387,8 @@ async saveAPPayment() {
                 */
 
                 await this.loadData(
-    false
-);
+                    false
+                );
 
             }
 
@@ -18648,6 +20642,7 @@ renderViewPayment(
 ======================================================
 VIEW AP PAYMENT
 ONLY ACTIVE PAYMENT
+WITH BANK / PAYMENT ACCOUNT
 ======================================================
 */
 
@@ -18869,6 +20864,155 @@ async viewPayment(
 
         /*
         ==================================================
+        GET UNIQUE BANK ACCOUNT IDS
+
+        BANK ACCOUNT =
+        CHART OF ACCOUNTS
+        ==================================================
+        */
+
+        const bankAccountIds =
+            [
+                ...new Set(
+                    validPayments
+
+                        .map(
+                            payment =>
+                                Number(
+                                    payment.bank_account_id
+                                    || 0
+                                )
+                        )
+
+                        .filter(
+                            bankAccountId =>
+                                bankAccountId > 0
+                        )
+                )
+            ];
+
+
+        /*
+        ==================================================
+        LOAD BANK / PAYMENT ACCOUNTS
+        ==================================================
+        */
+
+        let bankAccounts =
+            [];
+
+
+        if (
+            bankAccountIds.length > 0
+        ) {
+
+            const {
+
+                data: bankData,
+
+                error: bankError
+
+            } = await supabase
+
+                .from(
+                    "mst_chart_of_accounts"
+                )
+
+                .select(`
+                    id,
+                    account_code,
+                    account_name
+                `)
+
+                .in(
+                    "id",
+                    bankAccountIds
+                );
+
+
+            if (
+                bankError
+            ) {
+
+                console.error(
+                    "AP PAYMENT BANK ACCOUNT ERROR:",
+                    {
+
+                        message:
+                            bankError.message,
+
+                        details:
+                            bankError.details,
+
+                        hint:
+                            bankError.hint,
+
+                        code:
+                            bankError.code
+
+                    }
+                );
+
+
+                throw bankError;
+
+            }
+
+
+            bankAccounts =
+                Array.isArray(
+                    bankData
+                )
+                    ? bankData
+                    : [];
+
+        }
+
+
+        /*
+        ==================================================
+        MAP BANK ACCOUNT TO PAYMENT
+        ==================================================
+        */
+
+        const paymentHistory =
+            validPayments.map(
+                payment => {
+
+                    const bankAccount =
+                        bankAccounts.find(
+                            account => {
+
+                                return (
+                                    String(
+                                        account.id
+                                    )
+                                    ===
+                                    String(
+                                        payment.bank_account_id
+                                    )
+                                );
+
+                            }
+                        )
+                        || null;
+
+
+                    return {
+
+                        ...payment,
+
+                        bank_account:
+                            bankAccount
+
+                    };
+
+                }
+            );
+
+
+        /*
+        ==================================================
         DEBUG
         ==================================================
         */
@@ -18884,10 +21028,10 @@ async viewPayment(
                     invoice.invoice_no,
 
                 payment_count:
-                    validPayments.length,
+                    paymentHistory.length,
 
                 payments:
-                    validPayments
+                    paymentHistory
 
             }
         );
@@ -18901,7 +21045,7 @@ async viewPayment(
 
         this.openPaymentHistoryModal(
             invoice,
-            validPayments
+            paymentHistory
         );
 
     }
@@ -18927,6 +21071,8 @@ async viewPayment(
 ======================================================
 OPEN AP PAYMENT HISTORY MODAL
 ONLY ACTIVE PAYMENT
+WITH BANK / PAYMENT ACCOUNT
+DESCRIPTION FULL WIDTH
 ======================================================
 */
 
@@ -19136,6 +21282,85 @@ openPaymentHistoryModal(
 
                     /*
                     ======================================
+                    BANK / PAYMENT ACCOUNT
+                    ======================================
+                    */
+
+                    const bankAccount =
+                        payment?.bank_account
+                        ||
+                        null;
+
+
+                    const bankAccountCode =
+                        String(
+                            bankAccount?.account_code
+                            ||
+                            ""
+                        )
+                        .trim();
+
+
+                    const bankAccountName =
+                        String(
+                            bankAccount?.account_name
+                            ||
+                            ""
+                        )
+                        .trim();
+
+
+                    let bankAccountDisplay =
+                        "-";
+
+
+                    if (
+                        bankAccountCode
+                        &&
+                        bankAccountName
+                    ) {
+
+                        bankAccountDisplay =
+                            `${bankAccountCode} - ${bankAccountName}`;
+
+                    }
+
+                    else if (
+                        bankAccountName
+                    ) {
+
+                        bankAccountDisplay =
+                            bankAccountName;
+
+                    }
+
+                    else if (
+                        bankAccountCode
+                    ) {
+
+                        bankAccountDisplay =
+                            bankAccountCode;
+
+                    }
+
+
+                    /*
+                    ======================================
+                    DESCRIPTION
+                    ======================================
+                    */
+
+                    const paymentDescription =
+                        String(
+                            payment?.description
+                            ||
+                            "-"
+                        )
+                        .trim();
+
+
+                    /*
+                    ======================================
                     JOURNAL
                     ======================================
                     */
@@ -19229,7 +21454,7 @@ openPaymentHistoryModal(
                                 class="
                                     badge
                                     ${badgeClass}
-                                    ms-2
+                                    ap-payment-journal-status
                                 ">
 
                                 ${journalStatus}
@@ -19249,25 +21474,33 @@ openPaymentHistoryModal(
 
                     return `
 
+                        <!-- ==============================
+                             MAIN PAYMENT ROW
+                        =============================== -->
+
                         <tr>
 
 
-                            <!-- ==========================
-                                 NO
-                            =========================== -->
+                            <!-- NO -->
 
-                            <td class="text-center">
+                            <td
+                                class="
+                                    text-center
+                                    align-middle
+                                ">
 
                                 ${index + 1}
 
                             </td>
 
 
-                            <!-- ==========================
-                                 PAYMENT DATE
-                            =========================== -->
+                            <!-- PAYMENT DATE -->
 
-                            <td class="text-center">
+                            <td
+                                class="
+                                    text-center
+                                    align-middle
+                                ">
 
                                 ${
                                     payment?.payment_date
@@ -19278,44 +21511,39 @@ openPaymentHistoryModal(
                             </td>
 
 
-                            <!-- ==========================
-                                 REFERENCE
-                            =========================== -->
+                            <!-- BANK / PAYMENT ACCOUNT -->
 
-                            <td>
+                            <td
+                                class="
+                                    align-middle
+                                "
+                                style="
+                                    white-space:normal;
+                                    overflow-wrap:anywhere;
+                                    word-break:normal;
+                                    line-height:1.5;
+                                ">
 
-                                ${
-                                    payment?.reference_no
-                                    ||
-                                    "-"
-                                }
+                                <div
+                                    class="
+                                        ap-payment-bank-account
+                                        fw-medium
+                                    ">
 
-                            </td>
+                                    ${bankAccountDisplay}
 
-
-                            <!-- ==========================
-                                 DESCRIPTION
-                            =========================== -->
-
-                            <td>
-
-                                ${
-                                    payment?.description
-                                    ||
-                                    "-"
-                                }
+                                </div>
 
                             </td>
 
 
-                            <!-- ==========================
-                                 AMOUNT
-                            =========================== -->
+                            <!-- AMOUNT -->
 
                             <td
                                 class="
                                     text-end
                                     fw-semibold
+                                    align-middle
                                 ">
 
                                 ${
@@ -19327,31 +21555,96 @@ openPaymentHistoryModal(
                             </td>
 
 
-                            <!-- ==========================
-                                 JOURNAL
-                            =========================== -->
+                            <!-- JOURNAL -->
 
                             <td
                                 class="
                                     text-center
-                                    text-nowrap
+                                    align-middle
+                                    ap-payment-journal-cell
                                 ">
 
                                 <div
                                     class="
-                                        d-flex
-                                        align-items-center
-                                        justify-content-center
-                                        gap-1
+                                        ap-payment-journal-wrap
                                     ">
 
-                                    <span class="fw-semibold">
+                                    <div
+                                        class="
+                                            ap-payment-journal-no
+                                        ">
 
                                         ${journalNo}
 
-                                    </span>
+                                    </div>
+
 
                                     ${journalStatusBadge}
+
+                                </div>
+
+                            </td>
+
+
+                        </tr>
+
+
+                        <!-- ==============================
+                             DESCRIPTION ROW
+                        =============================== -->
+
+                        <tr
+                            class="
+                                ap-payment-description-row
+                            ">
+
+
+                            <!-- EMPTY UNDER NO -->
+
+                            <td></td>
+
+
+                            <!-- DESCRIPTION FULL WIDTH -->
+
+                            <td
+                                colspan="4"
+                                class="
+                                    ap-payment-description-cell
+                                ">
+
+                                <div
+                                    class="
+                                        ap-payment-description-wrap
+                                    ">
+
+                                    <span
+                                        class="
+                                            ap-payment-description-label
+                                        ">
+
+                                        Description
+
+                                    </span>
+
+
+                                    <span
+                                        class="
+                                            ap-payment-description-separator
+                                        ">
+
+                                        :
+
+                                    </span>
+
+
+                                    <span
+                                        class="
+                                            ap-payment-description-value
+                                        ">
+
+                                        ${paymentDescription}
+
+                                    </span>
 
                                 </div>
 
@@ -19457,9 +21750,7 @@ openPaymentHistoryModal(
                         <div class="row g-3 mb-4">
 
 
-                            <!-- ==============================
-                                 INVOICE NO
-                            =============================== -->
+                            <!-- INVOICE NO -->
 
                             <div class="col-md-4">
 
@@ -19483,9 +21774,7 @@ openPaymentHistoryModal(
                             </div>
 
 
-                            <!-- ==============================
-                                 VENDOR
-                            =============================== -->
+                            <!-- VENDOR -->
 
                             <div class="col-md-5">
 
@@ -19505,9 +21794,7 @@ openPaymentHistoryModal(
                             </div>
 
 
-                            <!-- ==============================
-                                 TOTAL PAID
-                            =============================== -->
+                            <!-- TOTAL PAID -->
 
                             <div class="col-md-3">
 
@@ -19551,7 +21838,64 @@ openPaymentHistoryModal(
                                     table-hover
                                     align-middle
                                     mb-0
+                                "
+                                style="
+                                    width:100%;
+                                    table-layout:fixed;
                                 ">
+
+
+                                <!-- ==========================
+                                     COLUMN WIDTH
+                                =========================== -->
+
+                                <colgroup>
+
+                                    <!-- NO -->
+
+                                    <col
+                                        style="
+                                            width:45px;
+                                        ">
+
+
+                                    <!-- PAYMENT DATE -->
+
+                                    <col
+                                        style="
+                                            width:110px;
+                                        ">
+
+
+                                    <!-- BANK / PAYMENT ACCOUNT -->
+
+                                    <col
+                                        style="
+                                            width:320px;
+                                        ">
+
+
+                                    <!-- AMOUNT -->
+
+                                    <col
+                                        style="
+                                            width:130px;
+                                        ">
+
+
+                                    <!-- JOURNAL -->
+
+                                    <col
+                                        style="
+                                            width:170px;
+                                        ">
+
+                                </colgroup>
+
+
+                                <!-- ==========================
+                                     TABLE HEADER
+                                =========================== -->
 
                                 <thead>
 
@@ -19559,8 +21903,9 @@ openPaymentHistoryModal(
 
 
                                         <th
-                                            class="text-center"
-                                            style="width:60px;">
+                                            class="
+                                                text-center
+                                            ">
 
                                             No
 
@@ -19568,32 +21913,26 @@ openPaymentHistoryModal(
 
 
                                         <th
-                                            class="text-center"
-                                            style="width:140px;">
+                                            class="
+                                                text-center
+                                            ">
 
                                             Payment Date
 
                                         </th>
 
 
-                                        <th
-                                            style="width:180px;">
-
-                                            Reference No
-
-                                        </th>
-
-
                                         <th>
 
-                                            Description
+                                            Bank / Payment Account
 
                                         </th>
 
 
                                         <th
-                                            class="text-end"
-                                            style="width:170px;">
+                                            class="
+                                                text-end
+                                            ">
 
                                             Amount
 
@@ -19601,8 +21940,9 @@ openPaymentHistoryModal(
 
 
                                         <th
-                                            class="="text-center"
-                                            style="width:260px;">
+                                            class="
+                                                text-center
+                                            ">
 
                                             Journal
 
@@ -19614,6 +21954,10 @@ openPaymentHistoryModal(
                                 </thead>
 
 
+                                <!-- ==========================
+                                     TABLE BODY
+                                =========================== -->
+
                                 <tbody>
 
                                     ${rows}
@@ -19621,12 +21965,19 @@ openPaymentHistoryModal(
                                 </tbody>
 
 
+                                <!-- ==========================
+                                     TABLE FOOTER
+                                =========================== -->
+
                                 <tfoot>
 
                                     <tr>
 
+
+                                        <!-- TOTAL LABEL -->
+
                                         <td
-                                            colspan="4"
+                                            colspan="3"
                                             class="
                                                 text-end
                                                 fw-semibold
@@ -19636,6 +21987,8 @@ openPaymentHistoryModal(
 
                                         </td>
 
+
+                                        <!-- TOTAL AMOUNT -->
 
                                         <td
                                             class="
@@ -19652,7 +22005,10 @@ openPaymentHistoryModal(
                                         </td>
 
 
+                                        <!-- JOURNAL -->
+
                                         <td></td>
+
 
                                     </tr>
 

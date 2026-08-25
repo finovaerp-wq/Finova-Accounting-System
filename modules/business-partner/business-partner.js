@@ -667,7 +667,19 @@ this.txtPage?.addEventListener(
 }
 /*
 ==========================================================
-PREVIEW
+PREVIEW BUSINESS PARTNER
+NEW TAB
+TAHOMA FONT
+NO TOOLBAR
+NO LOGO
+LONG TEXT NO WRAP
+
+FINAL :
+- ADDRESS LAST COLUMN
+- HORIZONTAL SCROLLBAR ALWAYS AVAILABLE
+  AT BOTTOM OF BROWSER
+- FIXED BOTTOM SCROLLBAR
+- SYNCHRONIZED WITH TABLE
 ==========================================================
 */
 
@@ -675,70 +687,1630 @@ preview() {
 
     try {
 
-        if (!this.filteredData.length) {
+        /*
+        ==================================================
+        CURRENT FILTERED DATA
+        ==================================================
+        */
 
-            this.showError("No data available.");
+        const businessPartners =
+            Array.isArray(
+                this.filteredData
+            )
+                ? this.filteredData
+                : [];
+
+
+        /*
+        ==================================================
+        VALIDATE DATA
+        ==================================================
+        */
+
+        if (
+            businessPartners.length === 0
+        ) {
+
+            this.showError(
+                "No Business Partner data available to preview."
+            );
 
             return;
 
         }
 
-        const columns = [
 
-            "Code",
-            "Name",
-            "Type",
-            "Term Of Payment",
-            "Phone",
-            "Status"
+        /*
+        ==================================================
+        OPEN NEW TAB
+        ==================================================
+        */
 
-        ];
+        const previewWindow =
+            window.open(
+                "",
+                "_blank"
+            );
 
-        const rows = this.filteredData.map(item => `
 
-<tr>
+        if (
+            !previewWindow
+        ) {
 
-<td>
-    <strong class="text-dark">
-        ${item.bp_code}
-    </strong>
-</td>
+            this.showError(
+                "Preview tab was blocked by the browser."
+            );
 
-<td>
-    <strong class="text-dark">
-        ${item.bp_name}
-    </strong>
-</td>
+            return;
 
-<td>${item.bp_type}</td>
+        }
 
-<td>${item.mst_term_of_payment?.top_code ?? ""}</td>
 
-<td>${item.phone ?? ""}</td>
+        /*
+        ==================================================
+        PREVIEW DATE
+        ==================================================
+        */
 
-<td>${item.status ? "Active" : "Inactive"}</td>
+        const previewDate =
+            new Date()
+                .toLocaleString(
+                    "id-ID"
+                );
 
-</tr>
 
-`);
+        /*
+        ==================================================
+        ESCAPE HTML
+        ==================================================
+        */
 
-        PreviewService.open({
+        const escapeHTML =
+            value => {
 
-            title: "Business Partner",
+                return String(
+                    value ?? ""
+                )
+                    .replaceAll(
+                        "&",
+                        "&amp;"
+                    )
+                    .replaceAll(
+                        "<",
+                        "&lt;"
+                    )
+                    .replaceAll(
+                        ">",
+                        "&gt;"
+                    )
+                    .replaceAll(
+                        '"',
+                        "&quot;"
+                    )
+                    .replaceAll(
+                        "'",
+                        "&#039;"
+                    );
 
-            columns,
+            };
 
-            rows
 
-        });
+        /*
+        ==================================================
+        ROWS
+        ==================================================
+        */
+
+        const rows =
+            businessPartners
+                .map(
+                    (
+                        item,
+                        index
+                    ) => {
+
+                        /*
+                        ======================================
+                        TOP
+                        ======================================
+                        */
+
+                        const topCode =
+                            item
+                                ?.mst_term_of_payment
+                                ?.top_code
+                            ||
+                            "-";
+
+
+                        /*
+                        ======================================
+                        STATUS
+                        ======================================
+                        */
+
+                        const status =
+                            item?.status
+                                ? "Active"
+                                : "Inactive";
+
+
+                        /*
+                        ======================================
+                        RETURN ROW
+                        ======================================
+                        */
+
+                        return `
+
+                            <tr>
+
+                                <td class="center">
+
+                                    ${index + 1}
+
+                                </td>
+
+
+                                <td>
+
+                                    ${
+                                        escapeHTML(
+                                            item?.bp_code
+                                            ||
+                                            "-"
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <td>
+
+                                    ${
+                                        escapeHTML(
+                                            item?.bp_name
+                                            ||
+                                            "-"
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <td class="center">
+
+                                    ${
+                                        escapeHTML(
+                                            item?.bp_type
+                                            ||
+                                            "-"
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <td class="center">
+
+                                    ${
+                                        escapeHTML(
+                                            topCode
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <td>
+
+                                    ${
+                                        escapeHTML(
+                                            item?.phone
+                                            ||
+                                            "-"
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <td>
+
+                                    ${
+                                        escapeHTML(
+                                            item?.email
+                                            ||
+                                            "-"
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <td>
+
+                                    ${
+                                        escapeHTML(
+                                            item?.tax_number
+                                            ||
+                                            "-"
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <td>
+
+                                    ${
+                                        escapeHTML(
+                                            item?.city
+                                            ||
+                                            "-"
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <td>
+
+                                    ${
+                                        escapeHTML(
+                                            item?.country
+                                            ||
+                                            "-"
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <td class="center">
+
+                                    ${
+                                        escapeHTML(
+                                            status
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <td class="address">
+
+                                    ${
+                                        escapeHTML(
+                                            item?.address
+                                            ||
+                                            "-"
+                                        )
+                                    }
+
+                                </td>
+
+                            </tr>
+
+                        `;
+
+                    }
+                )
+                .join("");
+
+
+        /*
+        ==================================================
+        HTML
+        ==================================================
+        */
+
+        const html = `
+
+            <!DOCTYPE html>
+
+            <html lang="id">
+
+            <head>
+
+                <meta charset="UTF-8">
+
+                <meta
+                    name="viewport"
+                    content="
+                        width=device-width,
+                        initial-scale=1.0
+                    "
+                >
+
+
+                <title>
+                    Business Partner - Preview
+                </title>
+
+
+                <style>
+
+                    /*
+                    ==========================================
+                    RESET
+                    ==========================================
+                    */
+
+                    * {
+
+                        box-sizing:
+                            border-box;
+
+                    }
+
+
+                    html,
+                    body {
+
+                        margin:
+                            0;
+
+                        padding:
+                            0;
+
+                        width:
+                            100%;
+
+                        min-height:
+                            100%;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    BODY
+                    ==========================================
+                    */
+
+                    body {
+
+                        padding:
+                            28px 32px 40px 32px;
+
+                        background:
+                            #ffffff;
+
+                        color:
+                            #1f2937;
+
+                        font-family:
+                            Tahoma,
+                            Arial,
+                            sans-serif;
+
+                        font-size:
+                            12px;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    REPORT
+                    ==========================================
+                    */
+
+                    .report {
+
+                        display:
+                            block;
+
+                        width:
+                            100%;
+
+                        max-width:
+                            100%;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    HEADER
+                    ==========================================
+                    */
+
+                    .report-header {
+
+                        width:
+                            100%;
+
+                        padding-bottom:
+                            16px;
+
+                        margin-bottom:
+                            20px;
+
+                        border-bottom:
+                            2px solid #244494;
+
+                    }
+
+
+                    .report-title {
+
+                        margin:
+                            0;
+
+                        font-size:
+                            22px;
+
+                        font-weight:
+                            700;
+
+                    }
+
+
+                    .report-subtitle {
+
+                        margin-top:
+                            6px;
+
+                        font-size:
+                            16px;
+
+                        font-weight:
+                            700;
+
+                        color:
+                            #244494;
+
+                    }
+
+
+                    .report-description {
+
+                        margin-top:
+                            5px;
+
+                        color:
+                            #6b7280;
+
+                    }
+
+
+                    .report-date {
+
+                        margin-top:
+                            6px;
+
+                        font-size:
+                            11px;
+
+                        color:
+                            #6b7280;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    TABLE CONTAINER
+                    ==========================================
+                    */
+
+                    .table-container {
+
+                        display:
+                            block;
+
+                        width:
+                            100%;
+
+                        max-width:
+                            100%;
+
+                        border:
+                            1px solid #d1d5db;
+
+                        border-radius:
+                            4px;
+
+                        overflow:
+                            hidden;
+
+                        background:
+                            #ffffff;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    TABLE WRAPPER
+
+                    NATIVE HORIZONTAL SCROLLBAR HIDDEN
+                    BECAUSE FIXED SCROLLBAR IS USED
+                    ==========================================
+                    */
+
+                    .table-wrapper {
+
+                        display:
+                            block;
+
+                        width:
+                            100%;
+
+                        max-width:
+                            100%;
+
+                        overflow-x:
+                            auto;
+
+                        overflow-y:
+                            visible;
+
+                        scrollbar-width:
+                            none;
+
+                    }
+
+
+                    .table-wrapper::-webkit-scrollbar {
+
+                        display:
+                            none;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    TABLE
+                    ==========================================
+                    */
+
+                    table {
+
+                        width:
+                            max-content;
+
+                        min-width:
+                            100%;
+
+                        margin:
+                            0;
+
+                        border-collapse:
+                            collapse;
+
+                        border-spacing:
+                            0;
+
+                        table-layout:
+                            auto;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    HEADER
+                    ==========================================
+                    */
+
+                    thead th {
+
+                        padding:
+                            10px 9px;
+
+                        background:
+                            #244494;
+
+                        color:
+                            #ffffff;
+
+                        border-right:
+                            1px solid #d1d5db;
+
+                        border-bottom:
+                            1px solid #d1d5db;
+
+                        font-size:
+                            11px;
+
+                        font-weight:
+                            700;
+
+                        text-align:
+                            center;
+
+                        vertical-align:
+                            middle;
+
+                        white-space:
+                            nowrap;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    BODY
+                    ==========================================
+                    */
+
+                    tbody td {
+
+                        padding:
+                            9px;
+
+                        border-right:
+                            1px solid #d1d5db;
+
+                        border-bottom:
+                            1px solid #d1d5db;
+
+                        vertical-align:
+                            middle;
+
+                        background:
+                            #ffffff;
+
+                        color:
+                            #1f2937;
+
+                        font-size:
+                            12px;
+
+                        font-weight:
+                            400;
+
+                        white-space:
+                            nowrap;
+
+                    }
+
+
+                    thead th:last-child,
+                    tbody td:last-child {
+
+                        border-right:
+                            0;
+
+                    }
+
+
+                    tbody tr:last-child td {
+
+                        border-bottom:
+                            0;
+
+                    }
+
+
+                    tbody tr:nth-child(even) td {
+
+                        background:
+                            #f8fafc;
+
+                    }
+
+
+                    tbody tr:hover td {
+
+                        background:
+                            #f1f5f9;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    ALIGNMENT
+                    ==========================================
+                    */
+
+                    .center {
+
+                        text-align:
+                            center;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    COLUMN WIDTH
+                    ==========================================
+                    */
+
+                    .col-no {
+
+                        width:
+                            45px;
+
+                        min-width:
+                            45px;
+
+                    }
+
+
+                    .col-code {
+
+                        min-width:
+                            120px;
+
+                    }
+
+
+                    .col-name {
+
+                        min-width:
+                            240px;
+
+                    }
+
+
+                    .col-type {
+
+                        min-width:
+                            110px;
+
+                    }
+
+
+                    .col-top {
+
+                        min-width:
+                            110px;
+
+                    }
+
+
+                    .col-phone {
+
+                        min-width:
+                            140px;
+
+                    }
+
+
+                    .col-email {
+
+                        min-width:
+                            220px;
+
+                    }
+
+
+                    .col-tax {
+
+                        min-width:
+                            170px;
+
+                    }
+
+
+                    .col-city {
+
+                        min-width:
+                            140px;
+
+                    }
+
+
+                    .col-country {
+
+                        min-width:
+                            120px;
+
+                    }
+
+
+                    .col-status {
+
+                        min-width:
+                            90px;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    ADDRESS
+                    LAST COLUMN + WIDE
+                    ==========================================
+                    */
+
+                    .col-address {
+
+                        min-width:
+                            420px;
+
+                    }
+
+
+                    .address {
+
+                        min-width:
+                            420px;
+
+                        text-align:
+                            left;
+
+                        white-space:
+                            nowrap;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    FOOTER
+                    ==========================================
+                    */
+
+                    .report-footer {
+
+                        display:
+                            flex;
+
+                        justify-content:
+                            space-between;
+
+                        align-items:
+                            center;
+
+                        width:
+                            100%;
+
+                        margin-top:
+                            18px;
+
+                        padding-top:
+                            12px;
+
+                        border-top:
+                            1px solid #e5e7eb;
+
+                        color:
+                            #6b7280;
+
+                        font-size:
+                            11px;
+
+                        white-space:
+                            nowrap;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    FIXED BOTTOM SCROLLBAR
+                    ALWAYS AVAILABLE AT BOTTOM OF BROWSER
+                    ==========================================
+                    */
+
+                    .fixed-horizontal-scroll {
+
+                        position:
+                            fixed;
+
+                        left:
+                            0;
+
+                        right:
+                            0;
+
+                        bottom:
+                            0;
+
+                        z-index:
+                            99999;
+
+                        width:
+                            100%;
+
+                        height:
+                            22px;
+
+                        padding:
+                            0 32px;
+
+                        overflow:
+                            hidden;
+
+                        background:
+                            #f8fafc;
+
+                        border-top:
+                            1px solid #d1d5db;
+
+                        box-shadow:
+                            0 -2px 6px
+                            rgba(
+                                0,
+                                0,
+                                0,
+                                0.08
+                            );
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    FIXED SCROLL INNER
+                    ==========================================
+                    */
+
+                    .fixed-horizontal-scroll-inner {
+
+                        width:
+                            100%;
+
+                        height:
+                            21px;
+
+                        overflow-x:
+                            auto;
+
+                        overflow-y:
+                            hidden;
+
+                        scrollbar-width:
+                            auto;
+
+                        scrollbar-color:
+                            #9aa5b3
+                            #eef1f4;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    FAKE WIDTH
+                    ==========================================
+                    */
+
+                    .fixed-horizontal-scroll-content {
+
+                        width:
+                            100%;
+
+                        height:
+                            1px;
+
+                        min-height:
+                            1px;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    CHROME / EDGE SCROLLBAR
+                    ==========================================
+                    */
+
+                    .fixed-horizontal-scroll-inner::-webkit-scrollbar {
+
+                        height:
+                            16px;
+
+                    }
+
+
+                    .fixed-horizontal-scroll-inner::-webkit-scrollbar-track {
+
+                        background:
+                            #eef1f4;
+
+                    }
+
+
+                    .fixed-horizontal-scroll-inner::-webkit-scrollbar-thumb {
+
+                        background:
+                            #9aa5b3;
+
+                        border-radius:
+                            10px;
+
+                        border:
+                            3px solid #eef1f4;
+
+                    }
+
+
+                    .fixed-horizontal-scroll-inner::-webkit-scrollbar-thumb:hover {
+
+                        background:
+                            #7e8997;
+
+                    }
+
+                </style>
+
+            </head>
+
+
+            <body>
+
+
+                <div class="report">
+
+
+                    <!-- ==================================
+                         HEADER
+                    =================================== -->
+
+                    <div class="report-header">
+
+                        <h1 class="report-title">
+
+                            FINOVA ACCOUNTING SYSTEM
+
+                        </h1>
+
+
+                        <div class="report-subtitle">
+
+                            Business Partner
+
+                        </div>
+
+
+                        <div class="report-description">
+
+                            Business Partner Master Data
+
+                        </div>
+
+
+                        <div class="report-date">
+
+                            Preview Date :
+                            ${previewDate}
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ==================================
+                         TABLE
+                    =================================== -->
+
+                    <div class="table-container">
+
+
+                        <div
+                            class="table-wrapper"
+                            id="bp-table-scroll"
+                        >
+
+
+                            <table
+                                id="bp-preview-table"
+                            >
+
+
+                                <colgroup>
+
+                                    <col class="col-no">
+
+                                    <col class="col-code">
+
+                                    <col class="col-name">
+
+                                    <col class="col-type">
+
+                                    <col class="col-top">
+
+                                    <col class="col-phone">
+
+                                    <col class="col-email">
+
+                                    <col class="col-tax">
+
+                                    <col class="col-city">
+
+                                    <col class="col-country">
+
+                                    <col class="col-status">
+
+                                    <col class="col-address">
+
+                                </colgroup>
+
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th>
+                                            No
+                                        </th>
+
+                                        <th>
+                                            Code
+                                        </th>
+
+                                        <th>
+                                            Business Partner
+                                        </th>
+
+                                        <th>
+                                            Type
+                                        </th>
+
+                                        <th>
+                                            TOP
+                                        </th>
+
+                                        <th>
+                                            Phone
+                                        </th>
+
+                                        <th>
+                                            Email
+                                        </th>
+
+                                        <th>
+                                            Tax Number
+                                        </th>
+
+                                        <th>
+                                            City
+                                        </th>
+
+                                        <th>
+                                            Country
+                                        </th>
+
+                                        <th>
+                                            Status
+                                        </th>
+
+                                        <th>
+                                            Address
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+
+                                <tbody>
+
+                                    ${rows}
+
+                                </tbody>
+
+
+                            </table>
+
+
+                        </div>
+
+
+                    </div>
+
+
+                    <!-- ==================================
+                         FOOTER
+                    =================================== -->
+
+                    <div class="report-footer">
+
+                        <div>
+
+                            Total Record :
+                            ${businessPartners.length}
+
+                        </div>
+
+
+                        <div>
+
+                            Generated by FINOVA Accounting System
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- ==================================
+                     FIXED BOTTOM SCROLLBAR
+                =================================== -->
+
+                <div
+                    class="fixed-horizontal-scroll"
+                    id="bp-fixed-scroll-container"
+                >
+
+                    <div
+                        class="fixed-horizontal-scroll-inner"
+                        id="bp-fixed-scroll"
+                    >
+
+                        <div
+                            class="fixed-horizontal-scroll-content"
+                            id="bp-fixed-scroll-content"
+                        >
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+            </body>
+
+
+            </html>
+
+        `;
+
+
+        /*
+        ==================================================
+        WRITE NEW TAB
+        ==================================================
+        */
+
+        previewWindow.document.open();
+
+        previewWindow.document.write(
+            html
+        );
+
+        previewWindow.document.close();
+
+
+        /*
+        ==================================================
+        TAB TITLE
+        ==================================================
+        */
+
+        previewWindow.document.title =
+            "Business Partner - Preview";
+
+
+        /*
+        ==================================================
+        SETUP FIXED BOTTOM SCROLLBAR
+        ==================================================
+        */
+
+        const setupScrollSync = () => {
+
+            const doc =
+                previewWindow.document;
+
+
+            /*
+            ==============================================
+            ELEMENTS
+            ==============================================
+            */
+
+            const tableScroll =
+                doc.getElementById(
+                    "bp-table-scroll"
+                );
+
+
+            const table =
+                doc.getElementById(
+                    "bp-preview-table"
+                );
+
+
+            const fixedScrollContainer =
+                doc.getElementById(
+                    "bp-fixed-scroll-container"
+                );
+
+
+            const fixedScroll =
+                doc.getElementById(
+                    "bp-fixed-scroll"
+                );
+
+
+            const fixedScrollContent =
+                doc.getElementById(
+                    "bp-fixed-scroll-content"
+                );
+
+
+            /*
+            ==============================================
+            VALIDATION
+            ==============================================
+            */
+
+            if (
+                !tableScroll
+                ||
+                !table
+                ||
+                !fixedScrollContainer
+                ||
+                !fixedScroll
+                ||
+                !fixedScrollContent
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+            ==============================================
+            UPDATE SCROLL WIDTH
+            ==============================================
+            */
+
+            const updateScrollWidth = () => {
+
+                const tableWidth =
+                    Math.max(
+                        table.scrollWidth,
+                        table.offsetWidth
+                    );
+
+
+                fixedScrollContent.style.width =
+                    `${tableWidth}px`;
+
+
+                /*
+                ==========================================
+                SHOW ONLY WHEN TABLE IS WIDER
+                ==========================================
+                */
+
+                if (
+                    tableWidth <=
+                    tableScroll.clientWidth
+                ) {
+
+                    fixedScrollContainer.style.display =
+                        "none";
+
+                }
+
+                else {
+
+                    fixedScrollContainer.style.display =
+                        "block";
+
+                }
+
+            };
+
+
+            /*
+            ==============================================
+            SYNC STATE
+            ==============================================
+            */
+
+            let syncingFixed =
+                false;
+
+            let syncingTable =
+                false;
+
+
+            /*
+            ==============================================
+            FIXED SCROLL -> TABLE
+            ==============================================
+            */
+
+            fixedScroll.addEventListener(
+                "scroll",
+                () => {
+
+                    if (
+                        syncingTable
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    syncingFixed =
+                        true;
+
+
+                    tableScroll.scrollLeft =
+                        fixedScroll.scrollLeft;
+
+
+                    requestAnimationFrame(
+                        () => {
+
+                            syncingFixed =
+                                false;
+
+                        }
+                    );
+
+                }
+            );
+
+
+            /*
+            ==============================================
+            TABLE -> FIXED SCROLL
+            ==============================================
+            */
+
+            tableScroll.addEventListener(
+                "scroll",
+                () => {
+
+                    if (
+                        syncingFixed
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    syncingTable =
+                        true;
+
+
+                    fixedScroll.scrollLeft =
+                        tableScroll.scrollLeft;
+
+
+                    requestAnimationFrame(
+                        () => {
+
+                            syncingTable =
+                                false;
+
+                        }
+                    );
+
+                }
+            );
+
+
+            /*
+            ==============================================
+            INITIAL WIDTH
+            ==============================================
+            */
+
+            updateScrollWidth();
+
+
+            requestAnimationFrame(
+                () => {
+
+                    updateScrollWidth();
+
+                }
+            );
+
+
+            /*
+            ==============================================
+            WINDOW RESIZE
+            ==============================================
+            */
+
+            previewWindow.addEventListener(
+                "resize",
+                updateScrollWidth
+            );
+
+
+            /*
+            ==============================================
+            RESIZE OBSERVER
+            ==============================================
+            */
+
+            if (
+                typeof previewWindow.ResizeObserver
+                !==
+                "undefined"
+            ) {
+
+                const resizeObserver =
+                    new previewWindow.ResizeObserver(
+                        () => {
+
+                            updateScrollWidth();
+
+                        }
+                    );
+
+
+                resizeObserver.observe(
+                    table
+                );
+
+
+                resizeObserver.observe(
+                    tableScroll
+                );
+
+            }
+
+        };
+
+
+        /*
+        ==================================================
+        RUN SCROLL SETUP
+        ==================================================
+        */
+
+        if (
+            previewWindow.document.readyState ===
+            "complete"
+        ) {
+
+            setupScrollSync();
+
+        }
+
+        else {
+
+            previewWindow.addEventListener(
+                "load",
+                setupScrollSync,
+                {
+                    once:
+                        true
+                }
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        FOCUS
+        ==================================================
+        */
+
+        previewWindow.focus();
 
     }
 
+
     catch (error) {
 
-        console.error(error);
+        console.error(
+            "BusinessPartner.preview:",
+            error
+        );
 
-        this.showError("Preview failed.");
+
+        this.showError(
+            error?.message
+            ||
+            "Preview Business Partner failed."
+        );
 
     }
 

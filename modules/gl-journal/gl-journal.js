@@ -6633,118 +6633,1179 @@ PREVIEW HTML
 
 previewHTML() {
 
-    /*
-    ======================================================
-    VALIDATION
-    ======================================================
-    */
+    try {
 
-    if (!this.filteredJournals.length) {
+        /*
+        ======================================================
+        VALIDATION
+        ======================================================
+        */
 
-    this.showError(
-        "No journal available."
-    );
+        if (
+            !Array.isArray(
+                this.filteredJournals
+            )
+            ||
+            this.filteredJournals.length === 0
+        ) {
 
-    return;
+            this.showError(
+                "No journal available."
+            );
 
-}
-console.log("===== PREVIEW DATA =====");
+            return;
 
-console.log(this.filteredJournals);
+        }
 
-console.log(
-    this.filteredJournals[0]
-);
 
-console.log(
-    this.filteredJournals[0]?.details
-);
+        /*
+        ======================================================
+        OPEN PREVIEW TAB
+        ======================================================
+        */
 
-    /*
-    ======================================================
-    BUILD ROWS
-    ======================================================
-    */
+        const previewWindow =
+            window.open(
+                "",
+                "_blank"
+            );
 
-    const rows = [];
 
-this.filteredJournals.forEach(journal => {
+        if (
+            !previewWindow
+        ) {
 
-    (journal.details || []).forEach(detail => {
+            this.showError(
+                "Preview tab was blocked by the browser."
+            );
 
-        rows.push(`
+            return;
 
-            <tr>
+        }
 
-                <td>${journal.journal_date ?? "-"}</td>
 
-                <td>${journal.journal_no ?? "-"}</td>
+        /*
+        ======================================================
+        PREVIEW DATE
+        ======================================================
+        */
 
-                <td>
+        const previewDate =
+            new Date()
+                .toLocaleString(
+                    "id-ID"
+                );
 
-                    ${detail.mst_chart_of_accounts?.account_code ?? "-"}
 
-                </td>
+        /*
+        ======================================================
+        ESCAPE HTML
+        ======================================================
+        */
 
-                <td>
+        const escapeHTML =
+            value => {
 
-                    ${detail.mst_chart_of_accounts?.account_name ?? "-"}
+                return String(
+                    value ?? ""
+                )
+                    .replaceAll(
+                        "&",
+                        "&amp;"
+                    )
+                    .replaceAll(
+                        "<",
+                        "&lt;"
+                    )
+                    .replaceAll(
+                        ">",
+                        "&gt;"
+                    )
+                    .replaceAll(
+                        '"',
+                        "&quot;"
+                    )
+                    .replaceAll(
+                        "'",
+                        "&#039;"
+                    );
 
-                </td>
+            };
 
-                <td>
 
-                    ${detail.description ?? "-"}
+        /*
+        ======================================================
+        BUILD ROWS
+        ======================================================
+        */
 
-                </td>
+        const rows = [];
 
-                <td style="text-align:right">
 
-                    ${this.formatCurrency(detail.debit)}
+        this.filteredJournals.forEach(
+            journal => {
 
-                </td>
+                const details =
+                    Array.isArray(
+                        journal?.details
+                    )
+                        ? journal.details
+                        : [];
 
-                <td style="text-align:right">
 
-                    ${this.formatCurrency(detail.credit)}
+                details.forEach(
+                    detail => {
 
-                </td>
+                        const account =
+                            detail
+                                ?.mst_chart_of_accounts
+                            ||
+                            {};
 
-            </tr>
 
-        `);
+                        rows.push(`
 
-    });
+                            <tr>
 
-});
+                                <td class="center">
 
-    PreviewService.open({
+                                    ${
+                                        escapeHTML(
+                                            journal?.journal_date
+                                            ||
+                                            "-"
+                                        )
+                                    }
 
-        title: "General Journal",
+                                </td>
 
-        subtitle: "Accounting / General Journal",
 
-       columns: [
+                                <td>
 
-    "Accounting Date",
+                                    ${
+                                        escapeHTML(
+                                            journal?.journal_no
+                                            ||
+                                            "-"
+                                        )
+                                    }
 
-    "Journal No",
+                                </td>
 
-    "Account Code",
 
-    "Account Name",
+                                <td>
 
-    "Description",
+                                    ${
+                                        escapeHTML(
+                                            account?.account_code
+                                            ||
+                                            "-"
+                                        )
+                                    }
 
-    "Debit",
+                                </td>
 
-    "Credit"
 
-],
+                                <td>
 
-        rows
+                                    ${
+                                        escapeHTML(
+                                            account?.account_name
+                                            ||
+                                            "-"
+                                        )
+                                    }
 
-    });
+                                </td>
+
+
+                                <td class="description">
+
+                                    ${
+                                        escapeHTML(
+                                            detail?.description
+                                            ||
+                                            "-"
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <td class="amount">
+
+                                    ${
+                                        this.formatCurrency(
+                                            Number(
+                                                detail?.debit
+                                                ||
+                                                0
+                                            )
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <td class="amount">
+
+                                    ${
+                                        this.formatCurrency(
+                                            Number(
+                                                detail?.credit
+                                                ||
+                                                0
+                                            )
+                                        )
+                                    }
+
+                                </td>
+
+                            </tr>
+
+                        `);
+
+                    }
+                );
+
+            }
+        );
+
+
+        /*
+        ======================================================
+        HTML
+        ======================================================
+        */
+
+        const html = `
+
+            <!DOCTYPE html>
+
+            <html lang="id">
+
+            <head>
+
+                <meta charset="UTF-8">
+
+                <meta
+                    name="viewport"
+                    content="width=device-width, initial-scale=1.0"
+                >
+
+                <title>
+                    General Journal - Preview
+                </title>
+
+
+                <style>
+
+                    * {
+
+                        box-sizing:
+                            border-box;
+
+                    }
+
+
+                    html,
+                    body {
+
+                        margin:
+                            0;
+
+                        padding:
+                            0;
+
+                        width:
+                            100%;
+
+                        min-height:
+                            100%;
+
+                    }
+
+
+                    body {
+
+                        padding:
+                            28px 32px 42px 32px;
+
+                        background:
+                            #ffffff;
+
+                        color:
+                            #1f2937;
+
+                        font-family:
+                            Tahoma,
+                            Arial,
+                            sans-serif;
+
+                        font-size:
+                            12px;
+
+                    }
+
+
+                    .report {
+
+                        width:
+                            100%;
+
+                        max-width:
+                            100%;
+
+                    }
+
+
+                    .report-header {
+
+                        width:
+                            100%;
+
+                        padding-bottom:
+                            16px;
+
+                        margin-bottom:
+                            20px;
+
+                        border-bottom:
+                            2px solid #244494;
+
+                    }
+
+
+                    .report-title {
+
+                        margin:
+                            0;
+
+                        font-size:
+                            22px;
+
+                        font-weight:
+                            700;
+
+                    }
+
+
+                    .report-subtitle {
+
+                        margin-top:
+                            6px;
+
+                        font-size:
+                            16px;
+
+                        font-weight:
+                            700;
+
+                        color:
+                            #244494;
+
+                    }
+
+
+                    .report-description {
+
+                        margin-top:
+                            5px;
+
+                        color:
+                            #6b7280;
+
+                    }
+
+
+                    .report-date {
+
+                        margin-top:
+                            6px;
+
+                        font-size:
+                            11px;
+
+                        color:
+                            #6b7280;
+
+                    }
+
+
+                    .table-container {
+
+                        width:
+                            100%;
+
+                        max-width:
+                            100%;
+
+                        border:
+                            1px solid #d1d5db;
+
+                        border-radius:
+                            4px;
+
+                        overflow:
+                            hidden;
+
+                        background:
+                            #ffffff;
+
+                    }
+
+
+                    .table-wrapper {
+
+                        width:
+                            100%;
+
+                        max-width:
+                            100%;
+
+                        overflow-x:
+                            auto;
+
+                        overflow-y:
+                            visible;
+
+                        scrollbar-width:
+                            none;
+
+                    }
+
+
+                    .table-wrapper::-webkit-scrollbar {
+
+                        display:
+                            none;
+
+                    }
+
+
+                    table {
+
+                        width:
+                            max-content;
+
+                        min-width:
+                            100%;
+
+                        margin:
+                            0;
+
+                        border-collapse:
+                            collapse;
+
+                        table-layout:
+                            auto;
+
+                    }
+
+
+                    th {
+
+                        padding:
+                            10px 9px;
+
+                        background:
+                            #244494;
+
+                        color:
+                            #ffffff;
+
+                        border:
+                            1px solid #d1d5db;
+
+                        font-size:
+                            11px;
+
+                        font-weight:
+                            700;
+
+                        text-align:
+                            center;
+
+                        vertical-align:
+                            middle;
+
+                        white-space:
+                            nowrap;
+
+                    }
+
+
+                    td {
+
+                        padding:
+                            9px;
+
+                        border:
+                            1px solid #d1d5db;
+
+                        vertical-align:
+                            middle;
+
+                        background:
+                            #ffffff;
+
+                        white-space:
+                            nowrap;
+
+                    }
+
+
+                    tbody tr:nth-child(even) td {
+
+                        background:
+                            #f8fafc;
+
+                    }
+
+
+                    tbody tr:hover td {
+
+                        background:
+                            #f1f5f9;
+
+                    }
+
+
+                    .center {
+
+                        text-align:
+                            center;
+
+                    }
+
+
+                    .amount {
+
+                        min-width:
+                            140px;
+
+                        text-align:
+                            right;
+
+                        white-space:
+                            nowrap;
+
+                    }
+
+
+                    .description {
+
+                        min-width:
+                            420px;
+
+                        text-align:
+                            left;
+
+                        white-space:
+                            nowrap;
+
+                    }
+
+
+                    .col-date {
+
+                        min-width:
+                            120px;
+
+                    }
+
+
+                    .col-journal {
+
+                        min-width:
+                            170px;
+
+                    }
+
+
+                    .col-code {
+
+                        min-width:
+                            130px;
+
+                    }
+
+
+                    .col-name {
+
+                        min-width:
+                            260px;
+
+                    }
+
+
+                    .col-description {
+
+                        min-width:
+                            420px;
+
+                    }
+
+
+                    .col-amount {
+
+                        min-width:
+                            140px;
+
+                    }
+
+
+                    .report-footer {
+
+                        display:
+                            flex;
+
+                        justify-content:
+                            space-between;
+
+                        align-items:
+                            center;
+
+                        width:
+                            100%;
+
+                        margin-top:
+                            18px;
+
+                        padding-top:
+                            12px;
+
+                        border-top:
+                            1px solid #e5e7eb;
+
+                        color:
+                            #6b7280;
+
+                        font-size:
+                            11px;
+
+                        white-space:
+                            nowrap;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    FIXED BOTTOM SCROLLBAR
+                    ==========================================
+                    */
+
+                    .fixed-horizontal-scroll {
+
+                        position:
+                            fixed;
+
+                        left:
+                            0;
+
+                        right:
+                            0;
+
+                        bottom:
+                            0;
+
+                        z-index:
+                            99999;
+
+                        width:
+                            100%;
+
+                        height:
+                            22px;
+
+                        padding:
+                            0 32px;
+
+                        overflow:
+                            hidden;
+
+                        background:
+                            #f8fafc;
+
+                        border-top:
+                            1px solid #d1d5db;
+
+                        box-shadow:
+                            0 -2px 6px
+                            rgba(
+                                0,
+                                0,
+                                0,
+                                0.08
+                            );
+
+                    }
+
+
+                    .fixed-horizontal-scroll-inner {
+
+                        width:
+                            100%;
+
+                        height:
+                            21px;
+
+                        overflow-x:
+                            auto;
+
+                        overflow-y:
+                            hidden;
+
+                    }
+
+
+                    .fixed-horizontal-scroll-content {
+
+                        width:
+                            100%;
+
+                        height:
+                            1px;
+
+                        min-height:
+                            1px;
+
+                    }
+
+
+                    .fixed-horizontal-scroll-inner::-webkit-scrollbar {
+
+                        height:
+                            16px;
+
+                    }
+
+
+                    .fixed-horizontal-scroll-inner::-webkit-scrollbar-track {
+
+                        background:
+                            #eef1f4;
+
+                    }
+
+
+                    .fixed-horizontal-scroll-inner::-webkit-scrollbar-thumb {
+
+                        background:
+                            #9aa5b3;
+
+                        border-radius:
+                            10px;
+
+                        border:
+                            3px solid #eef1f4;
+
+                    }
+
+
+                    .fixed-horizontal-scroll-inner::-webkit-scrollbar-thumb:hover {
+
+                        background:
+                            #7e8997;
+
+                    }
+
+                </style>
+
+            </head>
+
+
+            <body>
+
+
+                <div class="report">
+
+
+                    <div class="report-header">
+
+                        <h1 class="report-title">
+
+                            FINOVA ACCOUNTING SYSTEM
+
+                        </h1>
+
+
+                        <div class="report-subtitle">
+
+                            General Journal
+
+                        </div>
+
+
+                        <div class="report-description">
+
+                            Accounting / General Journal
+
+                        </div>
+
+
+                        <div class="report-date">
+
+                            Preview Date :
+                            ${previewDate}
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="table-container">
+
+                        <div
+                            class="table-wrapper"
+                            id="gl-table-scroll"
+                        >
+
+                            <table
+                                id="gl-preview-table"
+                            >
+
+                                <colgroup>
+
+                                    <col class="col-date">
+
+                                    <col class="col-journal">
+
+                                    <col class="col-code">
+
+                                    <col class="col-name">
+
+                                    <col class="col-description">
+
+                                    <col class="col-amount">
+
+                                    <col class="col-amount">
+
+                                </colgroup>
+
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th>
+                                            Accounting Date
+                                        </th>
+
+                                        <th>
+                                            Journal No
+                                        </th>
+
+                                        <th>
+                                            Account Code
+                                        </th>
+
+                                        <th>
+                                            Account Name
+                                        </th>
+
+                                        <th>
+                                            Description
+                                        </th>
+
+                                        <th>
+                                            Debit
+                                        </th>
+
+                                        <th>
+                                            Credit
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+
+                                <tbody>
+
+                                    ${rows.join("")}
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="report-footer">
+
+                        <div>
+
+                            Total Journal :
+                            ${this.filteredJournals.length}
+
+                        </div>
+
+
+                        <div>
+
+                            Generated by FINOVA Accounting System
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+                <div
+                    class="fixed-horizontal-scroll"
+                    id="gl-fixed-scroll-container"
+                >
+
+                    <div
+                        class="fixed-horizontal-scroll-inner"
+                        id="gl-fixed-scroll"
+                    >
+
+                        <div
+                            class="fixed-horizontal-scroll-content"
+                            id="gl-fixed-scroll-content"
+                        >
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+            </body>
+
+            </html>
+
+        `;
+
+
+        /*
+        ======================================================
+        WRITE NEW TAB
+        ======================================================
+        */
+
+        previewWindow.document.open();
+
+        previewWindow.document.write(
+            html
+        );
+
+        previewWindow.document.close();
+
+
+        previewWindow.document.title =
+            "General Journal - Preview";
+
+
+        /*
+        ======================================================
+        SETUP FIXED HORIZONTAL SCROLL
+        ======================================================
+        */
+
+        const setupScrollSync = () => {
+
+            const doc =
+                previewWindow.document;
+
+
+            const tableScroll =
+                doc.getElementById(
+                    "gl-table-scroll"
+                );
+
+
+            const table =
+                doc.getElementById(
+                    "gl-preview-table"
+                );
+
+
+            const fixedScrollContainer =
+                doc.getElementById(
+                    "gl-fixed-scroll-container"
+                );
+
+
+            const fixedScroll =
+                doc.getElementById(
+                    "gl-fixed-scroll"
+                );
+
+
+            const fixedScrollContent =
+                doc.getElementById(
+                    "gl-fixed-scroll-content"
+                );
+
+
+            if (
+                !tableScroll
+                ||
+                !table
+                ||
+                !fixedScrollContainer
+                ||
+                !fixedScroll
+                ||
+                !fixedScrollContent
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+            ==============================================
+            WIDTH
+            ==============================================
+            */
+
+            const updateScrollWidth = () => {
+
+                const tableWidth =
+                    Math.max(
+                        table.scrollWidth,
+                        table.offsetWidth
+                    );
+
+
+                fixedScrollContent.style.width =
+                    `${tableWidth}px`;
+
+
+                if (
+                    tableWidth <=
+                    tableScroll.clientWidth
+                ) {
+
+                    fixedScrollContainer.style.display =
+                        "none";
+
+                }
+
+                else {
+
+                    fixedScrollContainer.style.display =
+                        "block";
+
+                }
+
+            };
+
+
+            /*
+            ==============================================
+            SCROLL FIXED -> TABLE
+            ==============================================
+            */
+
+            fixedScroll.addEventListener(
+                "scroll",
+                () => {
+
+                    tableScroll.scrollLeft =
+                        fixedScroll.scrollLeft;
+
+                }
+            );
+
+
+            /*
+            ==============================================
+            SCROLL TABLE -> FIXED
+            ==============================================
+            */
+
+            tableScroll.addEventListener(
+                "scroll",
+                () => {
+
+                    fixedScroll.scrollLeft =
+                        tableScroll.scrollLeft;
+
+                }
+            );
+
+
+            updateScrollWidth();
+
+
+            requestAnimationFrame(
+                updateScrollWidth
+            );
+
+
+            previewWindow.addEventListener(
+                "resize",
+                updateScrollWidth
+            );
+
+        };
+
+
+        /*
+        ======================================================
+        RUN
+        ======================================================
+        */
+
+        if (
+            previewWindow.document.readyState ===
+            "complete"
+        ) {
+
+            setupScrollSync();
+
+        }
+
+        else {
+
+            previewWindow.addEventListener(
+                "load",
+                setupScrollSync,
+                {
+                    once:
+                        true
+                }
+            );
+
+        }
+
+
+        /*
+        ======================================================
+        FOCUS
+        ======================================================
+        */
+
+        previewWindow.focus();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "GeneralJournal.previewHTML:",
+            error
+        );
+
+
+        this.showError(
+            error?.message
+            ||
+            "Failed to preview General Journal."
+        );
+
+    }
 
 }
 /*
