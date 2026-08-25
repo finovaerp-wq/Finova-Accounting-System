@@ -2283,3 +2283,173 @@ tr.ap-data-row.ap-row-completed:hover
     word-break: break-word;
 
 }
+/* ==========================================================
+   AP PAYMENT SUMMARY
+========================================================== */
+
+#accountPayablePaymentModal
+.ap-payment-summary {
+
+    width: 100%;
+
+    padding: 14px 14px 16px 14px;
+
+    background: #F8F9FA;
+
+    border-radius: 6px;
+
+}
+
+
+/* ==========================================================
+   SUMMARY LINE
+========================================================== */
+
+#accountPayablePaymentModal
+.ap-payment-summary-line {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    width: 100%;
+
+    min-height: 28px;
+
+}
+
+
+/* ==========================================================
+   SUMMARY LABEL
+========================================================== */
+
+#accountPayablePaymentModal
+.ap-payment-summary-label {
+
+    color: #6B7280;
+
+    font-size: 13px;
+
+    font-weight: 400;
+
+}
+
+
+/* ==========================================================
+   SUMMARY VALUE
+========================================================== */
+
+#accountPayablePaymentModal
+.ap-payment-summary-value {
+
+    color: #1F2937;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    text-align: right;
+
+}
+
+
+/* ==========================================================
+   DIVIDER
+========================================================== */
+
+#accountPayablePaymentModal
+.ap-payment-summary-divider {
+
+    width: 100%;
+
+    height: 1px;
+
+    margin: 10px 0 14px 0;
+
+    background: #C9CDD3;
+
+}
+
+
+/* ==========================================================
+   PAYMENT AMOUNT
+========================================================== */
+
+#accountPayablePaymentModal
+.ap-payment-amount {
+
+    width: 100%;
+
+    height: 40px;
+
+    min-height: 40px;
+
+    padding-left: 12px;
+
+    padding-right: 12px;
+
+    color: #1F2937;
+
+    font-size: 18px;
+
+    font-weight: 600;
+
+    text-align: right;
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION
+========================================================== */
+
+#accountPayablePaymentModal
+.ap-payment-description {
+
+    width: 100%;
+
+    min-height: 110px;
+
+    line-height: 1.5;
+
+    resize: vertical;
+
+    white-space: pre-wrap;
+
+    overflow-wrap: anywhere;
+
+    word-break: break-word;
+
+}
+
+
+/* ==========================================================
+   JOURNAL PREVIEW
+========================================================== */
+
+#accountPayablePaymentModal
+.ap-payment-journal-preview {
+
+    background: #FFFFFF;
+
+}
+
+
+/* ==========================================================
+   FOOTER
+========================================================== */
+
+#accountPayablePaymentModal
+.modal-footer {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+    gap: 8px;
+
+}

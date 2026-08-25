@@ -137,6 +137,7 @@ this.accountPayablePaymentModal = null;
 this.apPaymentAPId = null;
 
 this.apPaymentInvoiceNo = null;
+this.apPaymentPoNo = null;
 
 this.apPaymentVendor = null;
 
@@ -5820,7 +5821,11 @@ this.btnConfirmApDeleteInvoice =
             "accountPayableDetailModal"
         );
 
-
+    this.apPaymentPoNo =
+    document.getElementById(
+        "ap-payment-po-no"
+    );
+     
     /*
     ==================================================
     ADD AP FORM
@@ -17645,6 +17650,22 @@ async createPayment(
                 || "";
 
         }
+        /*
+==================================================
+PO NO
+==================================================
+*/
+
+if (
+    this.apPaymentPoNo
+) {
+
+    this.apPaymentPoNo.value =
+        invoice.po_no
+        ||
+        "";
+
+}
 
 
         /*
@@ -18649,8 +18670,7 @@ showVoidConfirmation() {
     
   /*
 ======================================================
-LOAD DATA
-OPTIONAL LOADING
+LOAD ACCOUNT PAYABLE
 ======================================================
 */
 
@@ -18666,18 +18686,34 @@ async loadData(
         ==================================================
         */
 
-        this.tableBody =
+        const activeTableBody =
             document.getElementById(
                 "ap-table-body"
             );
 
 
         if (
+            activeTableBody
+        ) {
+
+            this.tableBody =
+                activeTableBody;
+
+        }
+
+
+        /*
+        ==================================================
+        TABLE BODY NOT FOUND
+        ==================================================
+        */
+
+        if (
             !this.tableBody
         ) {
 
             console.warn(
-                "AP TABLE BODY NOT FOUND."
+                "AccountPayable.loadData: active table body not found."
             );
 
             return;
@@ -18687,13 +18723,16 @@ async loadData(
 
         /*
         ==================================================
-        SHOW LOADING
-        ONLY WHEN REQUESTED
+        LOADING
+        ONLY INITIAL LOAD / REFRESH
+        SAME AS ACCOUNT RECEIVABLE
         ==================================================
         */
 
         if (
             showLoading
+            &&
+            this.tableBody
         ) {
 
             this.tableBody.innerHTML = `
@@ -18702,7 +18741,8 @@ async loadData(
 
                     <td
                         colspan="6"
-                        class="text-center py-5">
+                        class="text-center py-5"
+                    >
 
                         <div
                             class="
@@ -18711,13 +18751,21 @@ async loadData(
                                 align-items-center
                                 justify-content-center
                                 gap-2
-                            ">
+                            "
+                        >
 
                             <div
-                                class="spinner-border text-primary"
-                                role="status">
+                                class="
+                                    spinner-border
+                                    spinner-border-sm
+                                    text-primary
+                                "
+                                role="status"
+                            >
 
-                                <span class="visually-hidden">
+                                <span
+                                    class="visually-hidden"
+                                >
 
                                     Loading...
 
@@ -18727,11 +18775,16 @@ async loadData(
 
 
                             <div
-                                class="text-muted small">
+                                class="
+                                    text-muted
+                                    small
+                                "
+                            >
 
                                 Loading Account Payable...
 
                             </div>
+
 
                         </div>
 
@@ -18754,76 +18807,11 @@ async loadData(
             await this.service.getAll();
 
 
-        data =
-            Array.isArray(
-                data
-            )
-                ? data
-                : [];
-
-
         /*
         ==================================================
-        SYNC PAYMENT STATUS
+        NORMALIZE DATA
         ==================================================
         */
-
-        for (
-            const invoice
-            of data
-        ) {
-
-            const currentStatus =
-                String(
-                    invoice?.status
-                    ||
-                    ""
-                )
-                .trim();
-
-
-            if (
-                currentStatus === "Complete"
-                ||
-                currentStatus === "Paid"
-                ||
-                currentStatus === "Partial Paid"
-            ) {
-
-                try {
-
-                    await this.service
-                        .updatePaymentStatus(
-                            invoice.id
-                        );
-
-                }
-
-                catch (
-                    syncError
-                ) {
-
-                    console.error(
-                        "AP PAYMENT STATUS SYNC ERROR:",
-                        syncError
-                    );
-
-                }
-
-            }
-
-        }
-
-
-        /*
-        ==================================================
-        RELOAD AFTER STATUS SYNC
-        ==================================================
-        */
-
-        data =
-            await this.service.getAll();
-
 
         data =
             Array.isArray(
@@ -18851,7 +18839,21 @@ async loadData(
 
         /*
         ==================================================
-        KEEP CURRENT PAGE
+        PAGE SIZE
+        ==================================================
+        */
+
+        const pageSize =
+            Number(
+                this.pageSize
+            )
+            ||
+            20;
+
+
+        /*
+        ==================================================
+        TOTAL PAGES
         ==================================================
         */
 
@@ -18861,10 +18863,16 @@ async loadData(
                 Math.ceil(
                     this.filteredData.length
                     /
-                    this.pageSize
+                    pageSize
                 )
             );
 
+
+        /*
+        ==================================================
+        KEEP CURRENT PAGE VALID
+        ==================================================
+        */
 
         this.currentPage =
             Math.min(
@@ -18882,7 +18890,8 @@ async loadData(
 
         /*
         ==================================================
-        RE-CACHE ACTIVE BODY
+        RE-CACHE TABLE BODY
+        AFTER ASYNC OPERATION
         ==================================================
         */
 
@@ -18898,11 +18907,75 @@ async loadData(
         ==================================================
         */
 
-        this.render();
+        if (
+            typeof this.render ===
+            "function"
+        ) {
+
+            this.render();
+
+        }
+
+        else {
+
+            /*
+            ==============================================
+            FALLBACK
+            ==============================================
+            */
+
+            if (
+                typeof this.renderTable ===
+                "function"
+            ) {
+
+                this.renderTable();
+
+            }
+
+
+            if (
+                typeof this.renderPagination ===
+                "function"
+            ) {
+
+                this.renderPagination();
+
+            }
+
+        }
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "ACCOUNT PAYABLE LOAD DATA:",
+            {
+
+                total:
+                    this.data.length,
+
+                currentPage:
+                    this.currentPage,
+
+                totalPages:
+                    totalPages,
+
+                showLoading:
+                    showLoading
+
+            }
+        );
 
     }
 
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
             "AccountPayable.loadData:",
@@ -18910,7 +18983,74 @@ async loadData(
         );
 
 
+        /*
+        ==================================================
+        RE-CACHE TABLE BODY
+        ==================================================
+        */
+
+        const activeTableBody =
+            document.getElementById(
+                "ap-table-body"
+            );
+
+
+        if (
+            activeTableBody
+        ) {
+
+            this.tableBody =
+                activeTableBody;
+
+
+            /*
+            ==============================================
+            ERROR TABLE
+            ==============================================
+            */
+
+            this.tableBody.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="6"
+                        class="
+                            text-center
+                            text-danger
+                            py-5
+                        "
+                    >
+
+                        <i
+                            class="
+                                fa-solid
+                                fa-circle-exclamation
+                                me-2
+                            "
+                        >
+                        </i>
+
+                        Failed to load Account Payable.
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        }
+
+
+        /*
+        ==================================================
+        ERROR MESSAGE
+        ==================================================
+        */
+
         this.showError(
+            error?.message
+            ||
             "Failed to load Account Payable."
         );
 

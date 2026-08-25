@@ -3,7 +3,13 @@
 FINOVA ACCOUNTING SYSTEM
 MODULE  : ACCOUNT RECEIVABLE
 FILE    : account-receivable-payment-modal.html
-VERSION : 1.0.0
+VERSION : 2.0.0
+
+FINAL :
+- SAME VISUAL FLOW AS AP PAYMENT
+- DESCRIPTION FULL WIDTH
+- LONG DESCRIPTION SAFE
+- CURRENT JS IDS PRESERVED
 ==========================================================
 -->
 
@@ -14,10 +20,17 @@ VERSION : 1.0.0
     tabindex="-1"
     data-bs-backdrop="static"
     data-bs-keyboard="false"
-    aria-hidden="true">
+    aria-hidden="true"
+>
 
 
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div
+        class="
+            modal-dialog
+            modal-lg
+            modal-dialog-centered
+        "
+    >
 
 
         <div class="modal-content">
@@ -29,21 +42,40 @@ VERSION : 1.0.0
 
             <div class="modal-header">
 
+
                 <div>
+
 
                     <h5
                         class="modal-title"
-                        id="ar-payment-modal-title">
+                        id="ar-payment-modal-title"
+                    >
 
-                        Receive Payment
+                        <i
+                            class="
+                                fa-solid
+                                fa-money-bill-transfer
+                                me-2
+                            "
+                        ></i>
+
+                        AR Payment
 
                     </h5>
 
-                    <div class="small text-muted">
 
-                        Account Receivable Payment
+                    <div
+                        class="
+                            small
+                            text-muted
+                            mt-1
+                        "
+                    >
+
+                        Create payment for completed Account Receivable
 
                     </div>
+
 
                 </div>
 
@@ -52,8 +84,10 @@ VERSION : 1.0.0
                     type="button"
                     class="btn-close"
                     data-bs-dismiss="modal"
-                    aria-label="Close">
+                    aria-label="Close"
+                >
                 </button>
+
 
             </div>
 
@@ -65,108 +99,74 @@ VERSION : 1.0.0
             <div class="modal-body">
 
 
-                <!-- ==============================================
+                <!-- ==================================================
                      HIDDEN AR ID
-                =============================================== -->
+                =================================================== -->
 
                 <input
                     type="hidden"
-                    id="ar-payment-ar-id">
+                    id="ar-payment-ar-id"
+                >
 
 
-                <!-- ==============================================
+                <!-- ==================================================
                      INVOICE INFORMATION
-                =============================================== -->
+                =================================================== -->
 
-                <div class="border rounded p-3 mb-3">
-
-
-                    <div class="row g-3">
+                <div class="row g-3">
 
 
-                        <div class="col-md-6">
+                    <!-- ==============================================
+                         INVOICE NO
+                    =============================================== -->
 
-                            <label class="form-label">
-
-                                Invoice No
-
-                            </label>
-
-                            <input
-                                type="text"
-                                id="ar-payment-invoice-no"
-                                class="form-control"
-                                readonly>
-
-                        </div>
+                    <div class="col-md-6">
 
 
-                        <div class="col-md-6">
+                        <label
+                            for="ar-payment-invoice-no"
+                            class="form-label"
+                        >
 
-                            <label class="form-label">
+                            Invoice No
 
-                                Customer
-
-                            </label>
-
-                            <input
-                                type="text"
-                                id="ar-payment-customer"
-                                class="form-control"
-                                readonly>
-
-                        </div>
+                        </label>
 
 
-                        <div class="col-md-4">
-
-                            <label class="form-label">
-
-                                Total Invoice
-
-                            </label>
-
-                            <input
-                                type="text"
-                                id="ar-payment-total"
-                                class="form-control text-end"
-                                readonly>
-
-                        </div>
+                        <input
+                            type="text"
+                            id="ar-payment-invoice-no"
+                            class="form-control"
+                            readonly
+                        >
 
 
-                        <div class="col-md-4">
-
-                            <label class="form-label">
-
-                                Paid Amount
-
-                            </label>
-
-                            <input
-                                type="text"
-                                id="ar-payment-paid"
-                                class="form-control text-end"
-                                readonly>
-
-                        </div>
+                    </div>
 
 
-                        <div class="col-md-4">
+                    <!-- ==============================================
+                         CUSTOMER
+                    =============================================== -->
 
-                            <label class="form-label">
+                    <div class="col-md-6">
 
-                                Outstanding
 
-                            </label>
+                        <label
+                            for="ar-payment-customer"
+                            class="form-label"
+                        >
 
-                            <input
-                                type="text"
-                                id="ar-payment-outstanding"
-                                class="form-control text-end fw-semibold"
-                                readonly>
+                            Customer
 
-                        </div>
+                        </label>
+
+
+                        <input
+                            type="text"
+                            id="ar-payment-customer"
+                            class="form-control"
+                            readonly
+                        >
 
 
                     </div>
@@ -175,129 +175,82 @@ VERSION : 1.0.0
                 </div>
 
 
-                <!-- ==============================================
-                     PAYMENT DATE
-                =============================================== -->
+                <!-- ==================================================
+                     PAYMENT INFORMATION
+                =================================================== -->
 
-                <div class="row g-3">
+                <div class="row g-3 mt-1">
 
+
+                    <!-- ==============================================
+                         PAYMENT DATE
+                    =============================================== -->
 
                     <div class="col-md-6">
 
+
                         <label
                             for="ar-payment-date"
-                            class="form-label">
+                            class="form-label"
+                        >
 
                             Payment Date
-                            <span class="text-danger">*</span>
+
+                            <span class="text-danger">
+
+                                *
+
+                            </span>
 
                         </label>
+
 
                         <input
                             type="date"
                             id="ar-payment-date"
-                            class="form-control">
+                            class="form-control"
+                        >
+
 
                     </div>
 
 
-                    <!-- ==========================================
-                         PAYMENT ACCOUNT
-                    =========================================== -->
+                    <!-- ==============================================
+                         BANK ACCOUNT
+                    =============================================== -->
 
                     <div class="col-md-6">
 
+
                         <label
                             for="ar-payment-account"
-                            class="form-label">
+                            class="form-label"
+                        >
 
-                            Bank / Cash Account
-                            <span class="text-danger">*</span>
+                            Bank Account
+
+                            <span class="text-danger">
+
+                                *
+
+                            </span>
 
                         </label>
 
+
                         <select
                             id="ar-payment-account"
-                            class="form-select">
+                            class="form-select"
+                        >
 
                             <option value="">
 
-                                Select Bank / Cash Account
+                                Select Bank Account
 
                             </option>
 
                         </select>
 
-                    </div>
-
-
-                    <!-- ==========================================
-                         PAYMENT AMOUNT
-                    =========================================== -->
-
-                    <div class="col-md-6">
-
-                        <label
-                            for="ar-payment-amount"
-                            class="form-label">
-
-                            Payment Amount
-                            <span class="text-danger">*</span>
-
-                        </label>
-
-                        <input
-                            type="text"
-                            id="ar-payment-amount"
-                            class="form-control text-end"
-                            inputmode="numeric"
-                            value="0">
-
-                    </div>
-
-
-                    <!-- ==========================================
-                         REFERENCE NO
-                    =========================================== -->
-
-                    <div class="col-md-6">
-
-                        <label
-                            for="ar-payment-reference-no"
-                            class="form-label">
-
-                            Reference No
-
-                        </label>
-
-                        <input
-                            type="text"
-                            id="ar-payment-reference-no"
-                            class="form-control"
-                            placeholder="Transfer / receipt reference">
-
-                    </div>
-
-
-                    <!-- ==========================================
-                         DESCRIPTION
-                    =========================================== -->
-
-                    <div class="col-12">
-
-                        <label
-                            for="ar-payment-description"
-                            class="form-label">
-
-                            Description
-
-                        </label>
-
-                        <textarea
-                            id="ar-payment-description"
-                            class="form-control"
-                            rows="3"
-                            placeholder="Payment description"></textarea>
 
                     </div>
 
@@ -305,44 +258,339 @@ VERSION : 1.0.0
                 </div>
 
 
-                <!-- ==============================================
+                    <!-- ==================================================
+                        PAYMENT SUMMARY
+                        SAME AS ACCOUNT PAYABLE
+                    =================================================== -->
+
+                    <div
+                        class="
+                            ar-payment-summary
+                            bg-light
+                            rounded
+                            p-3
+                            mt-4
+                        "
+                    >
+
+
+                        <!-- ==============================================
+                            DPP
+                        =============================================== -->
+
+                        <div
+                            class="
+                                d-flex
+                                justify-content-between
+                                align-items-center
+                                mb-2
+                            "
+                        >
+
+                            <span class="text-muted">
+
+                                DPP
+
+                            </span>
+
+
+                            <strong
+                                id="ar-payment-dpp"
+                            >
+
+                                0
+
+                            </strong>
+
+                        </div>
+
+
+                        <!-- ==============================================
+                            TAX (+)
+                        =============================================== -->
+
+                        <div
+                            class="
+                                d-flex
+                                justify-content-between
+                                align-items-center
+                                mb-2
+                            "
+                        >
+
+                            <span class="text-muted">
+
+                                Tax (+)
+
+                            </span>
+
+
+                            <strong
+                                id="ar-payment-tax-plus"
+                            >
+
+                                0
+
+                            </strong>
+
+                        </div>
+
+
+                        <!-- ==============================================
+                            TAX (-)
+                        =============================================== -->
+
+                        <div
+                            class="
+                                d-flex
+                                justify-content-between
+                                align-items-center
+                            "
+                        >
+
+                            <span class="text-muted">
+
+                                Tax (-)
+
+                            </span>
+
+
+                            <strong
+                                id="ar-payment-tax-minus"
+                            >
+
+                                0
+
+                            </strong>
+
+                        </div>
+
+
+                        <hr class="my-3">
+
+
+                        <!-- ==============================================
+                            PAYMENT AMOUNT
+                        =============================================== -->
+
+                        <div
+                            class="
+                                row
+                                align-items-center
+                                g-3
+                            "
+                        >
+
+
+                            <div class="col-md-6">
+
+                                <label
+                                    for="ar-payment-amount"
+                                    class="
+                                        form-label
+                                        fw-semibold
+                                        mb-1
+                                    "
+                                >
+
+                                    Payment Amount
+
+                                    <span class="text-danger">
+
+                                        *
+
+                                    </span>
+
+                                </label>
+
+
+                                <div
+                                    class="
+                                        small
+                                        text-muted
+                                    "
+                                >
+
+                                    Maximum payment is current outstanding.
+
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-md-6">
+
+                                <input
+                                    type="text"
+                                    id="ar-payment-amount"
+                                    class="
+                                        form-control
+                                        text-end
+                                        fw-semibold
+                                    "
+                                    inputmode="numeric"
+                                    autocomplete="off"
+                                    value="0"
+                                >
+
+                            </div>
+
+
+                        </div>
+
+
+                    </div>
+
+                <!-- ==================================================
+                     REFERENCE NO
+                     FULL WIDTH
+                =================================================== -->
+
+                <div class="row g-3 mt-1">
+
+
+                    <div class="col-12">
+
+
+                        <label
+                            for="ar-payment-reference-no"
+                            class="form-label"
+                        >
+
+                            Reference No
+
+                        </label>
+
+
+                        <input
+                            type="text"
+                            id="ar-payment-reference-no"
+                            class="form-control"
+                            placeholder="Transfer / receipt reference"
+                            autocomplete="off"
+                        >
+
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- ==================================================
+                     DESCRIPTION
+                     FULL WIDTH SEPARATE SECTION
+                =================================================== -->
+
+                <div class="row g-3 mt-1">
+
+
+                    <div class="col-12">
+
+
+                        <label
+                            for="ar-payment-description"
+                            class="form-label"
+                        >
+
+                            Description
+
+                        </label>
+
+
+                        <textarea
+                            id="ar-payment-description"
+                            class="
+                                form-control
+                                ar-payment-description
+                            "
+                            rows="4"
+                            placeholder="Payment description"
+                        ></textarea>
+
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- ==================================================
                      JOURNAL PREVIEW
-                =============================================== -->
+                =================================================== -->
 
-                <div class="alert alert-light border mt-4 mb-0">
+                <div
+                    class="
+                        ar-payment-journal-preview
+                        alert
+                        alert-light
+                        border
+                        mt-4
+                        mb-0
+                    "
+                >
 
 
-                    <div class="fw-semibold mb-1">
+                    <div
+                        class="
+                            fw-semibold
+                            mb-2
+                        "
+                    >
 
                         Journal Preview
 
                     </div>
 
 
-                    <div class="small text-muted">
-
-                        Debit:
-
-                        <strong
-                            id="ar-payment-preview-debit">
-
-                            BANK / CASH
-
-                        </strong>
+                    <div
+                        class="
+                            small
+                            text-muted
+                        "
+                    >
 
 
-                        <span class="mx-2">
-                            |
-                        </span>
+                        <div class="mb-1">
+
+                            Debit:
+
+                            <strong
+                                id="ar-payment-preview-debit"
+                            >
+
+                                BANK / CASH
+
+                            </strong>
+
+                        </div>
 
 
-                        Credit:
+                        <div class="mb-1">
 
-                        <strong>
+                            Credit:
 
-                            PIUTANG USAHA
+                            <strong>
 
-                        </strong>
+                                PIUTANG USAHA
+
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            Payment GL Journal will be generated as
+
+                            <strong>
+
+                                Draft
+
+                            </strong>.
+
+                        </div>
+
 
                     </div>
 
@@ -360,22 +608,38 @@ VERSION : 1.0.0
             <div class="modal-footer">
 
 
+                <!-- ==============================================
+                     CANCEL
+                =============================================== -->
+
                 <button
                     type="button"
                     class="btn btn-outline-secondary"
-                    data-bs-dismiss="modal">
+                    data-bs-dismiss="modal"
+                >
 
                     Cancel
 
                 </button>
 
 
+                <!-- ==============================================
+                     RECEIVE PAYMENT
+                =============================================== -->
+
                 <button
                     type="button"
                     id="btn-save-ar-payment"
-                    class="btn btn-success">
+                    class="btn btn-success"
+                >
 
-                    <i class="fa-solid fa-money-bill-wave me-1"></i>
+                    <i
+                        class="
+                            fa-solid
+                            fa-money-bill-wave
+                            me-1
+                        "
+                    ></i>
 
                     Receive Payment
 

@@ -195,296 +195,224 @@
                     id="ar-modal-tab-content">
 
 
-                    <!-- ==================================================
-                         TAB 1 : HEADER INFO
-                    =================================================== -->
+                    <!-- ==========================================================
+                            HEADER INFO
+                            SAME STRUCTURE AS ACCOUNT PAYABLE
+                        ========================================================== -->
 
-                    <div
-                        class="tab-pane fade show active"
-                        id="ar-header-info-pane"
-                        role="tabpanel"
-                        aria-labelledby="ar-header-info-tab"
-                        tabindex="0">
+                        <div
+                            class="tab-pane fade show active"
+                            id="ar-header-info-pane"
+                            role="tabpanel"
+                        >
 
+                            <div class="ar-header-card">
 
-                        <div class="p-4">
+                                <div class="row g-3">
 
 
-                            <div class="finova-card">
+                                    <!-- CUSTOMER -->
 
+                                    <div class="col-md-6">
 
-                                <div class="finova-card-body">
+                                        <label
+                                            for="ar-form-customer"
+                                            class="form-label"
+                                        >
+                                            Customer
+                                            <span class="text-danger">*</span>
+                                        </label>
 
+                                        <select
+                                            id="ar-form-customer"
+                                            class="form-select"
+                                        >
 
-                                    <input
-                                        type="hidden"
-                                        id="ar-form-id">
+                                            <option value="">
+                                                Select Customer
+                                            </option>
 
-
-                                    <div class="row g-3">
-
-
-                                        <!-- ==================================
-                                             CUSTOMER
-                                        =================================== -->
-
-                                        <div class="col-md-6">
-
-                                            <label
-                                                for="ar-form-customer"
-                                                class="form-label">
-
-                                                Customer
-                                                <span class="text-danger">*</span>
-
-                                            </label>
-
-
-                                            <select
-                                                id="ar-form-customer"
-                                                class="form-select">
-
-                                                <option value="">
-                                                    Select Customer
-                                                </option>
-
-                                            </select>
-
-                                        </div>
-
-
-                                        <!-- ==================================
-                                             PO NO
-                                        =================================== -->
-
-                                        <div class="col-md-6">
-
-                                            <label
-                                                for="ar-form-po-no"
-                                                class="form-label">
-
-                                                PO No
-
-                                            </label>
-
-
-                                            <input
-                                                type="text"
-                                                id="ar-form-po-no"
-                                                class="form-control"
-                                                placeholder="Enter PO number">
-
-                                        </div>
-
-
-                                        <!-- ==================================
-                                             INVOICE NO
-                                        =================================== -->
-
-                                        <div class="col-md-6">
-
-                                            <label
-                                                for="ar-form-invoice-no"
-                                                class="form-label">
-
-                                                Invoice No
-                                                <span class="text-danger">*</span>
-
-                                            </label>
-
-
-                                            <input
-                                                type="text"
-                                                id="ar-form-invoice-no"
-                                                class="form-control"
-                                                placeholder="Enter invoice number">
-
-                                        </div>
-
-
-                                        <!-- ==================================
-                                             NO JOURNAL
-                                        =================================== -->
-
-                                        <div class="col-md-6">
-
-                                            <label
-                                                for="ar-form-journal-no"
-                                                class="form-label">
-
-                                                No. Journal
-
-                                            </label>
-
-
-                                            <input
-                                                type="text"
-                                                id="ar-form-journal-no"
-                                                name="journal_no"
-                                                class="form-control"
-                                                placeholder="AUTO"
-                                                readonly>
-
-                                        </div>
-
-
-                                        <!-- ==================================
-                                             INVOICE DATE
-                                        =================================== -->
-
-                                        <div class="col-md-6">
-
-                                            <label
-                                                for="ar-form-invoice-date"
-                                                class="form-label">
-
-                                                Invoice Date
-                                                <span class="text-danger">*</span>
-
-                                            </label>
-
-
-                                            <input
-                                                type="date"
-                                                id="ar-form-invoice-date"
-                                                class="form-control">
-
-                                        </div>
-
-
-                                        <!-- ==================================
-                                             DATE RECEIVED
-                                        =================================== -->
-
-                                        <div class="col-md-6">
-
-                                            <label
-                                                for="ar-form-date-received"
-                                                class="form-label">
-
-                                                Date Received
-                                                <span class="text-danger">*</span>
-
-                                            </label>
-
-
-                                            <input
-                                                type="date"
-                                                id="ar-form-date-received"
-                                                class="form-control">
-
-                                        </div>
-
-
-                                        <!-- ==================================
-                                             TERM OF PAYMENT
-                                        =================================== -->
-
-                                        <div class="col-md-6">
-
-                                            <label
-                                                for="ar-form-top"
-                                                class="form-label">
-
-                                                Term of Payment
-
-                                            </label>
-
-
-                                            <input
-                                                type="text"
-                                                id="ar-form-top"
-                                                class="form-control"
-                                                readonly
-                                                placeholder="Auto from Customer">
-
-                                        </div>
-
-
-                                        <!-- ==================================
-                                             DUE DATE
-                                        =================================== -->
-
-                                        <div class="col-md-6">
-
-                                            <label
-                                                for="ar-form-due-date"
-                                                class="form-label">
-
-                                                Due Date
-
-                                            </label>
-
-
-                                            <input
-                                                type="date"
-                                                id="ar-form-due-date"
-                                                class="form-control"
-                                                readonly>
-
-                                        </div>
-
-
-                                        <!-- ==================================
-                                             STATUS
-                                        =================================== -->
-
-                                        <div class="col-md-6">
-
-                                            <label
-                                                for="ar-form-status"
-                                                class="form-label">
-
-                                                Status
-
-                                            </label>
-
-
-                                            <input
-                                                type="text"
-                                                id="ar-form-status"
-                                                class="form-control"
-                                                value="Draft"
-                                                readonly>
-
-                                        </div>
-
-
-                                        <!-- ==================================
-                                             DESCRIPTION
-                                        =================================== -->
-
-                                        <div class="col-12">
-
-                                            <label
-                                                for="ar-form-description"
-                                                class="form-label">
-
-                                                Description
-
-                                            </label>
-
-
-                                            <textarea
-                                                id="ar-form-description"
-                                                class="form-control"
-                                                rows="2"
-                                                placeholder="Enter description">
-                                            </textarea>
-
-                                        </div>
-
+                                        </select>
 
                                     </div>
+
+
+                                    <!-- PO NO -->
+
+                                    <div class="col-md-6">
+
+                                        <label
+                                            for="ar-form-po-no"
+                                            class="form-label"
+                                        >
+                                            PO No
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            id="ar-form-po-no"
+                                            class="form-control"
+                                            placeholder="Enter PO number"
+                                        >
+
+                                    </div>
+
+
+                                    <!-- INVOICE NO -->
+
+                                    <div class="col-md-6">
+
+                                        <label
+                                            for="ar-form-invoice-no"
+                                            class="form-label"
+                                        >
+                                            Invoice No
+                                            <span class="text-danger">*</span>
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            id="ar-form-invoice-no"
+                                            class="form-control"
+                                            placeholder="Enter invoice number"
+                                        >
+
+                                    </div>
+
+
+                                    <!-- JOURNAL -->
+
+                                    <div class="col-md-6">
+
+                                        <label
+                                            for="ar-form-journal-no"
+                                            class="form-label"
+                                        >
+                                            No. Journal
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            id="ar-form-journal-no"
+                                            class="form-control"
+                                            value="AUTO"
+                                            readonly
+                                        >
+
+                                    </div>
+
+
+                                    <!-- INVOICE DATE -->
+
+                                    <div class="col-md-6">
+
+                                        <label
+                                            for="ar-form-invoice-date"
+                                            class="form-label"
+                                        >
+                                            Invoice Date
+                                            <span class="text-danger">*</span>
+                                        </label>
+
+                                        <input
+                                            type="date"
+                                            id="ar-form-invoice-date"
+                                            class="form-control"
+                                        >
+
+                                    </div>
+
+
+                                    <!-- DATE RECEIVED -->
+
+                                    <div class="col-md-6">
+
+                                        <label
+                                            for="ar-form-date-received"
+                                            class="form-label"
+                                        >
+                                            Date Received
+                                            <span class="text-danger">*</span>
+                                        </label>
+
+                                        <input
+                                            type="date"
+                                            id="ar-form-date-received"
+                                            class="form-control"
+                                        >
+
+                                    </div>
+
+
+                                    <!-- TERM OF PAYMENT -->
+
+                                    <div class="col-md-6">
+
+                                        <label
+                                            for="ar-form-top"
+                                            class="form-label"
+                                        >
+                                            Term of Payment
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            id="ar-form-top"
+                                            class="form-control"
+                                            placeholder="Auto from Customer"
+                                            readonly
+                                        >
+
+                                    </div>
+
+
+                                    <!-- DUE DATE -->
+
+                                    <div class="col-md-6">
+
+                                        <label
+                                            for="ar-form-due-date"
+                                            class="form-label"
+                                        >
+                                            Due Date
+                                        </label>
+
+                                        <input
+                                            type="date"
+                                            id="ar-form-due-date"
+                                            class="form-control"
+                                            readonly
+                                        >
+
+                                    </div>
+
+
+                                    <!-- DESCRIPTION -->
+
+                                    <div class="col-12">
+
+                                        <label
+                                            for="ar-form-description"
+                                            class="form-label"
+                                        >
+                                            Description
+                                        </label>
+
+                                        <textarea
+                                            id="ar-form-description"
+                                            class="form-control"
+                                            rows="2"
+                                            placeholder="Enter description"
+                                        ></textarea>
+
+                                    </div>
+
 
                                 </div>
 
                             </div>
 
                         </div>
-
-                    </div>
-
 
                     <!-- ==================================================
                          TAB 2 : INVOICE DETAILS

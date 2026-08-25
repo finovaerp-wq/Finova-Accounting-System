@@ -91,56 +91,114 @@ async getAll() {
 
     try {
 
+        /*
+        ==================================================
+        QUERY
+        ==================================================
+        */
+
         const {
 
             data,
 
             error
 
-        } = await supabase
+        } =
+            await supabase
 
-            .from(
-                this.table
-            )
-
-            .select(`
-
-                *,
-
-                mst_business_partner (
-                    id,
-                    bp_code,
-                    bp_name,
-                    bp_type,
-                    top_id,
-                    is_active
-                ),
-
-                trx_gl_journal (
-                    id,
-                    journal_no,
-                    journal_date,
-                    status
+                .from(
+                    this.table
                 )
 
-            `)
+                .select(`
 
-            .order(
-                "created_at",
+                    *,
+
+                    mst_business_partner (
+                        id,
+                        bp_code,
+                        bp_name,
+                        bp_type,
+                        top_id,
+                        is_active
+                    ),
+
+                    trx_gl_journal (
+                        id,
+                        journal_no,
+                        journal_date,
+                        status
+                    )
+
+                `)
+
+                .order(
+                    "created_at",
+                    {
+                        ascending:
+                            true
+                    }
+                );
+
+
+        /*
+        ==================================================
+        ERROR
+        ==================================================
+        */
+
+        if (
+            error
+        ) {
+
+            console.error(
+                "ACCOUNT RECEIVABLE GET ALL ERROR:",
                 {
-                    ascending: true
+
+                    message:
+                        error.message,
+
+                    details:
+                        error.details,
+
+                    hint:
+                        error.hint,
+
+                    code:
+                        error.code
+
                 }
             );
 
-
-        if (error) {
 
             throw error;
 
         }
 
 
-        return data || [];
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "ACCOUNT RECEIVABLE GET ALL:",
+            data
+        );
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
+
+        return Array.isArray(
+            data
+        )
+            ? data
+            : [];
 
     }
 
@@ -748,251 +806,301 @@ async complete(
 
 
     /*
-    ======================================================
-    SEARCH
-    ======================================================
-    */
+======================================================
+SEARCH ACCOUNT RECEIVABLE
+======================================================
+*/
 
-    async search(
-        filters = {}
-    ) {
+async search(
+    filters = {}
+) {
 
-        try {
+    try {
 
-            let query =
-                supabase
+        /*
+        ==================================================
+        NORMALIZE FILTER
+        ==================================================
+        */
 
-                    .from(
-                        this.table
+        const dateFrom =
+            String(
+                filters?.dateFrom
+                || ""
+            )
+            .trim();
+
+
+        const dateTo =
+            String(
+                filters?.dateTo
+                || ""
+            )
+            .trim();
+
+
+        const status =
+            String(
+                filters?.status
+                || "all"
+            )
+            .trim();
+
+
+        const findBy =
+            String(
+                filters?.findBy
+                || "invoice_no"
+            )
+            .trim()
+            .toLowerCase();
+
+
+        const keyword =
+            String(
+                filters?.keyword
+                || ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        /*
+        ==================================================
+        VALIDATE DATE RANGE
+        ==================================================
+        */
+
+        if (
+            dateFrom
+            &&
+            dateTo
+            &&
+            dateFrom > dateTo
+        ) {
+
+            throw new Error(
+                "Invoice Date From cannot be greater than Invoice Date To."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        BASE QUERY
+        ==================================================
+        */
+
+        let query =
+            supabase
+
+                .from(
+                    this.table
+                )
+
+                .select(`
+
+                    *,
+
+                    mst_business_partner (
+                        id,
+                        bp_code,
+                        bp_name,
+                        bp_type,
+                        top_id,
+                        is_active
+                    ),
+
+                    trx_gl_journal (
+                        id,
+                        journal_no,
+                        journal_date,
+                        status
                     )
 
-                    .select(`
-                        *,
-                        mst_business_partner (
-                            id,
-                            bp_code,
-                            bp_name,
-                            bp_type,
-                            top_id,
-                            is_active
-                        )
-                    `);
+                `);
+
+
+        /*
+        ==================================================
+        INVOICE DATE FROM
+        ==================================================
+        */
+
+        if (
+            dateFrom
+        ) {
+
+            query =
+                query.gte(
+                    "invoice_date",
+                    dateFrom
+                );
+
+        }
+
+
+        /*
+        ==================================================
+        INVOICE DATE TO
+        ==================================================
+        */
+
+        if (
+            dateTo
+        ) {
+
+            query =
+                query.lte(
+                    "invoice_date",
+                    dateTo
+                );
+
+        }
+
+
+        /*
+        ==================================================
+        STATUS
+        ==================================================
+        */
+
+        if (
+            status
+            &&
+            status.toLowerCase() !== "all"
+        ) {
+
+            const normalizedStatus =
+                status.toLowerCase();
 
 
             /*
-            ==================================================
-            DATE FROM
-            ==================================================
+            ==============================================
+            NOT COMPLETED
+            COMPATIBILITY WITH AP LOGIC
+            ==============================================
             */
 
             if (
-                filters.dateFrom
+                normalizedStatus ===
+                "not_completed"
             ) {
 
                 query =
-                    query.gte(
-                        "invoice_date",
-                        filters.dateFrom
+                    query.in(
+                        "status",
+                        [
+                            this.STATUS.DRAFT,
+                            this.STATUS.UNPAID
+                        ]
                     );
 
             }
 
 
             /*
-            ==================================================
-            DATE TO
-            ==================================================
+            ==============================================
+            COMPLETED
+            COMPATIBILITY WITH AP LOGIC
+            ==============================================
             */
 
-            if (
-                filters.dateTo
-            ) {
-
-                query =
-                    query.lte(
-                        "invoice_date",
-                        filters.dateTo
-                    );
-
-            }
-
-
-            /*
-            ==================================================
-            STATUS
-            ==================================================
-            */
-
-            if (
-                filters.status
-                &&
-                filters.status !== "all"
+            else if (
+                normalizedStatus ===
+                "completed"
             ) {
 
                 query =
                     query.eq(
                         "status",
-                        filters.status
+                        this.STATUS.PAID
                     );
 
             }
 
 
             /*
-            ==================================================
-            ORDER
-            ==================================================
+            ==============================================
+            AR STANDARD STATUS
+            ==============================================
             */
 
-            query =
-                query.order(
-                    "invoice_date",
-                    {
-                        ascending:
-                            false
-                    }
-                );
+            else {
 
-
-            /*
-            ==================================================
-            EXECUTE
-            ==================================================
-            */
-
-            const {
-
-                data,
-
-                error
-
-            } = await query;
-
-
-            if (error) {
-
-                throw error;
-
-            }
-
-
-            let result =
-                data || [];
-
-
-            /*
-            ==================================================
-            KEYWORD
-            ==================================================
-            */
-
-            if (
-                filters.keyword
-                &&
-                filters.keyword.trim()
-            ) {
-
-                const keyword =
-                    filters.keyword
-                        .trim()
-                        .toLowerCase();
-
-
-                result =
-                    result.filter(
-                        invoice => {
-
-                            const invoiceNo =
-                                String(
-                                    invoice.invoice_no
-                                    || ""
-                                )
-                                .toLowerCase();
-
-
-                            const customerName =
-                                String(
-                                    invoice
-                                        .mst_business_partner
-                                        ?.bp_name
-                                    || ""
-                                )
-                                .toLowerCase();
-
-
-                            const customerCode =
-                                String(
-                                    invoice
-                                        .mst_business_partner
-                                        ?.bp_code
-                                    || ""
-                                )
-                                .toLowerCase();
-
-
-                            const poNo =
-                                String(
-                                    invoice.po_no
-                                    || ""
-                                )
-                                .toLowerCase();
-
-
-                            const description =
-                                String(
-                                    invoice.description
-                                    || ""
-                                )
-                                .toLowerCase();
-
-
-                            return (
-
-                                invoiceNo.includes(
-                                    keyword
-                                )
-
-                                ||
-
-                                customerName.includes(
-                                    keyword
-                                )
-
-                                ||
-
-                                customerCode.includes(
-                                    keyword
-                                )
-
-                                ||
-
-                                poNo.includes(
-                                    keyword
-                                )
-
-                                ||
-
-                                description.includes(
-                                    keyword
-                                )
-
-                            );
-
-                        }
+                query =
+                    query.eq(
+                        "status",
+                        status
                     );
 
             }
-
-
-            return result;
 
         }
 
-        catch (error) {
+
+        /*
+        ==================================================
+        ORDER
+        NEWEST CREATED AR AT BOTTOM
+        SAME PATTERN AS AP
+        ==================================================
+        */
+
+        query =
+            query.order(
+                "created_at",
+                {
+                    ascending:
+                        true
+                }
+            );
+
+
+        /*
+        ==================================================
+        EXECUTE
+        ==================================================
+        */
+
+        const {
+
+            data,
+
+            error
+
+        } =
+            await query;
+
+
+        /*
+        ==================================================
+        DATABASE ERROR
+        ==================================================
+        */
+
+        if (
+            error
+        ) {
 
             console.error(
-                "AccountReceivableService.search:",
-                error
+                "AR SEARCH DATABASE ERROR:",
+                {
+
+                    message:
+                        error.message,
+
+                    details:
+                        error.details,
+
+                    hint:
+                        error.hint,
+
+                    code:
+                        error.code
+
+                }
             );
 
 
@@ -1000,9 +1108,302 @@ async complete(
 
         }
 
+
+        /*
+        ==================================================
+        RESULT
+        ==================================================
+        */
+
+        let result =
+            Array.isArray(
+                data
+            )
+                ? data
+                : [];
+
+
+        /*
+        ==================================================
+        KEYWORD
+        FOLLOW FIND BY
+        ==================================================
+        */
+
+        if (
+            keyword
+        ) {
+
+            result =
+                result.filter(
+                    invoice => {
+
+                        /*
+                        ======================================
+                        INVOICE NO
+                        ======================================
+                        */
+
+                        const invoiceNo =
+                            String(
+                                invoice?.invoice_no
+                                || ""
+                            )
+                            .trim()
+                            .toLowerCase();
+
+
+                        /*
+                        ======================================
+                        PO NO
+                        ======================================
+                        */
+
+                        const poNo =
+                            String(
+                                invoice?.po_no
+                                || ""
+                            )
+                            .trim()
+                            .toLowerCase();
+
+
+                        /*
+                        ======================================
+                        DESCRIPTION
+                        ======================================
+                        */
+
+                        const description =
+                            String(
+                                invoice?.description
+                                || ""
+                            )
+                            .trim()
+                            .toLowerCase();
+
+
+                        /*
+                        ======================================
+                        CUSTOMER NAME
+                        ======================================
+                        */
+
+                        const customerName =
+                            String(
+                                invoice
+                                    ?.mst_business_partner
+                                    ?.bp_name
+                                || ""
+                            )
+                            .trim()
+                            .toLowerCase();
+
+
+                        /*
+                        ======================================
+                        CUSTOMER CODE
+                        ======================================
+                        */
+
+                        const customerCode =
+                            String(
+                                invoice
+                                    ?.mst_business_partner
+                                    ?.bp_code
+                                || ""
+                            )
+                            .trim()
+                            .toLowerCase();
+
+
+                        /*
+                        ======================================
+                        FIND BY
+                        ======================================
+                        */
+
+                        switch (
+                            findBy
+                        ) {
+
+                            /*
+                            ==================================
+                            INVOICE NO
+                            ==================================
+                            */
+
+                            case "invoice_no":
+
+                                return invoiceNo.includes(
+                                    keyword
+                                );
+
+
+                            /*
+                            ==================================
+                            CUSTOMER
+                            ==================================
+                            */
+
+                            case "customer":
+
+                            case "customer_name":
+
+                                return (
+                                    customerName.includes(
+                                        keyword
+                                    )
+                                    ||
+                                    customerCode.includes(
+                                        keyword
+                                    )
+                                );
+
+
+                            /*
+                            ==================================
+                            PO NO
+                            ==================================
+                            */
+
+                            case "po_no":
+
+                                return poNo.includes(
+                                    keyword
+                                );
+
+
+                            /*
+                            ==================================
+                            DESCRIPTION
+                            ==================================
+                            */
+
+                            case "description":
+
+                                return description.includes(
+                                    keyword
+                                );
+
+
+                            /*
+                            ==================================
+                            DEFAULT
+                            SEARCH ALL
+                            ==================================
+                            */
+
+                            default:
+
+                                return (
+
+                                    invoiceNo.includes(
+                                        keyword
+                                    )
+
+                                    ||
+
+                                    poNo.includes(
+                                        keyword
+                                    )
+
+                                    ||
+
+                                    customerName.includes(
+                                        keyword
+                                    )
+
+                                    ||
+
+                                    customerCode.includes(
+                                        keyword
+                                    )
+
+                                    ||
+
+                                    description.includes(
+                                        keyword
+                                    )
+
+                                );
+
+                        }
+
+                    }
+                );
+
+        }
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "AR SERVICE SEARCH RESULT:",
+            {
+
+                filters: {
+
+                    dateFrom:
+                        dateFrom,
+
+                    dateTo:
+                        dateTo,
+
+                    status:
+                        status,
+
+                    findBy:
+                        findBy,
+
+                    keyword:
+                        keyword
+
+                },
+
+                total:
+                    result.length,
+
+                invoice_dates:
+                    result.map(
+                        invoice =>
+                            invoice?.invoice_date
+                    ),
+
+                data:
+                    result
+
+            }
+        );
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
+
+        return result;
+
     }
 
+    catch (error) {
 
+        console.error(
+            "AccountReceivableService.search:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
     /*
     ======================================================
     GET CUSTOMERS

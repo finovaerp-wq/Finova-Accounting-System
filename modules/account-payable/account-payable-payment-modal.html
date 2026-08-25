@@ -1,8 +1,16 @@
-<!-- ==========================================================
-     FINOVA ACCOUNTING SYSTEM
-     MODULE : ACCOUNT PAYABLE
-     COMPONENT : PAYMENT MODAL
-=========================================================== -->
+<!--
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+MODULE    : ACCOUNT PAYABLE
+COMPONENT : PAYMENT MODAL
+
+FINAL :
+- SAME VISUAL AS AR PAYMENT
+- ADD PO NO
+- DESCRIPTION FULL WIDTH
+- PAYMENT SUMMARY SAME AS AR
+==========================================================
+-->
 
 
 <div
@@ -11,14 +19,20 @@
     tabindex="-1"
     aria-hidden="true"
     data-bs-backdrop="static"
-    data-bs-keyboard="false">
+    data-bs-keyboard="false"
+>
 
 
     <div
-        class="modal-dialog modal-lg modal-dialog-centered">
+        class="
+            modal-dialog
+            modal-lg
+            modal-dialog-centered
+        "
+    >
 
 
-        <div class="modal-content shadow-lg">
+        <div class="modal-content">
 
 
             <!-- ==================================================
@@ -27,24 +41,42 @@
 
             <div class="modal-header">
 
+
                 <div>
 
-                    <h5 class="modal-title fw-semibold">
+
+                    <h5
+                        class="
+                            modal-title
+                            fw-semibold
+                        "
+                    >
 
                         <i
-                            class="fa-solid fa-money-bill-transfer me-2">
-                        </i>
+                            class="
+                                fa-solid
+                                fa-money-bill-transfer
+                                me-2
+                            "
+                        ></i>
 
                         AP Payment
 
                     </h5>
 
 
-                    <div class="text-muted small mt-1">
+                    <div
+                        class="
+                            text-muted
+                            small
+                            mt-1
+                        "
+                    >
 
                         Create payment for completed Account Payable
 
                     </div>
+
 
                 </div>
 
@@ -53,8 +85,10 @@
                     type="button"
                     class="btn-close"
                     data-bs-dismiss="modal"
-                    aria-label="Close">
+                    aria-label="Close"
+                >
                 </button>
+
 
             </div>
 
@@ -72,109 +106,69 @@
 
                 <input
                     type="hidden"
-                    id="ap-payment-ap-id">
+                    id="ap-payment-ap-id"
+                >
 
 
-                <!-- ==============================================
-                     INVOICE INFORMATION
-                =============================================== -->
+                <!-- ==================================================
+                     INVOICE / VENDOR
+                =================================================== -->
 
                 <div class="row g-3">
 
 
-                    <!-- ==========================================
+                    <!-- ==============================================
                          INVOICE NO
-                    =========================================== -->
+                    =============================================== -->
 
                     <div class="col-md-6">
 
+
                         <label
                             for="ap-payment-invoice-no"
-                            class="form-label">
+                            class="form-label"
+                        >
 
                             Invoice No
 
                         </label>
 
+
                         <input
                             type="text"
                             id="ap-payment-invoice-no"
                             class="form-control"
-                            readonly>
+                            readonly
+                        >
+
 
                     </div>
 
 
-                    <!-- ==========================================
+                    <!-- ==============================================
                          VENDOR
-                    =========================================== -->
+                    =============================================== -->
 
                     <div class="col-md-6">
 
+
                         <label
                             for="ap-payment-vendor"
-                            class="form-label">
+                            class="form-label"
+                        >
 
                             Vendor
 
                         </label>
 
+
                         <input
                             type="text"
                             id="ap-payment-vendor"
                             class="form-control"
-                            readonly>
+                            readonly
+                        >
 
-                    </div>
-
-
-                    <!-- ==========================================
-                         PAYMENT DATE
-                    =========================================== -->
-
-                    <div class="col-md-6">
-
-                        <label
-                            for="ap-payment-date"
-                            class="form-label">
-
-                            Payment Date
-                            <span class="text-danger">*</span>
-
-                        </label>
-
-                        <input
-                            type="date"
-                            id="ap-payment-date"
-                            class="form-control">
-
-                    </div>
-
-
-                    <!-- ==========================================
-                         BANK ACCOUNT
-                    =========================================== -->
-
-                    <div class="col-md-6">
-
-                        <label
-                            for="ap-payment-bank-account"
-                            class="form-label">
-
-                            Bank Account
-                            <span class="text-danger">*</span>
-
-                        </label>
-
-                        <select
-                            id="ap-payment-bank-account"
-                            class="form-select">
-
-                            <option value="">
-                                Select Bank Account
-                            </option>
-
-                        </select>
 
                     </div>
 
@@ -182,193 +176,333 @@
                 </div>
 
 
-                <!-- ==============================================
-                     PAYMENT CALCULATION
-                =============================================== -->
-
-                <div class="card mt-4 bg-light border-0">
-
-                    <div class="card-body">
-
-
-                        <!-- ==========================================
-                             DPP
-                        =========================================== -->
-
-                        <div
-                            class="d-flex
-                                   justify-content-between
-                                   align-items-center
-                                   mb-2">
-
-                            <span class="text-muted">
-
-                                DPP
-
-                            </span>
-
-                            <strong id="ap-payment-dpp">
-
-                                0
-
-                            </strong>
-
-                        </div>
-
-
-                        <!-- ==========================================
-                             TAX (+)
-                        =========================================== -->
-
-                        <div
-                            class="d-flex
-                                   justify-content-between
-                                   align-items-center
-                                   mb-2">
-
-                            <span class="text-muted">
-
-                                Tax (+)
-
-                            </span>
-
-                            <strong id="ap-payment-tax-plus">
-
-                                0
-
-                            </strong>
-
-                        </div>
-
-
-                        <!-- ==========================================
-                             TAX (-)
-                        =========================================== -->
-
-                        <div
-                            class="d-flex
-                                   justify-content-between
-                                   align-items-center
-                                   mb-3">
-
-                            <span class="text-muted">
-
-                                Tax (-)
-
-                            </span>
-
-                            <strong id="ap-payment-tax-minus">
-
-                                0
-
-                            </strong>
-
-                        </div>
-
-
-                        <hr>
-
-
-                        <!-- ==========================================
-                             PAYMENT AMOUNT
-                             EDITABLE FOR PARTIAL PAYMENT
-                        =========================================== -->
-
-                        <div class="row align-items-center g-3">
-
-                            <div class="col-md-6">
-
-                                <label
-                                    for="ap-payment-amount"
-                                    class="form-label fw-semibold mb-0">
-
-                                    Payment Amount
-
-                                    <span class="text-danger">
-                                        *
-                                    </span>
-
-                                </label>
-
-                                <div class="small text-muted mt-1">
-
-                                    Maximum payment is current outstanding.
-
-                                </div>
-
-                            </div>
-
-
-                            <div class="col-md-6">
-
-                                <input
-                                    type="text"
-                                    id="ap-payment-amount"
-                                    class="form-control text-end fw-semibold fs-5"
-                                    inputmode="numeric"
-                                    autocomplete="off"
-                                    placeholder="0">
-
-                            </div>
-
-                        </div>
-
-
-                    </div>
-
-                </div>
-
-
-                <!-- ==============================================
-                     REFERENCE / DESCRIPTION
-                =============================================== -->
+                <!-- ==================================================
+                     PO NO / PAYMENT DATE
+                =================================================== -->
 
                 <div class="row g-3 mt-1">
 
 
-                    <!-- ==========================================
-                         REFERENCE NO
-                    =========================================== -->
+                    <!-- ==============================================
+                         PO NO
+                    =============================================== -->
 
                     <div class="col-md-6">
 
+
+                        <label
+                            for="ap-payment-po-no"
+                            class="form-label"
+                        >
+
+                            PO No
+
+                        </label>
+
+
+                        <input
+                            type="text"
+                            id="ap-payment-po-no"
+                            class="form-control"
+                            readonly
+                        >
+
+
+                    </div>
+
+
+                    <!-- ==============================================
+                         PAYMENT DATE
+                    =============================================== -->
+
+                    <div class="col-md-6">
+
+
+                        <label
+                            for="ap-payment-date"
+                            class="form-label"
+                        >
+
+                            Payment Date
+
+                            <span class="text-danger">
+
+                                *
+
+                            </span>
+
+                        </label>
+
+
+                        <input
+                            type="date"
+                            id="ap-payment-date"
+                            class="form-control"
+                        >
+
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- ==================================================
+                     BANK ACCOUNT
+                =================================================== -->
+
+                <div class="row g-3 mt-1">
+
+
+                    <div class="col-12">
+
+
+                        <label
+                            for="ap-payment-bank-account"
+                            class="form-label"
+                        >
+
+                            Bank Account
+
+                            <span class="text-danger">
+
+                                *
+
+                            </span>
+
+                        </label>
+
+
+                        <select
+                            id="ap-payment-bank-account"
+                            class="form-select"
+                        >
+
+                            <option value="">
+
+                                Select Bank Account
+
+                            </option>
+
+                        </select>
+
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- ==================================================
+                     PAYMENT CALCULATION
+                     SAME AS AR PAYMENT
+                =================================================== -->
+
+                <div
+                    class="
+                        ap-payment-summary
+                        mt-4
+                    "
+                >
+
+
+                    <!-- ==============================================
+                         DPP
+                    =============================================== -->
+
+                    <div class="ap-payment-summary-line">
+
+
+                        <span class="ap-payment-summary-label">
+
+                            DPP
+
+                        </span>
+
+
+                        <strong
+                            id="ap-payment-dpp"
+                            class="ap-payment-summary-value"
+                        >
+
+                            0
+
+                        </strong>
+
+
+                    </div>
+
+
+                    <!-- ==============================================
+                         TAX (+)
+                    =============================================== -->
+
+                    <div class="ap-payment-summary-line">
+
+
+                        <span class="ap-payment-summary-label">
+
+                            Tax (+)
+
+                        </span>
+
+
+                        <strong
+                            id="ap-payment-tax-plus"
+                            class="ap-payment-summary-value"
+                        >
+
+                            0
+
+                        </strong>
+
+
+                    </div>
+
+
+                    <!-- ==============================================
+                         TAX (-)
+                    =============================================== -->
+
+                    <div class="ap-payment-summary-line">
+
+
+                        <span class="ap-payment-summary-label">
+
+                            Tax (-)
+
+                        </span>
+
+
+                        <strong
+                            id="ap-payment-tax-minus"
+                            class="ap-payment-summary-value"
+                        >
+
+                            0
+
+                        </strong>
+
+
+                    </div>
+
+
+                    <!-- ==============================================
+                         DIVIDER
+                    =============================================== -->
+
+                    <div class="ap-payment-summary-divider">
+                    </div>
+
+
+                    <!-- ==============================================
+                         PAYMENT AMOUNT
+                    =============================================== -->
+
+                    <div
+                        class="
+                            row
+                            g-3
+                            align-items-center
+                        "
+                    >
+
+
+                        <!-- LEFT -->
+
+                        <div class="col-md-6">
+
+
+                            <label
+                                for="ap-payment-amount"
+                                class="
+                                    form-label
+                                    fw-semibold
+                                    mb-1
+                                "
+                            >
+
+                                Payment Amount
+
+                                <span class="text-danger">
+
+                                    *
+
+                                </span>
+
+                            </label>
+
+
+                            <div
+                                class="
+                                    small
+                                    text-muted
+                                "
+                            >
+
+                                Maximum payment is current outstanding.
+
+                            </div>
+
+
+                        </div>
+
+
+                        <!-- RIGHT -->
+
+                        <div class="col-md-6">
+
+
+                            <input
+                                type="text"
+                                id="ap-payment-amount"
+                                class="
+                                    form-control
+                                    ap-payment-amount
+                                "
+                                inputmode="numeric"
+                                autocomplete="off"
+                                placeholder="0"
+                            >
+
+
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- ==================================================
+                     REFERENCE NO
+                =================================================== -->
+
+                <div class="row g-3 mt-1">
+
+
+                    <div class="col-12">
+
+
                         <label
                             for="ap-payment-reference-no"
-                            class="form-label">
+                            class="form-label"
+                        >
 
                             Reference No
 
                         </label>
 
+
                         <input
                             type="text"
                             id="ap-payment-reference-no"
                             class="form-control"
-                            placeholder="Transfer / payment reference">
+                            placeholder="Transfer / payment reference"
+                            autocomplete="off"
+                        >
 
-                    </div>
-
-
-                    <!-- ==========================================
-                         DESCRIPTION
-                         DEFAULT FROM AP HEADER
-                    =========================================== -->
-
-                    <div class="col-md-6">
-
-                        <label
-                            for="ap-payment-description"
-                            class="form-label">
-
-                            Description
-
-                        </label>
-
-                        <input
-                            type="text"
-                            id="ap-payment-description"
-                            class="form-control"
-                            placeholder="Payment description">
 
                     </div>
 
@@ -376,30 +510,83 @@
                 </div>
 
 
-                <!-- ==============================================
+                <!-- ==================================================
+                     DESCRIPTION
+                     FULL WIDTH
+                =================================================== -->
+
+                <div class="row g-3 mt-1">
+
+
+                    <div class="col-12">
+
+
+                        <label
+                            for="ap-payment-description"
+                            class="form-label"
+                        >
+
+                            Description
+
+                        </label>
+
+
+                        <textarea
+                            id="ap-payment-description"
+                            class="
+                                form-control
+                                ap-payment-description
+                            "
+                            rows="4"
+                            placeholder="Payment description"
+                        ></textarea>
+
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- ==================================================
                      JOURNAL PREVIEW
-                =============================================== -->
+                =================================================== -->
 
                 <div
-                    class="alert
-                           alert-light
-                           border
-                           mt-4
-                           mb-0">
+                    class="
+                        ap-payment-journal-preview
+                        alert
+                        alert-light
+                        border
+                        mt-4
+                        mb-0
+                    "
+                >
 
 
-                    <div class="fw-semibold mb-2">
+                    <div
+                        class="
+                            fw-semibold
+                            mb-2
+                        "
+                    >
 
                         Journal Preview
 
                     </div>
 
 
-                    <!-- ==========================================
-                         DPP JOURNAL
-                    =========================================== -->
+                    <!-- ==============================================
+                         DPP
+                    =============================================== -->
 
-                    <div class="small text-muted">
+                    <div
+                        class="
+                            small
+                            text-muted
+                            mb-1
+                        "
+                    >
 
                         DPP:
 
@@ -412,11 +599,17 @@
                     </div>
 
 
-                    <!-- ==========================================
-                         TAX (+) JOURNAL
-                    =========================================== -->
+                    <!-- ==============================================
+                         TAX (+)
+                    =============================================== -->
 
-                    <div class="small text-muted">
+                    <div
+                        class="
+                            small
+                            text-muted
+                            mb-1
+                        "
+                    >
 
                         Tax (+):
 
@@ -429,11 +622,16 @@
                     </div>
 
 
-                    <!-- ==========================================
-                         TAX (-) JOURNAL
-                    =========================================== -->
+                    <!-- ==============================================
+                         TAX (-)
+                    =============================================== -->
 
-                    <div class="small text-muted">
+                    <div
+                        class="
+                            small
+                            text-muted
+                        "
+                    >
 
                         Tax (-):
 
@@ -442,6 +640,25 @@
                             BANK → HUTANG USAHA
 
                         </strong>
+
+                    </div>
+
+
+                    <div
+                        class="
+                            small
+                            text-muted
+                            mt-2
+                        "
+                    >
+
+                        Payment GL Journal will be generated as
+
+                        <strong>
+
+                            Draft
+
+                        </strong>.
 
                     </div>
 
@@ -459,34 +676,40 @@
             <div class="modal-footer">
 
 
-                <!-- ==========================================
+                <!-- ==============================================
                      CANCEL
-                =========================================== -->
+                =============================================== -->
 
                 <button
                     type="button"
-                    class="btn btn-secondary"
-                    data-bs-dismiss="modal">
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal"
+                >
 
                     Cancel
 
                 </button>
 
 
-                <!-- ==========================================
-                     PAY
-                =========================================== -->
+                <!-- ==============================================
+                     RECEIVE PAYMENT
+                =============================================== -->
 
                 <button
                     type="button"
                     class="btn btn-success"
-                    id="btn-save-ap-payment">
+                    id="btn-save-ap-payment"
+                >
 
                     <i
-                        class="fa-solid fa-check me-1">
-                    </i>
+                        class="
+                            fa-solid
+                            fa-money-bill-wave
+                            me-1
+                        "
+                    ></i>
 
-                    Pay
+                    Receive Payment
 
                 </button>
 
@@ -496,6 +719,8 @@
 
         </div>
 
+
     </div>
+
 
 </div>

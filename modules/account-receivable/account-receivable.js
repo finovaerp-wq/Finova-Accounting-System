@@ -142,11 +142,25 @@ this.arPaymentInvoiceNo = null;
 
 this.arPaymentCustomer = null;
 
-this.arPaymentTotal = null;
 
-this.arPaymentPaid = null;
+/*
+==================================================
+PAYMENT SUMMARY
+==================================================
+*/
 
-this.arPaymentOutstanding = null;
+this.arPaymentDPP = null;
+
+this.arPaymentTaxPlus = null;
+
+this.arPaymentTaxMinus = null;
+
+
+/*
+==================================================
+PAYMENT INPUT
+==================================================
+*/
 
 this.arPaymentDate = null;
 
@@ -157,6 +171,22 @@ this.arPaymentAmount = null;
 this.arPaymentReferenceNo = null;
 
 this.arPaymentDescription = null;
+
+
+/*
+==================================================
+PAYMENT JOURNAL PREVIEW
+==================================================
+*/
+
+this.arPaymentPreviewDebit = null;
+
+
+/*
+==================================================
+SAVE PAYMENT
+==================================================
+*/
 
 this.btnSaveARPayment = null;
 
@@ -671,415 +701,556 @@ async loadPaymentModalHTML() {
 
 
     /*
-    ======================================================
-    CACHE DOM
-    ======================================================
-    */
-
-    cacheDOM() {
-
-        /*
-        ==================================================
-        TABLE
-        ==================================================
-        */
-
-        this.tableBody =
-            document.getElementById(
-                "account-receivable-table-body"
-            );
-
-
-        /*
-        ==================================================
-        FILTER
-        ==================================================
-        */
-
-        this.dateFrom =
-            document.getElementById(
-                "ar-date-from"
-            );
-
-
-        this.dateTo =
-            document.getElementById(
-                "ar-date-to"
-            );
-
-
-        this.statusFilter =
-            document.getElementById(
-                "ar-status"
-            );
-
-
-        this.findBy =
-            document.getElementById(
-                "ar-find-by"
-            );
-
-
-        this.keyword =
-            document.getElementById(
-                "ar-keyword"
-            );
-        
-        /*
-==================================================
-PAYMENT
-==================================================
+======================================================
+CACHE DOM
+======================================================
 */
 
-this.arPaymentARId =
-    document.getElementById(
-        "ar-payment-ar-id"
-    );
-
-
-this.arPaymentInvoiceNo =
-    document.getElementById(
-        "ar-payment-invoice-no"
-    );
-
-
-this.arPaymentCustomer =
-    document.getElementById(
-        "ar-payment-customer"
-    );
-
-
-this.arPaymentTotal =
-    document.getElementById(
-        "ar-payment-total"
-    );
-
-
-this.arPaymentPaid =
-    document.getElementById(
-        "ar-payment-paid"
-    );
-
-
-this.arPaymentOutstanding =
-    document.getElementById(
-        "ar-payment-outstanding"
-    );
-
-
-this.arPaymentDate =
-    document.getElementById(
-        "ar-payment-date"
-    );
-
-
-this.arPaymentAccount =
-    document.getElementById(
-        "ar-payment-account"
-    );
-
-
-this.arPaymentAmount =
-    document.getElementById(
-        "ar-payment-amount"
-    );
-
-
-this.arPaymentReferenceNo =
-    document.getElementById(
-        "ar-payment-reference-no"
-    );
-
-
-this.arPaymentDescription =
-    document.getElementById(
-        "ar-payment-description"
-    );
-
-
-this.btnSaveARPayment =
-    document.getElementById(
-        "btn-save-ar-payment"
-    );
-
-        /*
-        ==================================================
-        TOOLBAR
-        ==================================================
-        */
-
-        this.btnFind =
-            document.getElementById(
-                "btn-ar-find"
-            );
-
-
-        this.btnAdd =
-            document.getElementById(
-                "btn-add-ar"
-            );
-
-
-        this.btnRefresh =
-            document.getElementById(
-                "btn-refresh-ar"
-            );
-
-
-        this.btnDownloadExcel =
-            document.getElementById(
-                "btn-download-excel-ar"
-            );
-
-
-        this.btnPreviewHTML =
-            document.getElementById(
-                "btn-preview-html-ar"
-            );
-
-
-        /*
-        ==================================================
-        PAGINATION
-        ==================================================
-        */
-
-        this.btnFirstPage =
-            document.getElementById(
-                "ar-page-first"
-            );
-
-
-        this.btnPrevPage =
-            document.getElementById(
-                "ar-page-prev"
-            );
-
-
-        this.currentPageInput =
-            document.getElementById(
-                "ar-current-page"
-            );
-
-
-        this.totalPagesElement =
-            document.getElementById(
-                "ar-total-pages"
-            );
-
-
-        this.btnNextPage =
-            document.getElementById(
-                "ar-page-next"
-            );
-
-
-        this.btnLastPage =
-            document.getElementById(
-                "ar-page-last"
-            );
-
-
-        this.recordInfo =
-            document.getElementById(
-                "ar-record-info"
-            );
-
-
-        /*
-        ==================================================
-        HEADER FORM
-        ==================================================
-        */
-
-        this.arFormId =
-            document.getElementById(
-                "ar-form-id"
-            );
-
-
-        this.arFormCustomer =
-            document.getElementById(
-                "ar-form-customer"
-            );
-
-
-        this.arFormTop =
-            document.getElementById(
-                "ar-form-top"
-            );
-
-
-        this.arFormInvoiceNo =
-            document.getElementById(
-                "ar-form-invoice-no"
-            );
-
-
-        this.arFormPoNo =
-            document.getElementById(
-                "ar-form-po-no"
-            );
-
-
-        this.arFormInvoiceDate =
-            document.getElementById(
-                "ar-form-invoice-date"
-            );
-
-
-        this.arFormDateReceived =
-            document.getElementById(
-                "ar-form-date-received"
-            );
-
-
-        this.arFormDueDate =
-            document.getElementById(
-                "ar-form-due-date"
-            );
-
-
-        this.arFormJournalNo =
-            document.getElementById(
-                "ar-form-journal-no"
-            );
-
-
-        this.arFormStatus =
-            document.getElementById(
-                "ar-form-status"
-            );
-
-
-        this.arFormDescription =
-            document.getElementById(
-                "ar-form-description"
-            );
-
-
-        /*
-        ==================================================
-        DETAIL
-        ==================================================
-        */
-
-        this.btnAddDetail =
-            document.getElementById(
-                "btn-add-ar-detail"
-            );
-
-
-        this.btnSaveARDetail =
-            document.getElementById(
-                "btn-save-ar-detail"
-            );
-
-
-        this.arDetailCOA =
-            document.getElementById(
-                "ar-detail-coa"
-            );
-
-
-        this.arDetailQuantity =
-            document.getElementById(
-                "ar-detail-quantity"
-            );
-
-
-        this.arDetailUnitPrice =
-            document.getElementById(
-                "ar-detail-unit-price"
-            );
-
-
-        this.arDetailTaxOutputRate =
-            document.getElementById(
-                "ar-detail-tax-output-rate"
-            );
-
-
-        this.arDetailWithholdingTaxRate =
-            document.getElementById(
-                "ar-detail-withholding-tax-rate"
-            );
-
-
-        this.arDetailLineAmount =
-            document.getElementById(
-                "ar-detail-line-amount"
-            );
-
-
-        this.arDetailTaxOutputAmount =
-            document.getElementById(
-                "ar-detail-tax-output-amount"
-            );
-
-
-        this.arDetailWithholdingTaxAmount =
-            document.getElementById(
-                "ar-detail-withholding-tax-amount"
-            );
-
-
-        this.arDetailTotalAmount =
-            document.getElementById(
-                "ar-detail-total-amount"
-            );
-
-
-        /*
-        ==================================================
-        SAVE
-        ==================================================
-        */
-
-        this.btnSaveDraft =
-            document.getElementById(
-                "btn-save-ar-draft"
-            );
-
-
-        /*
-        ==================================================
-        SUMMARY
-        ==================================================
-        */
-
-        this.arFormSubtotal =
-            document.getElementById(
-                "ar-form-subtotal"
-            );
-
-
-        this.arFormTax =
-            document.getElementById(
-                "ar-form-tax"
-            );
-
-
-        this.arFormWHT =
-            document.getElementById(
-                "ar-form-wht"
-            );
-
-
-        this.arFormTotal =
-            document.getElementById(
-                "ar-form-total"
-            );
-
-
-        console.log(
-            "Account Receivable DOM cached."
+cacheDOM() {
+
+    /*
+    ==================================================
+    TABLE
+    ==================================================
+    */
+
+    this.tableBody =
+        document.getElementById(
+            "account-receivable-table-body"
         );
 
-    }
+
+    /*
+    ==================================================
+    FILTER
+    ==================================================
+    */
+
+    this.dateFrom =
+        document.getElementById(
+            "ar-date-from"
+        );
+
+
+    this.dateTo =
+        document.getElementById(
+            "ar-date-to"
+        );
+
+
+    this.statusFilter =
+        document.getElementById(
+            "ar-status"
+        );
+
+
+    this.findBy =
+        document.getElementById(
+            "ar-find-by"
+        );
+
+
+    this.keyword =
+        document.getElementById(
+            "ar-keyword"
+        );
+
+
+    /*
+    ==================================================
+    PAYMENT
+    ==================================================
+    */
+
+    this.arPaymentARId =
+        document.getElementById(
+            "ar-payment-ar-id"
+        );
+
+
+    this.arPaymentInvoiceNo =
+        document.getElementById(
+            "ar-payment-invoice-no"
+        );
+
+
+    this.arPaymentCustomer =
+        document.getElementById(
+            "ar-payment-customer"
+        );
+
+
+    /*
+    ==================================================
+    PAYMENT SUMMARY
+    SAME AS ACCOUNT PAYABLE
+
+    DPP
+    TAX (+)
+    TAX (-)
+    ==================================================
+    */
+
+    this.arPaymentDPP =
+        document.getElementById(
+            "ar-payment-dpp"
+        );
+
+
+    this.arPaymentTaxPlus =
+        document.getElementById(
+            "ar-payment-tax-plus"
+        );
+
+
+    this.arPaymentTaxMinus =
+        document.getElementById(
+            "ar-payment-tax-minus"
+        );
+
+
+    /*
+    ==================================================
+    PAYMENT DATE
+    ==================================================
+    */
+
+    this.arPaymentDate =
+        document.getElementById(
+            "ar-payment-date"
+        );
+
+
+    /*
+    ==================================================
+    PAYMENT ACCOUNT
+    ==================================================
+    */
+
+    this.arPaymentAccount =
+        document.getElementById(
+            "ar-payment-account"
+        );
+
+
+    /*
+    ==================================================
+    PAYMENT AMOUNT
+    ==================================================
+    */
+
+    this.arPaymentAmount =
+        document.getElementById(
+            "ar-payment-amount"
+        );
+
+
+    /*
+    ==================================================
+    REFERENCE NO
+    ==================================================
+    */
+
+    this.arPaymentReferenceNo =
+        document.getElementById(
+            "ar-payment-reference-no"
+        );
+
+
+    /*
+    ==================================================
+    DESCRIPTION
+    ==================================================
+    */
+
+    this.arPaymentDescription =
+        document.getElementById(
+            "ar-payment-description"
+        );
+
+
+    /*
+    ==================================================
+    JOURNAL PREVIEW
+    ==================================================
+    */
+
+    this.arPaymentPreviewDebit =
+        document.getElementById(
+            "ar-payment-preview-debit"
+        );
+
+
+    /*
+    ==================================================
+    SAVE PAYMENT
+    ==================================================
+    */
+
+    this.btnSaveARPayment =
+        document.getElementById(
+            "btn-save-ar-payment"
+        );
+
+
+    /*
+    ==================================================
+    TOOLBAR
+    ==================================================
+    */
+
+    this.btnFind =
+        document.getElementById(
+            "btn-ar-find"
+        );
+
+
+    this.btnAdd =
+        document.getElementById(
+            "btn-add-ar"
+        );
+
+
+    this.btnRefresh =
+        document.getElementById(
+            "btn-refresh-ar"
+        );
+
+
+    this.btnDownloadExcel =
+        document.getElementById(
+            "btn-download-excel-ar"
+        );
+
+
+    this.btnPreviewHTML =
+        document.getElementById(
+            "btn-preview-html-ar"
+        );
+
+
+    /*
+    ==================================================
+    PAGINATION
+    ==================================================
+    */
+
+    this.btnFirstPage =
+        document.getElementById(
+            "ar-page-first"
+        );
+
+
+    this.btnPrevPage =
+        document.getElementById(
+            "ar-page-prev"
+        );
+
+
+    this.currentPageInput =
+        document.getElementById(
+            "ar-current-page"
+        );
+
+
+    this.totalPagesElement =
+        document.getElementById(
+            "ar-total-pages"
+        );
+
+
+    this.btnNextPage =
+        document.getElementById(
+            "ar-page-next"
+        );
+
+
+    this.btnLastPage =
+        document.getElementById(
+            "ar-page-last"
+        );
+
+
+    this.recordInfo =
+        document.getElementById(
+            "ar-record-info"
+        );
+
+
+    /*
+    ==================================================
+    HEADER FORM
+    ==================================================
+    */
+
+    this.arFormId =
+        document.getElementById(
+            "ar-form-id"
+        );
+
+
+    this.arFormCustomer =
+        document.getElementById(
+            "ar-form-customer"
+        );
+
+
+    this.arFormTop =
+        document.getElementById(
+            "ar-form-top"
+        );
+
+
+    this.arFormInvoiceNo =
+        document.getElementById(
+            "ar-form-invoice-no"
+        );
+
+
+    this.arFormPoNo =
+        document.getElementById(
+            "ar-form-po-no"
+        );
+
+
+    this.arFormInvoiceDate =
+        document.getElementById(
+            "ar-form-invoice-date"
+        );
+
+
+    this.arFormDateReceived =
+        document.getElementById(
+            "ar-form-date-received"
+        );
+
+
+    this.arFormDueDate =
+        document.getElementById(
+            "ar-form-due-date"
+        );
+
+
+    this.arFormJournalNo =
+        document.getElementById(
+            "ar-form-journal-no"
+        );
+
+
+    this.arFormStatus =
+        document.getElementById(
+            "ar-form-status"
+        );
+
+
+    this.arFormDescription =
+        document.getElementById(
+            "ar-form-description"
+        );
+
+
+    /*
+    ==================================================
+    DETAIL
+    ==================================================
+    */
+
+    this.btnAddDetail =
+        document.getElementById(
+            "btn-add-ar-detail"
+        );
+
+
+    this.btnSaveARDetail =
+        document.getElementById(
+            "btn-save-ar-detail"
+        );
+
+
+    this.arDetailCOA =
+        document.getElementById(
+            "ar-detail-coa"
+        );
+
+
+    this.arDetailQuantity =
+        document.getElementById(
+            "ar-detail-quantity"
+        );
+
+
+    this.arDetailUnitPrice =
+        document.getElementById(
+            "ar-detail-unit-price"
+        );
+
+
+    this.arDetailTaxOutputRate =
+        document.getElementById(
+            "ar-detail-tax-output-rate"
+        );
+
+
+    this.arDetailWithholdingTaxRate =
+        document.getElementById(
+            "ar-detail-withholding-tax-rate"
+        );
+
+
+    this.arDetailLineAmount =
+        document.getElementById(
+            "ar-detail-line-amount"
+        );
+
+
+    this.arDetailTaxOutputAmount =
+        document.getElementById(
+            "ar-detail-tax-output-amount"
+        );
+
+
+    this.arDetailWithholdingTaxAmount =
+        document.getElementById(
+            "ar-detail-withholding-tax-amount"
+        );
+
+
+    this.arDetailTotalAmount =
+        document.getElementById(
+            "ar-detail-total-amount"
+        );
+
+
+    /*
+    ==================================================
+    SAVE
+    ==================================================
+    */
+
+    this.btnSaveDraft =
+        document.getElementById(
+            "btn-save-ar-draft"
+        );
+
+
+    /*
+    ==================================================
+    SUMMARY
+    AR FORM
+    ==================================================
+    */
+
+    this.arFormSubtotal =
+        document.getElementById(
+            "ar-form-subtotal"
+        );
+
+
+    this.arFormTax =
+        document.getElementById(
+            "ar-form-tax"
+        );
+
+
+    this.arFormWHT =
+        document.getElementById(
+            "ar-form-wht"
+        );
+
+
+    this.arFormTotal =
+        document.getElementById(
+            "ar-form-total"
+        );
+
+
+    /*
+    ==================================================
+    DEBUG
+    ==================================================
+    */
+
+    console.log(
+        "Account Receivable DOM cached.",
+        {
+
+            tableBody:
+                Boolean(
+                    this.tableBody
+                ),
+
+            paymentModalFields: {
+
+                arId:
+                    Boolean(
+                        this.arPaymentARId
+                    ),
+
+                invoiceNo:
+                    Boolean(
+                        this.arPaymentInvoiceNo
+                    ),
+
+                customer:
+                    Boolean(
+                        this.arPaymentCustomer
+                    ),
+
+                dpp:
+                    Boolean(
+                        this.arPaymentDPP
+                    ),
+
+                taxPlus:
+                    Boolean(
+                        this.arPaymentTaxPlus
+                    ),
+
+                taxMinus:
+                    Boolean(
+                        this.arPaymentTaxMinus
+                    ),
+
+                paymentDate:
+                    Boolean(
+                        this.arPaymentDate
+                    ),
+
+                paymentAccount:
+                    Boolean(
+                        this.arPaymentAccount
+                    ),
+
+                paymentAmount:
+                    Boolean(
+                        this.arPaymentAmount
+                    ),
+
+                referenceNo:
+                    Boolean(
+                        this.arPaymentReferenceNo
+                    ),
+
+                description:
+                    Boolean(
+                        this.arPaymentDescription
+                    ),
+
+                saveButton:
+                    Boolean(
+                        this.btnSaveARPayment
+                    )
+
+            }
+
+        }
+    );
+
+}
     /*
 ======================================================
 LOAD PAYMENT ACCOUNTS
+BANK / CASH
 ======================================================
 */
 
@@ -1087,128 +1258,241 @@ async loadPaymentAccounts() {
 
     try {
 
+        /*
+        ==================================================
+        VALIDATE SELECT
+        ==================================================
+        */
+
         if (
             !this.arPaymentAccount
         ) {
 
-            return;
+            throw new Error(
+                "AR Payment Account select not found."
+            );
 
         }
 
 
+        /*
+        ==================================================
+        RESET
+        ==================================================
+        */
+
+        this.arPaymentAccount.innerHTML = `
+
+            <option value="">
+
+                Select Bank Account
+
+            </option>
+
+        `;
+
+
+        /*
+        ==================================================
+        LOAD COA
+
+        IMPORTANT:
+        ONLY ACTIVE + ALLOW TRANSACTION
+        ==================================================
+        */
+
         const {
+
             data,
+
             error
-        } =
-            await supabase
 
-                .from(
-                    "mst_chart_of_accounts"
-                )
+        } = await supabase
 
-                .select(`
-                    id,
-                    account_code,
-                    account_name,
-                    normal_balance,
-                    is_header,
-                    allow_transaction,
-                    status
-                `)
+            .from(
+                "mst_chart_of_accounts"
+            )
 
-                .eq(
-                    "status",
-                    true
-                )
+            .select(`
+                id,
+                account_code,
+                account_name,
+                status,
+                allow_transaction
+            `)
 
-                .eq(
-                    "is_header",
-                    false
-                )
+            .eq(
+                "status",
+                true
+            )
 
-                .eq(
-                    "allow_transaction",
-                    true
-                )
+            .eq(
+                "allow_transaction",
+                true
+            )
 
-                .order(
-                    "account_code",
-                    {
-                        ascending:
-                            true
-                    }
-                );
+            .order(
+                "account_code",
+                {
+                    ascending:
+                        true
+                }
+            );
 
 
-        if (error) {
+        if (
+            error
+        ) {
 
             throw error;
 
         }
 
 
-        this.arPaymentAccount.innerHTML = `
+        const accounts =
+            Array.isArray(
+                data
+            )
+                ? data
+                : [];
 
-            <option value="">
-                Select Bank / Cash Account
-            </option>
 
-        `;
+        /*
+        ==================================================
+        FILTER BANK / CASH
 
+        TEMPORARY RULE:
+        account name contains
+        BANK / CASH / KAS
+        ==================================================
+        */
 
-        (data || [])
-            .filter(
+        const paymentAccounts =
+            accounts.filter(
                 account => {
 
-                    const name =
-                        String(
-                            account.account_name
-                            || ""
-                        )
-                        .trim()
-                        .toUpperCase();
+                    const text =
+                        `${account.account_code || ""} ${account.account_name || ""}`
+                            .toLowerCase();
 
 
                     return (
-                        name.includes(
-                            "BANK"
+                        text.includes(
+                            "bank"
                         )
                         ||
-                        name.includes(
-                            "KAS"
+                        text.includes(
+                            "cash"
+                        )
+                        ||
+                        text.includes(
+                            "kas"
                         )
                     );
 
                 }
-            )
-            .forEach(
-                account => {
-
-                    const option =
-                        document.createElement(
-                            "option"
-                        );
-
-
-                    option.value =
-                        account.id;
-
-
-                    option.textContent =
-                        `${account.account_code} - ${account.account_name}`;
-
-
-                    this.arPaymentAccount
-                        .appendChild(
-                            option
-                        );
-
-                }
             );
+
+
+        /*
+        ==================================================
+        BUILD OPTION
+        ==================================================
+        */
+
+        paymentAccounts.forEach(
+            account => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                /*
+                ==========================================
+                IMPORTANT
+
+                VALUE MUST BE COA ID
+                ==========================================
+                */
+
+                option.value =
+                    String(
+                        account.id
+                    );
+
+
+                option.textContent =
+                    `${account.account_code} :: ${account.account_name}`;
+
+
+                this.arPaymentAccount.appendChild(
+                    option
+                );
+
+            }
+        );
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "AR PAYMENT ACCOUNTS:",
+            {
+
+                totalCOA:
+                    accounts.length,
+
+                paymentAccounts:
+                    paymentAccounts.length,
+
+                select:
+                    this.arPaymentAccount,
+
+                options:
+                    [
+                        ...this.arPaymentAccount.options
+                    ].map(
+                        item => ({
+                            value:
+                                item.value,
+
+                            text:
+                                item.textContent
+                        })
+                    )
+
+            }
+        );
+
+
+        /*
+        ==================================================
+        NO ACCOUNT
+        ==================================================
+        */
+
+        if (
+            paymentAccounts.length ===
+            0
+        ) {
+
+            console.warn(
+                "No Bank / Cash Account found."
+            );
+
+        }
 
     }
 
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
             "AccountReceivable.loadPaymentAccounts:",
@@ -1225,7 +1509,17 @@ async loadPaymentAccounts() {
 ======================================================
 RECEIVE PAYMENT
 ACCOUNT RECEIVABLE
-SAME FLOW AS ACCOUNT PAYABLE
+
+FINAL - SAME LOGIC AS ACCOUNT PAYABLE
+
+RULE :
+- AR MUST ALREADY BE COMPLETED
+- COMPLETED = gl_journal_id EXISTS
+- GL JOURNAL MUST EXIST
+- GL JOURNAL MUST BE POSTED
+- OUTSTANDING MUST BE > 0
+- PAID / VOID CANNOT RECEIVE PAYMENT
+- PAYMENT SUMMARY SAME AS AP
 ======================================================
 */
 
@@ -1241,7 +1535,9 @@ async receivePayment(
         ==================================================
         */
 
-        if (!id) {
+        if (
+            !id
+        ) {
 
             throw new Error(
                 "Account Receivable ID is required."
@@ -1252,7 +1548,7 @@ async receivePayment(
 
         /*
         ==================================================
-        LOAD AR
+        LOAD FRESH ACCOUNT RECEIVABLE
         ==================================================
         */
 
@@ -1281,30 +1577,47 @@ async receivePayment(
 
         /*
         ==================================================
-        STATUS VALIDATION
+        DETAILS
+        ==================================================
+        */
 
-        ALLOWED:
-        Complete
-        Partial Paid
+        const details =
+            Array.isArray(
+                result.details
+            )
+                ? result.details
+                : [];
+
+
+        /*
+        ==================================================
+        AR STATUS
         ==================================================
         */
 
         const status =
             String(
                 invoice.status
-                || ""
+                ||
+                ""
             )
-            .trim();
+            .trim()
+            .toLowerCase();
 
+
+        /*
+        ==================================================
+        PAID VALIDATION
+        ==================================================
+        */
 
         if (
-            status !== "Complete"
-            &&
-            status !== "Partial Paid"
+            status ===
+            "paid"
         ) {
 
             throw new Error(
-                `Account Receivable status is "${status}". Payment is only allowed for Complete or Partial Paid Account Receivable.`
+                "Account Receivable is already fully paid."
             );
 
         }
@@ -1312,14 +1625,172 @@ async receivePayment(
 
         /*
         ==================================================
-        TOTAL
+        VOID VALIDATION
+        ==================================================
+        */
+
+        if (
+            status ===
+            "void"
+        ) {
+
+            throw new Error(
+                "Void Account Receivable cannot receive payment."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        GL JOURNAL ID
+
+        SAME LOGIC AS AP
+
+        gl_journal_id EXISTS
+        =
+        ACCOUNT RECEIVABLE ALREADY COMPLETED
+        ==================================================
+        */
+
+        const glJournalId =
+            invoice.gl_journal_id
+            ||
+            null;
+
+
+        /*
+        ==================================================
+        NOT COMPLETED
+        ==================================================
+        */
+
+        if (
+            !glJournalId
+        ) {
+
+            throw new Error(
+                "Account Receivable must be completed before receiving payment."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        LOAD FRESH GL JOURNAL
+
+        DO NOT RELY ON TABLE JOIN DATA
+        ==================================================
+        */
+
+        const {
+
+            data:
+                glJournal,
+
+            error:
+                glJournalError
+
+        } =
+            await supabase
+
+                .from(
+                    "trx_gl_journal"
+                )
+
+                .select(`
+                    id,
+                    journal_no,
+                    journal_date,
+                    status
+                `)
+
+                .eq(
+                    "id",
+                    glJournalId
+                )
+
+                .maybeSingle();
+
+
+        /*
+        ==================================================
+        GL JOURNAL QUERY ERROR
+        ==================================================
+        */
+
+        if (
+            glJournalError
+        ) {
+
+            throw glJournalError;
+
+        }
+
+
+        /*
+        ==================================================
+        GL JOURNAL NOT FOUND
+        ==================================================
+        */
+
+        if (
+            !glJournal
+        ) {
+
+            throw new Error(
+                "Account Receivable GL Journal was not found."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        GL JOURNAL STATUS
+        ==================================================
+        */
+
+        const glJournalStatus =
+            String(
+                glJournal.status
+                ||
+                ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        /*
+        ==================================================
+        JOURNAL MUST BE POSTED
+        ==================================================
+        */
+
+        if (
+            glJournalStatus !==
+            "posted"
+        ) {
+
+            throw new Error(
+                `GL Journal ${glJournal.journal_no || ""} must be Posted before receiving payment.`
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        TOTAL AMOUNT
         ==================================================
         */
 
         const totalAmount =
             Number(
                 invoice.total_amount
-                || 0
+                ||
+                0
             );
 
 
@@ -1336,7 +1807,21 @@ async receivePayment(
 
         /*
         ==================================================
-        OUTSTANDING
+        PAID AMOUNT
+        ==================================================
+        */
+
+        const paidAmount =
+            Number(
+                invoice.paid_amount
+                ||
+                0
+            );
+
+
+        /*
+        ==================================================
+        OUTSTANDING AMOUNT
         ==================================================
         */
 
@@ -1344,9 +1829,20 @@ async receivePayment(
             Number(
                 invoice.outstanding_amount
                 ??
-                totalAmount
+                (
+                    totalAmount
+                    -
+                    
+                    paidAmount
+                )
             );
 
+
+        /*
+        ==================================================
+        OUTSTANDING VALIDATION
+        ==================================================
+        */
 
         if (
             outstandingAmount <= 0
@@ -1361,7 +1857,206 @@ async receivePayment(
 
         /*
         ==================================================
-        CURRENT PAYMENT AR
+        DPP
+
+        FIRST TRY HEADER VALUE.
+
+        IF HEADER DOES NOT HAVE DPP,
+        CALCULATE FROM DETAILS.
+        ==================================================
+        */
+
+        let dppAmount =
+            Number(
+                invoice.dpp_amount
+                ??
+                invoice.subtotal
+                ??
+                invoice.sub_total
+                ??
+                0
+            );
+
+
+        if (
+            dppAmount === 0
+            &&
+            details.length
+        ) {
+
+            dppAmount =
+                details.reduce(
+                    (
+                        total,
+                        detail
+                    ) => {
+
+                        return (
+                            total
+                            +
+                            Number(
+                                detail.line_amount
+                                ??
+                                detail.amount
+                                ??
+                                detail.dpp_amount
+                                ??
+                                0
+                            )
+                        );
+
+                    },
+                    0
+                );
+
+        }
+
+
+        /*
+==================================================
+TAX (+)
+ACCOUNT RECEIVABLE
+==================================================
+*/
+
+let taxPlusAmount =
+    Number(
+        invoice.tax_plus_amount
+        ??
+        invoice.tax_output_amount
+        ??
+        invoice.tax_amount
+        ??
+        0
+    );
+
+
+/*
+==================================================
+CALCULATE FROM DETAILS
+==================================================
+*/
+
+if (
+    taxPlusAmount === 0
+    &&
+    details.length
+) {
+
+    taxPlusAmount =
+        details.reduce(
+            (
+                total,
+                detail
+            ) => {
+
+                return (
+                    total
+                    +
+                    Number(
+                        detail.tax_output_amount
+                        ??
+                        detail.tax_plus_amount
+                        ??
+                        0
+                    )
+                );
+
+            },
+            0
+        );
+
+}
+
+        /*
+        ==================================================
+        TAX (-)
+
+        FIRST TRY HEADER VALUE.
+
+        IF HEADER DOES NOT HAVE TAX (-),
+        CALCULATE FROM DETAILS.
+        ==================================================
+        */
+
+        let taxMinusAmount =
+            Number(
+                invoice.tax_minus_amount
+                ??
+                invoice.withholding_tax_amount
+                ??
+                invoice.wht_amount
+                ??
+                0
+            );
+
+
+        if (
+            taxMinusAmount === 0
+            &&
+            details.length
+        ) {
+
+            taxMinusAmount =
+                details.reduce(
+                    (
+                        total,
+                        detail
+                    ) => {
+
+                        return (
+                            total
+                            +
+                            Number(
+                                detail.tax_minus_amount
+                                ??
+                                detail.withholding_tax_amount
+                                ??
+                                detail.wht_amount
+                                ??
+                                0
+                            )
+                        );
+
+                    },
+                    0
+                );
+
+        }
+
+
+        /*
+        ==================================================
+        FALLBACK DPP
+
+        IF AR DATA DOES NOT STORE DPP SEPARATELY,
+        DERIVE IT FROM:
+
+        TOTAL = DPP + TAX (+) - TAX (-)
+
+        DPP = TOTAL - TAX (+) + TAX (-)
+        ==================================================
+        */
+
+        if (
+            dppAmount === 0
+            &&
+            totalAmount > 0
+        ) {
+
+            dppAmount =
+                totalAmount
+                -
+                taxPlusAmount
+                +
+                taxMinusAmount;
+
+        }
+
+
+        /*
+        ==================================================
+        SET CURRENT PAYMENT AR
         ==================================================
         */
 
@@ -1371,7 +2066,7 @@ async receivePayment(
 
         /*
         ==================================================
-        LOAD PAYMENT ACCOUNTS
+        LOAD BANK / CASH PAYMENT ACCOUNTS
         ==================================================
         */
 
@@ -1406,7 +2101,8 @@ async receivePayment(
 
             this.arPaymentInvoiceNo.value =
                 invoice.invoice_no
-                || "";
+                ||
+                "";
 
         }
 
@@ -1423,26 +2119,27 @@ async receivePayment(
 
             this.arPaymentCustomer.value =
                 invoice
-                    .mst_business_partner
+                    ?.mst_business_partner
                     ?.bp_name
-                || "";
+                ||
+                "";
 
         }
 
 
         /*
         ==================================================
-        TOTAL
+        DPP
         ==================================================
         */
 
         if (
-            this.arPaymentTotal
+            this.arPaymentDPP
         ) {
 
-            this.arPaymentTotal.value =
+            this.arPaymentDPP.textContent =
                 this.formatCurrency(
-                    totalAmount
+                    dppAmount
                 );
 
         }
@@ -1450,20 +2147,17 @@ async receivePayment(
 
         /*
         ==================================================
-        PAID
+        TAX (+)
         ==================================================
         */
 
         if (
-            this.arPaymentPaid
+            this.arPaymentTaxPlus
         ) {
 
-            this.arPaymentPaid.value =
+            this.arPaymentTaxPlus.textContent =
                 this.formatCurrency(
-                    Number(
-                        invoice.paid_amount
-                        || 0
-                    )
+                    taxPlusAmount
                 );
 
         }
@@ -1471,17 +2165,17 @@ async receivePayment(
 
         /*
         ==================================================
-        OUTSTANDING
+        TAX (-)
         ==================================================
         */
 
         if (
-            this.arPaymentOutstanding
+            this.arPaymentTaxMinus
         ) {
 
-            this.arPaymentOutstanding.value =
+            this.arPaymentTaxMinus.textContent =
                 this.formatCurrency(
-                    outstandingAmount
+                    taxMinusAmount
                 );
 
         }
@@ -1527,7 +2221,9 @@ async receivePayment(
         /*
         ==================================================
         PAYMENT AMOUNT
-        DEFAULT = OUTSTANDING
+
+        DEFAULT =
+        CURRENT OUTSTANDING
         ==================================================
         */
 
@@ -1545,7 +2241,7 @@ async receivePayment(
 
         /*
         ==================================================
-        REFERENCE
+        REFERENCE NO
         ==================================================
         */
 
@@ -1562,7 +2258,6 @@ async receivePayment(
         /*
         ==================================================
         DESCRIPTION
-        GET FROM AR HEADER
         ==================================================
         */
 
@@ -1572,7 +2267,8 @@ async receivePayment(
 
             this.arPaymentDescription.value =
                 invoice.description
-                || "";
+                ||
+                "";
 
         }
 
@@ -1584,33 +2280,55 @@ async receivePayment(
         */
 
         console.log(
-            "AR PAYMENT MODAL:",
+            "AR PAYMENT VALIDATION:",
             {
-                id,
+
+                ar_id:
+                    id,
+
                 invoice_no:
                     invoice.invoice_no,
 
-                status:
-                    status,
+                ar_status:
+                    invoice.status,
+
+                completed:
+                    true,
+
+                gl_journal_id:
+                    glJournal.id,
+
+                journal_no:
+                    glJournal.journal_no,
+
+                journal_status:
+                    glJournal.status,
+
+                dpp:
+                    dppAmount,
+
+                tax_plus:
+                    taxPlusAmount,
+
+                tax_minus:
+                    taxMinusAmount,
 
                 total_amount:
                     totalAmount,
 
                 paid_amount:
-                    Number(
-                        invoice.paid_amount
-                        || 0
-                    ),
+                    paidAmount,
 
                 outstanding_amount:
                     outstandingAmount
+
             }
         );
 
 
         /*
         ==================================================
-        SHOW MODAL
+        PAYMENT MODAL VALIDATION
         ==================================================
         */
 
@@ -1625,6 +2343,12 @@ async receivePayment(
         }
 
 
+        /*
+        ==================================================
+        SHOW PAYMENT MODAL
+        ==================================================
+        */
+
         bootstrap.Modal
             .getOrCreateInstance(
                 this.accountReceivablePaymentModal
@@ -1633,7 +2357,9 @@ async receivePayment(
 
     }
 
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
             "AccountReceivable.receivePayment:",
@@ -1642,7 +2368,7 @@ async receivePayment(
 
 
         this.showError(
-            error.message
+            error?.message
             ||
             "Failed to open AR Payment."
         );
@@ -1938,7 +2664,21 @@ async generateARPaymentJournal(
 ======================================================
 SAVE AR PAYMENT
 FULL / PARTIAL PAYMENT
-SAME FLOW AS ACCOUNT PAYABLE
+
+FINAL - SAME LOGIC AS ACCOUNT PAYABLE
+
+RULE :
+- PREVENT DOUBLE CLICK
+- AR MUST ALREADY BE COMPLETED
+- COMPLETED = gl_journal_id EXISTS
+- ORIGINAL AR GL JOURNAL MUST EXIST
+- ORIGINAL AR GL JOURNAL MUST BE POSTED
+- PAID / VOID CANNOT RECEIVE PAYMENT
+- OUTSTANDING MUST BE > 0
+- PREVENT OVERPAYMENT
+- GENERATE PAYMENT GL JOURNAL
+- PAYMENT GL JOURNAL = DRAFT
+- NO LOADING AFTER ACTION
 ======================================================
 */
 
@@ -1951,9 +2691,9 @@ async savePayment() {
     */
 
     if (
-        this.btnSavePayment
+        this.btnSaveARPayment
         &&
-        this.btnSavePayment.dataset.processing
+        this.btnSaveARPayment.dataset.processing
         ===
         "true"
     ) {
@@ -1970,13 +2710,13 @@ async savePayment() {
     */
 
     if (
-        this.btnSavePayment
+        this.btnSaveARPayment
     ) {
 
-        this.btnSavePayment.dataset.processing =
+        this.btnSaveARPayment.dataset.processing =
             "true";
 
-        this.btnSavePayment.disabled =
+        this.btnSaveARPayment.disabled =
             true;
 
     }
@@ -1996,7 +2736,9 @@ async savePayment() {
             this.arPaymentARId?.value;
 
 
-        if (!id) {
+        if (
+            !id
+        ) {
 
             throw new Error(
                 "Account Receivable ID is required."
@@ -2013,10 +2755,13 @@ async savePayment() {
 
         const paymentDate =
             this.arPaymentDate?.value
-            || "";
+            ||
+            "";
 
 
-        if (!paymentDate) {
+        if (
+            !paymentDate
+        ) {
 
             throw new Error(
                 "Payment Date is required."
@@ -2034,19 +2779,27 @@ async savePayment() {
         const paymentAccountId =
             Number(
                 this.arPaymentAccount?.value
-                || 0
+                ||
+                0
             );
 
 
-        if (
-            !paymentAccountId
-        ) {
+      /*
+==================================================
+VALIDATE BANK ACCOUNT
+SAME AS AP
+==================================================
+*/
 
-            throw new Error(
-                "Bank / Cash Account is required."
-            );
+if (!paymentAccountId) {
 
-        }
+    this.showError(
+        "Bank Account is required."
+    );
+
+    return;
+
+}
 
 
         /*
@@ -2082,7 +2835,8 @@ async savePayment() {
             this.arPaymentReferenceNo
                 ?.value
                 ?.trim()
-            || null;
+            ||
+            null;
 
 
         /*
@@ -2095,12 +2849,13 @@ async savePayment() {
             this.arPaymentDescription
                 ?.value
                 ?.trim()
-            || null;
+            ||
+            null;
 
 
         /*
         ==================================================
-        LOAD FRESH AR
+        LOAD FRESH ACCOUNT RECEIVABLE
         ==================================================
         */
 
@@ -2129,26 +2884,33 @@ async savePayment() {
 
         /*
         ==================================================
-        STATUS
+        CURRENT AR STATUS
         ==================================================
         */
 
         const currentStatus =
             String(
                 invoice.status
-                || ""
+                ||
+                ""
             )
-            .trim();
+            .trim()
+            .toLowerCase();
 
+
+        /*
+        ==================================================
+        PAID VALIDATION
+        ==================================================
+        */
 
         if (
-            currentStatus !== "Complete"
-            &&
-            currentStatus !== "Partial Paid"
+            currentStatus ===
+            "paid"
         ) {
 
             throw new Error(
-                `Account Receivable status is "${currentStatus}". Payment is only allowed for Complete or Partial Paid Account Receivable.`
+                "Account Receivable is already fully paid."
             );
 
         }
@@ -2156,20 +2918,201 @@ async savePayment() {
 
         /*
         ==================================================
-        TOTAL
+        VOID VALIDATION
+        ==================================================
+        */
+
+        if (
+            currentStatus ===
+            "void"
+        ) {
+
+            throw new Error(
+                "Void Account Receivable cannot receive payment."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        ORIGINAL AR GL JOURNAL ID
+
+        SAME LOGIC AS AP :
+
+        gl_journal_id EXISTS
+        =
+        AR ALREADY COMPLETED
+        ==================================================
+        */
+
+        const glJournalId =
+            invoice.gl_journal_id
+            ||
+            null;
+
+
+        /*
+        ==================================================
+        AR MUST BE COMPLETED
+        ==================================================
+        */
+
+        if (
+            !glJournalId
+        ) {
+
+            throw new Error(
+                "Account Receivable must be completed before receiving payment."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        LOAD FRESH ORIGINAL AR GL JOURNAL
+        ==================================================
+        */
+
+        const {
+
+            data:
+                arGLJournal,
+
+            error:
+                arGLJournalError
+
+        } =
+            await supabase
+
+                .from(
+                    "trx_gl_journal"
+                )
+
+                .select(`
+                    id,
+                    journal_no,
+                    journal_date,
+                    status
+                `)
+
+                .eq(
+                    "id",
+                    glJournalId
+                )
+
+                .maybeSingle();
+
+
+        /*
+        ==================================================
+        JOURNAL QUERY ERROR
+        ==================================================
+        */
+
+        if (
+            arGLJournalError
+        ) {
+
+            throw arGLJournalError;
+
+        }
+
+
+        /*
+        ==================================================
+        ORIGINAL JOURNAL NOT FOUND
+        ==================================================
+        */
+
+        if (
+            !arGLJournal
+        ) {
+
+            throw new Error(
+                "Account Receivable GL Journal was not found."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        ORIGINAL JOURNAL STATUS
+        ==================================================
+        */
+
+        const arGLJournalStatus =
+            String(
+                arGLJournal.status
+                ||
+                ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        /*
+        ==================================================
+        ORIGINAL JOURNAL MUST BE POSTED
+        ==================================================
+        */
+
+        if (
+            arGLJournalStatus !==
+            "posted"
+        ) {
+
+            throw new Error(
+                `GL Journal ${arGLJournal.journal_no || ""} must be Posted before receiving payment.`
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        TOTAL AMOUNT
         ==================================================
         */
 
         const totalAmount =
             Number(
                 invoice.total_amount
-                || 0
+                ||
+                0
+            );
+
+
+        if (
+            totalAmount <= 0
+        ) {
+
+            throw new Error(
+                "Account Receivable Total Amount is invalid."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        PAID AMOUNT
+        ==================================================
+        */
+
+        const paidAmount =
+            Number(
+                invoice.paid_amount
+                ||
+                0
             );
 
 
         /*
         ==================================================
-        OUTSTANDING
+        OUTSTANDING AMOUNT
         ==================================================
         */
 
@@ -2177,9 +3120,19 @@ async savePayment() {
             Number(
                 invoice.outstanding_amount
                 ??
-                totalAmount
+                (
+                    totalAmount
+                    -
+                    paidAmount
+                )
             );
 
+
+        /*
+        ==================================================
+        OUTSTANDING VALIDATION
+        ==================================================
+        */
 
         if (
             outstandingAmount <= 0
@@ -2226,13 +3179,21 @@ async savePayment() {
             ||
             `Payment AR ${
                 invoice.invoice_no
-                || ""
+                ||
+                ""
             }`;
 
 
         /*
         ==================================================
-        GENERATE GL JOURNAL
+        GENERATE AR PAYMENT GL JOURNAL
+
+        PAYMENT JOURNAL :
+        DR BANK / CASH
+        CR ACCOUNT RECEIVABLE
+
+        STATUS :
+        DRAFT
         ==================================================
         */
 
@@ -2260,6 +3221,12 @@ async savePayment() {
             );
 
 
+        /*
+        ==================================================
+        VALIDATE PAYMENT JOURNAL
+        ==================================================
+        */
+
         if (
             !journal
             ||
@@ -2276,7 +3243,6 @@ async savePayment() {
         /*
         ==================================================
         CREATE PAYMENT
-        USE SERVICE
         ==================================================
         */
 
@@ -2319,26 +3285,30 @@ async savePayment() {
 
             /*
             ==================================================
-            ROLLBACK GL JOURNAL
+            ROLLBACK PAYMENT GL JOURNAL
+
+            IF PAYMENT INSERT FAILED
             ==================================================
             */
 
             const {
 
-                error: rollbackError
+                error:
+                    rollbackError
 
-            } = await supabase
+            } =
+                await supabase
 
-                .from(
-                    "trx_gl_journal"
-                )
+                    .from(
+                        "trx_gl_journal"
+                    )
 
-                .delete()
+                    .delete()
 
-                .eq(
-                    "id",
-                    journal.id
-                );
+                    .eq(
+                        "id",
+                        journal.id
+                    );
 
 
             if (
@@ -2381,9 +3351,11 @@ async savePayment() {
         ==================================================
         UPDATE PAYMENT STATUS
 
-        Complete
-        → Partial Paid
-        → Paid
+        UNPAID
+            ↓
+        PARTIAL PAID
+            ↓
+        PAID
         ==================================================
         */
 
@@ -2406,7 +3378,7 @@ async savePayment() {
 
         /*
         ==================================================
-        VERIFY FRESH AR
+        VERIFY FRESH ACCOUNT RECEIVABLE
         ==================================================
         */
 
@@ -2447,6 +3419,15 @@ async savePayment() {
                 invoice_no:
                     updatedInvoice.invoice_no,
 
+                original_gl_journal_id:
+                    glJournalId,
+
+                original_journal_no:
+                    arGLJournal.journal_no,
+
+                original_journal_status:
+                    arGLJournal.status,
+
                 payment_amount:
                     paymentAmount,
 
@@ -2462,7 +3443,7 @@ async savePayment() {
                 payment_id:
                     payment.id,
 
-                gl_journal_id:
+                payment_gl_journal_id:
                     journal.id
 
             }
@@ -2471,7 +3452,7 @@ async savePayment() {
 
         /*
         ==================================================
-        CLOSE MODAL
+        CLOSE PAYMENT MODAL
         ==================================================
         */
 
@@ -2496,7 +3477,7 @@ async savePayment() {
 
         /*
         ==================================================
-        CLEAR STATE
+        CLEAR PAYMENT STATE
         ==================================================
         */
 
@@ -2546,11 +3527,15 @@ async savePayment() {
 
         /*
         ==================================================
-        RELOAD BODY
+        REFRESH ACCOUNT RECEIVABLE
+
+        NO LOADING AFTER ACTION
         ==================================================
         */
 
-        await this.loadData();
+        await this.loadData(
+            false
+        );
 
 
         /*
@@ -2559,9 +3544,19 @@ async savePayment() {
         ==================================================
         */
 
+        const updatedStatus =
+            String(
+                updatedInvoice.status
+                ||
+                ""
+            )
+            .trim()
+            .toLowerCase();
+
+
         if (
-            updatedInvoice.status ===
-            "Paid"
+            updatedStatus ===
+            "paid"
         ) {
 
             this.showSuccess(
@@ -2571,15 +3566,16 @@ async savePayment() {
         }
 
         else if (
-            updatedInvoice.status ===
-            "Partial Paid"
+            updatedStatus ===
+            "partial paid"
         ) {
 
             this.showSuccess(
                 `Partial payment successfully saved. Outstanding: ${this.formatCurrency(
                     Number(
                         updatedInvoice.outstanding_amount
-                        || 0
+                        ||
+                        0
                     )
                 )}`
             );
@@ -2595,6 +3591,12 @@ async savePayment() {
         }
 
 
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
+
         return {
 
             payment,
@@ -2608,7 +3610,9 @@ async savePayment() {
 
     }
 
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
             "AccountReceivable.savePayment:",
@@ -2617,7 +3621,7 @@ async savePayment() {
 
 
         this.showError(
-            error.message
+            error?.message
             ||
             "Failed to save AR Payment."
         );
@@ -2636,13 +3640,13 @@ async savePayment() {
         */
 
         if (
-            this.btnSavePayment
+            this.btnSaveARPayment
         ) {
 
-            this.btnSavePayment.dataset.processing =
+            this.btnSaveARPayment.dataset.processing =
                 "false";
 
-            this.btnSavePayment.disabled =
+            this.btnSaveARPayment.disabled =
                 false;
 
         }
@@ -2650,7 +3654,6 @@ async savePayment() {
     }
 
 }
-
     /*
     ======================================================
     LOAD CUSTOMERS
@@ -3643,23 +4646,48 @@ async calculateARDueDate() {
 
    /*
 ======================================================
-LOAD DATA
-ACCOUNT RECEIVABLE
-SHOW LOADING + SYNC PAYMENT STATUS
+LOAD ACCOUNT RECEIVABLE
 ======================================================
 */
 
-async loadData() {
+async loadData(
+    showLoading = true
+) {
 
     try {
 
         /*
         ==================================================
+        RE-CACHE ACTIVE TABLE BODY
+        ==================================================
+        */
+
+        const activeTableBody =
+            document.getElementById(
+                "account-receivable-table-body"
+            );
+
+
+        if (
+            activeTableBody
+        ) {
+
+            this.tableBody =
+                activeTableBody;
+
+        }
+
+
+        /*
+        ==================================================
         LOADING
+        ONLY INITIAL LOAD / REFRESH
         ==================================================
         */
 
         if (
+            showLoading
+            &&
             this.tableBody
         ) {
 
@@ -3669,7 +4697,11 @@ async loadData() {
 
                     <td
                         colspan="6"
-                        class="text-center py-5">
+                        class="
+                            text-center
+                            py-5
+                        "
+                    >
 
                         <div
                             class="
@@ -3678,19 +4710,35 @@ async loadData() {
                                 align-items-center
                                 justify-content-center
                                 gap-2
-                            ">
+                            "
+                        >
 
                             <div
-                                class="spinner-border text-primary"
-                                role="status">
+                                class="
+                                    spinner-border
+                                    spinner-border-sm
+                                    text-primary
+                                "
+                                role="status"
+                            >
 
-                                <span class="visually-hidden">
+                                <span
+                                    class="visually-hidden"
+                                >
+
                                     Loading...
+
                                 </span>
 
                             </div>
 
-                            <div class="text-muted small">
+
+                            <div
+                                class="
+                                    text-muted
+                                    small
+                                "
+                            >
 
                                 Loading Account Receivable...
 
@@ -3709,7 +4757,7 @@ async loadData() {
 
         /*
         ==================================================
-        LOAD AR
+        LOAD ACCOUNT RECEIVABLE
         ==================================================
         */
 
@@ -3717,105 +4765,53 @@ async loadData() {
             await this.service.getAll();
 
 
+        /*
+        ==================================================
+        NORMALIZE DATA
+        ==================================================
+        */
+
         data =
-            Array.isArray(data)
+            Array.isArray(
+                data
+            )
                 ? data
                 : [];
 
 
         /*
         ==================================================
-        SYNC PAYMENT STATUS
-        ==================================================
-        */
-
-        for (
-            const invoice
-            of data
-        ) {
-
-            const currentStatus =
-                String(
-                    invoice.status
-                    || ""
-                )
-                .trim();
-
-
-            if (
-                currentStatus === "Complete"
-                ||
-                currentStatus === "Partial Paid"
-                ||
-                currentStatus === "Paid"
-            ) {
-
-                try {
-
-                    await this.service
-                        .updatePaymentStatus(
-                            invoice.id
-                        );
-
-                }
-
-                catch (
-                    syncError
-                ) {
-
-                    console.error(
-                        "AR PAYMENT STATUS SYNC ERROR:",
-                        {
-                            id:
-                                invoice.id,
-
-                            invoice_no:
-                                invoice.invoice_no,
-
-                            current_status:
-                                currentStatus,
-
-                            error:
-                                syncError
-                        }
-                    );
-
-                }
-
-            }
-
-        }
-
-
-        /*
-        ==================================================
-        RELOAD FRESH DATA
-        ==================================================
-        */
-
-        data =
-            await this.service.getAll();
-
-
-        /*
-        ==================================================
-        STORE
+        STORE DATA
         ==================================================
         */
 
         this.data =
-            Array.isArray(data)
-                ? data
-                : [];
+            data;
 
 
         this.filteredData =
-            [...this.data];
+            [
+                ...data
+            ];
 
 
         /*
         ==================================================
-        PAGINATION
+        PAGE SIZE
+        ==================================================
+        */
+
+        const pageSize =
+            Number(
+                this.pageSize
+            )
+            ||
+            20;
+
+
+        /*
+        ==================================================
+        TOTAL PAGES
         ==================================================
         */
 
@@ -3825,18 +4821,41 @@ async loadData() {
                 Math.ceil(
                     this.filteredData.length
                     /
-                    this.pageSize
+                    pageSize
                 )
             );
 
 
+        /*
+        ==================================================
+        KEEP CURRENT PAGE VALID
+        ==================================================
+        */
+
         this.currentPage =
             Math.min(
                 Math.max(
-                    this.currentPage,
+                    Number(
+                        this.currentPage
+                    )
+                    ||
+                    1,
                     1
                 ),
                 totalPages
+            );
+
+
+        /*
+        ==================================================
+        RE-CACHE TABLE BODY
+        AFTER ASYNC OPERATION
+        ==================================================
+        */
+
+        this.tableBody =
+            document.getElementById(
+                "account-receivable-table-body"
             );
 
 
@@ -3846,11 +4865,87 @@ async loadData() {
         ==================================================
         */
 
-        this.renderTable();
+        if (
+            typeof this.render ===
+            "function"
+        ) {
+
+            this.render();
+
+        }
+
+        else {
+
+            /*
+            ==============================================
+            FALLBACK
+            ==============================================
+            */
+
+            if (
+                typeof this.renderTable ===
+                "function"
+            ) {
+
+                this.renderTable();
+
+            }
+
+
+            if (
+                typeof this.renderPagination ===
+                "function"
+            ) {
+
+                this.renderPagination();
+
+            }
+
+        }
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "ACCOUNT RECEIVABLE LOAD DATA:",
+            {
+
+                total:
+                    this.data.length,
+
+                filtered:
+                    this.filteredData.length,
+
+                currentPage:
+                    this.currentPage,
+
+                pageSize:
+                    pageSize,
+
+                totalPages:
+                    totalPages,
+
+                showLoading:
+                    showLoading
+
+            }
+        );
 
     }
 
-    catch (error) {
+    catch (
+        error
+    ) {
+
+        /*
+        ==================================================
+        ERROR LOG
+        ==================================================
+        */
 
         console.error(
             "AccountReceivable.loadData:",
@@ -3858,9 +4953,31 @@ async loadData() {
         );
 
 
+        /*
+        ==================================================
+        RE-CACHE ACTIVE TABLE BODY
+        ==================================================
+        */
+
+        const activeTableBody =
+            document.getElementById(
+                "account-receivable-table-body"
+            );
+
+
+        /*
+        ==================================================
+        ERROR TABLE
+        ==================================================
+        */
+
         if (
-            this.tableBody
+            activeTableBody
         ) {
+
+            this.tableBody =
+                activeTableBody;
+
 
             this.tableBody.innerHTML = `
 
@@ -3868,7 +4985,21 @@ async loadData() {
 
                     <td
                         colspan="6"
-                        class="text-center text-danger py-5">
+                        class="
+                            text-center
+                            text-danger
+                            py-5
+                        "
+                    >
+
+                        <i
+                            class="
+                                fa-solid
+                                fa-circle-exclamation
+                                me-2
+                            "
+                        >
+                        </i>
 
                         Failed to load Account Receivable.
 
@@ -3881,44 +5012,67 @@ async loadData() {
         }
 
 
+        /*
+        ==================================================
+        ERROR MESSAGE
+        ==================================================
+        */
+
         this.showError(
+            error?.message
+            ||
             "Failed to load Account Receivable."
         );
 
     }
 
 }
-
     /*
-    ======================================================
-    SEARCH
-    ======================================================
-    */
+======================================================
+SEARCH ACCOUNT RECEIVABLE
+======================================================
+*/
 
-    search() {
+async search() {
+
+    try {
+
+        /*
+        ==================================================
+        GET FILTER VALUE
+        ==================================================
+        */
 
         const dateFrom =
-            this.dateFrom?.value
-            || "";
+            String(
+                this.dateFrom?.value
+                || ""
+            )
+            .trim();
 
 
         const dateTo =
-            this.dateTo?.value
-            || "";
+            String(
+                this.dateTo?.value
+                || ""
+            )
+            .trim();
 
 
         const status =
             String(
                 this.statusFilter?.value
-                || ""
+                || "all"
             )
-            .trim()
-            .toLowerCase();
+            .trim();
 
 
         const findBy =
-            this.findBy?.value
-            || "invoice_no";
+            String(
+                this.findBy?.value
+                || "invoice_no"
+            )
+            .trim();
 
 
         const keyword =
@@ -3926,241 +5080,319 @@ async loadData() {
                 this.keyword?.value
                 || ""
             )
-            .trim()
-            .toLowerCase();
+            .trim();
 
 
-        this.filteredData =
-            this.data.filter(
-                item => {
+        /*
+        ==================================================
+        VALIDATE DATE RANGE
+        ==================================================
+        */
 
-                    /*
-                    ======================================
-                    DATE FROM
-                    ======================================
-                    */
+        if (
+            dateFrom
+            &&
+            dateTo
+            &&
+            dateFrom > dateTo
+        ) {
 
-                    if (
-                        dateFrom
-                        &&
-                        item.invoice_date
-                        &&
-                        item.invoice_date < dateFrom
-                    ) {
-
-                        return false;
-
-                    }
-
-
-                    /*
-                    ======================================
-                    DATE TO
-                    ======================================
-                    */
-
-                    if (
-                        dateTo
-                        &&
-                        item.invoice_date
-                        &&
-                        item.invoice_date > dateTo
-                    ) {
-
-                        return false;
-
-                    }
-
-
-                    /*
-                    ======================================
-                    STATUS
-                    ======================================
-                    */
-
-                    if (
-                        status
-                        &&
-                        String(
-                            item.status
-                            || ""
-                        )
-                        .trim()
-                        .toLowerCase()
-                        !== status
-                    ) {
-
-                        return false;
-
-                    }
-
-
-                    /*
-                    ======================================
-                    KEYWORD
-                    ======================================
-                    */
-
-                    if (
-                        keyword
-                    ) {
-
-                        let value =
-                            "";
-
-
-                        switch (findBy) {
-
-                            case "customer":
-
-                                value =
-                                    item
-                                        .mst_business_partner
-                                        ?.bp_name
-                                    || "";
-
-                                break;
-
-
-                            case "po_no":
-
-                                value =
-                                    item.po_no
-                                    || "";
-
-                                break;
-
-
-                            case "description":
-
-                                value =
-                                    item.description
-                                    || "";
-
-                                break;
-
-
-                            case "invoice_no":
-
-                            default:
-
-                                value =
-                                    item.invoice_no
-                                    || "";
-
-                                break;
-
-                        }
-
-
-                        if (
-                            !String(value)
-                                .toLowerCase()
-                                .includes(
-                                    keyword
-                                )
-                        ) {
-
-                            return false;
-
-                        }
-
-                    }
-
-
-                    return true;
-
-                }
+            this.showError(
+                "Invoice Date From cannot be greater than Invoice Date To."
             );
 
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        FILTER OBJECT
+        ==================================================
+        */
+
+        const filters = {
+
+            dateFrom:
+                dateFrom,
+
+            dateTo:
+                dateTo,
+
+            status:
+                status,
+
+            findBy:
+                findBy,
+
+            keyword:
+                keyword
+
+        };
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "AR SEARCH FILTER:",
+            filters
+        );
+
+
+        /*
+        ==================================================
+        SEARCH DATABASE
+        ==================================================
+        */
+
+        const result =
+            await this.service.search(
+                filters
+            );
+
+
+        /*
+        ==================================================
+        SET FILTERED DATA
+        ==================================================
+        */
+
+        this.filteredData =
+            Array.isArray(
+                result
+            )
+                ? result
+                : [];
+
+
+        /*
+        ==================================================
+        RESET PAGE
+        ==================================================
+        */
 
         this.currentPage =
             1;
 
 
-        this.renderTable();
+        /*
+        ==================================================
+        RENDER
+        ==================================================
+        */
 
-    }
-
-
-    /*
-    ======================================================
-    TOTAL PAGES
-    ======================================================
-    */
-
-    getTotalPages() {
-
-        const total =
-            this.filteredData.length;
+        this.render();
 
 
-        return Math.max(
-            1,
-            Math.ceil(
-                total
-                /
-                this.pageSize
-            )
+        /*
+        ==================================================
+        DEBUG RESULT
+        ==================================================
+        */
+
+        console.log(
+            "AR SEARCH RESULT:",
+            {
+
+                date_from:
+                    dateFrom,
+
+                date_to:
+                    dateTo,
+
+                status:
+                    status,
+
+                find_by:
+                    findBy,
+
+                keyword:
+                    keyword,
+
+                total:
+                    this.filteredData.length,
+
+                data:
+                    this.filteredData
+
+            }
         );
 
     }
 
+    catch (error) {
 
-    /*
-    ======================================================
-    GO TO PAGE
-    ======================================================
-    */
-
-    goToPage(page) {
-
-        const totalPages =
-            this.getTotalPages();
+        console.error(
+            "AccountReceivable.search:",
+            error
+        );
 
 
-        let nextPage =
-            Number(
-                page
-                || 1
-            );
-
-
-        if (
-            Number.isNaN(
-                nextPage
-            )
-        ) {
-
-            nextPage =
-                1;
-
-        }
-
-
-        nextPage =
-            Math.max(
-                1,
-                Math.min(
-                    nextPage,
-                    totalPages
-                )
-            );
-
-
-        this.currentPage =
-            nextPage;
-
-
-        this.renderTable();
+        this.showError(
+            error?.message
+            ||
+            "Failed to search Account Receivable."
+        );
 
     }
 
+}
 
     /*
 ======================================================
+GET TOTAL PAGES
+======================================================
+*/
+
+getTotalPages() {
+
+    /*
+    ==================================================
+    TOTAL RECORDS
+    ==================================================
+    */
+
+    const totalRecords =
+        Array.isArray(
+            this.filteredData
+        )
+            ? this.filteredData.length
+            : 0;
+
+
+    /*
+    ==================================================
+    PAGE SIZE
+    ==================================================
+    */
+
+    const pageSize =
+        Number(
+            this.pageSize
+        )
+        ||
+        20;
+
+
+    /*
+    ==================================================
+    TOTAL PAGES
+    MINIMUM = 1
+    ==================================================
+    */
+
+    return Math.max(
+        1,
+        Math.ceil(
+            totalRecords
+            /
+            pageSize
+        )
+    );
+
+}
+
+
+/*
+======================================================
+GO TO PAGE
+======================================================
+*/
+
+goToPage(page) {
+
+    /*
+    ==================================================
+    TOTAL PAGES
+    ==================================================
+    */
+
+    const totalPages =
+        this.getTotalPages();
+
+
+    /*
+    ==================================================
+    NORMALIZE PAGE
+    ==================================================
+    */
+
+    let nextPage =
+        Number(
+            page
+        )
+        ||
+        1;
+
+
+    nextPage =
+        Math.max(
+            1,
+            Math.min(
+                nextPage,
+                totalPages
+            )
+        );
+
+
+    /*
+    ==================================================
+    SET CURRENT PAGE
+    ==================================================
+    */
+
+    this.currentPage =
+        nextPage;
+
+
+    /*
+    ==================================================
+    RENDER
+    ==================================================
+    */
+
+    this.render();
+
+}
+
+
+/*
+======================================================
+RENDER
+======================================================
+*/
+
+render() {
+
+    /*
+    ==================================================
+    TABLE
+    ==================================================
+    */
+
+    this.renderTable();
+
+
+    /*
+    ==================================================
+    PAGINATION
+    ==================================================
+    */
+
+    this.renderPagination();
+
+}
+
+
+/*
+======================================================
 RENDER TABLE
-ACCOUNT RECEIVABLE
+ALWAYS USE ACTIVE DOM
 ======================================================
 */
 
@@ -4168,13 +5400,29 @@ renderTable() {
 
     /*
     ==================================================
-    VALIDATE TABLE BODY
+    ALWAYS GET CURRENT TABLE BODY
+    ==================================================
+    */
+
+    const activeTableBody =
+        document.getElementById(
+            "account-receivable-table-body"
+        );
+
+
+    /*
+    ==================================================
+    TABLE BODY NOT AVAILABLE
     ==================================================
     */
 
     if (
-        !this.tableBody
+        !activeTableBody
     ) {
+
+        console.warn(
+            "AccountReceivable.renderTable: active table body not found."
+        );
 
         return;
 
@@ -4183,12 +5431,242 @@ renderTable() {
 
     /*
     ==================================================
-    TOTAL RECORD
+    UPDATE CACHE
+    ==================================================
+    */
+
+    this.tableBody =
+        activeTableBody;
+
+
+    /*
+    ==================================================
+    DATA
+    ==================================================
+    */
+
+    const filteredData =
+        Array.isArray(
+            this.filteredData
+        )
+            ? this.filteredData
+            : [];
+
+
+    /*
+    ==================================================
+    PAGE SIZE
+    ==================================================
+    */
+
+    const pageSize =
+        Number(
+            this.pageSize
+        )
+        ||
+        20;
+
+
+    /*
+    ==================================================
+    TOTAL PAGES
+    ==================================================
+    */
+
+    const totalPages =
+        Math.max(
+            1,
+            Math.ceil(
+                filteredData.length
+                /
+                pageSize
+            )
+        );
+
+
+    /*
+    ==================================================
+    KEEP CURRENT PAGE VALID
+    ==================================================
+    */
+
+    this.currentPage =
+        Math.min(
+            Math.max(
+                Number(
+                    this.currentPage
+                )
+                ||
+                1,
+                1
+            ),
+            totalPages
+        );
+
+
+    /*
+    ==================================================
+    START INDEX
+    ==================================================
+    */
+
+    const startIndex =
+        (
+            this.currentPage
+            -
+            1
+        )
+        *
+        pageSize;
+
+
+    /*
+    ==================================================
+    END INDEX
+    ==================================================
+    */
+
+    const endIndex =
+        startIndex
+        +
+        pageSize;
+
+
+    /*
+    ==================================================
+    PAGE DATA
+    ==================================================
+    */
+
+    const pageData =
+        filteredData.slice(
+            startIndex,
+            endIndex
+        );
+
+
+    /*
+    ==================================================
+    EMPTY
+    ==================================================
+    */
+
+    if (
+        pageData.length === 0
+    ) {
+
+        activeTableBody.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="6"
+                    class="
+                        text-center
+                        py-5
+                        text-muted
+                    "
+                >
+
+                    No Account Receivable found.
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    /*
+    ==================================================
+    RENDER ROWS
+    ==================================================
+    */
+
+    activeTableBody.innerHTML =
+        pageData
+            .map(
+                (
+                    invoice,
+                    index
+                ) => {
+
+                    return this.createTableRow(
+                        invoice,
+                        startIndex
+                        +
+                        index
+                        +
+                        1
+                    );
+
+                }
+            )
+            .join("");
+
+
+    /*
+    ==================================================
+    DEBUG
+    ==================================================
+    */
+
+    console.log(
+        "ACCOUNT RECEIVABLE TABLE RENDER:",
+        {
+
+            totalFiltered:
+                filteredData.length,
+
+            pageSize:
+                pageSize,
+
+            currentPage:
+                this.currentPage,
+
+            totalPages:
+                totalPages,
+
+            startIndex:
+                startIndex,
+
+            endIndex:
+                Math.min(
+                    endIndex,
+                    filteredData.length
+                ),
+
+            rowsRendered:
+                pageData.length
+
+        }
+    );
+
+}
+/*
+======================================================
+RENDER PAGINATION
+======================================================
+*/
+
+renderPagination() {
+
+    /*
+    ==================================================
+    DATA
     ==================================================
     */
 
     const totalRecords =
-        this.filteredData.length;
+        Array.isArray(
+            this.filteredData
+        )
+            ? this.filteredData.length
+            : 0;
 
 
     /*
@@ -4203,131 +5681,27 @@ renderTable() {
 
     /*
     ==================================================
-    VALIDATE CURRENT PAGE
+    KEEP CURRENT PAGE VALID
     ==================================================
     */
 
-    if (
-        this.currentPage
-        >
-        totalPages
-    ) {
-
-        this.currentPage =
-            totalPages;
-
-    }
-
-
-    if (
-        this.currentPage
-        <
-        1
-    ) {
-
-        this.currentPage =
-            1;
-
-    }
-
-
-    /*
-    ==================================================
-    PAGINATION RANGE
-    ==================================================
-    */
-
-    const start =
-        (
-            this.currentPage
-            -
-            1
-        )
-        *
-        this.pageSize;
-
-
-    const end =
-        start
-        +
-        this.pageSize;
-
-
-    /*
-    ==================================================
-    PAGE DATA
-    ==================================================
-    */
-
-    const pageData =
-        this.filteredData.slice(
-            start,
-            end
+    this.currentPage =
+        Math.max(
+            1,
+            Math.min(
+                Number(
+                    this.currentPage
+                )
+                ||
+                1,
+                totalPages
+            )
         );
 
 
     /*
     ==================================================
-    EMPTY TABLE
-    ==================================================
-    */
-
-    if (
-        !pageData.length
-    ) {
-
-        this.tableBody.innerHTML = `
-
-            <tr class="finova-empty-row">
-
-                <td
-                    colspan="6"
-                    class="text-center text-muted py-4">
-
-                    No Account Receivable data.
-
-                </td>
-
-            </tr>
-
-        `;
-
-    }
-
-    else {
-
-        /*
-        ==================================================
-        RENDER ROW
-        ==================================================
-        */
-
-        this.tableBody.innerHTML =
-            pageData
-                .map(
-                    (
-                        item,
-                        index
-                    ) =>
-
-                        this.createTableRow(
-                            item,
-                            start
-                            +
-                            index
-                            +
-                            1
-                        )
-
-                )
-                .join("");
-
-    }
-
-
-    /*
-    ==================================================
-    CURRENT PAGE
+    CURRENT PAGE INPUT
     ==================================================
     */
 
@@ -4337,6 +5711,14 @@ renderTable() {
 
         this.currentPageInput.value =
             this.currentPage;
+
+
+        this.currentPageInput.min =
+            1;
+
+
+        this.currentPageInput.max =
+            totalPages;
 
     }
 
@@ -4359,6 +5741,60 @@ renderTable() {
 
     /*
     ==================================================
+    BUTTON STATE
+    ==================================================
+    */
+
+    const isFirstPage =
+        this.currentPage <= 1;
+
+
+    const isLastPage =
+        this.currentPage >= totalPages;
+
+
+    if (
+        this.btnFirstPage
+    ) {
+
+        this.btnFirstPage.disabled =
+            isFirstPage;
+
+    }
+
+
+    if (
+        this.btnPrevPage
+    ) {
+
+        this.btnPrevPage.disabled =
+            isFirstPage;
+
+    }
+
+
+    if (
+        this.btnNextPage
+    ) {
+
+        this.btnNextPage.disabled =
+            isLastPage;
+
+    }
+
+
+    if (
+        this.btnLastPage
+    ) {
+
+        this.btnLastPage.disabled =
+            isLastPage;
+
+    }
+
+
+    /*
+    ==================================================
     RECORD INFO
     ==================================================
     */
@@ -4367,89 +5803,66 @@ renderTable() {
         this.recordInfo
     ) {
 
-        this.recordInfo.textContent =
-            totalRecords;
+        if (
+            totalRecords === 0
+        ) {
 
-    }
+            this.recordInfo.textContent =
+                "Displaying Record 0 - 0 of 0";
 
+        }
 
-    /*
-    ==================================================
-    FIRST PAGE
-    ==================================================
-    */
+        else {
 
-    if (
-        this.btnFirstPage
-    ) {
-
-        this.btnFirstPage.disabled =
-            this.currentPage
-            <=
-            1;
-
-    }
+            const pageSize =
+                Number(
+                    this.pageSize
+                )
+                ||
+                20;
 
 
-    /*
-    ==================================================
-    PREVIOUS PAGE
-    ==================================================
-    */
-
-    if (
-        this.btnPrevPage
-    ) {
-
-        this.btnPrevPage.disabled =
-            this.currentPage
-            <=
-            1;
-
-    }
+            const startRecord =
+                (
+                    this.currentPage
+                    -
+                    1
+                )
+                *
+                pageSize
+                +
+                1;
 
 
-    /*
-    ==================================================
-    NEXT PAGE
-    ==================================================
-    */
-
-    if (
-        this.btnNextPage
-    ) {
-
-        this.btnNextPage.disabled =
-            this.currentPage
-            >=
-            totalPages;
-
-    }
+            const endRecord =
+                Math.min(
+                    this.currentPage
+                    *
+                    pageSize,
+                    totalRecords
+                );
 
 
-    /*
-    ==================================================
-    LAST PAGE
-    ==================================================
-    */
+            this.recordInfo.textContent =
+                `Displaying Record ${startRecord} - ${endRecord} of ${totalRecords}`;
 
-    if (
-        this.btnLastPage
-    ) {
-
-        this.btnLastPage.disabled =
-            this.currentPage
-            >=
-            totalPages;
+        }
 
     }
 
 }
-    /*
+ /*
 ======================================================
 CREATE TABLE ROW
 ACCOUNT RECEIVABLE
 COMPACT BODY LAYOUT
+
+FINAL :
+- JOURNAL NOT SET IF NOT COMPLETED
+- JOURNAL NOT POSTED IF GL = DRAFT / OTHER
+- JOURNAL POSTED IF GL = POSTED
+- SAME DISPLAY LOGIC AS ACCOUNT PAYABLE
+- VIEW PAYMENT IF PAYMENT EXISTS
 ======================================================
 */
 
@@ -4470,7 +5883,8 @@ createTableRow(
 
     const customerName =
         customer?.bp_name
-        || "-";
+        ||
+        "-";
 
 
     /*
@@ -4481,30 +5895,140 @@ createTableRow(
 
     const invoiceNo =
         item?.invoice_no
-        || "-";
+        ||
+        "-";
 
 
     const poNo =
         item?.po_no
-        || "-";
+        ||
+        "-";
 
 
     /*
     ==================================================
-    JOURNAL NUMBER
+    GL JOURNAL
     ==================================================
     */
 
-    const journalNo =
-    item?.trx_gl_journal?.journal_no
-    ||
-    item?.journal_no
-    ||
-    (
+    const journalId =
         item?.gl_journal_id
-            ? "Linked"
-            : "Not Set"
-    );
+        ||
+        item
+            ?.trx_gl_journal
+            ?.id
+        ||
+        null;
+
+
+    const hasJournal =
+        Boolean(
+            journalId
+        );
+
+
+    const journalNo =
+        hasJournal
+
+            ? (
+                item
+                    ?.trx_gl_journal
+                    ?.journal_no
+                ||
+                item?.journal_no
+                ||
+                "Linked"
+            )
+
+            : "Not Set";
+
+
+    /*
+    ==================================================
+    JOURNAL STATUS
+    ==================================================
+    */
+
+    const journalStatus =
+        String(
+            item
+                ?.trx_gl_journal
+                ?.status
+            ||
+            ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    /*
+    ==================================================
+    JOURNAL POSTED
+    ==================================================
+    */
+
+    const journalPosted =
+        hasJournal
+        &&
+        journalStatus ===
+        "posted";
+
+
+    /*
+    ==================================================
+    JOURNAL STATUS HTML
+
+    NO JOURNAL
+    -> NOTHING
+
+    JOURNAL EXISTS + POSTED
+    -> GREEN
+
+    JOURNAL EXISTS + NOT POSTED
+    -> RED
+    ==================================================
+    */
+
+    const journalStatusHTML =
+        !hasJournal
+
+            ? ""
+
+            : journalPosted
+
+                ? `
+
+                    <div
+                        class="
+                            ar-journal-status
+                            text-success
+                            fw-semibold
+                            mt-1
+                        "
+                    >
+
+                        Journal POSTED
+
+                    </div>
+
+                `
+
+                : `
+
+                    <div
+                        class="
+                            ar-journal-status
+                            text-danger
+                            fw-semibold
+                            mt-1
+                        "
+                    >
+
+                        Journal NOT POSTED
+
+                    </div>
+
+                `;
 
 
     /*
@@ -4515,7 +6039,8 @@ createTableRow(
 
     const description =
         item?.description
-        || "-";
+        ||
+        "-";
 
 
     /*
@@ -4526,17 +6051,20 @@ createTableRow(
 
     const invoiceDate =
         item?.invoice_date
-        || "-";
+        ||
+        "-";
 
 
     const dateReceived =
         item?.date_received
-        || "-";
+        ||
+        "-";
 
 
     const dueDate =
         item?.due_date
-        || "-";
+        ||
+        "-";
 
 
     /*
@@ -4548,14 +6076,16 @@ createTableRow(
     const totalValue =
         Number(
             item?.total_amount
-            || 0
+            ||
+            0
         );
 
 
     const paidValue =
         Number(
             item?.paid_amount
-            || 0
+            ||
+            0
         );
 
 
@@ -4563,7 +6093,11 @@ createTableRow(
         Number(
             item?.outstanding_amount
             ??
-            totalValue
+            (
+                totalValue
+                -
+                paidValue
+            )
         );
 
 
@@ -4583,31 +6117,47 @@ createTableRow(
         this.formatCurrency(
             outstandingValue
         );
-    /*
-==================================================
-PAYMENT STATUS
-SAME AS ACCOUNT PAYABLE
-==================================================
-*/
 
-const paymentStatus =
-    this.getPaymentStatus(
-        item
-    );
 
     /*
     ==================================================
-    STATUS
+    PAYMENT STATUS
+    SAME AS ACCOUNT PAYABLE
+    ==================================================
+    */
+
+    const paymentStatus =
+        this.getPaymentStatus(
+            item
+        );
+
+
+    /*
+    ==================================================
+    TECHNICAL STATUS
     ==================================================
     */
 
     const technicalStatus =
         String(
             item?.status
-            || ""
+            ||
+            ""
         )
         .trim()
         .toLowerCase();
+
+
+    /*
+    ==================================================
+    VIEW PAYMENT
+    ==================================================
+    */
+
+    const viewPaymentHTML =
+        this.renderViewPayment(
+            item
+        );
 
 
     /*
@@ -4619,6 +6169,7 @@ const paymentStatus =
     console.log(
         "AR ROW:",
         {
+
             invoice_no:
                 invoiceNo,
 
@@ -4637,8 +6188,21 @@ const paymentStatus =
             outstanding:
                 outstandingValue,
 
-            journal:
-                journalNo
+            gl_journal_id:
+                journalId,
+
+            journal_no:
+                journalNo,
+
+            journal_status:
+                journalStatus,
+
+            journal_posted:
+                journalPosted,
+
+            has_payment:
+                paidValue > 0
+
         }
     );
 
@@ -4654,14 +6218,20 @@ const paymentStatus =
         <tr
             class="ar-data-row"
             data-id="${item?.id || ""}"
-            data-status="${technicalStatus}">
+            data-status="${technicalStatus}"
+        >
 
 
             <!-- ======================================
                  NO
             ======================================= -->
 
-            <td class="finova-table-index ar-cell-no">
+            <td
+                class="
+                    finova-table-index
+                    ar-cell-no
+                "
+            >
 
                 ${rowNumber}
 
@@ -4685,7 +6255,8 @@ const paymentStatus =
                             class="
                                 ar-document-badge
                                 ar-document-badge-receivable
-                            ">
+                            "
+                        >
 
                             RECEIVABLE
 
@@ -4696,7 +6267,8 @@ const paymentStatus =
                             class="
                                 ar-document-badge
                                 ar-document-badge-invoice
-                            ">
+                            "
+                        >
 
                             INV
 
@@ -4715,17 +6287,20 @@ const paymentStatus =
 
                         </span>
 
+
                         <span class="ar-info-separator">
 
                             :
 
                         </span>
 
+
                         <span
                             class="
                                 ar-info-value
                                 fw-semibold
-                            ">
+                            "
+                        >
 
                             ${invoiceNo}
 
@@ -4744,11 +6319,13 @@ const paymentStatus =
 
                         </span>
 
+
                         <span class="ar-info-separator">
 
                             :
 
                         </span>
+
 
                         <span class="ar-info-value">
 
@@ -4769,19 +6346,31 @@ const paymentStatus =
 
                         </span>
 
+
                         <span class="ar-info-separator">
 
                             :
 
                         </span>
 
-                        <span class="ar-info-value">
+
+                        <span
+                            class="
+                                ar-info-value
+                                fw-semibold
+                            "
+                        >
 
                             ${journalNo}
 
                         </span>
 
                     </div>
+
+
+                    <!-- JOURNAL STATUS -->
+
+                    ${journalStatusHTML}
 
 
                 </div>
@@ -4817,11 +6406,13 @@ const paymentStatus =
 
                         </span>
 
+
                         <span class="ar-info-separator">
 
                             :
 
                         </span>
+
 
                         <span class="ar-description-value">
 
@@ -4856,11 +6447,13 @@ const paymentStatus =
 
                         </span>
 
+
                         <span class="ar-info-separator">
 
                             :
 
                         </span>
+
 
                         <span class="ar-info-value">
 
@@ -4881,11 +6474,13 @@ const paymentStatus =
 
                         </span>
 
+
                         <span class="ar-info-separator">
 
                             :
 
                         </span>
+
 
                         <span class="ar-info-value">
 
@@ -4906,11 +6501,13 @@ const paymentStatus =
 
                         </span>
 
+
                         <span class="ar-info-separator">
 
                             :
 
                         </span>
+
 
                         <span class="ar-info-value">
 
@@ -4945,17 +6542,20 @@ const paymentStatus =
 
                         </span>
 
+
                         <span class="ar-info-separator">
 
                             :
 
                         </span>
 
+
                         <span
                             class="
                                 ar-info-value
                                 ar-amount-value
-                            ">
+                            "
+                        >
 
                             ${totalAmount}
 
@@ -4974,17 +6574,20 @@ const paymentStatus =
 
                         </span>
 
+
                         <span class="ar-info-separator">
 
                             :
 
                         </span>
 
+
                         <span
                             class="
                                 ar-info-value
                                 ar-amount-value
-                            ">
+                            "
+                        >
 
                             ${paidAmount}
 
@@ -5003,17 +6606,20 @@ const paymentStatus =
 
                         </span>
 
+
                         <span class="ar-info-separator">
 
                             :
 
                         </span>
 
+
                         <span
                             class="
                                 ar-info-value
                                 ar-amount-value
-                            ">
+                            "
+                        >
 
                             ${outstandingAmount}
 
@@ -5028,7 +6634,8 @@ const paymentStatus =
                         class="
                             ar-info-line
                             ar-status-line
-                        ">
+                        "
+                    >
 
                         <span class="ar-info-label">
 
@@ -5036,21 +6643,69 @@ const paymentStatus =
 
                         </span>
 
+
                         <span class="ar-info-separator">
 
                             :
 
                         </span>
 
+
                         <span class="ar-info-value">
 
-                           ${this.renderStatus(
-    paymentStatus
-)}
+                            ${
+                                this.renderStatus(
+                                    paymentStatus
+                                )
+                            }
 
                         </span>
 
                     </div>
+
+
+                    <!-- ==================================
+                         VIEW PAYMENT
+                    =================================== -->
+
+                    ${
+                        viewPaymentHTML
+
+                            ? `
+
+                                <div
+                                    class="
+                                        ar-info-line
+                                        ar-view-payment-line
+                                    "
+                                >
+
+                                    <span class="ar-info-label">
+
+                                        Payment
+
+                                    </span>
+
+
+                                    <span class="ar-info-separator">
+
+                                        :
+
+                                    </span>
+
+
+                                    <span class="ar-info-value">
+
+                                        ${viewPaymentHTML}
+
+                                    </span>
+
+                                </div>
+
+                            `
+
+                            : ""
+                    }
 
 
                 </div>
@@ -5066,11 +6721,14 @@ const paymentStatus =
                 class="
                     finova-table-action
                     ar-cell-action
-                ">
+                "
+            >
 
-                ${this.renderActionButtons(
-                    item
-                )}
+                ${
+                    this.renderActionButtons(
+                        item
+                    )
+                }
 
             </td>
 
@@ -5078,6 +6736,1731 @@ const paymentStatus =
         </tr>
 
     `;
+
+}
+
+
+/*
+======================================================
+RENDER VIEW PAYMENT
+ACCOUNT RECEIVABLE
+
+RULE :
+- DRAFT       = HIDE
+- VOID        = HIDE
+- PAID = 0    = HIDE
+- PAID > 0    = SHOW
+======================================================
+*/
+
+renderViewPayment(
+    invoice
+) {
+
+    /*
+    ==================================================
+    VALIDATION
+    ==================================================
+    */
+
+    if (
+        !invoice
+    ) {
+
+        return "";
+
+    }
+
+
+    /*
+    ==================================================
+    AR ID
+    ==================================================
+    */
+
+    const id =
+        invoice?.id;
+
+
+    if (
+        !id
+    ) {
+
+        return "";
+
+    }
+
+
+    /*
+    ==================================================
+    TECHNICAL STATUS
+    ==================================================
+    */
+
+    const technicalStatus =
+        String(
+            invoice?.status
+            ||
+            "Draft"
+        )
+        .trim()
+        .toLowerCase();
+
+
+    /*
+    ==================================================
+    DRAFT / VOID
+    ==================================================
+    */
+
+    if (
+        technicalStatus === "draft"
+        ||
+        technicalStatus === "void"
+    ) {
+
+        return "";
+
+    }
+
+
+    /*
+    ==================================================
+    PAID AMOUNT
+    ==================================================
+    */
+
+    const paidAmount =
+        Number(
+            invoice?.paid_amount
+            ||
+            0
+        );
+
+
+    /*
+    ==================================================
+    NO PAYMENT
+    ==================================================
+    */
+
+    if (
+        !Number.isFinite(
+            paidAmount
+        )
+        ||
+        paidAmount <= 0
+    ) {
+
+        return "";
+
+    }
+
+
+    /*
+    ==================================================
+    BUTTON
+    ==================================================
+    */
+
+    return `
+
+        <button
+            type="button"
+            class="
+                btn
+                btn-link
+                p-0
+                ar-view-payment
+            "
+            data-action="view-payment"
+            data-id="${id}"
+            title="View Payment"
+        >
+
+            <i
+                class="
+                    fa-regular
+                    fa-eye
+                    me-1
+                "
+            >
+            </i>
+
+            View Payment
+
+        </button>
+
+    `;
+
+}
+
+
+/*
+======================================================
+VIEW AR PAYMENT
+ONLY ACTIVE PAYMENT
+WITH BANK / PAYMENT ACCOUNT
+======================================================
+*/
+
+async viewPayment(
+    id
+) {
+
+    try {
+
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
+
+        if (
+            !id
+        ) {
+
+            throw new Error(
+                "Account Receivable ID is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        GET ACCOUNT RECEIVABLE
+        ==================================================
+        */
+
+        const result =
+            await this.service.getById(
+                id
+            );
+
+
+        const invoice =
+            result?.header
+            ||
+            null;
+
+
+        if (
+            !invoice
+        ) {
+
+            throw new Error(
+                "Account Receivable not found."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        GET ACTIVE PAYMENT HISTORY
+        ==================================================
+        */
+
+        const {
+
+            data:
+                payments,
+
+            error
+
+        } = await supabase
+
+            .from(
+                "trx_account_receivable_payment"
+            )
+
+            .select(`
+
+                id,
+
+                account_receivable_id,
+
+                payment_date,
+
+                payment_account_id,
+
+                amount,
+
+                reference_no,
+
+                description,
+
+                gl_journal_id,
+
+                created_at,
+
+                trx_gl_journal (
+                    id,
+                    journal_no,
+                    journal_date,
+                    status
+                )
+
+            `)
+
+            .eq(
+                "account_receivable_id",
+                id
+            )
+
+            .not(
+                "gl_journal_id",
+                "is",
+                null
+            )
+
+            .order(
+                "payment_date",
+                {
+                    ascending:
+                        false
+                }
+            )
+
+            .order(
+                "created_at",
+                {
+                    ascending:
+                        false
+                }
+            );
+
+
+        /*
+        ==================================================
+        DATABASE ERROR
+        ==================================================
+        */
+
+        if (
+            error
+        ) {
+
+            console.error(
+                "AR PAYMENT HISTORY ERROR:",
+                {
+
+                    message:
+                        error.message,
+
+                    details:
+                        error.details,
+
+                    hint:
+                        error.hint,
+
+                    code:
+                        error.code
+
+                }
+            );
+
+
+            throw error;
+
+        }
+
+
+        /*
+        ==================================================
+        VALIDATE PAYMENT
+        ==================================================
+        */
+
+        if (
+            !Array.isArray(
+                payments
+            )
+            ||
+            payments.length === 0
+        ) {
+
+            throw new Error(
+                "Active payment history not found."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        VALID PAYMENT
+        ==================================================
+        */
+
+        const validPayments =
+            payments.filter(
+                payment => {
+
+                    return (
+                        payment
+                        &&
+                        payment.gl_journal_id
+                    );
+
+                }
+            );
+
+
+        if (
+            validPayments.length === 0
+        ) {
+
+            throw new Error(
+                "No active payment with GL Journal found."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        GET UNIQUE PAYMENT ACCOUNT IDS
+        ==================================================
+        */
+
+        const paymentAccountIds =
+            [
+                ...new Set(
+
+                    validPayments
+
+                        .map(
+                            payment =>
+                                Number(
+                                    payment
+                                        ?.payment_account_id
+                                    ||
+                                    0
+                                )
+                        )
+
+                        .filter(
+                            accountId =>
+                                accountId > 0
+                        )
+
+                )
+            ];
+
+
+        /*
+        ==================================================
+        LOAD PAYMENT ACCOUNTS
+        ==================================================
+        */
+
+        let paymentAccounts =
+            [];
+
+
+        if (
+            paymentAccountIds.length > 0
+        ) {
+
+            const {
+
+                data:
+                    accountData,
+
+                error:
+                    accountError
+
+            } = await supabase
+
+                .from(
+                    "mst_chart_of_accounts"
+                )
+
+                .select(`
+                    id,
+                    account_code,
+                    account_name
+                `)
+
+                .in(
+                    "id",
+                    paymentAccountIds
+                );
+
+
+            if (
+                accountError
+            ) {
+
+                console.error(
+                    "AR PAYMENT ACCOUNT ERROR:",
+                    accountError
+                );
+
+
+                throw accountError;
+
+            }
+
+
+            paymentAccounts =
+                Array.isArray(
+                    accountData
+                )
+                    ? accountData
+                    : [];
+
+        }
+
+
+        /*
+        ==================================================
+        MAP PAYMENT ACCOUNT
+        ==================================================
+        */
+
+        const paymentHistory =
+            validPayments.map(
+                payment => {
+
+                    const paymentAccount =
+                        paymentAccounts.find(
+                            account => {
+
+                                return (
+                                    String(
+                                        account.id
+                                    )
+                                    ===
+                                    String(
+                                        payment
+                                            .payment_account_id
+                                    )
+                                );
+
+                            }
+                        )
+                        ||
+                        null;
+
+
+                    return {
+
+                        ...payment,
+
+                        payment_account:
+                            paymentAccount
+
+                    };
+
+                }
+            );
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "AR ACTIVE PAYMENT HISTORY:",
+            {
+
+                account_receivable_id:
+                    id,
+
+                invoice_no:
+                    invoice.invoice_no,
+
+                payment_count:
+                    paymentHistory.length,
+
+                payments:
+                    paymentHistory
+
+            }
+        );
+
+
+        /*
+        ==================================================
+        OPEN MODAL
+        ==================================================
+        */
+
+        this.openPaymentHistoryModal(
+            invoice,
+            paymentHistory
+        );
+
+    }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "AccountReceivable.viewPayment:",
+            error
+        );
+
+
+        this.showError(
+            error?.message
+            ||
+            "Failed to load payment history."
+        );
+
+    }
+
+}
+
+
+/*
+======================================================
+OPEN AR PAYMENT HISTORY MODAL
+SAME VISUAL STANDARD AS ACCOUNT PAYABLE
+
+RULE:
+- SHOW ACTIVE PAYMENT ONLY
+- SHOW BANK / PAYMENT ACCOUNT
+- SHOW PAYMENT JOURNAL
+- DESCRIPTION FULL WIDTH
+- TOTAL PAID
+======================================================
+*/
+
+openPaymentHistoryModal(
+    invoice,
+    payments = []
+) {
+
+    /*
+    ==================================================
+    VALIDATE INVOICE
+    ==================================================
+    */
+
+    if (!invoice) {
+
+        this.showError(
+            "Account Receivable data is required."
+        );
+
+        return;
+
+    }
+
+
+    /*
+    ==================================================
+    ACTIVE PAYMENTS ONLY
+    ==================================================
+    */
+
+    const activePayments =
+        (
+            Array.isArray(payments)
+                ? payments
+                : []
+        )
+        .filter(
+            payment => {
+
+                return Boolean(
+                    payment
+                    &&
+                    payment.gl_journal_id
+                );
+
+            }
+        );
+
+
+    /*
+    ==================================================
+    NO ACTIVE PAYMENT
+    ==================================================
+    */
+
+    if (
+        activePayments.length === 0
+    ) {
+
+        this.showError(
+            "Active payment history not found."
+        );
+
+        return;
+
+    }
+
+
+    /*
+    ==================================================
+    REMOVE OLD MODAL
+    ==================================================
+    */
+
+    const oldModal =
+        document.getElementById(
+            "arPaymentHistoryModal"
+        );
+
+
+    if (oldModal) {
+
+        const oldInstance =
+            bootstrap.Modal.getInstance(
+                oldModal
+            );
+
+
+        if (oldInstance) {
+
+            oldInstance.dispose();
+
+        }
+
+
+        oldModal.remove();
+
+    }
+
+
+    /*
+    ==================================================
+    CUSTOMER
+    ==================================================
+    */
+
+    const customerName =
+        String(
+            invoice
+                ?.mst_business_partner
+                ?.bp_name
+            ||
+            "-"
+        )
+        .trim();
+
+
+    /*
+    ==================================================
+    INVOICE NO
+    ==================================================
+    */
+
+    const invoiceNo =
+        String(
+            invoice?.invoice_no
+            ||
+            "-"
+        )
+        .trim();
+
+
+    /*
+    ==================================================
+    TOTAL PAID
+    ==================================================
+    */
+
+    const totalPaid =
+        activePayments.reduce(
+            (
+                total,
+                payment
+            ) => {
+
+                const amount =
+                    Number(
+                        payment?.amount
+                        ||
+                        0
+                    );
+
+
+                return (
+                    total
+                    +
+                    (
+                        Number.isFinite(amount)
+                            ? amount
+                            : 0
+                    )
+                );
+
+            },
+            0
+        );
+
+
+    /*
+    ==================================================
+    BUILD PAYMENT ROWS
+    ==================================================
+    */
+
+    const rows =
+        activePayments
+            .map(
+                (
+                    payment,
+                    index
+                ) => {
+
+                    /*
+                    ======================================
+                    PAYMENT AMOUNT
+                    ======================================
+                    */
+
+                    const paymentAmount =
+                        Number(
+                            payment?.amount
+                            ||
+                            0
+                        );
+
+
+                    /*
+                    ======================================
+                    PAYMENT DATE
+                    ======================================
+                    */
+
+                    const paymentDate =
+                        payment?.payment_date
+                        ||
+                        "-";
+
+
+                    /*
+                    ======================================
+                    PAYMENT ACCOUNT
+                    ======================================
+                    */
+
+                    const paymentAccount =
+                        payment
+                            ?.payment_account
+                        ||
+                        null;
+
+
+                    const accountCode =
+                        String(
+                            paymentAccount
+                                ?.account_code
+                            ||
+                            ""
+                        )
+                        .trim();
+
+
+                    const accountName =
+                        String(
+                            paymentAccount
+                                ?.account_name
+                            ||
+                            ""
+                        )
+                        .trim();
+
+
+                    let accountDisplay =
+                        "-";
+
+
+                    if (
+                        accountCode
+                        &&
+                        accountName
+                    ) {
+
+                        accountDisplay =
+                            `${accountCode} - ${accountName}`;
+
+                    }
+
+                    else if (accountName) {
+
+                        accountDisplay =
+                            accountName;
+
+                    }
+
+                    else if (accountCode) {
+
+                        accountDisplay =
+                            accountCode;
+
+                    }
+
+
+                    /*
+                    ======================================
+                    DESCRIPTION
+                    ======================================
+                    */
+
+                    const paymentDescription =
+                        String(
+                            payment?.description
+                            ||
+                            "-"
+                        )
+                        .trim();
+
+
+                    /*
+                    ======================================
+                    JOURNAL
+                    ======================================
+                    */
+
+                    const journal =
+                        payment
+                            ?.trx_gl_journal
+                        ||
+                        null;
+
+
+                    const journalNo =
+                        String(
+                            journal?.journal_no
+                            ||
+                            "-"
+                        )
+                        .trim();
+
+
+                    const journalStatus =
+                        String(
+                            journal?.status
+                            ||
+                            ""
+                        )
+                        .trim();
+
+
+                    /*
+                    ======================================
+                    JOURNAL STATUS BADGE
+                    ======================================
+                    */
+
+                    let journalStatusBadge =
+                        "";
+
+
+                    if (journalStatus) {
+
+                        let badgeClass =
+                            "bg-secondary";
+
+
+                        if (
+                            journalStatus.toLowerCase()
+                            ===
+                            "posted"
+                        ) {
+
+                            badgeClass =
+                                "bg-success";
+
+                        }
+
+                        else if (
+                            journalStatus.toLowerCase()
+                            ===
+                            "draft"
+                        ) {
+
+                            badgeClass =
+                                "bg-warning text-dark";
+
+                        }
+
+                        else if (
+                            journalStatus.toLowerCase()
+                            ===
+                            "void"
+                        ) {
+
+                            badgeClass =
+                                "bg-danger";
+
+                        }
+
+
+                        journalStatusBadge = `
+
+                            <span
+                                class="
+                                    badge
+                                    ${badgeClass}
+                                    ar-payment-journal-status
+                                "
+                            >
+
+                                ${journalStatus}
+
+                            </span>
+
+                        `;
+
+                    }
+
+
+                    /*
+                    ======================================
+                    RETURN PAYMENT ROW
+                    ======================================
+                    */
+
+                    return `
+
+                        <!-- ==============================
+                             PAYMENT MAIN ROW
+                        =============================== -->
+
+                        <tr
+                            class="
+                                ar-payment-main-row
+                            "
+                        >
+
+                            <!-- NO -->
+
+                            <td
+                                class="
+                                    text-center
+                                    align-middle
+                                "
+                            >
+
+                                ${index + 1}
+
+                            </td>
+
+
+                            <!-- PAYMENT DATE -->
+
+                            <td
+                                class="
+                                    text-center
+                                    align-middle
+                                "
+                            >
+
+                                ${paymentDate}
+
+                            </td>
+
+
+                            <!-- BANK / PAYMENT ACCOUNT -->
+
+                            <td
+                                class="
+                                    align-middle
+                                    ar-payment-account-cell
+                                "
+                            >
+
+                                <div
+                                    class="
+                                        ar-payment-account
+                                    "
+                                >
+
+                                    ${accountDisplay}
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- AMOUNT -->
+
+                            <td
+                                class="
+                                    text-end
+                                    align-middle
+                                    ar-payment-amount-cell
+                                "
+                            >
+
+                                ${
+                                    this.formatCurrency(
+                                        paymentAmount
+                                    )
+                                }
+
+                            </td>
+
+
+                            <!-- JOURNAL -->
+
+                            <td
+                                class="
+                                    text-center
+                                    align-middle
+                                    ar-payment-journal-cell
+                                "
+                            >
+
+                                <div
+                                    class="
+                                        ar-payment-journal-wrap
+                                    "
+                                >
+
+                                    <div
+                                        class="
+                                            ar-payment-journal-no
+                                        "
+                                    >
+
+                                        ${journalNo}
+
+                                    </div>
+
+
+                                    ${journalStatusBadge}
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+
+                        <!-- ==============================
+                             DESCRIPTION
+                        =============================== -->
+
+                        <tr
+                            class="
+                                ar-payment-description-row
+                            "
+                        >
+
+                            <!-- EMPTY NO COLUMN -->
+
+                            <td
+                                class="
+                                    ar-payment-description-empty
+                                "
+                            >
+                            </td>
+
+
+                            <!-- DESCRIPTION -->
+
+                            <td
+                                colspan="4"
+                                class="
+                                    ar-payment-description-cell
+                                "
+                            >
+
+                                <div
+                                    class="
+                                        ar-payment-description-wrap
+                                    "
+                                >
+
+                                    <span
+                                        class="
+                                            ar-payment-description-label
+                                        "
+                                    >
+
+                                        Description
+
+                                    </span>
+
+
+                                    <span
+                                        class="
+                                            ar-payment-description-separator
+                                        "
+                                    >
+
+                                        :
+
+                                    </span>
+
+
+                                    <span
+                                        class="
+                                            ar-payment-description-value
+                                        "
+                                    >
+
+                                        ${paymentDescription}
+
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+
+    /*
+    ==================================================
+    MODAL HTML
+    ==================================================
+    */
+
+    const modalHTML = `
+
+        <div
+            class="
+                modal
+                fade
+            "
+            id="arPaymentHistoryModal"
+            tabindex="-1"
+            aria-hidden="true"
+        >
+
+            <div
+                class="
+                    modal-dialog
+                    modal-xl
+                    modal-dialog-centered
+                    modal-dialog-scrollable
+                "
+            >
+
+                <div
+                    class="
+                        modal-content
+                    "
+                >
+
+
+                    <!-- ==============================
+                         HEADER
+                    =============================== -->
+
+                    <div
+                        class="
+                            modal-header
+                        "
+                    >
+
+                        <div
+                            class="
+                                ar-payment-history-heading
+                            "
+                        >
+
+                            <h5
+                                class="
+                                    modal-title
+                                "
+                            >
+
+                                <i
+                                    class="
+                                        fa-solid
+                                        fa-money-bill-transfer
+                                        me-2
+                                    "
+                                >
+                                </i>
+
+                                View Payment
+
+                            </h5>
+
+
+                            <div
+                                class="
+                                    small
+                                    text-muted
+                                    mt-1
+                                "
+                            >
+
+                                Account Receivable Payment History
+
+                            </div>
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            class="
+                                btn-close
+                            "
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                        >
+                        </button>
+
+                    </div>
+
+
+                    <!-- ==============================
+                         BODY
+                    =============================== -->
+
+                    <div
+                        class="
+                            modal-body
+                        "
+                    >
+
+
+                        <!-- ==========================
+                             HEADER INFORMATION
+                        =========================== -->
+
+                        <div
+                            class="
+                                row
+                                g-3
+                                mb-4
+                                ar-payment-history-info
+                            "
+                        >
+
+
+                            <!-- INVOICE NO -->
+
+                            <div
+                                class="
+                                    col-md-4
+                                "
+                            >
+
+                                <label
+                                    class="
+                                        form-label
+                                    "
+                                >
+
+                                    Invoice No
+
+                                </label>
+
+
+                                <input
+                                    type="text"
+                                    class="
+                                        form-control
+                                    "
+                                    value="${invoiceNo}"
+                                    readonly
+                                >
+
+                            </div>
+
+
+                            <!-- CUSTOMER -->
+
+                            <div
+                                class="
+                                    col-md-5
+                                "
+                            >
+
+                                <label
+                                    class="
+                                        form-label
+                                    "
+                                >
+
+                                    Customer
+
+                                </label>
+
+
+                                <input
+                                    type="text"
+                                    class="
+                                        form-control
+                                    "
+                                    value="${customerName}"
+                                    readonly
+                                >
+
+                            </div>
+
+
+                            <!-- TOTAL PAID -->
+
+                            <div
+                                class="
+                                    col-md-3
+                                "
+                            >
+
+                                <label
+                                    class="
+                                        form-label
+                                    "
+                                >
+
+                                    Total Paid
+
+                                </label>
+
+
+                                <input
+                                    type="text"
+                                    class="
+                                        form-control
+                                        text-end
+                                        fw-semibold
+                                    "
+                                    value="${
+                                        this.formatCurrency(
+                                            totalPaid
+                                        )
+                                    }"
+                                    readonly
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ==========================
+                             PAYMENT TABLE
+                        =========================== -->
+
+                        <div
+                            class="
+                                table-responsive
+                                ar-payment-history-table-wrapper
+                            "
+                        >
+
+                            <table
+                                class="
+                                    table
+                                    table-bordered
+                                    table-hover
+                                    align-middle
+                                    mb-0
+                                    ar-payment-history-table
+                                "
+                            >
+
+
+                                <!-- ======================
+                                     FIXED COLUMN WIDTH
+                                ======================= -->
+
+                                <colgroup>
+
+                                    <col
+                                        class="
+                                            ar-payment-col-no
+                                        "
+                                    >
+
+                                    <col
+                                        class="
+                                            ar-payment-col-date
+                                        "
+                                    >
+
+                                    <col
+                                        class="
+                                            ar-payment-col-account
+                                        "
+                                    >
+
+                                    <col
+                                        class="
+                                            ar-payment-col-amount
+                                        "
+                                    >
+
+                                    <col
+                                        class="
+                                            ar-payment-col-journal
+                                        "
+                                    >
+
+                                </colgroup>
+
+
+                                <!-- ======================
+                                     HEADER
+                                ======================= -->
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th
+                                            class="
+                                                text-center
+                                            "
+                                        >
+
+                                            No
+
+                                        </th>
+
+
+                                        <th
+                                            class="
+                                                text-center
+                                            "
+                                        >
+
+                                            Payment Date
+
+                                        </th>
+
+
+                                        <th>
+
+                                            Bank / Payment Account
+
+                                        </th>
+
+
+                                        <th
+                                            class="
+                                                text-end
+                                            "
+                                        >
+
+                                            Amount
+
+                                        </th>
+
+
+                                        <th
+                                            class="
+                                                text-center
+                                            "
+                                        >
+
+                                            Journal
+
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+
+                                <!-- ======================
+                                     BODY
+                                ======================= -->
+
+                                <tbody>
+
+                                    ${rows}
+
+                                </tbody>
+
+
+                                <!-- ======================
+                                     FOOTER
+                                ======================= -->
+
+                                <tfoot>
+
+                                    <tr>
+
+                                        <th
+                                            colspan="3"
+                                            class="
+                                                text-end
+                                            "
+                                        >
+
+                                            Total Paid
+
+                                        </th>
+
+
+                                        <th
+                                            class="
+                                                text-end
+                                                fw-semibold
+                                            "
+                                        >
+
+                                            ${
+                                                this.formatCurrency(
+                                                    totalPaid
+                                                )
+                                            }
+
+                                        </th>
+
+
+                                        <th>
+                                        </th>
+
+                                    </tr>
+
+                                </tfoot>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ==============================
+                         FOOTER
+                    =============================== -->
+
+                    <div
+                        class="
+                            modal-footer
+                        "
+                    >
+
+                        <div
+                            class="
+                                me-auto
+                                text-muted
+                                small
+                            "
+                        >
+
+                            ${
+                                activePayments.length
+                            }
+
+                            payment transaction${
+                                activePayments.length > 1
+                                    ? "s"
+                                    : ""
+                            }
+
+                        </div>
+
+
+                        <button
+                            type="button"
+                            class="
+                                btn
+                                btn-secondary
+                            "
+                            data-bs-dismiss="modal"
+                        >
+
+                            Close
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    /*
+    ==================================================
+    APPEND MODAL
+    ==================================================
+    */
+
+    document.body.insertAdjacentHTML(
+        "beforeend",
+        modalHTML
+    );
+
+
+    /*
+    ==================================================
+    GET MODAL
+    ==================================================
+    */
+
+    const modalElement =
+        document.getElementById(
+            "arPaymentHistoryModal"
+        );
+
+
+    if (!modalElement) {
+
+        this.showError(
+            "AR Payment History Modal could not be created."
+        );
+
+        return;
+
+    }
+
+
+    /*
+    ==================================================
+    CREATE BOOTSTRAP MODAL
+    ==================================================
+    */
+
+    const modal =
+        bootstrap.Modal
+            .getOrCreateInstance(
+                modalElement
+            );
+
+
+    /*
+    ==================================================
+    SHOW MODAL
+    ==================================================
+    */
+
+    modal.show();
+
+
+    /*
+    ==================================================
+    CLEAN AFTER CLOSE
+    ==================================================
+    */
+
+    modalElement.addEventListener(
+        "hidden.bs.modal",
+        () => {
+
+            modal.dispose();
+
+            modalElement.remove();
+
+        },
+        {
+            once: true
+        }
+    );
 
 }
 /*
@@ -5143,6 +8526,176 @@ getPaymentStatus(
 
 
     return "Partial Paid";
+
+}
+/*
+======================================================
+RENDER VIEW PAYMENT
+ACCOUNT RECEIVABLE
+
+SAME LOGIC AS ACCOUNT PAYABLE
+
+RULE :
+- DRAFT       = HIDE
+- VOID        = HIDE
+- PAID = 0    = HIDE
+- PAID > 0    = SHOW VIEW PAYMENT
+======================================================
+*/
+
+renderViewPayment(
+    invoice
+) {
+
+    /*
+    ==================================================
+    VALIDATION
+    ==================================================
+    */
+
+    if (
+        !invoice
+    ) {
+
+        return "";
+
+    }
+
+
+    /*
+    ==================================================
+    AR ID
+    ==================================================
+    */
+
+    const id =
+        invoice?.id;
+
+
+    if (
+        !id
+    ) {
+
+        return "";
+
+    }
+
+
+    /*
+    ==================================================
+    TECHNICAL STATUS
+    ==================================================
+    */
+
+    const technicalStatus =
+        String(
+            invoice?.status
+            ||
+            "Draft"
+        )
+        .trim();
+
+
+    /*
+    ==================================================
+    DRAFT
+    ==================================================
+    */
+
+    if (
+        technicalStatus ===
+        "Draft"
+    ) {
+
+        return "";
+
+    }
+
+
+    /*
+    ==================================================
+    VOID
+    ==================================================
+    */
+
+    if (
+        technicalStatus ===
+        "Void"
+    ) {
+
+        return "";
+
+    }
+
+
+    /*
+    ==================================================
+    PAID AMOUNT
+    ==================================================
+    */
+
+    const paidAmount =
+        Number(
+            invoice?.paid_amount
+            ||
+            0
+        );
+
+
+    /*
+    ==================================================
+    NO PAYMENT
+    ==================================================
+    */
+
+    if (
+        !Number.isFinite(
+            paidAmount
+        )
+        ||
+        paidAmount <= 0
+    ) {
+
+        return "";
+
+    }
+
+
+    /*
+    ==================================================
+    VIEW PAYMENT BUTTON
+    ==================================================
+    */
+
+    return `
+
+        <button
+            type="button"
+            class="
+                btn
+                btn-link
+                p-0
+                ar-view-payment
+            "
+            data-action="view-payment"
+            data-id="${id}"
+            title="View Payment"
+        >
+
+            <i
+                class="
+                    fa-regular
+                    fa-eye
+                    me-1
+                "
+            >
+            </i>
+
+            View Payment
+
+        </button>
+
+    `;
 
 }
 /*
@@ -5396,11 +8949,45 @@ renderStatusBadge(
 }
 
 
-   /*
+ /*
 ======================================================
 RENDER ACTION BUTTONS
 ACCOUNT RECEIVABLE
+
 SAME LOGIC AS ACCOUNT PAYABLE
+
+RULE :
+
+NOT COMPLETED
+- gl_journal_id = null
+- Edit
+- Delete
+- Complete
+
+COMPLETED + JOURNAL NOT POSTED
+- gl_journal_id exists
+- View
+- Print
+- Payment NOT SHOWN
+
+COMPLETED + JOURNAL POSTED
+- gl_journal_id exists
+- View
+- Print
+- Payment SHOWN
+
+PARTIAL PAID
+- Original Journal must still be Posted
+- Outstanding > 0
+- Payment SHOWN
+
+PAID
+- View
+- Print
+
+VOID
+- View
+- Print
 ======================================================
 */
 
@@ -5408,241 +8995,222 @@ renderActionButtons(
     invoice
 ) {
 
+    /*
+    ==================================================
+    ID
+    ==================================================
+    */
+
     const id =
         invoice?.id;
 
 
-    if (!id) {
+    if (
+        !id
+    ) {
 
         return "";
 
     }
 
 
+    /*
+    ==================================================
+    STATUS
+    ==================================================
+    */
+
     const status =
         String(
             invoice?.status
-            || "Draft"
+            ||
+            ""
         )
-        .trim();
+        .trim()
+        .toLowerCase();
 
 
     /*
     ==================================================
-    DRAFT
-    EDIT | DELETE | COMPLETE
+    GL JOURNAL ID
+
+    gl_journal_id EXISTS
+    =
+    ACCOUNT RECEIVABLE ALREADY COMPLETED
     ==================================================
     */
 
-    if (
-        status === "Draft"
-    ) {
-
-        return `
-
-            <div
-                class="btn-group btn-group-sm"
-                role="group">
-
-                <button
-                    type="button"
-                    class="btn btn-outline-primary"
-                    title="Edit"
-                    data-action="edit"
-                    data-id="${id}">
-
-                    <i class="fa-solid fa-pen"></i>
-
-                </button>
+    const glJournalId =
+        invoice?.gl_journal_id
+        ||
+        invoice
+            ?.trx_gl_journal
+            ?.id
+        ||
+        null;
 
 
-                <button
-                    type="button"
-                    class="btn btn-outline-danger"
-                    title="Delete"
-                    data-action="delete"
-                    data-id="${id}">
-
-                    <i class="fa-solid fa-trash"></i>
-
-                </button>
-
-
-                <button
-                    type="button"
-                    class="btn btn-outline-success"
-                    title="Complete"
-                    data-action="complete"
-                    data-id="${id}">
-
-                    <i class="fa-solid fa-check"></i>
-
-                </button>
-
-            </div>
-
-        `;
-
-    }
+    const hasJournal =
+        Boolean(
+            glJournalId
+        );
 
 
     /*
     ==================================================
-    COMPLETE
-    VIEW | PRINT | PAYMENT
+    GL JOURNAL STATUS
     ==================================================
     */
 
-    if (
-        status === "Complete"
-    ) {
-
-        return `
-
-            <div
-                class="btn-group btn-group-sm"
-                role="group">
-
-                <button
-                    type="button"
-                    class="btn btn-outline-secondary"
-                    title="View"
-                    data-action="view"
-                    data-id="${id}">
-
-                    <i class="fa-regular fa-eye"></i>
-
-                </button>
-
-
-                <button
-                    type="button"
-                    class="btn btn-outline-dark"
-                    title="Print"
-                    data-action="print"
-                    data-id="${id}">
-
-                    <i class="fa-solid fa-print"></i>
-
-                </button>
-
-
-                <button
-                    type="button"
-                    class="btn btn-outline-success"
-                    title="Receive Payment"
-                    data-action="payment"
-                    data-id="${id}">
-
-                    <i class="fa-solid fa-money-bill-transfer"></i>
-
-                </button>
-
-            </div>
-
-        `;
-
-    }
+    const journalStatus =
+        String(
+            invoice
+                ?.trx_gl_journal
+                ?.status
+            ||
+            ""
+        )
+        .trim()
+        .toLowerCase();
 
 
     /*
     ==================================================
-    PARTIAL PAID
-    VIEW | PRINT | PAYMENT
+    JOURNAL POSTED
     ==================================================
     */
 
-    if (
-        status === "Partial Paid"
-    ) {
-
-        return `
-
-            <div
-                class="btn-group btn-group-sm"
-                role="group">
-
-                <button
-                    type="button"
-                    class="btn btn-outline-secondary"
-                    title="View"
-                    data-action="view"
-                    data-id="${id}">
-
-                    <i class="fa-regular fa-eye"></i>
-
-                </button>
+    const journalPosted =
+        hasJournal
+        &&
+        journalStatus ===
+        "posted";
 
 
-                <button
-                    type="button"
-                    class="btn btn-outline-dark"
-                    title="Print"
-                    data-action="print"
-                    data-id="${id}">
+    /*
+    ==================================================
+    AMOUNT
+    ==================================================
+    */
 
-                    <i class="fa-solid fa-print"></i>
+    const totalAmount =
+        Number(
+            invoice?.total_amount
+            ||
+            0
+        );
 
-                </button>
+
+    const paidAmount =
+        Number(
+            invoice?.paid_amount
+            ||
+            0
+        );
 
 
-                <button
-                    type="button"
-                    class="btn btn-outline-success"
-                    title="Receive Payment"
-                    data-action="payment"
-                    data-id="${id}">
+    const outstandingAmount =
+        Number(
+            invoice?.outstanding_amount
+            ??
+            (
+                totalAmount
+                -
+                paidAmount
+            )
+        );
 
-                    <i class="fa-solid fa-money-bill-transfer"></i>
 
-                </button>
+    /*
+    ==================================================
+    PAYMENT ALLOWED
 
-            </div>
+    PAYMENT ONLY APPEARS WHEN:
+    - JOURNAL EXISTS
+    - JOURNAL POSTED
+    - OUTSTANDING > 0
+    - NOT PAID
+    - NOT VOID
+    ==================================================
+    */
 
-        `;
-
-    }
+    const canPayment =
+        hasJournal
+        &&
+        journalPosted
+        &&
+        outstandingAmount > 0
+        &&
+        status !== "paid"
+        &&
+        status !== "void";
 
 
     /*
     ==================================================
     PAID
-    VIEW | PRINT
+
+    VIEW
+    PRINT
     ==================================================
     */
 
     if (
-        status === "Paid"
+        status ===
+        "paid"
     ) {
 
         return `
 
             <div
-                class="btn-group btn-group-sm"
-                role="group">
+                class="
+                    btn-group
+                    btn-group-sm
+                "
+                role="group"
+            >
+
+                <!-- VIEW -->
 
                 <button
                     type="button"
                     class="btn btn-outline-secondary"
                     title="View"
                     data-action="view"
-                    data-id="${id}">
+                    data-id="${id}"
+                >
 
-                    <i class="fa-regular fa-eye"></i>
+                    <i
+                        class="
+                            fa-regular
+                            fa-eye
+                        "
+                    >
+                    </i>
 
                 </button>
 
+
+                <!-- PRINT -->
 
                 <button
                     type="button"
                     class="btn btn-outline-dark"
                     title="Print"
                     data-action="print"
-                    data-id="${id}">
+                    data-id="${id}"
+                >
 
-                    <i class="fa-solid fa-print"></i>
+                    <i
+                        class="
+                            fa-solid
+                            fa-print
+                        "
+                    >
+                    </i>
 
                 </button>
+
 
             </div>
 
@@ -5654,42 +9222,68 @@ renderActionButtons(
     /*
     ==================================================
     VOID
-    VIEW | PRINT
+
+    VIEW
+    PRINT
     ==================================================
     */
 
     if (
-        status === "Void"
+        status ===
+        "void"
     ) {
 
         return `
 
             <div
-                class="btn-group btn-group-sm"
-                role="group">
+                class="
+                    btn-group
+                    btn-group-sm
+                "
+                role="group"
+            >
+
+                <!-- VIEW -->
 
                 <button
                     type="button"
                     class="btn btn-outline-secondary"
                     title="View"
                     data-action="view"
-                    data-id="${id}">
+                    data-id="${id}"
+                >
 
-                    <i class="fa-regular fa-eye"></i>
+                    <i
+                        class="
+                            fa-regular
+                            fa-eye
+                        "
+                    >
+                    </i>
 
                 </button>
 
+
+                <!-- PRINT -->
 
                 <button
                     type="button"
                     class="btn btn-outline-dark"
                     title="Print"
                     data-action="print"
-                    data-id="${id}">
+                    data-id="${id}"
+                >
 
-                    <i class="fa-solid fa-print"></i>
+                    <i
+                        class="
+                            fa-solid
+                            fa-print
+                        "
+                    >
+                    </i>
 
                 </button>
+
 
             </div>
 
@@ -5698,7 +9292,200 @@ renderActionButtons(
     }
 
 
-    return "";
+    /*
+    ==================================================
+    NOT COMPLETED
+
+    NO GL JOURNAL
+
+    EDIT
+    DELETE
+    COMPLETE
+    ==================================================
+    */
+
+    if (
+        !hasJournal
+    ) {
+
+        return `
+
+            <div
+                class="
+                    btn-group
+                    btn-group-sm
+                "
+                role="group"
+            >
+
+                <!-- EDIT -->
+
+                <button
+                    type="button"
+                    class="btn btn-outline-primary"
+                    title="Edit"
+                    data-action="edit"
+                    data-id="${id}"
+                >
+
+                    <i
+                        class="
+                            fa-solid
+                            fa-pen
+                        "
+                    >
+                    </i>
+
+                </button>
+
+
+                <!-- DELETE -->
+
+                <button
+                    type="button"
+                    class="btn btn-outline-danger"
+                    title="Delete"
+                    data-action="delete"
+                    data-id="${id}"
+                >
+
+                    <i
+                        class="
+                            fa-solid
+                            fa-trash
+                        "
+                    >
+                    </i>
+
+                </button>
+
+
+                <!-- COMPLETE -->
+
+                <button
+                    type="button"
+                    class="btn btn-outline-success"
+                    title="Complete"
+                    data-action="complete"
+                    data-id="${id}"
+                >
+
+                    <i
+                        class="
+                            fa-solid
+                            fa-check
+                        "
+                    >
+                    </i>
+
+                </button>
+
+
+            </div>
+
+        `;
+
+    }
+
+
+    /*
+    ==================================================
+    COMPLETED
+
+    JOURNAL EXISTS
+
+    VIEW
+    PRINT
+    PAYMENT ONLY IF POSTED
+    ==================================================
+    */
+
+    return `
+
+        <div
+            class="
+                btn-group
+                btn-group-sm
+            "
+            role="group"
+        >
+
+            <!-- VIEW -->
+
+            <button
+                type="button"
+                class="btn btn-outline-secondary"
+                title="View"
+                data-action="view"
+                data-id="${id}"
+            >
+
+                <i
+                    class="
+                        fa-regular
+                        fa-eye
+                    "
+                >
+                </i>
+
+            </button>
+
+
+            <!-- PRINT -->
+
+            <button
+                type="button"
+                class="btn btn-outline-dark"
+                title="Print"
+                data-action="print"
+                data-id="${id}"
+            >
+
+                <i
+                    class="
+                        fa-solid
+                        fa-print
+                    "
+                >
+                </i>
+
+            </button>
+
+
+            <!-- RECEIVE PAYMENT -->
+
+            ${
+                canPayment
+
+                    ? `
+
+                        <button
+                            type="button"
+                            class="btn btn-outline-success"
+                            title="Receive Payment"
+                            data-action="payment"
+                            data-id="${id}"
+                        >
+
+                            <i
+                                class="
+                                    fa-solid
+                                    fa-money-bill-transfer
+                                "
+                            >
+                            </i>
+
+                        </button>
+
+                    `
+
+                    : ""
+            }
+
+
+        </div>
+
+    `;
 
 }
     /*
@@ -7946,7 +11733,9 @@ updateInvoiceSummary() {
                 "add";
 
 
-            await this.loadData();
+            await this.loadData(
+    false
+);
 
         }
 
@@ -8074,7 +11863,9 @@ updateInvoiceSummary() {
             );
 
 
-            await this.loadData();
+            await this.loadData(
+    false
+);
 
         }
 
@@ -8096,653 +11887,878 @@ updateInvoiceSummary() {
 
 
     /*
-    ======================================================
-    REFRESH
-    ======================================================
-    */
+======================================================
+REFRESH ACCOUNT RECEIVABLE
+WITH LOADING
+======================================================
+*/
 
-    async refresh() {
+async refresh() {
 
-        try {
-
-            if (
-                this.dateFrom
-            ) {
-
-                this.dateFrom.value =
-                    "";
-
-            }
-
-
-            if (
-                this.dateTo
-            ) {
-
-                this.dateTo.value =
-                    "";
-
-            }
-
-
-            if (
-                this.statusFilter
-            ) {
-
-                this.statusFilter.value =
-                    "";
-
-            }
-
-
-            if (
-                this.keyword
-            ) {
-
-                this.keyword.value =
-                    "";
-
-            }
-
-
-            this.currentPage =
-                1;
-
-
-            await this.loadData();
-
-        }
-
-        catch (error) {
-
-            console.error(
-                "AccountReceivable.refresh:",
-                error
-            );
-
-        }
-
-    }
-
-
-    /*
-    ======================================================
-    BIND EVENTS
-    ======================================================
-    */
-
-    bindEvents() {
+    try {
 
         /*
         ==================================================
-        FIND
+        CLEAR DATE FROM
         ==================================================
         */
 
-        this.btnFind?.addEventListener(
-            "click",
-            () => {
+        if (
+            this.dateFrom
+        ) {
+
+            this.dateFrom.value =
+                "";
+
+        }
+
+
+        /*
+        ==================================================
+        CLEAR DATE TO
+        ==================================================
+        */
+
+        if (
+            this.dateTo
+        ) {
+
+            this.dateTo.value =
+                "";
+
+        }
+
+
+        /*
+        ==================================================
+        CLEAR STATUS
+        ==================================================
+        */
+
+        if (
+            this.statusFilter
+        ) {
+
+            this.statusFilter.value =
+                "";
+
+        }
+
+
+        /*
+        ==================================================
+        RESET FIND BY
+        ==================================================
+        */
+
+        if (
+            this.findBy
+        ) {
+
+            this.findBy.value =
+                "invoice_no";
+
+        }
+
+
+        /*
+        ==================================================
+        CLEAR KEYWORD
+        ==================================================
+        */
+
+        if (
+            this.keyword
+        ) {
+
+            this.keyword.value =
+                "";
+
+        }
+
+
+        /*
+        ==================================================
+        RESET PAGE
+        ==================================================
+        */
+
+        this.currentPage =
+            1;
+
+
+        /*
+        ==================================================
+        LOAD DATA
+        REFRESH = WITH LOADING
+        ==================================================
+        */
+
+        await this.loadData(
+            true
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountReceivable.refresh:",
+            error
+        );
+
+
+        this.showError(
+            error?.message
+            ||
+            "Failed to refresh Account Receivable."
+        );
+
+    }
+
+}
+
+
+   /*
+======================================================
+BIND EVENTS
+======================================================
+*/
+
+bindEvents() {
+
+    /*
+    ==================================================
+    FIND
+    ==================================================
+    */
+
+    this.btnFind?.addEventListener(
+        "click",
+        () => {
+
+            this.search();
+
+        }
+    );
+
+
+    /*
+    ==================================================
+    CUSTOMER CHANGE
+    ==================================================
+    */
+
+    this.arFormCustomer?.addEventListener(
+        "change",
+        async () => {
+
+            await this.handleCustomerChange();
+
+        }
+    );
+
+
+    /*
+    ==================================================
+    DATE RECEIVED CHANGE
+    ==================================================
+    */
+
+    this.arFormDateReceived?.addEventListener(
+        "change",
+        async () => {
+
+            await this.calculateARDueDate();
+
+        }
+    );
+
+
+    /*
+    ==================================================
+    DOWNLOAD EXCEL
+    ==================================================
+    */
+
+    this.btnDownloadExcel?.addEventListener(
+        "click",
+        () => {
+
+            this.exportExcel();
+
+        }
+    );
+
+
+    /*
+    ==================================================
+    PREVIEW HTML
+    ==================================================
+    */
+
+    this.btnPreviewHTML?.addEventListener(
+        "click",
+        () => {
+
+            this.previewHTML();
+
+        }
+    );
+
+
+    /*
+    ==================================================
+    SAVE AR PAYMENT
+    ==================================================
+    */
+
+    this.btnSaveARPayment?.addEventListener(
+        "click",
+        async () => {
+
+            await this.savePayment();
+
+        }
+    );
+    /*
+==================================================
+PAYMENT AMOUNT FORMAT
+FORMAT THOUSANDS WHILE TYPING
+
+11000
+→ 11.000
+
+1100000
+→ 1.100.000
+==================================================
+*/
+
+this.arPaymentAmount?.addEventListener(
+    "input",
+    event => {
+
+        /*
+        ==============================================
+        GET RAW VALUE
+        ==============================================
+        */
+
+        let value =
+            String(
+                event.target.value
+                || ""
+            );
+
+
+        /*
+        ==============================================
+        REMOVE NON NUMERIC
+        ==============================================
+        */
+
+        value =
+            value.replace(
+                /[^0-9]/g,
+                ""
+            );
+
+
+        /*
+        ==============================================
+        EMPTY
+        ==============================================
+        */
+
+        if (
+            !value
+        ) {
+
+            event.target.value =
+                "";
+
+            return;
+
+        }
+
+
+        /*
+        ==============================================
+        REMOVE LEADING ZERO
+        ==============================================
+        */
+
+        value =
+            value.replace(
+                /^0+(?=\d)/,
+                ""
+            );
+
+
+        /*
+        ==============================================
+        FORMAT INDONESIAN THOUSANDS
+        ==============================================
+        */
+
+        event.target.value =
+            Number(
+                value
+            )
+            .toLocaleString(
+                "id-ID",
+                {
+                    maximumFractionDigits: 0
+                }
+            );
+
+    }
+);
+
+
+    /*
+    ==================================================
+    ENTER SEARCH
+    ==================================================
+    */
+
+    this.keyword?.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key === "Enter"
+            ) {
+
+                event.preventDefault();
 
                 this.search();
 
             }
-        );
-        /*
-==================================================
-CUSTOMER CHANGE
-==================================================
-*/
 
-this.arFormCustomer?.addEventListener(
-    "change",
-    async () => {
-
-        await this.handleCustomerChange();
-
-    }
-);
+        }
+    );
 
 
-/*
-==================================================
-DATE RECEIVED CHANGE
-==================================================
-*/
+    /*
+    ==================================================
+    ADD AR
+    ==================================================
+    */
 
-this.arFormDateReceived?.addEventListener(
-    "change",
-    async () => {
+    this.btnAdd?.addEventListener(
+        "click",
+        () => {
 
-        await this.calculateARDueDate();
+            this.addInvoice();
 
-    }
-);
-        /*
-==================================================
-DOWNLOAD EXCEL
-==================================================
-*/
-
-this.btnDownloadExcel?.addEventListener(
-    "click",
-    () => {
-
-        this.exportExcel();
-
-    }
-);
+        }
+    );
 
 
-/*
-==================================================
-PREVIEW HTML
-==================================================
-*/
+    /*
+    ==================================================
+    REFRESH
+    ==================================================
+    */
 
-this.btnPreviewHTML?.addEventListener(
-    "click",
-    () => {
+    this.btnRefresh?.addEventListener(
+        "click",
+        () => {
 
-        this.previewHTML();
+            this.refresh();
 
-    }
-);
-        /*
-==================================================
-SAVE AR PAYMENT
-==================================================
-*/
-
-this.btnSaveARPayment?.addEventListener(
-    "click",
-    async () => {
-
-        await this.savePayment();
-
-    }
-);
+        }
+    );
 
 
-        /*
-        ==================================================
-        ENTER SEARCH
-        ==================================================
-        */
+    /*
+    ==================================================
+    ADD DETAIL
+    ==================================================
+    */
 
-        this.keyword?.addEventListener(
-            "keydown",
+    this.btnAddDetail?.addEventListener(
+        "click",
+        () => {
+
+            this.addInvoiceDetail();
+
+        }
+    );
+
+
+    /*
+    ==================================================
+    SAVE DETAIL
+    ==================================================
+    */
+
+    this.btnSaveARDetail?.addEventListener(
+        "click",
+        () => {
+
+            this.saveInvoiceDetail();
+
+        }
+    );
+
+
+    /*
+    ==================================================
+    SAVE DRAFT / EDIT
+    ==================================================
+    */
+
+    this.btnSaveDraft?.addEventListener(
+        "click",
+        async () => {
+
+            if (
+                this.currentMode === "edit"
+            ) {
+
+                await this.saveEdit();
+
+                return;
+
+            }
+
+
+            await this.saveDraft();
+
+        }
+    );
+
+
+    /*
+    ==================================================
+    DETAIL CALCULATION
+    ==================================================
+    */
+
+    this.arDetailQuantity?.addEventListener(
+        "input",
+        () => {
+
+            this.calculateDetail();
+
+        }
+    );
+
+
+    this.arDetailUnitPrice?.addEventListener(
+        "input",
+        () => {
+
+            this.formatUnitPrice();
+
+            this.calculateDetail();
+
+        }
+    );
+
+
+    this.arDetailTaxOutputRate?.addEventListener(
+        "change",
+        () => {
+
+            this.calculateDetail();
+
+        }
+    );
+
+
+    this.arDetailWithholdingTaxRate?.addEventListener(
+        "change",
+        () => {
+
+            this.calculateDetail();
+
+        }
+    );
+
+
+    /*
+    ==================================================
+    DETAIL ACTION
+    ==================================================
+    */
+
+    document
+        .getElementById(
+            "ar-detail-body"
+        )
+        ?.addEventListener(
+            "click",
             event => {
 
-                if (
-                    event.key === "Enter"
-                ) {
+                const button =
+                    event.target.closest(
+                        "[data-detail-action]"
+                    );
 
-                    event.preventDefault();
-
-                    this.search();
-
-                }
-
-            }
-        );
-
-
-        /*
-        ==================================================
-        ADD AR
-        ==================================================
-        */
-
-        this.btnAdd?.addEventListener(
-            "click",
-            () => {
-
-                this.addInvoice();
-
-            }
-        );
-
-
-        /*
-        ==================================================
-        REFRESH
-        ==================================================
-        */
-
-        this.btnRefresh?.addEventListener(
-            "click",
-            () => {
-
-                this.refresh();
-
-            }
-        );
-
-
-        /*
-        ==================================================
-        ADD DETAIL
-        ==================================================
-        */
-
-        this.btnAddDetail?.addEventListener(
-            "click",
-            () => {
-
-                this.addInvoiceDetail();
-
-            }
-        );
-
-
-        /*
-        ==================================================
-        SAVE DETAIL
-        ==================================================
-        */
-
-        this.btnSaveARDetail?.addEventListener(
-            "click",
-            () => {
-
-                this.saveInvoiceDetail();
-
-            }
-        );
-
-
-        /*
-        ==================================================
-        SAVE DRAFT / EDIT
-        ==================================================
-        */
-
-        this.btnSaveDraft?.addEventListener(
-            "click",
-            async () => {
 
                 if (
-                    this.currentMode
-                    === "edit"
+                    !button
                 ) {
-
-                    await this.saveEdit();
 
                     return;
 
                 }
 
 
-                await this.saveDraft();
-
-            }
-        );
+                const action =
+                    button.dataset.detailAction;
 
 
-        /*
-        ==================================================
-        DETAIL CALCULATION
-        ==================================================
-        */
-
-        this.arDetailQuantity?.addEventListener(
-            "input",
-            () => {
-
-                this.calculateDetail();
-
-            }
-        );
+                const id =
+                    button.dataset.detailId;
 
 
-        this.arDetailUnitPrice?.addEventListener(
-            "input",
-            () => {
+                if (
+                    !id
+                ) {
 
-                this.formatUnitPrice();
-
-                this.calculateDetail();
-
-            }
-        );
-
-
-        this.arDetailTaxOutputRate?.addEventListener(
-            "change",
-            () => {
-
-                this.calculateDetail();
-
-            }
-        );
-
-
-        this.arDetailWithholdingTaxRate?.addEventListener(
-            "change",
-            () => {
-
-                this.calculateDetail();
-
-            }
-        );
-
-
-        /*
-        ==================================================
-        DETAIL ACTION
-        ==================================================
-        */
-
-        document
-            .getElementById(
-                "ar-detail-body"
-            )
-            ?.addEventListener(
-                "click",
-                event => {
-
-                    const button =
-                        event.target.closest(
-                            "[data-detail-action]"
-                        );
-
-
-                    if (!button) {
-
-                        return;
-
-                    }
-
-
-                    const action =
-                        button.dataset.detailAction;
-
-
-                    const id =
-                        button.dataset.detailId;
-
-
-                    if (
-                        action === "edit"
-                    ) {
-
-                        this.editInvoiceDetail(
-                            id
-                        );
-
-                    }
-
-
-                    if (
-                        action === "delete"
-                    ) {
-
-                        this.deleteInvoiceDetail(
-                            id
-                        );
-
-                    }
+                    return;
 
                 }
-            );
 
 
-       /*
-==================================================
-TABLE ACTION
-==================================================
-*/
+                /*
+                ==========================================
+                EDIT DETAIL
+                ==========================================
+                */
 
-this.tableBody?.addEventListener(
-    "click",
-    async event => {
+                if (
+                    action === "edit"
+                ) {
 
-        const button =
-            event.target.closest(
-                "[data-action]"
-            );
+                    this.editInvoiceDetail(
+                        id
+                    );
 
+                    return;
 
-        if (!button) {
+                }
 
-            return;
 
-        }
+                /*
+                ==========================================
+                DELETE DETAIL
+                ==========================================
+                */
 
+                if (
+                    action === "delete"
+                ) {
 
-        const action =
-            button.dataset.action;
+                    this.deleteInvoiceDetail(
+                        id
+                    );
 
+                    return;
 
-        const id =
-            button.dataset.id;
-
-
-        if (!id) {
-
-            return;
-
-        }
-
-
-        /*
-        ==============================================
-        VIEW
-        ==============================================
-        */
-
-        if (
-            action === "view"
-        ) {
-
-            await this.viewInvoice(
-                id
-            );
-
-            return;
-
-        }
-
-
-
-        /*
-        ==============================================
-        EDIT
-        ==============================================
-        */
-
-        if (
-            action === "edit"
-        ) {
-
-            await this.editInvoice(
-                id
-            );
-
-            return;
-
-        }
-
-
-        /*
-        ==============================================
-        DELETE
-        ==============================================
-        */
-
-        if (
-            action === "delete"
-        ) {
-
-            await this.deleteInvoice(
-                id
-            );
-
-            return;
-
-        }
-
-
-        /*
-        ==============================================
-        COMPLETE
-        ==============================================
-        */
-
-        if (
-            action === "complete"
-        ) {
-
-            await this.completeInvoice(
-                id
-            );
-
-            return;
-
-        }
-
-
-        /*
-        ==============================================
-        PRINT
-        ==============================================
-        */
-
-        if (
-            action === "print"
-        ) {
-
-            await this.printInvoice(
-                id
-            );
-
-            return;
-
-        }
-
-
-        /*
-        ==============================================
-        RECEIVE PAYMENT
-        ==============================================
-        */
-
-        if (
-            action === "payment"
-        ) {
-
-            await this.receivePayment(
-                id
-            );
-
-            return;
-
-        }
-
-
-        /*
-        ==============================================
-        VOID
-        ==============================================
-        */
-
-        if (
-            action === "void"
-        ) {
-
-            await this.voidInvoice(
-                id
-            );
-
-            return;
-
-        }
-
-
-        /*
-        ==============================================
-        UNKNOWN ACTION
-        ==============================================
-        */
-
-        console.warn(
-            "Unknown AR action:",
-            action
-        );
-
-    }
-);
-
-        /*
-        ==================================================
-        PAGINATION
-        ==================================================
-        */
-
-        this.btnFirstPage?.addEventListener(
-            "click",
-            () => {
-
-                this.goToPage(
-                    1
-                );
+                }
 
             }
         );
 
 
-        this.btnPrevPage?.addEventListener(
-            "click",
-            () => {
+    /*
+    ==================================================
+    TABLE ACTION
+    ==================================================
+    */
 
-                this.goToPage(
-                    this.currentPage
-                    -
-                    1
+    this.tableBody?.addEventListener(
+        "click",
+        async event => {
+
+            /*
+            ==============================================
+            GET ACTION BUTTON
+            ==============================================
+            */
+
+            const button =
+                event.target.closest(
+                    "[data-action]"
                 );
 
+
+            if (
+                !button
+            ) {
+
+                return;
+
             }
-        );
 
 
-        this.currentPageInput?.addEventListener(
-            "change",
-            () => {
+            /*
+            ==============================================
+            ACTION
+            ==============================================
+            */
 
-                this.goToPage(
-                    this.currentPageInput.value
+            const action =
+                button.dataset.action;
+
+
+            /*
+            ==============================================
+            ID
+            ==============================================
+            */
+
+            const id =
+                button.dataset.id;
+
+
+            if (
+                !id
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+            ==============================================
+            VIEW
+            ==============================================
+            */
+
+            if (
+                action === "view"
+            ) {
+
+                await this.viewInvoice(
+                    id
                 );
 
+                return;
+
             }
-        );
 
 
-        this.btnNextPage?.addEventListener(
-            "click",
-            () => {
+            /*
+            ==============================================
+            EDIT
+            ==============================================
+            */
 
-                this.goToPage(
-                    this.currentPage
-                    +
-                    1
+            if (
+                action === "edit"
+            ) {
+
+                await this.editInvoice(
+                    id
                 );
 
+                return;
+
             }
-        );
 
 
-        this.btnLastPage?.addEventListener(
-            "click",
-            () => {
+            /*
+            ==============================================
+            DELETE
+            ==============================================
+            */
 
-                this.goToPage(
-                    this.getTotalPages()
+            if (
+                action === "delete"
+            ) {
+
+                await this.deleteInvoice(
+                    id
                 );
 
-            }
-        );
+                return;
 
-    }
+            }
+
+
+            /*
+            ==============================================
+            COMPLETE
+            ==============================================
+            */
+
+            if (
+                action === "complete"
+            ) {
+
+                await this.completeInvoice(
+                    id
+                );
+
+                return;
+
+            }
+
+
+            /*
+            ==============================================
+            PRINT
+            ==============================================
+            */
+
+            if (
+                action === "print"
+            ) {
+
+                await this.printInvoice(
+                    id
+                );
+
+                return;
+
+            }
+
+
+            /*
+            ==============================================
+            RECEIVE PAYMENT
+            ==============================================
+            */
+
+            if (
+                action === "payment"
+            ) {
+
+                await this.receivePayment(
+                    id
+                );
+
+                return;
+
+            }
+
+
+            /*
+            ==============================================
+            VIEW PAYMENT
+            ==============================================
+            */
+
+            if (
+                action === "view-payment"
+            ) {
+
+                await this.viewPayment(
+                    id
+                );
+
+                return;
+
+            }
+
+
+            /*
+            ==============================================
+            VOID
+            ==============================================
+            */
+
+            if (
+                action === "void"
+            ) {
+
+                await this.voidInvoice(
+                    id
+                );
+
+                return;
+
+            }
+
+
+            /*
+            ==============================================
+            UNKNOWN ACTION
+            ==============================================
+            */
+
+            console.warn(
+                "Unknown AR action:",
+                action
+            );
+
+        }
+    );
+
+
+    /*
+    ==================================================
+    PAGINATION
+    ==================================================
+    */
+
+    this.btnFirstPage?.addEventListener(
+        "click",
+        () => {
+
+            this.goToPage(
+                1
+            );
+
+        }
+    );
+
+
+    this.btnPrevPage?.addEventListener(
+        "click",
+        () => {
+
+            this.goToPage(
+                this.currentPage - 1
+            );
+
+        }
+    );
+
+
+    this.currentPageInput?.addEventListener(
+        "change",
+        () => {
+
+            this.goToPage(
+                this.currentPageInput.value
+            );
+
+        }
+    );
+
+
+    this.btnNextPage?.addEventListener(
+        "click",
+        () => {
+
+            this.goToPage(
+                this.currentPage + 1
+            );
+
+        }
+    );
+
+
+    this.btnLastPage?.addEventListener(
+        "click",
+        () => {
+
+            this.goToPage(
+                this.getTotalPages()
+            );
+
+        }
+    );
+
+}
     /*
 ======================================================
 GET FILTERED DATA
@@ -9310,7 +13326,9 @@ async voidInvoice(id) {
         ==================================================
         */
 
-        await this.loadData();
+        await this.loadData(
+    false
+);
 
 
         console.log(
@@ -10546,7 +14564,24 @@ async generateARJournal(
 ======================================================
 COMPLETE ACCOUNT RECEIVABLE
 GENERATE GL JOURNAL AS DRAFT
-SAME FLOW AS ACCOUNT PAYABLE
+
+FINAL - SAME FLOW AS ACCOUNT PAYABLE
+
+RULE :
+
+1. DRAFT + NO JOURNAL
+   -> GENERATE GL
+   -> LINK GL
+   -> CHANGE STATUS TO COMPLETE
+
+2. COMPLETE + NO JOURNAL
+   -> RECOVERY
+   -> GENERATE GL
+   -> LINK GL
+   -> KEEP STATUS COMPLETE
+
+3. JOURNAL ALREADY EXISTS
+   -> DO NOT GENERATE DUPLICATE JOURNAL
 ======================================================
 */
 
@@ -10556,7 +14591,15 @@ async completeInvoice(
 
     try {
 
-        if (!id) {
+        /*
+        ==================================================
+        VALIDATE ID
+        ==================================================
+        */
+
+        if (
+            !id
+        ) {
 
             throw new Error(
                 "Account Receivable ID is required."
@@ -10567,7 +14610,7 @@ async completeInvoice(
 
         /*
         ==================================================
-        LOAD AR
+        LOAD FRESH AR
         ==================================================
         */
 
@@ -10604,24 +14647,45 @@ async completeInvoice(
 
         /*
         ==================================================
-        STATUS
+        CURRENT STATUS
         ==================================================
         */
 
         const currentStatus =
             String(
                 invoice.status
-                || ""
+                ||
+                ""
             )
-            .trim();
+            .trim()
+            .toLowerCase();
 
+
+        /*
+        ==================================================
+        CURRENT GL JOURNAL ID
+        ==================================================
+        */
+
+        let journalId =
+            invoice.gl_journal_id
+            ||
+            null;
+
+
+        /*
+        ==================================================
+        BLOCK PAID
+        ==================================================
+        */
 
         if (
-            currentStatus !== "Draft"
+            currentStatus ===
+            "paid"
         ) {
 
             throw new Error(
-                `Account Receivable status is "${currentStatus}". Only Draft Account Receivable can be completed.`
+                "Paid Account Receivable cannot be completed again."
             );
 
         }
@@ -10629,7 +14693,88 @@ async completeInvoice(
 
         /*
         ==================================================
-        EXISTING GL JOURNAL
+        BLOCK VOID
+        ==================================================
+        */
+
+        if (
+            currentStatus ===
+            "void"
+        ) {
+
+            throw new Error(
+                "Void Account Receivable cannot be completed."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        ALLOWED STATUS
+
+        DRAFT
+        COMPLETE
+
+        COMPLETE IS ALLOWED ONLY FOR RECOVERY
+        WHEN GL JOURNAL IS MISSING
+        ==================================================
+        */
+
+        if (
+            currentStatus !== "draft"
+            &&
+            currentStatus !== "complete"
+        ) {
+
+            throw new Error(
+                `Account Receivable status is "${invoice.status}". Account Receivable cannot be completed.`
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        ALREADY COMPLETE
+        JOURNAL ALREADY EXISTS
+        ==================================================
+        */
+
+        if (
+            currentStatus === "complete"
+            &&
+            journalId
+        ) {
+
+            throw new Error(
+                "Account Receivable has already been completed and GL Journal already exists."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        VALIDATE DETAILS
+        ==================================================
+        */
+
+        if (
+            !details.length
+        ) {
+
+            throw new Error(
+                "Account Receivable detail cannot be empty."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        GENERATE GL JOURNAL
+        ONLY IF JOURNAL DOES NOT EXIST
         ==================================================
         */
 
@@ -10637,20 +14782,16 @@ async completeInvoice(
             null;
 
 
-        let journalId =
-            invoice?.gl_journal_id
-            || null;
-
-
-        /*
-        ==================================================
-        GENERATE GL ONLY IF NOT EXISTS
-        ==================================================
-        */
-
         if (
             !journalId
         ) {
+
+            /*
+            ==============================================
+            GENERATE GL
+            STATUS GL = DRAFT
+            ==============================================
+            */
 
             journal =
                 await this.generateARJournal(
@@ -10678,7 +14819,7 @@ async completeInvoice(
 
             /*
             ==============================================
-            LINK GL JOURNAL
+            LINK GL JOURNAL TO AR
             ==============================================
             */
 
@@ -10692,23 +14833,94 @@ async completeInvoice(
 
         /*
         ==================================================
-        COMPLETE AR
-        DRAFT -> COMPLETE
+        UPDATE AR STATUS
+
+        ONLY DRAFT NEEDS STATUS CHANGE
+
+        DRAFT
+        -> COMPLETE
+
+        EXISTING COMPLETE RECOVERY
+        -> KEEP COMPLETE
         ==================================================
         */
 
-        const completed =
-            await this.service.complete(
+        let completed =
+            invoice;
+
+
+        if (
+            currentStatus ===
+            "draft"
+        ) {
+
+            completed =
+                await this.service.complete(
+                    id
+                );
+
+
+            if (
+                !completed
+            ) {
+
+                /*
+                ==========================================
+                IMPORTANT
+
+                AR STATUS UPDATE FAILED AFTER GL CREATED.
+                KEEP ERROR VISIBLE.
+                ==========================================
+                */
+
+                throw new Error(
+                    "Failed to complete Account Receivable."
+                );
+
+            }
+
+        }
+
+
+        /*
+        ==================================================
+        VERIFY FINAL AR
+        ==================================================
+        */
+
+        const verifyResult =
+            await this.service.getById(
                 id
             );
 
 
+        const verifiedAR =
+            verifyResult?.header;
+
+
         if (
-            !completed
+            !verifiedAR
         ) {
 
             throw new Error(
-                "Failed to complete Account Receivable."
+                "Failed to verify completed Account Receivable."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        VERIFY GL LINK
+        ==================================================
+        */
+
+        if (
+            !verifiedAR.gl_journal_id
+        ) {
+
+            throw new Error(
+                "Account Receivable GL Journal was generated but was not linked to Account Receivable."
             );
 
         }
@@ -10717,10 +14929,52 @@ async completeInvoice(
         /*
         ==================================================
         RELOAD
+        NO LOADING
         ==================================================
         */
 
-        await this.loadData();
+        await this.loadData(
+            false
+        );
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "ACCOUNT RECEIVABLE COMPLETE:",
+            {
+
+                ar_id:
+                    id,
+
+                previous_status:
+                    invoice.status,
+
+                final_status:
+                    verifiedAR.status,
+
+                recovery:
+                    currentStatus ===
+                    "complete",
+
+                gl_journal_id:
+                    verifiedAR.gl_journal_id,
+
+                journal_no:
+                    journal?.journal_no
+                    ||
+                    verifiedAR
+                        ?.trx_gl_journal
+                        ?.journal_no
+                    ||
+                    null
+
+            }
+        );
 
 
         /*
@@ -10729,24 +14983,50 @@ async completeInvoice(
         ==================================================
         */
 
-        this.showSuccess(
-            "Account Receivable successfully completed."
-        );
+        if (
+            currentStatus ===
+            "complete"
+        ) {
 
+            this.showSuccess(
+                "Account Receivable GL Journal successfully generated."
+            );
+
+        }
+
+        else {
+
+            this.showSuccess(
+                "Account Receivable successfully completed."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
 
         return {
 
             ar:
-                completed,
+                verifiedAR,
 
             journal:
-                journal
+                journal,
+
+            gl_journal_id:
+                verifiedAR.gl_journal_id
 
         };
 
     }
 
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
             "AccountReceivable.completeInvoice:",
@@ -10755,7 +15035,7 @@ async completeInvoice(
 
 
         this.showError(
-            error.message
+            error?.message
             ||
             "Failed to complete Account Receivable."
         );
