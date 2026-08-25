@@ -18927,31 +18927,106 @@ async search() {
 
     try {
 
+        /*
+        ==================================================
+        GET FILTER VALUE
+        ==================================================
+        */
+
+        const dateFrom =
+            String(
+                this.dateFrom?.value
+                || ""
+            )
+            .trim();
+
+
+        const dateTo =
+            String(
+                this.dateTo?.value
+                || ""
+            )
+            .trim();
+
+
+        const status =
+            String(
+                this.statusFilter?.value
+                || "all"
+            )
+            .trim();
+
+
+        const findBy =
+            String(
+                this.findBy?.value
+                || "invoice_no"
+            )
+            .trim();
+
+
+        const keyword =
+            String(
+                this.keyword?.value
+                || ""
+            )
+            .trim();
+
+
+        /*
+        ==================================================
+        VALIDATE DATE RANGE
+        ==================================================
+        */
+
+        if (
+            dateFrom
+            &&
+            dateTo
+            &&
+            dateFrom > dateTo
+        ) {
+
+            this.showError(
+                "Invoice Date From cannot be greater than Invoice Date To."
+            );
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        FILTER OBJECT
+        ==================================================
+        */
+
         const filters = {
 
             dateFrom:
-                this.dateFrom?.value
-                || "",
+                dateFrom,
 
             dateTo:
-                this.dateTo?.value
-                || "",
+                dateTo,
 
             status:
-                this.statusFilter?.value
-                || "all",
+                status,
 
             findBy:
-                this.findBy?.value
-                || "invoice_no",
+                findBy,
 
             keyword:
-                this.keyword?.value
-                    ?.trim()
-                || ""
+                keyword
 
         };
 
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
 
         console.log(
             "AP SEARCH FILTER:",
@@ -18959,17 +19034,73 @@ async search() {
         );
 
 
-        this.filteredData =
+        /*
+        ==================================================
+        SEARCH DATABASE
+        ==================================================
+        */
+
+        const result =
             await this.service.search(
                 filters
             );
 
 
+        /*
+        ==================================================
+        SET FILTERED DATA
+        ==================================================
+        */
+
+        this.filteredData =
+            Array.isArray(
+                result
+            )
+                ? result
+                : [];
+
+
+        /*
+        ==================================================
+        RESET PAGE
+        ==================================================
+        */
+
         this.currentPage =
             1;
 
 
+        /*
+        ==================================================
+        RENDER
+        ==================================================
+        */
+
         this.render();
+
+
+        /*
+        ==================================================
+        DEBUG RESULT
+        ==================================================
+        */
+
+        console.log(
+            "AP SEARCH RESULT:",
+            {
+                dateFrom:
+                    dateFrom,
+
+                dateTo:
+                    dateTo,
+
+                total:
+                    this.filteredData.length,
+
+                data:
+                    this.filteredData
+            }
+        );
 
     }
 
@@ -18982,13 +19113,14 @@ async search() {
 
 
         this.showError(
+            error?.message
+            ||
             "Failed to search Account Payable."
         );
 
     }
 
 }
-
     /*
 ======================================================
 REFRESH

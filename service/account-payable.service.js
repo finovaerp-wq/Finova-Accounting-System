@@ -1007,60 +1007,82 @@ async resetAfterJournalDelete(
 }
 
 
-    /*
+   /*
 ======================================================
 SEARCH
 ======================================================
 */
 
-async search(filters = {}) {
+async search(
+    filters = {}
+) {
 
     try {
 
         /*
         ==================================================
-        BASE QUERY
+        NORMALIZE FILTER
         ==================================================
         */
 
-        let query = supabase
+        const dateFrom =
+            String(
+                filters?.dateFrom
+                || ""
+            )
+            .trim();
 
-            .from(this.table)
 
-            .select(`
-                *,
+        const dateTo =
+            String(
+                filters?.dateTo
+                || ""
+            )
+            .trim();
 
-                mst_business_partner (
-                    id,
-                    bp_code,
-                    bp_name,
-                    bp_type,
-                    top_id,
-                    is_active
-                ),
 
-                trx_gl_journal (
-                    id,
-                    journal_no,
-                    journal_date,
-                    status
-                )
-            `);
+        const status =
+            String(
+                filters?.status
+                || "all"
+            )
+            .trim();
+
+
+        const findBy =
+            String(
+                filters?.findBy
+                || "invoice_no"
+            )
+            .trim()
+            .toLowerCase();
+
+
+        const keyword =
+            String(
+                filters?.keyword
+                || ""
+            )
+            .trim()
+            .toLowerCase();
 
 
         /*
         ==================================================
-        DATE FROM
+        VALIDATE DATE RANGE
         ==================================================
         */
 
         if (
-            filters.dateFrom
+            dateFrom
+            &&
+            dateTo
+            &&
+            dateFrom > dateTo
         ) {
 
-            query = query.gte(
-                "invoice_date",
-                filters.dateFrom
+            throw new Error(
+                "Invoice Date From cannot be greater than Invoice Date To."
             );
 
         }
@@ -1068,18 +1090,74 @@ async search(filters = {}) {
 
         /*
         ==================================================
-        DATE TO
+        BASE QUERY
+        ==================================================
+        */
+
+        let query =
+            supabase
+
+                .from(
+                    this.table
+                )
+
+                .select(`
+
+                    *,
+
+                    mst_business_partner (
+                        id,
+                        bp_code,
+                        bp_name,
+                        bp_type,
+                        top_id,
+                        is_active
+                    ),
+
+                    trx_gl_journal (
+                        id,
+                        journal_no,
+                        journal_date,
+                        status
+                    )
+
+                `);
+
+
+        /*
+        ==================================================
+        INVOICE DATE FROM
         ==================================================
         */
 
         if (
-            filters.dateTo
+            dateFrom
         ) {
 
-            query = query.lte(
-                "invoice_date",
-                filters.dateTo
-            );
+            query =
+                query.gte(
+                    "invoice_date",
+                    dateFrom
+                );
+
+        }
+
+
+        /*
+        ==================================================
+        INVOICE DATE TO
+        ==================================================
+        */
+
+        if (
+            dateTo
+        ) {
+
+            query =
+                query.lte(
+                    "invoice_date",
+                    dateTo
+                );
 
         }
 
@@ -1091,9 +1169,9 @@ async search(filters = {}) {
         */
 
         if (
-            filters.status
+            status
             &&
-            filters.status !== "all"
+            status !== "all"
         ) {
 
             /*
@@ -1103,18 +1181,19 @@ async search(filters = {}) {
             */
 
             if (
-                filters.status ===
+                status ===
                 "not_completed"
             ) {
 
-                query = query.in(
-                    "status",
-                    [
-                        this.STATUS.DRAFT,
-                        this.STATUS.POSTED,
-                        this.STATUS.PARTIAL_PAID
-                    ]
-                );
+                query =
+                    query.in(
+                        "status",
+                        [
+                            this.STATUS.DRAFT,
+                            this.STATUS.POSTED,
+                            this.STATUS.PARTIAL_PAID
+                        ]
+                    );
 
             }
 
@@ -1126,14 +1205,15 @@ async search(filters = {}) {
             */
 
             else if (
-                filters.status ===
+                status ===
                 "completed"
             ) {
 
-                query = query.eq(
-                    "status",
-                    this.STATUS.PAID
-                );
+                query =
+                    query.eq(
+                        "status",
+                        this.STATUS.PAID
+                    );
 
             }
 
@@ -1146,10 +1226,11 @@ async search(filters = {}) {
 
             else {
 
-                query = query.eq(
-                    "status",
-                    filters.status
-                );
+                query =
+                    query.eq(
+                        "status",
+                        status
+                    );
 
             }
 
@@ -1157,18 +1238,19 @@ async search(filters = {}) {
 
 
         /*
-==================================================
-ORDER
-NEWEST CREATED AP AT THE BOTTOM
-==================================================
-*/
+        ==================================================
+        ORDER
+        ==================================================
+        */
 
-query = query.order(
-    "created_at",
-    {
-        ascending: true
-    }
-);
+        query =
+            query.order(
+                "created_at",
+                {
+                    ascending:
+                        true
+                }
+            );
 
 
         /*
@@ -1183,10 +1265,19 @@ query = query.order(
 
             error
 
-        } = await query;
+        } =
+            await query;
 
 
-        if (error) {
+        /*
+        ==================================================
+        DATABASE ERROR
+        ==================================================
+        */
+
+        if (
+            error
+        ) {
 
             throw error;
 
@@ -1200,165 +1291,156 @@ query = query.order(
         */
 
         let result =
-            data || [];
+            Array.isArray(
+                data
+            )
+                ? data
+                : [];
 
 
         /*
         ==================================================
         KEYWORD
-        FOLLOW FIND BY
         ==================================================
         */
 
         if (
-            filters.keyword
-            &&
-            filters.keyword.trim()
+            keyword
         ) {
 
-            /*
-            ==============================================
-            KEYWORD
-            ==============================================
-            */
+            result =
+                result.filter(
+                    invoice => {
 
-            const keyword =
-                String(
-                    filters.keyword
-                )
-                .trim()
-                .toLowerCase();
+                        /*
+                        ======================================
+                        VALUES
+                        ======================================
+                        */
 
-
-            /*
-            ==============================================
-            FIND BY
-            ==============================================
-            */
-
-            const findBy =
-                String(
-                    filters.findBy
-                    || "invoice_no"
-                )
-                .trim()
-                .toLowerCase();
+                        const invoiceNo =
+                            String(
+                                invoice?.invoice_no
+                                || ""
+                            )
+                            .trim()
+                            .toLowerCase();
 
 
-            /*
-            ==============================================
-            FILTER RESULT
-            ==============================================
-            */
-
-            result = result.filter(
-                invoice => {
-
-                    /*
-                    ======================================
-                    INVOICE NO
-                    ======================================
-                    */
-
-                    const invoiceNo =
-                        String(
-                            invoice?.invoice_no
-                            || ""
-                        )
-                        .trim()
-                        .toLowerCase();
+                        const poNo =
+                            String(
+                                invoice?.po_no
+                                || ""
+                            )
+                            .trim()
+                            .toLowerCase();
 
 
-                    /*
-                    ======================================
-                    VENDOR NAME
-                    ======================================
-                    */
-
-                    const vendorName =
-                        String(
-                            invoice
-                                ?.mst_business_partner
-                                ?.bp_name
-                            || ""
-                        )
-                        .trim()
-                        .toLowerCase();
+                        const description =
+                            String(
+                                invoice?.description
+                                || ""
+                            )
+                            .trim()
+                            .toLowerCase();
 
 
-                    /*
-                    ======================================
-                    VENDOR CODE
-                    ======================================
-                    */
-
-                    const vendorCode =
-                        String(
-                            invoice
-                                ?.mst_business_partner
-                                ?.bp_code
-                            || ""
-                        )
-                        .trim()
-                        .toLowerCase();
+                        const vendorName =
+                            String(
+                                invoice
+                                    ?.mst_business_partner
+                                    ?.bp_name
+                                || ""
+                            )
+                            .trim()
+                            .toLowerCase();
 
 
-                    /*
-                    ======================================
-                    FIND BY : INVOICE NO
-                    ======================================
-                    */
+                        const vendorCode =
+                            String(
+                                invoice
+                                    ?.mst_business_partner
+                                    ?.bp_code
+                                || ""
+                            )
+                            .trim()
+                            .toLowerCase();
 
-                    if (
-                        findBy ===
-                        "invoice_no"
-                    ) {
 
-                        return invoiceNo.includes(
-                            keyword
-                        );
+                        /*
+                        ======================================
+                        FIND BY
+                        ======================================
+                        */
+
+                        switch (
+                            findBy
+                        ) {
+
+                            case "invoice_no":
+
+                                return invoiceNo.includes(
+                                    keyword
+                                );
+
+
+                            case "po_no":
+
+                                return poNo.includes(
+                                    keyword
+                                );
+
+
+                            case "vendor":
+
+                            case "vendor_name":
+
+                                return (
+                                    vendorName.includes(
+                                        keyword
+                                    )
+                                    ||
+                                    vendorCode.includes(
+                                        keyword
+                                    )
+                                );
+
+
+                            case "description":
+
+                                return description.includes(
+                                    keyword
+                                );
+
+
+                            default:
+
+                                return (
+                                    invoiceNo.includes(
+                                        keyword
+                                    )
+                                    ||
+                                    poNo.includes(
+                                        keyword
+                                    )
+                                    ||
+                                    vendorName.includes(
+                                        keyword
+                                    )
+                                    ||
+                                    vendorCode.includes(
+                                        keyword
+                                    )
+                                    ||
+                                    description.includes(
+                                        keyword
+                                    )
+                                );
+
+                        }
 
                     }
-
-
-                    /*
-                    ======================================
-                    FIND BY : VENDOR
-                    ======================================
-                    */
-
-                    if (
-                        findBy ===
-                        "vendor"
-                    ) {
-
-                        return (
-
-                            vendorName.includes(
-                                keyword
-                            )
-
-                            ||
-
-                            vendorCode.includes(
-                                keyword
-                            )
-
-                        );
-
-                    }
-
-
-                    /*
-                    ======================================
-                    UNKNOWN FIND BY
-                    ======================================
-                    */
-
-                    return false;
-
-                }
-            );
+                );
 
         }
 
@@ -1370,16 +1452,26 @@ query = query.order(
         */
 
         console.log(
-            "ACCOUNT PAYABLE SEARCH:",
+            "AP SERVICE SEARCH RESULT:",
             {
-                filters:
-                    filters,
 
-                result_count:
+                filters: {
+                    dateFrom,
+                    dateTo,
+                    status,
+                    findBy,
+                    keyword
+                },
+
+                total:
                     result.length,
 
-                result:
-                    result
+                invoice_dates:
+                    result.map(
+                        item =>
+                            item.invoice_date
+                    )
+
             }
         );
 
