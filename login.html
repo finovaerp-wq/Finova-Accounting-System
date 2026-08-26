@@ -17,25 +17,37 @@
         FINOVA Accounting System
     </title>
 
-    <!-- Bootstrap -->
+
+    <!-- ==========================================================
+         BOOTSTRAP
+    =========================================================== -->
 
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
         rel="stylesheet">
 
-    <!-- Font Awesome -->
+
+    <!-- ==========================================================
+         FONT AWESOME
+    =========================================================== -->
 
     <link
         rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
-    <!-- Google Font -->
+
+    <!-- ==========================================================
+         GOOGLE FONT
+    =========================================================== -->
 
     <link
         href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
 
-    <!-- Login CSS -->
+
+    <!-- ==========================================================
+         LOGIN CSS
+    =========================================================== -->
 
     <link
         rel="stylesheet"
@@ -43,321 +55,648 @@
 
 </head>
 
+
 <body>
 
-<!-- ==========================================================
-     BACKGROUND
-=========================================================== -->
 
-<div class="bg-circle bg-circle-top"></div>
+    <!-- ==========================================================
+         BACKGROUND DECORATION
+    =========================================================== -->
 
-<div class="bg-circle bg-circle-bottom"></div>
+    <div class="login-bg-circle login-bg-circle-top"></div>
 
-<div class="bg-dots dots-top"></div>
+    <div class="login-bg-circle login-bg-circle-bottom"></div>
 
-<div class="bg-dots dots-bottom"></div>
+    <div class="login-bg-dots login-bg-dots-top"></div>
 
-<!-- ==========================================================
-     PAGE
-=========================================================== -->
+    <div class="login-bg-dots login-bg-dots-bottom"></div>
 
-<div class="login-page">
 
-    <div class="login-wrapper">
+    <!-- ==========================================================
+         LOGIN PAGE
+    =========================================================== -->
+
+    <main class="login-page">
+
 
         <!-- ======================================================
-             LEFT PANEL
+             LOGIN WRAPPER
         ======================================================= -->
 
-        <div class="login-left">
-
-            <div class="overlay-circle"></div>
-
-            <div class="overlay-circle-small"></div>
-
-            <div class="left-content">
-
-                <!-- BRAND -->
-
-                <div class="brand-header">
-
-                    <div class="brand-logo">
-
-                        <h1>Finova</h1>
-
-                        <span>Accounting System</span>
-
-                    </div>
-
-                    <div class="brand-line"></div>
-
-                </div>
-
-                <!-- CONTENT -->
-
-                <div class="brand-body">
-
-                    <span class="brand-tag">
-
-                        ENTERPRISE ERP PLATFORM
-
-                    </span>
-
-                    <h2>
-
-                        Smart Accounting
-                        <br>
-                        for Modern Business
-
-                    </h2>
-
-                    <p>
-
-                        FINOVA helps businesses manage
-                        accounting, finance, reporting and
-                        financial operations through one
-                        integrated cloud platform.
-
-                    </p>
-
-                </div>
+        <section class="login-wrapper">
 
 
-                
-            </div>
+            <!-- ==================================================
+                 LEFT PANEL
+            =================================================== -->
 
+            <div class="login-left">
+
+
+                <!-- ==============================================
+                     DECORATION
+                =============================================== -->
+
+                <div class="login-left-glow"></div>
+
+
+                <!-- ==============================================
+                     LEFT CONTENT
+                =============================================== -->
+
+                <div class="login-brand">
+
+
+                    <!-- ==========================================
+                         LOGO / BRAND
+                    =========================================== -->
+
+                    <div class="brand-header">
+
+
+                        <div class="brand-logo-row">
+
+
+                            <!--
+                            ==================================================
+                            FINOVA LOGO
+
+                            Jika file logo Anda berbeda lokasi,
+                            cukup ubah src di bawah ini.
+                            ==================================================
+                            -->
+
+                            <div class="brand-logo-row">
+
+   <img
+    src="assets/images/Favicon.png"
+    alt="FINOVA"
+    class="brand-logo-image">
+
+    <div class="brand-name">
+
+        <div class="brand-name-main">
+            FINOVA
         </div>
 
-        <!-- ======================================================
-             RIGHT PANEL
-        ======================================================= -->
+        <div class="brand-name-sub">
+            Accounting System
+        </div>
 
-        <div class="login-right">
+    </div>
 
-            <div class="login-card">
+</div>
 
-                <!-- HEADER -->
 
-                <div class="login-header">
+                        </div>
 
-                    <span class="login-badge">
 
-                        Welcome Back
+                        <div class="brand-line"></div>
 
-                    </span>
 
-                    <h2 class="login-title">
+                    </div>
 
-                        Sign In
 
-                    </h2>
+                    <!-- ==========================================
+                         BRAND MESSAGE
+                    =========================================== -->
 
-                    <p>
+                    <div class="brand-content">
 
-                        Login to continue using
 
-                        <strong>
+                        <h1>
 
-                            FINOVA Accounting System
+                            Smart Accounting
+                            <br>
+                            for Modern Business
 
-                        </strong>
+                        </h1>
 
-                    </p>
+
+                        <p>
+
+                            FINOVA helps businesses manage
+                            accounting, finance, reporting and
+                            financial operations through one
+                            integrated cloud platform.
+
+                        </p>
+
+
+                    </div>
+
 
                 </div>
 
-                <!-- FORM -->
 
-                <form
-                    id="login-form"
-                    autocomplete="off">
+                <!-- ==============================================
+                     FINANCE VISUAL
+                     PURE HTML / CSS
+                =============================================== -->
 
-                    <!-- EMAIL -->
+                <div class="finance-visual">
 
-                    <div class="mb-3">
 
-                        <label class="form-label">
+                    <!-- ==========================================
+                         DESK
+                    =========================================== -->
 
-                            Email Address
+                    <div class="finance-desk"></div>
 
-                        </label>
 
-                        <div class="input-group">
+                    <!-- ==========================================
+                         MONITOR
+                    =========================================== -->
 
-                            <span class="input-group-text">
+                    <div class="finance-monitor">
 
-                                <i class="fa-solid fa-envelope"></i>
 
-                            </span>
+                        <div class="finance-monitor-screen">
 
-                            <input
-                                id="email"
-                                type="email"
-                                class="form-control"
-                                placeholder="admin@finova.com"
-                                required>
+
+                            <!-- ==================================
+                                 MONITOR HEADER
+                            =================================== -->
+
+                            <div class="finance-monitor-header">
+
+
+                                <div class="finance-monitor-logo">
+
+                                    <i class="fa-solid fa-chart-line"></i>
+
+                                    <span>
+                                        FINOVA
+                                    </span>
+
+                                </div>
+
+
+                                <div class="finance-monitor-dot"></div>
+
+
+                            </div>
+
+
+                            <!-- ==================================
+                                 DASHBOARD TITLE
+                            =================================== -->
+
+                            <div class="finance-dashboard-title">
+
+                                Dashboard
+
+                            </div>
+
+
+                            <!-- ==================================
+                                 DASHBOARD CARDS
+                            =================================== -->
+
+                            <div class="finance-dashboard-grid">
+
+
+                                <div class="finance-stat-card">
+
+                                    <span>
+                                        Revenue
+                                    </span>
+
+                                    <strong>
+                                        Rp 1.250.000.000
+                                    </strong>
+
+                                    <div class="finance-chart-line">
+
+                                        <span></span>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="finance-stat-card">
+
+                                    <span>
+                                        Expenses
+                                    </span>
+
+                                    <strong>
+                                        Rp 664.000.000
+                                    </strong>
+
+                                    <div class="finance-donut"></div>
+
+                                </div>
+
+
+                                <div class="finance-stat-card finance-stat-wide">
+
+                                    <span>
+                                        Net Profit
+                                    </span>
+
+                                    <strong>
+                                        Rp 586.000.000
+                                    </strong>
+
+                                    <div class="finance-bars">
+
+                                        <i></i>
+                                        <i></i>
+                                        <i></i>
+                                        <i></i>
+                                        <i></i>
+                                        <i></i>
+
+                                    </div>
+
+                                </div>
+
+
+                            </div>
+
 
                         </div>
 
-                    </div>
 
-                    <!-- PASSWORD -->
+                        <div class="finance-monitor-neck"></div>
 
-                    <div class="mb-3">
+                        <div class="finance-monitor-base"></div>
 
-                        <label class="form-label">
-
-                            Password
-
-                        </label>
-
-                        <div class="input-group">
-
-                            <span class="input-group-text">
-
-                                <i class="fa-solid fa-lock"></i>
-
-                            </span>
-
-                            <input
-                                id="password"
-                                type="password"
-                                class="form-control"
-                                placeholder="Enter your password"
-                                required>
-
-                            <button
-                                id="btn-toggle-password"
-                                type="button">
-
-                                <i class="fa-solid fa-eye"></i>
-
-                            </button>
-
-                        </div>
 
                     </div>
 
-                    <!-- OPTION -->
 
-                    <div class="login-option">
+                    <!-- ==========================================
+                         DESK ITEMS
+                    =========================================== -->
 
-                        <div class="form-check">
+                    <div class="finance-book"></div>
 
-                            <input
-                                id="remember-me"
-                                type="checkbox"
-                                class="form-check-input">
+                    <div class="finance-document">
 
-                            <label
-                                class="form-check-label"
-                                for="remember-me">
-
-                                Remember Me
-
-                            </label>
-
-                        </div>
-
-                        <a href="forgot-password.html">
-
-                            Forgot Password?
-
-                        </a>
+                        <span></span>
+                        <span></span>
+                        <span></span>
 
                     </div>
 
-                    <!-- BUTTON -->
 
-                    <button
-                        id="btn-login"
-                        class="btn"
-                        type="submit">
+                    
 
-                        <span
-                            id="login-spinner"
-                            class="spinner-border spinner-border-sm d-none">
+                </div>
+
+
+            </div>
+
+
+            <!-- ==================================================
+                 RIGHT PANEL
+            =================================================== -->
+
+            <div class="login-right">
+
+
+                <!-- ==============================================
+                     LOGIN CARD
+                =============================================== -->
+
+                <div class="login-card">
+
+
+                    <!-- ==========================================
+                         LOGIN HEADER
+                    =========================================== -->
+
+                    <header class="login-header">
+
+
+                        <span class="login-badge">
+
+                            Welcome Back
 
                         </span>
 
-                        <i
-                            id="login-icon"
-                            class="fa-solid fa-right-to-bracket"></i>
 
-                        <span id="login-text">
+                        <h2 class="login-title">
 
                             Sign In
 
+                        </h2>
+
+
+                        <p>
+
+                            Login to continue using
+
+                            <strong>
+
+                                FINOVA Accounting System
+
+                            </strong>
+
+                        </p>
+
+
+                    </header>
+
+
+                    <!-- ==========================================
+                         LOGIN FORM
+                    =========================================== -->
+
+                    <form
+                        id="login-form"
+                        autocomplete="off">
+
+
+                        <!-- ======================================
+                             EMAIL
+                        ======================================= -->
+
+                        <div class="login-form-group">
+
+
+                            <label
+                                for="email"
+                                class="form-label">
+
+                                Email Address
+
+                            </label>
+
+
+                            <div class="login-input-group">
+
+
+                                <span class="login-input-icon">
+
+                                    <i class="fa-solid fa-envelope"></i>
+
+                                </span>
+
+
+                                <input
+                                    id="email"
+                                    type="email"
+                                    class="login-input"
+                                    placeholder="admin@finova.com"
+                                    autocomplete="email"
+                                    required>
+
+
+                            </div>
+
+
+                        </div>
+
+
+                        <!-- ======================================
+                             PASSWORD
+                        ======================================= -->
+
+                        <div class="login-form-group">
+
+
+                            <label
+                                for="password"
+                                class="form-label">
+
+                                Password
+
+                            </label>
+
+
+                            <div class="login-input-group">
+
+
+                                <span class="login-input-icon">
+
+                                    <i class="fa-solid fa-lock"></i>
+
+                                </span>
+
+
+                                <input
+                                    id="password"
+                                    type="password"
+                                    class="login-input"
+                                    placeholder="Enter your password"
+                                    autocomplete="current-password"
+                                    required>
+
+
+                                <button
+                                    id="btn-toggle-password"
+                                    type="button"
+                                    class="password-toggle"
+                                    aria-label="Show password">
+
+                                    <i class="fa-solid fa-eye"></i>
+
+                                </button>
+
+
+                            </div>
+
+
+                        </div>
+
+
+                        <!-- ======================================
+                             OPTION
+                        ======================================= -->
+
+                        <div class="login-option">
+
+
+                            <div class="remember-wrapper">
+
+
+                                <input
+                                    id="remember-me"
+                                    type="checkbox"
+                                    class="form-check-input">
+
+
+                                <label
+                                    class="remember-label"
+                                    for="remember-me">
+
+                                    Remember Me
+
+                                </label>
+
+
+                            </div>
+
+
+                            <a
+                                href="forgot-password.html"
+                                class="forgot-password">
+
+                                Forgot Password?
+
+                            </a>
+
+
+                        </div>
+
+
+                        <!-- ======================================
+                             SIGN IN
+                        ======================================= -->
+
+                        <button
+                            id="btn-login"
+                            class="login-button"
+                            type="submit">
+
+
+                            <span
+                                id="login-spinner"
+                                class="
+                                    spinner-border
+                                    spinner-border-sm
+                                    d-none
+                                "
+                                role="status"
+                                aria-hidden="true">
+                            </span>
+
+
+                            <i
+                                id="login-icon"
+                                class="
+                                    fa-solid
+                                    fa-right-to-bracket
+                                ">
+                            </i>
+
+
+                            <span id="login-text">
+
+                                Sign In
+
+                            </span>
+
+
+                        </button>
+
+
+                    </form>
+
+
+                    <!-- ==========================================
+                         DIVIDER
+                    =========================================== -->
+
+                    <div class="login-divider">
+
+
+                        <span>
+
+                            FINOVA ERP
+
                         </span>
 
-                    </button>
 
-                </form>
+                    </div>
 
-                <!-- DIVIDER -->
 
-                <div class="login-divider">
+                    <!-- ==========================================
+                         FOOTER
+                    =========================================== -->
 
-                    <span>
+                    <footer class="login-footer">
 
-                        FINOVA ERP
 
-                    </span>
+                        <p>
 
-                </div>
+                            © 2026 FINOVA Accounting System
 
-                <!-- FOOTER -->
+                        </p>
 
-                <div class="login-footer">
 
-                    <p>
+                        <p>
 
-                        © 2026 FINOVA Accounting System
+                            Enterprise Edition Version 2.0
 
-                    </p>
+                        </p>
 
-                    <p>
 
-                        Enterprise Edition Version 2.0
+                    </footer>
 
-                    </p>
 
                 </div>
+
 
             </div>
 
-        </div>
 
-    </div>
+        </section>
 
-</div>
 
-<!-- ==========================================================
-     LOADING
-=========================================================== -->
+    </main>
 
-<div
-    id="login-loading"
-    class="d-none">
+
+    <!-- ==========================================================
+         LOGIN LOADING
+    =========================================================== -->
 
     <div
-        class="spinner-border text-light">
+        id="login-loading"
+        class="d-none">
+
+
+        <div class="login-loading-content">
+
+
+            <div
+                class="spinner-border text-light"
+                role="status">
+
+                <span class="visually-hidden">
+
+                    Loading...
+
+                </span>
+
+            </div>
+
+
+            <span>
+
+                Signing In...
+
+            </span>
+
+
+        </div>
+
 
     </div>
 
-</div>
 
-<!-- Bootstrap -->
+    <!-- ==========================================================
+         BOOTSTRAP
+    =========================================================== -->
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js">
+    </script>
 
-<!-- Login JS -->
 
-<script
-    type="module"
-    src="assets/js/login.js">
+    <!-- ==========================================================
+         LOGIN JS
+    =========================================================== -->
 
-</script>
+    <script
+        type="module"
+        src="assets/js/login.js">
+    </script>
+
 
 </body>
 
