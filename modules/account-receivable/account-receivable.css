@@ -2318,8 +2318,14 @@ th:nth-child(2) {
 
 }
 /* ==========================================================
+   FINOVA ACCOUNTING SYSTEM
    ACCOUNT RECEIVABLE MODAL
-   SAME VISUAL AS ACCOUNT PAYABLE
+   SAME LAYOUT AS ACCOUNT PAYABLE
+========================================================== */
+
+
+/* ==========================================================
+   MODAL DIALOG
 ========================================================== */
 
 #accountReceivableModal
@@ -2330,18 +2336,24 @@ th:nth-child(2) {
 }
 
 
+/* ==========================================================
+   MODAL CONTENT
+========================================================== */
+
 #accountReceivableModal
 .modal-content {
 
-    height: calc(100vh - 24px);
+    height: calc(100vh - 48px);
 
-    max-height: calc(100vh - 24px);
+    max-height: calc(100vh - 48px);
 
     display: flex;
 
     flex-direction: column;
 
     overflow: hidden;
+
+    background: #FFFFFF;
 
 }
 
@@ -2355,17 +2367,25 @@ th:nth-child(2) {
 
     flex: 0 0 auto;
 
-    min-height: 70px;
+    min-height: 64px;
 
-    padding: 12px 14px;
+    padding: 10px 14px;
 
-    border-bottom: 1px solid #DEE2E6;
+    background: #FFFFFF;
+
+    border-bottom: 0;
 
 }
 
 
+/* ==========================================================
+   MODAL TITLE
+========================================================== */
+
 #accountReceivableModal
 .modal-title {
+
+    margin: 0;
 
     color: #1F3A5F;
 
@@ -2377,13 +2397,28 @@ th:nth-child(2) {
 
 
 /* ==========================================================
+   MODAL SUBTITLE
+========================================================== */
+
+#accountReceivableModal
+.modal-header
+.text-muted {
+
+    margin-top: 2px;
+
+    font-size: 12px;
+
+}
+
+
+/* ==========================================================
    MODAL BODY
 ========================================================== */
 
 #accountReceivableModal
 .modal-body {
 
-    display: flex;
+    display: flex !important;
 
     flex-direction: column;
 
@@ -2391,76 +2426,147 @@ th:nth-child(2) {
 
     min-height: 0;
 
-    padding: 0;
+    padding: 0 !important;
 
     overflow-y: auto;
+
+    overflow-x: hidden;
+
+    background: #FFFFFF;
 
 }
 
 
 /* ==========================================================
-   TAB NAVIGATION
+   TABS
+   SAME GREY AREA AS AP
 ========================================================== */
 
 #accountReceivableModal
-.nav-tabs {
+#ar-modal-tabs {
+
+    display: grid !important;
+
+    grid-template-columns:
+        repeat(
+            4,
+            minmax(0, 1fr)
+        );
 
     flex: 0 0 auto;
 
+    gap: 5px;
+
     width: 100%;
 
-    margin: 0;
+    margin: 0 !important;
 
-    border-bottom: 1px solid #D7DDE5;
+    padding: 6px !important;
+
+    background: #F1F3F6 !important;
+
+    border: 0 !important;
+
+    border-top:
+        1px solid #E1E5EA !important;
+
+    border-bottom:
+        1px solid #DDE2E8 !important;
 
 }
 
 
+/* ==========================================================
+   TAB ITEM
+========================================================== */
+
 #accountReceivableModal
-.nav-tabs
+#ar-modal-tabs
 .nav-item {
 
-    flex: 1 1 25%;
+    width: 100%;
+
+    min-width: 0;
+
+    margin: 0 !important;
 
 }
 
 
+/* ==========================================================
+   TAB BUTTON
+========================================================== */
+
 #accountReceivableModal
-.nav-tabs
+#ar-modal-tabs
 .nav-link {
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
 
     width: 100%;
 
-    height: 42px;
+    min-height: 36px;
 
-    display: flex;
+    margin: 0 !important;
 
-    align-items: center;
+    padding: 7px 14px !important;
 
-    justify-content: center;
+    background:
+        transparent !important;
 
-    padding: 0 12px;
+    border:
+        1px solid transparent !important;
 
-    color: #1F3A5F;
+    border-radius:
+        8px !important;
 
-    font-size: 14px;
+    color:
+        #344054 !important;
 
-    font-weight: 500;
+    font-size:
+        13.5px !important;
 
-    border-radius: 0;
+    font-weight:
+        600 !important;
+
+    white-space:
+        nowrap;
+
+    box-shadow:
+        none;
 
 }
 
 
+/* ==========================================================
+   ACTIVE TAB
+========================================================== */
+
 #accountReceivableModal
-.nav-tabs
+#ar-modal-tabs
 .nav-link.active {
 
-    color: #0D6EFD;
+    background:
+        #FFFFFF !important;
 
-    font-weight: 600;
+    border-color:
+        #CFD7E2 !important;
 
-    background: #FFFFFF;
+    color:
+        #0B5ED7 !important;
+
+    font-weight:
+        700 !important;
+
+    box-shadow:
+        0 2px 7px rgba(15, 23, 42, .11),
+        0 1px 2px rgba(15, 23, 42, .05),
+        0 0 0 1px rgba(13, 110, 253, .025)
+        !important;
 
 }
 
@@ -2470,11 +2576,15 @@ th:nth-child(2) {
 ========================================================== */
 
 #accountReceivableModal
-.tab-content {
+#ar-modal-tab-content {
 
-    flex: 1 1 auto;
+    flex: 0 0 auto;
+
+    width: 100%;
 
     min-height: 0;
+
+    background: #FFFFFF;
 
 }
 
@@ -2484,9 +2594,10 @@ th:nth-child(2) {
 ========================================================== */
 
 #accountReceivableModal
-#ar-header-info-pane {
+#ar-header-info-pane
+> .p-4 {
 
-    padding: 20px;
+    padding: 20px !important;
 
 }
 
@@ -2496,11 +2607,10 @@ th:nth-child(2) {
 ========================================================== */
 
 #accountReceivableModal
-.ar-header-card {
+#ar-header-info-pane
+.finova-card {
 
     width: 100%;
-
-    padding: 22px 24px;
 
     background: #FFFFFF;
 
@@ -2508,17 +2618,76 @@ th:nth-child(2) {
 
     border-radius: 14px;
 
-    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.05);
+    box-shadow:
+        0 3px 10px
+        rgba(
+            15,
+            23,
+            42,
+            .05
+        );
 
 }
 
 
 /* ==========================================================
-   FORM LABEL
+   HEADER CARD BODY
 ========================================================== */
 
 #accountReceivableModal
-.ar-header-card
+#ar-header-info-pane
+.finova-card-body {
+
+    padding: 20px !important;
+
+}
+
+
+/* ==========================================================
+   FORM ROW
+========================================================== */
+
+#accountReceivableModal
+#ar-header-info-pane
+.finova-card-body
+> .row {
+
+    width: auto !important;
+
+    margin-right: -8px !important;
+
+    margin-left: -8px !important;
+
+    --bs-gutter-x: 16px;
+
+    --bs-gutter-y: 12px;
+
+}
+/* ==========================================================
+   FORM COLUMN
+========================================================== */
+
+#accountReceivableModal
+#ar-header-info-pane
+.finova-card-body
+> .row
+> [class*="col-"] {
+
+    padding-left: 8px;
+
+    padding-right: 8px;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   LABEL
+========================================================== */
+
+#accountReceivableModal
+#ar-header-info-pane
 .form-label {
 
     margin-bottom: 6px;
@@ -2533,30 +2702,32 @@ th:nth-child(2) {
 
 
 /* ==========================================================
-   FORM CONTROL
+   INPUT
 ========================================================== */
 
 #accountReceivableModal
-.ar-header-card
+#ar-header-info-pane
 .form-control,
 
 #accountReceivableModal
-.ar-header-card
+#ar-header-info-pane
 .form-select {
 
     width: 100%;
 
-    height: 34px;
+    height: 36px;
 
-    min-height: 34px;
+    min-height: 36px;
 
-    padding: 5px 10px;
+    padding: 6px 10px;
 
     font-size: 14px;
 
-    border: 1px solid #D7DDE5;
+    border:
+        1px solid #D7DDE5;
 
-    border-radius: 5px;
+    border-radius:
+        5px;
 
 }
 
@@ -2566,24 +2737,21 @@ th:nth-child(2) {
 ========================================================== */
 
 #accountReceivableModal
-.ar-header-card
-textarea.form-control {
+#ar-form-description {
 
-    height: 54px;
+    height: 54px !important;
 
-    min-height: 54px;
+    min-height: 54px !important;
 
     padding: 8px 10px;
 
-    line-height: 1.45;
-
-    resize: vertical;
+    line-height: 1.4;
 
 }
 
 
 /* ==========================================================
-   MODAL SUMMARY AREA
+   SUMMARY AREA
 ========================================================== */
 
 #accountReceivableModal
@@ -2593,11 +2761,22 @@ textarea.form-control {
 
     justify-content: flex-end;
 
+    flex: 0 0 auto;
+
     width: 100%;
 
-    margin-top: 20px;
+    margin: 0 !important;
 
-    padding: 0 18px 18px 18px;
+    padding:
+        16px
+        20px
+        16px
+        20px;
+
+    background: #FFFFFF;
+
+    border-top:
+        1px solid #DEE2E6;
 
 }
 
@@ -2609,19 +2788,28 @@ textarea.form-control {
 #accountReceivableModal
 .ar-summary-card {
 
-    width: 420px;
+    width: 360px;
 
     max-width: 100%;
 
-    padding: 22px 24px;
+    padding: 18px 20px;
 
     background: #FFFFFF;
 
-    border: 1px solid #EEF0F3;
+    border:
+        1px solid #EEF0F3;
 
-    border-radius: 14px;
+    border-radius:
+        14px;
 
-    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.05);
+    box-shadow:
+        0 3px 10px
+        rgba(
+            15,
+            23,
+            42,
+            .05
+        );
 
 }
 
@@ -2639,20 +2827,11 @@ textarea.form-control {
 
     justify-content: space-between;
 
-    min-height: 28px;
+    min-height: 26px;
 
     color: #1F3A5F;
 
     font-size: 14px;
-
-}
-
-
-#accountReceivableModal
-.ar-summary-line
-strong {
-
-    font-weight: 700;
 
 }
 
@@ -2668,7 +2847,7 @@ strong {
 
     height: 1px;
 
-    margin: 14px 0;
+    margin: 12px 0;
 
     background: #CBD5E1;
 
@@ -2676,7 +2855,7 @@ strong {
 
 
 /* ==========================================================
-   TOTAL RECEIVABLE
+   TOTAL
 ========================================================== */
 
 #accountReceivableModal
@@ -2696,13 +2875,42 @@ strong {
 
     flex: 0 0 auto;
 
-    min-height: 62px;
+    min-height: 54px;
 
     padding: 10px 14px;
 
-    border-top: 1px solid #DEE2E6;
-
     background: #FFFFFF;
+
+    border-top:
+        1px solid #DEE2E6;
+
+}
+
+
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+@media (max-width: 768px) {
+
+    #accountReceivableModal
+    #ar-modal-tabs {
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+
+    }
+
+
+    #accountReceivableModal
+    .ar-summary-card {
+
+        width: 100%;
+
+    }
 
 }
 /* ==========================================================

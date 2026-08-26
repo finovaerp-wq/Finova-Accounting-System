@@ -9489,83 +9489,175 @@ renderActionButtons(
 
 }
     /*
-    ======================================================
-    ADD AR
-    ======================================================
-    */
+======================================================
+ADD AR
+ALWAYS OPEN HEADER INFO TAB
+======================================================
+*/
 
-    async addInvoice() {
+async addInvoice() {
 
-        try {
+    try {
 
-            this.currentInvoiceId =
-                null;
+        /*
+        ==============================================
+        RESET STATE
+        ==============================================
+        */
 
-            this.currentDetailId =
-                null;
-
-            this.currentMode =
-                "add";
-
-            this.invoiceDetails =
-                [];
+        this.currentInvoiceId =
+            null;
 
 
-            this.resetForm();
+        this.currentDetailId =
+            null;
 
 
-            await this.loadDetailCOA();
-
-            await this.loadTaxMaster();
-
-
-            if (
-                this.arFormStatus
-            ) {
-
-                this.arFormStatus.value =
-                    "Draft";
-
-            }
+        this.currentMode =
+            "add";
 
 
-            this.renderInvoiceDetails();
-
-            this.renderTaxPlus();
-
-            this.renderTaxMinus();
-
-            this.updateInvoiceSummary();
+        this.invoiceDetails =
+            [];
 
 
-            const modal =
-                bootstrap.Modal
+        /*
+        ==============================================
+        RESET FORM
+        ==============================================
+        */
+
+        this.resetForm();
+
+
+        /*
+        ==============================================
+        LOAD MASTER DATA
+        ==============================================
+        */
+
+        await this.loadDetailCOA();
+
+        await this.loadTaxMaster();
+
+
+        /*
+        ==============================================
+        DEFAULT STATUS
+        ==============================================
+        */
+
+        if (
+            this.arFormStatus
+        ) {
+
+            this.arFormStatus.value =
+                "Draft";
+
+        }
+
+
+        /*
+        ==============================================
+        RENDER
+        ==============================================
+        */
+
+        this.renderInvoiceDetails();
+
+        this.renderTaxPlus();
+
+        this.renderTaxMinus();
+
+        this.updateInvoiceSummary();
+
+
+        /*
+        ==============================================
+        RESET TAB TO HEADER INFO
+
+        IMPORTANT:
+        PREVENT PREVIOUS TAB HISTORY
+        ==============================================
+        */
+
+        const headerInfoTab =
+            document.getElementById(
+                "ar-header-info-tab"
+            );
+
+
+        if (
+            headerInfoTab
+        ) {
+
+            const tabInstance =
+                bootstrap.Tab
                     .getOrCreateInstance(
-                        this.accountReceivableModal
+                        headerInfoTab
                     );
 
 
-            modal.show();
+            tabInstance.show();
 
         }
 
-        catch (error) {
 
-            console.error(
-                "AccountReceivable.addInvoice:",
-                error
-            );
+        /*
+        ==============================================
+        RESET MODAL BODY SCROLL
+        ==============================================
+        */
+
+        const modalBody =
+            this.accountReceivableModal
+                ?.querySelector(
+                    ".modal-body"
+                );
 
 
-            this.showError(
-                "Failed to open Account Receivable."
-            );
+        if (
+            modalBody
+        ) {
+
+            modalBody.scrollTop =
+                0;
 
         }
+
+
+        /*
+        ==============================================
+        SHOW MODAL
+        ==============================================
+        */
+
+        const modal =
+            bootstrap.Modal
+                .getOrCreateInstance(
+                    this.accountReceivableModal
+                );
+
+
+        modal.show();
 
     }
 
+    catch (error) {
 
+        console.error(
+            "AccountReceivable.addInvoice:",
+            error
+        );
+
+
+        this.showError(
+            "Failed to open Account Receivable."
+        );
+
+    }
+
+}
     /*
     ======================================================
     RESET FORM
