@@ -380,259 +380,6 @@ input[type="date"] {
 
 
 /* ==========================================================
-   1. NO
-========================================================== */
-
-#gl-journal-table
-th:nth-child(1),
-
-#gl-journal-table
-td:nth-child(1) {
-
-    width: 45px;
-
-    text-align: center;
-
-}
-
-
-/* ==========================================================
-   2. ACCOUNTING DATE
-========================================================== */
-
-#gl-journal-table
-th:nth-child(2),
-
-#gl-journal-table
-td:nth-child(2) {
-
-    width: 120px;
-
-    text-align: center;
-
-    white-space: nowrap;
-
-}
-
-
-/* ==========================================================
-   3. JOURNAL NO
-========================================================== */
-
-#gl-journal-table
-th:nth-child(3),
-
-#gl-journal-table
-td:nth-child(3) {
-
-    width: 145px;
-
-    white-space: nowrap;
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-
-}
-
-
-/* ==========================================================
-   4. AP INVOICE NO
-========================================================== */
-
-#gl-journal-table
-th:nth-child(4),
-
-#gl-journal-table
-td:nth-child(4) {
-
-    width: 135px;
-
-    white-space: nowrap;
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-
-}
-
-
-/* ==========================================================
-   5. PO NO
-========================================================== */
-
-#gl-journal-table
-th:nth-child(5),
-
-#gl-journal-table
-td:nth-child(5) {
-
-    width: 140px;
-
-    white-space: nowrap;
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-
-}
-
-
-/* ==========================================================
-   6. SOURCE
-========================================================== */
-
-#gl-journal-table
-th:nth-child(6),
-
-#gl-journal-table
-td:nth-child(6) {
-
-    width: 65px;
-
-    text-align: center;
-
-    white-space: nowrap;
-
-}
-
-
-/* ==========================================================
-   7. DESCRIPTION
-========================================================== */
-
-#gl-journal-table
-th:nth-child(7) {
-
-    width: auto;
-
-    min-width: 180px;
-
-    text-align: left;
-
-}
-
-
-/* ==========================================================
-   DESCRIPTION BODY
-   SHOW FULL DESCRIPTION
-========================================================== */
-
-#gl-journal-table
-td:nth-child(7) {
-
-    width: auto;
-
-    min-width: 180px;
-
-    text-align: left;
-
-    white-space: normal !important;
-
-    overflow: visible !important;
-
-    text-overflow: clip !important;
-
-    overflow-wrap: anywhere !important;
-
-    word-wrap: break-word !important;
-
-    word-break: break-word !important;
-
-    line-height: 1.45 !important;
-
-    vertical-align: middle !important;
-
-}
-
-
-/* ==========================================================
-   8. TOTAL DEBIT
-========================================================== */
-
-#gl-journal-table
-th:nth-child(8),
-
-#gl-journal-table
-td:nth-child(8) {
-
-    width: 115px;
-
-    text-align: right;
-
-    white-space: nowrap;
-
-}
-
-
-/* ==========================================================
-   9. TOTAL CREDIT
-========================================================== */
-
-#gl-journal-table
-th:nth-child(9),
-
-#gl-journal-table
-td:nth-child(9) {
-
-    width: 115px;
-
-    text-align: right;
-
-    white-space: nowrap;
-
-}
-
-
-/* ==========================================================
-   10. STATUS
-========================================================== */
-
-#gl-journal-table
-th:nth-child(10),
-
-#gl-journal-table
-td:nth-child(10) {
-
-    width: 85px;
-
-    text-align: center;
-
-    white-space: nowrap;
-
-}
-
-
-/* ==========================================================
-   11. ACTION
-========================================================== */
-
-#gl-journal-table
-th:nth-child(11),
-
-#gl-journal-table
-td:nth-child(11) {
-
-    width: 70px;
-
-    max-width: 70px;
-
-    padding-left: 6px !important;
-
-    padding-right: 6px !important;
-
-    text-align: center !important;
-
-    vertical-align: middle !important;
-
-    white-space: nowrap;
-
-    overflow: visible !important;
-
-}
-
-
-/* ==========================================================
    TABLE HEADER
 ========================================================== */
 
@@ -1212,5 +959,1050 @@ td {
     min-width: 0;
 
     overflow-x: hidden !important;
+
+}
+/* ==========================================================
+   FINOVA ACCOUNTING SYSTEM
+   GENERAL JOURNAL
+   FINAL CLEAN TABLE LAYOUT
+   FONT SIZE SAME AS ACCOUNT PAYABLE
+========================================================== */
+
+
+/* ==========================================================
+   MAIN TABLE
+========================================================== */
+
+#gl-journal-table.gl-journal-main-table {
+
+    width: 100%;
+
+    min-width: 100%;
+
+    table-layout: fixed;
+
+    margin-bottom: 0;
+
+}
+
+
+/* ==========================================================
+   COLUMN WIDTH
+========================================================== */
+
+
+/* NO */
+
+#gl-journal-table .gl-col-no {
+
+    width: 32px;
+
+}
+
+
+/* DATE */
+
+#gl-journal-table .gl-col-date {
+
+    width: 60px;
+
+}
+
+
+/* JOURNAL INFORMATION */
+
+#gl-journal-table .gl-col-information {
+
+    width: auto;
+
+}
+
+
+/* SOURCE */
+
+#gl-journal-table .gl-col-source {
+    width: 72px;
+}
+
+
+/* AMOUNT */
+
+#gl-journal-table .gl-col-amount {
+
+    width: 175px;
+
+}
+
+
+/* CREATED */
+
+#gl-journal-table .gl-col-created {
+
+    width: 100px;
+
+}
+
+
+/* STATUS */
+
+#gl-journal-table .gl-col-status {
+
+    width: 80px;
+
+}
+
+
+/* ACTION */
+
+#gl-journal-table .gl-col-action {
+
+    width: 42px;
+
+}
+
+
+/* ==========================================================
+   TABLE HEADER
+========================================================== */
+
+#gl-journal-table
+> thead
+> tr
+> th {
+
+    vertical-align: middle;
+
+    white-space: nowrap;
+
+    font-weight: 700 !important;
+
+    color: #111827 !important;
+
+}
+
+
+/* ==========================================================
+   TABLE BODY
+   SAME AS AP
+========================================================== */
+
+#gl-journal-table
+> tbody
+> tr
+> td {
+
+    height: auto !important;
+
+    padding-top: 10px;
+
+    padding-bottom: 10px;
+
+    font-size: 14px;
+
+    font-weight: 400 !important;
+
+    line-height: 1.55;
+
+    color: #1F2937 !important;
+
+}
+
+
+/* ==========================================================
+   TABLE ROW
+========================================================== */
+
+#gl-journal-table
+> tbody
+> tr {
+
+    height: auto !important;
+
+    min-height: 0 !important;
+
+}
+
+
+/* ==========================================================
+   NO COLUMN
+========================================================== */
+
+#gl-journal-table
+.gl-journal-no-cell {
+
+    width: 32px;
+
+    min-width: 32px;
+
+    max-width: 32px;
+
+    padding-left: 2px !important;
+
+    padding-right: 2px !important;
+
+    font-size: 13px;
+
+    font-weight: 500;
+
+    text-align: center;
+
+    vertical-align: middle;
+
+    white-space: nowrap;
+
+    color: var(--text-secondary);
+
+}
+
+
+/* ==========================================================
+   DATE COLUMN
+========================================================== */
+
+#gl-journal-table
+.gl-journal-date-cell {
+
+    width: 60px;
+
+    min-width: 60px;
+
+    max-width: 60px;
+
+    padding-left: 2px !important;
+
+    padding-right: 2px !important;
+
+    text-align: center;
+
+    vertical-align: middle;
+
+    white-space: normal;
+
+}
+
+
+/* ==========================================================
+   DATE TEXT
+========================================================== */
+
+#gl-journal-table
+.gl-journal-date {
+
+    display: block;
+
+    width: 100%;
+
+    font-size: 13px;
+
+    font-weight: 400;
+
+    line-height: 1.55;
+
+    text-align: center;
+
+    white-space: normal;
+
+    color: var(--text-secondary);
+
+}
+
+
+/* ==========================================================
+   JOURNAL INFORMATION COLUMN
+========================================================== */
+
+#gl-journal-table
+.gl-journal-info-cell {
+
+    width: auto;
+
+    min-width: 0;
+
+    max-width: none;
+
+    padding: 10px 12px !important;
+
+    vertical-align: top;
+
+    white-space: normal;
+
+}
+
+
+/* ==========================================================
+   JOURNAL INFORMATION WRAPPER
+========================================================== */
+
+#gl-journal-table
+.gl-journal-info {
+
+    display: flex;
+
+    flex-direction: column;
+
+    width: 100%;
+
+    min-width: 0;
+
+    gap: 2px;
+
+}
+
+
+/* ==========================================================
+   JOURNAL INFORMATION LINE
+========================================================== */
+
+#gl-journal-table
+.gl-journal-info-line {
+
+    display: grid;
+
+    grid-template-columns:
+        48px
+        10px
+        minmax(0, 1fr);
+
+    column-gap: 2px;
+
+    align-items: start;
+
+    width: 100%;
+
+    min-width: 0;
+
+    line-height: 1.55;
+
+}
+
+
+/* ==========================================================
+   JOURNAL INFORMATION LABEL
+========================================================== */
+
+#gl-journal-table
+.gl-journal-info-label {
+
+    font-size: 13px;
+
+    font-weight: 500;
+
+    white-space: nowrap;
+
+    color: var(--text-secondary);
+
+}
+
+
+/* ==========================================================
+   JOURNAL INFORMATION SEPARATOR
+========================================================== */
+
+#gl-journal-table
+.gl-journal-info-separator {
+
+    font-size: 13px;
+
+    text-align: center;
+
+    color: #94A3B8;
+
+}
+
+
+/* ==========================================================
+   JOURNAL INFORMATION VALUE
+========================================================== */
+
+#gl-journal-table
+.gl-journal-info-value {
+
+    display: block;
+
+    min-width: 0;
+
+    font-size: 13px;
+
+    font-weight: 500;
+
+    white-space: normal;
+
+    overflow-wrap: anywhere;
+
+    color: var(--text-primary);
+
+}
+
+
+/* ==========================================================
+   JOURNAL NUMBER
+========================================================== */
+
+#gl-journal-table
+.gl-journal-number {
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    color: var(--text-primary);
+
+}
+
+
+/* ==========================================================
+   TRANSACTION COUNT
+========================================================== */
+
+#gl-journal-table
+.gl-journal-transaction-line {
+
+    margin-bottom: 2px;
+
+}
+
+
+#gl-journal-table
+.gl-journal-transaction-count {
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    color: var(--text-primary);
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION
+========================================================== */
+
+#gl-journal-table
+.gl-journal-description {
+
+    display: block;
+
+    width: 100%;
+
+    min-width: 0;
+
+    max-width: 100%;
+
+    font-size: 13px;
+
+    font-weight: 400;
+
+    line-height: 1.55;
+
+    white-space: normal;
+
+    overflow: visible;
+
+    text-overflow: clip;
+
+    overflow-wrap: anywhere;
+
+    word-break: normal;
+
+    color: var(--text-secondary);
+
+}
+
+
+/* ==========================================================
+   SOURCE COLUMN
+========================================================== */
+
+#gl-journal-table
+.gl-journal-source-cell {
+
+    width: 72px;
+
+    min-width: 72px;
+
+    max-width: 72px;
+
+    padding-left: 3px !important;
+
+    padding-right: 3px !important;
+
+    text-align: center;
+
+    vertical-align: middle;
+
+    white-space: nowrap;
+}
+
+
+/* ==========================================================
+   SOURCE BADGE
+========================================================== */
+
+#gl-journal-table
+.gl-journal-source-cell
+.badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 5px 8px;
+
+    font-size: 11.5px;
+
+    font-weight: 600;
+
+    line-height: 1;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   AMOUNT COLUMN
+========================================================== */
+
+#gl-journal-table
+.gl-journal-amount-cell {
+
+    width: 175px;
+
+    min-width: 175px;
+
+    max-width: 175px;
+
+    padding: 8px 8px !important;
+
+    vertical-align: middle;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   AMOUNT LINE
+========================================================== */
+
+#gl-journal-table
+.gl-journal-summary-line {
+
+    display: grid;
+
+    grid-template-columns:
+        48px
+        10px
+        minmax(0, 1fr);
+
+    column-gap: 2px;
+
+    align-items: center;
+
+    width: 100%;
+
+    min-width: 0;
+
+    line-height: 1.55;
+
+}
+
+
+/* ==========================================================
+   AMOUNT LABEL
+========================================================== */
+
+#gl-journal-table
+.gl-journal-summary-label {
+
+    font-size: 13px;
+
+    font-weight: 500;
+
+    white-space: nowrap;
+
+    color: var(--text-secondary);
+
+}
+
+
+/* ==========================================================
+   AMOUNT SEPARATOR
+========================================================== */
+
+#gl-journal-table
+.gl-journal-summary-separator {
+
+    font-size: 13px;
+
+    text-align: center;
+
+    color: #94A3B8;
+
+}
+
+
+/* ==========================================================
+   AMOUNT VALUE
+========================================================== */
+
+#gl-journal-table
+.gl-journal-summary-value {
+
+    min-width: 0;
+
+    font-size: 13.5px;
+
+    font-weight: 600;
+
+    text-align: right;
+
+    white-space: nowrap;
+
+    color: var(--text-primary);
+
+}
+
+
+/* ==========================================================
+   CREATED COLUMN
+========================================================== */
+
+#gl-journal-table
+.gl-journal-created-cell {
+
+    width: 100px;
+
+    min-width: 100px;
+
+    max-width: 100px;
+
+    padding-left: 4px !important;
+
+    padding-right: 4px !important;
+
+    font-size: 13px;
+
+    line-height: 1.55;
+
+    text-align: center;
+
+    vertical-align: middle;
+
+    white-space: normal;
+
+    color: var(--text-secondary);
+
+}
+
+
+/* ==========================================================
+   CREATED DATE / TIME
+========================================================== */
+
+#gl-journal-table
+.gl-created-date,
+
+#gl-journal-table
+.gl-created-time {
+
+    display: block;
+
+    width: 100%;
+
+    font-size: 13px;
+
+    line-height: 1.55;
+
+    text-align: center;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   STATUS COLUMN
+========================================================== */
+
+#gl-journal-table
+.gl-journal-status-cell {
+
+    width: 80px;
+
+    min-width: 80px;
+
+    max-width: 80px;
+
+    padding-left: 3px !important;
+
+    padding-right: 3px !important;
+
+    text-align: center;
+
+    vertical-align: middle;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   STATUS BADGE
+========================================================== */
+
+#gl-journal-table
+.gl-journal-status-cell
+.badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-width: 60px;
+
+    padding: 6px 9px;
+
+    font-size: 11.5px;
+
+    font-weight: 600;
+
+    line-height: 1;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   ACTION COLUMN
+========================================================== */
+
+#gl-journal-table
+.gl-journal-action-cell {
+
+    position: relative;
+
+    width: 42px;
+
+    min-width: 42px;
+
+    max-width: 42px;
+
+    padding-left: 2px !important;
+
+    padding-right: 2px !important;
+
+    text-align: center;
+
+    vertical-align: middle;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   ACTION DROPDOWN
+========================================================== */
+
+#gl-journal-table
+.gl-journal-action-cell
+.gl-action-dropdown {
+
+    position: relative;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+}
+
+
+/* ==========================================================
+   ACTION BUTTON
+========================================================== */
+
+#gl-journal-table
+.gl-action-trigger {
+
+    display: inline-flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    width: 32px !important;
+
+    min-width: 32px !important;
+
+    max-width: 32px !important;
+
+    height: 32px !important;
+
+    min-height: 32px !important;
+
+    padding: 0 !important;
+
+    margin: 0 !important;
+
+    border: 0 !important;
+
+    border-radius: 6px !important;
+
+    background: transparent !important;
+
+    color: var(--text-secondary);
+
+    line-height: 1;
+
+}
+
+
+/* ==========================================================
+   ACTION ICON
+========================================================== */
+
+#gl-journal-table
+.gl-action-trigger
+i {
+
+    margin: 0 !important;
+
+    font-size: 13px;
+
+    line-height: 1;
+
+}
+
+
+/* ==========================================================
+   ACTION HOVER / FOCUS
+========================================================== */
+
+#gl-journal-table
+.gl-action-trigger:hover,
+
+#gl-journal-table
+.gl-action-trigger:focus {
+
+    border: 0 !important;
+
+    background: transparent !important;
+
+    color: var(--text-primary);
+
+    box-shadow: none !important;
+
+}
+
+
+/* ==========================================================
+   ACTION MENU
+========================================================== */
+
+#gl-journal-table
+.gl-action-menu {
+
+    min-width: 165px;
+
+    padding: 6px;
+
+    border: 1px solid #E2E8F0;
+
+    border-radius: 9px;
+
+    box-shadow:
+        0 10px 24px rgba(15, 23, 42, .14);
+
+}
+
+
+/* ==========================================================
+   ACTION MENU ITEM
+========================================================== */
+
+#gl-journal-table
+.gl-action-menu
+.dropdown-item {
+
+    display: flex;
+
+    align-items: center;
+
+    width: 100%;
+
+    min-height: 36px;
+
+    padding: 7px 10px;
+
+    border: 0;
+
+    border-radius: 6px;
+
+    background: transparent;
+
+    font-size: 13px;
+
+    font-weight: 500;
+
+    text-align: left;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   ACTION MENU ICON
+========================================================== */
+
+#gl-journal-table
+.gl-action-menu
+.dropdown-item
+i {
+
+    flex: 0 0 18px;
+
+    width: 18px;
+
+    margin-right: 8px !important;
+
+    text-align: center;
+
+}
+
+
+/* ==========================================================
+   ACTION DIVIDER
+========================================================== */
+
+#gl-journal-table
+.gl-action-menu
+.dropdown-divider {
+
+    margin: 5px 0;
+
+}
+
+
+/* ==========================================================
+   ACTION COLORS
+========================================================== */
+
+#gl-journal-table
+.gl-action-menu
+.btn-edit-journal {
+
+    color: #2563EB;
+
+}
+
+
+#gl-journal-table
+.gl-action-menu
+.btn-post-journal {
+
+    color: #16A34A;
+
+}
+
+
+#gl-journal-table
+.gl-action-menu
+.btn-voucher-journal {
+
+    color: #0891B2;
+
+}
+
+
+#gl-journal-table
+.gl-action-menu
+.btn-view-journal {
+
+    color: #475569;
+
+}
+
+
+#gl-journal-table
+.gl-action-menu
+.btn-duplicate-journal {
+
+    color: #64748B;
+
+}
+
+
+#gl-journal-table
+.gl-action-menu
+.btn-void-journal,
+
+#gl-journal-table
+.gl-action-menu
+.btn-delete-journal {
+
+    color: #DC2626 !important;
+
+}
+
+
+/* ==========================================================
+   ACTION ITEM HOVER
+========================================================== */
+
+#gl-journal-table
+.gl-action-menu
+.dropdown-item:hover {
+
+    background: #F8FAFC !important;
+
+}
+
+
+/* ==========================================================
+   ACTION DANGER HOVER
+========================================================== */
+
+#gl-journal-table
+.gl-action-menu
+.btn-delete-journal:hover,
+
+#gl-journal-table
+.gl-action-menu
+.btn-void-journal:hover {
+
+    color: #DC2626 !important;
+
+    background: #FEF2F2 !important;
+
+}
+
+
+/* ==========================================================
+   ROW HOVER
+========================================================== */
+
+#gl-journal-table
+.gl-journal-row {
+
+    transition:
+        background-color 0.15s ease;
+
+}
+
+
+#gl-journal-table
+.gl-journal-row:hover {
+
+    background-color: #F8F9FA;
 
 }

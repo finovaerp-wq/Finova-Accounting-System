@@ -307,7 +307,10 @@ cacheDOM() {
             await this.loadCOA();
 
 
-            await this.loadData();
+            await this.loadData(
+    true,
+    true
+);
 
 
             console.log(
@@ -662,45 +665,221 @@ getTotalPages() {
 }
 
 
-    /*
+   /*
 ======================================================
 LOAD DATA
 ======================================================
 */
 
 async loadData(
-    resetPage = true
+    resetPage = true,
+    showLoading = true
 ) {
 
     try {
+
+        /*
+        ==================================================
+        RE-CACHE ACTIVE TABLE BODY
+        ==================================================
+        */
+
+        const activeTableBody =
+            document.getElementById(
+                "tax-table-body"
+            );
+
+
+        if (
+            activeTableBody
+        ) {
+
+            this.tableBody =
+                activeTableBody;
+
+        }
+
+
+        /*
+        ==================================================
+        TABLE BODY NOT FOUND
+        ==================================================
+        */
+
+        if (
+            !this.tableBody
+        ) {
+
+            console.warn(
+                "Tax.loadData: active table body not found."
+            );
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        LOADING
+        ONLY INITIAL LOAD / REFRESH
+        SAME AS ACCOUNT PAYABLE
+        ==================================================
+        */
+
+        if (
+            showLoading
+            &&
+            this.tableBody
+        ) {
+
+            this.tableBody.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="9"
+                        class="text-center py-5"
+                    >
+
+                        <div
+                            class="
+                                d-flex
+                                flex-column
+                                align-items-center
+                                justify-content-center
+                                gap-2
+                            "
+                        >
+
+                            <div
+                                class="
+                                    spinner-border
+                                    spinner-border-sm
+                                    text-primary
+                                "
+                                role="status"
+                            >
+
+                                <span
+                                    class="visually-hidden"
+                                >
+                                    Loading...
+                                </span>
+
+                            </div>
+
+
+                            <div
+                                class="
+                                    text-muted
+                                    small
+                                "
+                            >
+
+                                Loading Tax Master...
+
+                            </div>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        }
+
+
+        /*
+        ==================================================
+        LOAD TAX MASTER
+        ==================================================
+        */
 
         const data =
             await this.service.getAll();
 
 
+        /*
+        ==================================================
+        NORMALIZE DATA
+        ==================================================
+        */
+
         this.taxes =
-            Array.isArray(data)
+            Array.isArray(
+                data
+            )
                 ? data
                 : [];
 
 
-        if (resetPage) {
+        /*
+        ==================================================
+        RESET PAGE
+        ==================================================
+        */
+
+        if (
+            resetPage
+        ) {
 
             this.currentPage = 1;
 
         }
 
 
+        /*
+        ==================================================
+        RENDER
+        ==================================================
+        */
+
         this.render();
 
     }
 
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
             "Tax.loadData:",
             error
         );
+
+
+        /*
+        ==================================================
+        SHOW LOAD ERROR
+        ==================================================
+        */
+
+        if (
+            this.tableBody
+        ) {
+
+            this.tableBody.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="9"
+                        class="text-center py-5 text-danger"
+                    >
+
+                        Failed to load Tax Master.
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        }
+
 
         throw error;
 

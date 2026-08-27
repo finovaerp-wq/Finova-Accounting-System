@@ -152,17 +152,10 @@ async init() {
 
     try {
 
-        /*
-        ======================================================
-        SHOW LOADING
-        ======================================================
-        */
-
-        window.App?.showLoading?.();
-
         console.group(
             "GL Journal Initialization"
         );
+
 
         /*
         ======================================================
@@ -172,6 +165,7 @@ async init() {
 
         this.cacheDom();
 
+
         /*
         ======================================================
         LOAD JOURNAL MODAL
@@ -179,6 +173,7 @@ async init() {
         */
 
         await this.loadJournalModal();
+
 
         /*
         ======================================================
@@ -188,6 +183,7 @@ async init() {
 
         this.createDeleteJournalModal();
 
+
         /*
         ======================================================
         BIND ALL EVENTS
@@ -196,17 +192,24 @@ async init() {
 
         this.bindEvents();
 
+
         /*
         ======================================================
         LOAD JOURNAL DATA
+        INITIAL TABLE LOADING
+        SAME AS ACCOUNT PAYABLE
         ======================================================
         */
 
-        await this.loadData();
+        await this.loadData(
+            true
+        );
+
 
         console.log(
             "GL Journal initialized successfully."
         );
+
 
         console.groupEnd();
 
@@ -220,12 +223,6 @@ async init() {
         );
 
         throw error;
-
-    }
-
-    finally {
-
-        window.App?.hideLoading?.();
 
     }
 
@@ -1782,140 +1779,767 @@ async loadJournalModal() {
         
         }
     /*
-    ==========================================================
-    LOAD GENERAL JOURNAL
-    ==========================================================
-    */
-
-    async loadData() {
-
-        try {
-
-            /*
-            ======================================================
-            SHOW LOADING
-            ======================================================
-            */
-
-            window.App?.showLoading?.();
-
-            /*
-======================================================
-LOAD HEADER
-======================================================
+==========================================================
+LOAD GENERAL JOURNAL
+==========================================================
 */
 
-const headers =
-    await this.service.getAll();
+async loadData(
+    showLoading = true
+) {
 
-/*
-======================================================
-LOAD DETAIL EACH JOURNAL
-======================================================
-*/
+    try {
 
-const result = await Promise.all(
+        /*
+        ======================================================
+        RE-CACHE ACTIVE TABLE BODY
+        ======================================================
+        */
 
-    (headers || []).map(async journal => {
-
-        const fullJournal =
-            await this.service.getById(
-                journal.id
+        const activeTableBody =
+            document.getElementById(
+                "gl-journal-tbody"
             );
 
-        return fullJournal;
 
-    })
+        if (
+            activeTableBody
+        ) {
 
-);
-            /*
-            ======================================================
-            VALIDATE RESULT
-            ======================================================
-            */
-
-            this.journals =
-                Array.isArray(result)
-                    ? result
-                    : [];
-
-            /*
-            ======================================================
-            INITIAL FILTER
-            ======================================================
-            */
-
-            this.filteredJournals =
-                [...this.journals];
-
-            /*
-======================================================
-PAGINATION
-======================================================
-*/
-
-this.totalRows =
-    this.filteredJournals.length;
-
-this.totalPages =
-    Math.max(
-        1,
-        Math.ceil(
-            this.totalRows /
-            this.pageSize
-        )
-    );
-
-/*
-======================================================
-KEEP CURRENT PAGE
-======================================================
-*/
-
-this.currentPage =
-    Math.min(
-        Math.max(this.currentPage, 1),
-        this.totalPages
-    );
-
-/*
-======================================================
-REFRESH VIEW
-======================================================
-*/
-
-this.refreshView();
+            this.tableBody =
+                activeTableBody;
 
         }
 
-        catch (error) {
 
-            console.error(
-                "Failed to load journal.",
-                error
+        /*
+        ======================================================
+        TABLE BODY NOT FOUND
+        ======================================================
+        */
+
+        if (
+            !this.tableBody
+        ) {
+
+            console.warn(
+                "GeneralJournal.loadData: active table body not found."
             );
 
-            this.journals = [];
-
-            this.filteredJournals = [];
-
-            this.totalRows = 0;
-
-            this.totalPages = 1;
-
-            this.currentPage = 1;
-
-            throw error;
+            return;
 
         }
 
-        finally {
 
-            window.App?.hideLoading?.();
+        /*
+        ======================================================
+        LOADING
+        SAME STYLE AS ACCOUNT PAYABLE
+        ======================================================
+        */
+
+        if (
+            showLoading
+            &&
+            this.tableBody
+        ) {
+
+            this.tableBody.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="8"
+                        class="text-center py-5"
+                    >
+
+                        <div
+                            class="
+                                d-flex
+                                flex-column
+                                align-items-center
+                                justify-content-center
+                                gap-2
+                            "
+                        >
+
+                            <div
+                                class="
+                                    spinner-border
+                                    spinner-border-sm
+                                    text-primary
+                                "
+                                role="status"
+                            >
+
+                                <span
+                                    class="visually-hidden"
+                                >
+                                    Loading...
+                                </span>
+
+                            </div>
+
+
+                            <div
+                                class="
+                                    text-muted
+                                    small
+                                "
+                            >
+
+                                Loading General Journal...
+
+                            </div>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+            `;
 
         }
+
+
+        /*
+        ======================================================
+        LOAD JOURNAL HEADER
+        ======================================================
+        */
+
+        const headers =
+            await this.service.getAll();
+
+
+        /*
+        ======================================================
+        VALIDATE HEADER RESULT
+        ======================================================
+        */
+
+        const journalHeaders =
+            Array.isArray(
+                headers
+            )
+                ? headers
+                : [];
+
+
+        /*
+        ======================================================
+        LOAD FULL JOURNAL DATA
+        HEADER + DETAIL
+        ======================================================
+        */
+
+        const result =
+            await Promise.all(
+
+                journalHeaders.map(
+
+                    async journal => {
+
+                        try {
+
+                            /*
+                            ==============================================
+                            LOAD FULL JOURNAL
+                            ==============================================
+                            */
+
+                            const fullJournal =
+                                await this.service.getById(
+                                    journal.id
+                                );
+
+
+                            /*
+                            ==============================================
+                            MERGE HEADER + FULL JOURNAL
+
+                            Header data is preserved because fields such as
+                            source information may originate from getAll().
+                            ==============================================
+                            */
+
+                            return {
+
+                                ...journal,
+
+                                ...(fullJournal || {})
+
+                            };
+
+                        }
+
+                        catch (
+                            detailError
+                        ) {
+
+                            /*
+                            ==============================================
+                            DETAIL LOAD FAILED
+
+                            Do not remove the complete journal row just
+                            because its detail failed to load.
+                            ==============================================
+                            */
+
+                            console.error(
+                                `Failed to load journal detail: ${journal.id}`,
+                                detailError
+                            );
+
+
+                            return {
+
+                                ...journal,
+
+                                details: []
+
+                            };
+
+                        }
+
+                    }
+
+                )
+
+            );
+
+
+        /*
+        ======================================================
+        VALIDATE RESULT
+        ======================================================
+        */
+
+        this.journals =
+            Array.isArray(
+                result
+            )
+                ? result
+                : [];
+
+
+        /*
+        ======================================================
+        NORMALIZE JOURNAL DATA
+        ======================================================
+        */
+
+        this.journals =
+            this.journals.map(
+
+                journal => {
+
+                    /*
+                    ==============================================
+                    SOURCE MODULE
+                    ==============================================
+                    */
+
+                    let sourceModule =
+                        String(
+                            journal.source_module
+                            || journal.source
+                            || "GLJ"
+                        )
+                        .trim()
+                        .toUpperCase();
+
+
+                    /*
+                    ==============================================
+                    NORMALIZE GENERAL JOURNAL
+                    ==============================================
+                    */
+
+                    if (
+                        sourceModule === "GENERAL"
+                        ||
+                        sourceModule === "GL"
+                        ||
+                        sourceModule === "GENERAL JOURNAL"
+                    ) {
+
+                        sourceModule = "GLJ";
+
+                    }
+
+
+                    /*
+                    ==============================================
+                    NORMALIZE ACCOUNT PAYABLE
+                    ==============================================
+                    */
+
+                    if (
+                        sourceModule === "ACCOUNT PAYABLE"
+                        ||
+                        sourceModule === "PAYABLE"
+                    ) {
+
+                        sourceModule = "AP";
+
+                    }
+
+
+                    /*
+                    ==============================================
+                    NORMALIZE ACCOUNT RECEIVABLE
+                    ==============================================
+                    */
+
+                    if (
+                        sourceModule === "ACCOUNT RECEIVABLE"
+                        ||
+                        sourceModule === "RECEIVABLE"
+                    ) {
+
+                        sourceModule = "AR";
+
+                    }
+
+
+                    /*
+                    ==============================================
+                    TRANSACTION COUNT
+
+                    IMPORTANT:
+                    This is NOT journal.details.length because
+                    details are COA journal lines.
+
+                    Priority:
+                    transaction_count
+                    document_count
+                    item_count
+
+                    One manually created GL Journal header
+                    represents one transaction by default.
+                    ==============================================
+                    */
+
+                    const transactionCount =
+                        Math.max(
+
+                            1,
+
+                            Number(
+                                journal.transaction_count
+                                ??
+                                journal.document_count
+                                ??
+                                journal.item_count
+                                ??
+                                1
+                            )
+                            || 1
+
+                        );
+
+
+                    /*
+                    ==============================================
+                    TOTAL DEBIT / CREDIT
+
+                    Keep totals returned by service if available.
+                    If they are not available, calculate from
+                    journal detail.
+                    ==============================================
+                    */
+
+                    let totalDebit =
+                        Number(
+                            journal.total_debit
+                            || 0
+                        );
+
+
+                    let totalCredit =
+                        Number(
+                            journal.total_credit
+                            || 0
+                        );
+
+
+                    /*
+                    ==============================================
+                    FALLBACK TOTAL FROM DETAILS
+                    ==============================================
+                    */
+
+                    if (
+                        Array.isArray(
+                            journal.details
+                        )
+                    ) {
+
+                        /*
+                        ==========================================
+                        CALCULATE DEBIT ONLY WHEN HEADER TOTAL
+                        DOES NOT EXIST
+                        ==========================================
+                        */
+
+                        if (
+                            !journal.total_debit
+                        ) {
+
+                            totalDebit =
+                                journal.details.reduce(
+
+                                    (
+                                        total,
+                                        detail
+                                    ) => {
+
+                                        /*
+                                        ==================================
+                                        SUPPORT MULTIPLE DETAIL STRUCTURES
+                                        ==================================
+                                        */
+
+                                        const debit =
+                                            Number(
+                                                detail.debit
+                                                ??
+                                                detail.debit_amount
+                                                ??
+                                                (
+                                                    detail.debit_account_id
+                                                        ? detail.amount
+                                                        : 0
+                                                )
+                                                ??
+                                                0
+                                            );
+
+
+                                        return (
+                                            total
+                                            +
+                                            (
+                                                Number.isFinite(
+                                                    debit
+                                                )
+                                                    ? debit
+                                                    : 0
+                                            )
+                                        );
+
+                                    },
+
+                                    0
+
+                                );
+
+                        }
+
+
+                        /*
+                        ==========================================
+                        CALCULATE CREDIT ONLY WHEN HEADER TOTAL
+                        DOES NOT EXIST
+                        ==========================================
+                        */
+
+                        if (
+                            !journal.total_credit
+                        ) {
+
+                            totalCredit =
+                                journal.details.reduce(
+
+                                    (
+                                        total,
+                                        detail
+                                    ) => {
+
+                                        const credit =
+                                            Number(
+                                                detail.credit
+                                                ??
+                                                detail.credit_amount
+                                                ??
+                                                (
+                                                    detail.credit_account_id
+                                                        ? detail.amount
+                                                        : 0
+                                                )
+                                                ??
+                                                0
+                                            );
+
+
+                                        return (
+                                            total
+                                            +
+                                            (
+                                                Number.isFinite(
+                                                    credit
+                                                )
+                                                    ? credit
+                                                    : 0
+                                            )
+                                        );
+
+                                    },
+
+                                    0
+
+                                );
+
+                        }
+
+                    }
+
+
+                    /*
+                    ==============================================
+                    RETURN NORMALIZED JOURNAL
+                    ==============================================
+                    */
+
+                    return {
+
+                        ...journal,
+
+                        source_module:
+                            sourceModule,
+
+                        transaction_count:
+                            transactionCount,
+
+                        total_debit:
+                            totalDebit,
+
+                        total_credit:
+                            totalCredit
+
+                    };
+
+                }
+
+            );
+
+
+        /*
+        ======================================================
+        INITIAL FILTER DATA
+        ======================================================
+        */
+
+        this.filteredJournals =
+            [
+                ...this.journals
+            ];
+
+
+        /*
+        ======================================================
+        TOTAL ROWS
+        ======================================================
+        */
+
+        this.totalRows =
+            this.filteredJournals.length;
+
+
+        /*
+        ======================================================
+        TOTAL PAGES
+        ======================================================
+        */
+
+        this.totalPages =
+            Math.max(
+
+                1,
+
+                Math.ceil(
+
+                    this.totalRows
+                    /
+                    this.pageSize
+
+                )
+
+            );
+
+
+        /*
+        ======================================================
+        KEEP CURRENT PAGE VALID
+        ======================================================
+        */
+
+        this.currentPage =
+            Math.min(
+
+                Math.max(
+                    Number(
+                        this.currentPage
+                    )
+                    || 1,
+
+                    1
+                ),
+
+                this.totalPages
+
+            );
+
+
+        /*
+        ======================================================
+        REFRESH VIEW
+        ======================================================
+        */
+
+        this.refreshView();
+
+
+        /*
+        ======================================================
+        LOG
+        ======================================================
+        */
+
+        console.log(
+            "General Journal loaded:",
+            {
+                rows:
+                    this.totalRows,
+
+                pages:
+                    this.totalPages
+            }
+        );
 
     }
+
+    catch (
+        error
+    ) {
+
+        /*
+        ======================================================
+        ERROR LOG
+        ======================================================
+        */
+
+        console.error(
+            "Failed to load General Journal.",
+            error
+        );
+
+
+        /*
+        ======================================================
+        RESET DATA
+        ======================================================
+        */
+
+        this.journals = [];
+
+        this.filteredJournals = [];
+
+        this.totalRows = 0;
+
+        this.totalPages = 1;
+
+        this.currentPage = 1;
+
+
+        /*
+        ======================================================
+        ERROR DISPLAY
+        8 COLUMNS
+        ======================================================
+        */
+
+        if (
+            this.tableBody
+        ) {
+
+            this.tableBody.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="8"
+                        class="
+                            text-center
+                            py-5
+                            text-danger
+                        "
+                    >
+
+                        <div
+                            class="
+                                d-flex
+                                flex-column
+                                align-items-center
+                                justify-content-center
+                                gap-2
+                            "
+                        >
+
+                            <i
+                                class="
+                                    fa-solid
+                                    fa-circle-exclamation
+                                "
+                            ></i>
+
+
+                            <div>
+
+                                Failed to load General Journal.
+
+                            </div>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        }
+
+
+        /*
+        ======================================================
+        UPDATE PAGINATION
+        ======================================================
+        */
+
+        if (
+            typeof this.updatePagination
+            === "function"
+        ) {
+
+            this.updatePagination();
+
+        }
+
+
+        /*
+        ======================================================
+        THROW ERROR
+        ======================================================
+        */
+
+        throw error;
+
+    }
+
+}
 /*
 ==========================================================
 REFRESH VIEW
@@ -2094,7 +2718,8 @@ renderTable() {
 /*
 ==========================================================
 CREATE TABLE ROW
-GLOBAL TABLE STANDARD
+COMPACT JOURNAL DISPLAY
+FINAL
 ==========================================================
 */
 
@@ -2103,15 +2728,195 @@ createTableRow(
     rowNumber
 ) {
 
+    /*
+    ======================================================
+    DATE
+    ======================================================
+    */
+
+    const journalDate =
+        this.formatDisplayDate(
+            journal.journal_date
+        );
+
+
+    /*
+    ======================================================
+    JOURNAL NUMBER
+    ======================================================
+    */
+
+    const journalNo =
+        journal.journal_no
+        || "-";
+
+
+    /*
+    ======================================================
+    SOURCE MODULE
+    ======================================================
+    */
+
+    let source =
+        String(
+            journal.source_module
+            || "GLJ"
+        )
+        .trim()
+        .toUpperCase();
+
+
+    /*
+    ======================================================
+    NORMALIZE SOURCE
+    ======================================================
+    */
+
+    if (
+        source === "GENERAL"
+        ||
+        source === "GL"
+        ||
+        source === "GENERAL JOURNAL"
+    ) {
+
+        source = "GLJ";
+
+    }
+
+
+    if (
+        source === "ACCOUNT PAYABLE"
+    ) {
+
+        source = "AP";
+
+    }
+
+
+    if (
+        source === "ACCOUNT RECEIVABLE"
+    ) {
+
+        source = "AR";
+
+    }
+
+
+    /*
+    ======================================================
+    INVOICE NUMBER
+    ======================================================
+    */
+
+    const invoiceNo =
+        journal.source_invoice_no
+        || "";
+
+
+    /*
+    ======================================================
+    PO NUMBER
+    ======================================================
+    */
+
+    const poNo =
+        journal.source_po_no
+        || "";
+
+
+    /*
+    ======================================================
+    DESCRIPTION
+    ======================================================
+    */
+
+    const description =
+        journal.description
+        || "-";
+
+
+    /*
+    ======================================================
+    TRANSACTION COUNT
+
+    IMPORTANT:
+    TRANSACTION COUNT IS NOT COA DETAIL COUNT
+    ======================================================
+    */
+
+    const transactionCount =
+        Math.max(
+            1,
+            Number(
+                journal.transaction_count
+                ??
+                journal.document_count
+                ??
+                journal.item_count
+                ??
+                1
+            )
+        );
+
+
+    /*
+    ======================================================
+    TOTAL DEBIT
+    ======================================================
+    */
+
+    const totalDebit =
+        Number(
+            journal.total_debit
+            || 0
+        );
+
+
+    /*
+    ======================================================
+    TOTAL CREDIT
+    ======================================================
+    */
+
+    const totalCredit =
+        Number(
+            journal.total_credit
+            || 0
+        );
+
+
+    /*
+    ======================================================
+    CREATED DATE
+    ======================================================
+    */
+
+    const createdAt =
+        this.formatCreatedDateTime(
+            journal.created_at
+        );
+
+
+    /*
+    ======================================================
+    RETURN ROW
+    ======================================================
+    */
+
     return `
 
-        <tr>
+        <tr
+            class="gl-journal-row"
+            data-id="${journal.id}"
+        >
+
 
             <!-- ==========================================
                  NO
             =========================================== -->
 
-            <td class="finova-table-index">
+            <td class="gl-journal-no-cell">
 
                 ${rowNumber}
 
@@ -2119,53 +2924,210 @@ createTableRow(
 
 
             <!-- ==========================================
-                 ACCOUNTING DATE
+                 DATE
             =========================================== -->
 
-            <td class="finova-table-date">
+            <td class="gl-journal-date-cell">
 
-                ${journal.journal_date ?? "-"}
+                <div class="gl-journal-date">
+
+                    ${journalDate}
+
+                </div>
 
             </td>
 
 
             <!-- ==========================================
-                 JOURNAL NO
+                 JOURNAL INFORMATION
             =========================================== -->
 
-            <td class="finova-table-code">
+            <td class="gl-journal-info-cell">
 
-                ${journal.journal_no ?? "-"}
-
-            </td>
+                <div class="gl-journal-info">
 
 
-            <!-- ==========================================
-                 AP INVOICE NO
-            =========================================== -->
+                    <!-- ==================================
+                         ITEMS / TRANSACTION
+                    =================================== -->
 
-            <td>
+                    <div
+                        class="
+                            gl-journal-info-line
+                            gl-journal-transaction-line
+                        "
+                    >
 
-                ${
-                    journal.source_module === "AP"
-                        ? journal.source_invoice_no || "-"
-                        : "-"
-                }
+                        <span class="gl-journal-info-label">
 
-            </td>
+                            Items
+
+                        </span>
+
+                        <span class="gl-journal-info-separator">
+
+                            :
+
+                        </span>
+
+                        <strong
+                            class="
+                                gl-journal-info-value
+                                gl-journal-transaction-count
+                            "
+                        >
+
+                            ${transactionCount}
+
+                            ${
+                                transactionCount === 1
+                                    ? "Transaction"
+                                    : "Transactions"
+                            }
+
+                        </strong>
+
+                    </div>
 
 
-            <!-- ==========================================
-                 PO NO
-            =========================================== -->
+                    <!-- ==================================
+                         JOURNAL NO
+                    =================================== -->
 
-            <td>
+                    <div class="gl-journal-info-line">
 
-                ${
-                    journal.source_module === "AP"
-                        ? journal.source_po_no || "-"
-                        : "-"
-                }
+                        <span class="gl-journal-info-label">
+
+                            No
+
+                        </span>
+
+                        <span class="gl-journal-info-separator">
+
+                            :
+
+                        </span>
+
+                        <strong
+                            class="
+                                gl-journal-info-value
+                                gl-journal-number
+                            "
+                        >
+
+                            ${this.escapeHTML(
+                                journalNo
+                            )}
+
+                        </strong>
+
+                    </div>
+
+
+                    <!-- ==================================
+                         INVOICE NO
+                    =================================== -->
+
+                    <div class="gl-journal-info-line">
+
+                        <span class="gl-journal-info-label">
+
+                            Inv No
+
+                        </span>
+
+                        <span class="gl-journal-info-separator">
+
+                            :
+
+                        </span>
+
+                        <span class="gl-journal-info-value">
+
+                            ${
+                                invoiceNo
+                                    ? `"${this.escapeHTML(
+                                        invoiceNo
+                                    )}"`
+                                    : "-"
+                            }
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- ==================================
+                         PO NO
+                    =================================== -->
+
+                    <div class="gl-journal-info-line">
+
+                        <span class="gl-journal-info-label">
+
+                            PO No
+
+                        </span>
+
+                        <span class="gl-journal-info-separator">
+
+                            :
+
+                        </span>
+
+                        <span class="gl-journal-info-value">
+
+                            ${
+                                poNo
+                                    ? `PO/ ${this.escapeHTML(
+                                        poNo
+                                    )}`
+                                    : "-"
+                            }
+
+                        </span>
+
+                    </div>
+
+
+                    <!-- ==================================
+                         DESCRIPTION
+                    =================================== -->
+
+                    <div class="gl-journal-info-line">
+
+                        <span class="gl-journal-info-label">
+
+                            Desc
+
+                        </span>
+
+                        <span class="gl-journal-info-separator">
+
+                            :
+
+                        </span>
+
+                        <span
+                            class="
+                                gl-journal-info-value
+                                gl-journal-description
+                            "
+                            title="${this.escapeHTML(
+                                description
+                            )}"
+                        >
+
+                            ${this.escapeHTML(
+                                description
+                            )}
+
+                        </span>
+
+                    </div>
+
+
+                </div>
 
             </td>
 
@@ -2174,50 +3136,86 @@ createTableRow(
                  SOURCE
             =========================================== -->
 
-            <td class="text-center">
+            <td class="gl-journal-source-cell">
 
-                ${this.renderSourceBadge(journal)}
-
-            </td>
-
-
-            <!-- ==========================================
-                 DESCRIPTION
-            =========================================== -->
-
-            <td class="finova-table-description">
-
-                ${journal.description ?? "-"}
-
-            </td>
-
-
-            <!-- ==========================================
-                 TOTAL DEBIT
-            =========================================== -->
-
-            <td class="finova-table-number">
-
-                ${this.formatCurrency(
-                    Number(
-                        journal.total_debit ?? 0
-                    )
+                ${this.renderSourceBadge(
+                    journal
                 )}
 
             </td>
 
 
             <!-- ==========================================
-                 TOTAL CREDIT
+                 AMOUNT
             =========================================== -->
 
-            <td class="finova-table-number">
+            <td class="gl-journal-amount-cell">
 
-                ${this.formatCurrency(
-                    Number(
-                        journal.total_credit ?? 0
-                    )
-                )}
+
+                <!-- DEBIT -->
+
+                <div class="gl-journal-summary-line">
+
+                    <span class="gl-journal-summary-label">
+
+                        Debits
+
+                    </span>
+
+                    <span class="gl-journal-summary-separator">
+
+                        :
+
+                    </span>
+
+                    <strong class="gl-journal-summary-value">
+
+                        ${this.formatCurrency(
+                            totalDebit
+                        )}
+
+                    </strong>
+
+                </div>
+
+
+                <!-- CREDIT -->
+
+                <div class="gl-journal-summary-line">
+
+                    <span class="gl-journal-summary-label">
+
+                        Credits
+
+                    </span>
+
+                    <span class="gl-journal-summary-separator">
+
+                        :
+
+                    </span>
+
+                    <strong class="gl-journal-summary-value">
+
+                        ${this.formatCurrency(
+                            totalCredit
+                        )}
+
+                    </strong>
+
+                </div>
+
+
+            </td>
+
+
+            <!-- ==========================================
+                 CREATED
+            =========================================== -->
+
+            <td class="gl-journal-created-cell">
+
+                ${createdAt}
 
             </td>
 
@@ -2226,7 +3224,7 @@ createTableRow(
                  STATUS
             =========================================== -->
 
-            <td class="finova-table-status">
+            <td class="gl-journal-status-cell">
 
                 ${this.renderStatusBadge(
                     journal.status
@@ -2239,17 +3237,27 @@ createTableRow(
                  ACTION
             =========================================== -->
 
-            <td class="finova-table-action">
+            <td class="gl-journal-action-cell">
 
-                <div class="dropdown gl-action-dropdown">
+                <div
+                    class="
+                        dropdown
+                        gl-action-dropdown
+                    "
+                >
 
                     <button
                         type="button"
-                        class="btn btn-sm btn-outline-secondary gl-action-trigger"
+                        class="
+                            btn
+                            btn-sm
+                            gl-action-trigger
+                        "
                         data-bs-toggle="dropdown"
                         data-bs-auto-close="outside"
                         aria-expanded="false"
-                        title="Actions">
+                        title="Actions"
+                    >
 
                         <i class="fa-solid fa-gear"></i>
 
@@ -2257,7 +3265,12 @@ createTableRow(
 
 
                     <div
-                        class="dropdown-menu dropdown-menu-end gl-action-menu">
+                        class="
+                            dropdown-menu
+                            dropdown-menu-end
+                            gl-action-menu
+                        "
+                    >
 
                         ${this.renderActionButtons(
                             journal
@@ -2269,9 +3282,177 @@ createTableRow(
 
             </td>
 
+
         </tr>
 
     `;
+
+}
+
+/*
+==========================================================
+FORMAT DISPLAY DATE
+==========================================================
+*/
+
+formatDisplayDate(
+    value
+) {
+
+    if (
+        !value
+    ) {
+
+        return "-";
+
+    }
+
+
+    const date =
+        new Date(
+            `${value}T00:00:00`
+        );
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return value;
+
+    }
+
+
+    return date.toLocaleDateString(
+        "en-GB",
+        {
+
+            day: "numeric",
+
+            month: "short",
+
+            year: "numeric"
+
+        }
+    );
+
+}
+
+
+/*
+==========================================================
+FORMAT CREATED DATE TIME
+==========================================================
+*/
+
+formatCreatedDateTime(
+    value
+) {
+
+    if (
+        !value
+    ) {
+
+        return "-";
+
+    }
+
+
+    const date =
+        new Date(
+            value
+        );
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return "-";
+
+    }
+
+
+    const datePart =
+        date.toLocaleDateString(
+            "sv-SE"
+        );
+
+
+    const timePart =
+        date.toLocaleTimeString(
+            "en-GB",
+            {
+
+                hour: "2-digit",
+
+                minute: "2-digit",
+
+                second: "2-digit",
+
+                hour12: false
+
+            }
+        );
+
+
+    return `
+
+        <div class="gl-created-date">
+
+            ${datePart}
+
+        </div>
+
+        <div class="gl-created-time">
+
+            ${timePart}
+
+        </div>
+
+    `;
+
+}
+
+
+/*
+==========================================================
+ESCAPE HTML
+==========================================================
+*/
+
+escapeHTML(
+    value
+) {
+
+    return String(
+        value
+        ?? ""
+    )
+    .replaceAll(
+        "&",
+        "&amp;"
+    )
+    .replaceAll(
+        "<",
+        "&lt;"
+    )
+    .replaceAll(
+        ">",
+        "&gt;"
+    )
+    .replaceAll(
+        '"',
+        "&quot;"
+    )
+    .replaceAll(
+        "'",
+        "&#039;"
+    );
 
 }
 /*
