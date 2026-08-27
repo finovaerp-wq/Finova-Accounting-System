@@ -3630,6 +3630,7 @@ renderStatusBadge(status) {
 ==========================================================
 RENDER ACTION BUTTONS
 FINAL
+VOID SAME AS DRAFT
 ==========================================================
 */
 
@@ -3837,6 +3838,7 @@ renderActionButtons(
     /*
     ======================================================
     VOID
+    SAME ACTION AS DRAFT
     ======================================================
     */
 
@@ -3845,6 +3847,38 @@ renderActionButtons(
     ) {
 
         return `
+
+            <button
+                type="button"
+                class="
+                    dropdown-item
+                    btn-edit-journal
+                "
+                data-id="${journal.id}"
+            >
+
+                <i class="fa-solid fa-pen"></i>
+
+                Edit
+
+            </button>
+
+
+            <button
+                type="button"
+                class="
+                    dropdown-item
+                    btn-post-journal
+                "
+                data-id="${journal.id}"
+            >
+
+                <i class="fa-solid fa-check"></i>
+
+                Post
+
+            </button>
+
 
             <button
                 type="button"
@@ -3862,6 +3896,9 @@ renderActionButtons(
             </button>
 
 
+            <div class="dropdown-divider"></div>
+
+
             <button
                 type="button"
                 class="
@@ -3874,6 +3911,22 @@ renderActionButtons(
                 <i class="fa-solid fa-copy"></i>
 
                 Duplicate
+
+            </button>
+
+
+            <button
+                type="button"
+                class="
+                    dropdown-item
+                    btn-delete-journal
+                "
+                data-id="${journal.id}"
+            >
+
+                <i class="fa-solid fa-trash"></i>
+
+                Delete
 
             </button>
 
@@ -4043,6 +4096,7 @@ initializeDetailAccountTomSelect() {
 /*
 ==========================================================
 GET JOURNAL DETAIL CATEGORY
+FINAL
 DPP / TAX (+) / TAX (-)
 ==========================================================
 */
@@ -4053,7 +4107,7 @@ getJournalDetailCategory(
 
     /*
     ======================================================
-    EXPLICIT SOURCE TYPE
+    EXPLICIT TYPE
     ======================================================
     */
 
@@ -4140,7 +4194,7 @@ getJournalDetailCategory(
 
     /*
     ======================================================
-    FALLBACK FROM DESCRIPTION
+    DESCRIPTION FALLBACK
     ======================================================
     */
 
@@ -4155,7 +4209,7 @@ getJournalDetailCategory(
 
     /*
     ======================================================
-    TAX MINUS
+    TAX MINUS FALLBACK
     ======================================================
     */
 
@@ -4174,7 +4228,7 @@ getJournalDetailCategory(
 
     /*
     ======================================================
-    TAX PLUS
+    TAX PLUS FALLBACK
     ======================================================
     */
 
@@ -4198,6 +4252,138 @@ getJournalDetailCategory(
     */
 
     return "DPP";
+
+}
+/*
+==========================================================
+GET JOURNAL DETAIL DESCRIPTION
+FINAL
+
+RULE:
+AP / AR
+- DPP     = Header Description
+- TAX (+) = Header Description
+- TAX (-) = Header Description
+
+GLJ MANUAL
+- Use Detail Description
+==========================================================
+*/
+
+getJournalDetailDescription(
+    detail
+) {
+
+    /*
+    ======================================================
+    SOURCE MODULE
+    ======================================================
+    */
+
+    const source =
+        String(
+            this.currentJournal?.source_module
+            ||
+            this.currentJournal?.source
+            ||
+            "GLJ"
+        )
+        .trim()
+        .toUpperCase();
+
+
+    /*
+    ======================================================
+    CHECK AP
+    ======================================================
+    */
+
+    const isAP =
+        source === "AP"
+        ||
+        source === "ACCOUNT PAYABLE"
+        ||
+        source === "PAYABLE";
+
+
+    /*
+    ======================================================
+    CHECK AR
+    ======================================================
+    */
+
+    const isAR =
+        source === "AR"
+        ||
+        source === "ACCOUNT RECEIVABLE"
+        ||
+        source === "RECEIVABLE";
+
+
+    /*
+    ======================================================
+    AP / AR GENERATED JOURNAL
+
+    ALL DETAIL DESCRIPTION FOLLOW HEADER DESCRIPTION.
+
+    DPP
+    TAX (+)
+    TAX (-)
+
+    Tax information is NOT appended to description.
+    ======================================================
+    */
+
+    if (
+        isAP
+        ||
+        isAR
+    ) {
+
+        const headerDescription =
+            String(
+                this.currentJournal?.source_description
+                ||
+                this.currentJournal?.header_description
+                ||
+                this.currentJournal?.description
+                ||
+                ""
+            )
+            .trim();
+
+
+        return (
+            headerDescription
+            ||
+            "-"
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    MANUAL GL JOURNAL
+
+    KEEP ORIGINAL DETAIL DESCRIPTION
+    ======================================================
+    */
+
+    const detailDescription =
+        String(
+            detail?.description
+            ||
+            ""
+        )
+        .trim();
+
+
+    return (
+        detailDescription
+        ||
+        "-"
+    );
 
 }
 /*
@@ -4338,7 +4524,16 @@ renderDetailTable() {
 ==========================================================
 CREATE DETAIL ROW
 FINAL
-DESCRIPTION + DPP / TAX (+) / TAX (-)
+
+ACCOUNT ROW FIRST
+DESCRIPTION BELOW
+
+DRAFT / VOID
+- EDIT
+- DELETE
+
+POSTED
+- READ ONLY
 ==========================================================
 */
 
@@ -4391,13 +4586,14 @@ createDetailRow(
 
     /*
     ======================================================
-    DESCRIPTION
+    FINAL DESCRIPTION
     ======================================================
     */
 
     const description =
-        detail.description
-        || "-";
+        this.getJournalDetailDescription(
+            detail
+        );
 
 
     /*
@@ -4494,13 +4690,18 @@ createDetailRow(
 
     /*
     ======================================================
-    ALLOW DETAIL EDIT
-    ONLY DRAFT
+    ALLOW EDIT
+
+    DRAFT = EDITABLE
+    VOID  = EDITABLE
+    POSTED = READ ONLY
     ======================================================
     */
 
     const allowEdit =
-        journalStatus === "draft";
+        journalStatus === "draft"
+        ||
+        journalStatus === "void";
 
 
     /*
@@ -4513,74 +4714,7 @@ createDetailRow(
 
 
         <!-- ==========================================
-             DESCRIPTION ROW
-        =========================================== -->
-
-        <tr
-            class="journal-detail-description-row"
-            data-index="${index}"
-        >
-
-            <td
-                colspan="6"
-                class="journal-detail-description-cell"
-            >
-
-                <div class="journal-detail-description-wrap">
-
-
-                    <!-- CATEGORY -->
-
-                    <span
-                        class="
-                            journal-detail-category
-                            ${categoryClass}
-                        "
-                    >
-
-                        ${category}
-
-                    </span>
-
-
-                    <!-- LABEL -->
-
-                    <span class="journal-detail-description-label">
-
-                        Description
-
-                    </span>
-
-
-                    <!-- SEPARATOR -->
-
-                    <span class="journal-detail-description-separator">
-
-                        :
-
-                    </span>
-
-
-                    <!-- VALUE -->
-
-                    <span class="journal-detail-description-value">
-
-                        ${this.escapeHTML(
-                            description
-                        )}
-
-                    </span>
-
-
-                </div>
-
-            </td>
-
-        </tr>
-
-
-        <!-- ==========================================
-             ACCOUNT ROW
+             ACCOUNT JOURNAL ROW
         =========================================== -->
 
         <tr
@@ -4658,6 +4792,8 @@ createDetailRow(
                                 "
                             >
 
+                                <!-- EDIT -->
+
                                 <button
                                     type="button"
                                     class="
@@ -4673,6 +4809,8 @@ createDetailRow(
 
                                 </button>
 
+
+                                <!-- DELETE -->
 
                                 <button
                                     type="button"
@@ -4709,6 +4847,73 @@ createDetailRow(
 
             </td>
 
+
+        </tr>
+
+
+        <!-- ==========================================
+             DESCRIPTION BELOW ACCOUNT
+        =========================================== -->
+
+        <tr
+            class="journal-detail-description-row"
+            data-index="${index}"
+        >
+
+            <td
+                colspan="6"
+                class="journal-detail-description-cell"
+            >
+
+                <div class="journal-detail-description-wrap">
+
+
+                    <!-- CATEGORY -->
+
+                    <span
+                        class="
+                            journal-detail-category
+                            ${categoryClass}
+                        "
+                    >
+
+                        ${category}
+
+                    </span>
+
+
+                    <!-- LABEL -->
+
+                    <span class="journal-detail-description-label">
+
+                        Description
+
+                    </span>
+
+
+                    <!-- SEPARATOR -->
+
+                    <span class="journal-detail-description-separator">
+
+                        :
+
+                    </span>
+
+
+                    <!-- DESCRIPTION -->
+
+                    <span class="journal-detail-description-value">
+
+                        ${this.escapeHTML(
+                            description
+                        )}
+
+                    </span>
+
+
+                </div>
+
+            </td>
 
         </tr>
 
