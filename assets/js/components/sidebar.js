@@ -319,6 +319,104 @@ menuGroup(title, icon, children) {
     `;
 
 }
+/*
+==========================================================
+SET ACTIVE MENU
+==========================================================
+*/
+
+setActiveMenu(module) {
+
+    const sidebar =
+        document.querySelector(
+            ".finova-sidebar"
+        );
+
+    if (!sidebar) {
+        return;
+    }
+
+
+    /*
+    ======================================================
+    REMOVE ALL ACTIVE MENU
+    ======================================================
+    */
+
+    sidebar
+        .querySelectorAll(
+            ".finova-menu-item, .finova-submenu-item"
+        )
+        .forEach(item => {
+
+            item.classList.remove(
+                "active"
+            );
+
+        });
+
+
+    /*
+    ======================================================
+    FIND CURRENT MENU
+    ======================================================
+    */
+
+    const activeMenu =
+        sidebar.querySelector(
+            `[data-module="${module}"]`
+        );
+
+    if (!activeMenu) {
+        return;
+    }
+
+
+    /*
+    ======================================================
+    SET ACTIVE MENU
+    ======================================================
+    */
+
+    activeMenu.classList.add(
+        "active"
+    );
+
+
+    /*
+    ======================================================
+    OPEN PARENT GROUP
+    ======================================================
+    */
+
+    const parentGroup =
+        activeMenu.closest(
+            ".finova-menu-group"
+        );
+
+    if (parentGroup) {
+
+        parentGroup.classList.add(
+            "open"
+        );
+
+        const submenu =
+            parentGroup.querySelector(
+                ".finova-submenu"
+            );
+
+        if (submenu) {
+
+            submenu.classList.add(
+                "open"
+            );
+
+        }
+
+    }
+
+}
+
 
     bindEvents() {
 
@@ -422,40 +520,9 @@ ACTIVE MENU
 ==========================================
 */
 
-sidebar
-    .querySelectorAll(
-        ".finova-menu-item, .finova-submenu-item"
-    )
-    .forEach(item => {
-
-        item.classList.remove("active");
-
-    });
-
-sidebar
-    .querySelectorAll(".finova-menu-group")
-    .forEach(group => {
-
-        group.classList.remove("active");
-
-    });
-
-menu.classList.add("active");
-
-/*
-==========================================
-ACTIVE PARENT
-==========================================
-*/
-
-const parentGroup =
-    menu.closest(".finova-menu-group");
-
-if (parentGroup) {
-
-    parentGroup.classList.add("open");
-
-}
+this.setActiveMenu(
+    module
+);
 
         /*
         ==========================================

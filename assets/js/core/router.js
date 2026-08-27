@@ -414,29 +414,125 @@ async loadModule(route) {
 
     }
 
-    setActiveMenu(moduleName) {
+    /*
+==========================================================
+SET ACTIVE MENU
+==========================================================
+*/
 
-        document
-            .querySelectorAll(".finova-menu-item")
-            .forEach(menu => {
+setActiveMenu(moduleName) {
 
-                menu.classList.remove("active");
+    /*
+    ======================================================
+    USE SIDEBAR COMPONENT
+    AS SINGLE SOURCE OF TRUTH
+    ======================================================
+    */
 
-            });
+    if (
+        window.finovaSidebar
+        &&
+        typeof window.finovaSidebar.setActiveMenu
+            === "function"
+    ) {
 
-        const active = document.querySelector(
-
-            `[data-module="${moduleName}"]`
-
+        window.finovaSidebar.setActiveMenu(
+            moduleName
         );
 
-        if (active) {
+        return;
 
-            active.classList.add("active");
+    }
+
+
+    /*
+    ======================================================
+    FALLBACK
+    REMOVE ALL ACTIVE MENU
+    ======================================================
+    */
+
+    document
+        .querySelectorAll(
+            ".finova-menu-item, .finova-submenu-item"
+        )
+        .forEach(
+            menu => {
+
+                menu.classList.remove(
+                    "active"
+                );
+
+            }
+        );
+
+
+    /*
+    ======================================================
+    FIND CURRENT MENU
+    ======================================================
+    */
+
+    const active =
+        document.querySelector(
+            `[data-module="${moduleName}"]`
+        );
+
+
+    if (!active) {
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    SET ACTIVE
+    ======================================================
+    */
+
+    active.classList.add(
+        "active"
+    );
+
+
+    /*
+    ======================================================
+    OPEN PARENT GROUP
+    ======================================================
+    */
+
+    const parentGroup =
+        active.closest(
+            ".finova-menu-group"
+        );
+
+
+    if (parentGroup) {
+
+        parentGroup.classList.add(
+            "open"
+        );
+
+
+        const submenu =
+            parentGroup.querySelector(
+                ".finova-submenu"
+            );
+
+
+        if (submenu) {
+
+            submenu.classList.add(
+                "open"
+            );
 
         }
 
     }
+
+}
 
     show404() {
 
