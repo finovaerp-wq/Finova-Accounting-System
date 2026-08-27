@@ -2708,9 +2708,397 @@ renderTable() {
 }
 /*
 ==========================================================
+GET JOURNAL SOURCE INFO
+FINAL
+==========================================================
+*/
+
+getJournalSourceInfo(
+    journal
+) {
+
+    /*
+    ======================================================
+    SOURCE MODULE
+    ======================================================
+    */
+
+    let sourceModule =
+        String(
+            journal?.source_module
+            ||
+            journal?.source
+            ||
+            "GLJ"
+        )
+        .trim()
+        .toUpperCase();
+
+
+    /*
+    ======================================================
+    NORMALIZE SOURCE MODULE
+    ======================================================
+    */
+
+    if (
+        sourceModule === "GENERAL"
+        ||
+        sourceModule === "GL"
+        ||
+        sourceModule === "GENERAL JOURNAL"
+    ) {
+
+        sourceModule =
+            "GLJ";
+
+    }
+
+
+    if (
+        sourceModule === "ACCOUNT PAYABLE"
+        ||
+        sourceModule === "PAYABLE"
+    ) {
+
+        sourceModule =
+            "AP";
+
+    }
+
+
+    if (
+        sourceModule === "ACCOUNT RECEIVABLE"
+        ||
+        sourceModule === "RECEIVABLE"
+    ) {
+
+        sourceModule =
+            "AR";
+
+    }
+
+
+    /*
+    ======================================================
+    SOURCE DOCUMENT TYPE
+    ======================================================
+    */
+
+    const sourceDocumentType =
+        String(
+            journal?.source_document_type
+            ||
+            ""
+        )
+        .trim()
+        .toUpperCase();
+
+
+    /*
+    ======================================================
+    AP INVOICE
+    ======================================================
+    */
+
+    if (
+        sourceModule === "AP"
+        &&
+        sourceDocumentType === "AP_INVOICE"
+    ) {
+
+        return {
+
+            module:
+                "AP",
+
+            documentType:
+                "AP_INVOICE",
+
+            code:
+                "AP",
+
+            label:
+                "AP Invoice",
+
+            category:
+                "invoice",
+
+            badgeClass:
+                "gl-source-ap-invoice"
+
+        };
+
+    }
+
+
+    /*
+    ======================================================
+    AP PAYMENT
+    ======================================================
+    */
+
+    if (
+        sourceModule === "AP"
+        &&
+        sourceDocumentType === "AP_PAYMENT"
+    ) {
+
+        return {
+
+            module:
+                "AP",
+
+            documentType:
+                "AP_PAYMENT",
+
+            code:
+                "AP",
+
+            label:
+                "AP Payment",
+
+            category:
+                "payment",
+
+            badgeClass:
+                "gl-source-ap-payment"
+
+        };
+
+    }
+
+
+    /*
+    ======================================================
+    AR INVOICE
+    ======================================================
+    */
+
+    if (
+        sourceModule === "AR"
+        &&
+        sourceDocumentType === "AR_INVOICE"
+    ) {
+
+        return {
+
+            module:
+                "AR",
+
+            documentType:
+                "AR_INVOICE",
+
+            code:
+                "AR",
+
+            label:
+                "AR Invoice",
+
+            category:
+                "invoice",
+
+            badgeClass:
+                "gl-source-ar-invoice"
+
+        };
+
+    }
+
+
+    /*
+    ======================================================
+    AR PAYMENT
+    ======================================================
+    */
+
+    if (
+        sourceModule === "AR"
+        &&
+        sourceDocumentType === "AR_PAYMENT"
+    ) {
+
+        return {
+
+            module:
+                "AR",
+
+            documentType:
+                "AR_PAYMENT",
+
+            code:
+                "AR",
+
+            label:
+                "AR Payment",
+
+            category:
+                "payment",
+
+            badgeClass:
+                "gl-source-ar-payment"
+
+        };
+
+    }
+
+
+    /*
+    ======================================================
+    GENERAL JOURNAL
+    ======================================================
+    */
+
+    if (
+        sourceModule === "GLJ"
+    ) {
+
+        return {
+
+            module:
+                "GLJ",
+
+            documentType:
+                sourceDocumentType
+                ||
+                "MANUAL_JOURNAL",
+
+            code:
+                "GLJ",
+
+            label:
+                "GL Journal",
+
+            category:
+                "manual",
+
+            badgeClass:
+                "gl-source-glj"
+
+        };
+
+    }
+
+
+    /*
+    ======================================================
+    AP FALLBACK
+    ======================================================
+    */
+
+    if (
+        sourceModule === "AP"
+    ) {
+
+        return {
+
+            module:
+                "AP",
+
+            documentType:
+                sourceDocumentType,
+
+            code:
+                "AP",
+
+            label:
+                "AP",
+
+            category:
+                "other",
+
+            badgeClass:
+                "gl-source-ap-invoice"
+
+        };
+
+    }
+
+
+    /*
+    ======================================================
+    AR FALLBACK
+    ======================================================
+    */
+
+    if (
+        sourceModule === "AR"
+    ) {
+
+        return {
+
+            module:
+                "AR",
+
+            documentType:
+                sourceDocumentType,
+
+            code:
+                "AR",
+
+            label:
+                "AR",
+
+            category:
+                "other",
+
+            badgeClass:
+                "gl-source-ar-invoice"
+
+        };
+
+    }
+
+
+    /*
+    ======================================================
+    DEFAULT
+    ======================================================
+    */
+
+    return {
+
+        module:
+            sourceModule
+            ||
+            "GLJ",
+
+        documentType:
+            sourceDocumentType,
+
+        code:
+            sourceModule
+            ||
+            "GLJ",
+
+        label:
+            sourceModule
+            ||
+            "GL Journal",
+
+        category:
+            "other",
+
+        badgeClass:
+            "gl-source-glj"
+
+    };
+
+}
+
+/*
+==========================================================
 CREATE TABLE ROW
 FINAL
+
 ITEMS = JOURNAL DETAIL TOTAL LINE
+
+SOURCE:
+- AP Invoice
+- AP Payment
+- AR Invoice
+- AR Payment
+- GL Journal
 ==========================================================
 */
 
@@ -2727,7 +3115,7 @@ createTableRow(
 
     const journalDate =
         this.formatDisplayDate(
-            journal.journal_date
+            journal?.journal_date
         );
 
 
@@ -2738,76 +3126,21 @@ createTableRow(
     */
 
     const journalNo =
-        journal.journal_no
-        || "-";
+        journal?.journal_no
+        ||
+        "-";
 
 
     /*
     ======================================================
-    SOURCE
+    SOURCE INFO
     ======================================================
     */
 
-    let source =
-        String(
-            journal.source_module
-            || "GLJ"
-        )
-        .trim()
-        .toUpperCase();
-
-
-    /*
-    ======================================================
-    NORMALIZE GL
-    ======================================================
-    */
-
-    if (
-        source === "GENERAL"
-        ||
-        source === "GL"
-        ||
-        source === "GENERAL JOURNAL"
-    ) {
-
-        source = "GLJ";
-
-    }
-
-
-    /*
-    ======================================================
-    NORMALIZE AP
-    ======================================================
-    */
-
-    if (
-        source === "ACCOUNT PAYABLE"
-        ||
-        source === "PAYABLE"
-    ) {
-
-        source = "AP";
-
-    }
-
-
-    /*
-    ======================================================
-    NORMALIZE AR
-    ======================================================
-    */
-
-    if (
-        source === "ACCOUNT RECEIVABLE"
-        ||
-        source === "RECEIVABLE"
-    ) {
-
-        source = "AR";
-
-    }
+    const sourceInfo =
+        this.getJournalSourceInfo(
+            journal
+        );
 
 
     /*
@@ -2817,8 +3150,9 @@ createTableRow(
     */
 
     const invoiceNo =
-        journal.source_invoice_no
-        || "";
+        journal?.source_invoice_no
+        ||
+        "";
 
 
     /*
@@ -2829,8 +3163,9 @@ createTableRow(
 
     const rawPoNo =
         String(
-            journal.source_po_no
-            || ""
+            journal?.source_po_no
+            ||
+            ""
         )
         .trim();
 
@@ -2851,21 +3186,24 @@ createTableRow(
     */
 
     const description =
-        journal.description
-        || "-";
+        journal?.description
+        ||
+        "-";
 
 
     /*
-==========================================================
-ITEMS / TOTAL LINE
-==========================================================
-*/
+    ======================================================
+    ITEMS / TOTAL LINE
+    ======================================================
+    */
 
-const totalLine =
-    Number(
-        journal.total_line
-        || 0
-    );
+    const totalLine =
+        Number(
+            journal?.total_line
+            ||
+            0
+        );
+
 
     /*
     ======================================================
@@ -2875,8 +3213,9 @@ const totalLine =
 
     const totalDebit =
         Number(
-            journal.total_debit
-            || 0
+            journal?.total_debit
+            ||
+            0
         );
 
 
@@ -2888,8 +3227,9 @@ const totalLine =
 
     const totalCredit =
         Number(
-            journal.total_credit
-            || 0
+            journal?.total_credit
+            ||
+            0
         );
 
 
@@ -2901,24 +3241,8 @@ const totalLine =
 
     const createdAt =
         this.formatCreatedDateTime(
-            journal.created_at
+            journal?.created_at
         );
-
-
-    /*
-    ======================================================
-    NORMALIZED SOURCE JOURNAL
-    ======================================================
-    */
-
-    const sourceJournal = {
-
-        ...journal,
-
-        source_module:
-            source
-
-    };
 
 
     /*
@@ -3042,9 +3366,11 @@ const totalLine =
                             "
                         >
 
-                            ${this.escapeHTML(
-                                journalNo
-                            )}
+                            ${
+                                this.escapeHTML(
+                                    journalNo
+                                )
+                            }
 
                         </strong>
 
@@ -3146,14 +3472,18 @@ const totalLine =
                                 gl-journal-info-value
                                 gl-journal-description
                             "
-                            title="${this.escapeHTML(
-                                description
-                            )}"
+                            title="${
+                                this.escapeHTML(
+                                    description
+                                )
+                            }"
                         >
 
-                            ${this.escapeHTML(
-                                description
-                            )}
+                            ${
+                                this.escapeHTML(
+                                    description
+                                )
+                            }
 
                         </span>
 
@@ -3171,9 +3501,29 @@ const totalLine =
 
             <td class="gl-journal-source-cell">
 
-                ${this.renderSourceBadge(
-                    sourceJournal
-                )}
+                <div class="gl-journal-source-wrapper">
+
+                    <span
+                        class="
+                            gl-journal-source-badge
+                            ${sourceInfo.badgeClass}
+                        "
+                        title="${
+                            this.escapeHTML(
+                                sourceInfo.label
+                            )
+                        }"
+                    >
+
+                        ${
+                            this.escapeHTML(
+                                sourceInfo.label
+                            )
+                        }
+
+                    </span>
+
+                </div>
 
             </td>
 
@@ -3205,9 +3555,11 @@ const totalLine =
 
                     <strong class="gl-journal-summary-value">
 
-                        ${this.formatCurrency(
-                            totalDebit
-                        )}
+                        ${
+                            this.formatCurrency(
+                                totalDebit
+                            )
+                        }
 
                     </strong>
 
@@ -3234,9 +3586,11 @@ const totalLine =
 
                     <strong class="gl-journal-summary-value">
 
-                        ${this.formatCurrency(
-                            totalCredit
-                        )}
+                        ${
+                            this.formatCurrency(
+                                totalCredit
+                            )
+                        }
 
                     </strong>
 
@@ -3263,9 +3617,11 @@ const totalLine =
 
             <td class="gl-journal-status-cell">
 
-                ${this.renderStatusBadge(
-                    journal.status
-                )}
+                ${
+                    this.renderStatusBadge(
+                        journal?.status
+                    )
+                }
 
             </td>
 
@@ -3309,9 +3665,11 @@ const totalLine =
                         "
                     >
 
-                        ${this.renderActionButtons(
-                            journal
-                        )}
+                        ${
+                            this.renderActionButtons(
+                                journal
+                            )
+                        }
 
                     </div>
 
@@ -10020,6 +10378,7 @@ setJournalReadOnly(
         );
 
 }
+
 /*
 ==========================================================
 PREVIEW HTML

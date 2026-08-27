@@ -1016,11 +1016,6 @@ td {
 }
 
 
-/* SOURCE */
-
-#gl-journal-table .gl-col-source {
-    width: 72px;
-}
 
 
 /* AMOUNT */
@@ -1428,29 +1423,6 @@ td {
 }
 
 
-/* ==========================================================
-   SOURCE COLUMN
-========================================================== */
-
-#gl-journal-table
-.gl-journal-source-cell {
-
-    width: 72px;
-
-    min-width: 72px;
-
-    max-width: 72px;
-
-    padding-left: 3px !important;
-
-    padding-right: 3px !important;
-
-    text-align: center;
-
-    vertical-align: middle;
-
-    white-space: nowrap;
-}
 
 
 /* ==========================================================
@@ -3969,5 +3941,501 @@ i {
 
     box-shadow:
         0 2px 5px rgba(13, 110, 253, .18);
+
+}
+/*
+==========================================================
+GL JOURNAL SOURCE
+==========================================================
+*/
+
+.gl-journal-source-cell {
+
+    text-align: center !important;
+
+    vertical-align: middle !important;
+
+}
+
+
+.gl-journal-source-wrapper {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: 100%;
+
+}
+
+
+.gl-journal-source-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-width: 82px;
+
+    height: 26px;
+
+    padding: 0 10px;
+
+    border-radius: 999px;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    line-height: 1;
+
+    white-space: nowrap;
+
+}
+
+
+/*
+==========================================================
+AP INVOICE
+==========================================================
+*/
+
+.gl-source-ap-invoice {
+
+    background: #FFF3CD;
+
+    color: #856404;
+
+}
+
+
+/*
+==========================================================
+AP PAYMENT
+==========================================================
+*/
+
+.gl-source-ap-payment {
+
+    background: #FDE2E2;
+
+    color: #B42318;
+
+}
+
+
+/*
+==========================================================
+AR INVOICE
+==========================================================
+*/
+
+.gl-source-ar-invoice {
+
+    background: #D1FAE5;
+
+    color: #047857;
+
+}
+
+
+/*
+==========================================================
+AR PAYMENT
+==========================================================
+*/
+
+.gl-source-ar-payment {
+
+    background: #DBEAFE;
+
+    color: #1D4ED8;
+
+}
+
+
+/*
+==========================================================
+GENERAL JOURNAL
+==========================================================
+*/
+
+.gl-source-glj {
+
+    background: #E8F1FF;
+
+    color: #0D6EFD;
+
+}
+/* ==========================================================
+   GL JOURNAL
+   SOURCE COLUMN
+========================================================== */
+
+/* HEADER + BODY SOURCE */
+
+.gl-journal-table th.gl-journal-source-cell,
+.gl-journal-table td.gl-journal-source-cell,
+.gl-journal-source-cell {
+
+    width: 135px !important;
+
+    min-width: 135px !important;
+
+    max-width: 135px !important;
+
+    padding-left: 12px !important;
+
+    padding-right: 12px !important;
+
+    text-align: center !important;
+
+    vertical-align: middle !important;
+
+}
+
+
+/* ==========================================================
+   SOURCE WRAPPER
+========================================================== */
+
+.gl-journal-source-wrapper {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: 100%;
+
+}
+
+
+/* ==========================================================
+   SOURCE BADGE
+========================================================== */
+
+.gl-journal-source-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-width: 100px;
+
+    height: 26px;
+
+    padding: 0 12px;
+
+    border-radius: 999px;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    line-height: 1;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   AP INVOICE
+========================================================== */
+
+.gl-source-ap-invoice {
+
+    background: #FFF3CD;
+
+    color: #856404;
+
+}
+
+
+/* ==========================================================
+   AP PAYMENT
+========================================================== */
+
+.gl-source-ap-payment {
+
+    background: #FCE7F3;
+
+    color: #BE185D;
+
+}
+
+
+/* ==========================================================
+   AR INVOICE
+========================================================== */
+
+.gl-source-ar-invoice {
+
+    background: #D1FAE5;
+
+    color: #047857;
+
+}
+
+
+/* ==========================================================
+   AR PAYMENT
+========================================================== */
+
+.gl-source-ar-payment {
+
+    background: #DBEAFE;
+
+    color: #1D4ED8;
+
+}
+
+
+/* ==========================================================
+   GL JOURNAL
+========================================================== */
+
+.gl-source-glj {
+
+    background: #E8F1FF;
+
+    color: #0D6EFD;
+
+}
+
+
+/* ==========================================================
+   AP INVOICE
+========================================================== */
+
+.gl-source-ap-invoice {
+
+    background: #FFF3CD;
+
+    color: #856404;
+
+}
+
+
+/* ==========================================================
+   AP PAYMENT
+========================================================== */
+
+.gl-source-ap-payment {
+
+    background: #FCE7F3;
+
+    color: #BE185D;
+
+}
+
+
+/* ==========================================================
+   AR INVOICE
+========================================================== */
+
+.gl-source-ar-invoice {
+
+    background: #D1FAE5;
+
+    color: #047857;
+
+}
+
+
+/* ==========================================================
+   AR PAYMENT
+========================================================== */
+
+.gl-source-ar-payment {
+
+    background: #DBEAFE;
+
+    color: #1D4ED8;
+
+}
+
+
+/* ==========================================================
+   GL JOURNAL
+========================================================== */
+
+.gl-source-glj {
+
+    background: #E8F1FF;
+
+    color: #0D6EFD;
+
+}
+/* ==========================================================
+   GL JOURNAL
+   SOURCE COLUMN FINAL
+========================================================== */
+
+/*
+IMPORTANT:
+COLUMN WIDTH IS CONTROLLED BY COLGROUP
+*/
+
+#gl-journal-table
+.gl-col-source {
+
+    width: 145px !important;
+
+    min-width: 145px !important;
+
+}
+
+
+/* ==========================================================
+   SOURCE HEADER + BODY
+========================================================== */
+
+#gl-journal-table
+.gl-journal-source-cell {
+
+    width: 145px !important;
+
+    min-width: 145px !important;
+
+    max-width: 145px !important;
+
+    padding-left: 10px !important;
+
+    padding-right: 10px !important;
+
+    text-align: center !important;
+
+    vertical-align: middle !important;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   SOURCE WRAPPER
+========================================================== */
+
+#gl-journal-table
+.gl-journal-source-wrapper {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: 100%;
+
+}
+
+
+/* ==========================================================
+   SOURCE BADGE
+========================================================== */
+
+#gl-journal-table
+.gl-journal-source-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-width: 105px;
+
+    height: 26px;
+
+    padding: 0 12px;
+
+    border-radius: 999px;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    line-height: 1;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   AP INVOICE
+========================================================== */
+
+#gl-journal-table
+.gl-source-ap-invoice {
+
+    background: #FFF3CD;
+
+    color: #856404;
+
+}
+
+
+/* ==========================================================
+   AP PAYMENT
+========================================================== */
+
+#gl-journal-table
+.gl-source-ap-payment {
+
+    background: #FCE7F3;
+
+    color: #BE185D;
+
+}
+
+
+/* ==========================================================
+   AR INVOICE
+========================================================== */
+
+#gl-journal-table
+.gl-source-ar-invoice {
+
+    background: #D1FAE5;
+
+    color: #047857;
+
+}
+
+
+/* ==========================================================
+   AR PAYMENT
+========================================================== */
+
+#gl-journal-table
+.gl-source-ar-payment {
+
+    background: #DBEAFE;
+
+    color: #1D4ED8;
+
+}
+
+
+/* ==========================================================
+   GL JOURNAL
+========================================================== */
+
+#gl-journal-table
+.gl-source-glj {
+
+    background: #E8F1FF;
+
+    color: #0D6EFD;
 
 }
