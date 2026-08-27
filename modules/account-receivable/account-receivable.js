@@ -5650,30 +5650,15 @@ renderTable() {
 /*
 ======================================================
 RENDER PAGINATION
+SAME AS ACCOUNT PAYABLE
 ======================================================
 */
 
 renderPagination() {
 
-    /*
-    ==================================================
-    DATA
-    ==================================================
-    */
-
     const totalRecords =
-        Array.isArray(
-            this.filteredData
-        )
-            ? this.filteredData.length
-            : 0;
+        this.filteredData.length;
 
-
-    /*
-    ==================================================
-    TOTAL PAGES
-    ==================================================
-    */
 
     const totalPages =
         this.getTotalPages();
@@ -5689,11 +5674,7 @@ renderPagination() {
         Math.max(
             1,
             Math.min(
-                Number(
-                    this.currentPage
-                )
-                ||
-                1,
+                this.currentPage,
                 totalPages
             )
         );
@@ -5701,7 +5682,7 @@ renderPagination() {
 
     /*
     ==================================================
-    CURRENT PAGE INPUT
+    CURRENT PAGE
     ==================================================
     */
 
@@ -5741,60 +5722,6 @@ renderPagination() {
 
     /*
     ==================================================
-    BUTTON STATE
-    ==================================================
-    */
-
-    const isFirstPage =
-        this.currentPage <= 1;
-
-
-    const isLastPage =
-        this.currentPage >= totalPages;
-
-
-    if (
-        this.btnFirstPage
-    ) {
-
-        this.btnFirstPage.disabled =
-            isFirstPage;
-
-    }
-
-
-    if (
-        this.btnPrevPage
-    ) {
-
-        this.btnPrevPage.disabled =
-            isFirstPage;
-
-    }
-
-
-    if (
-        this.btnNextPage
-    ) {
-
-        this.btnNextPage.disabled =
-            isLastPage;
-
-    }
-
-
-    if (
-        this.btnLastPage
-    ) {
-
-        this.btnLastPage.disabled =
-            isLastPage;
-
-    }
-
-
-    /*
-    ==================================================
     RECORD INFO
     ==================================================
     */
@@ -5804,7 +5731,7 @@ renderPagination() {
     ) {
 
         if (
-            totalRecords === 0
+            !totalRecords
         ) {
 
             this.recordInfo.textContent =
@@ -5814,39 +5741,93 @@ renderPagination() {
 
         else {
 
-            const pageSize =
-                Number(
-                    this.pageSize
-                )
-                ||
-                20;
-
-
-            const startRecord =
+            const start =
                 (
-                    this.currentPage
-                    -
-                    1
+                    this.currentPage - 1
                 )
                 *
-                pageSize
+                this.pageSize
                 +
                 1;
 
 
-            const endRecord =
+            const end =
                 Math.min(
                     this.currentPage
                     *
-                    pageSize,
+                    this.pageSize,
                     totalRecords
                 );
 
 
             this.recordInfo.textContent =
-                `Displaying Record ${startRecord} - ${endRecord} of ${totalRecords}`;
+                `Displaying Record ${start} - ${end} of ${totalRecords}`;
 
         }
+
+    }
+
+
+    /*
+    ==================================================
+    FIRST
+    ==================================================
+    */
+
+    if (
+        this.btnFirstPage
+    ) {
+
+        this.btnFirstPage.disabled =
+            this.currentPage <= 1;
+
+    }
+
+
+    /*
+    ==================================================
+    PREVIOUS
+    ==================================================
+    */
+
+    if (
+        this.btnPrevPage
+    ) {
+
+        this.btnPrevPage.disabled =
+            this.currentPage <= 1;
+
+    }
+
+
+    /*
+    ==================================================
+    NEXT
+    ==================================================
+    */
+
+    if (
+        this.btnNextPage
+    ) {
+
+        this.btnNextPage.disabled =
+            this.currentPage >= totalPages;
+
+    }
+
+
+    /*
+    ==================================================
+    LAST
+    ==================================================
+    */
+
+    if (
+        this.btnLastPage
+    ) {
+
+        this.btnLastPage.disabled =
+            this.currentPage >= totalPages;
 
     }
 

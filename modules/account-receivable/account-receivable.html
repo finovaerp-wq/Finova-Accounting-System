@@ -440,134 +440,141 @@ VERSION : 2.0.0
                 </div>
 
 
-                <!-- ==========================================
-                     PAGINATION
-                =========================================== -->
+                <!-- ==================================================
+     GLOBAL PAGINATION
+=================================================== -->
 
-                <div class="finova-pagination-wrapper">
+<div class="finova-pagination-wrapper">
 
-
-                    <!-- ======================================
-                         LEFT
-                    ======================================= -->
-
-                    <div class="finova-pagination-left">
+    <div class="finova-pagination-left">
 
 
-                        <span class="finova-pagination-label">
+        <!-- ==============================
+             FIRST
+        =============================== -->
 
-                            Total Record:
+        <button
+            type="button"
+            id="ar-page-first"
+            class="finova-pagination-btn"
+            title="First Page"
+            disabled>
 
-                        </span>
+            <i class="fa-solid fa-angles-left"></i>
 
-
-                        <span
-                            id="ar-record-info"
-                            class="finova-pagination-total">
-
-                            0
-
-                        </span>
-
-
-                    </div>
+        </button>
 
 
-                    <!-- ======================================
-                         RIGHT
-                    ======================================= -->
+        <!-- ==============================
+             PREVIOUS
+        =============================== -->
 
-                    <div class="finova-pagination-right">
+        <button
+            type="button"
+            id="ar-page-prev"
+            class="finova-pagination-btn"
+            title="Previous Page"
+            disabled>
 
+            <i class="fa-solid fa-angle-left"></i>
 
-                        <!-- FIRST -->
-
-                        <button
-                            type="button"
-                            id="ar-page-first"
-                            class="btn btn-sm btn-outline-secondary"
-                            title="First Page">
-
-                            <i class="fa-solid fa-angles-left"></i>
-
-                        </button>
+        </button>
 
 
-                        <!-- PREVIOUS -->
+        <!-- ==============================
+             PAGE LABEL
+        =============================== -->
 
-                        <button
-                            type="button"
-                            id="ar-page-prev"
-                            class="btn btn-sm btn-outline-secondary"
-                            title="Previous Page">
-
-                            <i class="fa-solid fa-angle-left"></i>
-
-                        </button>
+        <span class="finova-pagination-label">
+            Page
+        </span>
 
 
-                        <!-- CURRENT PAGE -->
+        <!-- ==============================
+             CURRENT PAGE
+        =============================== -->
 
-                        <input
-                            type="number"
-                            id="ar-current-page"
-                            class="form-control form-control-sm finova-pagination-input"
-                            min="1"
-                            value="1">
-
-
-                        <!-- TOTAL PAGE -->
-
-                        <span class="finova-pagination-page-text">
-
-                            /
-
-                            <span id="ar-total-pages">
-
-                                1
-
-                            </span>
-
-                        </span>
+        <input
+            type="number"
+            id="ar-current-page"
+            class="finova-pagination-input"
+            value="1"
+            min="1"
+            step="1"
+            autocomplete="off"
+            title="Enter page number">
 
 
-                        <!-- NEXT -->
+        <!-- ==============================
+             OF
+        =============================== -->
 
-                        <button
-                            type="button"
-                            id="ar-page-next"
-                            class="btn btn-sm btn-outline-secondary"
-                            title="Next Page">
-
-                            <i class="fa-solid fa-angle-right"></i>
-
-                        </button>
+        <span class="finova-pagination-label">
+            of
+        </span>
 
 
-                        <!-- LAST -->
+        <!-- ==============================
+             TOTAL PAGE
+        =============================== -->
 
-                        <button
-                            type="button"
-                            id="ar-page-last"
-                            class="btn btn-sm btn-outline-secondary"
-                            title="Last Page">
+        <span
+            id="ar-total-pages"
+            class="finova-pagination-total">
 
-                            <i class="fa-solid fa-angles-right"></i>
+            1
 
-                        </button>
-
-
-                    </div>
+        </span>
 
 
-                </div>
+        <!-- ==============================
+             NEXT
+        =============================== -->
+
+        <button
+            type="button"
+            id="ar-page-next"
+            class="finova-pagination-btn"
+            title="Next Page"
+            disabled>
+
+            <i class="fa-solid fa-angle-right"></i>
+
+        </button>
 
 
-            </div>
+        <!-- ==============================
+             LAST
+        =============================== -->
 
-        </div>
+        <button
+            type="button"
+            id="ar-page-last"
+            class="finova-pagination-btn"
+            title="Last Page"
+            disabled>
+
+            <i class="fa-solid fa-angles-right"></i>
+
+        </button>
+
 
     </div>
+
+
+    <!-- ==================================
+         RECORD INFO
+    =================================== -->
+
+    <div
+        id="ar-record-info"
+        class="finova-pagination-info">
+
+        Displaying Record 0 - 0 of 0
+
+    </div>
+
+</div>
 
 
     <!-- ==================================================
