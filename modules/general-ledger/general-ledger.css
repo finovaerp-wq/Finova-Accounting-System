@@ -1,0 +1,637 @@
+/*
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+MODULE : GENERAL LEDGER
+Version : 1.0 Enterprise
+
+VISUAL STANDARD
+- Account Payable
+- Aging Payable
+- General Journal
+==========================================================
+*/
+
+
+/* ==========================================================
+   PAGE
+========================================================== */
+
+.general-ledger-page {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    width: 100%;
+
+}
+
+
+/* ==========================================================
+   PAGE HEADER
+========================================================== */
+
+.general-ledger-page
+> .finova-page-header {
+
+    width: 100%;
+
+    margin-bottom: 8px !important;
+
+    flex: 0 0 auto;
+
+    box-sizing: border-box;
+
+}
+
+
+.general-ledger-page
+> .finova-page-header
+.finova-page-header-right {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+    gap: 8px;
+
+}
+
+
+.general-ledger-page
+> .finova-page-header
+.finova-page-header-right
+.btn {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    height: 38px;
+
+    min-height: 38px;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   FILTER CARD
+========================================================== */
+
+.general-ledger-page
+> .general-ledger-filter-card {
+
+    width: 100% !important;
+
+    max-width: none !important;
+
+    margin: 0 !important;
+
+    flex: 0 0 auto;
+
+    box-sizing: border-box;
+
+    border-radius: 12px;
+
+}
+
+
+.general-ledger-filter-card
+> .finova-card-body {
+
+    width: 100%;
+
+    padding: 8px 20px !important;
+
+    box-sizing: border-box;
+
+}
+
+
+.general-ledger-filter-card
+> .finova-card-body
+> .row {
+
+    width: 100% !important;
+
+    margin: 0 !important;
+
+    padding: 0 !important;
+
+    box-sizing: border-box;
+
+    align-items: end !important;
+
+}
+
+
+.general-ledger-filter-card
+> .finova-card-body
+> .row
+> [class*="col-"] {
+
+    min-width: 0;
+
+    margin: 0;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   FILTER LABEL
+========================================================== */
+
+.general-ledger-filter-card
+.form-label {
+
+    display: block;
+
+    margin-top: 0 !important;
+
+    margin-bottom: 6px !important;
+
+    color: #1F2937;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    line-height: 1.2;
+
+    text-align: left;
+
+}
+
+
+/* ==========================================================
+   FILTER CONTROL
+========================================================== */
+
+.general-ledger-filter-card
+.form-control,
+
+.general-ledger-filter-card
+.form-select {
+
+    width: 100%;
+
+    height: 46px !important;
+
+    min-height: 46px !important;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   INPUT GROUP
+========================================================== */
+
+.general-ledger-filter-card
+.input-group {
+
+    display: flex !important;
+
+    flex-wrap: nowrap !important;
+
+    align-items: stretch;
+
+    width: 100% !important;
+
+    height: 46px !important;
+
+}
+
+
+.general-ledger-filter-card
+#general-ledger-keyword {
+
+    flex: 1 1 auto !important;
+
+    width: 1% !important;
+
+    min-width: 0 !important;
+
+    height: 46px !important;
+
+    border-top-right-radius: 0 !important;
+
+    border-bottom-right-radius: 0 !important;
+
+}
+
+
+.general-ledger-filter-card
+#btn-find-general-ledger {
+
+    display: inline-flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    flex: 0 0 80px !important;
+
+    width: 80px !important;
+
+    min-width: 80px !important;
+
+    height: 46px !important;
+
+    padding: 0 12px !important;
+
+    white-space: nowrap;
+
+    border-top-left-radius: 0 !important;
+
+    border-bottom-left-radius: 0 !important;
+
+}
+
+
+/* ==========================================================
+   TABLE CARD
+========================================================== */
+
+.general-ledger-table-card {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    width: 100%;
+
+    overflow: hidden;
+
+}
+
+
+.general-ledger-table-card
+.finova-card-body {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    padding: 0 !important;
+
+    overflow: hidden;
+
+}
+
+
+.general-ledger-table-card
+.finova-table-container {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    width: 100%;
+
+    height: 100%;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   TABLE SCROLL
+========================================================== */
+
+.general-ledger-table-card
+.table-responsive {
+
+    display: block;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    width: 100%;
+
+    overflow-x: auto;
+
+    overflow-y: auto;
+
+}
+
+
+/* ==========================================================
+   TABLE
+========================================================== */
+
+.general-ledger-table-card
+.finova-table {
+
+    width: 100%;
+
+    min-width: 1500px;
+
+    margin-bottom: 0;
+
+    vertical-align: middle;
+
+}
+
+
+.general-ledger-table-card
+.finova-table
+thead
+th {
+
+    font-weight: 700 !important;
+
+    color: #111827 !important;
+
+    white-space: nowrap;
+
+    vertical-align: middle;
+
+}
+
+
+.general-ledger-table-card
+.finova-table
+tbody
+td {
+
+    font-weight: 400 !important;
+
+    color: #1F2937 !important;
+
+    vertical-align: middle;
+
+}
+
+
+/* ==========================================================
+   TABLE FOOTER
+========================================================== */
+
+.general-ledger-table-card
+tfoot
+th,
+
+.general-ledger-table-card
+tfoot
+td {
+
+    position: sticky;
+
+    bottom: 0;
+
+    z-index: 4;
+
+    background: #F8FAFC;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   COLUMN WIDTH
+========================================================== */
+
+.glr-col-no {
+
+    width: 55px;
+
+    min-width: 55px;
+
+    max-width: 55px;
+
+}
+
+
+.glr-col-date {
+
+    width: 110px;
+
+    min-width: 110px;
+
+}
+
+
+.glr-col-journal {
+
+    width: 170px;
+
+    min-width: 170px;
+
+}
+
+
+.glr-col-account {
+
+    width: 130px;
+
+    min-width: 130px;
+
+}
+
+
+.glr-col-account-name {
+
+    width: 220px;
+
+    min-width: 220px;
+
+}
+
+
+.glr-col-bp {
+
+    width: 220px;
+
+    min-width: 220px;
+
+}
+
+
+.glr-col-description {
+
+    width: 320px;
+
+    min-width: 320px;
+
+}
+
+
+.glr-col-amount {
+
+    width: 130px;
+
+    min-width: 130px;
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION
+========================================================== */
+
+.general-ledger-description {
+
+    white-space: normal !important;
+
+    word-break: break-word;
+
+    line-height: 1.45;
+
+}
+
+
+/* ==========================================================
+   AMOUNT
+========================================================== */
+
+.general-ledger-debit,
+
+.general-ledger-credit,
+
+.general-ledger-balance {
+
+    font-weight: 600;
+
+}
+
+
+/* ==========================================================
+   PAGINATION
+========================================================== */
+
+.general-ledger-table-card
+.finova-pagination-wrapper {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    flex: 0 0 auto;
+
+    width: 100%;
+
+    margin-top: auto;
+
+}
+
+
+.general-ledger-table-card
+.finova-pagination-left {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+}
+
+
+.general-ledger-table-card
+.finova-pagination-info {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    margin-left: auto;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+@media (max-width: 991.98px) {
+
+    .general-ledger-page
+    > .finova-page-header {
+
+        align-items: flex-start;
+
+    }
+
+
+    .general-ledger-page
+    > .finova-page-header
+    .finova-page-header-right {
+
+        flex-wrap: wrap;
+
+        justify-content: flex-start;
+
+    }
+
+
+    .general-ledger-filter-card
+    > .finova-card-body {
+
+        padding: 10px 14px !important;
+
+    }
+
+}
+
+
+@media (max-width: 767.98px) {
+
+    .general-ledger-table-card
+    .finova-pagination-wrapper {
+
+        flex-wrap: wrap;
+
+        gap: 8px;
+
+    }
+
+
+    .general-ledger-table-card
+    .finova-pagination-info {
+
+        width: 100%;
+
+        margin-left: 0;
+
+        justify-content: flex-end;
+
+    }
+
+}
