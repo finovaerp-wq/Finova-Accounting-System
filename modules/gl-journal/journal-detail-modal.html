@@ -1,7 +1,8 @@
 <!-- ==========================================================
 FINOVA ACCOUNTING SYSTEM
 Journal Detail Modal
-Version : 4.0 Enterprise
+Version : 4.1 Enterprise
+Searchable COA
 ========================================================== -->
 
 <div
@@ -37,157 +38,165 @@ Version : 4.0 Enterprise
 
             </div>
 
+
             <!-- ==========================================
                  BODY
             =========================================== -->
 
             <div class="modal-body">
 
-    <!-- ==========================================
-         HIDDEN STATE
-    =========================================== -->
 
-    <input
-        type="hidden"
-        id="detail-id"
-        value="">
+                <!-- ==========================================
+                     HIDDEN STATE
+                =========================================== -->
 
-    <input
-        type="hidden"
-        id="detail-mode"
-        value="add">
+                <input
+                    type="hidden"
+                    id="detail-id"
+                    value="">
 
-    <div class="row g-4">
+                <input
+                    type="hidden"
+                    id="detail-mode"
+                    value="add">
 
-        <!-- ======================================================
-             DESCRIPTION
-        ======================================================= -->
 
-        <div class="col-12">
+                <div class="row g-4">
 
-            <label
-                for="detail-description"
-                class="form-label fw-semibold">
 
-                Description
-            </label>
+                    <!-- ======================================================
+                         DESCRIPTION
+                    ======================================================= -->
 
-            <textarea
-                id="detail-description"
-                class="form-control"
-                rows="5"
-                placeholder="Input journal description..."></textarea>
+                    <div class="col-12">
 
-        </div>
+                        <label
+                            for="detail-description"
+                            class="form-label fw-semibold">
 
-        <!-- ======================================================
-             DEBIT ACCOUNT
-        ======================================================= -->
+                            Description
 
-        <div class="col-md-6">
+                        </label>
 
-            <label
-                for="detail-debit-account"
-                class="form-label fw-semibold">
+                        <textarea
+                            id="detail-description"
+                            class="form-control"
+                            rows="5"
+                            placeholder="Input journal description..."></textarea>
 
-                Debit Account
-            </label>
+                    </div>
 
-            <select
-                id="detail-debit-account"
-                class="form-select">
 
-                <option value="">
+                    <!-- ======================================================
+                         DEBIT ACCOUNT
+                    ======================================================= -->
 
-                    -- Select Debit Account --
+                    <div class="col-md-6">
 
-                </option>
+                        <label
+                            for="detail-debit-account"
+                            class="form-label fw-semibold">
 
-            </select>
+                            Debit Account
 
-        </div>
+                        </label>
 
-        <!-- ======================================================
-             CREDIT ACCOUNT
-        ======================================================= -->
+                        <select
+                            id="detail-debit-account"
+                            class="form-select">
 
-        <div class="col-md-6">
+                            <option value="">
+                                Select Chart of Account
+                            </option>
 
-            <label
-                for="detail-credit-account"
-                class="form-label fw-semibold">
+                        </select>
 
-                Credit Account
-            </label>
+                    </div>
 
-            <select
-                id="detail-credit-account"
-                class="form-select">
 
-                <option value="">
+                    <!-- ======================================================
+                         CREDIT ACCOUNT
+                    ======================================================= -->
 
-                    -- Select Credit Account --
+                    <div class="col-md-6">
 
-                </option>
+                        <label
+                            for="detail-credit-account"
+                            class="form-label fw-semibold">
 
-            </select>
+                            Credit Account
 
-        </div>
+                        </label>
 
-        <!-- ======================================================
-     AMOUNT
-======================================================= -->
+                        <select
+                            id="detail-credit-account"
+                            class="form-select">
 
-<div class="col-md-4">
+                            <option value="">
+                                Select Chart of Account
+                            </option>
 
-    <label
-        for="detail-amount"
-        class="form-label fw-semibold">
+                        </select>
 
-        Amount
+                    </div>
 
-    </label>
 
-    <input
-        type="text"
-        id="detail-amount"
-        class="form-control text-start"
-        inputmode="numeric"
-        placeholder="0"
-        autocomplete="off">
+                    <!-- ======================================================
+                         AMOUNT
+                    ======================================================= -->
 
-</div>
+                    <div class="col-md-4">
 
-        <!-- ======================================================
-             BUSINESS PARTNER
-        ======================================================= -->
+                        <label
+                            for="detail-amount"
+                            class="form-label fw-semibold">
 
-        <div class="col-md-8">
+                            Amount
 
-            <label
-                for="detail-business-partner"
-                class="form-label fw-semibold">
+                        </label>
 
-                Business Partner
-            </label>
+                        <input
+                            type="text"
+                            id="detail-amount"
+                            class="form-control text-start"
+                            inputmode="numeric"
+                            placeholder="0"
+                            autocomplete="off">
 
-            <select
-                id="detail-business-partner"
-                class="form-select">
+                    </div>
 
-                <option value="">
 
-                    -- Optional --
+                    <!-- ======================================================
+                         BUSINESS PARTNER
+                    ======================================================= -->
 
-                </option>
+                    <div class="col-md-8">
 
-            </select>
+                        <label
+                            for="detail-business-partner"
+                            class="form-label fw-semibold">
 
-        </div>
+                            Business Partner
 
-    </div>
+                        </label>
 
-</div>
+                        <select
+                            id="detail-business-partner"
+                            class="form-select">
+
+                            <option value="">
+                                -- Optional --
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
 
             <!-- ==========================================
                  FOOTER
@@ -216,6 +225,7 @@ Version : 4.0 Enterprise
                 </button>
 
             </div>
+
 
         </div>
 

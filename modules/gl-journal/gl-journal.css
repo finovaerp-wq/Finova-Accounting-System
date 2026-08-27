@@ -1003,9 +1003,7 @@ td {
 /* DATE */
 
 #gl-journal-table .gl-col-date {
-
-    width: 60px;
-
+    width: 90px;
 }
 
 
@@ -1127,14 +1125,25 @@ td {
    NO COLUMN
 ========================================================== */
 
+/* ==========================================================
+   NO COLUMN
+========================================================== */
+
+#gl-journal-table .gl-col-no {
+
+    width: 42px;
+
+}
+
+
 #gl-journal-table
 .gl-journal-no-cell {
 
-    width: 32px;
+    width: 42px;
 
-    min-width: 32px;
+    min-width: 42px;
 
-    max-width: 32px;
+    max-width: 42px;
 
     padding-left: 2px !important;
 
@@ -1157,26 +1166,27 @@ td {
 
 /* ==========================================================
    DATE COLUMN
+   FINAL - CENTER + SINGLE LINE
 ========================================================== */
 
 #gl-journal-table
 .gl-journal-date-cell {
 
-    width: 60px;
+    width: 90px;
 
-    min-width: 60px;
+    min-width: 90px;
 
-    max-width: 60px;
+    max-width: 90px;
 
-    padding-left: 2px !important;
+    padding-left: 4px !important;
 
-    padding-right: 2px !important;
+    padding-right: 4px !important;
 
     text-align: center;
 
-    vertical-align: middle;
+    vertical-align: middle !important;
 
-    white-space: normal;
+    white-space: nowrap !important;
 
 }
 
@@ -1192,6 +1202,10 @@ td {
 
     width: 100%;
 
+    margin: 0;
+
+    padding: 0;
+
     font-size: 13px;
 
     font-weight: 400;
@@ -1200,7 +1214,11 @@ td {
 
     text-align: center;
 
-    white-space: normal;
+    white-space: nowrap !important;
+
+    word-break: keep-all;
+
+    overflow-wrap: normal;
 
     color: var(--text-secondary);
 
@@ -2004,5 +2022,1404 @@ i {
 .gl-journal-row:hover {
 
     background-color: #F8F9FA;
+
+}
+/* ==========================================================
+   FINOVA ACCOUNTING SYSTEM
+   GENERAL JOURNAL
+   JOURNAL DETAIL TABLE
+   FINAL 2 ROW LAYOUT
+========================================================== */
+
+
+/* ==========================================================
+   TABLE
+========================================================== */
+
+#journal-detail-table {
+
+    width: 100%;
+
+    table-layout: fixed;
+
+    margin-bottom: 0;
+
+}
+
+
+/* ==========================================================
+   COLUMN WIDTH
+========================================================== */
+
+#journal-detail-table
+.journal-detail-col-no {
+
+    width: 55px;
+
+}
+
+
+#journal-detail-table
+.journal-detail-col-debit {
+
+    width: 25%;
+
+}
+
+
+#journal-detail-table
+.journal-detail-col-credit {
+
+    width: 25%;
+
+}
+
+
+#journal-detail-table
+.journal-detail-col-amount {
+
+    width: 160px;
+
+}
+
+
+#journal-detail-table
+.journal-detail-col-bp {
+
+    width: 25%;
+
+}
+
+
+#journal-detail-table
+.journal-detail-col-action {
+
+    width: 90px;
+
+}
+
+
+/* ==========================================================
+   HEADER
+========================================================== */
+
+#journal-detail-table
+> thead
+> tr
+> th {
+
+    padding: 10px 12px;
+
+    vertical-align: middle;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    color: #111827;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION ROW
+========================================================== */
+
+#journal-detail-table
+.journal-detail-description-row
+> td {
+
+    background: #F8FAFC;
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION CELL
+========================================================== */
+
+#journal-detail-table
+.journal-detail-description-cell {
+
+    padding: 10px 14px !important;
+
+    vertical-align: top !important;
+
+    border-bottom: 0 !important;
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION WRAPPER
+========================================================== */
+
+#journal-detail-table
+.journal-detail-description-wrap {
+
+    display: grid;
+
+    grid-template-columns:
+        82px
+        10px
+        minmax(0, 1fr);
+
+    column-gap: 3px;
+
+    align-items: start;
+
+    width: 100%;
+
+    min-width: 0;
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION LABEL
+========================================================== */
+
+#journal-detail-table
+.journal-detail-description-label {
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    line-height: 1.55;
+
+    white-space: nowrap;
+
+    color: var(--text-secondary);
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION SEPARATOR
+========================================================== */
+
+#journal-detail-table
+.journal-detail-description-separator {
+
+    font-size: 13px;
+
+    line-height: 1.55;
+
+    text-align: center;
+
+    color: #94A3B8;
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION VALUE
+========================================================== */
+
+#journal-detail-table
+.journal-detail-description-value {
+
+    display: block;
+
+    min-width: 0;
+
+    font-size: 13px;
+
+    font-weight: 400;
+
+    line-height: 1.55;
+
+    color: var(--text-primary);
+
+    white-space: normal;
+
+    overflow-wrap: anywhere;
+
+    word-break: normal;
+
+}
+
+
+/* ==========================================================
+   ACCOUNT ROW
+========================================================== */
+
+#journal-detail-table
+.journal-detail-account-row
+> td {
+
+    padding: 10px 12px !important;
+
+    font-size: 13px;
+
+    line-height: 1.5;
+
+    vertical-align: middle !important;
+
+    background: #FFFFFF;
+
+}
+
+
+/* ==========================================================
+   NO
+========================================================== */
+
+#journal-detail-table
+.journal-detail-no-cell {
+
+    width: 55px;
+
+    text-align: center;
+
+    vertical-align: middle !important;
+
+    color: var(--text-secondary);
+
+}
+
+
+/* ==========================================================
+   DEBIT ACCOUNT
+========================================================== */
+
+#journal-detail-table
+.journal-detail-debit-cell {
+
+    min-width: 0;
+
+    white-space: normal;
+
+    overflow-wrap: anywhere;
+
+    word-break: normal;
+
+    color: var(--text-primary);
+
+}
+
+
+/* ==========================================================
+   CREDIT ACCOUNT
+========================================================== */
+
+#journal-detail-table
+.journal-detail-credit-cell {
+
+    min-width: 0;
+
+    white-space: normal;
+
+    overflow-wrap: anywhere;
+
+    word-break: normal;
+
+    color: var(--text-primary);
+
+}
+
+
+/* ==========================================================
+   AMOUNT
+========================================================== */
+
+#journal-detail-table
+.journal-detail-amount-cell {
+
+    width: 160px;
+
+    font-size: 13.5px;
+
+    font-weight: 600;
+
+    text-align: right;
+
+    vertical-align: middle !important;
+
+    white-space: nowrap;
+
+    color: var(--text-primary);
+
+}
+
+
+/* ==========================================================
+   BUSINESS PARTNER
+========================================================== */
+
+#journal-detail-table
+.journal-detail-bp-cell {
+
+    min-width: 0;
+
+    white-space: normal;
+
+    overflow-wrap: anywhere;
+
+    word-break: normal;
+
+    color: var(--text-primary);
+
+}
+
+
+/* ==========================================================
+   ACTION
+========================================================== */
+
+#journal-detail-table
+.journal-detail-action-cell {
+
+    width: 90px;
+
+    text-align: center;
+
+    vertical-align: middle !important;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   ACTION BUTTON GROUP
+========================================================== */
+
+#journal-detail-table
+.journal-detail-action-cell
+.btn-group {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+}
+
+
+/* ==========================================================
+   ACTION BUTTON
+========================================================== */
+
+#journal-detail-table
+.journal-detail-action-cell
+.btn {
+
+    width: 30px;
+
+    height: 30px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 0;
+
+}
+
+
+/* ==========================================================
+   ACTION ICON
+========================================================== */
+
+#journal-detail-table
+.journal-detail-action-cell
+.btn
+i {
+
+    font-size: 12px;
+
+}
+
+
+/* ==========================================================
+   ACCOUNT ROW HOVER
+========================================================== */
+
+#journal-detail-table
+.journal-detail-account-row:hover
+> td {
+
+    background: #F8FAFC;
+
+}
+/* ==========================================================
+   JOURNAL DETAIL CATEGORY
+========================================================== */
+
+.journal-detail-description-wrap {
+
+    display: grid;
+
+    grid-template-columns:
+        70px
+        82px
+        10px
+        minmax(0, 1fr);
+
+    column-gap: 4px;
+
+    align-items: start;
+
+    width: 100%;
+
+    min-width: 0;
+
+}
+
+
+/* ==========================================================
+   CATEGORY
+========================================================== */
+
+.journal-detail-category {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: fit-content;
+
+    min-width: 58px;
+
+    min-height: 22px;
+
+    padding: 3px 7px;
+
+    border-radius: 4px;
+
+    font-size: 10.5px;
+
+    font-weight: 600;
+
+    line-height: 1;
+
+    white-space: nowrap;
+
+}
+
+
+/* DPP */
+
+.journal-detail-category-dpp {
+
+    background: #EAF2FF;
+
+    color: #315D9A;
+
+}
+
+
+/* TAX PLUS */
+
+.journal-detail-category-plus {
+
+    background: #ECFDF3;
+
+    color: #027A48;
+
+}
+
+
+/* TAX MINUS */
+
+.journal-detail-category-minus {
+
+    background: #FFF4E5;
+
+    color: #B54708;
+
+}
+/* ==========================================================
+   JOURNAL DETAIL SECTION
+========================================================== */
+
+.journal-detail-section {
+
+    display: flex;
+
+    flex-direction: column;
+
+    min-height: 0;
+
+    height: 100%;
+
+    background: #FFFFFF;
+
+}
+
+
+/* ==========================================================
+   DETAIL HEADER
+========================================================== */
+
+.journal-detail-section-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    flex: 0 0 auto;
+
+    padding: 14px;
+
+    border-bottom: 1px solid #DEE2E6;
+
+}
+
+
+/* ==========================================================
+   DETAIL SCROLL AREA
+========================================================== */
+
+.journal-detail-scroll {
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    max-height: 430px;
+
+    overflow-x: auto;
+
+    overflow-y: auto;
+
+}
+
+
+/* ==========================================================
+   TABLE HEADER STICKY
+========================================================== */
+
+.journal-detail-scroll
+#journal-detail-table
+thead {
+
+    position: sticky;
+
+    top: 0;
+
+    z-index: 10;
+
+    background: #F8F9FA;
+
+}
+
+
+/* ==========================================================
+   PERMANENT SUMMARY
+========================================================== */
+
+.journal-summary-sticky {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    flex: 0 0 auto;
+
+    width: 100%;
+
+    padding: 12px 14px;
+
+    border-top: 1px solid #D7DBE0;
+
+    background: #FFFFFF;
+
+    box-shadow:
+        0 -4px 12px rgba(15, 23, 42, .06);
+
+    z-index: 20;
+
+}
+
+
+/* ==========================================================
+   SUMMARY ITEM
+========================================================== */
+
+.journal-summary-item {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 3px;
+
+    padding: 0 12px;
+
+    border-right: 1px solid #E5E7EB;
+
+}
+
+
+.journal-summary-item:last-child {
+
+    border-right: 0;
+
+}
+
+
+.journal-summary-item
+span {
+
+    font-size: 12px;
+
+    font-weight: 500;
+
+    color: var(--text-secondary);
+
+}
+
+
+.journal-summary-item
+strong {
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    color: var(--text-primary);
+
+}
+/* ==========================================================
+   FINOVA ACCOUNTING SYSTEM
+   GENERAL JOURNAL
+   JOURNAL DETAIL
+   FINAL
+========================================================== */
+
+
+/* ==========================================================
+   MODAL
+========================================================== */
+
+#glJournalModal
+.gl-journal-modal-content {
+
+    height: calc(100vh - 40px);
+
+    max-height: calc(100vh - 40px);
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   MODAL BODY
+========================================================== */
+
+#glJournalModal
+.gl-journal-modal-body {
+
+    display: flex;
+
+    flex-direction: column;
+
+    min-height: 0;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   JOURNAL INFORMATION
+========================================================== */
+
+#glJournalModal
+.gl-journal-info-card {
+
+    flex: 0 0 auto;
+
+}
+
+
+/* ==========================================================
+   JOURNAL DETAIL CARD
+========================================================== */
+
+#glJournalModal
+.gl-journal-detail-card {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   JOURNAL DETAIL HEADER
+========================================================== */
+
+#glJournalModal
+.gl-journal-detail-card
+> .card-header {
+
+    flex: 0 0 auto;
+
+}
+
+
+/* ==========================================================
+   DETAIL SCROLL AREA
+========================================================== */
+
+#glJournalModal
+.journal-detail-scroll {
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    overflow-x: auto;
+
+    overflow-y: auto;
+
+    background: #FFFFFF;
+
+}
+
+
+/* ==========================================================
+   TABLE
+========================================================== */
+
+#journal-detail-table {
+
+    width: 100%;
+
+    min-width: 950px;
+
+    table-layout: fixed;
+
+    margin-bottom: 0;
+
+}
+
+
+/* ==========================================================
+   TABLE HEADER STICKY
+========================================================== */
+
+#journal-detail-table
+> thead {
+
+    position: sticky;
+
+    top: 0;
+
+    z-index: 15;
+
+}
+
+
+#journal-detail-table
+> thead
+> tr
+> th {
+
+    padding: 10px 12px;
+
+    vertical-align: middle;
+
+    background: #F8F9FA;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    color: #111827;
+
+    white-space: nowrap;
+
+    box-shadow:
+        inset 0 -1px 0 #D7DBE0;
+
+}
+
+
+/* ==========================================================
+   COLUMN WIDTH
+========================================================== */
+
+#journal-detail-table
+.journal-detail-col-no {
+
+    width: 55px;
+
+}
+
+
+#journal-detail-table
+.journal-detail-col-debit {
+
+    width: 25%;
+
+}
+
+
+#journal-detail-table
+.journal-detail-col-credit {
+
+    width: 25%;
+
+}
+
+
+#journal-detail-table
+.journal-detail-col-amount {
+
+    width: 150px;
+
+}
+
+
+#journal-detail-table
+.journal-detail-col-bp {
+
+    width: 25%;
+
+}
+
+
+#journal-detail-table
+.journal-detail-col-action {
+
+    width: 90px;
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION ROW
+========================================================== */
+
+#journal-detail-table
+.journal-detail-description-row
+> td {
+
+    background: #F8FAFC;
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION CELL
+========================================================== */
+
+#journal-detail-table
+.journal-detail-description-cell {
+
+    padding: 9px 14px !important;
+
+    vertical-align: top !important;
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION WRAPPER
+========================================================== */
+
+#journal-detail-table
+.journal-detail-description-wrap {
+
+    display: grid;
+
+    grid-template-columns:
+        68px
+        82px
+        10px
+        minmax(0, 1fr);
+
+    column-gap: 4px;
+
+    align-items: start;
+
+    width: 100%;
+
+    min-width: 0;
+
+}
+
+
+/* ==========================================================
+   CATEGORY
+========================================================== */
+
+#journal-detail-table
+.journal-detail-category {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: fit-content;
+
+    min-width: 58px;
+
+    min-height: 22px;
+
+    padding: 3px 7px;
+
+    border-radius: 4px;
+
+    font-size: 10.5px;
+
+    font-weight: 600;
+
+    line-height: 1;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   DPP
+========================================================== */
+
+#journal-detail-table
+.journal-detail-category-dpp {
+
+    background: #EAF2FF;
+
+    color: #315D9A;
+
+}
+
+
+/* ==========================================================
+   TAX PLUS
+========================================================== */
+
+#journal-detail-table
+.journal-detail-category-plus {
+
+    background: #ECFDF3;
+
+    color: #027A48;
+
+}
+
+
+/* ==========================================================
+   TAX MINUS
+========================================================== */
+
+#journal-detail-table
+.journal-detail-category-minus {
+
+    background: #FFF4E5;
+
+    color: #B54708;
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION LABEL
+========================================================== */
+
+#journal-detail-table
+.journal-detail-description-label {
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    line-height: 1.55;
+
+    white-space: nowrap;
+
+    color: var(--text-secondary);
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION SEPARATOR
+========================================================== */
+
+#journal-detail-table
+.journal-detail-description-separator {
+
+    font-size: 13px;
+
+    line-height: 1.55;
+
+    text-align: center;
+
+    color: #94A3B8;
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION VALUE
+========================================================== */
+
+#journal-detail-table
+.journal-detail-description-value {
+
+    min-width: 0;
+
+    font-size: 13px;
+
+    font-weight: 400;
+
+    line-height: 1.55;
+
+    color: var(--text-primary);
+
+    white-space: normal;
+
+    overflow-wrap: anywhere;
+
+    word-break: normal;
+
+}
+
+
+/* ==========================================================
+   ACCOUNT ROW
+========================================================== */
+
+#journal-detail-table
+.journal-detail-account-row
+> td {
+
+    padding: 10px 12px !important;
+
+    font-size: 13px;
+
+    line-height: 1.5;
+
+    vertical-align: middle !important;
+
+    background: #FFFFFF;
+
+}
+
+
+/* ==========================================================
+   ACCOUNT ROW HOVER
+========================================================== */
+
+#journal-detail-table
+.journal-detail-account-row:hover
+> td {
+
+    background: #F8FAFC;
+
+}
+
+
+/* ==========================================================
+   NO
+========================================================== */
+
+#journal-detail-table
+.journal-detail-no-cell {
+
+    text-align: center;
+
+    vertical-align: middle !important;
+
+    color: var(--text-secondary);
+
+}
+
+
+/* ==========================================================
+   DEBIT / CREDIT
+========================================================== */
+
+#journal-detail-table
+.journal-detail-debit-cell,
+
+#journal-detail-table
+.journal-detail-credit-cell {
+
+    min-width: 0;
+
+    white-space: normal;
+
+    overflow-wrap: anywhere;
+
+    word-break: normal;
+
+    color: var(--text-primary);
+
+}
+
+
+/* ==========================================================
+   AMOUNT
+========================================================== */
+
+#journal-detail-table
+.journal-detail-amount-cell {
+
+    font-size: 13.5px;
+
+    font-weight: 600;
+
+    text-align: right;
+
+    vertical-align: middle !important;
+
+    white-space: nowrap;
+
+    color: var(--text-primary);
+
+}
+
+
+/* ==========================================================
+   BUSINESS PARTNER
+========================================================== */
+
+#journal-detail-table
+.journal-detail-bp-cell {
+
+    min-width: 0;
+
+    white-space: normal;
+
+    overflow-wrap: anywhere;
+
+    word-break: normal;
+
+    color: var(--text-primary);
+
+}
+
+
+/* ==========================================================
+   ACTION
+========================================================== */
+
+#journal-detail-table
+.journal-detail-action-cell {
+
+    text-align: center;
+
+    vertical-align: middle !important;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   ACTION GROUP
+========================================================== */
+
+#journal-detail-table
+.journal-detail-action-cell
+.btn-group {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+}
+
+
+/* ==========================================================
+   ACTION BUTTON
+========================================================== */
+
+#journal-detail-table
+.journal-detail-action-cell
+.btn {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: 30px;
+
+    height: 30px;
+
+    padding: 0;
+
+}
+
+
+/* ==========================================================
+   ACTION ICON
+========================================================== */
+
+#journal-detail-table
+.journal-detail-action-cell
+.btn
+i {
+
+    font-size: 12px;
+
+}
+
+
+/* ==========================================================
+   PERMANENT SUMMARY
+========================================================== */
+
+#glJournalModal
+.journal-summary-sticky {
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(240px, 1fr)
+        180px
+        220px;
+
+    align-items: center;
+
+    flex: 0 0 auto;
+
+    width: 100%;
+
+    min-height: 74px;
+
+    padding: 10px 14px;
+
+    border-top: 1px solid #D7DBE0;
+
+    background: #FFFFFF;
+
+    box-shadow:
+        0 -4px 12px rgba(15, 23, 42, .06);
+
+    z-index: 20;
+
+}
+
+
+/* ==========================================================
+   SUMMARY TITLE
+========================================================== */
+
+#glJournalModal
+.journal-summary-title {
+
+    padding-right: 16px;
+
+}
+
+
+/* ==========================================================
+   SUMMARY ITEM
+========================================================== */
+
+#glJournalModal
+.journal-summary-item {
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    gap: 3px;
+
+    min-height: 46px;
+
+    padding: 0 16px;
+
+    border-left: 1px solid #E5E7EB;
+
+}
+
+
+/* ==========================================================
+   SUMMARY LABEL
+========================================================== */
+
+#glJournalModal
+.journal-summary-label {
+
+    font-size: 12px;
+
+    font-weight: 500;
+
+    color: var(--text-secondary);
+
+}
+
+
+/* ==========================================================
+   SUMMARY VALUE
+========================================================== */
+
+#glJournalModal
+.journal-summary-value {
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+    color: var(--text-primary);
+
+}
+
+
+/* ==========================================================
+   FOOTER
+========================================================== */
+
+#glJournalModal
+.gl-journal-footer {
+
+    flex: 0 0 auto;
+
+}
+
+
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+@media (
+    max-width: 900px
+) {
+
+    #glJournalModal
+    .journal-summary-sticky {
+
+        grid-template-columns:
+            1fr
+            130px
+            170px;
+
+    }
 
 }

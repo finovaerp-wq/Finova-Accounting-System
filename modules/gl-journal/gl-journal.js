@@ -1629,55 +1629,103 @@ this.btnPostJournal?.addEventListener(
 /*
 ==========================================================
 LOAD DETAIL MODAL
+FINAL
 ==========================================================
 */
 
 async loadDetailModal() {
 
-    if (this.detailModalLoaded) {
+    /*
+    ======================================================
+    ALREADY LOADED
+    ======================================================
+    */
+
+    if (
+        this.detailModalLoaded
+    ) {
 
         return;
 
     }
 
-    const response = await fetch(
 
-        "modules/gl-journal/journal-detail-modal.html"
+    /*
+    ======================================================
+    LOAD HTML
+    ======================================================
+    */
 
-    );
+    const response =
+        await fetch(
+            "modules/gl-journal/journal-detail-modal.html"
+        );
 
-    if (!response.ok) {
+
+    if (
+        !response.ok
+    ) {
 
         throw new Error(
-
             "Failed to load Journal Detail Modal."
-
         );
 
     }
 
-    this.detailModalContainer.innerHTML =
 
+    /*
+    ======================================================
+    INJECT HTML
+    ======================================================
+    */
+
+    this.detailModalContainer.innerHTML =
         await response.text();
 
-    this.detailModal =
 
-        new bootstrap.Modal(
+    /*
+    ======================================================
+    CREATE BOOTSTRAP MODAL
+    ======================================================
+    */
 
-            document.getElementById(
-
-                "journalDetailModal"
-
-            )
-
+    this.detailModalElement =
+        document.getElementById(
+            "journalDetailModal"
         );
+
+
+    this.detailModal =
+        new bootstrap.Modal(
+            this.detailModalElement
+        );
+
+
+    /*
+    ======================================================
+    CACHE DOM
+    ======================================================
+    */
 
     this.cacheDetailModalDom();
 
+
+    /*
+    ======================================================
+    BIND EVENTS
+    ======================================================
+    */
+
     this.bindDetailModalEvents();
 
+
+    /*
+    ======================================================
+    MARK LOADED
+    ======================================================
+    */
+
     this.detailModalLoaded = true;
-    
 
 }
 /*
@@ -1781,6 +1829,7 @@ async loadJournalModal() {
     /*
 ==========================================================
 LOAD GENERAL JOURNAL
+FINAL
 ==========================================================
 */
 
@@ -1834,14 +1883,11 @@ async loadData(
         /*
         ======================================================
         LOADING
-        SAME STYLE AS ACCOUNT PAYABLE
         ======================================================
         */
 
         if (
             showLoading
-            &&
-            this.tableBody
         ) {
 
             this.tableBody.innerHTML = `
@@ -1872,10 +1918,10 @@ async loadData(
                                 role="status"
                             >
 
-                                <span
-                                    class="visually-hidden"
-                                >
+                                <span class="visually-hidden">
+
                                     Loading...
+
                                 </span>
 
                             </div>
@@ -1913,12 +1959,6 @@ async loadData(
             await this.service.getAll();
 
 
-        /*
-        ======================================================
-        VALIDATE HEADER RESULT
-        ======================================================
-        */
-
         const journalHeaders =
             Array.isArray(
                 headers
@@ -1929,7 +1969,7 @@ async loadData(
 
         /*
         ======================================================
-        LOAD FULL JOURNAL DATA
+        LOAD FULL JOURNAL
         HEADER + DETAIL
         ======================================================
         */
@@ -1943,26 +1983,11 @@ async loadData(
 
                         try {
 
-                            /*
-                            ==============================================
-                            LOAD FULL JOURNAL
-                            ==============================================
-                            */
-
                             const fullJournal =
                                 await this.service.getById(
                                     journal.id
                                 );
 
-
-                            /*
-                            ==============================================
-                            MERGE HEADER + FULL JOURNAL
-
-                            Header data is preserved because fields such as
-                            source information may originate from getAll().
-                            ==============================================
-                            */
 
                             return {
 
@@ -1978,20 +2003,18 @@ async loadData(
                             detailError
                         ) {
 
-                            /*
-                            ==============================================
-                            DETAIL LOAD FAILED
-
-                            Do not remove the complete journal row just
-                            because its detail failed to load.
-                            ==============================================
-                            */
-
                             console.error(
-                                `Failed to load journal detail: ${journal.id}`,
+                                "Failed to load journal detail:",
+                                journal.id,
                                 detailError
                             );
 
+
+                            /*
+                            ==================================
+                            KEEP HEADER EVEN IF DETAIL FAILS
+                            ==================================
+                            */
 
                             return {
 
@@ -2012,26 +2035,12 @@ async loadData(
 
         /*
         ======================================================
-        VALIDATE RESULT
+        NORMALIZE JOURNAL
         ======================================================
         */
 
         this.journals =
-            Array.isArray(
-                result
-            )
-                ? result
-                : [];
-
-
-        /*
-        ======================================================
-        NORMALIZE JOURNAL DATA
-        ======================================================
-        */
-
-        this.journals =
-            this.journals.map(
+            result.map(
 
                 journal => {
 
@@ -2044,8 +2053,10 @@ async loadData(
                     let sourceModule =
                         String(
                             journal.source_module
-                            || journal.source
-                            || "GLJ"
+                            ||
+                            journal.source
+                            ||
+                            "GLJ"
                         )
                         .trim()
                         .toUpperCase();
@@ -2053,7 +2064,7 @@ async loadData(
 
                     /*
                     ==============================================
-                    NORMALIZE GENERAL JOURNAL
+                    NORMALIZE GL
                     ==============================================
                     */
 
@@ -2072,7 +2083,7 @@ async loadData(
 
                     /*
                     ==============================================
-                    NORMALIZE ACCOUNT PAYABLE
+                    NORMALIZE AP
                     ==============================================
                     */
 
@@ -2089,7 +2100,7 @@ async loadData(
 
                     /*
                     ==============================================
-                    NORMALIZE ACCOUNT RECEIVABLE
+                    NORMALIZE AR
                     ==============================================
                     */
 
@@ -2109,45 +2120,24 @@ async loadData(
                     TRANSACTION COUNT
 
                     IMPORTANT:
-                    This is NOT journal.details.length because
-                    details are COA journal lines.
+                    ONE DETAIL ROW = ONE TRANSACTION
 
-                    Priority:
-                    transaction_count
-                    document_count
-                    item_count
-
-                    One manually created GL Journal header
-                    represents one transaction by default.
+                    DO NOT COUNT DEBIT / CREDIT ACCOUNT
+                    SEPARATELY.
                     ==============================================
                     */
 
                     const transactionCount =
-                        Math.max(
-
-                            1,
-
-                            Number(
-                                journal.transaction_count
-                                ??
-                                journal.document_count
-                                ??
-                                journal.item_count
-                                ??
-                                1
-                            )
-                            || 1
-
-                        );
+                        Array.isArray(
+                            journal.details
+                        )
+                            ? journal.details.length
+                            : 0;
 
 
                     /*
                     ==============================================
-                    TOTAL DEBIT / CREDIT
-
-                    Keep totals returned by service if available.
-                    If they are not available, calculate from
-                    journal detail.
+                    TOTAL DEBIT
                     ==============================================
                     */
 
@@ -2157,6 +2147,12 @@ async loadData(
                             || 0
                         );
 
+
+                    /*
+                    ==============================================
+                    TOTAL CREDIT
+                    ==============================================
+                    */
 
                     let totalCredit =
                         Number(
@@ -2179,13 +2175,12 @@ async loadData(
 
                         /*
                         ==========================================
-                        CALCULATE DEBIT ONLY WHEN HEADER TOTAL
-                        DOES NOT EXIST
+                        TOTAL DEBIT
                         ==========================================
                         */
 
                         if (
-                            !journal.total_debit
+                            journal.total_debit == null
                         ) {
 
                             totalDebit =
@@ -2195,12 +2190,6 @@ async loadData(
                                         total,
                                         detail
                                     ) => {
-
-                                        /*
-                                        ==================================
-                                        SUPPORT MULTIPLE DETAIL STRUCTURES
-                                        ==================================
-                                        */
 
                                         const debit =
                                             Number(
@@ -2241,13 +2230,12 @@ async loadData(
 
                         /*
                         ==========================================
-                        CALCULATE CREDIT ONLY WHEN HEADER TOTAL
-                        DOES NOT EXIST
+                        TOTAL CREDIT
                         ==========================================
                         */
 
                         if (
-                            !journal.total_credit
+                            journal.total_credit == null
                         ) {
 
                             totalCredit =
@@ -2328,7 +2316,7 @@ async loadData(
 
         /*
         ======================================================
-        INITIAL FILTER DATA
+        FILTER DATA
         ======================================================
         */
 
@@ -2380,12 +2368,14 @@ async loadData(
             Math.min(
 
                 Math.max(
+
                     Number(
                         this.currentPage
                     )
                     || 1,
 
                     1
+
                 ),
 
                 this.totalPages
@@ -2401,35 +2391,11 @@ async loadData(
 
         this.refreshView();
 
-
-        /*
-        ======================================================
-        LOG
-        ======================================================
-        */
-
-        console.log(
-            "General Journal loaded:",
-            {
-                rows:
-                    this.totalRows,
-
-                pages:
-                    this.totalPages
-            }
-        );
-
     }
 
     catch (
         error
     ) {
-
-        /*
-        ======================================================
-        ERROR LOG
-        ======================================================
-        */
 
         console.error(
             "Failed to load General Journal.",
@@ -2439,7 +2405,7 @@ async loadData(
 
         /*
         ======================================================
-        RESET DATA
+        RESET
         ======================================================
         */
 
@@ -2457,7 +2423,6 @@ async loadData(
         /*
         ======================================================
         ERROR DISPLAY
-        8 COLUMNS
         ======================================================
         */
 
@@ -2528,12 +2493,6 @@ async loadData(
 
         }
 
-
-        /*
-        ======================================================
-        THROW ERROR
-        ======================================================
-        */
 
         throw error;
 
@@ -2787,6 +2746,8 @@ createTableRow(
 
     if (
         source === "ACCOUNT PAYABLE"
+        ||
+        source === "PAYABLE"
     ) {
 
         source = "AP";
@@ -2796,6 +2757,8 @@ createTableRow(
 
     if (
         source === "ACCOUNT RECEIVABLE"
+        ||
+        source === "RECEIVABLE"
     ) {
 
         source = "AR";
@@ -2820,9 +2783,27 @@ createTableRow(
     ======================================================
     */
 
+    const rawPoNo =
+        String(
+            journal.source_po_no
+            || ""
+        )
+        .trim();
+
+
+    /*
+    ======================================================
+    NORMALIZE PO NUMBER
+    ======================================================
+    */
+
     const poNo =
-        journal.source_po_no
-        || "";
+        rawPoNo
+            ? rawPoNo.replace(
+                /^PO\s*\/\s*/i,
+                ""
+            )
+            : "";
 
 
     /*
@@ -2841,22 +2822,25 @@ createTableRow(
     TRANSACTION COUNT
 
     IMPORTANT:
-    TRANSACTION COUNT IS NOT COA DETAIL COUNT
+    VALUE COMES FROM loadData()
+
+    transaction_count =
+    journal.details.length
+
+    ONE DETAIL ROW = ONE TRANSACTION
     ======================================================
     */
 
     const transactionCount =
         Math.max(
-            1,
+
+            0,
+
             Number(
                 journal.transaction_count
-                ??
-                journal.document_count
-                ??
-                journal.item_count
-                ??
-                1
+                || 0
             )
+
         );
 
 
@@ -2888,7 +2872,7 @@ createTableRow(
 
     /*
     ======================================================
-    CREATED DATE
+    CREATED
     ======================================================
     */
 
@@ -2896,6 +2880,22 @@ createTableRow(
         this.formatCreatedDateTime(
             journal.created_at
         );
+
+
+    /*
+    ======================================================
+    NORMALIZED SOURCE JOURNAL
+    ======================================================
+    */
+
+    const sourceJournal = {
+
+        ...journal,
+
+        source_module:
+            source
+
+    };
 
 
     /*
@@ -2948,7 +2948,7 @@ createTableRow(
 
 
                     <!-- ==================================
-                         ITEMS / TRANSACTION
+                         ITEMS / TRANSACTION COUNT
                     =================================== -->
 
                     <div
@@ -2964,11 +2964,13 @@ createTableRow(
 
                         </span>
 
+
                         <span class="gl-journal-info-separator">
 
                             :
 
                         </span>
+
 
                         <strong
                             class="
@@ -3002,11 +3004,13 @@ createTableRow(
 
                         </span>
 
+
                         <span class="gl-journal-info-separator">
 
                             :
 
                         </span>
+
 
                         <strong
                             class="
@@ -3036,19 +3040,21 @@ createTableRow(
 
                         </span>
 
+
                         <span class="gl-journal-info-separator">
 
                             :
 
                         </span>
 
+
                         <span class="gl-journal-info-value">
 
                             ${
                                 invoiceNo
-                                    ? `"${this.escapeHTML(
+                                    ? this.escapeHTML(
                                         invoiceNo
-                                    )}"`
+                                    )
                                     : "-"
                             }
 
@@ -3069,17 +3075,19 @@ createTableRow(
 
                         </span>
 
+
                         <span class="gl-journal-info-separator">
 
                             :
 
                         </span>
 
+
                         <span class="gl-journal-info-value">
 
                             ${
                                 poNo
-                                    ? `PO/ ${this.escapeHTML(
+                                    ? `PO/${this.escapeHTML(
                                         poNo
                                     )}`
                                     : "-"
@@ -3102,11 +3110,13 @@ createTableRow(
 
                         </span>
 
+
                         <span class="gl-journal-info-separator">
 
                             :
 
                         </span>
+
 
                         <span
                             class="
@@ -3139,7 +3149,7 @@ createTableRow(
             <td class="gl-journal-source-cell">
 
                 ${this.renderSourceBadge(
-                    journal
+                    sourceJournal
                 )}
 
             </td>
@@ -3162,11 +3172,13 @@ createTableRow(
 
                     </span>
 
+
                     <span class="gl-journal-summary-separator">
 
                         :
 
                     </span>
+
 
                     <strong class="gl-journal-summary-value">
 
@@ -3189,11 +3201,13 @@ createTableRow(
 
                     </span>
 
+
                     <span class="gl-journal-summary-separator">
 
                         :
 
                     </span>
+
 
                     <strong class="gl-journal-summary-value">
 
@@ -3615,16 +3629,24 @@ renderStatusBadge(status) {
 /*
 ==========================================================
 RENDER ACTION BUTTONS
-DROPDOWN MENU
+FINAL
 ==========================================================
 */
 
-renderActionButtons(journal) {
+renderActionButtons(
+    journal
+) {
+
+    /*
+    ======================================================
+    STATUS
+    ======================================================
+    */
 
     const status =
         String(
             journal.status
-            || ""
+            || "Draft"
         )
         .trim()
         .toLowerCase();
@@ -3644,10 +3666,14 @@ renderActionButtons(journal) {
 
             <button
                 type="button"
-                class="dropdown-item btn-edit-journal"
-                data-id="${journal.id}">
+                class="
+                    dropdown-item
+                    btn-edit-journal
+                "
+                data-id="${journal.id}"
+            >
 
-                <i class="fa-solid fa-pen me-2"></i>
+                <i class="fa-solid fa-pen"></i>
 
                 Edit
 
@@ -3656,10 +3682,14 @@ renderActionButtons(journal) {
 
             <button
                 type="button"
-                class="dropdown-item btn-post-journal"
-                data-id="${journal.id}">
+                class="
+                    dropdown-item
+                    btn-post-journal
+                "
+                data-id="${journal.id}"
+            >
 
-                <i class="fa-solid fa-upload me-2"></i>
+                <i class="fa-solid fa-check"></i>
 
                 Post
 
@@ -3668,24 +3698,16 @@ renderActionButtons(journal) {
 
             <button
                 type="button"
-                class="dropdown-item btn-voucher-journal"
-                data-id="${journal.id}">
+                class="
+                    dropdown-item
+                    btn-view-journal
+                "
+                data-id="${journal.id}"
+            >
 
-                <i class="fa-solid fa-file-lines me-2"></i>
+                <i class="fa-solid fa-eye"></i>
 
-                Voucher
-
-            </button>
-
-
-            <button
-                type="button"
-                class="dropdown-item btn-duplicate-journal"
-                data-id="${journal.id}">
-
-                <i class="fa-solid fa-copy me-2"></i>
-
-                Duplicate
+                View
 
             </button>
 
@@ -3695,10 +3717,30 @@ renderActionButtons(journal) {
 
             <button
                 type="button"
-                class="dropdown-item text-danger btn-delete-journal"
-                data-id="${journal.id}">
+                class="
+                    dropdown-item
+                    btn-duplicate-journal
+                "
+                data-id="${journal.id}"
+            >
 
-                <i class="fa-solid fa-trash me-2"></i>
+                <i class="fa-solid fa-copy"></i>
+
+                Duplicate
+
+            </button>
+
+
+            <button
+                type="button"
+                class="
+                    dropdown-item
+                    btn-delete-journal
+                "
+                data-id="${journal.id}"
+            >
+
+                <i class="fa-solid fa-trash"></i>
 
                 Delete
 
@@ -3723,10 +3765,14 @@ renderActionButtons(journal) {
 
             <button
                 type="button"
-                class="dropdown-item btn-view-journal"
-                data-id="${journal.id}">
+                class="
+                    dropdown-item
+                    btn-view-journal
+                "
+                data-id="${journal.id}"
+            >
 
-                <i class="fa-solid fa-eye me-2"></i>
+                <i class="fa-solid fa-eye"></i>
 
                 View
 
@@ -3735,10 +3781,14 @@ renderActionButtons(journal) {
 
             <button
                 type="button"
-                class="dropdown-item btn-voucher-journal"
-                data-id="${journal.id}">
+                class="
+                    dropdown-item
+                    btn-voucher-journal
+                "
+                data-id="${journal.id}"
+            >
 
-                <i class="fa-solid fa-file-lines me-2"></i>
+                <i class="fa-solid fa-file-invoice"></i>
 
                 Voucher
 
@@ -3747,10 +3797,14 @@ renderActionButtons(journal) {
 
             <button
                 type="button"
-                class="dropdown-item btn-duplicate-journal"
-                data-id="${journal.id}">
+                class="
+                    dropdown-item
+                    btn-duplicate-journal
+                "
+                data-id="${journal.id}"
+            >
 
-                <i class="fa-solid fa-copy me-2"></i>
+                <i class="fa-solid fa-copy"></i>
 
                 Duplicate
 
@@ -3762,10 +3816,14 @@ renderActionButtons(journal) {
 
             <button
                 type="button"
-                class="dropdown-item text-danger btn-void-journal"
-                data-id="${journal.id}">
+                class="
+                    dropdown-item
+                    btn-void-journal
+                "
+                data-id="${journal.id}"
+            >
 
-                <i class="fa-solid fa-ban me-2"></i>
+                <i class="fa-solid fa-ban"></i>
 
                 Void
 
@@ -3790,63 +3848,32 @@ renderActionButtons(journal) {
 
             <button
                 type="button"
-                class="dropdown-item btn-edit-journal"
-                data-id="${journal.id}">
+                class="
+                    dropdown-item
+                    btn-view-journal
+                "
+                data-id="${journal.id}"
+            >
 
-                <i class="fa-solid fa-pen me-2"></i>
+                <i class="fa-solid fa-eye"></i>
 
-                Edit
-
-            </button>
-
-
-            <button
-                type="button"
-                class="dropdown-item btn-post-journal"
-                data-id="${journal.id}">
-
-                <i class="fa-solid fa-upload me-2"></i>
-
-                Post
+                View
 
             </button>
 
 
             <button
                 type="button"
-                class="dropdown-item btn-voucher-journal"
-                data-id="${journal.id}">
+                class="
+                    dropdown-item
+                    btn-duplicate-journal
+                "
+                data-id="${journal.id}"
+            >
 
-                <i class="fa-solid fa-file-lines me-2"></i>
-
-                Voucher
-
-            </button>
-
-
-            <button
-                type="button"
-                class="dropdown-item btn-duplicate-journal"
-                data-id="${journal.id}">
-
-                <i class="fa-solid fa-copy me-2"></i>
+                <i class="fa-solid fa-copy"></i>
 
                 Duplicate
-
-            </button>
-
-
-            <div class="dropdown-divider"></div>
-
-
-            <button
-                type="button"
-                class="dropdown-item text-danger btn-delete-journal"
-                data-id="${journal.id}">
-
-                <i class="fa-solid fa-trash me-2"></i>
-
-                Delete
 
             </button>
 
@@ -3865,10 +3892,14 @@ renderActionButtons(journal) {
 
         <button
             type="button"
-            class="dropdown-item btn-view-journal"
-            data-id="${journal.id}">
+            class="
+                dropdown-item
+                btn-view-journal
+            "
+            data-id="${journal.id}"
+        >
 
-            <i class="fa-solid fa-eye me-2"></i>
+            <i class="fa-solid fa-eye"></i>
 
             View
 
@@ -3879,101 +3910,545 @@ renderActionButtons(journal) {
 }
 /*
 ==========================================================
+INITIALIZE DETAIL ACCOUNT TOM SELECT
+==========================================================
+*/
+
+initializeDetailAccountTomSelect() {
+
+    /*
+    ======================================================
+    DESTROY OLD INSTANCE
+    ======================================================
+    */
+
+    if (
+        this.debitAccountTomSelect
+    ) {
+
+        this.debitAccountTomSelect.destroy();
+
+        this.debitAccountTomSelect = null;
+
+    }
+
+
+    if (
+        this.creditAccountTomSelect
+    ) {
+
+        this.creditAccountTomSelect.destroy();
+
+        this.creditAccountTomSelect = null;
+
+    }
+
+
+    /*
+    ======================================================
+    DEBIT ACCOUNT
+    ======================================================
+    */
+
+    const debitElement =
+        document.getElementById(
+            "detail-debit-account"
+        );
+
+
+    if (
+        debitElement
+    ) {
+
+        this.debitAccountTomSelect =
+            new TomSelect(
+
+                debitElement,
+
+                {
+
+                    create: false,
+
+                    allowEmptyOption: true,
+
+                    placeholder:
+                        "Select Chart of Account",
+
+                    searchField: [
+                        "text"
+                    ],
+
+                    sortField: {
+                        field: "text",
+                        direction: "asc"
+                    },
+
+                    maxOptions: 500
+
+                }
+
+            );
+
+    }
+
+
+    /*
+    ======================================================
+    CREDIT ACCOUNT
+    ======================================================
+    */
+
+    const creditElement =
+        document.getElementById(
+            "detail-credit-account"
+        );
+
+
+    if (
+        creditElement
+    ) {
+
+        this.creditAccountTomSelect =
+            new TomSelect(
+
+                creditElement,
+
+                {
+
+                    create: false,
+
+                    allowEmptyOption: true,
+
+                    placeholder:
+                        "Select Chart of Account",
+
+                    searchField: [
+                        "text"
+                    ],
+
+                    sortField: {
+                        field: "text",
+                        direction: "asc"
+                    },
+
+                    maxOptions: 500
+
+                }
+
+            );
+
+    }
+
+}
+/*
+==========================================================
+GET JOURNAL DETAIL CATEGORY
+DPP / TAX (+) / TAX (-)
+==========================================================
+*/
+
+getJournalDetailCategory(
+    detail
+) {
+
+    /*
+    ======================================================
+    EXPLICIT SOURCE TYPE
+    ======================================================
+    */
+
+    const rawType =
+        String(
+            detail.line_type
+            ??
+            detail.detail_type
+            ??
+            detail.tax_type
+            ??
+            detail.source_line_type
+            ??
+            ""
+        )
+        .trim()
+        .toUpperCase();
+
+
+    /*
+    ======================================================
+    DPP
+    ======================================================
+    */
+
+    if (
+        rawType === "DPP"
+        ||
+        rawType === "BASE"
+        ||
+        rawType === "PRINCIPAL"
+    ) {
+
+        return "DPP";
+
+    }
+
+
+    /*
+    ======================================================
+    TAX PLUS
+    ======================================================
+    */
+
+    if (
+        rawType === "PLUS"
+        ||
+        rawType === "TAX_PLUS"
+        ||
+        rawType === "TAX (+)"
+        ||
+        rawType === "INPUT TAX"
+        ||
+        rawType === "VAT INPUT"
+    ) {
+
+        return "TAX (+)";
+
+    }
+
+
+    /*
+    ======================================================
+    TAX MINUS
+    ======================================================
+    */
+
+    if (
+        rawType === "MINUS"
+        ||
+        rawType === "TAX_MINUS"
+        ||
+        rawType === "TAX (-)"
+        ||
+        rawType === "WITHHOLDING TAX"
+        ||
+        rawType === "WHT"
+    ) {
+
+        return "TAX (-)";
+
+    }
+
+
+    /*
+    ======================================================
+    FALLBACK FROM DESCRIPTION
+    ======================================================
+    */
+
+    const description =
+        String(
+            detail.description
+            || ""
+        )
+        .trim()
+        .toUpperCase();
+
+
+    /*
+    ======================================================
+    TAX MINUS
+    ======================================================
+    */
+
+    if (
+        description.includes("PPH")
+        ||
+        description.includes("WITHHOLDING")
+        ||
+        description.includes("WHT")
+    ) {
+
+        return "TAX (-)";
+
+    }
+
+
+    /*
+    ======================================================
+    TAX PLUS
+    ======================================================
+    */
+
+    if (
+        description.includes("PPN")
+        ||
+        description.includes("PAJAK MASUKAN")
+        ||
+        description.includes("VAT INPUT")
+    ) {
+
+        return "TAX (+)";
+
+    }
+
+
+    /*
+    ======================================================
+    DEFAULT
+    ======================================================
+    */
+
+    return "DPP";
+
+}
+/*
+==========================================================
 RENDER DETAIL TABLE
+FINAL
 ==========================================================
 */
 
 renderDetailTable() {
 
-    if (!this.detailTableBody) {
+    /*
+    ======================================================
+    VALIDATE TABLE BODY
+    ======================================================
+    */
+
+    if (
+        !this.detailTableBody
+    ) {
 
         return;
 
     }
 
+
+    /*
+    ======================================================
+    CLEAR TABLE
+    ======================================================
+    */
+
     this.detailTableBody.innerHTML = "";
 
+
+    /*
+    ======================================================
+    EMPTY DETAIL
+    ======================================================
+    */
+
     if (
-        !Array.isArray(this.detailLines) ||
+        !Array.isArray(
+            this.detailLines
+        )
+        ||
         this.detailLines.length === 0
     ) {
 
         this.detailTableBody.innerHTML = `
+
             <tr id="journal-empty-row">
-                <td colspan="7"
-                    class="text-center py-5 text-muted">
+
+                <td
+                    colspan="6"
+                    class="
+                        text-center
+                        py-5
+                        text-muted
+                    "
+                >
+
+                    <i
+                        class="
+                            fa-solid
+                            fa-folder-open
+                            fa-2x
+                            d-block
+                            mb-3
+                        "
+                    ></i>
 
                     No journal detail available.
 
+                    <br>
+
+                    Click Add Line to add journal detail.
+
                 </td>
+
             </tr>
+
         `;
+
+
+        /*
+        ======================================================
+        UPDATE SUMMARY
+        ======================================================
+        */
+
+        this.updateSummaryDisplay?.();
 
         return;
 
     }
 
-    this.detailLines.forEach((detail, index) => {
 
-        this.detailTableBody.insertAdjacentHTML(
+    /*
+    ======================================================
+    RENDER DETAIL
+    ======================================================
+    */
 
-            "beforeend",
+    this.detailLines.forEach(
 
-            this.createDetailRow(
-                detail,
-                index
-            )
+        (
+            detail,
+            index
+        ) => {
 
-        );
+            this.detailTableBody.insertAdjacentHTML(
 
-    });
+                "beforeend",
+
+                this.createDetailRow(
+                    detail,
+                    index
+                )
+
+            );
+
+        }
+
+    );
+
+
+    /*
+    ======================================================
+    UPDATE SUMMARY
+    ======================================================
+    */
+
+    this.updateSummaryDisplay?.();
 
 }
 /*
 ==========================================================
 CREATE DETAIL ROW
+FINAL
+DESCRIPTION + DPP / TAX (+) / TAX (-)
 ==========================================================
 */
 
-createDetailRow(detail, index) {
+createDetailRow(
+    detail,
+    index
+) {
 
     /*
     ======================================================
-    ACCOUNT DISPLAY
+    CATEGORY
+    ======================================================
+    */
+
+    const category =
+        this.getJournalDetailCategory(
+            detail
+        );
+
+
+    /*
+    ======================================================
+    CATEGORY CLASS
+    ======================================================
+    */
+
+    let categoryClass =
+        "journal-detail-category-dpp";
+
+
+    if (
+        category === "TAX (+)"
+    ) {
+
+        categoryClass =
+            "journal-detail-category-plus";
+
+    }
+
+
+    if (
+        category === "TAX (-)"
+    ) {
+
+        categoryClass =
+            "journal-detail-category-minus";
+
+    }
+
+
+    /*
+    ======================================================
+    DESCRIPTION
+    ======================================================
+    */
+
+    const description =
+        detail.description
+        || "-";
+
+
+    /*
+    ======================================================
+    DEBIT ACCOUNT
     ======================================================
     */
 
     const debitAccount =
+        detail.debit_account_code
 
-        detail.debit_account_code && detail.debit_account_name
-
-            ? `${detail.debit_account_code} - ${detail.debit_account_name}`
+            ? `${
+                detail.debit_account_code
+            } - ${
+                detail.debit_account_name
+                || ""
+            }`
 
             : (
-
-                detail.debit_account_name ||
-
-                detail.debit_account ||
-
+                detail.debit_account_name
+                ||
+                detail.debit_account
+                ||
                 "-"
-
             );
+
+
+    /*
+    ======================================================
+    CREDIT ACCOUNT
+    ======================================================
+    */
 
     const creditAccount =
+        detail.credit_account_code
 
-        detail.credit_account_code && detail.credit_account_name
-
-            ? `${detail.credit_account_code} - ${detail.credit_account_name}`
+            ? `${
+                detail.credit_account_code
+            } - ${
+                detail.credit_account_name
+                || ""
+            }`
 
             : (
-
-                detail.credit_account_name ||
-
-                detail.credit_account ||
-
+                detail.credit_account_name
+                ||
+                detail.credit_account
+                ||
                 "-"
-
             );
+
 
     /*
     ======================================================
@@ -3982,12 +4457,12 @@ createDetailRow(detail, index) {
     */
 
     const businessPartner =
-
-        detail.business_partner_name ||
-
-        detail.bp_name ||
-
+        detail.business_partner_name
+        ||
+        detail.bp_name
+        ||
         "-";
+
 
     /*
     ======================================================
@@ -3996,8 +4471,37 @@ createDetailRow(detail, index) {
     */
 
     const amount =
+        Number(
+            detail.amount
+            || 0
+        );
 
-        Number(detail.amount || 0);
+
+    /*
+    ======================================================
+    JOURNAL STATUS
+    ======================================================
+    */
+
+    const journalStatus =
+        String(
+            this.currentJournal?.status
+            || "Draft"
+        )
+        .trim()
+        .toLowerCase();
+
+
+    /*
+    ======================================================
+    ALLOW DETAIL EDIT
+    ONLY DRAFT
+    ======================================================
+    */
+
+    const allowEdit =
+        journalStatus === "draft";
+
 
     /*
     ======================================================
@@ -4007,71 +4511,204 @@ createDetailRow(detail, index) {
 
     return `
 
-        <tr data-index="${index}">
 
-            <td class="text-center">
+        <!-- ==========================================
+             DESCRIPTION ROW
+        =========================================== -->
+
+        <tr
+            class="journal-detail-description-row"
+            data-index="${index}"
+        >
+
+            <td
+                colspan="6"
+                class="journal-detail-description-cell"
+            >
+
+                <div class="journal-detail-description-wrap">
+
+
+                    <!-- CATEGORY -->
+
+                    <span
+                        class="
+                            journal-detail-category
+                            ${categoryClass}
+                        "
+                    >
+
+                        ${category}
+
+                    </span>
+
+
+                    <!-- LABEL -->
+
+                    <span class="journal-detail-description-label">
+
+                        Description
+
+                    </span>
+
+
+                    <!-- SEPARATOR -->
+
+                    <span class="journal-detail-description-separator">
+
+                        :
+
+                    </span>
+
+
+                    <!-- VALUE -->
+
+                    <span class="journal-detail-description-value">
+
+                        ${this.escapeHTML(
+                            description
+                        )}
+
+                    </span>
+
+
+                </div>
+
+            </td>
+
+        </tr>
+
+
+        <!-- ==========================================
+             ACCOUNT ROW
+        =========================================== -->
+
+        <tr
+            class="journal-detail-account-row"
+            data-index="${index}"
+        >
+
+
+            <!-- NO -->
+
+            <td class="journal-detail-no-cell">
 
                 ${index + 1}
 
             </td>
 
-            <td>
 
-                ${detail.description || "-"}
+            <!-- DEBIT ACCOUNT -->
 
-            </td>
+            <td class="journal-detail-debit-cell">
 
-            <td>
-
-                ${debitAccount}
-
-            </td>
-
-            <td>
-
-                ${creditAccount}
+                ${this.escapeHTML(
+                    debitAccount
+                )}
 
             </td>
 
-            <td class="text-end">
 
-                ${this.formatCurrency(amount)}
+            <!-- CREDIT ACCOUNT -->
+
+            <td class="journal-detail-credit-cell">
+
+                ${this.escapeHTML(
+                    creditAccount
+                )}
+
+            </td>
+
+
+            <!-- AMOUNT -->
+
+            <td class="journal-detail-amount-cell">
+
+                ${this.formatCurrency(
+                    amount
+                )}
 
             </td>
 
-            <td>
 
-                ${businessPartner}
+            <!-- BUSINESS PARTNER -->
+
+            <td class="journal-detail-bp-cell">
+
+                ${this.escapeHTML(
+                    businessPartner
+                )}
+
+            </td>
+
+
+            <!-- ACTION -->
+
+            <td class="journal-detail-action-cell">
+
+                ${
+                    allowEdit
+
+                        ? `
+
+                            <div
+                                class="
+                                    btn-group
+                                    btn-group-sm
+                                "
+                            >
+
+                                <button
+                                    type="button"
+                                    class="
+                                        btn
+                                        btn-outline-primary
+                                        btn-edit-detail
+                                    "
+                                    data-index="${index}"
+                                    title="Edit"
+                                >
+
+                                    <i class="fa-solid fa-pen"></i>
+
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    class="
+                                        btn
+                                        btn-outline-danger
+                                        btn-delete-detail
+                                    "
+                                    data-index="${index}"
+                                    title="Delete"
+                                >
+
+                                    <i class="fa-solid fa-trash"></i>
+
+                                </button>
+
+                            </div>
+
+                        `
+
+                        : `
+
+                            <span
+                                class="text-muted"
+                                title="Posted journal is read only"
+                            >
+
+                                <i class="fa-solid fa-lock"></i>
+
+                            </span>
+
+                        `
+                }
 
             </td>
 
-            <td class="text-center">
-
-                <div class="btn-group btn-group-sm">
-
-                    <button
-                        type="button"
-                        class="btn btn-outline-primary btn-edit-detail"
-                        data-index="${index}"
-                        title="Edit">
-
-                        <i class="fa-solid fa-pen"></i>
-
-                    </button>
-
-                    <button
-                        type="button"
-                        class="btn btn-outline-danger btn-delete-detail"
-                        data-index="${index}"
-                        title="Delete">
-
-                        <i class="fa-solid fa-trash"></i>
-
-                    </button>
-
-                </div>
-
-            </td>
 
         </tr>
 
@@ -7047,81 +7684,106 @@ openEditLine(index) {
 /*
 ==========================================================
 OPEN ADD DETAIL MODAL
+FINAL
 ==========================================================
 */
 
 async openAddDetailModal() {
 
+    /*
+    ======================================================
+    LOAD MODAL
+    ======================================================
+    */
+
     await this.loadDetailModal();
 
-    this.populateCOA();
 
-    this.populateBusinessPartners();
+    /*
+    ======================================================
+    ENSURE MASTER DATA
+    ======================================================
+    */
+
+    if (
+        !Array.isArray(
+            this.coaList
+        )
+        ||
+        this.coaList.length === 0
+    ) {
+
+        await this.loadCOA();
+
+    }
+
+    else {
+
+        this.populateCOA();
+
+    }
+
+
+    if (
+        !Array.isArray(
+            this.businessPartnerList
+        )
+        ||
+        this.businessPartnerList.length === 0
+    ) {
+
+        await this.loadBusinessPartners();
+
+    }
+
+    else {
+
+        this.populateBusinessPartners();
+
+    }
+
+
+    /*
+    ======================================================
+    CLEAR FORM
+    ======================================================
+    */
 
     this.clearDetailForm();
 
-    this.detailMode.value = "add";
 
-    this.detailId.value = "";
+    /*
+    ======================================================
+    MODE
+    ======================================================
+    */
 
-    this.currentDetail = null;
+    this.detailMode.value =
+        "add";
 
-    this.currentDetailIndex = -1;
+
+    this.detailId.value =
+        "";
+
+
+    this.currentDetail =
+        null;
+
+
+    this.currentDetailIndex =
+        -1;
+
+
+    /*
+    ======================================================
+    SHOW
+    ======================================================
+    */
 
     this.detailModal.show();
 
 }
-/*
-==========================================================
-CLEAR DETAIL FORM
-==========================================================
-*/
 
-clearDetailForm() {
-
-    if (this.detailId) {
-
-        this.detailId.value = "";
-
-    }
-
-    if (this.detailMode) {
-
-        this.detailMode.value = "add";
-
-    }
-
-    if (this.detailDescription) {
-
-        this.detailDescription.value = "";
-
-    }
-
-    if (this.detailDebitAccount) {
-
-        this.detailDebitAccount.value = "";
-
-    }
-
-    if (this.detailCreditAccount) {
-
-        this.detailCreditAccount.value = "";
-
-    }
-
-    if (this.detailBusinessPartner) {
-
-        this.detailBusinessPartner.value = "";
-
-    }
-
-    if (this.detailAmount) {
-
-        this.detailAmount.value = "0.00";
-
-    }
-
-}
 /*
 ==========================================================
 FILL DETAIL FORM
@@ -7155,30 +7817,71 @@ fillDetailForm() {
 /*
 ==========================================================
 COLLECT DETAIL FORM
+FINAL
 ==========================================================
 */
 
 collectDetailForm() {
-    console.log("detailDebitAccount", this.detailDebitAccount);
-    console.log("detailCreditAccount", this.detailCreditAccount);
-    console.log("detailBusinessPartner", this.detailBusinessPartner);
-    /*
-    ======================================================
-    DEBIT ACCOUNT
-    ======================================================
-    */
-
-    const debitOption =
-        this.detailDebitAccount.selectedOptions[0];
 
     /*
     ======================================================
-    CREDIT ACCOUNT
+    ACCOUNT ID
     ======================================================
     */
 
-    const creditOption =
-        this.detailCreditAccount.selectedOptions[0];
+    const debitAccountId =
+        this.debitAccountTomSelect
+            ? this.debitAccountTomSelect.getValue()
+            : (
+                this.detailDebitAccount?.value
+                || ""
+            );
+
+
+    const creditAccountId =
+        this.creditAccountTomSelect
+            ? this.creditAccountTomSelect.getValue()
+            : (
+                this.detailCreditAccount?.value
+                || ""
+            );
+
+
+    /*
+    ======================================================
+    ACCOUNT MASTER
+    ======================================================
+    */
+
+    const debitAccount =
+        this.coaList.find(
+
+            account =>
+                String(
+                    account.id
+                )
+                ===
+                String(
+                    debitAccountId
+                )
+
+        );
+
+
+    const creditAccount =
+        this.coaList.find(
+
+            account =>
+                String(
+                    account.id
+                )
+                ===
+                String(
+                    creditAccountId
+                )
+
+        );
+
 
     /*
     ======================================================
@@ -7186,8 +7889,51 @@ collectDetailForm() {
     ======================================================
     */
 
-    const bpOption =
-        this.detailBusinessPartner.selectedOptions[0];
+    const businessPartnerId =
+        this.detailBusinessPartner?.value
+        || null;
+
+
+    const businessPartner =
+        this.businessPartnerList.find(
+
+            bp =>
+                String(
+                    bp.id
+                )
+                ===
+                String(
+                    businessPartnerId
+                )
+
+        );
+
+
+    /*
+    ======================================================
+    AMOUNT
+    REMOVE THOUSAND SEPARATOR
+    ======================================================
+    */
+
+    const amount =
+        Number(
+
+            String(
+                this.detailAmount?.value
+                || "0"
+            )
+            .replace(
+                /\./g,
+                ""
+            )
+            .replace(
+                /,/g,
+                ""
+            )
+
+        );
+
 
     /*
     ======================================================
@@ -7198,46 +7944,54 @@ collectDetailForm() {
     return {
 
         description:
+            this.detailDescription?.value
+                .trim()
+            || "",
 
-            this.detailDescription.value.trim(),
 
         debit_account_id:
+            debitAccountId,
 
-            this.detailDebitAccount.value,
 
         debit_account_code:
+            debitAccount?.account_code
+            || "",
 
-            debitOption?.dataset.code || "",
 
         debit_account_name:
+            debitAccount?.account_name
+            || "",
 
-            debitOption?.dataset.name || "",
 
         credit_account_id:
+            creditAccountId,
 
-            this.detailCreditAccount.value,
 
         credit_account_code:
+            creditAccount?.account_code
+            || "",
 
-            creditOption?.dataset.code || "",
 
         credit_account_name:
+            creditAccount?.account_name
+            || "",
 
-            creditOption?.dataset.name || "",
 
         business_partner_id:
+            businessPartnerId,
 
-            this.detailBusinessPartner.value || null,
 
         business_partner_name:
+            businessPartner?.bp_name
+            || "",
 
-            bpOption?.text || "",
 
         amount:
-
-            Number(
-                this.detailAmount.value || 0
+            Number.isFinite(
+                amount
             )
+                ? amount
+                : 0
 
     };
 
@@ -7877,80 +8631,151 @@ async loadCOA() {
 /*
 ==========================================================
 POPULATE CHART OF ACCOUNTS
+FINAL
 ==========================================================
 */
 
 populateCOA() {
 
+    /*
+    ======================================================
+    VALIDATION
+    ======================================================
+    */
+
     if (
-
-        !this.detailDebitAccount ||
-
+        !this.detailDebitAccount
+        ||
         !this.detailCreditAccount
-
     ) {
 
         return;
 
     }
 
+
     /*
     ======================================================
-    RESET
+    DESTROY OLD TOM SELECT
+    BEFORE REBUILDING OPTIONS
+    ======================================================
+    */
+
+    if (
+        this.debitAccountTomSelect
+    ) {
+
+        this.debitAccountTomSelect.destroy();
+
+        this.debitAccountTomSelect = null;
+
+    }
+
+
+    if (
+        this.creditAccountTomSelect
+    ) {
+
+        this.creditAccountTomSelect.destroy();
+
+        this.creditAccountTomSelect = null;
+
+    }
+
+
+    /*
+    ======================================================
+    RESET NATIVE SELECT
     ======================================================
     */
 
     this.detailDebitAccount.innerHTML = `
+
         <option value="">
-            -- Select Debit Account --
+            Select Chart of Account
         </option>
+
     `;
 
+
     this.detailCreditAccount.innerHTML = `
+
         <option value="">
-            -- Select Credit Account --
+            Select Chart of Account
         </option>
+
     `;
+
 
     /*
     ======================================================
-    OPTION
+    BUILD OPTIONS
     ======================================================
     */
 
-    this.coaList.forEach(account => {
+    this.coaList.forEach(
 
-        const option = `
+        account => {
 
-            <option
-                value="${account.id}"
-                data-code="${account.account_code}"
-                data-name="${account.account_name}">
+            const debitOption =
+                document.createElement(
+                    "option"
+                );
 
-                ${account.account_code}
-                :: ${account.account_name}
 
-            </option>
+            debitOption.value =
+                account.id;
 
-        `;
 
-        this.detailDebitAccount.insertAdjacentHTML(
+            debitOption.textContent =
+                `${
+                    account.account_code
+                } :: ${
+                    account.account_name
+                }`;
 
-            "beforeend",
 
-            option
+            debitOption.dataset.code =
+                account.account_code;
 
-        );
 
-        this.detailCreditAccount.insertAdjacentHTML(
+            debitOption.dataset.name =
+                account.account_name;
 
-            "beforeend",
 
-            option
+            /*
+            ==================================================
+            CREDIT OPTION
+            ==================================================
+            */
 
-        );
+            const creditOption =
+                debitOption.cloneNode(
+                    true
+                );
 
-    });
+
+            this.detailDebitAccount.appendChild(
+                debitOption
+            );
+
+
+            this.detailCreditAccount.appendChild(
+                creditOption
+            );
+
+        }
+
+    );
+
+
+    /*
+    ======================================================
+    INITIALIZE SEARCHABLE SELECT
+    ======================================================
+    */
+
+    this.initializeDetailAccountTomSelect();
 
 }
 /*
@@ -10031,50 +10856,134 @@ saveDetail() {
 /*
 ==========================================================
 CLEAR DETAIL FORM
+FINAL
 ==========================================================
 */
 
 clearDetailForm() {
 
-    if (this.detailId) {
+    /*
+    ======================================================
+    HIDDEN
+    ======================================================
+    */
 
-        this.detailId.value = "";
+    if (
+        this.detailId
+    ) {
 
-    }
-
-    if (this.detailMode) {
-
-        this.detailMode.value = "add";
-
-    }
-
-    if (this.detailDescription) {
-
-        this.detailDescription.value = "";
+        this.detailId.value =
+            "";
 
     }
 
-    if (this.detailDebitAccount) {
 
-        this.detailDebitAccount.selectedIndex = 0;
+    if (
+        this.detailMode
+    ) {
 
-    }
-
-    if (this.detailCreditAccount) {
-
-        this.detailCreditAccount.selectedIndex = 0;
+        this.detailMode.value =
+            "add";
 
     }
 
-    if (this.detailBusinessPartner) {
 
-        this.detailBusinessPartner.selectedIndex = 0;
+    /*
+    ======================================================
+    DESCRIPTION
+    ======================================================
+    */
+
+    if (
+        this.detailDescription
+    ) {
+
+        this.detailDescription.value =
+            "";
 
     }
 
-    if (this.detailAmount) {
 
-        this.detailAmount.value = 0;
+    /*
+    ======================================================
+    DEBIT
+    ======================================================
+    */
+
+    if (
+        this.debitAccountTomSelect
+    ) {
+
+        this.debitAccountTomSelect.clear(
+            true
+        );
+
+    }
+
+    else if (
+        this.detailDebitAccount
+    ) {
+
+        this.detailDebitAccount.value =
+            "";
+
+    }
+
+
+    /*
+    ======================================================
+    CREDIT
+    ======================================================
+    */
+
+    if (
+        this.creditAccountTomSelect
+    ) {
+
+        this.creditAccountTomSelect.clear(
+            true
+        );
+
+    }
+
+    else if (
+        this.detailCreditAccount
+    ) {
+
+        this.detailCreditAccount.value =
+            "";
+
+    }
+
+
+    /*
+    ======================================================
+    BUSINESS PARTNER
+    ======================================================
+    */
+
+    if (
+        this.detailBusinessPartner
+    ) {
+
+        this.detailBusinessPartner.value =
+            "";
+
+    }
+
+
+    /*
+    ======================================================
+    AMOUNT
+    ======================================================
+    */
+
+    if (
+        this.detailAmount
+    ) {
+
+        this.detailAmount.value =
+            "";
 
     }
 
@@ -10082,53 +10991,182 @@ clearDetailForm() {
 /*
 ==========================================================
 OPEN EDIT DETAIL MODAL
+FINAL
 ==========================================================
 */
 
-async openEditDetailModal(index) {
+async openEditDetailModal(
+    index
+) {
+
+    /*
+    ======================================================
+    VALIDATION
+    ======================================================
+    */
 
     if (
-
-        index === undefined ||
-
-        index === null ||
-
+        index === undefined
+        ||
+        index === null
+        ||
         !this.detailLines[index]
-
     ) {
 
         return;
 
     }
 
+
+    /*
+    ======================================================
+    LOAD MODAL
+    ======================================================
+    */
+
     await this.loadDetailModal();
 
-    this.populateCOA();
 
-    this.populateBusinessPartners();
+    /*
+    ======================================================
+    MASTER DATA
+    ======================================================
+    */
+
+    if (
+        !Array.isArray(
+            this.coaList
+        )
+        ||
+        this.coaList.length === 0
+    ) {
+
+        await this.loadCOA();
+
+    }
+
+    else {
+
+        this.populateCOA();
+
+    }
+
+
+    if (
+        !Array.isArray(
+            this.businessPartnerList
+        )
+        ||
+        this.businessPartnerList.length === 0
+    ) {
+
+        await this.loadBusinessPartners();
+
+    }
+
+    else {
+
+        this.populateBusinessPartners();
+
+    }
+
+
+    /*
+    ======================================================
+    DETAIL
+    ======================================================
+    */
 
     const detail =
-
         this.detailLines[index];
 
-    this.detailMode.value = "edit";
 
-    this.detailId.value = index;
+    /*
+    ======================================================
+    MODE
+    ======================================================
+    */
+
+    this.detailMode.value =
+        "edit";
+
+
+    this.detailId.value =
+        index;
+
+
+    /*
+    ======================================================
+    DESCRIPTION
+    ======================================================
+    */
 
     this.detailDescription.value =
-        detail.description || "";
+        detail.description
+        || "";
 
-    this.detailDebitAccount.value =
-        detail.debit_account_id || "";
 
-    this.detailCreditAccount.value =
-        detail.credit_account_id || "";
+    /*
+    ======================================================
+    DEBIT ACCOUNT
+    ======================================================
+    */
+
+    this.debitAccountTomSelect?.setValue(
+
+        detail.debit_account_id
+        || "",
+
+        true
+
+    );
+
+
+    /*
+    ======================================================
+    CREDIT ACCOUNT
+    ======================================================
+    */
+
+    this.creditAccountTomSelect?.setValue(
+
+        detail.credit_account_id
+        || "",
+
+        true
+
+    );
+
+
+    /*
+    ======================================================
+    AMOUNT
+    ======================================================
+    */
 
     this.detailAmount.value =
-    Number(detail.amount || 0).toString();
+        this.formatDetailAmount(
+            detail.amount
+            || 0
+        );
+
+
+    /*
+    ======================================================
+    BUSINESS PARTNER
+    ======================================================
+    */
 
     this.detailBusinessPartner.value =
-        detail.business_partner_id || "";
+        detail.business_partner_id
+        || "";
+
+
+    /*
+    ======================================================
+    SHOW
+    ======================================================
+    */
 
     this.detailModal.show();
 
@@ -10250,6 +11288,7 @@ formatDetailAmount(value) {
 /*
 ==========================================================
 BIND DETAIL MODAL EVENTS
+FINAL
 ==========================================================
 */
 
@@ -10261,15 +11300,18 @@ bindDetailModalEvents() {
     ======================================================
     */
 
-    if (this.detailModalEventsBound) {
+    if (
+        this.detailModalEventsBound
+    ) {
 
         return;
 
     }
 
-    this.detailModalEventsBound = true;
 
-    console.log("BIND DETAIL EVENTS");
+    this.detailModalEventsBound =
+        true;
+
 
     /*
     ======================================================
@@ -10283,60 +11325,57 @@ bindDetailModalEvents() {
 
         () => {
 
-            console.log("SAVE LINE CLICK");
-
             this.saveDetailLine();
 
         }
 
     );
 
+
     /*
     ======================================================
-    FORMAT AMOUNT
+    AMOUNT INPUT FORMAT
     ======================================================
     */
 
     this.detailAmount?.addEventListener(
 
-        "blur",
+        "input",
 
         () => {
 
-            const amount =
-    Number(
-        this.detailAmount.value
-            .replace(/\./g, "")
-    );
+            const rawValue =
+                this.detailAmount.value
+                    .replace(
+                        /\D/g,
+                        ""
+                    );
+
+
+            if (
+                !rawValue
+            ) {
+
+                this.detailAmount.value =
+                    "";
+
+                return;
+
+            }
+
 
             this.detailAmount.value =
-                amount.toFixed(2);
+                Number(
+                    rawValue
+                )
+                .toLocaleString(
+                    "id-ID"
+                );
 
         }
 
     );
-    this.detailAmount?.addEventListener(
-    "input",
-    () => {
 
-        const rawValue =
-            this.detailAmount.value
-                .replace(/\D/g, "");
-
-        if (!rawValue) {
-
-            this.detailAmount.value = "";
-
-            return;
-
-        }
-
-        this.detailAmount.value =
-            Number(rawValue)
-                .toLocaleString("id-ID");
-
-    }
-);
 
     /*
     ======================================================
@@ -10348,27 +11387,36 @@ bindDetailModalEvents() {
 
         "keydown",
 
-        (event) => {
+        event => {
 
-            if (event.key !== "Enter") {
+            if (
+                event.key !== "Enter"
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                event.target.tagName ===
+                "TEXTAREA"
+            ) {
 
                 return;
 
             }
 
-            if (event.target.tagName === "TEXTAREA") {
-
-                return;
-
-            }
 
             event.preventDefault();
+
 
             this.saveDetailLine();
 
         }
 
     );
+
 
     /*
     ======================================================
