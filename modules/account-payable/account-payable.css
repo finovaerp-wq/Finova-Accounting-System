@@ -2453,3 +2453,128 @@ tr.ap-data-row.ap-row-completed:hover
     gap: 8px;
 
 }
+/* ==========================================================
+   FINOVA ACCOUNTING SYSTEM
+   ACCOUNT PAYABLE
+   INVOICE DETAIL TABLE
+========================================================== */
+
+
+/* ==========================================================
+   TABLE WRAPPER
+========================================================== */
+
+.ap-invoice-detail-table-wrapper {
+
+    width: 100%;
+
+    overflow-x: auto;
+
+}
+
+
+/* ==========================================================
+   TABLE
+========================================================== */
+
+.ap-invoice-detail-table {
+
+    width: 100%;
+
+    table-layout: fixed;
+
+    margin-bottom: 0;
+
+}
+
+
+/* ==========================================================
+   HEADER
+========================================================== */
+
+.ap-invoice-detail-table thead th {
+
+    vertical-align: middle;
+
+    white-space: nowrap;
+
+    font-weight: 600;
+
+}
+
+
+/* ==========================================================
+   BODY
+========================================================== */
+
+.ap-invoice-detail-table tbody td {
+
+    vertical-align: top;
+
+}
+
+
+/* ==========================================================
+   ACCOUNT COLUMN
+========================================================== */
+
+.ap-invoice-detail-table th:nth-child(2),
+.ap-invoice-detail-table td:nth-child(2) {
+
+    white-space: normal;
+
+    overflow-wrap: anywhere;
+
+    word-break: normal;
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION COLUMN
+========================================================== */
+
+.ap-invoice-detail-table th:nth-child(3),
+.ap-invoice-detail-table td:nth-child(3) {
+
+    white-space: normal;
+
+    overflow-wrap: anywhere;
+
+    word-break: normal;
+
+    line-height: 1.5;
+
+}
+
+
+/* ==========================================================
+   NUMBER COLUMNS
+========================================================== */
+
+.ap-invoice-detail-table th:nth-child(4),
+.ap-invoice-detail-table td:nth-child(4),
+
+.ap-invoice-detail-table th:nth-child(5),
+.ap-invoice-detail-table td:nth-child(5),
+
+.ap-invoice-detail-table th:nth-child(6),
+.ap-invoice-detail-table td:nth-child(6) {
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   ACTION COLUMN
+========================================================== */
+
+.ap-invoice-detail-table th:nth-child(7),
+.ap-invoice-detail-table td:nth-child(7) {
+
+    white-space: nowrap;
+
+    text-align: center;
+
+}

@@ -9974,12 +9974,21 @@ async addInvoice() {
 
 
     /*
-    ======================================================
-    CALCULATE DETAIL
-    ======================================================
-    */
+======================================================
+CALCULATE DETAIL
+ACCOUNT RECEIVABLE
+======================================================
+*/
 
-    calculateDetail() {
+calculateDetail() {
+
+    try {
+
+        /*
+        ==================================================
+        QUANTITY
+        ==================================================
+        */
 
         const quantity =
             Number(
@@ -9988,20 +9997,28 @@ async addInvoice() {
             );
 
 
+        /*
+        ==================================================
+        UNIT PRICE
+        ==================================================
+        */
+
         const unitPrice =
             this.parseNumber(
                 this.arDetailUnitPrice?.value
             );
 
 
+        /*
+        ==================================================
+        TAX (+)
+        ==================================================
+        */
+
         const taxPlusOption =
             this.arDetailTaxOutputRate
-                ?.selectedOptions?.[0];
-
-
-        const taxMinusOption =
-            this.arDetailWithholdingTaxRate
-                ?.selectedOptions?.[0];
+                ?.selectedOptions
+                ?.[0];
 
 
         const taxOutputRate =
@@ -10013,6 +10030,18 @@ async addInvoice() {
             );
 
 
+        /*
+        ==================================================
+        TAX (-)
+        ==================================================
+        */
+
+        const taxMinusOption =
+            this.arDetailWithholdingTaxRate
+                ?.selectedOptions
+                ?.[0];
+
+
         const withholdingTaxRate =
             Number(
                 taxMinusOption
@@ -10022,11 +10051,18 @@ async addInvoice() {
             );
 
 
+        /*
+        ==================================================
+        CALCULATE
+        ==================================================
+        */
+
         const calculated =
             this.service
                 .calculateDetailAmount({
 
-                    quantity,
+                    quantity:
+                        quantity,
 
                     unit_price:
                         unitPrice,
@@ -10040,55 +10076,161 @@ async addInvoice() {
                 });
 
 
+        /*
+        ==================================================
+        LINE AMOUNT
+        ==================================================
+        */
+
         if (
             this.arDetailLineAmount
         ) {
 
-            this.arDetailLineAmount.value =
-                this.formatCurrency(
-                    calculated.line_amount
-                );
+            this.arDetailLineAmount
+                .textContent =
+                    this.formatCurrency(
+                        calculated.line_amount
+                        || 0
+                    );
 
         }
 
+
+        /*
+        ==================================================
+        TAX (+)
+        ==================================================
+        */
 
         if (
             this.arDetailTaxOutputAmount
         ) {
 
-            this.arDetailTaxOutputAmount.value =
-                this.formatCurrency(
-                    calculated.tax_output_amount
-                );
+            this.arDetailTaxOutputAmount
+                .textContent =
+                    this.formatCurrency(
+                        calculated.tax_output_amount
+                        || 0
+                    );
 
         }
 
+
+        /*
+        ==================================================
+        TAX (-)
+        ==================================================
+        */
 
         if (
             this.arDetailWithholdingTaxAmount
         ) {
 
-            this.arDetailWithholdingTaxAmount.value =
-                this.formatCurrency(
-                    calculated.withholding_tax_amount
-                );
+            this.arDetailWithholdingTaxAmount
+                .textContent =
+                    this.formatCurrency(
+                        calculated.withholding_tax_amount
+                        || 0
+                    );
 
         }
 
+
+        /*
+        ==================================================
+        TOTAL AMOUNT
+        ==================================================
+        */
 
         if (
             this.arDetailTotalAmount
         ) {
 
-            this.arDetailTotalAmount.value =
-                this.formatCurrency(
-                    calculated.total_amount
-                );
+            this.arDetailTotalAmount
+                .textContent =
+                    this.formatCurrency(
+                        calculated.total_amount
+                        || 0
+                    );
 
         }
 
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "AR DETAIL CALCULATION:",
+            {
+
+                quantity:
+                    quantity,
+
+                unit_price:
+                    unitPrice,
+
+                tax_output_rate:
+                    taxOutputRate,
+
+                withholding_tax_rate:
+                    withholdingTaxRate,
+
+                line_amount:
+                    calculated.line_amount,
+
+                tax_output_amount:
+                    calculated.tax_output_amount,
+
+                withholding_tax_amount:
+                    calculated.withholding_tax_amount,
+
+                total_amount:
+                    calculated.total_amount
+
+            }
+        );
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
+
+        return calculated;
+
     }
 
+    catch (error) {
+
+        console.error(
+            "AccountReceivable.calculateDetail:",
+            error
+        );
+
+
+        return {
+
+            line_amount:
+                0,
+
+            tax_output_amount:
+                0,
+
+            withholding_tax_amount:
+                0,
+
+            total_amount:
+                0
+
+        };
+
+    }
+
+}
 
     /*
     ======================================================
@@ -10534,85 +10676,169 @@ async addInvoice() {
 
 
     /*
-    ======================================================
-    RENDER INVOICE DETAILS
-    ======================================================
+======================================================
+RENDER INVOICE DETAILS
+======================================================
+*/
+
+renderInvoiceDetails() {
+
+    const tableBody =
+        document.getElementById(
+            "ar-detail-body"
+        );
+
+
+    /*
+    ==================================================
+    VALIDATION
+    ==================================================
     */
 
-    renderInvoiceDetails() {
+    if (!tableBody) {
 
-        const body =
-            document.getElementById(
-                "ar-detail-body"
-            );
+        console.warn(
+            "AR detail body not found."
+        );
 
+        return;
 
-        if (!body) {
-
-            return;
-
-        }
+    }
 
 
-        if (
-            !this.invoiceDetails.length
-        ) {
+    /*
+    ==================================================
+    VIEW MODE
+    ==================================================
+    */
 
-            body.innerHTML = `
-
-                <tr>
-
-                    <td
-                        colspan="10"
-                        class="text-center text-muted py-4">
-
-                        No invoice detail.
-
-                    </td>
-
-                </tr>
-
-            `;
+    const isViewMode =
+        this.currentMode ===
+        "view";
 
 
-            return;
+    /*
+    ==================================================
+    EMPTY DETAIL
+    ==================================================
+    */
 
-        }
-
-
-        body.innerHTML =
+    if (
+        !Array.isArray(
             this.invoiceDetails
-                .map(
-                    (
-                        detail,
-                        index
-                    ) => `
+        )
+        ||
+        !this.invoiceDetails.length
+    ) {
+
+        tableBody.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="7"
+                    class="
+                        text-center
+                        text-muted
+                        py-4
+                    ">
+
+                    No detail added.
+
+                </td>
+
+            </tr>
+
+        `;
+
+
+        this.updateInvoiceSummary();
+
+
+        return;
+
+    }
+
+
+    /*
+    ==================================================
+    RENDER DETAIL
+    ==================================================
+    */
+
+    tableBody.innerHTML =
+        this.invoiceDetails
+            .map(
+                (
+                    detail,
+                    index
+                ) => {
+
+                    return `
 
                         <tr>
 
-                            <td>
+                            <!-- ==================================
+                                 NO
+                            =================================== -->
+
+                            <td
+                                class="
+                                    text-center
+                                    align-top
+                                ">
+
                                 ${index + 1}
-                            </td>
-
-
-                            <td>
-
-                                ${
-                                    detail.account_code
-                                    || ""
-                                }
-
-                                -
-
-                                ${
-                                    detail.account_name
-                                    || ""
-                                }
 
                             </td>
 
 
-                            <td>
+                            <!-- ==================================
+                                 ACCOUNT
+                            =================================== -->
+
+                            <td
+                                class="
+                                    align-top
+                                    ar-detail-account-cell
+                                ">
+
+                                <div class="fw-semibold">
+
+                                    ${
+                                        detail.account_code
+                                        || "-"
+                                    }
+
+                                </div>
+
+
+                                <div
+                                    class="
+                                        small
+                                        text-muted
+                                        mt-1
+                                    ">
+
+                                    ${
+                                        detail.account_name
+                                        || "-"
+                                    }
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- ==================================
+                                 DESCRIPTION
+                            =================================== -->
+
+                            <td
+                                class="
+                                    align-top
+                                    ar-detail-description-cell
+                                ">
 
                                 ${
                                     detail.description
@@ -10622,100 +10848,174 @@ async addInvoice() {
                             </td>
 
 
-                            <td class="text-end">
+                            <!-- ==================================
+                                 QUANTITY
+                            =================================== -->
 
-                                ${detail.quantity}
-
-                            </td>
-
-
-                            <td class="text-end">
-
-                                ${this.formatCurrency(
-                                    detail.unit_price
-                                )}
-
-                            </td>
-
-
-                            <td class="text-end">
-
-                                ${this.formatCurrency(
-                                    detail.line_amount
-                                )}
-
-                            </td>
-
-
-                            <td class="text-center">
+                            <td
+                                class="
+                                    text-end
+                                    align-top
+                                ">
 
                                 ${
-                                    detail.tax_plus_name
-                                    || "No Tax"
+                                    Number(
+                                        detail.quantity
+                                        || 0
+                                    )
+                                    .toLocaleString(
+                                        "id-ID"
+                                    )
                                 }
 
                             </td>
 
 
-                            <td class="text-center">
+                            <!-- ==================================
+                                 UNIT PRICE
+                            =================================== -->
+
+                            <td
+                                class="
+                                    text-end
+                                    align-top
+                                ">
 
                                 ${
-                                    detail.tax_minus_name
-                                    || "No Tax"
+                                    this.formatCurrency(
+                                        Number(
+                                            detail.unit_price
+                                            || 0
+                                        )
+                                    )
                                 }
 
                             </td>
 
 
-                            <td class="text-end">
+                            <!-- ==================================
+                                 AMOUNT
+                            =================================== -->
 
-                                ${this.formatCurrency(
-                                    detail.total_amount
-                                )}
+                            <td
+                                class="
+                                    text-end
+                                    fw-semibold
+                                    align-top
+                                ">
+
+                                ${
+                                    this.formatCurrency(
+                                        Number(
+                                            detail.total_amount
+                                            || 0
+                                        )
+                                    )
+                                }
 
                             </td>
 
 
-                            <td class="text-center">
+                            <!-- ==================================
+                                 ACTION
+                            =================================== -->
 
-                                <div class="btn-group btn-group-sm">
+                            <td
+                                class="
+                                    text-center
+                                    align-top
+                                ">
+
+                                ${
+                                    isViewMode
+
+                                        ? `
+
+                                            <span
+                                                class="
+                                                    text-muted
+                                                    small
+                                                ">
+
+                                                -
+
+                                            </span>
+
+                                        `
+
+                                        : `
+
+                                            <div
+                                                class="
+                                                    btn-group
+                                                    btn-group-sm
+                                                "
+                                                role="group">
+
+                                                <button
+                                                    type="button"
+                                                    class="
+                                                        btn
+                                                        btn-outline-primary
+                                                    "
+                                                    data-detail-action="edit"
+                                                    data-detail-id="${detail.id}"
+                                                    title="Edit Detail">
+
+                                                    <i
+                                                        class="
+                                                            fa-solid
+                                                            fa-pen
+                                                        ">
+                                                    </i>
+
+                                                </button>
 
 
-                                    <button
-                                        type="button"
-                                        class="btn btn-outline-primary"
-                                        data-detail-action="edit"
-                                        data-detail-id="${detail.id}"
-                                        title="Edit">
+                                                <button
+                                                    type="button"
+                                                    class="
+                                                        btn
+                                                        btn-outline-danger
+                                                    "
+                                                    data-detail-action="delete"
+                                                    data-detail-id="${detail.id}"
+                                                    title="Remove Detail">
 
-                                        <i class="fa-solid fa-pen"></i>
+                                                    <i
+                                                        class="
+                                                            fa-solid
+                                                            fa-trash
+                                                        ">
+                                                    </i>
 
-                                    </button>
+                                                </button>
 
+                                            </div>
 
-                                    <button
-                                        type="button"
-                                        class="btn btn-outline-danger"
-                                        data-detail-action="delete"
-                                        data-detail-id="${detail.id}"
-                                        title="Delete">
-
-                                        <i class="fa-solid fa-trash"></i>
-
-                                    </button>
-
-
-                                </div>
+                                        `
+                                }
 
                             </td>
 
                         </tr>
 
-                    `
-                )
-                .join("");
+                    `;
 
-    }
+                }
+            )
+            .join("");
+
+
+    /*
+    ==================================================
+    UPDATE SUMMARY
+    ==================================================
+    */
+
+    this.updateInvoiceSummary();
+
+}
 
 
     /*
@@ -11456,37 +11756,164 @@ updateInvoiceSummary() {
 
 
     /*
-    ======================================================
-    EDIT INVOICE
-    ======================================================
-    */
+======================================================
+EDIT INVOICE
+======================================================
+*/
 
-    async editInvoice(id) {
+async editInvoice(id) {
 
-        try {
+    try {
 
-            const result =
-                await this.service.getById(
-                    id
+        /*
+        ==================================================
+        GET DATA
+        ==================================================
+        */
+
+        const result =
+            await this.service.getById(
+                id
+            );
+
+
+        const header =
+            result?.header;
+
+
+        const details =
+            Array.isArray(
+                result?.details
+            )
+                ? result.details
+                : [];
+
+
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
+
+        if (!header) {
+
+            throw new Error(
+                "Account Receivable data not found."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        STATE
+        ==================================================
+        */
+
+        this.currentInvoiceId =
+            id;
+
+
+        this.currentMode =
+            "edit";
+
+
+        /*
+        ==================================================
+        RESTORE EDIT MODE
+        ==================================================
+        */
+
+        const editableFields = [
+
+            this.arFormCustomer,
+
+            this.arFormPoNo,
+
+            this.arFormInvoiceNo,
+
+            this.arFormInvoiceDate,
+
+            this.arFormDateReceived,
+
+            this.arFormDueDate,
+
+            this.arFormDescription,
+
+            this.arFormStatus
+
+        ];
+
+
+        editableFields.forEach(
+            field => {
+
+                if (field) {
+
+                    field.disabled =
+                        false;
+
+                }
+
+            }
+        );
+
+
+        /*
+        ==================================================
+        SHOW ADD DETAIL
+        ==================================================
+        */
+
+        if (
+            this.btnAddDetail
+        ) {
+
+            this.btnAddDetail
+                .classList
+                .remove(
+                    "d-none"
                 );
 
 
-            const header =
-                result.header;
+            this.btnAddDetail.disabled =
+                false;
+
+        }
 
 
-            const details =
-                result.details
-                || [];
+        /*
+        ==================================================
+        SHOW SAVE BUTTON
+        ==================================================
+        */
+
+        if (
+            this.btnSaveDraft
+        ) {
+
+            this.btnSaveDraft
+                .classList
+                .remove(
+                    "d-none"
+                );
 
 
-            this.currentInvoiceId =
-                id;
+            this.btnSaveDraft.disabled =
+                false;
+
+        }
 
 
-            this.currentMode =
-                "edit";
+        /*
+        ==================================================
+        CUSTOMER
+        ==================================================
+        */
 
+        if (
+            this.arFormCustomer
+        ) {
 
             this.arFormCustomer.value =
                 String(
@@ -11494,73 +11921,345 @@ updateInvoiceSummary() {
                     || ""
                 );
 
+        }
+
+
+        /*
+        ==================================================
+        PO NO
+        ==================================================
+        */
+
+        if (
+            this.arFormPoNo
+        ) {
 
             this.arFormPoNo.value =
                 header.po_no
                 || "";
 
+        }
+
+
+        /*
+        ==================================================
+        INVOICE NO
+        ==================================================
+        */
+
+        if (
+            this.arFormInvoiceNo
+        ) {
 
             this.arFormInvoiceNo.value =
                 header.invoice_no
                 || "";
 
+        }
+
+
+        /*
+        ==================================================
+        INVOICE DATE
+        ==================================================
+        */
+
+        if (
+            this.arFormInvoiceDate
+        ) {
 
             this.arFormInvoiceDate.value =
                 header.invoice_date
                 || "";
 
+        }
+
+
+        /*
+        ==================================================
+        DATE RECEIVED
+        ==================================================
+        */
+
+        if (
+            this.arFormDateReceived
+        ) {
 
             this.arFormDateReceived.value =
                 header.date_received
                 || "";
 
+        }
+
+
+        /*
+        ==================================================
+        TERM OF PAYMENT
+        ==================================================
+        */
+
+        if (
+            this.arFormTop
+        ) {
+
+            this.arFormTop.value =
+
+                header.term_of_payment
+                    ?.top_name
+
+                ||
+
+                header.top
+                    ?.top_name
+
+                ||
+
+                header.mst_term_of_payment
+                    ?.top_name
+
+                ||
+
+                "";
+
+        }
+
+
+        /*
+        ==================================================
+        DUE DATE
+        ==================================================
+        */
+
+        if (
+            this.arFormDueDate
+        ) {
 
             this.arFormDueDate.value =
                 header.due_date
                 || "";
 
+        }
+
+
+        /*
+        ==================================================
+        DESCRIPTION
+        ==================================================
+        */
+
+        if (
+            this.arFormDescription
+        ) {
 
             this.arFormDescription.value =
                 header.description
                 || "";
 
+        }
+
+
+        /*
+        ==================================================
+        JOURNAL NO
+        ==================================================
+        */
+
+        if (
+            this.arFormJournalNo
+        ) {
+
+            this.arFormJournalNo.value =
+
+                header.gl_journal
+                    ?.journal_no
+
+                ||
+
+                header.journal
+                    ?.journal_no
+
+                ||
+
+                header.journal_no
+
+                ||
+
+                "";
+
+        }
+
+
+        /*
+        ==================================================
+        STATUS
+        ==================================================
+        */
+
+        if (
+            this.arFormStatus
+        ) {
 
             this.arFormStatus.value =
                 header.status
                 || "Draft";
 
-
-            this.arFormJournalNo.value =
-                header.gl_journal
-                    ?.journal_no
-                || "";
+        }
 
 
-            this.invoiceDetails =
-                details.map(
-                    item => ({
+        /*
+        ==================================================
+        DETAIL DATA
+        ==================================================
+        */
+
+        this.invoiceDetails =
+            details.map(
+                item => {
+
+                    /*
+                    ==========================================
+                    REVENUE ACCOUNT ID
+                    ==========================================
+                    */
+
+                    const revenueAccountId =
+                        Number(
+                            item.revenue_account_id
+                            || 0
+                        );
+
+
+                    /*
+                    ==========================================
+                    FIND REVENUE ACCOUNT
+
+                    FIRST:
+                    use currentCOA
+
+                    FALLBACK:
+                    use joined revenue_account
+                    ==========================================
+                    */
+
+                    const revenueAccount =
+                        Array.isArray(
+                            this.currentCOA
+                        )
+
+                            ? this.currentCOA.find(
+                                account =>
+                                    Number(
+                                        account.id
+                                    )
+                                    ===
+                                    revenueAccountId
+                            )
+
+                            : null;
+
+
+                    /*
+                    ==========================================
+                    ACCOUNT CODE
+                    ==========================================
+                    */
+
+                    const accountCode =
+
+                        revenueAccount
+                            ?.account_code
+
+                        ||
+
+                        item.revenue_account
+                            ?.account_code
+
+                        ||
+
+                        item.account_code
+
+                        ||
+
+                        "";
+
+
+                    /*
+                    ==========================================
+                    ACCOUNT NAME
+                    ==========================================
+                    */
+
+                    const accountName =
+
+                        revenueAccount
+                            ?.account_name
+
+                        ||
+
+                        item.revenue_account
+                            ?.account_name
+
+                        ||
+
+                        item.account_name
+
+                        ||
+
+                        "";
+
+
+                    /*
+                    ==========================================
+                    RETURN DETAIL
+                    ==========================================
+                    */
+
+                    return {
+
+                        /*
+                        ======================================
+                        ID
+                        ======================================
+                        */
 
                         id:
                             item.id,
 
+
+                        /*
+                        ======================================
+                        REVENUE ACCOUNT
+                        ======================================
+                        */
+
                         revenue_account_id:
-                            Number(
-                                item.revenue_account_id
-                            ),
+                            revenueAccountId,
+
 
                         account_code:
-                            item.revenue_account
-                                ?.account_code
-                            || "",
+                            accountCode,
+
 
                         account_name:
-                            item.revenue_account
-                                ?.account_name
-                            || "",
+                            accountName,
+
+
+                        /*
+                        ======================================
+                        DESCRIPTION
+                        ======================================
+                        */
 
                         description:
                             item.description
                             || "",
+
+
+                        /*
+                        ======================================
+                        QUANTITY
+                        ======================================
+                        */
 
                         quantity:
                             Number(
@@ -11568,11 +12267,25 @@ updateInvoiceSummary() {
                                 || 0
                             ),
 
+
+                        /*
+                        ======================================
+                        UNIT PRICE
+                        ======================================
+                        */
+
                         unit_price:
                             Number(
                                 item.unit_price
                                 || 0
                             ),
+
+
+                        /*
+                        ======================================
+                        LINE AMOUNT
+                        ======================================
+                        */
 
                         line_amount:
                             Number(
@@ -11580,13 +12293,36 @@ updateInvoiceSummary() {
                                 || 0
                             ),
 
+
+                        /*
+                        ======================================
+                        TAX (+)
+                        ======================================
+                        */
+
                         tax_plus_id:
                             item.tax_plus_id
                             || null,
 
+
                         tax_plus_account_id:
                             item.tax_plus_account_id
                             || null,
+
+
+                        tax_plus_name:
+
+                            item.tax_plus
+                                ?.tax_name
+
+                            ||
+
+                            item.tax_plus_name
+
+                            ||
+
+                            null,
+
 
                         tax_output_rate:
                             Number(
@@ -11594,19 +12330,43 @@ updateInvoiceSummary() {
                                 || 0
                             ),
 
+
                         tax_output_amount:
                             Number(
                                 item.tax_output_amount
                                 || 0
                             ),
 
+
+                        /*
+                        ======================================
+                        TAX (-)
+                        ======================================
+                        */
+
                         tax_minus_id:
                             item.tax_minus_id
                             || null,
 
+
                         tax_minus_account_id:
                             item.tax_minus_account_id
                             || null,
+
+
+                        tax_minus_name:
+
+                            item.tax_minus
+                                ?.tax_name
+
+                            ||
+
+                            item.tax_minus_name
+
+                            ||
+
+                            null,
+
 
                         withholding_tax_rate:
                             Number(
@@ -11614,11 +12374,19 @@ updateInvoiceSummary() {
                                 || 0
                             ),
 
+
                         withholding_tax_amount:
                             Number(
                                 item.withholding_tax_amount
                                 || 0
                             ),
+
+
+                        /*
+                        ======================================
+                        TOTAL AMOUNT
+                        ======================================
+                        */
 
                         total_amount:
                             Number(
@@ -11626,42 +12394,118 @@ updateInvoiceSummary() {
                                 || 0
                             )
 
-                    })
-                );
+                    };
 
-
-            this.renderInvoiceDetails();
-
-            this.renderTaxPlus();
-
-            this.renderTaxMinus();
-
-            this.updateInvoiceSummary();
-
-
-            bootstrap.Modal
-                .getOrCreateInstance(
-                    this.accountReceivableModal
-                )
-                .show();
-
-        }
-
-        catch (error) {
-
-            console.error(
-                "AccountReceivable.editInvoice:",
-                error
+                }
             );
 
 
-            this.showError(
-                error.message
+        /*
+        ==================================================
+        DEBUG DETAIL
+        ==================================================
+        */
+
+        console.log(
+            "AR EDIT DETAILS:",
+            this.invoiceDetails
+        );
+
+
+        /*
+        ==================================================
+        RENDER INVOICE DETAIL
+        ==================================================
+        */
+
+        this.renderInvoiceDetails();
+
+
+        /*
+        ==================================================
+        RENDER TAX (+)
+        ==================================================
+        */
+
+        this.renderTaxPlus();
+
+
+        /*
+        ==================================================
+        RENDER TAX (-)
+        ==================================================
+        */
+
+        this.renderTaxMinus();
+
+
+        /*
+        ==================================================
+        UPDATE SUMMARY
+        ==================================================
+        */
+
+        this.updateInvoiceSummary();
+
+
+        /*
+        ==================================================
+        MODAL TITLE
+        ==================================================
+        */
+
+        const modalTitle =
+            document.getElementById(
+                "accountReceivableModalLabel"
             );
 
+
+        if (
+            modalTitle
+        ) {
+
+            modalTitle.innerHTML = `
+
+                <i class="fa-solid fa-file-invoice-dollar me-2"></i>
+
+                Edit Account Receivable
+
+            `;
+
         }
+
+
+        /*
+        ==================================================
+        SHOW MODAL
+        ==================================================
+        */
+
+        bootstrap.Modal
+            .getOrCreateInstance(
+                this.accountReceivableModal
+            )
+            .show();
 
     }
+
+    catch (error) {
+
+        console.error(
+            "AccountReceivable.editInvoice:",
+            error
+        );
+
+
+        this.showError(
+            error?.message
+            ||
+            "Failed to load Account Receivable."
+        );
+
+    }
+
+}
 
 
     /*
@@ -11849,84 +12693,202 @@ updateInvoiceSummary() {
 
 
     /*
-    ======================================================
-    VIEW
-    ======================================================
-    */
+======================================================
+VIEW INVOICE
+READ ONLY
+======================================================
+*/
 
-    async viewInvoice(id) {
+async viewInvoice(id) {
 
-        try {
+    try {
 
-            await this.editInvoice(
-                id
-            );
+        /*
+        ==================================================
+        LOAD INVOICE
+        ==================================================
+        */
 
-
-            this.currentMode =
-                "view";
-
-
-            const fields = [
-
-                this.arFormCustomer,
-                this.arFormPoNo,
-                this.arFormInvoiceNo,
-                this.arFormInvoiceDate,
-                this.arFormDateReceived,
-                this.arFormDueDate,
-                this.arFormDescription
-
-            ];
+        await this.editInvoice(
+            id
+        );
 
 
-            fields.forEach(
-                field => {
+        /*
+        ==================================================
+        SET MODE VIEW
+        ==================================================
+        */
 
-                    if (
-                        field
-                    ) {
+        this.currentMode =
+            "view";
 
-                        field.disabled =
-                            true;
 
-                    }
+        /*
+        ==================================================
+        HEADER FIELD
+        READ ONLY
+        ==================================================
+        */
+
+        const fields = [
+
+            this.arFormCustomer,
+
+            this.arFormPoNo,
+
+            this.arFormInvoiceNo,
+
+            this.arFormInvoiceDate,
+
+            this.arFormDateReceived,
+
+            this.arFormTop,
+
+            this.arFormDueDate,
+
+            this.arFormDescription,
+
+            this.arFormStatus
+
+        ];
+
+
+        fields.forEach(
+            field => {
+
+                if (!field) {
+
+                    return;
 
                 }
-            );
 
 
-            if (
-                this.btnAddDetail
-            ) {
-
-                this.btnAddDetail.disabled =
+                field.disabled =
                     true;
 
             }
+        );
 
 
-            if (
-                this.btnSaveDraft
-            ) {
+        /*
+        ==================================================
+        ADD DETAIL
+        HIDE
+        ==================================================
+        */
 
-                this.btnSaveDraft.disabled =
-                    true;
+        if (
+            this.btnAddDetail
+        ) {
 
-            }
-
-        }
-
-        catch (error) {
-
-            console.error(
-                "AccountReceivable.viewInvoice:",
-                error
+            this.btnAddDetail.classList.add(
+                "d-none"
             );
 
+            this.btnAddDetail.disabled =
+                true;
+
         }
+
+
+        /*
+        ==================================================
+        SAVE BUTTON
+        HIDE
+        ==================================================
+        */
+
+        if (
+            this.btnSaveDraft
+        ) {
+
+            this.btnSaveDraft.classList.add(
+                "d-none"
+            );
+
+            this.btnSaveDraft.disabled =
+                true;
+
+        }
+
+
+        /*
+        ==================================================
+        RE-RENDER DETAIL
+        IMPORTANT:
+        REMOVE EDIT / DELETE ACTION
+        ==================================================
+        */
+
+        this.renderInvoiceDetails();
+
+
+        /*
+        ==================================================
+        MODAL TITLE
+        ==================================================
+        */
+
+        const modalTitle =
+            document.getElementById(
+                "accountReceivableModalLabel"
+            );
+
+
+        if (
+            modalTitle
+        ) {
+
+            modalTitle.innerHTML = `
+
+                <i class="fa-solid fa-eye me-2"></i>
+
+                View Account Receivable
+
+            `;
+
+        }
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "ACCOUNT RECEIVABLE VIEW MODE:",
+            {
+
+                id:
+                    id,
+
+                mode:
+                    this.currentMode
+
+            }
+        );
 
     }
+
+    catch (error) {
+
+        console.error(
+            "AccountReceivable.viewInvoice:",
+            error
+        );
+
+
+        this.showError(
+            error?.message
+            ||
+            "Failed to view Account Receivable."
+        );
+
+    }
+
+}
 
 
     /*

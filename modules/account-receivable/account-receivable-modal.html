@@ -18,10 +18,8 @@
     data-bs-backdrop="static"
     data-bs-keyboard="false">
 
-
     <div
         class="modal-dialog modal-xl modal-dialog-scrollable">
-
 
         <div class="modal-content">
 
@@ -38,17 +36,13 @@
                         class="modal-title fw-semibold"
                         id="accountReceivableModalLabel">
 
-                        <i
-                            class="fa-solid fa-file-invoice-dollar me-2">
-                        </i>
+                        <i class="fa-solid fa-file-invoice-dollar me-2"></i>
 
                         Add Account Receivable
 
                     </h5>
 
-
-                    <div
-                        class="text-muted small">
+                    <div class="text-muted small">
 
                         Create new Account Receivable
 
@@ -75,94 +69,111 @@
 
 
                 <!-- ==================================================
-                        AR MODAL TABS
-                    =================================================== -->
+                     AR MODAL TABS
+                =================================================== -->
 
-                    <div class="ap-modern-tabs-wrapper">
+                <div class="ap-modern-tabs-wrapper">
 
-                        <ul
-                            class="nav nav-tabs nav-fill"
-                            id="ar-modal-tabs"
-                            role="tablist">
-
-                            <li class="nav-item" role="presentation">
-
-                                <button
-                                    class="nav-link active"
-                                    id="ar-header-info-tab"
-                                    data-bs-toggle="tab"
-                                    data-bs-target="#ar-header-info-pane"
-                                    type="button"
-                                    role="tab"
-                                    aria-controls="ar-header-info-pane"
-                                    aria-selected="true">
-
-                                    Header Info
-
-                                </button>
-
-                            </li>
+                    <ul
+                        class="nav nav-tabs nav-fill"
+                        id="ar-modal-tabs"
+                        role="tablist">
 
 
-                            <li class="nav-item" role="presentation">
+                        <!-- HEADER INFO -->
 
-                                <button
-                                    class="nav-link"
-                                    id="ar-invoice-details-tab"
-                                    data-bs-toggle="tab"
-                                    data-bs-target="#ar-invoice-details-pane"
-                                    type="button"
-                                    role="tab"
-                                    aria-controls="ar-invoice-details-pane"
-                                    aria-selected="false">
+                        <li
+                            class="nav-item"
+                            role="presentation">
 
-                                    Invoice Details
+                            <button
+                                class="nav-link active"
+                                id="ar-header-info-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#ar-header-info-pane"
+                                type="button"
+                                role="tab"
+                                aria-controls="ar-header-info-pane"
+                                aria-selected="true">
 
-                                </button>
+                                Header Info
 
-                            </li>
+                            </button>
 
-
-                            <li class="nav-item" role="presentation">
-
-                                <button
-                                    class="nav-link"
-                                    id="ar-tax-plus-tab"
-                                    data-bs-toggle="tab"
-                                    data-bs-target="#ar-tax-plus-pane"
-                                    type="button"
-                                    role="tab"
-                                    aria-controls="ar-tax-plus-pane"
-                                    aria-selected="false">
-
-                                    Tax (+)
-
-                                </button>
-
-                            </li>
+                        </li>
 
 
-                            <li class="nav-item" role="presentation">
+                        <!-- INVOICE DETAILS -->
 
-                                <button
-                                    class="nav-link"
-                                    id="ar-tax-minus-tab"
-                                    data-bs-toggle="tab"
-                                    data-bs-target="#ar-tax-minus-pane"
-                                    type="button"
-                                    role="tab"
-                                    aria-controls="ar-tax-minus-pane"
-                                    aria-selected="false">
+                        <li
+                            class="nav-item"
+                            role="presentation">
 
-                                    Tax (-)
+                            <button
+                                class="nav-link"
+                                id="ar-invoice-details-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#ar-invoice-details-pane"
+                                type="button"
+                                role="tab"
+                                aria-controls="ar-invoice-details-pane"
+                                aria-selected="false">
 
-                                </button>
+                                Invoice Details
 
-                            </li>
+                            </button>
 
-                        </ul>
+                        </li>
 
-                    </div>
+
+                        <!-- TAX PLUS -->
+
+                        <li
+                            class="nav-item"
+                            role="presentation">
+
+                            <button
+                                class="nav-link"
+                                id="ar-tax-plus-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#ar-tax-plus-pane"
+                                type="button"
+                                role="tab"
+                                aria-controls="ar-tax-plus-pane"
+                                aria-selected="false">
+
+                                Tax (+)
+
+                            </button>
+
+                        </li>
+
+
+                        <!-- TAX MINUS -->
+
+                        <li
+                            class="nav-item"
+                            role="presentation">
+
+                            <button
+                                class="nav-link"
+                                id="ar-tax-minus-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#ar-tax-minus-pane"
+                                type="button"
+                                role="tab"
+                                aria-controls="ar-tax-minus-pane"
+                                aria-selected="false">
+
+                                Tax (-)
+
+                            </button>
+
+                        </li>
+
+                    </ul>
+
+                </div>
 
 
                 <!-- ==================================================
@@ -174,10 +185,9 @@
                     id="ar-modal-tab-content">
 
 
-                        <!-- ==========================================================
-                        HEADER INFO
-                        SAME STRUCTURE AS ACCOUNT PAYABLE
-                    ========================================================== -->
+                    <!-- ==================================================
+                         TAB 1 : HEADER INFO
+                    =================================================== -->
 
                     <div
                         class="tab-pane fade show active"
@@ -186,22 +196,16 @@
                         aria-labelledby="ar-header-info-tab"
                         tabindex="0">
 
-
                         <div class="p-4">
-
 
                             <div class="finova-card">
 
-
                                 <div class="finova-card-body">
-
 
                                     <div class="row g-3">
 
 
-                                        <!-- ==================================================
-                                            CUSTOMER
-                                        =================================================== -->
+                                        <!-- CUSTOMER -->
 
                                         <div class="col-md-6">
 
@@ -213,7 +217,6 @@
                                                 <span class="text-danger">*</span>
 
                                             </label>
-
 
                                             <select
                                                 id="ar-form-customer"
@@ -228,9 +231,7 @@
                                         </div>
 
 
-                                        <!-- ==================================================
-                                            PO NO
-                                        =================================================== -->
+                                        <!-- PO NO -->
 
                                         <div class="col-md-6">
 
@@ -242,7 +243,6 @@
 
                                             </label>
 
-
                                             <input
                                                 type="text"
                                                 id="ar-form-po-no"
@@ -252,9 +252,7 @@
                                         </div>
 
 
-                                        <!-- ==================================================
-                                            INVOICE NO
-                                        =================================================== -->
+                                        <!-- INVOICE NO -->
 
                                         <div class="col-md-6">
 
@@ -267,7 +265,6 @@
 
                                             </label>
 
-
                                             <input
                                                 type="text"
                                                 id="ar-form-invoice-no"
@@ -277,9 +274,7 @@
                                         </div>
 
 
-                                        <!-- ==================================================
-                                            NO JOURNAL
-                                        =================================================== -->
+                                        <!-- NO JOURNAL -->
 
                                         <div class="col-md-6">
 
@@ -290,7 +285,6 @@
                                                 No. Journal
 
                                             </label>
-
 
                                             <input
                                                 type="text"
@@ -303,9 +297,7 @@
                                         </div>
 
 
-                                        <!-- ==================================================
-                                            INVOICE DATE
-                                        =================================================== -->
+                                        <!-- INVOICE DATE -->
 
                                         <div class="col-md-6">
 
@@ -318,7 +310,6 @@
 
                                             </label>
 
-
                                             <input
                                                 type="date"
                                                 id="ar-form-invoice-date"
@@ -327,9 +318,7 @@
                                         </div>
 
 
-                                        <!-- ==================================================
-                                            DATE RECEIVED
-                                        =================================================== -->
+                                        <!-- DATE RECEIVED -->
 
                                         <div class="col-md-6">
 
@@ -342,7 +331,6 @@
 
                                             </label>
 
-
                                             <input
                                                 type="date"
                                                 id="ar-form-date-received"
@@ -351,9 +339,7 @@
                                         </div>
 
 
-                                        <!-- ==================================================
-                                            TERM OF PAYMENT
-                                        =================================================== -->
+                                        <!-- TERM OF PAYMENT -->
 
                                         <div class="col-md-6">
 
@@ -365,7 +351,6 @@
 
                                             </label>
 
-
                                             <input
                                                 type="text"
                                                 id="ar-form-top"
@@ -376,9 +361,7 @@
                                         </div>
 
 
-                                        <!-- ==================================================
-                                            DUE DATE
-                                        =================================================== -->
+                                        <!-- DUE DATE -->
 
                                         <div class="col-md-6">
 
@@ -390,7 +373,6 @@
 
                                             </label>
 
-
                                             <input
                                                 type="date"
                                                 id="ar-form-due-date"
@@ -400,9 +382,7 @@
                                         </div>
 
 
-                                        <!-- ==================================================
-                                            DESCRIPTION
-                                        =================================================== -->
+                                        <!-- DESCRIPTION -->
 
                                         <div class="col-12">
 
@@ -414,7 +394,6 @@
 
                                             </label>
 
-
                                             <textarea
                                                 id="ar-form-description"
                                                 class="form-control"
@@ -424,20 +403,16 @@
 
                                         </div>
 
-
                                     </div>
-
 
                                 </div>
 
-
                             </div>
-
 
                         </div>
 
-
                     </div>
+
 
                     <!-- ==================================================
                          TAB 2 : INVOICE DETAILS
@@ -450,40 +425,31 @@
                         aria-labelledby="ar-invoice-details-tab"
                         tabindex="0">
 
-
                         <div class="p-4">
 
-
                             <div class="finova-card">
-
 
                                 <div class="finova-card-body">
 
 
-                                    <!-- ======================================
-                                         DETAIL HEADER
-                                    ======================================= -->
+                                    <!-- DETAIL HEADER -->
 
                                     <div
-                                        class="d-flex
-                                               justify-content-between
-                                               align-items-center
-                                               mb-3">
-
+                                        class="
+                                            d-flex
+                                            justify-content-between
+                                            align-items-center
+                                            mb-3
+                                        ">
 
                                         <div>
 
                                             <div class="fw-semibold">
-
                                                 Invoice Details
-
                                             </div>
 
-
                                             <div class="text-muted small">
-
                                                 Add account receivable detail
-
                                             </div>
 
                                         </div>
@@ -494,9 +460,7 @@
                                             class="btn btn-sm btn-primary"
                                             id="btn-add-ar-detail">
 
-                                            <i
-                                                class="fa-solid fa-plus me-1">
-                                            </i>
+                                            <i class="fa-solid fa-plus me-1"></i>
 
                                             Add Detail
 
@@ -505,34 +469,57 @@
                                     </div>
 
 
-                                    <!-- ======================================
-                                         DETAIL TABLE
-                                    ======================================= -->
+                                    <!-- DETAIL TABLE -->
 
-                                    <div class="table-responsive">
-
+                                    <div
+                                        class="
+                                            table-responsive
+                                            ar-invoice-detail-table-wrapper
+                                        ">
 
                                         <table
-                                            class="table
-                                                   table-sm
-                                                   table-hover
-                                                   align-middle
-                                                   mb-0">
+                                            class="
+                                                table
+                                                table-sm
+                                                table-hover
+                                                align-middle
+                                                mb-0
+                                                ar-invoice-detail-table
+                                            ">
+
+
+                                            <colgroup>
+
+                                                <col style="width: 5%;">
+
+                                                <col style="width: 25%;">
+
+                                                <col style="width: 31%;">
+
+                                                <col style="width: 8%;">
+
+                                                <col style="width: 11%;">
+
+                                                <col style="width: 13%;">
+
+                                                <col style="width: 7%;">
+
+                                            </colgroup>
 
 
                                             <thead>
 
                                                 <tr>
 
-                                                    <th>
+                                                    <th class="text-center">
                                                         No
                                                     </th>
 
-                                                    <th>
+                                                    <th class="text-start">
                                                         Account
                                                     </th>
 
-                                                    <th>
+                                                    <th class="text-start">
                                                         Description
                                                     </th>
 
@@ -542,14 +529,6 @@
 
                                                     <th class="text-end">
                                                         Unit Price
-                                                    </th>
-
-                                                    <th class="text-end">
-                                                        Tax
-                                                    </th>
-
-                                                    <th class="text-end">
-                                                        WHT
                                                     </th>
 
                                                     <th class="text-end">
@@ -570,10 +549,12 @@
                                                 <tr id="ar-detail-empty">
 
                                                     <td
-                                                        colspan="9"
-                                                        class="text-center
-                                                               text-muted
-                                                               py-4">
+                                                        colspan="7"
+                                                        class="
+                                                            text-center
+                                                            text-muted
+                                                            py-4
+                                                        ">
 
                                                         No detail added.
 
@@ -583,11 +564,9 @@
 
                                             </tbody>
 
-
                                         </table>
 
                                     </div>
-
 
                                 </div>
 
@@ -609,29 +588,20 @@
                         aria-labelledby="ar-tax-plus-tab"
                         tabindex="0">
 
-
                         <div class="p-4">
-
 
                             <div class="finova-card">
 
-
                                 <div class="finova-card-body">
-
 
                                     <div class="mb-3">
 
                                         <div class="fw-semibold">
-
                                             Tax (+)
-
                                         </div>
 
-
                                         <div class="text-muted small">
-
                                             Automatically generated from Invoice Details
-
                                         </div>
 
                                     </div>
@@ -639,34 +609,26 @@
 
                                     <div class="table-responsive">
 
-
                                         <table
-                                            class="table
-                                                   table-sm
-                                                   table-hover
-                                                   align-middle
-                                                   mb-0">
-
+                                            class="
+                                                table
+                                                table-sm
+                                                table-hover
+                                                align-middle
+                                                mb-0
+                                            ">
 
                                             <thead>
 
                                                 <tr>
 
-                                                    <th>
-                                                        No
-                                                    </th>
+                                                    <th>No</th>
 
-                                                    <th>
-                                                        Tax Code
-                                                    </th>
+                                                    <th>Tax Code</th>
 
-                                                    <th>
-                                                        Tax Name
-                                                    </th>
+                                                    <th>Tax Name</th>
 
-                                                    <th>
-                                                        Tax Account
-                                                    </th>
+                                                    <th>Tax Account</th>
 
                                                     <th class="text-end">
                                                         Tax Base
@@ -691,9 +653,11 @@
 
                                                     <td
                                                         colspan="7"
-                                                        class="text-center
-                                                               text-muted
-                                                               py-4">
+                                                        class="
+                                                            text-center
+                                                            text-muted
+                                                            py-4
+                                                        ">
 
                                                         No Tax (+) found from Invoice Details.
 
@@ -703,33 +667,27 @@
 
                                             </tbody>
 
-
                                         </table>
 
                                     </div>
 
 
-                                    <!-- ======================================
-                                         TAX PLUS JOURNAL INFO
-                                    ======================================= -->
+                                    <!-- JOURNAL PREVIEW -->
 
                                     <div
-                                        class="alert
-                                               alert-light
-                                               border
-                                               mt-3
-                                               mb-0">
-
+                                        class="
+                                            alert
+                                            alert-light
+                                            border
+                                            mt-3
+                                            mb-0
+                                        ">
 
                                         <div class="ar-tax-journal-preview"></div>
 
-
                                         <div class="fw-semibold mb-1">
-
                                             Journal Preview
-
                                         </div>
-
 
                                         <div class="small text-muted">
 
@@ -742,11 +700,9 @@
 
                                             </strong>
 
-
                                             <span class="mx-2">
                                                 |
                                             </span>
-
 
                                             Credit:
 
@@ -760,7 +716,6 @@
                                         </div>
 
                                     </div>
-
 
                                 </div>
 
@@ -782,29 +737,20 @@
                         aria-labelledby="ar-tax-minus-tab"
                         tabindex="0">
 
-
                         <div class="p-4">
-
 
                             <div class="finova-card">
 
-
                                 <div class="finova-card-body">
-
 
                                     <div class="mb-3">
 
                                         <div class="fw-semibold">
-
                                             Tax (-)
-
                                         </div>
 
-
                                         <div class="text-muted small">
-
                                             Automatically generated from Invoice Details
-
                                         </div>
 
                                     </div>
@@ -812,34 +758,26 @@
 
                                     <div class="table-responsive">
 
-
                                         <table
-                                            class="table
-                                                   table-sm
-                                                   table-hover
-                                                   align-middle
-                                                   mb-0">
-
+                                            class="
+                                                table
+                                                table-sm
+                                                table-hover
+                                                align-middle
+                                                mb-0
+                                            ">
 
                                             <thead>
 
                                                 <tr>
 
-                                                    <th>
-                                                        No
-                                                    </th>
+                                                    <th>No</th>
 
-                                                    <th>
-                                                        Tax Code
-                                                    </th>
+                                                    <th>Tax Code</th>
 
-                                                    <th>
-                                                        Tax Name
-                                                    </th>
+                                                    <th>Tax Name</th>
 
-                                                    <th>
-                                                        Tax Account
-                                                    </th>
+                                                    <th>Tax Account</th>
 
                                                     <th class="text-end">
                                                         Tax Base
@@ -864,9 +802,11 @@
 
                                                     <td
                                                         colspan="7"
-                                                        class="text-center
-                                                               text-muted
-                                                               py-4">
+                                                        class="
+                                                            text-center
+                                                            text-muted
+                                                            py-4
+                                                        ">
 
                                                         No Tax (-) found from Invoice Details.
 
@@ -876,30 +816,25 @@
 
                                             </tbody>
 
-
                                         </table>
 
                                     </div>
 
 
-                                    <!-- ======================================
-                                         TAX MINUS JOURNAL INFO
-                                    ======================================= -->
+                                    <!-- JOURNAL PREVIEW -->
 
                                     <div
-                                        class="alert
-                                               alert-light
-                                               border
-                                               mt-3
-                                               mb-0">
-
+                                        class="
+                                            alert
+                                            alert-light
+                                            border
+                                            mt-3
+                                            mb-0
+                                        ">
 
                                         <div class="fw-semibold mb-1">
-
                                             Journal Preview
-
                                         </div>
-
 
                                         <div class="small text-muted">
 
@@ -912,11 +847,9 @@
 
                                             </strong>
 
-
                                             <span class="mx-2">
                                                 |
                                             </span>
-
 
                                             Credit:
 
@@ -931,7 +864,6 @@
 
                                     </div>
 
-
                                 </div>
 
                             </div>
@@ -939,7 +871,6 @@
                         </div>
 
                     </div>
-
 
                 </div>
 
@@ -950,9 +881,7 @@
 
                 <div class="border-top p-4">
 
-
                     <div class="d-flex justify-content-end">
-
 
                         <div
                             class="finova-card"
@@ -961,83 +890,67 @@
                                 max-width: 100%;
                             ">
 
-
                             <div class="finova-card-body">
 
 
-                                <!-- ======================================
-                                     SUBTOTAL
-                                ======================================= -->
+                                <!-- SUBTOTAL -->
 
                                 <div
-                                    class="d-flex
-                                           justify-content-between
-                                           align-items-center
-                                           mb-2">
+                                    class="
+                                        d-flex
+                                        justify-content-between
+                                        align-items-center
+                                        mb-2
+                                    ">
 
                                     <span>
-
                                         Subtotal
-
                                     </span>
-
 
                                     <strong id="ar-form-subtotal">
-
                                         0
-
                                     </strong>
 
                                 </div>
 
 
-                                <!-- ======================================
-                                     TAX PLUS
-                                ======================================= -->
+                                <!-- TAX PLUS -->
 
                                 <div
-                                    class="d-flex
-                                           justify-content-between
-                                           align-items-center
-                                           mb-2">
+                                    class="
+                                        d-flex
+                                        justify-content-between
+                                        align-items-center
+                                        mb-2
+                                    ">
 
                                     <span>
-
                                         Tax (+)
-
                                     </span>
-
 
                                     <strong id="ar-form-tax">
-
                                         0
-
                                     </strong>
 
                                 </div>
 
 
-                                <!-- ======================================
-                                     TAX MINUS
-                                ======================================= -->
+                                <!-- TAX MINUS -->
 
                                 <div
-                                    class="d-flex
-                                           justify-content-between
-                                           align-items-center
-                                           mb-2">
+                                    class="
+                                        d-flex
+                                        justify-content-between
+                                        align-items-center
+                                        mb-2
+                                    ">
 
                                     <span>
-
                                         Tax (-)
-
                                     </span>
 
-
                                     <strong id="ar-form-wht">
-
                                         0
-
                                     </strong>
 
                                 </div>
@@ -1046,21 +959,18 @@
                                 <hr>
 
 
-                                <!-- ======================================
-                                     TOTAL RECEIVABLE
-                                ======================================= -->
+                                <!-- TOTAL RECEIVABLE -->
 
                                 <div
-                                    class="d-flex
-                                           justify-content-between
-                                           align-items-center">
+                                    class="
+                                        d-flex
+                                        justify-content-between
+                                        align-items-center
+                                    ">
 
                                     <span class="fw-semibold">
-
                                         Total Receivable
-
                                     </span>
-
 
                                     <strong
                                         id="ar-form-total"
@@ -1072,7 +982,6 @@
 
                                 </div>
 
-
                             </div>
 
                         </div>
@@ -1080,7 +989,6 @@
                     </div>
 
                 </div>
-
 
             </div>
 
@@ -1090,7 +998,6 @@
             =================================================== -->
 
             <div class="modal-footer">
-
 
                 <button
                     type="button"
@@ -1107,17 +1014,13 @@
                     id="btn-save-ar-draft"
                     class="btn btn-primary">
 
-                    <i
-                        class="fa-solid fa-floppy-disk me-1">
-                    </i>
+                    <i class="fa-solid fa-floppy-disk me-1"></i>
 
                     Save Draft
 
                 </button>
 
-
             </div>
-
 
         </div>
 

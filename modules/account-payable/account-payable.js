@@ -10052,10 +10052,12 @@ renderInvoiceDetails() {
                 id="ap-detail-empty">
 
                 <td
-                    colspan="9"
-                    class="text-center
-                           text-muted
-                           py-4">
+                    colspan="7"
+                    class="
+                        text-center
+                        text-muted
+                        py-4
+                    ">
 
                     No detail added.
 
@@ -10089,7 +10091,10 @@ renderInvoiceDetails() {
     tableBody.innerHTML =
         this.invoiceDetails
             .map(
-                (detail, index) => {
+                (
+                    detail,
+                    index
+                ) => {
 
                     return `
 
@@ -10099,7 +10104,11 @@ renderInvoiceDetails() {
                                  NO
                             =================================== -->
 
-                            <td>
+                            <td
+                                class="
+                                    text-center
+                                    align-top
+                                ">
 
                                 ${index + 1}
 
@@ -10110,19 +10119,34 @@ renderInvoiceDetails() {
                                  ACCOUNT
                             =================================== -->
 
-                            <td>
+                            <td
+                                class="
+                                    align-top
+                                    ap-detail-account-cell
+                                ">
 
                                 <div
                                     class="fw-semibold">
 
-                                    ${detail.account_code || "-"}
+                                    ${
+                                        detail.account_code
+                                        || "-"
+                                    }
 
                                 </div>
 
-                                <div
-                                    class="small text-muted">
 
-                                    ${detail.account_name || "-"}
+                                <div
+                                    class="
+                                        small
+                                        text-muted
+                                        mt-1
+                                    ">
+
+                                    ${
+                                        detail.account_name
+                                        || "-"
+                                    }
 
                                 </div>
 
@@ -10133,9 +10157,16 @@ renderInvoiceDetails() {
                                  DESCRIPTION
                             =================================== -->
 
-                            <td>
+                            <td
+                                class="
+                                    align-top
+                                    ap-detail-description-cell
+                                ">
 
-                                ${detail.description || "-"}
+                                ${
+                                    detail.description
+                                    || "-"
+                                }
 
                             </td>
 
@@ -10145,9 +10176,20 @@ renderInvoiceDetails() {
                             =================================== -->
 
                             <td
-                                class="text-end">
+                                class="
+                                    text-end
+                                    align-top
+                                ">
 
-                                ${detail.quantity}
+                                ${
+                                    Number(
+                                        detail.quantity
+                                        || 0
+                                    )
+                                        .toLocaleString(
+                                            "id-ID"
+                                        )
+                                }
 
                             </td>
 
@@ -10157,39 +10199,19 @@ renderInvoiceDetails() {
                             =================================== -->
 
                             <td
-                                class="text-end">
+                                class="
+                                    text-end
+                                    align-top
+                                ">
 
-                                ${this.formatCurrency(
-                                    detail.unit_price
-                                )}
-
-                            </td>
-
-
-                            <!-- ==================================
-                                 TAX
-                            =================================== -->
-
-                            <td
-                                class="text-end">
-
-                                ${this.formatCurrency(
-                                    detail.tax_input_amount
-                                )}
-
-                            </td>
-
-
-                            <!-- ==================================
-                                 WHT
-                            =================================== -->
-
-                            <td
-                                class="text-end">
-
-                                ${this.formatCurrency(
-                                    detail.withholding_tax_amount
-                                )}
+                                ${
+                                    this.formatCurrency(
+                                        Number(
+                                            detail.unit_price
+                                            || 0
+                                        )
+                                    )
+                                }
 
                             </td>
 
@@ -10199,49 +10221,83 @@ renderInvoiceDetails() {
                             =================================== -->
 
                             <td
-                                class="text-end fw-semibold">
+                                class="
+                                    text-end
+                                    fw-semibold
+                                    align-top
+                                ">
 
-                                ${this.formatCurrency(
-                                    detail.total_amount
-                                )}
+                                ${
+                                    this.formatCurrency(
+                                        Number(
+                                            detail.total_amount
+                                            || 0
+                                        )
+                                    )
+                                }
 
                             </td>
 
 
                             <!-- ==================================
                                  ACTION
-                            ================================== -->
+                            =================================== -->
 
                             <td
-                                class="text-center">
+                                class="
+                                    text-center
+                                    align-top
+                                ">
 
                                 <div
-                                    class="btn-group btn-group-sm"
+                                    class="
+                                        btn-group
+                                        btn-group-sm
+                                    "
                                     role="group">
 
                                     <!-- EDIT -->
 
-                                   <button
-                                    type="button"
-                                    class="btn btn-outline-primary"
-                                    title="Edit Detail"
-                                    data-detail-action="edit"
-                                    data-detail-id="${detail.id}">
+                                    <button
+                                        type="button"
+                                        class="
+                                            btn
+                                            btn-outline-primary
+                                        "
+                                        title="Edit Detail"
+                                        data-detail-action="edit"
+                                        data-detail-id="${detail.id}">
 
-                                    <i class="fa-solid fa-pen"></i>
+                                        <i
+                                            class="
+                                                fa-solid
+                                                fa-pen
+                                            ">
+                                        </i>
 
-                                </button>
+                                    </button>
 
-                                <button
-                                    type="button"
-                                    class="btn btn-outline-danger"
-                                    title="Remove Detail"
-                                    data-detail-action="delete"
-                                    data-detail-id="${detail.id}">
 
-                                    <i class="fa-solid fa-trash"></i>
+                                    <!-- DELETE -->
 
-                                </button>
+                                    <button
+                                        type="button"
+                                        class="
+                                            btn
+                                            btn-outline-danger
+                                        "
+                                        title="Remove Detail"
+                                        data-detail-action="delete"
+                                        data-detail-id="${detail.id}">
+
+                                        <i
+                                            class="
+                                                fa-solid
+                                                fa-trash
+                                            ">
+                                        </i>
+
+                                    </button>
 
                                 </div>
 

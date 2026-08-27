@@ -489,77 +489,114 @@
                         </div>
 
 
-                        <!-- DETAIL TABLE -->
+                        <!-- ==========================================================
+                                DETAIL TABLE
+                            =========================================================== -->
 
-                        <div class="table-responsive">
+                            <div class="table-responsive ap-invoice-detail-table-wrapper">
 
-                            <table
-                                class="table
-                                       table-sm
-                                       table-hover
-                                       align-middle
-                                       mb-0">
+                                <table
+                                    class="table
+                                        table-sm
+                                        table-hover
+                                        align-middle
+                                        mb-0
+                                        ap-invoice-detail-table">
 
-                                <thead>
+                                    <!-- ==================================================
+                                        COLUMN WIDTH
+                                    =================================================== -->
 
-                                    <tr>
+                                    <colgroup>
 
-                                        <th>No</th>
+                                        <!-- NO -->
+                                        <col style="width: 5%;">
 
-                                        <th>Account</th>
+                                        <!-- ACCOUNT -->
+                                        <col style="width: 25%;">
 
-                                        <th>Description</th>
+                                        <!-- DESCRIPTION -->
+                                        <col style="width: 31%;">
 
-                                        <th class="text-end">
-                                            Qty
-                                        </th>
+                                        <!-- QTY -->
+                                        <col style="width: 8%;">
 
-                                        <th class="text-end">
-                                            Unit Price
-                                        </th>
+                                        <!-- UNIT PRICE -->
+                                        <col style="width: 11%;">
 
-                                        <th class="text-end">
-                                            Tax
-                                        </th>
+                                        <!-- AMOUNT -->
+                                        <col style="width: 13%;">
 
-                                        <th class="text-end">
-                                            WHT
-                                        </th>
+                                        <!-- ACTION -->
+                                        <col style="width: 7%;">
 
-                                        <th class="text-end">
-                                            Amount
-                                        </th>
-
-                                        <th class="text-center">
-                                            Action
-                                        </th>
-
-                                    </tr>
-
-                                </thead>
+                                    </colgroup>
 
 
-                                <tbody id="ap-detail-body">
+                                    <!-- ==================================================
+                                        TABLE HEADER
+                                    =================================================== -->
 
-                                    <tr id="ap-detail-empty">
+                                    <thead>
 
-                                        <td
-                                            colspan="9"
-                                            class="text-center
-                                                   text-muted
-                                                   py-4">
+                                        <tr>
 
-                                            No detail added.
+                                            <th class="text-center">
+                                                No
+                                            </th>
 
-                                        </td>
+                                            <th class="text-start">
+                                                Account
+                                            </th>
 
-                                    </tr>
+                                            <th class="text-start">
+                                                Description
+                                            </th>
 
-                                </tbody>
+                                            <th class="text-end">
+                                                Qty
+                                            </th>
 
-                            </table>
+                                            <th class="text-end">
+                                                Unit Price
+                                            </th>
 
-                        </div>
+                                            <th class="text-end">
+                                                Amount
+                                            </th>
+
+                                            <th class="text-center">
+                                                Action
+                                            </th>
+
+                                        </tr>
+
+                                    </thead>
+
+
+                                    <!-- ==================================================
+                                        TABLE BODY
+                                    =================================================== -->
+
+                                    <tbody id="ap-detail-body">
+
+                                        <tr id="ap-detail-empty">
+
+                                            <td
+                                                colspan="7"
+                                                class="text-center text-muted py-4">
+
+                                                No detail added.
+
+                                            </td>
+
+                                        </tr>
+
+                                    </tbody>
+
+                                </table>
+
+                            </div>
 
                     </div>
 
