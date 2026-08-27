@@ -13924,6 +13924,8 @@ exportExcel() {
 /*
 ======================================================
 PREVIEW HTML
+ACCOUNT RECEIVABLE
+SAME AS ACCOUNT PAYABLE
 ======================================================
 */
 
@@ -13931,16 +13933,32 @@ previewHTML() {
 
     try {
 
-        const data =
-            this.getFilteredData();
+        /*
+        ==================================================
+        CURRENT FILTERED DATA
+        ==================================================
+        */
 
+        const invoices =
+            Array.isArray(
+                this.filteredData
+            )
+                ? this.filteredData
+                : [];
+
+
+        /*
+        ==================================================
+        VALIDATE DATA
+        ==================================================
+        */
 
         if (
-            !data.length
+            invoices.length === 0
         ) {
 
             this.showError(
-                "No Account Receivable data available."
+                "No Account Receivable data available to preview."
             );
 
             return;
@@ -13948,206 +13966,1646 @@ previewHTML() {
         }
 
 
-        const columns = [
+        /*
+        ==================================================
+        OPEN NEW TAB
+        ==================================================
+        */
 
-            {
-                title:
-                    "No",
-
-                width:
-                    "45px",
-
-                align:
-                    "center"
-            },
-
-            {
-                title:
-                    "Invoice Date",
-
-                width:
-                    "100px"
-            },
-
-            {
-                title:
-                    "Invoice No",
-
-                width:
-                    "120px"
-            },
-
-            {
-                title:
-                    "Customer"
-            },
-
-            {
-                title:
-                    "PO No",
-
-                width:
-                    "120px"
-            },
-
-            {
-                title:
-                    "Due Date",
-
-                width:
-                    "100px"
-            },
-
-            {
-                title:
-                    "Total Amount",
-
-                width:
-                    "120px",
-
-                align:
-                    "right"
-            },
-
-            {
-                title:
-                    "Paid Amount",
-
-                width:
-                    "120px",
-
-                align:
-                    "right"
-            },
-
-            {
-                title:
-                    "Outstanding",
-
-                width:
-                    "120px",
-
-                align:
-                    "right"
-            },
-
-            {
-                title:
-                    "Status",
-
-                width:
-                    "80px",
-
-                align:
-                    "center"
-            }
-
-        ];
-
-
-        const rows =
-            data.map(
-                (
-                    item,
-                    index
-                ) => `
-
-                    <tr>
-
-                        <td style="text-align:center">
-                            ${index + 1}
-                        </td>
-
-
-                        <td>
-                            ${item.invoice_date || "-"}
-                        </td>
-
-
-                        <td>
-                            ${item.invoice_no || "-"}
-                        </td>
-
-
-                        <td>
-                            ${
-                                item
-                                    .mst_business_partner
-                                    ?.bp_name
-                                || "-"
-                            }
-                        </td>
-
-
-                        <td>
-                            ${item.po_no || "-"}
-                        </td>
-
-
-                        <td>
-                            ${item.due_date || "-"}
-                        </td>
-
-
-                        <td style="text-align:right">
-                            ${this.formatCurrency(
-                                Number(
-                                    item.total_amount
-                                    || 0
-                                )
-                            )}
-                        </td>
-
-
-                        <td style="text-align:right">
-                            ${this.formatCurrency(
-                                Number(
-                                    item.paid_amount
-                                    || 0
-                                )
-                            )}
-                        </td>
-
-
-                        <td style="text-align:right">
-                            ${this.formatCurrency(
-                                Number(
-                                    item.outstanding_amount
-                                    || 0
-                                )
-                            )}
-                        </td>
-
-
-                        <td style="text-align:center">
-                            ${item.status || "-"}
-                        </td>
-
-                    </tr>
-
-                `
+        const previewWindow =
+            window.open(
+                "",
+                "_blank"
             );
 
 
-        PreviewService.open({
+        if (
+            !previewWindow
+        ) {
 
-            title:
-                "Account Receivable",
+            this.showError(
+                "Preview tab was blocked by the browser."
+            );
 
-            subtitle:
-                "Account Receivable Report",
+            return;
 
-            columns,
+        }
 
-            rows,
 
-            orientation:
-                "landscape",
+        /*
+        ==================================================
+        PREVIEW DATE
+        ==================================================
+        */
 
-            paperSize:
-                "A4"
+        const previewDate =
+            new Date()
+                .toLocaleString(
+                    "id-ID"
+                );
 
-        });
+
+        /*
+        ==================================================
+        ESCAPE HTML
+        ==================================================
+        */
+
+        const escapeHTML =
+            value => {
+
+                return String(
+                    value ?? ""
+                )
+                    .replaceAll(
+                        "&",
+                        "&amp;"
+                    )
+                    .replaceAll(
+                        "<",
+                        "&lt;"
+                    )
+                    .replaceAll(
+                        ">",
+                        "&gt;"
+                    )
+                    .replaceAll(
+                        '"',
+                        "&quot;"
+                    )
+                    .replaceAll(
+                        "'",
+                        "&#039;"
+                    );
+
+            };
+
+
+        /*
+        ==================================================
+        TABLE ROWS
+        ==================================================
+        */
+
+        const rows =
+            invoices
+                .map(
+                    (
+                        invoice,
+                        index
+                    ) => {
+
+                        /*
+                        ======================================
+                        CUSTOMER
+                        ======================================
+                        */
+
+                        const customer =
+                            invoice
+                                ?.mst_business_partner
+                            ||
+                            {};
+
+
+                        /*
+                        ======================================
+                        JOURNAL
+                        ======================================
+                        */
+
+                        const journal =
+                            invoice
+                                ?.trx_gl_journal
+                            ||
+                            {};
+
+
+                        /*
+                        ======================================
+                        AMOUNT
+                        ======================================
+                        */
+
+                        const totalAmount =
+                            Number(
+                                invoice?.total_amount
+                                ||
+                                0
+                            );
+
+
+                        const paidAmount =
+                            Number(
+                                invoice?.paid_amount
+                                ||
+                                0
+                            );
+
+
+                        const outstandingAmount =
+                            Number(
+                                invoice?.outstanding_amount
+                                ??
+                                totalAmount
+                            );
+
+
+                        /*
+                        ======================================
+                        STATUS
+                        ======================================
+                        */
+
+                        const status =
+                            invoice?.status
+                            ||
+                            "-";
+
+
+                        /*
+                        ======================================
+                        JOURNAL NO
+                        ======================================
+                        */
+
+                        const journalNo =
+                            journal?.journal_no
+                            ||
+                            invoice?.journal_no
+                            ||
+                            "-";
+
+
+                        /*
+                        ======================================
+                        PO NO
+                        ======================================
+                        */
+
+                        const poNo =
+                            invoice?.po_no
+                            ||
+                            "-";
+
+
+                        /*
+                        ======================================
+                        DESCRIPTION
+                        ======================================
+                        */
+
+                        const description =
+                            invoice?.description
+                            ||
+                            "-";
+
+
+                        /*
+                        ======================================
+                        RETURN ROW
+                        ======================================
+                        */
+
+                        return `
+
+                            <tr>
+
+
+                                <!-- NO -->
+
+                                <td class="center">
+
+                                    ${index + 1}
+
+                                </td>
+
+
+                                <!-- INVOICE NO -->
+
+                                <td>
+
+                                    ${
+                                        escapeHTML(
+                                            invoice?.invoice_no
+                                            ||
+                                            "-"
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <!-- PO NO -->
+
+                                <td>
+
+                                    ${
+                                        escapeHTML(
+                                            poNo
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <!-- CUSTOMER -->
+
+                                <td>
+
+                                    ${
+                                        escapeHTML(
+                                            customer?.bp_name
+                                            ||
+                                            "-"
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <!-- INVOICE DATE -->
+
+                                <td class="center">
+
+                                    ${
+                                        escapeHTML(
+                                            invoice?.invoice_date
+                                            ||
+                                            "-"
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <!-- DUE DATE -->
+
+                                <td class="center">
+
+                                    ${
+                                        escapeHTML(
+                                            invoice?.due_date
+                                            ||
+                                            "-"
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <!-- TOTAL -->
+
+                                <td class="amount">
+
+                                    ${
+                                        this.formatCurrency(
+                                            totalAmount
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <!-- PAID -->
+
+                                <td class="amount">
+
+                                    ${
+                                        this.formatCurrency(
+                                            paidAmount
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <!-- OUTSTANDING -->
+
+                                <td class="amount">
+
+                                    ${
+                                        this.formatCurrency(
+                                            outstandingAmount
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <!-- STATUS -->
+
+                                <td class="center">
+
+                                    ${
+                                        escapeHTML(
+                                            status
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <!-- JOURNAL -->
+
+                                <td>
+
+                                    ${
+                                        escapeHTML(
+                                            journalNo
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <!-- DESCRIPTION -->
+
+                                <td class="description">
+
+                                    ${
+                                        escapeHTML(
+                                            description
+                                        )
+                                    }
+
+                                </td>
+
+
+                            </tr>
+
+                        `;
+
+                    }
+                )
+                .join("");
+
+
+        /*
+        ==================================================
+        HTML
+        ==================================================
+        */
+
+        const html = `
+
+            <!DOCTYPE html>
+
+            <html lang="id">
+
+            <head>
+
+                <meta charset="UTF-8">
+
+                <meta
+                    name="viewport"
+                    content="
+                        width=device-width,
+                        initial-scale=1.0
+                    "
+                >
+
+
+                <title>
+                    Account Receivable - Preview
+                </title>
+
+
+                <style>
+
+                    /*
+                    ==========================================
+                    RESET
+                    ==========================================
+                    */
+
+                    * {
+
+                        box-sizing:
+                            border-box;
+
+                    }
+
+
+                    html,
+                    body {
+
+                        margin:
+                            0;
+
+                        padding:
+                            0;
+
+                        width:
+                            100%;
+
+                        min-height:
+                            100%;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    BODY
+                    ==========================================
+                    */
+
+                    body {
+
+                        padding:
+                            28px 32px 42px 32px;
+
+                        background:
+                            #ffffff;
+
+                        color:
+                            #1f2937;
+
+                        font-family:
+                            Tahoma,
+                            Arial,
+                            sans-serif;
+
+                        font-size:
+                            12px;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    REPORT
+                    ==========================================
+                    */
+
+                    .report {
+
+                        display:
+                            block;
+
+                        width:
+                            100%;
+
+                        max-width:
+                            100%;
+
+                        margin:
+                            0;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    HEADER
+                    ==========================================
+                    */
+
+                    .report-header {
+
+                        width:
+                            100%;
+
+                        padding-bottom:
+                            16px;
+
+                        margin-bottom:
+                            20px;
+
+                        border-bottom:
+                            2px solid #244494;
+
+                    }
+
+
+                    .report-title {
+
+                        margin:
+                            0;
+
+                        font-size:
+                            22px;
+
+                        font-weight:
+                            700;
+
+                    }
+
+
+                    .report-subtitle {
+
+                        margin-top:
+                            6px;
+
+                        font-size:
+                            16px;
+
+                        font-weight:
+                            700;
+
+                        color:
+                            #244494;
+
+                    }
+
+
+                    .report-description {
+
+                        margin-top:
+                            5px;
+
+                        color:
+                            #6b7280;
+
+                    }
+
+
+                    .report-date {
+
+                        margin-top:
+                            6px;
+
+                        font-size:
+                            11px;
+
+                        color:
+                            #6b7280;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    TABLE CONTAINER
+                    ==========================================
+                    */
+
+                    .table-container {
+
+                        display:
+                            block;
+
+                        width:
+                            100%;
+
+                        max-width:
+                            100%;
+
+                        border:
+                            1px solid #d1d5db;
+
+                        border-radius:
+                            4px;
+
+                        overflow:
+                            hidden;
+
+                        background:
+                            #ffffff;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    TABLE WRAPPER
+                    ==========================================
+                    */
+
+                    .table-wrapper {
+
+                        display:
+                            block;
+
+                        width:
+                            100%;
+
+                        max-width:
+                            100%;
+
+                        overflow-x:
+                            auto;
+
+                        overflow-y:
+                            visible;
+
+                        scrollbar-width:
+                            none;
+
+                    }
+
+
+                    .table-wrapper::-webkit-scrollbar {
+
+                        display:
+                            none;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    TABLE
+                    ==========================================
+                    */
+
+                    table {
+
+                        width:
+                            max-content;
+
+                        min-width:
+                            100%;
+
+                        margin:
+                            0;
+
+                        border-collapse:
+                            collapse;
+
+                        border-spacing:
+                            0;
+
+                        table-layout:
+                            auto;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    TABLE HEADER
+                    ==========================================
+                    */
+
+                    thead th {
+
+                        padding:
+                            10px 9px;
+
+                        background:
+                            #244494;
+
+                        color:
+                            #ffffff;
+
+                        border-right:
+                            1px solid #d1d5db;
+
+                        border-bottom:
+                            1px solid #d1d5db;
+
+                        font-size:
+                            11px;
+
+                        font-weight:
+                            700;
+
+                        text-align:
+                            center;
+
+                        vertical-align:
+                            middle;
+
+                        white-space:
+                            nowrap;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    TABLE BODY
+                    ==========================================
+                    */
+
+                    tbody td {
+
+                        padding:
+                            9px;
+
+                        border-right:
+                            1px solid #d1d5db;
+
+                        border-bottom:
+                            1px solid #d1d5db;
+
+                        vertical-align:
+                            middle;
+
+                        background:
+                            #ffffff;
+
+                        color:
+                            #1f2937;
+
+                        font-size:
+                            12px;
+
+                        font-weight:
+                            400;
+
+                        white-space:
+                            nowrap;
+
+                    }
+
+
+                    thead th:last-child,
+                    tbody td:last-child {
+
+                        border-right:
+                            0;
+
+                    }
+
+
+                    tbody tr:last-child td {
+
+                        border-bottom:
+                            0;
+
+                    }
+
+
+                    tbody tr:nth-child(even) td {
+
+                        background:
+                            #f8fafc;
+
+                    }
+
+
+                    tbody tr:hover td {
+
+                        background:
+                            #f1f5f9;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    ALIGNMENT
+                    ==========================================
+                    */
+
+                    .center {
+
+                        text-align:
+                            center;
+
+                    }
+
+
+                    .amount {
+
+                        text-align:
+                            right;
+
+                        white-space:
+                            nowrap;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    DESCRIPTION
+                    ==========================================
+                    */
+
+                    .description {
+
+                        min-width:
+                            420px;
+
+                        text-align:
+                            left;
+
+                        white-space:
+                            nowrap;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    COLUMN WIDTH
+                    ==========================================
+                    */
+
+                    .col-no {
+
+                        width:
+                            45px;
+
+                        min-width:
+                            45px;
+
+                    }
+
+
+                    .col-invoice {
+
+                        min-width:
+                            145px;
+
+                    }
+
+
+                    .col-po {
+
+                        min-width:
+                            160px;
+
+                    }
+
+
+                    .col-customer {
+
+                        min-width:
+                            220px;
+
+                    }
+
+
+                    .col-date {
+
+                        min-width:
+                            105px;
+
+                    }
+
+
+                    .col-amount {
+
+                        min-width:
+                            120px;
+
+                    }
+
+
+                    .col-status {
+
+                        min-width:
+                            100px;
+
+                    }
+
+
+                    .col-journal {
+
+                        min-width:
+                            155px;
+
+                    }
+
+
+                    .col-description {
+
+                        min-width:
+                            420px;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    FOOTER
+                    ==========================================
+                    */
+
+                    .report-footer {
+
+                        display:
+                            flex;
+
+                        justify-content:
+                            space-between;
+
+                        align-items:
+                            center;
+
+                        width:
+                            100%;
+
+                        margin-top:
+                            18px;
+
+                        padding-top:
+                            12px;
+
+                        border-top:
+                            1px solid #e5e7eb;
+
+                        color:
+                            #6b7280;
+
+                        font-size:
+                            11px;
+
+                        white-space:
+                            nowrap;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    FIXED BOTTOM SCROLLBAR
+                    ==========================================
+                    */
+
+                    .fixed-horizontal-scroll {
+
+                        position:
+                            fixed;
+
+                        left:
+                            0;
+
+                        right:
+                            0;
+
+                        bottom:
+                            0;
+
+                        z-index:
+                            99999;
+
+                        width:
+                            100%;
+
+                        height:
+                            22px;
+
+                        padding:
+                            0 32px;
+
+                        overflow:
+                            hidden;
+
+                        background:
+                            #f8fafc;
+
+                        border-top:
+                            1px solid #d1d5db;
+
+                        box-shadow:
+                            0 -2px 6px
+                            rgba(
+                                0,
+                                0,
+                                0,
+                                0.08
+                            );
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    FIXED SCROLL INNER
+                    ==========================================
+                    */
+
+                    .fixed-horizontal-scroll-inner {
+
+                        width:
+                            100%;
+
+                        height:
+                            21px;
+
+                        overflow-x:
+                            auto;
+
+                        overflow-y:
+                            hidden;
+
+                        scrollbar-width:
+                            auto;
+
+                        scrollbar-color:
+                            #9aa5b3
+                            #eef1f4;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    FAKE CONTENT WIDTH
+                    ==========================================
+                    */
+
+                    .fixed-horizontal-scroll-content {
+
+                        width:
+                            100%;
+
+                        height:
+                            1px;
+
+                        min-height:
+                            1px;
+
+                    }
+
+
+                    .fixed-horizontal-scroll-inner::-webkit-scrollbar {
+
+                        height:
+                            16px;
+
+                    }
+
+
+                    .fixed-horizontal-scroll-inner::-webkit-scrollbar-track {
+
+                        background:
+                            #eef1f4;
+
+                    }
+
+
+                    .fixed-horizontal-scroll-inner::-webkit-scrollbar-thumb {
+
+                        background:
+                            #9aa5b3;
+
+                        border-radius:
+                            10px;
+
+                        border:
+                            3px solid #eef1f4;
+
+                    }
+
+
+                    .fixed-horizontal-scroll-inner::-webkit-scrollbar-thumb:hover {
+
+                        background:
+                            #7e8997;
+
+                    }
+
+                </style>
+
+            </head>
+
+
+            <body>
+
+
+                <div class="report">
+
+
+                    <!-- HEADER -->
+
+                    <div class="report-header">
+
+                        <h1 class="report-title">
+
+                            FINOVA ACCOUNTING SYSTEM
+
+                        </h1>
+
+
+                        <div class="report-subtitle">
+
+                            Account Receivable
+
+                        </div>
+
+
+                        <div class="report-description">
+
+                            Account Receivable Transaction Report
+
+                        </div>
+
+
+                        <div class="report-date">
+
+                            Preview Date :
+                            ${previewDate}
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- TABLE -->
+
+                    <div class="table-container">
+
+
+                        <div
+                            class="table-wrapper"
+                            id="ar-table-scroll"
+                        >
+
+
+                            <table
+                                id="ar-preview-table"
+                            >
+
+
+                                <colgroup>
+
+                                    <col class="col-no">
+
+                                    <col class="col-invoice">
+
+                                    <col class="col-po">
+
+                                    <col class="col-customer">
+
+                                    <col class="col-date">
+
+                                    <col class="col-date">
+
+                                    <col class="col-amount">
+
+                                    <col class="col-amount">
+
+                                    <col class="col-amount">
+
+                                    <col class="col-status">
+
+                                    <col class="col-journal">
+
+                                    <col class="col-description">
+
+                                </colgroup>
+
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th>
+                                            No
+                                        </th>
+
+                                        <th>
+                                            Invoice No
+                                        </th>
+
+                                        <th>
+                                            PO No
+                                        </th>
+
+                                        <th>
+                                            Customer
+                                        </th>
+
+                                        <th>
+                                            Invoice Date
+                                        </th>
+
+                                        <th>
+                                            Due Date
+                                        </th>
+
+                                        <th>
+                                            Total
+                                        </th>
+
+                                        <th>
+                                            Paid
+                                        </th>
+
+                                        <th>
+                                            Outstanding
+                                        </th>
+
+                                        <th>
+                                            Status
+                                        </th>
+
+                                        <th>
+                                            Journal
+                                        </th>
+
+                                        <th>
+                                            Description
+                                        </th>
+
+                                    </tr>
+
+                                </thead>
+
+
+                                <tbody>
+
+                                    ${rows}
+
+                                </tbody>
+
+
+                            </table>
+
+
+                        </div>
+
+
+                    </div>
+
+
+                    <!-- FOOTER -->
+
+                    <div class="report-footer">
+
+                        <div>
+
+                            Total Record :
+                            ${invoices.length}
+
+                        </div>
+
+
+                        <div>
+
+                            Generated by FINOVA Accounting System
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- FIXED BOTTOM SCROLLBAR -->
+
+                <div
+                    class="fixed-horizontal-scroll"
+                    id="ar-fixed-scroll-container"
+                >
+
+                    <div
+                        class="fixed-horizontal-scroll-inner"
+                        id="ar-fixed-scroll"
+                    >
+
+                        <div
+                            class="fixed-horizontal-scroll-content"
+                            id="ar-fixed-scroll-content"
+                        >
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+            </body>
+
+            </html>
+
+        `;
+
+
+        /*
+        ==================================================
+        WRITE NEW TAB
+        ==================================================
+        */
+
+        previewWindow.document.open();
+
+        previewWindow.document.write(
+            html
+        );
+
+        previewWindow.document.close();
+
+
+        /*
+        ==================================================
+        TAB TITLE
+        ==================================================
+        */
+
+        previewWindow.document.title =
+            "Account Receivable - Preview";
+
+
+        /*
+        ==================================================
+        SETUP FIXED BOTTOM SCROLLBAR
+        ==================================================
+        */
+
+        const setupScrollSync = () => {
+
+            const doc =
+                previewWindow.document;
+
+
+            /*
+            ==============================================
+            ELEMENTS
+            ==============================================
+            */
+
+            const tableScroll =
+                doc.getElementById(
+                    "ar-table-scroll"
+                );
+
+
+            const table =
+                doc.getElementById(
+                    "ar-preview-table"
+                );
+
+
+            const fixedScrollContainer =
+                doc.getElementById(
+                    "ar-fixed-scroll-container"
+                );
+
+
+            const fixedScroll =
+                doc.getElementById(
+                    "ar-fixed-scroll"
+                );
+
+
+            const fixedScrollContent =
+                doc.getElementById(
+                    "ar-fixed-scroll-content"
+                );
+
+
+            /*
+            ==============================================
+            VALIDATE
+            ==============================================
+            */
+
+            if (
+                !tableScroll
+                ||
+                !table
+                ||
+                !fixedScrollContainer
+                ||
+                !fixedScroll
+                ||
+                !fixedScrollContent
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+            ==============================================
+            UPDATE SCROLL WIDTH
+            ==============================================
+            */
+
+            const updateScrollWidth = () => {
+
+                const tableWidth =
+                    Math.max(
+                        table.scrollWidth,
+                        table.offsetWidth
+                    );
+
+
+                fixedScrollContent.style.width =
+                    `${tableWidth}px`;
+
+
+                /*
+                ==========================================
+                SHOW ONLY WHEN NEEDED
+                ==========================================
+                */
+
+                if (
+                    tableWidth <=
+                    tableScroll.clientWidth
+                ) {
+
+                    fixedScrollContainer.style.display =
+                        "none";
+
+                }
+
+                else {
+
+                    fixedScrollContainer.style.display =
+                        "block";
+
+                }
+
+            };
+
+
+            /*
+            ==============================================
+            SYNC STATE
+            ==============================================
+            */
+
+            let syncingFixed =
+                false;
+
+            let syncingTable =
+                false;
+
+
+            /*
+            ==============================================
+            FIXED SCROLL -> TABLE
+            ==============================================
+            */
+
+            fixedScroll.addEventListener(
+                "scroll",
+                () => {
+
+                    if (
+                        syncingTable
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    syncingFixed =
+                        true;
+
+
+                    tableScroll.scrollLeft =
+                        fixedScroll.scrollLeft;
+
+
+                    requestAnimationFrame(
+                        () => {
+
+                            syncingFixed =
+                                false;
+
+                        }
+                    );
+
+                }
+            );
+
+
+            /*
+            ==============================================
+            TABLE -> FIXED SCROLL
+            ==============================================
+            */
+
+            tableScroll.addEventListener(
+                "scroll",
+                () => {
+
+                    if (
+                        syncingFixed
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    syncingTable =
+                        true;
+
+
+                    fixedScroll.scrollLeft =
+                        tableScroll.scrollLeft;
+
+
+                    requestAnimationFrame(
+                        () => {
+
+                            syncingTable =
+                                false;
+
+                        }
+                    );
+
+                }
+            );
+
+
+            /*
+            ==============================================
+            INITIAL WIDTH
+            ==============================================
+            */
+
+            updateScrollWidth();
+
+
+            requestAnimationFrame(
+                () => {
+
+                    updateScrollWidth();
+
+                }
+            );
+
+
+            /*
+            ==============================================
+            WINDOW RESIZE
+            ==============================================
+            */
+
+            previewWindow.addEventListener(
+                "resize",
+                updateScrollWidth
+            );
+
+
+            /*
+            ==============================================
+            RESIZE OBSERVER
+            ==============================================
+            */
+
+            if (
+                typeof previewWindow.ResizeObserver
+                !==
+                "undefined"
+            ) {
+
+                const resizeObserver =
+                    new previewWindow.ResizeObserver(
+                        () => {
+
+                            updateScrollWidth();
+
+                        }
+                    );
+
+
+                resizeObserver.observe(
+                    table
+                );
+
+
+                resizeObserver.observe(
+                    tableScroll
+                );
+
+            }
+
+        };
+
+
+        /*
+        ==================================================
+        RUN SCROLL SETUP
+        ==================================================
+        */
+
+        if (
+            previewWindow.document.readyState ===
+            "complete"
+        ) {
+
+            setupScrollSync();
+
+        }
+
+        else {
+
+            previewWindow.addEventListener(
+                "load",
+                setupScrollSync,
+                {
+                    once:
+                        true
+                }
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        FOCUS
+        ==================================================
+        */
+
+        previewWindow.focus();
 
     }
 
@@ -14160,7 +15618,9 @@ previewHTML() {
 
 
         this.showError(
-            "Preview HTML failed."
+            error?.message
+            ||
+            "Failed to preview Account Receivable."
         );
 
     }
