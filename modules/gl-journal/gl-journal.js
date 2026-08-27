@@ -7013,85 +7013,219 @@ async deleteJournal(id) {
 
 
         /*
-        ==================================================
-        AP INVOICE
-        VALIDATE BEFORE DELETE
-        ==================================================
-        */
+==========================================================
+AP INVOICE
+VALIDATE BEFORE DELETE
+FINAL
+==========================================================
+*/
 
-        let apInvoiceBeforeDelete =
-            null;
+let apInvoiceBeforeDelete =
+    null;
 
 
-        if (
-            sourceModule === "AP"
-            &&
-            sourceDocumentType === "AP_INVOICE"
-            &&
+let apInvoicePayments =
+    [];
+
+
+if (
+    sourceModule === "AP"
+    &&
+    sourceDocumentType === "AP_INVOICE"
+    &&
+    sourceDocumentId
+) {
+
+    /*
+    ======================================================
+    GET AP INVOICE
+    ======================================================
+    */
+
+    const {
+
+        data: apInvoice,
+
+        error: apInvoiceError
+
+    } = await supabase
+
+        .from(
+            "trx_account_payable"
+        )
+
+        .select(`
+            id,
+            invoice_no,
+            total_amount,
+            paid_amount,
+            outstanding_amount,
+            status,
+            gl_journal_id
+        `)
+
+        .eq(
+            "id",
             sourceDocumentId
-        ) {
+        )
 
-            const {
-
-                data,
-
-                error
-
-            } = await supabase
-
-                .from(
-                    "trx_account_payable"
-                )
-
-                .select(`
-                    id,
-                    total_amount,
-                    paid_amount
-                `)
-
-                .eq(
-                    "id",
-                    sourceDocumentId
-                )
-
-                .maybeSingle();
+        .maybeSingle();
 
 
-            if (error) {
+    if (
+        apInvoiceError
+    ) {
 
-                throw error;
+        throw apInvoiceError;
 
-            }
-
-
-            apInvoiceBeforeDelete =
-                data
-                ||
-                null;
+    }
 
 
-            /*
-            ==============================================
-            DO NOT ALLOW DELETE IF PAYMENT EXISTS
-            ==============================================
-            */
+    if (
+        !apInvoice
+    ) {
 
-            if (
-                Number(
-                    apInvoiceBeforeDelete?.paid_amount
-                    ||
-                    0
-                ) > 0
-            ) {
+        throw new Error(
+            "Account Payable invoice not found."
+        );
 
-                throw new Error(
-                    "AP invoice journal cannot be deleted because payment already exists."
-                );
+    }
 
-            }
 
-        }
+    apInvoiceBeforeDelete =
+        apInvoice;
 
+
+    /*
+    ======================================================
+    GET ACTIVE AP PAYMENTS
+
+    IMPORTANT:
+    Do not depend only on paid_amount.
+
+    Payment transaction is the actual source
+    for determining whether AP already has payment.
+    ======================================================
+    */
+
+    const {
+
+        data: payments,
+
+        error: paymentsError
+
+    } = await supabase
+
+        .from(
+            "trx_ap_payment"
+        )
+
+        .select(`
+            id,
+            account_payable_id,
+            payment_amount,
+            gl_journal_id
+        `)
+
+        .eq(
+            "account_payable_id",
+            sourceDocumentId
+        );
+
+
+    if (
+        paymentsError
+    ) {
+
+        throw paymentsError;
+
+    }
+
+
+    apInvoicePayments =
+        (
+            payments
+            ||
+            []
+        )
+        .filter(
+
+            payment =>
+
+                payment?.gl_journal_id
+
+        );
+
+
+    /*
+    ======================================================
+    DEBUG
+    ======================================================
+    */
+
+    console.log(
+        "AP INVOICE BEFORE DELETE:",
+        apInvoiceBeforeDelete
+    );
+
+
+    console.log(
+        "AP ACTIVE PAYMENTS:",
+        apInvoicePayments
+    );
+
+
+    /*
+    ======================================================
+    PAYMENT EXISTS
+
+    Invoice journal cannot be deleted before
+    its payment journals are removed.
+    ======================================================
+    */
+
+    if (
+        apInvoicePayments.length > 0
+    ) {
+
+        const paymentCount =
+            apInvoicePayments.length;
+
+
+        const paymentAmount =
+            apInvoicePayments.reduce(
+
+                (
+                    total,
+                    payment
+                ) => {
+
+                    return (
+                        total
+                        +
+                        Number(
+                            payment?.payment_amount
+                            ||
+                            0
+                        )
+                    );
+
+                },
+
+                0
+
+            );
+
+
+        throw new Error(
+
+            `Journal invoice AP tidak dapat dihapus karena terdapat ${paymentCount} pembayaran aktif sebesar ${this.formatCurrency(paymentAmount)}. Hapus Journal AP Payment terlebih dahulu.`
+
+        );
+
+    }
+
+}
 
         /*
         ==================================================
