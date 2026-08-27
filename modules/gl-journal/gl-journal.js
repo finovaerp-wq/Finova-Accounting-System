@@ -629,11 +629,33 @@ updateSummaryDisplay() {
         this.summaryTotalLine
     ) {
 
-        this.summaryTotalLine.value =
-            this.summary.totalLine;
+        const totalLine =
+            Number(
+                this.summary.totalLine
+                || 0
+            );
+
+
+        /*
+        ==================================================
+        SUPPORT INPUT OR NORMAL ELEMENT
+        ==================================================
+        */
+
+        if (
+            "value"
+            in
+            this.summaryTotalLine
+        ) {
+
+            this.summaryTotalLine.value =
+                totalLine;
+
+        }
+
 
         this.summaryTotalLine.textContent =
-            this.summary.totalLine;
+            totalLine;
 
     }
 
@@ -648,17 +670,35 @@ updateSummaryDisplay() {
         this.summaryTotalAmount
     ) {
 
-        const amount =
+        const totalAmount =
             this.formatCurrency(
-                this.summary.totalDebit
+                Number(
+                    this.summary.totalDebit
+                    || 0
+                )
             );
 
 
-        this.summaryTotalAmount.value =
-            amount;
+        /*
+        ==================================================
+        SUPPORT INPUT OR NORMAL ELEMENT
+        ==================================================
+        */
+
+        if (
+            "value"
+            in
+            this.summaryTotalAmount
+        ) {
+
+            this.summaryTotalAmount.value =
+                totalAmount;
+
+        }
+
 
         this.summaryTotalAmount.textContent =
-            amount;
+            totalAmount;
 
     }
 
@@ -1843,11 +1883,11 @@ async loadJournalModal() {
 
         
         }
-    /*
+  /*
 ==========================================================
 LOAD GENERAL JOURNAL
 FINAL
-ITEMS = JOURNAL DETAIL TOTAL LINE
+ITEMS = UI JOURNAL TRANSACTION TOTAL LINE
 ==========================================================
 */
 
@@ -1969,7 +2009,7 @@ async loadData(
 
         /*
         ======================================================
-        LOAD HEADER
+        LOAD JOURNAL HEADER
         ======================================================
         */
 
@@ -1988,7 +2028,7 @@ async loadData(
         /*
         ======================================================
         LOAD FULL JOURNAL
-        HEADER + DETAIL
+        HEADER + DATABASE DETAIL
         ======================================================
         */
 
@@ -2007,32 +2047,130 @@ async loadData(
                                 );
 
 
+                            /*
+                            ==========================================
+                            DATABASE DETAIL
+
+                            DB FORMAT:
+                            Debit row
+                            Credit row
+                            ==========================================
+                            */
+
+                            const databaseDetails =
+                                Array.isArray(
+                                    fullJournal?.details
+                                )
+                                    ? fullJournal.details
+                                    : [];
+
+
+                            /*
+                            ==========================================
+                            MERGE DATABASE DETAIL
+
+                            Debit + Credit
+                            =
+                            ONE UI TRANSACTION
+                            ==========================================
+                            */
+
+                            const transactionDetails =
+                                this.service.mergeJournalDetail(
+                                    databaseDetails
+                                );
+
+
+                            /*
+                            ==========================================
+                            TOTAL LINE / ITEMS
+
+                            SAME AS JOURNAL DETAIL MODAL
+                            ==========================================
+                            */
+
+                            const totalLine =
+                                Array.isArray(
+                                    transactionDetails
+                                )
+                                    ? transactionDetails.length
+                                    : 0;
+
+
+                            /*
+                            ==========================================
+                            RETURN
+                            ==========================================
+                            */
+
                             return {
 
                                 ...journal,
 
-                                ...(fullJournal || {})
+                                ...(fullJournal || {}),
+
+                                /*
+                                ======================================
+                                KEEP DATABASE DETAIL IF NEEDED
+                                ======================================
+                                */
+
+                                database_details:
+                                    databaseDetails,
+
+                                /*
+                                ======================================
+                                UI TRANSACTION DETAIL
+                                ======================================
+                                */
+
+                                details:
+                                    transactionDetails,
+
+                                /*
+                                ======================================
+                                TOTAL LINE
+                                ======================================
+                                */
+
+                                total_line:
+                                    totalLine,
+
+                                transaction_count:
+                                    totalLine
 
                             };
 
                         }
 
                         catch (
-                            detailError
+                            journalError
                         ) {
 
                             console.error(
-                                "Failed to load journal detail:",
+                                "Failed to load journal:",
                                 journal.id,
-                                detailError
+                                journalError
                             );
 
+
+                            /*
+                            ==========================================
+                            KEEP HEADER
+                            ==========================================
+                            */
 
                             return {
 
                                 ...journal,
 
-                                details: []
+                                database_details: [],
+
+                                details: [],
+
+                                total_line: 0,
+
+                                transaction_count: 0
 
                             };
 
@@ -2088,7 +2226,8 @@ async loadData(
                         sourceModule === "GENERAL JOURNAL"
                     ) {
 
-                        sourceModule = "GLJ";
+                        sourceModule =
+                            "GLJ";
 
                     }
 
@@ -2105,7 +2244,8 @@ async loadData(
                         sourceModule === "PAYABLE"
                     ) {
 
-                        sourceModule = "AP";
+                        sourceModule =
+                            "AP";
 
                     }
 
@@ -2122,20 +2262,18 @@ async loadData(
                         sourceModule === "RECEIVABLE"
                     ) {
 
-                        sourceModule = "AR";
+                        sourceModule =
+                            "AR";
 
                     }
 
 
                     /*
                     ==============================================
-                    TOTAL LINE / ITEMS
+                    TOTAL LINE
 
-                    IMPORTANT:
-                    ONE DETAIL RECORD = ONE JOURNAL LINE
-
-                    SAME VALUE AS:
-                    Journal Summary -> Total Line
+                    USE UI TRANSACTION COUNT
+                    NOT DATABASE ROW COUNT
                     ==============================================
                     */
 
@@ -2153,7 +2291,7 @@ async loadData(
                     ==============================================
                     */
 
-                    let totalDebit =
+                    const totalDebit =
                         Number(
                             journal.total_debit
                             || 0
@@ -2166,135 +2304,11 @@ async loadData(
                     ==============================================
                     */
 
-                    let totalCredit =
+                    const totalCredit =
                         Number(
                             journal.total_credit
                             || 0
                         );
-
-
-                    /*
-                    ==============================================
-                    FALLBACK TOTAL FROM DETAIL
-                    ==============================================
-                    */
-
-                    if (
-                        Array.isArray(
-                            journal.details
-                        )
-                    ) {
-
-                        /*
-                        ==========================================
-                        TOTAL DEBIT
-                        ==========================================
-                        */
-
-                        if (
-                            journal.total_debit == null
-                        ) {
-
-                            totalDebit =
-                                journal.details.reduce(
-
-                                    (
-                                        total,
-                                        detail
-                                    ) => {
-
-                                        const debit =
-                                            Number(
-                                                detail.debit
-                                                ??
-                                                detail.debit_amount
-                                                ??
-                                                (
-                                                    detail.debit_account_id
-                                                        ? detail.amount
-                                                        : 0
-                                                )
-                                                ??
-                                                0
-                                            );
-
-
-                                        return (
-                                            total
-                                            +
-                                            (
-                                                Number.isFinite(
-                                                    debit
-                                                )
-                                                    ? debit
-                                                    : 0
-                                            )
-                                        );
-
-                                    },
-
-                                    0
-
-                                );
-
-                        }
-
-
-                        /*
-                        ==========================================
-                        TOTAL CREDIT
-                        ==========================================
-                        */
-
-                        if (
-                            journal.total_credit == null
-                        ) {
-
-                            totalCredit =
-                                journal.details.reduce(
-
-                                    (
-                                        total,
-                                        detail
-                                    ) => {
-
-                                        const credit =
-                                            Number(
-                                                detail.credit
-                                                ??
-                                                detail.credit_amount
-                                                ??
-                                                (
-                                                    detail.credit_account_id
-                                                        ? detail.amount
-                                                        : 0
-                                                )
-                                                ??
-                                                0
-                                            );
-
-
-                                        return (
-                                            total
-                                            +
-                                            (
-                                                Number.isFinite(
-                                                    credit
-                                                )
-                                                    ? credit
-                                                    : 0
-                                            )
-                                        );
-
-                                    },
-
-                                    0
-
-                                );
-
-                        }
-
-                    }
 
 
                     /*
@@ -2327,6 +2341,39 @@ async loadData(
                 }
 
             );
+
+
+        /*
+        ======================================================
+        DEBUG
+        ======================================================
+        */
+
+        console.table(
+
+            this.journals.map(
+
+                journal => ({
+
+                    journal_no:
+                        journal.journal_no,
+
+                    database_rows:
+                        journal.database_details?.length
+                        || 0,
+
+                    ui_transactions:
+                        journal.details?.length
+                        || 0,
+
+                    items:
+                        journal.total_line
+
+                })
+
+            )
+
+        );
 
 
         /*
@@ -2412,6 +2459,12 @@ async loadData(
         );
 
 
+        /*
+        ======================================================
+        RESET
+        ======================================================
+        */
+
         this.journals = [];
 
         this.filteredJournals = [];
@@ -2456,6 +2509,12 @@ async loadData(
 
         }
 
+
+        /*
+        ======================================================
+        PAGINATION
+        ======================================================
+        */
 
         if (
             typeof this.updatePagination
@@ -2651,7 +2710,7 @@ renderTable() {
 ==========================================================
 CREATE TABLE ROW
 FINAL
-ITEMS = TOTAL LINE JOURNAL DETAIL
+ITEMS = JOURNAL DETAIL TOTAL LINE
 ==========================================================
 */
 
@@ -2698,6 +2757,12 @@ createTableRow(
         .toUpperCase();
 
 
+    /*
+    ======================================================
+    NORMALIZE GL
+    ======================================================
+    */
+
     if (
         source === "GENERAL"
         ||
@@ -2711,6 +2776,12 @@ createTableRow(
     }
 
 
+    /*
+    ======================================================
+    NORMALIZE AP
+    ======================================================
+    */
+
     if (
         source === "ACCOUNT PAYABLE"
         ||
@@ -2721,6 +2792,12 @@ createTableRow(
 
     }
 
+
+    /*
+    ======================================================
+    NORMALIZE AR
+    ======================================================
+    */
 
     if (
         source === "ACCOUNT RECEIVABLE"
@@ -2735,7 +2812,7 @@ createTableRow(
 
     /*
     ======================================================
-    INVOICE NO
+    INVOICE NUMBER
     ======================================================
     */
 
@@ -2746,7 +2823,7 @@ createTableRow(
 
     /*
     ======================================================
-    PO NO
+    PO NUMBER
     ======================================================
     */
 
@@ -2779,28 +2856,16 @@ createTableRow(
 
 
     /*
-    ======================================================
-    ITEMS / TOTAL LINE
+==========================================================
+ITEMS / TOTAL LINE
+==========================================================
+*/
 
-    SAME VALUE AS JOURNAL DETAIL SUMMARY TOTAL LINE
-    ======================================================
-    */
-
-    const totalLine =
-        Math.max(
-
-            0,
-
-            Number(
-                journal.total_line
-                ??
-                journal.transaction_count
-                ??
-                0
-            )
-
-        );
-
+const totalLine =
+    Number(
+        journal.total_line
+        || 0
+    );
 
     /*
     ======================================================
@@ -2842,7 +2907,7 @@ createTableRow(
 
     /*
     ======================================================
-    SOURCE JOURNAL
+    NORMALIZED SOURCE JOURNAL
     ======================================================
     */
 
@@ -2858,7 +2923,7 @@ createTableRow(
 
     /*
     ======================================================
-    RETURN
+    RETURN ROW
     ======================================================
     */
 
@@ -2870,7 +2935,9 @@ createTableRow(
         >
 
 
-            <!-- NO -->
+            <!-- ==========================================
+                 NO
+            =========================================== -->
 
             <td class="gl-journal-no-cell">
 
@@ -2879,7 +2946,9 @@ createTableRow(
             </td>
 
 
-            <!-- DATE -->
+            <!-- ==========================================
+                 DATE
+            =========================================== -->
 
             <td class="gl-journal-date-cell">
 
@@ -2892,14 +2961,18 @@ createTableRow(
             </td>
 
 
-            <!-- JOURNAL INFORMATION -->
+            <!-- ==========================================
+                 JOURNAL INFORMATION
+            =========================================== -->
 
             <td class="gl-journal-info-cell">
 
                 <div class="gl-journal-info">
 
 
-                    <!-- ITEMS -->
+                    <!-- ==================================
+                         ITEMS
+                    =================================== -->
 
                     <div
                         class="
@@ -2942,7 +3015,9 @@ createTableRow(
                     </div>
 
 
-                    <!-- JOURNAL NO -->
+                    <!-- ==================================
+                         JOURNAL NO
+                    =================================== -->
 
                     <div class="gl-journal-info-line">
 
@@ -2952,11 +3027,13 @@ createTableRow(
 
                         </span>
 
+
                         <span class="gl-journal-info-separator">
 
                             :
 
                         </span>
+
 
                         <strong
                             class="
@@ -2974,7 +3051,9 @@ createTableRow(
                     </div>
 
 
-                    <!-- INVOICE NO -->
+                    <!-- ==================================
+                         INVOICE NO
+                    =================================== -->
 
                     <div class="gl-journal-info-line">
 
@@ -2984,11 +3063,13 @@ createTableRow(
 
                         </span>
 
+
                         <span class="gl-journal-info-separator">
 
                             :
 
                         </span>
+
 
                         <span class="gl-journal-info-value">
 
@@ -3005,7 +3086,9 @@ createTableRow(
                     </div>
 
 
-                    <!-- PO NO -->
+                    <!-- ==================================
+                         PO NO
+                    =================================== -->
 
                     <div class="gl-journal-info-line">
 
@@ -3015,11 +3098,13 @@ createTableRow(
 
                         </span>
 
+
                         <span class="gl-journal-info-separator">
 
                             :
 
                         </span>
+
 
                         <span class="gl-journal-info-value">
 
@@ -3036,7 +3121,9 @@ createTableRow(
                     </div>
 
 
-                    <!-- DESCRIPTION -->
+                    <!-- ==================================
+                         DESCRIPTION
+                    =================================== -->
 
                     <div class="gl-journal-info-line">
 
@@ -3046,11 +3133,13 @@ createTableRow(
 
                         </span>
 
+
                         <span class="gl-journal-info-separator">
 
                             :
 
                         </span>
+
 
                         <span
                             class="
@@ -3076,7 +3165,9 @@ createTableRow(
             </td>
 
 
-            <!-- SOURCE -->
+            <!-- ==========================================
+                 SOURCE
+            =========================================== -->
 
             <td class="gl-journal-source-cell">
 
@@ -3087,10 +3178,14 @@ createTableRow(
             </td>
 
 
-            <!-- AMOUNT -->
+            <!-- ==========================================
+                 AMOUNT
+            =========================================== -->
 
             <td class="gl-journal-amount-cell">
 
+
+                <!-- DEBIT -->
 
                 <div class="gl-journal-summary-line">
 
@@ -3100,11 +3195,13 @@ createTableRow(
 
                     </span>
 
+
                     <span class="gl-journal-summary-separator">
 
                         :
 
                     </span>
+
 
                     <strong class="gl-journal-summary-value">
 
@@ -3117,6 +3214,8 @@ createTableRow(
                 </div>
 
 
+                <!-- CREDIT -->
+
                 <div class="gl-journal-summary-line">
 
                     <span class="gl-journal-summary-label">
@@ -3125,11 +3224,13 @@ createTableRow(
 
                     </span>
 
+
                     <span class="gl-journal-summary-separator">
 
                         :
 
                     </span>
+
 
                     <strong class="gl-journal-summary-value">
 
@@ -3145,7 +3246,9 @@ createTableRow(
             </td>
 
 
-            <!-- CREATED -->
+            <!-- ==========================================
+                 CREATED
+            =========================================== -->
 
             <td class="gl-journal-created-cell">
 
@@ -3154,7 +3257,9 @@ createTableRow(
             </td>
 
 
-            <!-- STATUS -->
+            <!-- ==========================================
+                 STATUS
+            =========================================== -->
 
             <td class="gl-journal-status-cell">
 
@@ -3165,7 +3270,9 @@ createTableRow(
             </td>
 
 
-            <!-- ACTION -->
+            <!-- ==========================================
+                 ACTION
+            =========================================== -->
 
             <td class="gl-journal-action-cell">
 
@@ -4312,7 +4419,7 @@ renderDetailTable() {
 
     /*
     ======================================================
-    VALIDATE
+    VALIDATE TABLE BODY
     ======================================================
     */
 
@@ -4331,7 +4438,8 @@ renderDetailTable() {
     ======================================================
     */
 
-    this.detailTableBody.innerHTML = "";
+    this.detailTableBody.innerHTML =
+        "";
 
 
     /*
@@ -4372,11 +4480,11 @@ renderDetailTable() {
 
         /*
         ======================================================
-        UPDATE SUMMARY
+        SUMMARY
         ======================================================
         */
 
-        this.updateSummaryDisplay();
+        this.calculateSummary();
 
         return;
 
@@ -4385,7 +4493,7 @@ renderDetailTable() {
 
     /*
     ======================================================
-    RENDER ROW
+    RENDER DETAIL
     ======================================================
     */
 
@@ -4414,11 +4522,11 @@ renderDetailTable() {
 
     /*
     ======================================================
-    UPDATE SUMMARY
+    SUMMARY
     ======================================================
     */
 
-    this.updateSummaryDisplay();
+    this.calculateSummary();
 
 }
 /*
@@ -5505,62 +5613,247 @@ handleTableAction(event) {
 /*
 ==========================================================
 OPEN ADD JOURNAL
+FINAL
 ==========================================================
 */
 
 async openAddJournal() {
 
-    /*
-    ======================================================
-    MODE
-    ======================================================
-    */
+    try {
 
-    this.currentMode = "add";
+        /*
+        ======================================================
+        MODE
+        ======================================================
+        */
 
-    this.currentJournal = null;
+        this.currentMode =
+            "add";
 
-    /*
-    ======================================================
-    RESET DETAIL
-    ======================================================
-    */
 
-    this.detailLines = [];
+        /*
+        ======================================================
+        RESET CURRENT JOURNAL
+        ======================================================
+        */
 
-    /*
-    ======================================================
-    PREPARE FORM
-    ======================================================
-    */
+        this.currentJournal =
+            null;
 
-    this.clearJournalForm();
 
-    /*
-    ======================================================
-    LOAD MASTER
-    ======================================================
-    */
+        /*
+        ======================================================
+        IMPORTANT
+        RESET READ ONLY STATE
 
-    await this.loadMasterData();
+        IF PREVIOUSLY OPENED FROM VIEW MODE,
+        BUTTONS MAY STILL HAVE display:none
+        ======================================================
+        */
 
-    /*
-    ======================================================
-    INITIALIZE HEADER
-    ======================================================
-    */
+        this.setJournalReadOnly(
+            false
+        );
 
-    await this.initializeJournalHeader();
 
-    this.refreshDetailView();
+        /*
+        ======================================================
+        RESET DETAIL
+        ======================================================
+        */
 
-    /*
-    ======================================================
-    SHOW MODAL
-    ======================================================
-    */
+        this.detailLines =
+            [];
 
-    this.modal.show();
+
+        this.currentDetail =
+            null;
+
+
+        this.currentDetailIndex =
+            -1;
+
+
+        /*
+        ======================================================
+        CLEAR FORM
+        ======================================================
+        */
+
+        this.clearJournalForm();
+
+
+        /*
+        ======================================================
+        LOAD MASTER DATA
+        ======================================================
+        */
+
+        await this.loadMasterData();
+
+
+        /*
+        ======================================================
+        INITIALIZE HEADER
+        ======================================================
+        */
+
+        await this.initializeJournalHeader();
+
+
+        /*
+        ======================================================
+        FORCE DRAFT STATUS
+        ======================================================
+        */
+
+        if (
+            this.cboStatus
+        ) {
+
+            this.cboStatus.value =
+                "Draft";
+
+        }
+
+
+        this.updateJournalHeaderStatus(
+            "Draft"
+        );
+
+
+        /*
+        ======================================================
+        ENABLE HEADER INPUT
+        ======================================================
+        */
+
+        if (
+            this.txtAccountingDate
+        ) {
+
+            this.txtAccountingDate.disabled =
+                false;
+
+            this.txtAccountingDate.readOnly =
+                false;
+
+        }
+
+
+        if (
+            this.txtDescription
+        ) {
+
+            this.txtDescription.disabled =
+                false;
+
+            this.txtDescription.readOnly =
+                false;
+
+        }
+
+
+        const referenceNo =
+            document.getElementById(
+                "journal-reference-no"
+            );
+
+
+        if (
+            referenceNo
+        ) {
+
+            referenceNo.disabled =
+                false;
+
+            referenceNo.readOnly =
+                false;
+
+        }
+
+
+        /*
+        ======================================================
+        FORCE BUTTON VISIBILITY
+        ======================================================
+        */
+
+        if (
+            this.btnAddLine
+        ) {
+
+            this.btnAddLine.style.display =
+                "";
+
+            this.btnAddLine.disabled =
+                false;
+
+        }
+
+
+        if (
+            this.btnSaveJournal
+        ) {
+
+            this.btnSaveJournal.style.display =
+                "";
+
+            this.btnSaveJournal.disabled =
+                false;
+
+        }
+
+
+        if (
+            this.btnPostJournal
+        ) {
+
+            this.btnPostJournal.style.display =
+                "";
+
+            this.btnPostJournal.disabled =
+                false;
+
+        }
+
+
+        /*
+        ======================================================
+        REFRESH DETAIL
+        ======================================================
+        */
+
+        this.refreshDetailView();
+
+
+        /*
+        ======================================================
+        SHOW MODAL
+        ======================================================
+        */
+
+        this.modal.show();
+
+    }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "GeneralJournal.openAddJournal:",
+            error
+        );
+
+
+        window.App?.showError?.(
+            error?.message
+            ||
+            "Failed to open Add Journal."
+        );
+
+    }
 
 }
 /*
@@ -5891,40 +6184,108 @@ async loadMasterData() {
 /*
 ==========================================================
 OPEN EDIT JOURNAL
+FINAL
 ==========================================================
 */
 
-async openEditJournal(id) {
+async openEditJournal(
+    id
+) {
 
-    console.log("OPEN EDIT :", id);
+    try {
 
-    if (!id) {
+        /*
+        ======================================================
+        VALIDATION
+        ======================================================
+        */
 
-        return;
+        if (
+            !id
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+        ======================================================
+        MODE
+        ======================================================
+        */
+
+        this.currentMode =
+            "edit";
+
+
+        /*
+        ======================================================
+        LOAD MASTER
+        ======================================================
+        */
+
+        await this.loadMasterData();
+
+
+        /*
+        ======================================================
+        LOAD JOURNAL
+        ======================================================
+        */
+
+        await this.loadJournal(
+            id
+        );
+
+
+        /*
+        ======================================================
+        FILL FORM
+        ======================================================
+        */
+
+        this.fillJournalForm();
+
+
+        /*
+        ======================================================
+        RESET READ ONLY BEFORE SHOW
+        ======================================================
+        */
+
+        this.setJournalReadOnly(
+            false
+        );
+
+
+        /*
+        ======================================================
+        SHOW
+        ======================================================
+        */
+
+        this.modal.show();
 
     }
 
-    this.currentMode = "edit";
+    catch (
+        error
+    ) {
 
-    console.log("1. Load Master");
+        console.error(
+            "GeneralJournal.openEditJournal:",
+            error
+        );
 
-    await this.loadMasterData();
 
-    console.log("2. Load Journal");
+        window.App?.showError?.(
+            error?.message
+            ||
+            "Failed to open Journal."
+        );
 
-    await this.loadJournal(id);
-
-    console.log("3. Fill Form");
-
-    this.fillJournalForm();
-
-    console.log("4. Show Modal");
-
-    this.modal.show();
-
-    console.log("5. ReadOnly");
-
-    this.setJournalReadOnly(false);
+    }
 
 }
 /*
@@ -9279,107 +9640,223 @@ async openViewJournal(id) {
 /*
 ==========================================================
 SET JOURNAL READ ONLY
+FINAL
 ==========================================================
 */
 
-setJournalReadOnly(readOnly = true) {
+setJournalReadOnly(
+    readOnly = true
+) {
 
     /*
     ======================================================
-    HEADER
+    HEADER CONTROLS
     ======================================================
     */
 
-    [
-    "journal-accounting-date",
-    "journal-posting-period",
-    "journal-reference-no",
-    "journal-description"
-    ]
-    
-    .forEach(id => {
+    const controls = [
 
-        const element =
+        "journal-accounting-date",
 
-            document.getElementById(id);
+        "journal-reference-no",
 
-        if (!element) {
+        "journal-description"
 
-            return;
+    ];
+
+
+    controls.forEach(
+
+        id => {
+
+            const element =
+                document.getElementById(
+                    id
+                );
+
+
+            if (
+                !element
+            ) {
+
+                return;
+
+            }
+
+
+            element.disabled =
+                readOnly;
+
+
+            element.readOnly =
+                readOnly;
 
         }
 
-        element.disabled = readOnly;
+    );
 
-        element.readOnly = readOnly;
-
-    });
 
     /*
     ======================================================
-    BUTTON
+    POSTING PERIOD
+    ALWAYS READ ONLY
+    ======================================================
+    */
+
+    const postingPeriod =
+        document.getElementById(
+            "journal-posting-period"
+        );
+
+
+    if (
+        postingPeriod
+    ) {
+
+        postingPeriod.disabled =
+            false;
+
+        postingPeriod.readOnly =
+            true;
+
+    }
+
+
+    /*
+    ======================================================
+    JOURNAL NUMBER
+    ALWAYS READ ONLY
+    ======================================================
+    */
+
+    const journalNo =
+        document.getElementById(
+            "journal-journal-no"
+        );
+
+
+    if (
+        journalNo
+    ) {
+
+        journalNo.disabled =
+            false;
+
+        journalNo.readOnly =
+            true;
+
+    }
+
+
+    /*
+    ======================================================
+    STATUS
+    ALWAYS READ ONLY
+    ======================================================
+    */
+
+    const status =
+        document.getElementById(
+            "journal-status"
+        );
+
+
+    if (
+        status
+    ) {
+
+        status.disabled =
+            false;
+
+        status.readOnly =
+            true;
+
+    }
+
+
+    /*
+    ======================================================
+    ADD LINE
     ======================================================
     */
 
     const btnAddLine =
-
         document.getElementById(
-
             "btn-add-line"
-
         );
 
-    if (btnAddLine) {
+
+    if (
+        btnAddLine
+    ) {
 
         btnAddLine.style.display =
-
             readOnly
-
                 ? "none"
-
                 : "";
 
+
+        btnAddLine.disabled =
+            readOnly;
+
     }
+
+
+    /*
+    ======================================================
+    SAVE DRAFT
+    ======================================================
+    */
 
     const btnSave =
-
         document.getElementById(
-
             "btn-save-journal"
-
         );
 
-    if (btnSave) {
+
+    if (
+        btnSave
+    ) {
 
         btnSave.style.display =
-
             readOnly
-
                 ? "none"
-
                 : "";
 
+
+        btnSave.disabled =
+            readOnly;
+
     }
+
+
+    /*
+    ======================================================
+    SAVE & POST
+    ======================================================
+    */
 
     const btnPost =
-
         document.getElementById(
-
             "btn-post-journal"
-
         );
 
-    if (btnPost) {
+
+    if (
+        btnPost
+    ) {
 
         btnPost.style.display =
-
             readOnly
-
                 ? "none"
-
                 : "";
 
+
+        btnPost.disabled =
+            readOnly;
+
     }
+
 
     /*
     ======================================================
@@ -9388,24 +9865,25 @@ setJournalReadOnly(readOnly = true) {
     */
 
     document
-
         .querySelectorAll(
-
             ".btn-edit-detail, .btn-delete-detail"
-
         )
+        .forEach(
 
-        .forEach(button => {
+            button => {
 
-            button.style.display =
+                button.style.display =
+                    readOnly
+                        ? "none"
+                        : "";
 
-                readOnly
 
-                    ? "none"
+                button.disabled =
+                    readOnly;
 
-                    : "";
+            }
 
-        });
+        );
 
 }
 /*
@@ -9517,143 +9995,332 @@ previewHTML() {
 
 
         /*
+==========================================================
+BUILD ROWS
+FINAL
+MERGED JOURNAL DETAIL
+==========================================================
+*/
+
+const rows = [];
+
+
+/*
+==========================================================
+LOOP JOURNAL
+==========================================================
+*/
+
+this.filteredJournals.forEach(
+
+    journal => {
+
+        /*
         ======================================================
-        BUILD ROWS
+        JOURNAL DETAILS
+
+        CURRENT FORMAT:
+        Debit Account + Credit Account
+        already merged into one transaction.
         ======================================================
         */
 
-        const rows = [];
+        const details =
+            Array.isArray(
+                journal?.details
+            )
+                ? journal.details
+                : [];
 
 
-        this.filteredJournals.forEach(
-            journal => {
+        /*
+        ======================================================
+        LOOP TRANSACTION
+        ======================================================
+        */
 
-                const details =
-                    Array.isArray(
-                        journal?.details
-                    )
-                        ? journal.details
-                        : [];
+        details.forEach(
 
+            detail => {
 
-                details.forEach(
-                    detail => {
+                /*
+                ==================================================
+                DEBIT ACCOUNT
+                ==================================================
+                */
 
-                        const account =
-                            detail
-                                ?.mst_chart_of_accounts
-                            ||
-                            {};
-
-
-                        rows.push(`
-
-                            <tr>
-
-                                <td class="center">
-
-                                    ${
-                                        escapeHTML(
-                                            journal?.journal_date
-                                            ||
-                                            "-"
-                                        )
-                                    }
-
-                                </td>
+                const debitAccountCode =
+                    detail?.debit_account_code
+                    ||
+                    "-";
 
 
-                                <td>
-
-                                    ${
-                                        escapeHTML(
-                                            journal?.journal_no
-                                            ||
-                                            "-"
-                                        )
-                                    }
-
-                                </td>
+                const debitAccountName =
+                    detail?.debit_account_name
+                    ||
+                    "-";
 
 
-                                <td>
+                /*
+                ==================================================
+                CREDIT ACCOUNT
+                ==================================================
+                */
 
-                                    ${
-                                        escapeHTML(
-                                            account?.account_code
-                                            ||
-                                            "-"
-                                        )
-                                    }
-
-                                </td>
-
-
-                                <td>
-
-                                    ${
-                                        escapeHTML(
-                                            account?.account_name
-                                            ||
-                                            "-"
-                                        )
-                                    }
-
-                                </td>
+                const creditAccountCode =
+                    detail?.credit_account_code
+                    ||
+                    "-";
 
 
-                                <td class="description">
-
-                                    ${
-                                        escapeHTML(
-                                            detail?.description
-                                            ||
-                                            "-"
-                                        )
-                                    }
-
-                                </td>
+                const creditAccountName =
+                    detail?.credit_account_name
+                    ||
+                    "-";
 
 
-                                <td class="amount">
+                /*
+                ==================================================
+                AMOUNT
+                ==================================================
+                */
 
-                                    ${
-                                        this.formatCurrency(
-                                            Number(
-                                                detail?.debit
-                                                ||
-                                                0
-                                            )
-                                        )
-                                    }
-
-                                </td>
+                const amount =
+                    Number(
+                        detail?.amount
+                        ||
+                        0
+                    );
 
 
-                                <td class="amount">
+                /*
+                ==================================================
+                DESCRIPTION
+                ==================================================
+                */
 
-                                    ${
-                                        this.formatCurrency(
-                                            Number(
-                                                detail?.credit
-                                                ||
-                                                0
-                                            )
-                                        )
-                                    }
+                const description =
+                journal?.description
+                ||
+                "-";
 
-                                </td>
 
-                            </tr>
+                /*
+                ==================================================
+                DEBIT ROW
+                ==================================================
+                */
 
-                        `);
+                rows.push(`
 
-                    }
-                );
+                    <tr>
+
+                        <!-- ACCOUNTING DATE -->
+
+                        <td class="center">
+
+                            ${
+                                escapeHTML(
+                                    journal?.journal_date
+                                    ||
+                                    "-"
+                                )
+                            }
+
+                        </td>
+
+
+                        <!-- JOURNAL NO -->
+
+                        <td>
+
+                            ${
+                                escapeHTML(
+                                    journal?.journal_no
+                                    ||
+                                    "-"
+                                )
+                            }
+
+                        </td>
+
+
+                        <!-- ACCOUNT CODE -->
+
+                        <td>
+
+                            ${
+                                escapeHTML(
+                                    debitAccountCode
+                                )
+                            }
+
+                        </td>
+
+
+                        <!-- ACCOUNT NAME -->
+
+                        <td>
+
+                            ${
+                                escapeHTML(
+                                    debitAccountName
+                                )
+                            }
+
+                        </td>
+
+
+                        <!-- DESCRIPTION -->
+
+                        <td class="description">
+
+                            ${
+                                escapeHTML(
+                                    description
+                                )
+                            }
+
+                        </td>
+
+
+                        <!-- DEBIT -->
+
+                        <td class="amount">
+
+                            ${
+                                this.formatCurrency(
+                                    amount
+                                )
+                            }
+
+                        </td>
+
+
+                        <!-- CREDIT -->
+
+                        <td class="amount">
+
+                            ${this.formatCurrency(0)}
+
+                        </td>
+
+                    </tr>
+
+                `);
+
+
+                /*
+                ==================================================
+                CREDIT ROW
+                ==================================================
+                */
+
+                rows.push(`
+
+                    <tr>
+
+                        <!-- ACCOUNTING DATE -->
+
+                        <td class="center">
+
+                            ${
+                                escapeHTML(
+                                    journal?.journal_date
+                                    ||
+                                    "-"
+                                )
+                            }
+
+                        </td>
+
+
+                        <!-- JOURNAL NO -->
+
+                        <td>
+
+                            ${
+                                escapeHTML(
+                                    journal?.journal_no
+                                    ||
+                                    "-"
+                                )
+                            }
+
+                        </td>
+
+
+                        <!-- ACCOUNT CODE -->
+
+                        <td>
+
+                            ${
+                                escapeHTML(
+                                    creditAccountCode
+                                )
+                            }
+
+                        </td>
+
+
+                        <!-- ACCOUNT NAME -->
+
+                        <td>
+
+                            ${
+                                escapeHTML(
+                                    creditAccountName
+                                )
+                            }
+
+                        </td>
+
+
+                        <!-- DESCRIPTION -->
+
+                        <td class="description">
+
+                            ${
+                                escapeHTML(
+                                    description
+                                )
+                            }
+
+                        </td>
+
+
+                        <!-- DEBIT -->
+
+                        <td class="amount">
+
+                            ${this.formatCurrency(0)}
+
+                        </td>
+
+
+                        <!-- CREDIT -->
+
+                        <td class="amount">
+
+                            ${
+                                this.formatCurrency(
+                                    amount
+                                )
+                            }
+
+                        </td>
+
+                    </tr>
+
+                `);
 
             }
+
         );
 
+    }
+
+);
 
         /*
         ======================================================
@@ -10675,58 +11342,137 @@ ExcelExportService.export(
 /*
 ==========================================================
 CALCULATE SUMMARY
+FINAL
 ==========================================================
 */
 
 calculateSummary() {
 
-    if (!Array.isArray(this.detailLines)) {
+    /*
+    ======================================================
+    DETAILS
+    ======================================================
+    */
 
-        this.detailLines = [];
+    const details =
+        Array.isArray(
+            this.detailLines
+        )
+            ? this.detailLines
+            : [];
 
-    }
 
-    let totalAmount = 0;
+    /*
+    ======================================================
+    TOTAL LINE
+    ======================================================
+    */
 
-    this.detailLines.forEach(line => {
+    const totalLine =
+        details.length;
 
-        totalAmount +=
-            Number(line.amount || 0);
 
-    });
+    /*
+    ======================================================
+    TOTAL DEBIT
+    ======================================================
+    */
 
-    totalAmount =
-    Math.round(totalAmount);
+    const totalDebit =
+        details.reduce(
+
+            (
+                total,
+                detail
+            ) => {
+
+                const amount =
+                    Number(
+                        detail.amount
+                        || 0
+                    );
+
+
+                return (
+                    total
+                    +
+                    (
+                        Number.isFinite(
+                            amount
+                        )
+                            ? amount
+                            : 0
+                    )
+                );
+
+            },
+
+            0
+
+        );
+
+
+    /*
+    ======================================================
+    TOTAL CREDIT
+
+    Current GL detail structure:
+    one detail contains debit + credit pair
+    with the same amount.
+    ======================================================
+    */
+
+    const totalCredit =
+        totalDebit;
+
+
+    /*
+    ======================================================
+    DIFFERENCE
+    ======================================================
+    */
+
+    const difference =
+        totalDebit
+        -
+        totalCredit;
+
+
+    /*
+    ======================================================
+    SUMMARY
+    ======================================================
+    */
 
     this.summary = {
 
         totalLine:
-            this.detailLines.length,
+            totalLine,
 
         totalDebit:
-            totalAmount,
+            totalDebit,
 
         totalCredit:
-            totalAmount,
+            totalCredit,
 
         difference:
-            0,
+            difference,
 
         isBalanced:
-            true
+            difference === 0
 
     };
 
-    console.log(
-        "JOURNAL SUMMARY :",
-        this.summary
-    );
+
+    /*
+    ======================================================
+    UPDATE DISPLAY
+    ======================================================
+    */
 
     this.updateSummaryDisplay();
 
 }
-
-
 
 /*
 ==========================================================
