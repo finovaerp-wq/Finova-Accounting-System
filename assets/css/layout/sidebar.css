@@ -607,23 +607,155 @@ Version : 1.0.0
 }
 
 
-/* ===========================================
-   RESPONSIVE
-=========================================== */
 
-@media (max-width: 992px) {
+/* ==========================================================
+   MOBILE SIDEBAR
+========================================================== */
+
+.finova-sidebar-backdrop {
+
+    display: none;
+
+}
+
+
+@media (max-width: 991.98px) {
+
+    /*
+    ======================================================
+    SIDEBAR HOST
+    ======================================================
+    */
 
     #finova-sidebar {
 
-        left: -100%;
+        position: fixed !important;
 
-        transition: left var(--transition-normal);
+        top: 0;
+
+        left: 0;
+
+        bottom: 0;
+
+        width: 260px;
+
+        height: 100vh;
+
+        z-index: 1051;
+
+        transform: translateX(-100%);
+
+        transition:
+            transform 0.25s ease;
+
+        visibility: visible !important;
+
+        display: block !important;
 
     }
 
-    #finova-sidebar.show {
 
-        left: 0;
+    /*
+    ======================================================
+    OPEN
+    ======================================================
+    */
+
+    #finova-sidebar.mobile-open {
+
+        transform: translateX(0);
+
+    }
+
+
+    /*
+    ======================================================
+    INNER SIDEBAR
+    ======================================================
+    */
+
+    #finova-sidebar
+    .finova-sidebar {
+
+        width: 260px;
+
+        height: 100%;
+
+    }
+
+
+    /*
+    ======================================================
+    BACKDROP
+    ======================================================
+    */
+
+    .finova-sidebar-backdrop {
+
+        display: block;
+
+        position: fixed;
+
+        inset: 0;
+
+        z-index: 1050;
+
+        background:
+            rgba(
+                15,
+                23,
+                42,
+                0.45
+            );
+
+        opacity: 0;
+
+        visibility: hidden;
+
+        pointer-events: none;
+
+        transition:
+            opacity 0.25s ease,
+            visibility 0.25s ease;
+
+    }
+
+
+    .finova-sidebar-backdrop.show {
+
+        opacity: 1;
+
+        visibility: visible;
+
+        pointer-events: auto;
+
+    }
+
+
+    /*
+    ======================================================
+    BODY
+    ======================================================
+    */
+
+    body.finova-sidebar-open {
+
+        overflow: hidden;
+
+    }
+
+
+    /*
+    ======================================================
+    MAIN CONTENT
+    ======================================================
+    */
+
+    .finova-main {
+
+        margin-left: 0 !important;
+
+        width: 100% !important;
 
     }
 

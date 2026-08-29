@@ -15,9 +15,15 @@ export class FinovaSidebar {
 
     this.changePassword = null;
 
+    this.mobileBreakpoint = 991.98;
+
     this.render();
 
+    this.createMobileBackdrop();
+
     this.bindEvents();
+
+    this.bindMobileEvents();
 
 }
 
@@ -442,23 +448,24 @@ setActiveMenu(module) {
         );
 
         if (groupHeader) {
-const submenu = groupHeader.nextElementSibling;
+        const submenu = groupHeader.nextElementSibling;
 
-if (submenu) {
+        if (submenu) {
 
-    const group = groupHeader.parentElement;
+            const group = groupHeader.parentElement;
 
-    const isOpen = submenu.classList.contains("open");
+            const isOpen = submenu.classList.contains("open");
 
-group.classList.toggle("open");
+        group.classList.toggle("open");
 
-submenu.classList.toggle("open");
+        submenu.classList.toggle("open");
 
-}
+        }
 
             return;
 
         }
+        
 
         /*
         ==========================================
@@ -497,6 +504,7 @@ submenu.classList.toggle("open");
             return;
 
         }
+        
         
 
         /*
@@ -537,6 +545,398 @@ this.setActiveMenu(
         }
 
     });
+
+}
+/*
+==========================================================
+CREATE MOBILE BACKDROP
+==========================================================
+*/
+
+createMobileBackdrop() {
+
+    let backdrop =
+        document.getElementById(
+            "finova-sidebar-backdrop"
+        );
+
+    if (backdrop) {
+        return;
+    }
+
+
+    backdrop =
+        document.createElement(
+            "div"
+        );
+
+    backdrop.id =
+        "finova-sidebar-backdrop";
+
+    backdrop.className =
+        "finova-sidebar-backdrop";
+
+    document.body.appendChild(
+        backdrop
+    );
+
+}
+
+
+/*
+==========================================================
+BIND MOBILE EVENTS
+==========================================================
+*/
+
+bindMobileEvents() {
+
+    /*
+    ======================================================
+    SIDEBAR
+    ======================================================
+    */
+
+    const sidebarHost =
+        document.getElementById(
+            "finova-sidebar"
+        );
+
+
+    /*
+    ======================================================
+    BACKDROP
+    ======================================================
+    */
+
+    const backdrop =
+        document.getElementById(
+            "finova-sidebar-backdrop"
+        );
+
+
+    /*
+    ======================================================
+    MOBILE MENU BUTTON
+
+    Support beberapa ID agar kompatibel dengan topbar.
+    ======================================================
+    */
+
+    const menuButton =
+        document.getElementById(
+            "btn-mobile-sidebar"
+        )
+        ||
+        document.getElementById(
+            "sidebar-toggle"
+        )
+        ||
+        document.getElementById(
+            "btn-sidebar-toggle"
+        )
+        ||
+        document.querySelector(
+            "[data-finova-sidebar-toggle]"
+        );
+
+
+    /*
+    ======================================================
+    OPEN / TOGGLE
+    ======================================================
+    */
+
+    if (menuButton) {
+
+        menuButton.addEventListener(
+            "click",
+            (event) => {
+
+                event.preventDefault();
+
+                event.stopPropagation();
+
+                this.toggleMobileSidebar();
+
+            }
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    BACKDROP CLICK
+    ======================================================
+    */
+
+    if (backdrop) {
+
+        backdrop.addEventListener(
+            "click",
+            () => {
+
+                this.closeMobileSidebar();
+
+            }
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    CLOSE AFTER MENU NAVIGATION
+    ======================================================
+    */
+
+    if (sidebarHost) {
+
+        sidebarHost.addEventListener(
+            "click",
+            (event) => {
+
+                const menu =
+                    event.target.closest(
+                        ".finova-menu-item, .finova-submenu-item"
+                    );
+
+                if (!menu) {
+                    return;
+                }
+
+
+                const module =
+                    menu.dataset.module;
+
+
+                /*
+                ==========================================
+                GROUP HEADER IS NOT NAVIGATION
+                ==========================================
+                */
+
+                if (!module) {
+                    return;
+                }
+
+
+                /*
+                ==========================================
+                ONLY MOBILE
+                ==========================================
+                */
+
+                if (
+                    window.innerWidth
+                    <=
+                    this.mobileBreakpoint
+                ) {
+
+                    /*
+                    --------------------------------------
+                    Small delay allows router click
+                    to execute first.
+                    --------------------------------------
+                    */
+
+                    window.setTimeout(
+                        () => {
+
+                            this.closeMobileSidebar();
+
+                        },
+                        50
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    ESC KEY
+    ======================================================
+    */
+
+    document.addEventListener(
+        "keydown",
+        (event) => {
+
+            if (
+                event.key ===
+                "Escape"
+            ) {
+
+                this.closeMobileSidebar();
+
+            }
+
+        }
+    );
+
+
+    /*
+    ======================================================
+    WINDOW RESIZE
+    ======================================================
+    */
+
+    window.addEventListener(
+        "resize",
+        () => {
+
+            if (
+                window.innerWidth
+                >
+                this.mobileBreakpoint
+            ) {
+
+                this.closeMobileSidebar();
+
+            }
+
+        }
+    );
+
+}
+
+
+/*
+==========================================================
+OPEN MOBILE SIDEBAR
+==========================================================
+*/
+
+openMobileSidebar() {
+
+    const sidebarHost =
+        document.getElementById(
+            "finova-sidebar"
+        );
+
+    const backdrop =
+        document.getElementById(
+            "finova-sidebar-backdrop"
+        );
+
+
+    if (!sidebarHost) {
+        return;
+    }
+
+
+    sidebarHost.classList.add(
+        "mobile-open"
+    );
+
+
+    sidebarHost
+        .querySelector(
+            ".finova-sidebar"
+        )
+        ?.classList.add(
+            "mobile-open"
+        );
+
+
+    backdrop?.classList.add(
+        "show"
+    );
+
+
+    document.body.classList.add(
+        "finova-sidebar-open"
+    );
+
+}
+
+
+/*
+==========================================================
+CLOSE MOBILE SIDEBAR
+==========================================================
+*/
+
+closeMobileSidebar() {
+
+    const sidebarHost =
+        document.getElementById(
+            "finova-sidebar"
+        );
+
+    const backdrop =
+        document.getElementById(
+            "finova-sidebar-backdrop"
+        );
+
+
+    sidebarHost?.classList.remove(
+        "mobile-open"
+    );
+
+
+    sidebarHost
+        ?.querySelector(
+            ".finova-sidebar"
+        )
+        ?.classList.remove(
+            "mobile-open"
+        );
+
+
+    backdrop?.classList.remove(
+        "show"
+    );
+
+
+    document.body.classList.remove(
+        "finova-sidebar-open"
+    );
+
+}
+
+
+/*
+==========================================================
+TOGGLE MOBILE SIDEBAR
+==========================================================
+*/
+
+toggleMobileSidebar() {
+
+    const sidebarHost =
+        document.getElementById(
+            "finova-sidebar"
+        );
+
+
+    if (!sidebarHost) {
+        return;
+    }
+
+
+    const isOpen =
+        sidebarHost.classList.contains(
+            "mobile-open"
+        );
+
+
+    if (isOpen) {
+
+        this.closeMobileSidebar();
+
+    }
+    else {
+
+        this.openMobileSidebar();
+
+    }
 
 }
     /*
