@@ -13,13 +13,50 @@ export class FinovaSidebar {
 
     constructor() {
 
-    this.changePassword = null;
+    /*
+    ======================================================
+    CHANGE PASSWORD
+    ======================================================
+    */
 
-    this.mobileBreakpoint = 991.98;
+    this.changePassword =
+        null;
+
+
+    /*
+    ======================================================
+    MOBILE
+    ======================================================
+    */
+
+    this.mobileBreakpoint =
+        991.98;
+
+
+    /*
+    ======================================================
+    LOGOUT MODAL
+    ======================================================
+    */
+
+    this.logoutModal =
+        null;
+
+    this.logoutConfirmHandler =
+        null;
+
+
+    /*
+    ======================================================
+    INITIALIZE
+    ======================================================
+    */
 
     this.render();
 
     this.createMobileBackdrop();
+
+    this.createLogoutModal();
 
     this.bindEvents();
 
@@ -422,129 +459,539 @@ setActiveMenu(module) {
     }
 
 }
+/*
+==========================================================
+CREATE LOGOUT MODAL
+==========================================================
+*/
+
+createLogoutModal() {
+
+    /*
+    ======================================================
+    CHECK EXISTING MODAL
+    ======================================================
+    */
+
+    let modalElement =
+        document.getElementById(
+            "logoutConfirmModal"
+        );
 
 
-    bindEvents() {
-
-    const sidebar = document.querySelector(".finova-sidebar");
-
-    if (!sidebar) {
+    if (
+        modalElement
+    ) {
 
         return;
 
     }
-    
 
-    sidebar.addEventListener("click", (event) => {
 
-        /*
-        ==========================================
-        GROUP HEADER
-        ==========================================
-        */
+    /*
+    ======================================================
+    CREATE MODAL CONTAINER
+    ======================================================
+    */
 
-        const groupHeader = event.target.closest(
-            ".finova-menu-group-header"
+    const wrapper =
+        document.createElement(
+            "div"
         );
 
-        if (groupHeader) {
-        const submenu = groupHeader.nextElementSibling;
 
-        if (submenu) {
+    wrapper.innerHTML = `
 
-            const group = groupHeader.parentElement;
+        <!-- ==================================================
+             LOGOUT CONFIRMATION MODAL
+        =================================================== -->
 
-            const isOpen = submenu.classList.contains("open");
+        <div
+            class="modal fade"
+            id="logoutConfirmModal"
+            tabindex="-1"
+            aria-labelledby="logoutConfirmModalLabel"
+            aria-hidden="true"
+            data-bs-backdrop="static"
+            data-bs-keyboard="false"
+        >
 
-        group.classList.toggle("open");
+            <div
+                class="
+                    modal-dialog
+                    modal-dialog-centered
+                "
+            >
 
-        submenu.classList.toggle("open");
+                <div class="modal-content">
 
-        }
 
-            return;
+                    <!-- ======================================
+                         HEADER
+                    ======================================= -->
 
-        }
-        
+                    <div class="modal-header">
 
-        /*
-        ==========================================
-        MENU / SUBMENU
-        ==========================================
-        */
+                        <h5
+                            class="modal-title"
+                            id="logoutConfirmModalLabel"
+                        >
 
-        const menu = event.target.closest(
-            ".finova-menu-item, .finova-submenu-item"
-        );
+                            Confirm Logout
 
-        if (!menu) {
+                        </h5>
 
-            return;
 
-        }
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                        >
+                        </button>
 
-        const module = menu.dataset.module;
+                    </div>
 
-        if (!module) {
 
-            return;
+                    <!-- ======================================
+                         BODY
+                    ======================================= -->
 
-        }
+                    <div class="modal-body">
 
-        /*
-        ==========================================
-        CHANGE PASSWORD
-        ==========================================
-        */
+                        Are you sure you want to logout?
 
-        if (module === "change-password") {
+                    </div>
 
-            this.openChangePasswordModal();
 
-            return;
+                    <!-- ======================================
+                         FOOTER
+                    ======================================= -->
 
-        }
-        
-        
+                    <div class="modal-footer">
 
-        /*
-        ==========================================
-        LOGOUT
-        ==========================================
-        */
+                        <button
+                            type="button"
+                            class="
+                                btn
+                                btn-outline-secondary
+                            "
+                            data-bs-dismiss="modal"
+                        >
 
-        if (module === "logout") {
+                            Cancel
 
-            this.logout();
+                        </button>
 
-            return;
 
-        }
-        
+                        <button
+                            type="button"
+                            class="
+                                btn
+                                btn-danger
+                            "
+                            id="btn-confirm-logout"
+                        >
 
-        /*
-==========================================
-ACTIVE MENU
-==========================================
+                            <i
+                                class="
+                                    fa-solid
+                                    fa-right-from-bracket
+                                    me-1
+                                "
+                            ></i>
+
+                            Logout
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    /*
+    ======================================================
+    APPEND MODAL
+    ======================================================
+    */
+
+    modalElement =
+        wrapper.firstElementChild;
+
+
+    document.body.appendChild(
+        modalElement
+    );
+
+}
+
+
+   /*
+==========================================================
+BIND EVENTS
+==========================================================
 */
 
-this.setActiveMenu(
-    module
-);
+bindEvents() {
 
-        /*
-        ==========================================
-        ROUTER
-        ==========================================
-        */
+    const sidebar =
+        document.querySelector(
+            ".finova-sidebar"
+        );
 
-        if (window.finovaRouter) {
 
-            window.finovaRouter.navigate(module);
+    if (
+        !sidebar
+    ) {
+
+        return;
+
+    }
+
+
+    sidebar.addEventListener(
+
+        "click",
+
+        (event) => {
+
+
+            /*
+            ==================================================
+            GROUP HEADER
+            ==================================================
+            */
+
+            const groupHeader =
+                event.target.closest(
+                    ".finova-menu-group-header"
+                );
+
+
+            if (
+                groupHeader
+            ) {
+
+                const submenu =
+                    groupHeader.nextElementSibling;
+
+
+                if (
+                    submenu
+                ) {
+
+                    const group =
+                        groupHeader.parentElement;
+
+
+                    const isOpen =
+                        submenu.classList.contains(
+                            "open"
+                        );
+
+
+                    group.classList.toggle(
+                        "open"
+                    );
+
+
+                    submenu.classList.toggle(
+                        "open"
+                    );
+
+                }
+
+
+                return;
+
+            }
+
+
+            /*
+            ==================================================
+            MENU / SUBMENU
+            ==================================================
+            */
+
+            const menu =
+                event.target.closest(
+                    ".finova-menu-item, .finova-submenu-item"
+                );
+
+
+            if (
+                !menu
+            ) {
+
+                return;
+
+            }
+
+
+            const module =
+                menu.dataset.module;
+
+
+            if (
+                !module
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+            ==================================================
+            CHANGE PASSWORD
+            ==================================================
+            */
+
+            if (
+                module ===
+                "change-password"
+            ) {
+
+                event.preventDefault();
+
+
+                this.openChangePasswordModal();
+
+
+                return;
+
+            }
+
+
+            /*
+            ==================================================
+            LOGOUT
+            ==================================================
+            */
+
+            if (
+                module ===
+                "logout"
+            ) {
+
+                event.preventDefault();
+
+
+                this.showLogoutConfirmation();
+
+
+                return;
+
+            }
+
+
+            /*
+            ==================================================
+            ACTIVE MENU
+            ==================================================
+            */
+
+            this.setActiveMenu(
+                module
+            );
+
+
+            /*
+            ==================================================
+            ROUTER
+            ==================================================
+            */
+
+            if (
+                window.finovaRouter
+            ) {
+
+                window.finovaRouter.navigate(
+                    module
+                );
+
+            }
 
         }
 
-    });
+    );
+
+}
+/*
+==========================================================
+SHOW LOGOUT CONFIRMATION
+==========================================================
+*/
+
+showLogoutConfirmation() {
+
+    /*
+    ======================================================
+    GET MODAL
+    ======================================================
+    */
+
+    const modalElement =
+        document.getElementById(
+            "logoutConfirmModal"
+        );
+
+
+    if (
+        !modalElement
+    ) {
+
+        console.error(
+            "Logout confirmation modal not found."
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    GET CONFIRM BUTTON
+    ======================================================
+    */
+
+    const btnConfirmLogout =
+        document.getElementById(
+            "btn-confirm-logout"
+        );
+
+
+    if (
+        !btnConfirmLogout
+    ) {
+
+        console.error(
+            "Confirm Logout button not found."
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    BOOTSTRAP MODAL
+    ======================================================
+    */
+
+    this.logoutModal =
+        bootstrap.Modal.getOrCreateInstance(
+            modalElement
+        );
+
+
+    /*
+    ======================================================
+    REMOVE OLD HANDLER
+    ======================================================
+    */
+
+    if (
+        this.logoutConfirmHandler
+    ) {
+
+        btnConfirmLogout.removeEventListener(
+            "click",
+            this.logoutConfirmHandler
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    CREATE HANDLER
+    ======================================================
+    */
+
+    this.logoutConfirmHandler =
+        async () => {
+
+            /*
+            ==============================================
+            PREVENT DOUBLE CLICK
+            ==============================================
+            */
+
+            if (
+                btnConfirmLogout.disabled
+            ) {
+
+                return;
+
+            }
+
+
+            btnConfirmLogout.disabled =
+                true;
+
+
+            try {
+
+                /*
+                ==========================================
+                HIDE MODAL
+                ==========================================
+                */
+
+                this.logoutModal.hide();
+
+
+                /*
+                ==========================================
+                LOGOUT
+                ==========================================
+                */
+
+                await this.logout();
+
+            }
+
+            finally {
+
+                btnConfirmLogout.disabled =
+                    false;
+
+            }
+
+        };
+
+
+    /*
+    ======================================================
+    BIND CONFIRM BUTTON
+    ======================================================
+    */
+
+    btnConfirmLogout.addEventListener(
+        "click",
+        this.logoutConfirmHandler
+    );
+
+
+    /*
+    ======================================================
+    SHOW MODAL
+    ======================================================
+    */
+
+    this.logoutModal.show();
 
 }
 /*
@@ -942,71 +1389,47 @@ toggleMobileSidebar() {
     /*
 ==========================================================
 LOGOUT
+FINAL
+NO NATIVE CONFIRM
+NO NATIVE ALERT
 ==========================================================
 */
 
 async logout() {
 
-    const confirmed = confirm(
-
-        "Are you sure you want to logout?"
-
-    );
-
-    if (!confirmed) {
-
-        return;
-
-    }
-
     try {
 
+        /*
+        ======================================================
+        AUTH LOGOUT
+        ======================================================
+        */
+
         await AuthService.logout();
+
+
+        /*
+        ======================================================
+        REDIRECT LOGIN
+        ======================================================
+        */
+
         window.location.replace(
-
-    "login.html"
-
-);
+            "login.html"
+        );
 
     }
 
-    catch (error) {
+    catch (
+        error
+    ) {
 
-        console.error(error);
-
-        alert(error.message);
-
-    }
-
-}
-/*
-==========================================================
-OPEN CHANGE PASSWORD MODAL
-==========================================================
-*/
-
-openChangePasswordModal() {
-
-    const modalElement =
-        document.getElementById("change-password-modal");
-
-    if (!modalElement) {
-
-        console.error("Change Password Modal not found.");
-
-        return;
+        console.error(
+            "FinovaSidebar.logout:",
+            error
+        );
 
     }
-
-    if (!this.changePassword) {
-
-        this.changePassword = new ChangePassword();
-
-    }
-
-    const modal = new bootstrap.Modal(modalElement);
-
-    modal.show();
 
 }
 }
