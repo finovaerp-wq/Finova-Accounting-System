@@ -3,7 +3,7 @@
 FINOVA ACCOUNTING SYSTEM
 MODULE  : GENERAL LEDGER
 FILE    : general-ledger.html
-VERSION : 1.0.0
+VERSION : 2.1.0 FINAL
 ==========================================================
 -->
 
@@ -28,6 +28,7 @@ VERSION : 1.0.0
                 General Ledger
 
             </h1>
+
 
             <p class="finova-page-subtitle">
 
@@ -153,16 +154,16 @@ VERSION : 1.0.0
 
 
                 <!-- ======================================
-                     ACCOUNT
+                     SELECT COA
                 ======================================= -->
 
-                <div class="col-md-3">
+                <div class="col-md-4">
 
                     <label
                         for="general-ledger-account"
                         class="form-label">
 
-                        Account
+                        Select COA
 
                     </label>
 
@@ -182,51 +183,10 @@ VERSION : 1.0.0
 
 
                 <!-- ======================================
-                     FIND BY
-                ======================================= -->
-
-                <div class="col-md-2">
-
-                    <label
-                        for="general-ledger-find-by"
-                        class="form-label">
-
-                        Find By
-
-                    </label>
-
-                    <select
-                        id="general-ledger-find-by"
-                        class="form-select finova-control">
-
-                        <option value="journal_no">
-
-                            Journal No
-
-                        </option>
-
-                        <option value="description">
-
-                            Description
-
-                        </option>
-
-                        <option value="business_partner">
-
-                            Business Partner
-
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-                <!-- ======================================
                      KEYWORD
                 ======================================= -->
 
-                <div class="col-md-3">
+                <div class="col-md-4">
 
                     <label
                         for="general-ledger-keyword"
@@ -242,7 +202,7 @@ VERSION : 1.0.0
                             type="text"
                             id="general-ledger-keyword"
                             class="form-control finova-control"
-                            placeholder="Search Journal No or Description...">
+                            placeholder="Search GL Journal Description...">
 
                         <button
                             type="button"
@@ -309,70 +269,111 @@ VERSION : 1.0.0
 
                             <tr>
 
-                                <th class="finova-table-index glr-col-no">
+
+                                <th
+                                    class="
+                                        finova-table-index
+                                        glr-col-no
+                                    ">
 
                                     No
 
                                 </th>
 
 
-                                <th class="finova-table-date glr-col-date">
+                                <th
+                                    class="
+                                        finova-table-date
+                                        glr-col-date
+                                    ">
 
                                     Date
 
                                 </th>
 
 
-                                <th class="finova-table-code glr-col-journal">
+                                <th
+                                    class="
+                                        finova-table-code
+                                        glr-col-journal
+                                    ">
 
                                     Journal No
 
                                 </th>
 
 
-                                <th class="finova-table-code glr-col-account">
+                                <th
+                                    class="
+                                        finova-table-code
+                                        glr-col-account
+                                    ">
 
                                     Account Code
 
                                 </th>
 
 
-                                <th class="finova-table-name glr-col-account-name">
+                                <th
+                                    class="
+                                        finova-table-name
+                                        glr-col-account-name
+                                    ">
 
                                     Account Name
 
                                 </th>
 
 
-                                <th class="finova-table-name glr-col-bp">
+                                <th
+                                    class="
+                                        finova-table-name
+                                        glr-col-bp
+                                    ">
 
                                     Business Partner
 
                                 </th>
 
 
-                                <th class="finova-table-name glr-col-description">
+                                <th
+                                    class="
+                                        finova-table-name
+                                        glr-col-description
+                                    ">
 
                                     Description
 
                                 </th>
 
 
-                                <th class="finova-table-number glr-col-amount">
+                                <th
+                                    class="
+                                        finova-table-number
+                                        glr-col-amount
+                                    ">
 
                                     Debit
 
                                 </th>
 
 
-                                <th class="finova-table-number glr-col-amount">
+                                <th
+                                    class="
+                                        finova-table-number
+                                        glr-col-amount
+                                    ">
 
                                     Credit
 
                                 </th>
 
 
-                                <th class="finova-table-number glr-col-amount">
+                                <th
+                                    class="
+                                        finova-table-number
+                                        glr-col-amount
+                                    ">
 
                                     Balance
 
@@ -452,10 +453,6 @@ VERSION : 1.0.0
 
                 <div class="finova-pagination-wrapper">
 
-
-                    <!-- ======================================
-                         LEFT
-                    ======================================= -->
 
                     <div class="finova-pagination-left">
 
@@ -544,10 +541,6 @@ VERSION : 1.0.0
 
                     </div>
 
-
-                    <!-- ======================================
-                         RECORD INFO
-                    ======================================= -->
 
                     <div
                         id="general-ledger-record-info"
