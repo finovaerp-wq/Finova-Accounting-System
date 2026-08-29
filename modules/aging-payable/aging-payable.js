@@ -38,11 +38,49 @@ export class AgingPayable {
         this.service =
             new AccountPayableService();
 
+        
+
+
+        /*
+        ======================================================
+        BANK CACHE
+        ======================================================
+        */
+
+        this.bankMasterMap =
+            new Map();
+
+        this.vendorBankCache =
+            new Map();
+        /*
+        ==========================================================
+        LOAD CONTROL
+        ==========================================================
+        */
+
+        this.loadVersion = 0;
+
+        this.destroyed = false;
+
+
+        /*
+        ======================================================
+        DATA
+        ======================================================
+        */
+
         this.data =
             [];
 
         this.filteredData =
             [];
+
+
+        /*
+        ======================================================
+        PAGINATION
+        ======================================================
+        */
 
         this.currentPage =
             1;
@@ -56,62 +94,112 @@ export class AgingPayable {
         this.totalRows =
             0;
 
+
+        /*
+        ======================================================
+        AS OF DATE
+        ======================================================
+        */
+
         this.asOfDateValue =
             null;
+
+
+        /*
+        ======================================================
+        INITIALIZE
+        ======================================================
+        */
 
         this.init();
 
     }
 
+/*
+==========================================================
+INITIALIZE
+==========================================================
+*/
 
-    /*
-    ==========================================================
-    INITIALIZE
-    ==========================================================
-    */
+async init() {
 
-    async init() {
+    try {
 
-        try {
+        console.log(
+            "AgingPayable: INIT START"
+        );
 
-            window.App?.showLoading?.();
 
-            this.cacheDom();
+        /*
+        ======================================================
+        CACHE DOM
+        ======================================================
+        */
 
-            this.setDefaultFilterDates();
+        this.cacheDom();
 
-            this.bindEvents();
 
-            await this.loadData(
-                false
-            );
+        /*
+        ======================================================
+        DEFAULT FILTER
+        ======================================================
+        */
 
-        }
+        this.setDefaultFilterDates();
 
-        catch (error) {
 
-            console.error(
-                "AgingPayable.init",
-                error
-            );
+        /*
+        ======================================================
+        BIND EVENTS
+        ======================================================
+        */
 
-            this.showError(
-                error?.message
-                ||
-                "Failed to initialize Aging Payable."
-            );
+        this.bindEvents();
 
-        }
 
-        finally {
+        /*
+        ======================================================
+        INITIAL LOAD
 
-            window.App?.hideLoading?.();
+        IMPORTANT:
+        Hanya menggunakan TABLE LOADING.
+        Tidak menggunakan window.App.showLoading().
+        ======================================================
+        */
 
-        }
+        await this.loadData(
+            true
+        );
+
+
+        console.log(
+            "AgingPayable: INIT COMPLETE"
+        );
 
     }
 
+    catch (error) {
 
+        console.error(
+            "AgingPayable.init:",
+            error
+        );
+
+
+        this.showError(
+
+            error?.message
+
+            ||
+
+            "Failed to initialize Aging Payable."
+
+        );
+
+    }
+
+}
+    
     /*
     ==========================================================
     CACHE DOM
@@ -119,6 +207,7 @@ export class AgingPayable {
     */
 
     cacheDom() {
+
 
         /*
         ======================================================
@@ -131,25 +220,30 @@ export class AgingPayable {
                 "aging-payable-date-from"
             );
 
+
         this.filterDateTo =
             document.getElementById(
                 "aging-payable-date-to"
             );
+
 
         this.filterStatus =
             document.getElementById(
                 "aging-payable-status"
             );
 
+
         this.filterFindBy =
             document.getElementById(
                 "aging-payable-find-by"
             );
 
+
         this.filterKeyword =
             document.getElementById(
                 "aging-payable-keyword"
             );
+
 
         this.btnFind =
             document.getElementById(
@@ -159,7 +253,7 @@ export class AgingPayable {
 
         /*
         ======================================================
-        HEADER BUTTON
+        HEADER
         ======================================================
         */
 
@@ -168,10 +262,12 @@ export class AgingPayable {
                 "btn-refresh-aging-payable"
             );
 
+
         this.btnDownload =
             document.getElementById(
                 "btn-download-excel-aging-payable"
             );
+
 
         this.btnPreview =
             document.getElementById(
@@ -193,7 +289,7 @@ export class AgingPayable {
 
         /*
         ======================================================
-        TOTAL
+        AGING TOTAL
         ======================================================
         */
 
@@ -202,45 +298,60 @@ export class AgingPayable {
                 "aging-total-outstanding"
             );
 
+
         this.totalCurrent =
             document.getElementById(
                 "aging-total-current"
             );
+
 
         this.total1to30 =
             document.getElementById(
                 "aging-total-1-30"
             );
 
+
         this.total31to60 =
             document.getElementById(
                 "aging-total-31-60"
             );
+
 
         this.total61to90 =
             document.getElementById(
                 "aging-total-61-90"
             );
 
+
         this.total90plus =
             document.getElementById(
                 "aging-total-90-plus"
             );
+
+
+        /*
+        ======================================================
+        AMOUNT TOTAL
+        ======================================================
+        */
 
         this.totalAmount =
             document.getElementById(
                 "aging-total-amount"
             );
 
+
         this.totalBeforeTax =
             document.getElementById(
                 "aging-total-before-tax"
             );
 
+
         this.totalTaxPlus =
             document.getElementById(
                 "aging-total-tax-plus"
             );
+
 
         this.totalTaxMinus =
             document.getElementById(
@@ -259,30 +370,36 @@ export class AgingPayable {
                 "aging-page-first"
             );
 
+
         this.btnPrev =
             document.getElementById(
                 "aging-page-prev"
             );
+
 
         this.btnNext =
             document.getElementById(
                 "aging-page-next"
             );
 
+
         this.btnLast =
             document.getElementById(
                 "aging-page-last"
             );
+
 
         this.currentPageInput =
             document.getElementById(
                 "aging-current-page"
             );
 
+
         this.totalPagesLabel =
             document.getElementById(
                 "aging-total-pages"
             );
+
 
         this.displayRecord =
             document.getElementById(
@@ -303,16 +420,34 @@ export class AgingPayable {
         const today =
             new Date();
 
+
+        /*
+        ======================================================
+        LOCAL DATE
+        ======================================================
+        */
+
         const localToday =
             new Date(
+
                 today.getTime()
+
                 -
+
                 (
                     today.getTimezoneOffset()
                     *
                     60000
                 )
+
             );
+
+
+        /*
+        ======================================================
+        AS OF DATE
+        ======================================================
+        */
 
         this.asOfDateValue =
             localToday
@@ -322,6 +457,13 @@ export class AgingPayable {
                     10
                 );
 
+
+        /*
+        ======================================================
+        DATE FROM
+        ======================================================
+        */
+
         if (
             this.filterDateFrom
         ) {
@@ -330,6 +472,13 @@ export class AgingPayable {
                 "";
 
         }
+
+
+        /*
+        ======================================================
+        DATE TO
+        ======================================================
+        */
 
         if (
             this.filterDateTo
@@ -350,6 +499,7 @@ export class AgingPayable {
     */
 
     bindEvents() {
+
 
         /*
         ======================================================
@@ -466,11 +616,11 @@ export class AgingPayable {
 
             "click",
 
-            event => {
+            async event => {
 
                 event.preventDefault();
 
-                this.resetAndReload();
+                await this.resetAndReload();
 
             }
 
@@ -500,7 +650,7 @@ export class AgingPayable {
 
         /*
         ======================================================
-        DOWNLOAD
+        DOWNLOAD EXCEL
         ======================================================
         */
 
@@ -632,114 +782,431 @@ export class AgingPayable {
     }
 
 
+  /*
+==========================================================
+LOAD DATA
+==========================================================
+*/
+
+async loadData(
+    showLoading = false
+) {
+
     /*
-    ==========================================================
-    LOAD DATA
-    BUSINESS PARTNER + DEFAULT BANK
-    ==========================================================
+    ======================================================
+    CREATE LOAD VERSION
+    ======================================================
     */
 
-    async loadData(
-        showLoading = true
-    ) {
+    const loadVersion =
+        ++this.loadVersion;
 
-        try {
 
-            if (
-                showLoading
-            ) {
+    try {
 
-                window.App?.showLoading?.();
+        /*
+        ======================================================
+        LOADING
+        ======================================================
+        */
 
-            }
+        if (
+            showLoading
+        ) {
 
             this.showTableLoading();
 
+        }
+
+
+        /*
+        ======================================================
+        CLEAR BANK CACHE
+        ======================================================
+        */
+
+        this.vendorBankCache.clear();
+
+
+        /*
+        ======================================================
+        LOAD AP
+        ======================================================
+        */
+
+        const result =
+            await this.service.getAll();
+
+
+        /*
+        ======================================================
+        STOP OLD LOAD
+        ======================================================
+        */
+
+        if (
+            loadVersion !== this.loadVersion
+        ) {
+
+            return;
+
+        }
+
+
+        const source =
+
+            Array.isArray(result)
+
+                ? result
+
+                : Array.isArray(result?.data)
+
+                    ? result.data
+
+                    : [];
+
+
+        /*
+        ======================================================
+        LOAD BANK MASTER
+        ======================================================
+        */
+
+        await this.loadBankMaster();
+
+
+        /*
+        ======================================================
+        STOP OLD LOAD
+        ======================================================
+        */
+
+        if (
+            loadVersion !== this.loadVersion
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+        ======================================================
+        TEMP DATA
+
+        IMPORTANT:
+        Jangan langsung push ke this.data selama async loop.
+        ======================================================
+        */
+
+        const normalizedRows =
+            [];
+
+
+        /*
+        ======================================================
+        PROCESS AP
+        ======================================================
+        */
+
+        for (
+            const row
+            of source
+        ) {
 
             /*
             ==================================================
-            LOAD ACCOUNT PAYABLE
+            STOP OLD LOAD
             ==================================================
             */
 
-            const result =
-                await this.service.getAll();
+            if (
+                loadVersion !== this.loadVersion
+            ) {
 
-            const source =
-
-                Array.isArray(
-                    result
-                )
-
-                    ? result
-
-                    : Array.isArray(
-                        result?.data
-                    )
-
-                        ? result.data
-
-                        : [];
-
-
-            /*
-            ==================================================
-            LOAD BANK MASTER
-            ==================================================
-            */
-
-            let masterBanks =
-                [];
-
-            try {
-
-                masterBanks =
-                    await BankService.getAll();
+                return;
 
             }
 
-            catch (error) {
 
-                console.error(
-                    "AGING PAYABLE LOAD MASTER BANK ERROR:",
-                    error
+            /*
+            ==================================================
+            STATUS
+            ==================================================
+            */
+
+            const status =
+                String(
+                    row?.status
+                    ??
+                    ""
+                )
+                    .trim()
+                    .toLowerCase();
+
+
+            /*
+            ==================================================
+            SKIP PAID / VOID
+            ==================================================
+            */
+
+            if (
+                status === "paid"
+                ||
+                status === "void"
+            ) {
+
+                continue;
+
+            }
+
+
+            /*
+            ==================================================
+            VENDOR
+            ==================================================
+            */
+
+            const vendor =
+                row?.mst_business_partner
+                ??
+                {};
+
+
+            const vendorId =
+
+                row?.vendor_id
+
+                ??
+
+                vendor?.id
+
+                ??
+
+                null;
+
+
+            /*
+            ==================================================
+            BANK
+            ==================================================
+            */
+
+            const bankInfo =
+                await this.getVendorBankInfo(
+                    vendorId
                 );
 
-                masterBanks =
-                    [];
+
+            /*
+            ==================================================
+            STOP OLD LOAD AFTER ASYNC
+            ==================================================
+            */
+
+            if (
+                loadVersion !== this.loadVersion
+            ) {
+
+                return;
 
             }
 
 
             /*
             ==================================================
-            BANK MASTER MAP
+            NORMALIZE
             ==================================================
             */
 
-            const masterBankMap =
-                new Map();
+            const normalized =
+                this.normalizeRow({
 
-            (
-                Array.isArray(
-                    masterBanks
-                )
+                    ...row,
 
-                    ? masterBanks
+                    account_holder:
+                        bankInfo.account_holder,
 
-                    : []
-            )
-            .forEach(
+                    bank_name:
+                        bankInfo.bank_name,
 
-                bank => {
+                    bank_account:
+                        bankInfo.bank_account
 
-                    masterBankMap.set(
+                });
 
-                        String(
-                            bank?.id
-                            ??
-                            ""
-                        ),
+
+            /*
+            ==================================================
+            ONLY OUTSTANDING
+            ==================================================
+            */
+
+            if (
+                normalized
+                &&
+                this.toNumber(
+                    normalized.outstanding_amount
+                ) > 0
+            ) {
+
+                normalizedRows.push(
+                    normalized
+                );
+
+            }
+
+        }
+
+
+        /*
+        ======================================================
+        FINAL CHECK
+        ======================================================
+        */
+
+        if (
+            loadVersion !== this.loadVersion
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+        ======================================================
+        SET DATA ONCE
+
+        Jangan update this.data sedikit-sedikit.
+        ======================================================
+        */
+
+        this.data =
+            normalizedRows;
+
+
+        this.filteredData =
+            [...normalizedRows];
+
+
+        this.currentPage =
+            1;
+
+
+        /*
+        ======================================================
+        FILTER / RENDER
+        ======================================================
+        */
+
+        this.applyFilter();
+
+
+        console.log(
+            "AGING PAYABLE FINAL ROW COUNT:",
+            this.data.length
+        );
+
+    }
+
+    catch (error) {
+
+        /*
+        ======================================================
+        IGNORE ERROR FROM OLD LOAD
+        ======================================================
+        */
+
+        if (
+            loadVersion !== this.loadVersion
+        ) {
+
+            return;
+
+        }
+
+
+        console.error(
+            "AgingPayable.loadData:",
+            error
+        );
+
+
+        this.data =
+            [];
+
+
+        this.filteredData =
+            [];
+
+
+        this.currentPage =
+            1;
+
+
+        this.refreshView();
+
+
+        this.showError(
+
+            error?.message
+
+            ||
+
+            "Failed to load Aging Payable."
+
+        );
+
+    }
+
+}
+
+
+    /*
+==========================================================
+LOAD BANK MASTER
+==========================================================
+*/
+
+async loadBankMaster() {
+
+    try {
+
+        this.bankMasterMap.clear();
+
+
+        const result =
+            await BankService.getAll();
+
+
+        const banks =
+
+            Array.isArray(result)
+
+                ? result
+
+                : Array.isArray(result?.data)
+
+                    ? result.data
+
+                    : [];
+
+
+        banks.forEach(
+
+            bank => {
+
+                if (
+                    bank?.id !== null
+                    &&
+                    bank?.id !== undefined
+                ) {
+
+                    this.bankMasterMap.set(
+
+                        String(bank.id),
 
                         bank
 
@@ -747,356 +1214,298 @@ export class AgingPayable {
 
                 }
 
-            );
-
-
-            /*
-            ==================================================
-            BANK CACHE
-
-            vendor_id -> bank[]
-            ==================================================
-            */
-
-            const bankCache =
-                new Map();
-
-
-            /*
-            ==================================================
-            RESULT
-            ==================================================
-            */
-
-            const normalizedRows =
-                [];
-
-
-            /*
-            ==================================================
-            LOOP AP
-            ==================================================
-            */
-
-            for (
-                const row of source
-            ) {
-
-                /*
-                ==============================================
-                STATUS
-                ==============================================
-                */
-
-                const status =
-                    String(
-                        row?.status
-                        ??
-                        ""
-                    )
-                    .trim()
-                    .toLowerCase();
-
-
-                /*
-                ==============================================
-                PAID / VOID NOT AGING
-                ==============================================
-                */
-
-                if (
-                    status === "paid"
-                    ||
-                    status === "void"
-                ) {
-
-                    continue;
-
-                }
-
-
-                /*
-                ==============================================
-                VENDOR ID
-                ==============================================
-                */
-
-                const vendorId =
-
-                    row?.vendor_id
-
-                    ??
-
-                    row?.mst_business_partner?.id
-
-                    ??
-
-                    null;
-
-
-                /*
-                ==============================================
-                LOAD BUSINESS PARTNER BANK
-                ==============================================
-                */
-
-                let vendorBanks =
-                    [];
-
-
-                if (
-                    vendorId !== null
-                    &&
-                    vendorId !== undefined
-                    &&
-                    vendorId !== ""
-                ) {
-
-                    const cacheKey =
-                        String(
-                            vendorId
-                        );
-
-
-                    /*
-                    ==========================================
-                    FROM CACHE
-                    ==========================================
-                    */
-
-                    if (
-                        bankCache.has(
-                            cacheKey
-                        )
-                    ) {
-
-                        vendorBanks =
-                            bankCache.get(
-                                cacheKey
-                            );
-
-                    }
-
-                    /*
-                    ==========================================
-                    LOAD DATABASE
-                    ==========================================
-                    */
-
-                    else {
-
-                        try {
-
-                            const bankResult =
-                                await BusinessPartnerBankService
-                                    .getByBusinessPartner(
-                                        vendorId
-                                    );
-
-                            vendorBanks =
-
-                                Array.isArray(
-                                    bankResult
-                                )
-
-                                    ? bankResult
-
-                                    : [];
-
-
-                            /*
-                            ======================================
-                            ATTACH BANK MASTER
-                            ======================================
-                            */
-
-                            vendorBanks =
-                                vendorBanks.map(
-
-                                    bank => {
-
-                                        const masterBank =
-                                            masterBankMap.get(
-
-                                                String(
-                                                    bank?.bank_id
-                                                    ??
-                                                    ""
-                                                )
-
-                                            )
-
-                                            ??
-
-                                            null;
-
-
-                                        return {
-
-                                            ...bank,
-
-                                            mst_bank:
-                                                masterBank
-
-                                        };
-
-                                    }
-
-                                );
-
-
-                            /*
-                            ======================================
-                            SAVE CACHE
-                            ======================================
-                            */
-
-                            bankCache.set(
-                                cacheKey,
-                                vendorBanks
-                            );
-
-                        }
-
-                        catch (
-                            bankError
-                        ) {
-
-                            console.error(
-                                `AGING PAYABLE BANK ERROR VENDOR ${vendorId}:`,
-                                bankError
-                            );
-
-                            vendorBanks =
-                                [];
-
-                            bankCache.set(
-                                cacheKey,
-                                []
-                            );
-
-                        }
-
-                    }
-
-                }
-
-
-                /*
-                ==============================================
-                BUSINESS PARTNER
-                ==============================================
-                */
-
-                const vendor =
-                    row?.mst_business_partner
-                    ??
-                    {};
-
-
-                /*
-                ==============================================
-                ENRICH ROW
-                ==============================================
-                */
-
-                const enrichedRow = {
-
-                    ...row,
-
-                    mst_business_partner: {
-
-                        ...vendor,
-
-                        mst_business_partner_bank:
-                            vendorBanks
-
-                    }
-
-                };
-
-
-                /*
-                ==============================================
-                NORMALIZE
-                ==============================================
-                */
-
-                normalizedRows.push(
-
-                    this.normalizeRow(
-                        enrichedRow
-                    )
-
-                );
-
             }
 
-
-            /*
-            ==================================================
-            SAVE DATA
-            ==================================================
-            */
-
-            this.data =
-                normalizedRows;
+        );
 
 
-            console.log(
-                "AGING PAYABLE FINAL DATA:",
-                this.data
-            );
+        console.log(
+            "AGING PAYABLE BANK MASTER:",
+            banks
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AgingPayable.loadBankMaster:",
+            error
+        );
 
 
-            /*
-            ==================================================
-            APPLY FILTER
-            ==================================================
-            */
+        this.bankMasterMap.clear();
 
-            this.applyFilter();
+    }
 
-        }
+}
 
-        catch (error) {
 
-            console.error(
-                "AgingPayable.loadData",
-                error
-            );
+    /*
+==========================================================
+GET VENDOR BANK INFORMATION
+==========================================================
+*/
 
-            this.data =
-                [];
+async getVendorBankInfo(
+    vendorId
+) {
 
-            this.filteredData =
-                [];
+    const empty = {
 
-            this.refreshView();
+        account_holder:
+            "-",
 
-            this.showError(
-                error?.message
-                ||
-                "Failed to load Aging Payable."
-            );
+        bank_name:
+            "-",
 
-        }
+        bank_account:
+            "-"
 
-        finally {
+    };
 
-            if (
-                showLoading
-            ) {
 
-                window.App?.hideLoading?.();
+    /*
+    ======================================================
+    VALIDATE VENDOR
+    ======================================================
+    */
 
-            }
+    if (
+        vendorId === null
+        ||
+        vendorId === undefined
+        ||
+        vendorId === ""
+    ) {
 
-        }
+        return empty;
 
     }
 
 
+    const cacheKey =
+        String(
+            vendorId
+        );
+
+
+    /*
+    ======================================================
+    RETURN CACHE
+    ======================================================
+    */
+
+    if (
+        this.vendorBankCache.has(
+            cacheKey
+        )
+    ) {
+
+        return this.vendorBankCache.get(
+            cacheKey
+        );
+
+    }
+
+
+    try {
+
+        /*
+        ======================================================
+        LOAD BANK FROM BUSINESS PARTNER
+        ======================================================
+        */
+
+        const result =
+            await BusinessPartnerBankService
+                .getByBusinessPartner(
+                    vendorId
+                );
+
+
+        const banks =
+
+            Array.isArray(result)
+
+                ? result
+
+                : Array.isArray(result?.data)
+
+                    ? result.data
+
+                    : [];
+
+
+        console.log(
+            `AGING PAYABLE BANK VENDOR ${vendorId}:`,
+            banks
+        );
+
+
+        /*
+        ======================================================
+        NO BANK
+        ======================================================
+        */
+
+        if (
+            !banks.length
+        ) {
+
+            this.vendorBankCache.set(
+                cacheKey,
+                empty
+            );
+
+
+            return empty;
+
+        }
+
+
+        /*
+        ======================================================
+        SELECT DEFAULT BANK
+
+        Business Partner:
+        - use is_default = true
+        - fallback first bank
+        ======================================================
+        */
+
+        const bank =
+
+            banks.find(
+
+                item =>
+                    item?.is_default === true
+
+            )
+
+            ??
+
+            banks[0];
+
+
+        /*
+        ======================================================
+        GET MASTER BANK
+        ======================================================
+        */
+
+        const bankId =
+            bank?.bank_id
+            ??
+            null;
+
+
+        const bankMaster =
+
+            bankId !== null
+            &&
+            bankId !== undefined
+
+                ? this.bankMasterMap.get(
+                    String(
+                        bankId
+                    )
+                )
+
+                : null;
+
+
+        /*
+        ======================================================
+        BUILD BANK INFORMATION
+        ======================================================
+        */
+
+        const bankInfo = {
+
+            /*
+            Business Partner Bank:
+            account_name = Account Holder
+            */
+
+            account_holder:
+
+                bank?.account_name
+                ??
+                "-",
+
+
+            /*
+            Master Bank:
+            bank_name
+            */
+
+            bank_name:
+
+                bankMaster?.bank_name
+                ??
+                "-",
+
+
+            /*
+            Business Partner Bank:
+            account_number = Bank Account
+            */
+
+            bank_account:
+
+                bank?.account_number
+                ??
+                "-"
+
+        };
+
+
+        console.log(
+            `AGING PAYABLE SELECTED BANK ${vendorId}:`,
+            {
+                bank,
+                bankMaster,
+                bankInfo
+            }
+        );
+
+
+        /*
+        ======================================================
+        CACHE
+        ======================================================
+        */
+
+        this.vendorBankCache.set(
+            cacheKey,
+            bankInfo
+        );
+
+
+        return bankInfo;
+
+    }
+
+    catch (error) {
+
+        console.error(
+            `AGING PAYABLE BANK ERROR VENDOR ${vendorId}:`,
+            error
+        );
+
+
+        this.vendorBankCache.set(
+            cacheKey,
+            empty
+        );
+
+
+        return empty;
+
+    }
+
+}
     /*
     ==========================================================
     NORMALIZE ROW
@@ -1107,67 +1516,15 @@ export class AgingPayable {
         row
     ) {
 
+
         /*
         ======================================================
-        VENDOR
+        BUSINESS PARTNER
         ======================================================
         */
 
         const vendor =
             row?.mst_business_partner
-            ??
-            {};
-
-
-        /*
-        ======================================================
-        BANK LIST
-        ======================================================
-        */
-
-        const bankList =
-
-            Array.isArray(
-                vendor?.mst_business_partner_bank
-            )
-
-                ? vendor.mst_business_partner_bank
-
-                : [];
-
-
-        /*
-        ======================================================
-        DEFAULT BANK
-        ======================================================
-        */
-
-        const bank =
-
-            bankList.find(
-
-                item =>
-                    item?.is_default === true
-
-            )
-
-            ??
-
-            bankList[0]
-
-            ??
-
-            {};
-
-
-        /*
-        ======================================================
-        BANK MASTER
-        ======================================================
-        */
-
-        const bankMaster =
-            bank?.mst_bank
             ??
             {};
 
@@ -1182,14 +1539,6 @@ export class AgingPayable {
             this.toNumber(
 
                 row?.total_amount
-
-                ??
-
-                row?.grand_total
-
-                ??
-
-                row?.invoice_amount
 
                 ??
 
@@ -1215,14 +1564,6 @@ export class AgingPayable {
 
                 ??
 
-                row?.subtotal_amount
-
-                ??
-
-                row?.dpp_amount
-
-                ??
-
                 0
 
             );
@@ -1230,7 +1571,7 @@ export class AgingPayable {
 
         /*
         ======================================================
-        TAX +
+        TAX (+)
         ======================================================
         */
 
@@ -1256,7 +1597,7 @@ export class AgingPayable {
 
         /*
         ======================================================
-        TAX -
+        TAX (-)
         ======================================================
         */
 
@@ -1275,10 +1616,6 @@ export class AgingPayable {
 
                 ??
 
-                row?.wht_amount
-
-                ??
-
                 0
 
             );
@@ -1286,7 +1623,7 @@ export class AgingPayable {
 
         /*
         ======================================================
-        PAID
+        PAID AMOUNT
         ======================================================
         */
 
@@ -1345,7 +1682,7 @@ export class AgingPayable {
 
         /*
         ======================================================
-        RETURN
+        RESULT
         ======================================================
         */
 
@@ -1366,16 +1703,12 @@ export class AgingPayable {
 
                 ??
 
-                row?.vendor_name
-
-                ??
-
                 "-",
 
 
             /*
             ==================================================
-            INVOICE NO
+            DOCUMENT
             ==================================================
             */
 
@@ -1388,12 +1721,6 @@ export class AgingPayable {
                 "-",
 
 
-            /*
-            ==================================================
-            PO NO
-            ==================================================
-            */
-
             po_no:
 
                 row?.po_no
@@ -1402,12 +1729,6 @@ export class AgingPayable {
 
                 "-",
 
-
-            /*
-            ==================================================
-            DESCRIPTION
-            ==================================================
-            */
 
             description:
 
@@ -1421,21 +1742,12 @@ export class AgingPayable {
             /*
             ==================================================
             BANK
-
-            Account Holder =
-            mst_business_partner_bank.account_name
-
-            Bank Account =
-            mst_business_partner_bank.account_number
-
-            Bank Name =
-            mst_bank.bank_name
             ==================================================
             */
 
             account_holder:
 
-                bank?.account_name
+                row?.account_holder
 
                 ??
 
@@ -1444,11 +1756,7 @@ export class AgingPayable {
 
             bank_name:
 
-                bankMaster?.bank_name
-
-                ??
-
-                bank?.bank_name
+                row?.bank_name
 
                 ??
 
@@ -1457,7 +1765,7 @@ export class AgingPayable {
 
             bank_account:
 
-                bank?.account_number
+                row?.bank_account
 
                 ??
 
@@ -1553,9 +1861,7 @@ export class AgingPayable {
         };
 
     }
-
-
-    /*
+        /*
     ==========================================================
     REBUILD AGING
     ==========================================================
@@ -1581,6 +1887,7 @@ export class AgingPayable {
                 })
 
             );
+
 
         this.applyFilter();
 
@@ -1624,6 +1931,12 @@ export class AgingPayable {
         };
 
 
+        /*
+        ======================================================
+        AMOUNT
+        ======================================================
+        */
+
         const amount =
             this.toNumber(
                 outstanding
@@ -1632,34 +1945,67 @@ export class AgingPayable {
 
         /*
         ======================================================
-        NO DUE DATE / NO OUTSTANDING
+        NO OUTSTANDING
         ======================================================
         */
 
         if (
-            !dueDate
-            ||
             amount <= 0
         ) {
-
-            result.current =
-                amount;
 
             return result;
 
         }
 
 
+        /*
+        ======================================================
+        NO DUE DATE
+        ======================================================
+        */
+
+        if (
+            !dueDate
+        ) {
+
+            result.current =
+                amount;
+
+
+            return result;
+
+        }
+
+
+        /*
+        ======================================================
+        AS OF DATE
+        ======================================================
+        */
+
         const asOf =
             this.parseDate(
                 this.asOfDateValue
             );
+
+
+        /*
+        ======================================================
+        DUE DATE
+        ======================================================
+        */
 
         const due =
             this.parseDate(
                 dueDate
             );
 
+
+        /*
+        ======================================================
+        INVALID DATE
+        ======================================================
+        */
 
         if (
             !asOf
@@ -1670,29 +2016,31 @@ export class AgingPayable {
             result.current =
                 amount;
 
+
             return result;
 
         }
 
 
+        /*
+        ======================================================
+        AGING DAYS
+        ======================================================
+        */
+
         const days =
             Math.floor(
 
                 (
-                    asOf - due
+                    asOf.getTime()
+                    -
+                    due.getTime()
                 )
 
                 /
 
                 86400000
 
-            );
-
-
-        result.aging_days =
-            Math.max(
-                0,
-                days
             );
 
 
@@ -1706,13 +2054,31 @@ export class AgingPayable {
             days <= 0
         ) {
 
-            result.current =
-                amount;
+            result.aging_days =
+                0;
+
 
             result.bucket =
                 "current";
 
+
+            result.current =
+                amount;
+
+
+            return result;
+
         }
+
+
+        /*
+        ======================================================
+        OVERDUE DAYS
+        ======================================================
+        */
+
+        result.aging_days =
+            days;
 
 
         /*
@@ -1721,15 +2087,19 @@ export class AgingPayable {
         ======================================================
         */
 
-        else if (
+        if (
             days <= 30
         ) {
+
+            result.bucket =
+                "1-30";
+
 
             result.days_1_30 =
                 amount;
 
-            result.bucket =
-                "1-30";
+
+            return result;
 
         }
 
@@ -1740,15 +2110,19 @@ export class AgingPayable {
         ======================================================
         */
 
-        else if (
+        if (
             days <= 60
         ) {
+
+            result.bucket =
+                "31-60";
+
 
             result.days_31_60 =
                 amount;
 
-            result.bucket =
-                "31-60";
+
+            return result;
 
         }
 
@@ -1759,15 +2133,19 @@ export class AgingPayable {
         ======================================================
         */
 
-        else if (
+        if (
             days <= 90
         ) {
+
+            result.bucket =
+                "61-90";
+
 
             result.days_61_90 =
                 amount;
 
-            result.bucket =
-                "61-90";
+
+            return result;
 
         }
 
@@ -1778,15 +2156,12 @@ export class AgingPayable {
         ======================================================
         */
 
-        else {
+        result.bucket =
+            "90+";
 
-            result.days_90_plus =
-                amount;
 
-            result.bucket =
-                "90+";
-
-        }
+        result.days_90_plus =
+            amount;
 
 
         return result;
@@ -1802,25 +2177,67 @@ export class AgingPayable {
 
     applyFilter() {
 
+        /*
+        ======================================================
+        DATE FROM
+        ======================================================
+        */
+
         const dateFrom =
             this.filterDateFrom?.value
             ||
             "";
+
+
+        /*
+        ======================================================
+        DATE TO
+        ======================================================
+        */
 
         const dateTo =
             this.filterDateTo?.value
             ||
             "";
 
+
+        /*
+        ======================================================
+        STATUS
+        ======================================================
+        */
+
         const status =
-            this.filterStatus?.value
-            ||
-            "all";
+            String(
+                this.filterStatus?.value
+                ||
+                "all"
+            )
+                .trim()
+                .toLowerCase();
+
+
+        /*
+        ======================================================
+        FIND BY
+        ======================================================
+        */
 
         const findBy =
-            this.filterFindBy?.value
-            ||
-            "invoice";
+            String(
+                this.filterFindBy?.value
+                ||
+                "invoice"
+            )
+                .trim()
+                .toLowerCase();
+
+
+        /*
+        ======================================================
+        KEYWORD
+        ======================================================
+        */
 
         const keyword =
             String(
@@ -1828,14 +2245,21 @@ export class AgingPayable {
                 ??
                 ""
             )
-            .trim()
-            .toLowerCase();
+                .trim()
+                .toLowerCase();
 
+
+        /*
+        ======================================================
+        FILTER DATA
+        ======================================================
+        */
 
         this.filteredData =
             this.data.filter(
 
                 row => {
+
 
                     /*
                     ==============================================
@@ -1844,16 +2268,15 @@ export class AgingPayable {
                     */
 
                     const invoiceDate =
-
                         row?.invoice_date
 
                             ? String(
                                 row.invoice_date
                             )
-                            .slice(
-                                0,
-                                10
-                            )
+                                .slice(
+                                    0,
+                                    10
+                                )
 
                             : "";
 
@@ -1867,9 +2290,11 @@ export class AgingPayable {
                     if (
                         dateFrom
                         &&
-                        invoiceDate
-                        &&
-                        invoiceDate < dateFrom
+                        (
+                            !invoiceDate
+                            ||
+                            invoiceDate < dateFrom
+                        )
                     ) {
 
                         return false;
@@ -1886,9 +2311,11 @@ export class AgingPayable {
                     if (
                         dateTo
                         &&
-                        invoiceDate
-                        &&
-                        invoiceDate > dateTo
+                        (
+                            !invoiceDate
+                            ||
+                            invoiceDate > dateTo
+                        )
                     ) {
 
                         return false;
@@ -1904,25 +2331,25 @@ export class AgingPayable {
 
                     if (
                         status !== "all"
-
-                        &&
-
-                        String(
-                            row?.status
-                            ??
-                            ""
-                        )
-                        .toLowerCase()
-
-                        !==
-
-                        String(
-                            status
-                        )
-                        .toLowerCase()
                     ) {
 
-                        return false;
+                        const rowStatus =
+                            String(
+                                row?.status
+                                ??
+                                ""
+                            )
+                                .trim()
+                                .toLowerCase();
+
+
+                        if (
+                            rowStatus !== status
+                        ) {
+
+                            return false;
+
+                        }
 
                     }
 
@@ -1964,7 +2391,7 @@ export class AgingPayable {
 
                         value =
                             row?.invoice_no
-                            ||
+                            ??
                             "";
 
                     }
@@ -1982,7 +2409,7 @@ export class AgingPayable {
 
                         value =
                             row?.po_no
-                            ||
+                            ??
                             "";
 
                     }
@@ -1994,31 +2421,90 @@ export class AgingPayable {
                     ==============================================
                     */
 
-                    else {
+                    else if (
+                        findBy === "vendor"
+                    ) {
 
                         value =
                             row?.vendor_name
-                            ||
+                            ??
                             "";
 
                     }
 
 
+                    /*
+                    ==============================================
+                    FALLBACK SEARCH
+                    ==============================================
+                    */
+
+                    else {
+
+                        value = [
+
+                            row?.invoice_no,
+
+                            row?.po_no,
+
+                            row?.vendor_name,
+
+                            row?.description,
+
+                            row?.account_holder,
+
+                            row?.bank_name,
+
+                            row?.bank_account
+
+                        ]
+                            .filter(
+                                item =>
+                                    item !== null
+                                    &&
+                                    item !== undefined
+                            )
+                            .join(
+                                " "
+                            );
+
+                    }
+
+
+                    /*
+                    ==============================================
+                    MATCH
+                    ==============================================
+                    */
+
                     return String(
                         value
                     )
-                    .toLowerCase()
-                    .includes(
-                        keyword
-                    );
+                        .toLowerCase()
+                        .includes(
+                            keyword
+                        );
 
                 }
 
             );
 
 
+        /*
+        ======================================================
+        RESET PAGE
+        ======================================================
+        */
+
         this.currentPage =
             1;
+
+
+        /*
+        ======================================================
+        REFRESH
+        ======================================================
+        */
 
         this.refreshView();
 
@@ -2033,9 +2519,21 @@ export class AgingPayable {
 
     refreshView() {
 
+        /*
+        ======================================================
+        TOTAL ROWS
+        ======================================================
+        */
+
         this.totalRows =
             this.filteredData.length;
 
+
+        /*
+        ======================================================
+        TOTAL PAGES
+        ======================================================
+        */
 
         this.totalPages =
             Math.max(
@@ -2055,6 +2553,12 @@ export class AgingPayable {
             );
 
 
+        /*
+        ======================================================
+        VALIDATE CURRENT PAGE
+        ======================================================
+        */
+
         this.currentPage =
             Math.min(
 
@@ -2068,9 +2572,17 @@ export class AgingPayable {
             );
 
 
+        /*
+        ======================================================
+        RENDER
+        ======================================================
+        */
+
         this.renderTable();
 
+
         this.renderTotals();
+
 
         this.updatePagination();
 
@@ -2094,9 +2606,21 @@ export class AgingPayable {
         }
 
 
+        /*
+        ======================================================
+        CLEAR
+        ======================================================
+        */
+
         this.tableBody.innerHTML =
             "";
 
+
+        /*
+        ======================================================
+        START INDEX
+        ======================================================
+        */
 
         const start =
 
@@ -2109,12 +2633,20 @@ export class AgingPayable {
             this.pageSize;
 
 
+        /*
+        ======================================================
+        PAGE DATA
+        ======================================================
+        */
+
         const rows =
             this.filteredData.slice(
 
                 start,
 
-                start + this.pageSize
+                start
+                +
+                this.pageSize
 
             );
 
@@ -2122,7 +2654,6 @@ export class AgingPayable {
         /*
         ======================================================
         EMPTY
-        20 COLUMNS
         ======================================================
         */
 
@@ -2150,6 +2681,7 @@ export class AgingPayable {
 
             `;
 
+
             return;
 
         }
@@ -2157,7 +2689,7 @@ export class AgingPayable {
 
         /*
         ======================================================
-        ROW
+        ROWS
         ======================================================
         */
 
@@ -2196,7 +2728,6 @@ export class AgingPayable {
     /*
     ==========================================================
     CREATE ROW
-    20 COLUMNS
     ==========================================================
     */
 
@@ -2499,7 +3030,7 @@ export class AgingPayable {
 
 
                 <!-- ==========================================
-                     TAX +
+                     TAX (+)
                 =========================================== -->
 
                 <td class="finova-table-number">
@@ -2514,7 +3045,7 @@ export class AgingPayable {
 
 
                 <!-- ==========================================
-                     TAX -
+                     TAX (-)
                 =========================================== -->
 
                 <td class="finova-table-number">
@@ -2550,50 +3081,120 @@ export class AgingPayable {
                 row
             ) => {
 
+
+                /*
+                ==============================================
+                OUTSTANDING
+                ==============================================
+                */
+
                 total.outstanding +=
                     this.toNumber(
                         row.outstanding_amount
                     );
+
+
+                /*
+                ==============================================
+                CURRENT
+                ==============================================
+                */
 
                 total.current +=
                     this.toNumber(
                         row.current
                     );
 
+
+                /*
+                ==============================================
+                1 - 30
+                ==============================================
+                */
+
                 total.d1 +=
                     this.toNumber(
                         row.days_1_30
                     );
+
+
+                /*
+                ==============================================
+                31 - 60
+                ==============================================
+                */
 
                 total.d31 +=
                     this.toNumber(
                         row.days_31_60
                     );
 
+
+                /*
+                ==============================================
+                61 - 90
+                ==============================================
+                */
+
                 total.d61 +=
                     this.toNumber(
                         row.days_61_90
                     );
+
+
+                /*
+                ==============================================
+                > 90
+                ==============================================
+                */
 
                 total.d90 +=
                     this.toNumber(
                         row.days_90_plus
                     );
 
+
+                /*
+                ==============================================
+                TOTAL AMOUNT
+                ==============================================
+                */
+
                 total.totalAmount +=
                     this.toNumber(
                         row.total_amount
                     );
+
+
+                /*
+                ==============================================
+                BEFORE TAX
+                ==============================================
+                */
 
                 total.beforeTax +=
                     this.toNumber(
                         row.before_tax_amount
                     );
 
+
+                /*
+                ==============================================
+                TAX (+)
+                ==============================================
+                */
+
                 total.taxPlus +=
                     this.toNumber(
                         row.tax_plus_amount
                     );
+
+
+                /*
+                ==============================================
+                TAX (-)
+                ==============================================
+                */
 
                 total.taxMinus +=
                     this.toNumber(
@@ -2656,6 +3257,12 @@ export class AgingPayable {
             this.calculateTotals();
 
 
+        /*
+        ======================================================
+        OUTSTANDING
+        ======================================================
+        */
+
         if (
             this.totalOutstanding
         ) {
@@ -2667,6 +3274,12 @@ export class AgingPayable {
 
         }
 
+
+        /*
+        ======================================================
+        CURRENT
+        ======================================================
+        */
 
         if (
             this.totalCurrent
@@ -2680,6 +3293,12 @@ export class AgingPayable {
         }
 
 
+        /*
+        ======================================================
+        1 - 30
+        ======================================================
+        */
+
         if (
             this.total1to30
         ) {
@@ -2691,6 +3310,12 @@ export class AgingPayable {
 
         }
 
+
+        /*
+        ======================================================
+        31 - 60
+        ======================================================
+        */
 
         if (
             this.total31to60
@@ -2704,6 +3329,12 @@ export class AgingPayable {
         }
 
 
+        /*
+        ======================================================
+        61 - 90
+        ======================================================
+        */
+
         if (
             this.total61to90
         ) {
@@ -2715,6 +3346,12 @@ export class AgingPayable {
 
         }
 
+
+        /*
+        ======================================================
+        > 90
+        ======================================================
+        */
 
         if (
             this.total90plus
@@ -2728,6 +3365,12 @@ export class AgingPayable {
         }
 
 
+        /*
+        ======================================================
+        TOTAL AMOUNT
+        ======================================================
+        */
+
         if (
             this.totalAmount
         ) {
@@ -2739,6 +3382,12 @@ export class AgingPayable {
 
         }
 
+
+        /*
+        ======================================================
+        BEFORE TAX
+        ======================================================
+        */
 
         if (
             this.totalBeforeTax
@@ -2752,6 +3401,12 @@ export class AgingPayable {
         }
 
 
+        /*
+        ======================================================
+        TAX (+)
+        ======================================================
+        */
+
         if (
             this.totalTaxPlus
         ) {
@@ -2763,6 +3418,12 @@ export class AgingPayable {
 
         }
 
+
+        /*
+        ======================================================
+        TAX (-)
+        ======================================================
+        */
 
         if (
             this.totalTaxMinus
@@ -2785,6 +3446,12 @@ export class AgingPayable {
     */
 
     updatePagination() {
+
+        /*
+        ======================================================
+        START
+        ======================================================
+        */
 
         const start =
 
@@ -2809,6 +3476,12 @@ export class AgingPayable {
                 : 0;
 
 
+        /*
+        ======================================================
+        END
+        ======================================================
+        */
+
         const end =
             Math.min(
 
@@ -2821,6 +3494,12 @@ export class AgingPayable {
             );
 
 
+        /*
+        ======================================================
+        PAGE INPUT
+        ======================================================
+        */
+
         if (
             this.currentPageInput
         ) {
@@ -2831,6 +3510,12 @@ export class AgingPayable {
         }
 
 
+        /*
+        ======================================================
+        TOTAL PAGE
+        ======================================================
+        */
+
         if (
             this.totalPagesLabel
         ) {
@@ -2840,6 +3525,12 @@ export class AgingPayable {
 
         }
 
+
+        /*
+        ======================================================
+        RECORD INFO
+        ======================================================
+        */
 
         if (
             this.displayRecord
@@ -2856,6 +3547,12 @@ export class AgingPayable {
         }
 
 
+        /*
+        ======================================================
+        FIRST
+        ======================================================
+        */
+
         if (
             this.btnFirst
         ) {
@@ -2866,6 +3563,12 @@ export class AgingPayable {
         }
 
 
+        /*
+        ======================================================
+        PREVIOUS
+        ======================================================
+        */
+
         if (
             this.btnPrev
         ) {
@@ -2875,6 +3578,12 @@ export class AgingPayable {
 
         }
 
+
+        /*
+        ======================================================
+        NEXT
+        ======================================================
+        */
 
         if (
             this.btnNext
@@ -2887,6 +3596,12 @@ export class AgingPayable {
 
         }
 
+
+        /*
+        ======================================================
+        LAST
+        ======================================================
+        */
 
         if (
             this.btnLast
@@ -2912,6 +3627,12 @@ export class AgingPayable {
         page
     ) {
 
+        /*
+        ======================================================
+        VALIDATE
+        ======================================================
+        */
+
         this.currentPage =
             Math.min(
 
@@ -2932,7 +3653,20 @@ export class AgingPayable {
             );
 
 
+        /*
+        ======================================================
+        RENDER CURRENT PAGE
+        ======================================================
+        */
+
         this.renderTable();
+
+
+        /*
+        ======================================================
+        PAGINATION
+        ======================================================
+        */
 
         this.updatePagination();
 
@@ -2949,6 +3683,13 @@ export class AgingPayable {
 
         try {
 
+
+            /*
+            ==================================================
+            DATE FROM
+            ==================================================
+            */
+
             if (
                 this.filterDateFrom
             ) {
@@ -2958,6 +3699,12 @@ export class AgingPayable {
 
             }
 
+
+            /*
+            ==================================================
+            DATE TO
+            ==================================================
+            */
 
             if (
                 this.filterDateTo
@@ -2969,6 +3716,12 @@ export class AgingPayable {
             }
 
 
+            /*
+            ==================================================
+            STATUS
+            ==================================================
+            */
+
             if (
                 this.filterStatus
             ) {
@@ -2978,6 +3731,12 @@ export class AgingPayable {
 
             }
 
+
+            /*
+            ==================================================
+            FIND BY
+            ==================================================
+            */
 
             if (
                 this.filterFindBy
@@ -2989,6 +3748,12 @@ export class AgingPayable {
             }
 
 
+            /*
+            ==================================================
+            KEYWORD
+            ==================================================
+            */
+
             if (
                 this.filterKeyword
             ) {
@@ -2999,35 +3764,29 @@ export class AgingPayable {
             }
 
 
-            const today =
-                new Date();
+            /*
+            ==================================================
+            RESET AS OF DATE
+            ==================================================
+            */
 
-            const localToday =
-                new Date(
-
-                    today.getTime()
-
-                    -
-
-                    (
-                        today.getTimezoneOffset()
-                        *
-                        60000
-                    )
-
-                );
+            this.setDefaultFilterDates();
 
 
-            this.asOfDateValue =
-                localToday
+            /*
+            ==================================================
+            CLEAR BANK CACHE
+            ==================================================
+            */
 
-                    .toISOString()
+            this.vendorBankCache.clear();
 
-                    .slice(
-                        0,
-                        10
-                    );
 
+            /*
+            ==================================================
+            RELOAD
+            ==================================================
+            */
 
             await this.loadData(
                 true
@@ -3038,14 +3797,19 @@ export class AgingPayable {
         catch (error) {
 
             console.error(
-                "AgingPayable.resetAndReload",
+                "AgingPayable.resetAndReload:",
                 error
             );
 
+
             this.showError(
+
                 error?.message
+
                 ||
+
                 "Failed to refresh Aging Payable."
+
             );
 
         }
@@ -3056,7 +3820,6 @@ export class AgingPayable {
     /*
     ==========================================================
     SHOW TABLE LOADING
-    20 COLUMNS
     ==========================================================
     */
 
@@ -3071,6 +3834,12 @@ export class AgingPayable {
         }
 
 
+        /*
+        ======================================================
+        TABLE LOADING
+        ======================================================
+        */
+
         this.tableBody.innerHTML = `
 
             <tr>
@@ -3081,16 +3850,37 @@ export class AgingPayable {
 
                     <div
                         class="
-                            spinner-border
-                            spinner-border-sm
-                            text-primary
-                        "
-                        role="status">
-                    </div>
+                            d-flex
+                            flex-column
+                            align-items-center
+                            justify-content-center
+                            gap-2
+                        ">
 
-                    <div class="small text-muted mt-2">
+                        <div
+                            class="
+                                spinner-border
+                                spinner-border-sm
+                                text-primary
+                            "
+                            role="status">
 
-                        Loading Aging Payable...
+                            <span class="visually-hidden">
+                                Loading...
+                            </span>
+
+                        </div>
+
+
+                        <div
+                            class="
+                                small
+                                text-muted
+                            ">
+
+                            Loading Aging Payable...
+
+                        </div>
 
                     </div>
 
@@ -3100,10 +3890,139 @@ export class AgingPayable {
 
         `;
 
+
+        /*
+        ======================================================
+        RESET TOTAL
+        ======================================================
+        */
+
+        const totalElements = [
+
+            this.totalOutstanding,
+
+            this.totalCurrent,
+
+            this.total1to30,
+
+            this.total31to60,
+
+            this.total61to90,
+
+            this.total90plus,
+
+            this.totalAmount,
+
+            this.totalBeforeTax,
+
+            this.totalTaxPlus,
+
+            this.totalTaxMinus
+
+        ];
+
+
+        totalElements.forEach(
+
+            element => {
+
+                if (
+                    element
+                ) {
+
+                    element.textContent =
+                        "0";
+
+                }
+
+            }
+
+        );
+
+
+        /*
+        ======================================================
+        RESET PAGINATION DISPLAY
+        ======================================================
+        */
+
+        if (
+            this.currentPageInput
+        ) {
+
+            this.currentPageInput.value =
+                1;
+
+        }
+
+
+        if (
+            this.totalPagesLabel
+        ) {
+
+            this.totalPagesLabel.textContent =
+                "1";
+
+        }
+
+
+        if (
+            this.displayRecord
+        ) {
+
+            this.displayRecord.textContent =
+                "Loading data...";
+
+        }
+
+
+        /*
+        ======================================================
+        DISABLE PAGINATION
+        ======================================================
+        */
+
+        if (
+            this.btnFirst
+        ) {
+
+            this.btnFirst.disabled =
+                true;
+
+        }
+
+
+        if (
+            this.btnPrev
+        ) {
+
+            this.btnPrev.disabled =
+                true;
+
+        }
+
+
+        if (
+            this.btnNext
+        ) {
+
+            this.btnNext.disabled =
+                true;
+
+        }
+
+
+        if (
+            this.btnLast
+        ) {
+
+            this.btnLast.disabled =
+                true;
+
+        }
+
     }
-
-
-    /*
+        /*
     ==========================================================
     PREVIEW HTML
     ==========================================================
@@ -3112,6 +4031,12 @@ export class AgingPayable {
     previewHTML() {
 
         try {
+
+            /*
+            ======================================================
+            DATA
+            ======================================================
+            */
 
             const rowsData =
 
@@ -3123,6 +4048,12 @@ export class AgingPayable {
 
                     : [];
 
+
+            /*
+            ======================================================
+            VALIDATE
+            ======================================================
+            */
 
             if (
                 !rowsData.length
@@ -3140,6 +4071,7 @@ export class AgingPayable {
             /*
             ======================================================
             OPEN WINDOW FIRST
+            AVOID POPUP BLOCK
             ======================================================
             */
 
@@ -3166,6 +4098,12 @@ export class AgingPayable {
             }
 
 
+            /*
+            ======================================================
+            PREVIEW DATE
+            ======================================================
+            */
+
             const previewDate =
                 new Date()
                     .toLocaleString(
@@ -3175,7 +4113,7 @@ export class AgingPayable {
 
             /*
             ======================================================
-            ROWS
+            REPORT ROW
             ======================================================
             */
 
@@ -3191,12 +4129,24 @@ export class AgingPayable {
 
                             <tr>
 
+
+                                <!-- ==========================
+                                     NO
+                                =========================== -->
+
                                 <td class="center">
+
                                     ${index + 1}
+
                                 </td>
 
 
+                                <!-- ==========================
+                                     VENDOR
+                                =========================== -->
+
                                 <td>
+
                                     ${
                                         this.escapeHTML(
                                             row.vendor_name
@@ -3204,10 +4154,16 @@ export class AgingPayable {
                                             "-"
                                         )
                                     }
+
                                 </td>
 
 
+                                <!-- ==========================
+                                     INVOICE NO
+                                =========================== -->
+
                                 <td>
+
                                     ${
                                         this.escapeHTML(
                                             row.invoice_no
@@ -3215,12 +4171,16 @@ export class AgingPayable {
                                             "-"
                                         )
                                     }
+
                                 </td>
 
 
-                                <!-- PO NO -->
+                                <!-- ==========================
+                                     PO NO
+                                =========================== -->
 
                                 <td>
+
                                     ${
                                         this.escapeHTML(
                                             row.po_no
@@ -3228,10 +4188,16 @@ export class AgingPayable {
                                             "-"
                                         )
                                     }
+
                                 </td>
 
 
+                                <!-- ==========================
+                                     DESCRIPTION
+                                =========================== -->
+
                                 <td class="description">
+
                                     ${
                                         this.escapeHTML(
                                             row.description
@@ -3239,10 +4205,16 @@ export class AgingPayable {
                                             "-"
                                         )
                                     }
+
                                 </td>
 
 
+                                <!-- ==========================
+                                     ACCOUNT HOLDER
+                                =========================== -->
+
                                 <td>
+
                                     ${
                                         this.escapeHTML(
                                             row.account_holder
@@ -3250,10 +4222,16 @@ export class AgingPayable {
                                             "-"
                                         )
                                     }
+
                                 </td>
 
 
+                                <!-- ==========================
+                                     BANK NAME
+                                =========================== -->
+
                                 <td>
+
                                     ${
                                         this.escapeHTML(
                                             row.bank_name
@@ -3261,10 +4239,16 @@ export class AgingPayable {
                                             "-"
                                         )
                                     }
+
                                 </td>
 
 
+                                <!-- ==========================
+                                     BANK ACCOUNT
+                                =========================== -->
+
                                 <td>
+
                                     ${
                                         this.escapeHTML(
                                             row.bank_account
@@ -3272,115 +4256,189 @@ export class AgingPayable {
                                             "-"
                                         )
                                     }
+
                                 </td>
 
 
+                                <!-- ==========================
+                                     INVOICE DATE
+                                =========================== -->
+
                                 <td class="center">
+
                                     ${
                                         this.formatDate(
                                             row.invoice_date
                                         )
                                     }
+
                                 </td>
 
 
+                                <!-- ==========================
+                                     DUE DATE
+                                =========================== -->
+
                                 <td class="center">
+
                                     ${
                                         this.formatDate(
                                             row.due_date
                                         )
                                     }
+
                                 </td>
 
 
+                                <!-- ==========================
+                                     OUTSTANDING
+                                =========================== -->
+
                                 <td class="amount">
+
                                     ${
                                         this.formatAmount(
                                             row.outstanding_amount
                                         )
                                     }
+
                                 </td>
 
 
+                                <!-- ==========================
+                                     CURRENT
+                                =========================== -->
+
                                 <td class="amount">
+
                                     ${
                                         this.formatAmount(
                                             row.current
                                         )
                                     }
+
                                 </td>
 
 
+                                <!-- ==========================
+                                     1 - 30
+                                =========================== -->
+
                                 <td class="amount">
+
                                     ${
                                         this.formatAmount(
                                             row.days_1_30
                                         )
                                     }
+
                                 </td>
 
 
+                                <!-- ==========================
+                                     31 - 60
+                                =========================== -->
+
                                 <td class="amount">
+
                                     ${
                                         this.formatAmount(
                                             row.days_31_60
                                         )
                                     }
+
                                 </td>
 
 
+                                <!-- ==========================
+                                     61 - 90
+                                =========================== -->
+
                                 <td class="amount">
+
                                     ${
                                         this.formatAmount(
                                             row.days_61_90
                                         )
                                     }
+
                                 </td>
 
 
+                                <!-- ==========================
+                                     > 90
+                                =========================== -->
+
                                 <td class="amount">
+
                                     ${
                                         this.formatAmount(
                                             row.days_90_plus
                                         )
                                     }
+
                                 </td>
 
 
+                                <!-- ==========================
+                                     TOTAL AMOUNT
+                                =========================== -->
+
                                 <td class="amount">
+
                                     ${
                                         this.formatAmount(
                                             row.total_amount
                                         )
                                     }
+
                                 </td>
 
 
+                                <!-- ==========================
+                                     BEFORE TAX
+                                =========================== -->
+
                                 <td class="amount">
+
                                     ${
                                         this.formatAmount(
                                             row.before_tax_amount
                                         )
                                     }
+
                                 </td>
 
 
+                                <!-- ==========================
+                                     TAX (+)
+                                =========================== -->
+
                                 <td class="amount">
+
                                     ${
                                         this.formatAmount(
                                             row.tax_plus_amount
                                         )
                                     }
+
                                 </td>
 
 
+                                <!-- ==========================
+                                     TAX (-)
+                                =========================== -->
+
                                 <td class="amount">
+
                                     ${
                                         this.formatAmount(
                                             row.tax_minus_amount
                                         )
                                     }
+
                                 </td>
+
 
                             </tr>
 
@@ -3430,269 +4488,359 @@ export class AgingPayable {
 
 * {
 
-    box-sizing: border-box;
+    box-sizing:
+        border-box;
 
 }
 
 
 html {
 
-    margin: 0;
+    margin:
+        0;
 
-    padding: 0;
+    padding:
+        0;
 
-    width: 100%;
+    width:
+        100%;
 
-    min-height: 100%;
+    min-height:
+        100%;
 
-    overflow-x: auto;
+    overflow-x:
+        auto;
 
-    overflow-y: auto;
+    overflow-y:
+        auto;
 
 }
 
 
 body {
 
-    margin: 0;
+    margin:
+        0;
 
-    padding: 28px 32px 42px;
+    padding:
+        28px 32px 42px;
 
-    width: max-content;
+    width:
+        max-content;
 
-    min-width: 100%;
+    min-width:
+        100%;
 
-    min-height: 100vh;
+    min-height:
+        100vh;
 
-    background: #FFFFFF;
+    background:
+        #FFFFFF;
 
-    color: #1F2937;
+    color:
+        #1F2937;
 
     font-family:
         Tahoma,
         Arial,
         sans-serif;
 
-    font-size: 11px;
+    font-size:
+        11px;
 
 }
 
 
 .report {
 
-    width: max-content;
+    width:
+        max-content;
 
-    min-width: calc(100vw - 64px);
+    min-width:
+        calc(100vw - 64px);
 
 }
 
 
 .report-header {
 
-    width: 100%;
+    width:
+        100%;
 
-    margin-bottom: 20px;
+    margin-bottom:
+        20px;
 
-    padding-bottom: 16px;
+    padding-bottom:
+        16px;
 
-    border-bottom: 2px solid #244494;
+    border-bottom:
+        2px solid #244494;
 
 }
 
 
 .report-title {
 
-    margin: 0;
+    margin:
+        0;
 
-    font-size: 22px;
+    font-size:
+        22px;
 
-    font-weight: 700;
+    font-weight:
+        700;
 
 }
 
 
 .report-subtitle {
 
-    margin-top: 6px;
+    margin-top:
+        6px;
 
-    color: #244494;
+    color:
+        #244494;
 
-    font-size: 16px;
+    font-size:
+        16px;
 
-    font-weight: 700;
+    font-weight:
+        700;
 
 }
 
 
 .report-description {
 
-    margin-top: 5px;
+    margin-top:
+        5px;
 
-    color: #6B7280;
+    color:
+        #6B7280;
 
 }
 
 
 .report-date {
 
-    margin-top: 6px;
+    margin-top:
+        6px;
 
-    color: #6B7280;
+    color:
+        #6B7280;
 
-    font-size: 11px;
+    font-size:
+        11px;
 
 }
 
 
 .table-container {
 
-    width: max-content;
+    width:
+        max-content;
 
-    min-width: 100%;
+    min-width:
+        100%;
 
-    border: 1px solid #D1D5DB;
+    border:
+        1px solid #D1D5DB;
 
-    border-radius: 4px;
+    border-radius:
+        4px;
 
-    background: #FFFFFF;
+    background:
+        #FFFFFF;
 
-    overflow: visible;
+    overflow:
+        visible;
 
 }
 
 
 .table-wrapper {
 
-    width: max-content;
+    width:
+        max-content;
 
-    min-width: 100%;
+    min-width:
+        100%;
 
-    overflow: visible !important;
+    overflow:
+        visible !important;
 
 }
 
 
 table {
 
-    width: max-content;
+    width:
+        max-content;
 
-    min-width: 100%;
+    min-width:
+        100%;
 
-    margin: 0;
+    margin:
+        0;
 
-    border-collapse: collapse;
+    border-collapse:
+        collapse;
 
-    table-layout: auto;
+    table-layout:
+        auto;
 
 }
 
 
 th {
 
-    padding: 9px;
+    padding:
+        9px;
 
-    background: #244494;
+    background:
+        #244494;
 
-    color: #FFFFFF;
+    color:
+        #FFFFFF;
 
-    border: 1px solid #D1D5DB;
+    border:
+        1px solid #D1D5DB;
 
-    text-align: center;
+    text-align:
+        center;
 
-    font-size: 10px;
+    font-size:
+        10px;
 
-    font-weight: 700;
+    font-weight:
+        700;
 
-    white-space: nowrap;
+    white-space:
+        nowrap;
 
 }
 
 
 td {
 
-    padding: 8px 9px;
+    padding:
+        8px 9px;
 
-    border: 1px solid #D1D5DB;
+    border:
+        1px solid #D1D5DB;
 
-    background: #FFFFFF;
+    background:
+        #FFFFFF;
 
-    vertical-align: middle;
+    vertical-align:
+        middle;
 
-    white-space: nowrap;
+    white-space:
+        nowrap;
 
 }
 
 
 tbody tr:nth-child(even) td {
 
-    background: #F8FAFC;
+    background:
+        #F8FAFC;
 
 }
 
 
 .center {
 
-    text-align: center;
+    text-align:
+        center;
 
 }
 
 
 .description {
 
-    min-width: 280px;
+    min-width:
+        280px;
 
-    max-width: 420px;
+    max-width:
+        420px;
 
-    white-space: normal;
+    white-space:
+        normal;
 
-    word-break: break-word;
+    word-break:
+        break-word;
 
 }
 
 
 .amount {
 
-    min-width: 120px;
+    min-width:
+        120px;
 
-    text-align: right;
+    text-align:
+        right;
 
-    font-variant-numeric: tabular-nums;
+    font-variant-numeric:
+        tabular-nums;
 
 }
 
 
 tfoot td {
 
-    background: #EEF2FF;
+    background:
+        #EEF2FF;
 
-    color: #111827;
+    color:
+        #111827;
 
-    font-weight: 700;
+    font-weight:
+        700;
+
+}
+
+
+.total-label {
+
+    text-align:
+        right;
 
 }
 
 
 .report-footer {
 
-    display: flex;
+    display:
+        flex;
 
-    align-items: center;
+    align-items:
+        center;
 
-    justify-content: space-between;
+    justify-content:
+        space-between;
 
-    gap: 30px;
+    gap:
+        30px;
 
-    width: 100%;
+    width:
+        100%;
 
-    margin-top: 18px;
+    margin-top:
+        18px;
 
-    padding-top: 12px;
+    padding-top:
+        12px;
 
-    border-top: 1px solid #E5E7EB;
+    border-top:
+        1px solid #E5E7EB;
 
-    color: #6B7280;
+    color:
+        #6B7280;
 
-    font-size: 10px;
+    font-size:
+        10px;
 
 }
 
@@ -3701,9 +4849,11 @@ tfoot td {
 
     @page {
 
-        size: landscape;
+        size:
+            landscape;
 
-        margin: 7mm;
+        margin:
+            7mm;
 
     }
 
@@ -3711,20 +4861,25 @@ tfoot td {
     html,
     body {
 
-        overflow: visible;
+        overflow:
+            visible;
 
     }
 
 
     body {
 
-        width: auto;
+        width:
+            auto;
 
-        min-width: 0;
+        min-width:
+            0;
 
-        padding: 0;
+        padding:
+            0;
 
-        font-size: 7px;
+        font-size:
+            7px;
 
     }
 
@@ -3732,7 +4887,8 @@ tfoot td {
     th,
     td {
 
-        padding: 4px;
+        padding:
+            4px;
 
     }
 
@@ -3748,6 +4904,10 @@ tfoot td {
 
 <div class="report">
 
+
+    <!-- ==============================================
+         REPORT HEADER
+    =============================================== -->
 
     <div class="report-header">
 
@@ -3787,13 +4947,17 @@ tfoot td {
 
             Preview Date :
 
-            ${previewDate}
+            ${this.escapeHTML(previewDate)}
 
         </div>
 
 
     </div>
 
+
+    <!-- ==============================================
+         TABLE
+    =============================================== -->
 
     <div class="table-container">
 
@@ -3862,29 +5026,26 @@ tfoot td {
 
                     <tr>
 
-                        <!--
-                        10 COLUMNS BEFORE OUTSTANDING
 
-                        No
-                        Vendor
-                        Invoice No
-                        PO No
-                        Description
-                        Account Holder
-                        Bank Name
-                        Bank Account
-                        Invoice Date
-                        Due Date
+                        <!--
+                        ==========================================
+                        FIRST 10 NON-AMOUNT COLUMNS
+                        ==========================================
                         -->
 
                         <td
                             colspan="10"
-                            class="amount">
+                            class="
+                                amount
+                                total-label
+                            ">
 
                             TOTAL
 
                         </td>
 
+
+                        <!-- OUTSTANDING -->
 
                         <td class="amount">
 
@@ -3897,6 +5058,8 @@ tfoot td {
                         </td>
 
 
+                        <!-- CURRENT -->
+
                         <td class="amount">
 
                             ${
@@ -3907,6 +5070,8 @@ tfoot td {
 
                         </td>
 
+
+                        <!-- 1 - 30 -->
 
                         <td class="amount">
 
@@ -3919,6 +5084,8 @@ tfoot td {
                         </td>
 
 
+                        <!-- 31 - 60 -->
+
                         <td class="amount">
 
                             ${
@@ -3929,6 +5096,8 @@ tfoot td {
 
                         </td>
 
+
+                        <!-- 61 - 90 -->
 
                         <td class="amount">
 
@@ -3941,6 +5110,8 @@ tfoot td {
                         </td>
 
 
+                        <!-- > 90 -->
+
                         <td class="amount">
 
                             ${
@@ -3951,6 +5122,8 @@ tfoot td {
 
                         </td>
 
+
+                        <!-- TOTAL AMOUNT -->
 
                         <td class="amount">
 
@@ -3963,6 +5136,8 @@ tfoot td {
                         </td>
 
 
+                        <!-- BEFORE TAX -->
+
                         <td class="amount">
 
                             ${
@@ -3974,6 +5149,8 @@ tfoot td {
                         </td>
 
 
+                        <!-- TAX (+) -->
+
                         <td class="amount">
 
                             ${
@@ -3984,6 +5161,8 @@ tfoot td {
 
                         </td>
 
+
+                        <!-- TAX (-) -->
 
                         <td class="amount">
 
@@ -4007,6 +5186,10 @@ tfoot td {
 
     </div>
 
+
+    <!-- ==============================================
+         REPORT FOOTER
+    =============================================== -->
 
     <div class="report-footer">
 
@@ -4045,14 +5228,30 @@ tfoot td {
 
             previewWindow.document.open();
 
+
             previewWindow.document.write(
                 html
             );
 
+
             previewWindow.document.close();
+
+
+            /*
+            ======================================================
+            TITLE
+            ======================================================
+            */
 
             previewWindow.document.title =
                 "Aging Payable - Preview";
+
+
+            /*
+            ======================================================
+            FOCUS
+            ======================================================
+            */
 
             previewWindow.focus();
 
@@ -4061,14 +5260,19 @@ tfoot td {
         catch (error) {
 
             console.error(
-                "AgingPayable.previewHTML",
+                "AgingPayable.previewHTML:",
                 error
             );
 
+
             this.showError(
+
                 error?.message
+
                 ||
+
                 "Failed to preview Aging Payable."
+
             );
 
         }
@@ -4086,6 +5290,13 @@ tfoot td {
 
         try {
 
+
+            /*
+            ======================================================
+            DATA
+            ======================================================
+            */
+
             const rows =
 
                 Array.isArray(
@@ -4096,6 +5307,12 @@ tfoot td {
 
                     : [];
 
+
+            /*
+            ======================================================
+            VALIDATE
+            ======================================================
+            */
 
             if (
                 !rows.length
@@ -4110,6 +5327,12 @@ tfoot td {
             }
 
 
+            /*
+            ======================================================
+            EXCEL DATA
+            ======================================================
+            */
+
             const data =
                 rows.map(
 
@@ -4118,65 +5341,145 @@ tfoot td {
                         index
                     ) => ({
 
-                        "No":
-                            index + 1,
 
+                        /*
+                        ==========================================
+                        NO
+                        ==========================================
+                        */
+
+                        "No":
+
+                            index
+                            +
+                            1,
+
+
+                        /*
+                        ==========================================
+                        VENDOR
+                        ==========================================
+                        */
 
                         "Vendor":
+
                             row.vendor_name
                             ||
                             "",
 
 
+                        /*
+                        ==========================================
+                        INVOICE
+                        ==========================================
+                        */
+
                         "Invoice No":
+
                             row.invoice_no
                             ||
                             "",
 
 
+                        /*
+                        ==========================================
+                        PO NO
+                        ==========================================
+                        */
+
                         "PO No":
+
                             row.po_no
                             ||
                             "",
 
 
+                        /*
+                        ==========================================
+                        DESCRIPTION
+                        ==========================================
+                        */
+
                         "Description":
+
                             row.description
                             ||
                             "",
 
 
+                        /*
+                        ==========================================
+                        ACCOUNT HOLDER
+                        ==========================================
+                        */
+
                         "Account Holder":
+
                             row.account_holder
                             ||
                             "",
 
 
+                        /*
+                        ==========================================
+                        BANK NAME
+                        ==========================================
+                        */
+
                         "Bank Name":
+
                             row.bank_name
                             ||
                             "",
 
 
+                        /*
+                        ==========================================
+                        BANK ACCOUNT
+                        ==========================================
+                        */
+
                         "Bank Account":
+
                             row.bank_account
                             ||
                             "",
 
 
+                        /*
+                        ==========================================
+                        INVOICE DATE
+                        ==========================================
+                        */
+
                         "Invoice Date":
+
                             row.invoice_date
                             ||
                             "",
 
 
+                        /*
+                        ==========================================
+                        DUE DATE
+                        ==========================================
+                        */
+
                         "Due Date":
+
                             row.due_date
                             ||
                             "",
 
 
+                        /*
+                        ==========================================
+                        AGING DAYS
+                        ==========================================
+                        */
+
                         "Aging Days":
+
                             Number(
                                 row.aging_days
                                 ||
@@ -4184,61 +5487,131 @@ tfoot td {
                             ),
 
 
+                        /*
+                        ==========================================
+                        OUTSTANDING
+                        ==========================================
+                        */
+
                         "Outstanding":
+
                             this.toNumber(
                                 row.outstanding_amount
                             ),
 
 
+                        /*
+                        ==========================================
+                        CURRENT
+                        ==========================================
+                        */
+
                         "Current":
+
                             this.toNumber(
                                 row.current
                             ),
 
 
+                        /*
+                        ==========================================
+                        1 - 30
+                        ==========================================
+                        */
+
                         "1 - 30":
+
                             this.toNumber(
                                 row.days_1_30
                             ),
 
 
+                        /*
+                        ==========================================
+                        31 - 60
+                        ==========================================
+                        */
+
                         "31 - 60":
+
                             this.toNumber(
                                 row.days_31_60
                             ),
 
 
+                        /*
+                        ==========================================
+                        61 - 90
+                        ==========================================
+                        */
+
                         "61 - 90":
+
                             this.toNumber(
                                 row.days_61_90
                             ),
 
 
+                        /*
+                        ==========================================
+                        > 90
+                        ==========================================
+                        */
+
                         "> 90":
+
                             this.toNumber(
                                 row.days_90_plus
                             ),
 
 
+                        /*
+                        ==========================================
+                        TOTAL AMOUNT
+                        ==========================================
+                        */
+
                         "Total Amount":
+
                             this.toNumber(
                                 row.total_amount
                             ),
 
 
+                        /*
+                        ==========================================
+                        BEFORE TAX
+                        ==========================================
+                        */
+
                         "Before Tax Amount":
+
                             this.toNumber(
                                 row.before_tax_amount
                             ),
 
 
+                        /*
+                        ==========================================
+                        TAX (+)
+                        ==========================================
+                        */
+
                         "Tax (+)":
+
                             this.toNumber(
                                 row.tax_plus_amount
                             ),
 
 
+                        /*
+                        ==========================================
+                        TAX (-)
+                        ==========================================
+                        */
+
                         "Tax (-)":
+
                             this.toNumber(
                                 row.tax_minus_amount
                             )
@@ -4247,6 +5620,12 @@ tfoot td {
 
                 );
 
+
+            /*
+            ======================================================
+            EXPORT
+            ======================================================
+            */
 
             ExcelExportService.export(
 
@@ -4263,14 +5642,19 @@ tfoot td {
         catch (error) {
 
             console.error(
-                "AgingPayable.downloadExcel",
+                "AgingPayable.downloadExcel:",
                 error
             );
 
+
             this.showError(
+
                 error?.message
+
                 ||
+
                 "Failed to download Aging Payable Excel."
+
             );
 
         }
@@ -4315,6 +5699,13 @@ tfoot td {
         value
     ) {
 
+
+        /*
+        ======================================================
+        EMPTY
+        ======================================================
+        */
+
         if (
             value === null
             ||
@@ -4327,6 +5718,12 @@ tfoot td {
 
         }
 
+
+        /*
+        ======================================================
+        NUMBER
+        ======================================================
+        */
 
         if (
             typeof value === "number"
@@ -4343,16 +5740,36 @@ tfoot td {
         }
 
 
+        /*
+        ======================================================
+        TEXT
+        ======================================================
+        */
+
         const text =
             String(
                 value
             )
-            .trim();
+                .trim();
+
+
+        if (
+            !text
+        ) {
+
+            return 0;
+
+        }
 
 
         /*
         ======================================================
-        NORMAL DATABASE DECIMAL
+        NORMAL DATABASE NUMBER
+
+        Examples:
+        50000000
+        50000000.00
+        -50000000.00
         ======================================================
         */
 
@@ -4382,11 +5799,20 @@ tfoot td {
         /*
         ======================================================
         INDONESIAN FORMATTED NUMBER
+
+        Examples:
+        50.000.000
+        50.000.000,50
         ======================================================
         */
 
         const normalized =
             text
+
+                .replace(
+                    /\s/g,
+                    ""
+                )
 
                 .replace(
                     /\./g,
@@ -4432,6 +5858,12 @@ tfoot td {
             );
 
 
+        /*
+        ======================================================
+        AVOID -0 / FLOATING NOISE
+        ======================================================
+        */
+
         return Math.abs(
             number
         )
@@ -4464,21 +5896,56 @@ tfoot td {
         }
 
 
+        /*
+        ======================================================
+        NORMALIZE YYYY-MM-DD
+        ======================================================
+        */
+
         const text =
             String(
                 value
             )
-            .slice(
-                0,
-                10
-            );
+                .slice(
+                    0,
+                    10
+                );
 
+
+        /*
+        ======================================================
+        VALIDATE BASIC DATE
+        ======================================================
+        */
+
+        if (
+            !/^\d{4}-\d{2}-\d{2}$/.test(
+                text
+            )
+        ) {
+
+            return null;
+
+        }
+
+
+        /*
+        ======================================================
+        CREATE LOCAL DATE
+        ======================================================
+        */
 
         const date =
             new Date(
                 `${text}T00:00:00`
             );
 
+
+        /*
+        ======================================================
+        VALIDATE
+        ======================================================
+        */
 
         return Number.isNaN(
             date.getTime()
@@ -4548,19 +6015,32 @@ tfoot td {
         value
     ) {
 
-        return Math
+        /*
+        ======================================================
+        NUMBER
+        ======================================================
+        */
 
-            .round(
+        const amount =
+            Math.round(
 
                 this.cleanNumber(
                     value
                 )
 
-            )
-
-            .toLocaleString(
-                "id-ID"
             );
+
+
+        /*
+        ======================================================
+        IDR STYLE
+        50000000 -> 50.000.000
+        ======================================================
+        */
+
+        return amount.toLocaleString(
+            "id-ID"
+        );
 
     }
 
@@ -4576,35 +6056,39 @@ tfoot td {
     ) {
 
         return String(
+
             value
+
             ??
+
             ""
+
         )
 
-        .replaceAll(
-            "&",
-            "&amp;"
-        )
+            .replaceAll(
+                "&",
+                "&amp;"
+            )
 
-        .replaceAll(
-            "<",
-            "&lt;"
-        )
+            .replaceAll(
+                "<",
+                "&lt;"
+            )
 
-        .replaceAll(
-            ">",
-            "&gt;"
-        )
+            .replaceAll(
+                ">",
+                "&gt;"
+            )
 
-        .replaceAll(
-            '"',
-            "&quot;"
-        )
+            .replaceAll(
+                '"',
+                "&quot;"
+            )
 
-        .replaceAll(
-            "'",
-            "&#039;"
-        );
+            .replaceAll(
+                "'",
+                "&#039;"
+            );
 
     }
 
@@ -4619,6 +6103,12 @@ tfoot td {
         message
     ) {
 
+        /*
+        ======================================================
+        FINOVA GLOBAL ERROR
+        ======================================================
+        */
+
         if (
             window.App?.showError
         ) {
@@ -4632,10 +6122,18 @@ tfoot td {
         }
 
 
+        /*
+        ======================================================
+        FALLBACK
+        ======================================================
+        */
+
         alert(
             message
         );
 
     }
+
+
 
 }
