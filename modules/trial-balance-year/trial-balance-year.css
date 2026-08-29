@@ -1,0 +1,1021 @@
+/*
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+MODULE  : TRIAL BALANCE YEAR
+FILE    : trial-balance-year.css
+VERSION : 2.1.0
+==========================================================
+*/
+
+
+/* ==========================================================
+   TRIAL BALANCE YEAR PAGE
+========================================================== */
+
+.trial-balance-page {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    width: 100%;
+
+}
+
+
+/* ==========================================================
+   PAGE HEADER
+   SAME AS ACCOUNT PAYABLE
+========================================================== */
+
+.trial-balance-page
+> .finova-page-header {
+
+    width: 100%;
+
+    margin-bottom: 8px !important;
+
+    flex-shrink: 0;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   PAGE HEADER RIGHT
+========================================================== */
+
+.trial-balance-page
+.finova-page-header-right {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+    gap: 8px;
+
+}
+
+
+/* ==========================================================
+   HEADER BUTTON
+========================================================== */
+
+.trial-balance-page
+.finova-page-header-right
+.btn {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    height: 38px;
+
+    min-height: 38px;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   FILTER CARD
+   SAME AS ACCOUNT PAYABLE
+========================================================== */
+
+.trial-balance-page
+> .trial-balance-filter-card {
+
+    width: 100% !important;
+
+    max-width: none !important;
+
+    margin: 0 !important;
+
+    flex: 0 0 auto;
+
+    box-sizing: border-box;
+
+    border-radius: 12px;
+
+}
+
+
+/* ==========================================================
+   FILTER CARD BODY
+   SAME AS ACCOUNT PAYABLE
+========================================================== */
+
+.trial-balance-filter-card
+> .finova-card-body {
+
+    width: 100%;
+
+    padding: 8px 20px 8px 20px !important;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   FILTER ROW
+========================================================== */
+
+.trial-balance-filter-card
+> .finova-card-body
+> .row {
+
+    width: 100% !important;
+
+    margin: 0 !important;
+
+    padding: 0 !important;
+
+    box-sizing: border-box;
+
+    align-items: end !important;
+
+}
+
+
+/* ==========================================================
+   FILTER COLUMN
+========================================================== */
+
+.trial-balance-filter-card
+> .finova-card-body
+> .row
+> [class*="col-"] {
+
+    min-width: 0;
+
+    margin: 0;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   FILTER LABEL
+   SAME AS ACCOUNT PAYABLE
+========================================================== */
+
+.trial-balance-filter-card
+.form-label {
+
+    display: block;
+
+    margin-top: 0 !important;
+
+    margin-bottom: 6px !important;
+
+    color: #1F2937;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    line-height: 1.2;
+
+    text-align: left;
+
+}
+
+
+/* ==========================================================
+   FILTER INPUT & SELECT
+   SAME AS ACCOUNT PAYABLE
+========================================================== */
+
+.trial-balance-filter-card
+.form-control,
+
+.trial-balance-filter-card
+.form-select {
+
+    width: 100%;
+
+    height: 46px !important;
+
+    min-height: 46px !important;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   FILTER INPUT GROUP
+   SAME AS ACCOUNT PAYABLE
+========================================================== */
+
+.trial-balance-filter-card
+.input-group {
+
+    display: flex !important;
+
+    flex-wrap: nowrap !important;
+
+    align-items: stretch;
+
+    width: 100% !important;
+
+    height: 46px !important;
+
+    margin: 0 !important;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   KEYWORD INPUT
+========================================================== */
+
+.trial-balance-filter-card
+.input-group
+#trial-balance-keyword {
+
+    flex: 1 1 auto !important;
+
+    width: 1% !important;
+
+    min-width: 0 !important;
+
+    height: 46px !important;
+
+    border-top-right-radius: 0 !important;
+
+    border-bottom-right-radius: 0 !important;
+
+}
+
+
+/* ==========================================================
+   FIND BUTTON
+   SAME AS ACCOUNT PAYABLE
+========================================================== */
+
+.trial-balance-filter-card
+.input-group
+#btn-find-trial-balance {
+
+    display: inline-flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    flex: 0 0 80px !important;
+
+    width: 80px !important;
+
+    min-width: 80px !important;
+
+    height: 46px !important;
+
+    padding: 0 12px !important;
+
+    white-space: nowrap;
+
+    border-top-left-radius: 0 !important;
+
+    border-bottom-left-radius: 0 !important;
+
+}
+
+
+/* ==========================================================
+   TABLE CARD
+========================================================== */
+
+.trial-balance-table-card {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    width: 100%;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   TABLE CARD BODY
+========================================================== */
+
+.trial-balance-table-card
+.finova-card-body {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    padding: 0 !important;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   TABLE CONTAINER
+========================================================== */
+
+.trial-balance-table-card
+.finova-table-container {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    width: 100%;
+
+    height: 100%;
+
+    min-height: 0;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   TABLE RESPONSIVE
+========================================================== */
+
+.trial-balance-table-card
+.finova-table-container
+.table-responsive {
+
+    display: block;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    width: 100%;
+
+    overflow-x: auto;
+
+    overflow-y: auto;
+
+}
+
+
+/* ==========================================================
+   TABLE
+========================================================== */
+
+.trial-balance-table {
+
+    width: max-content !important;
+
+    min-width: 100% !important;
+
+    margin: 0 !important;
+
+    table-layout: fixed;
+
+    vertical-align: middle;
+
+}
+
+
+/* ==========================================================
+   COLUMN WIDTH
+========================================================== */
+
+.trial-balance-table
+.tb-col-description {
+
+    width: 360px;
+
+    min-width: 360px;
+
+    max-width: 360px;
+
+}
+
+
+.trial-balance-table
+.tb-col-beginning {
+
+    width: 145px;
+
+    min-width: 145px;
+
+    max-width: 145px;
+
+}
+
+
+.trial-balance-table
+.tb-col-month {
+
+    width: 135px;
+
+    min-width: 135px;
+
+    max-width: 135px;
+
+}
+
+
+/* ==========================================================
+   TABLE HEADER
+========================================================== */
+
+.trial-balance-table
+thead
+th {
+
+    position: sticky;
+
+    top: 0;
+
+    z-index: 5;
+
+    vertical-align: middle !important;
+
+    white-space: nowrap;
+
+    font-size: 12px;
+
+    font-weight: 700 !important;
+
+    color: #111827 !important;
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION HEADER
+========================================================== */
+
+.trial-balance-table
+.tb-description-header {
+
+    text-align: left !important;
+
+}
+
+
+/* ==========================================================
+   PERIOD HEADER
+========================================================== */
+
+.trial-balance-table
+.tb-period-header {
+
+    text-align: right !important;
+
+}
+
+
+/* ==========================================================
+   TABLE BODY
+========================================================== */
+
+.trial-balance-table
+tbody
+td {
+
+    vertical-align: middle !important;
+
+    font-size: 12px;
+
+    color: #1F2937;
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION CELL
+========================================================== */
+
+.tb-description-cell {
+
+    position: relative;
+
+    text-align: left !important;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION TEXT
+========================================================== */
+
+.tb-description-text {
+
+    display: flex;
+
+    align-items: center;
+
+    min-width: 0;
+
+}
+
+
+/* ==========================================================
+   ACCOUNT CODE
+========================================================== */
+
+.tb-account-code {
+
+    flex: 0 0 auto;
+
+    font-weight: 600;
+
+}
+
+
+/* ==========================================================
+   ACCOUNT SEPARATOR
+========================================================== */
+
+.tb-account-separator {
+
+    display: inline-block;
+
+    flex: 0 0 auto;
+
+    margin: 0 5px;
+
+    color: #9CA3AF;
+
+}
+
+
+/* ==========================================================
+   ACCOUNT NAME
+========================================================== */
+
+.tb-account-name {
+
+    min-width: 0;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   HIERARCHY LEVEL 0
+========================================================== */
+
+.tb-level-0
+.tb-description-cell {
+
+    padding-left: 14px !important;
+
+}
+
+
+/* ==========================================================
+   HIERARCHY LEVEL 1
+========================================================== */
+
+.tb-level-1
+.tb-description-cell {
+
+    padding-left: 32px !important;
+
+}
+
+
+/* ==========================================================
+   HIERARCHY LEVEL 2
+========================================================== */
+
+.tb-level-2
+.tb-description-cell {
+
+    padding-left: 50px !important;
+
+}
+
+
+/* ==========================================================
+   HIERARCHY LEVEL 3
+========================================================== */
+
+.tb-level-3
+.tb-description-cell {
+
+    padding-left: 68px !important;
+
+}
+
+
+/* ==========================================================
+   HIERARCHY LEVEL 4
+========================================================== */
+
+.tb-level-4
+.tb-description-cell {
+
+    padding-left: 86px !important;
+
+}
+
+
+/* ==========================================================
+   HIERARCHY LEVEL 5
+========================================================== */
+
+.tb-level-5
+.tb-description-cell {
+
+    padding-left: 104px !important;
+
+}
+
+
+/* ==========================================================
+   ROOT / CATEGORY ROW
+========================================================== */
+
+.trial-balance-table
+.tb-root-row
+td {
+
+    background: #EEF2FF !important;
+
+    color: #1E3A8A !important;
+
+    font-weight: 700 !important;
+
+    border-top-width: 2px;
+
+}
+
+
+/* ==========================================================
+   ROOT DESCRIPTION
+========================================================== */
+
+.trial-balance-table
+.tb-root-row
+.tb-description-cell {
+
+    text-transform: uppercase;
+
+}
+
+
+/* ==========================================================
+   PARENT ROW
+========================================================== */
+
+.trial-balance-table
+.tb-parent-row
+td {
+
+    background: #F8FAFC;
+
+    font-weight: 600 !important;
+
+}
+
+
+/* ==========================================================
+   LEAF ROW
+========================================================== */
+
+.trial-balance-table
+.tb-leaf-row
+td {
+
+    background: #FFFFFF;
+
+    font-weight: 400;
+
+}
+
+
+/* ==========================================================
+   LEAF ROW HOVER
+========================================================== */
+
+.trial-balance-table
+.tb-leaf-row:hover
+td {
+
+    background: #F8FAFC;
+
+}
+
+
+/* ==========================================================
+   NUMBER
+========================================================== */
+
+.trial-balance-table
+.tb-number {
+
+    text-align: right !important;
+
+    vertical-align: middle !important;
+
+    white-space: nowrap;
+
+    font-variant-numeric: tabular-nums;
+
+}
+
+
+/* ==========================================================
+   ZERO
+========================================================== */
+
+.trial-balance-table
+.tb-zero {
+
+    color: #9CA3AF;
+
+}
+
+
+/* ==========================================================
+   NEGATIVE
+========================================================== */
+
+.trial-balance-table
+.tb-negative {
+
+    color: #B91C1C;
+
+}
+
+
+/* ==========================================================
+   TABLE FOOTER
+========================================================== */
+
+.trial-balance-table
+tfoot
+th {
+
+    position: sticky;
+
+    bottom: 0;
+
+    z-index: 6;
+
+    background: #EEF2FF !important;
+
+    color: #111827 !important;
+
+    font-size: 12px;
+
+    font-weight: 700 !important;
+
+    white-space: nowrap;
+
+    vertical-align: middle !important;
+
+}
+
+
+/* ==========================================================
+   TOTAL LABEL
+========================================================== */
+
+.trial-balance-table
+.tb-total-label {
+
+    text-align: right !important;
+
+}
+
+
+/* ==========================================================
+   PAGINATION WRAPPER
+========================================================== */
+
+.trial-balance-table-card
+.finova-table-container
+.finova-pagination-wrapper {
+
+    flex: 0 0 auto;
+
+    width: 100%;
+
+    margin-top: auto;
+
+}
+
+
+/* ==========================================================
+   PAGINATION LEFT
+========================================================== */
+
+.trial-balance-table-card
+.finova-pagination-left {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+}
+
+
+/* ==========================================================
+   PAGINATION LABEL
+========================================================== */
+
+.trial-balance-table-card
+.finova-pagination-label {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   PAGINATION TOTAL
+========================================================== */
+
+.trial-balance-table-card
+.finova-pagination-total {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    min-width: 18px;
+
+    margin-left: 2px;
+
+}
+
+
+/* ==========================================================
+   PAGINATION INFO
+========================================================== */
+
+.trial-balance-table-card
+.finova-pagination-info {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    margin-left: auto;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   TABLET
+   SAME AS ACCOUNT PAYABLE
+========================================================== */
+
+@media (max-width: 1200px) {
+
+    .trial-balance-filter-card
+    > .finova-card-body {
+
+        padding-left: 16px !important;
+
+        padding-right: 16px !important;
+
+    }
+
+
+    .trial-balance-table
+    .tb-col-description {
+
+        width: 320px;
+
+        min-width: 320px;
+
+        max-width: 320px;
+
+    }
+
+}
+
+
+/* ==========================================================
+   TABLET / SMALL SCREEN
+========================================================== */
+
+@media (max-width: 991.98px) {
+
+    .trial-balance-page
+    > .finova-page-header {
+
+        align-items: flex-start;
+
+    }
+
+
+    .trial-balance-page
+    .finova-page-header-right {
+
+        flex-wrap: wrap;
+
+        justify-content: flex-start;
+
+    }
+
+}
+
+
+/* ==========================================================
+   MOBILE
+   SAME FILTER STANDARD AS ACCOUNT PAYABLE
+========================================================== */
+
+@media (max-width: 768px) {
+
+    .trial-balance-filter-card
+    > .finova-card-body {
+
+        padding: 8px 16px !important;
+
+    }
+
+
+    .trial-balance-table {
+
+        min-width: 2125px !important;
+
+    }
+
+
+    .trial-balance-table-card
+    .finova-pagination-wrapper {
+
+        flex-wrap: wrap;
+
+        gap: 8px;
+
+    }
+
+
+    .trial-balance-table-card
+    .finova-pagination-info {
+
+        width: 100%;
+
+        margin-left: 0;
+
+        justify-content: flex-end;
+
+    }
+
+}
+/* ==========================================================
+   FUTURE PERIOD
+========================================================== */
+
+.trial-balance-table
+.tb-future-period {
+
+    background: #FAFAFA;
+
+    color: transparent;
+
+}
