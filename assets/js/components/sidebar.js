@@ -77,7 +77,7 @@ export class FinovaSidebar {
                 <div class="finova-sidebar-logo">
 
     <img
-    src="assets/images/brand/sidebar-logo.png.png"
+    src="assets/images/brand/sidebar-logo.png"
     alt="FINOVA"
     class="finova-sidebar-logo-image">
 
