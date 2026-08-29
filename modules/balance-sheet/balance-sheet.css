@@ -1,0 +1,1021 @@
+/*
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+MODULE  : BALANCE SHEET
+FILE    : balance-sheet.css
+VERSION : 2.1.0
+==========================================================
+*/
+
+
+/* ==========================================================
+   BALANCE SHEET PAGE
+========================================================== */
+
+.balance-sheet-page {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    width: 100%;
+
+}
+
+
+/* ==========================================================
+   PAGE HEADER
+   SAME AS ACCOUNT PAYABLE
+========================================================== */
+
+.balance-sheet-page
+> .finova-page-header {
+
+    width: 100%;
+
+    margin-bottom: 8px !important;
+
+    flex-shrink: 0;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   PAGE HEADER RIGHT
+========================================================== */
+
+.balance-sheet-page
+.finova-page-header-right {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+    gap: 8px;
+
+}
+
+
+/* ==========================================================
+   HEADER BUTTON
+========================================================== */
+
+.balance-sheet-page
+.finova-page-header-right
+.btn {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    height: 38px;
+
+    min-height: 38px;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   FILTER CARD
+   SAME AS ACCOUNT PAYABLE
+========================================================== */
+
+.balance-sheet-page
+> .balance-sheet-filter-card {
+
+    width: 100% !important;
+
+    max-width: none !important;
+
+    margin: 0 !important;
+
+    flex: 0 0 auto;
+
+    box-sizing: border-box;
+
+    border-radius: 12px;
+
+}
+
+
+/* ==========================================================
+   FILTER CARD BODY
+   SAME AS ACCOUNT PAYABLE
+========================================================== */
+
+.balance-sheet-filter-card
+> .finova-card-body {
+
+    width: 100%;
+
+    padding: 8px 20px 8px 20px !important;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   FILTER ROW
+========================================================== */
+
+.balance-sheet-filter-card
+> .finova-card-body
+> .row {
+
+    width: 100% !important;
+
+    margin: 0 !important;
+
+    padding: 0 !important;
+
+    box-sizing: border-box;
+
+    align-items: end !important;
+
+}
+
+
+/* ==========================================================
+   FILTER COLUMN
+========================================================== */
+
+.balance-sheet-filter-card
+> .finova-card-body
+> .row
+> [class*="col-"] {
+
+    min-width: 0;
+
+    margin: 0;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   FILTER LABEL
+   SAME AS ACCOUNT PAYABLE
+========================================================== */
+
+.balance-sheet-filter-card
+.form-label {
+
+    display: block;
+
+    margin-top: 0 !important;
+
+    margin-bottom: 6px !important;
+
+    color: #1F2937;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    line-height: 1.2;
+
+    text-align: left;
+
+}
+
+
+/* ==========================================================
+   FILTER INPUT & SELECT
+   SAME AS ACCOUNT PAYABLE
+========================================================== */
+
+.balance-sheet-filter-card
+.form-control,
+
+.balance-sheet-filter-card
+.form-select {
+
+    width: 100%;
+
+    height: 46px !important;
+
+    min-height: 46px !important;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   FILTER INPUT GROUP
+   SAME AS ACCOUNT PAYABLE
+========================================================== */
+
+.balance-sheet-filter-card
+.input-group {
+
+    display: flex !important;
+
+    flex-wrap: nowrap !important;
+
+    align-items: stretch;
+
+    width: 100% !important;
+
+    height: 46px !important;
+
+    margin: 0 !important;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   KEYWORD INPUT
+========================================================== */
+
+.balance-sheet-filter-card
+.input-group
+#balance-sheet-keyword {
+
+    flex: 1 1 auto !important;
+
+    width: 1% !important;
+
+    min-width: 0 !important;
+
+    height: 46px !important;
+
+    border-top-right-radius: 0 !important;
+
+    border-bottom-right-radius: 0 !important;
+
+}
+
+
+/* ==========================================================
+   FIND BUTTON
+   SAME AS ACCOUNT PAYABLE
+========================================================== */
+
+.balance-sheet-filter-card
+.input-group
+#btn-find-balance-sheet {
+
+    display: inline-flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    flex: 0 0 80px !important;
+
+    width: 80px !important;
+
+    min-width: 80px !important;
+
+    height: 46px !important;
+
+    padding: 0 12px !important;
+
+    white-space: nowrap;
+
+    border-top-left-radius: 0 !important;
+
+    border-bottom-left-radius: 0 !important;
+
+}
+
+
+/* ==========================================================
+   TABLE CARD
+========================================================== */
+
+.balance-sheet-table-card {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    width: 100%;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   TABLE CARD BODY
+========================================================== */
+
+.balance-sheet-table-card
+.finova-card-body {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    padding: 0 !important;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   TABLE CONTAINER
+========================================================== */
+
+.balance-sheet-table-card
+.finova-table-container {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    width: 100%;
+
+    height: 100%;
+
+    min-height: 0;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   TABLE RESPONSIVE
+========================================================== */
+
+.balance-sheet-table-card
+.finova-table-container
+.table-responsive {
+
+    display: block;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    width: 100%;
+
+    overflow-x: auto;
+
+    overflow-y: auto;
+
+}
+
+
+/* ==========================================================
+   TABLE
+========================================================== */
+
+.balance-sheet-table {
+
+    width: max-content !important;
+
+    min-width: 100% !important;
+
+    margin: 0 !important;
+
+    table-layout: fixed;
+
+    vertical-align: middle;
+
+}
+
+
+/* ==========================================================
+   COLUMN WIDTH
+========================================================== */
+
+.balance-sheet-table
+.bs-col-description {
+
+    width: 360px;
+
+    min-width: 360px;
+
+    max-width: 360px;
+
+}
+
+
+.balance-sheet-table
+.bs-col-beginning {
+
+    width: 145px;
+
+    min-width: 145px;
+
+    max-width: 145px;
+
+}
+
+
+.balance-sheet-table
+.bs-col-month {
+
+    width: 135px;
+
+    min-width: 135px;
+
+    max-width: 135px;
+
+}
+
+
+/* ==========================================================
+   TABLE HEADER
+========================================================== */
+
+.balance-sheet-table
+thead
+th {
+
+    position: sticky;
+
+    top: 0;
+
+    z-index: 5;
+
+    vertical-align: middle !important;
+
+    white-space: nowrap;
+
+    font-size: 12px;
+
+    font-weight: 700 !important;
+
+    color: #111827 !important;
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION HEADER
+========================================================== */
+
+.balance-sheet-table
+.bs-description-header {
+
+    text-align: left !important;
+
+}
+
+
+/* ==========================================================
+   PERIOD HEADER
+========================================================== */
+
+.balance-sheet-table
+.bs-period-header {
+
+    text-align: right !important;
+
+}
+
+
+/* ==========================================================
+   TABLE BODY
+========================================================== */
+
+.balance-sheet-table
+tbody
+td {
+
+    vertical-align: middle !important;
+
+    font-size: 12px;
+
+    color: #1F2937;
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION CELL
+========================================================== */
+
+.bs-description-cell {
+
+    position: relative;
+
+    text-align: left !important;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION TEXT
+========================================================== */
+
+.bs-description-text {
+
+    display: flex;
+
+    align-items: center;
+
+    min-width: 0;
+
+}
+
+
+/* ==========================================================
+   ACCOUNT CODE
+========================================================== */
+
+.bs-account-code {
+
+    flex: 0 0 auto;
+
+    font-weight: 600;
+
+}
+
+
+/* ==========================================================
+   ACCOUNT SEPARATOR
+========================================================== */
+
+.bs-account-separator {
+
+    display: inline-block;
+
+    flex: 0 0 auto;
+
+    margin: 0 5px;
+
+    color: #9CA3AF;
+
+}
+
+
+/* ==========================================================
+   ACCOUNT NAME
+========================================================== */
+
+.bs-account-name {
+
+    min-width: 0;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   HIERARCHY LEVEL 0
+========================================================== */
+
+.bs-level-0
+.bs-description-cell {
+
+    padding-left: 14px !important;
+
+}
+
+
+/* ==========================================================
+   HIERARCHY LEVEL 1
+========================================================== */
+
+.bs-level-1
+.bs-description-cell {
+
+    padding-left: 32px !important;
+
+}
+
+
+/* ==========================================================
+   HIERARCHY LEVEL 2
+========================================================== */
+
+.bs-level-2
+.bs-description-cell {
+
+    padding-left: 50px !important;
+
+}
+
+
+/* ==========================================================
+   HIERARCHY LEVEL 3
+========================================================== */
+
+.bs-level-3
+.bs-description-cell {
+
+    padding-left: 68px !important;
+
+}
+
+
+/* ==========================================================
+   HIERARCHY LEVEL 4
+========================================================== */
+
+.bs-level-4
+.bs-description-cell {
+
+    padding-left: 86px !important;
+
+}
+
+
+/* ==========================================================
+   HIERARCHY LEVEL 5
+========================================================== */
+
+.bs-level-5
+.bs-description-cell {
+
+    padding-left: 104px !important;
+
+}
+
+
+/* ==========================================================
+   ROOT / CATEGORY ROW
+========================================================== */
+
+.balance-sheet-table
+.bs-root-row
+td {
+
+    background: #EEF2FF !important;
+
+    color: #1E3A8A !important;
+
+    font-weight: 700 !important;
+
+    border-top-width: 2px;
+
+}
+
+
+/* ==========================================================
+   ROOT DESCRIPTION
+========================================================== */
+
+.balance-sheet-table
+.bs-root-row
+.bs-description-cell {
+
+    text-transform: uppercase;
+
+}
+
+
+/* ==========================================================
+   PARENT ROW
+========================================================== */
+
+.balance-sheet-table
+.bs-parent-row
+td {
+
+    background: #F8FAFC;
+
+    font-weight: 600 !important;
+
+}
+
+
+/* ==========================================================
+   LEAF ROW
+========================================================== */
+
+.balance-sheet-table
+.bs-leaf-row
+td {
+
+    background: #FFFFFF;
+
+    font-weight: 400;
+
+}
+
+
+/* ==========================================================
+   LEAF ROW HOVER
+========================================================== */
+
+.balance-sheet-table
+.bs-leaf-row:hover
+td {
+
+    background: #F8FAFC;
+
+}
+
+
+/* ==========================================================
+   NUMBER
+========================================================== */
+
+.balance-sheet-table
+.bs-number {
+
+    text-align: right !important;
+
+    vertical-align: middle !important;
+
+    white-space: nowrap;
+
+    font-variant-numeric: tabular-nums;
+
+}
+
+
+/* ==========================================================
+   ZERO
+========================================================== */
+
+.balance-sheet-table
+.bs-zero {
+
+    color: #9CA3AF;
+
+}
+
+
+/* ==========================================================
+   NEGATIVE
+========================================================== */
+
+.balance-sheet-table
+.bs-negative {
+
+    color: #B91C1C;
+
+}
+
+
+/* ==========================================================
+   TABLE FOOTER
+========================================================== */
+
+.balance-sheet-table
+tfoot
+th {
+
+    position: sticky;
+
+    bottom: 0;
+
+    z-index: 6;
+
+    background: #EEF2FF !important;
+
+    color: #111827 !important;
+
+    font-size: 12px;
+
+    font-weight: 700 !important;
+
+    white-space: nowrap;
+
+    vertical-align: middle !important;
+
+}
+
+
+/* ==========================================================
+   TOTAL LABEL
+========================================================== */
+
+.balance-sheet-table
+.bs-total-label {
+
+    text-align: right !important;
+
+}
+
+
+/* ==========================================================
+   PAGINATION WRAPPER
+========================================================== */
+
+.balance-sheet-table-card
+.finova-table-container
+.finova-pagination-wrapper {
+
+    flex: 0 0 auto;
+
+    width: 100%;
+
+    margin-top: auto;
+
+}
+
+
+/* ==========================================================
+   PAGINATION LEFT
+========================================================== */
+
+.balance-sheet-table-card
+.finova-pagination-left {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+}
+
+
+/* ==========================================================
+   PAGINATION LABEL
+========================================================== */
+
+.balance-sheet-table-card
+.finova-pagination-label {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   PAGINATION TOTAL
+========================================================== */
+
+.balance-sheet-table-card
+.finova-pagination-total {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    min-width: 18px;
+
+    margin-left: 2px;
+
+}
+
+
+/* ==========================================================
+   PAGINATION INFO
+========================================================== */
+
+.balance-sheet-table-card
+.finova-pagination-info {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    margin-left: auto;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   TABLET
+   SAME AS ACCOUNT PAYABLE
+========================================================== */
+
+@media (max-width: 1200px) {
+
+    .balance-sheet-filter-card
+    > .finova-card-body {
+
+        padding-left: 16px !important;
+
+        padding-right: 16px !important;
+
+    }
+
+
+    .balance-sheet-table
+    .bs-col-description {
+
+        width: 320px;
+
+        min-width: 320px;
+
+        max-width: 320px;
+
+    }
+
+}
+
+
+/* ==========================================================
+   TABLET / SMALL SCREEN
+========================================================== */
+
+@media (max-width: 991.98px) {
+
+    .balance-sheet-page
+    > .finova-page-header {
+
+        align-items: flex-start;
+
+    }
+
+
+    .balance-sheet-page
+    .finova-page-header-right {
+
+        flex-wrap: wrap;
+
+        justify-content: flex-start;
+
+    }
+
+}
+
+
+/* ==========================================================
+   MOBILE
+   SAME FILTER STANDARD AS ACCOUNT PAYABLE
+========================================================== */
+
+@media (max-width: 768px) {
+
+    .balance-sheet-filter-card
+    > .finova-card-body {
+
+        padding: 8px 16px !important;
+
+    }
+
+
+    .balance-sheet-table {
+
+        min-width: 2125px !important;
+
+    }
+
+
+    .balance-sheet-table-card
+    .finova-pagination-wrapper {
+
+        flex-wrap: wrap;
+
+        gap: 8px;
+
+    }
+
+
+    .balance-sheet-table-card
+    .finova-pagination-info {
+
+        width: 100%;
+
+        margin-left: 0;
+
+        justify-content: flex-end;
+
+    }
+
+}
+/* ==========================================================
+   FUTURE PERIOD
+========================================================== */
+
+.balance-sheet-table
+.bs-future-period {
+
+    background: #FAFAFA;
+
+    color: transparent;
+
+}

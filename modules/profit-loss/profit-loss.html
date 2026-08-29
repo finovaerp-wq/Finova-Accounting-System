@@ -1,0 +1,684 @@
+<!--
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+MODULE  : PROFIT & LOSS
+FILE    : profit-loss.html
+VERSION : 2.0.0
+==========================================================
+-->
+
+<div class="finova-page profit-loss-page">
+
+
+    <!-- ==================================================
+         PAGE HEADER
+    =================================================== -->
+
+    <div class="finova-page-header">
+
+
+        <!-- ==============================================
+             LEFT
+        =============================================== -->
+
+        <div class="finova-page-header-left">
+
+            <h1 class="finova-page-title">
+
+                Profit & Loss
+
+            </h1>
+
+            <p class="finova-page-subtitle">
+
+                Accounting / Profit & Loss
+
+            </p>
+
+        </div>
+
+
+        <!-- ==============================================
+             RIGHT
+        =============================================== -->
+
+        <div class="finova-page-header-right">
+
+
+            <!-- DOWNLOAD EXCEL -->
+
+            <button
+                type="button"
+                id="btn-download-excel-profit-loss"
+                class="btn btn-outline-success finova-btn">
+
+                <i class="fa-solid fa-file-excel"></i>
+
+                Download Excel
+
+            </button>
+
+
+            <!-- PREVIEW -->
+
+            <button
+                type="button"
+                id="btn-preview-html-profit-loss"
+                class="btn btn-outline-primary finova-btn">
+
+                <i class="fa-solid fa-print"></i>
+
+                Preview HTML
+
+            </button>
+
+
+            <!-- REFRESH -->
+
+            <button
+                type="button"
+                id="btn-refresh-profit-loss"
+                class="btn btn-outline-secondary finova-btn">
+
+                <i class="fa-solid fa-rotate"></i>
+
+                Refresh
+
+            </button>
+
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         FILTER
+    =================================================== -->
+
+    <div
+        class="
+            finova-card
+            profit-loss-filter-card
+            mb-1
+        ">
+
+        <div class="finova-card-body">
+
+            <div class="row g-3 align-items-end">
+
+
+                <!-- ======================================
+                     FISCAL YEAR
+                ======================================= -->
+
+                <div class="col-md-2">
+
+                    <label
+                        for="profit-loss"
+                        class="form-label">
+
+                        Fiscal Year
+
+                    </label>
+
+                    <select
+                        id="profit-loss"
+                        class="form-select finova-control">
+                    </select>
+
+                </div>
+
+
+                <!-- ======================================
+                     ACCOUNT
+                ======================================= -->
+
+                <div class="col-md-4">
+
+                    <label
+                        for="profit-loss-account"
+                        class="form-label">
+
+                        Account
+
+                    </label>
+
+                    <select
+                        id="profit-loss-account"
+                        class="form-select finova-control">
+
+                        <option value="">
+
+                            Show All Accounts
+
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- ======================================
+                     KEYWORD
+                ======================================= -->
+
+                <div class="col-md-6">
+
+                    <label
+                        for="profit-loss-keyword"
+                        class="form-label">
+
+                        Keyword
+
+                    </label>
+
+                    <div class="input-group">
+
+                        <input
+                            type="text"
+                            id="profit-loss-keyword"
+                            class="form-control finova-control"
+                            placeholder="Search Account Code or Account Name...">
+
+                        <button
+                            type="button"
+                            id="btn-find-profit-loss"
+                            class="btn btn-primary">
+
+                            <i class="fa-solid fa-magnifying-glass me-1"></i>
+
+                            Find
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         TABLE CARD
+    =================================================== -->
+
+    <div
+        class="
+            finova-card
+            finova-table-card
+            profit-loss-table-card
+        ">
+
+        <div class="finova-card-body no-padding">
+
+            <div class="finova-table-container">
+
+
+                <!-- ======================================
+                     TABLE SCROLL
+                ======================================= -->
+
+                <div class="table-responsive">
+
+                    <table
+                        id="profit-loss-table"
+                        class="
+                            table
+                            finova-table
+                            table-hover
+                            align-middle
+                            mb-0
+                            profit-loss-table
+                        ">
+
+
+                        <!-- ==================================
+                             COLUMN
+                        =================================== -->
+
+                        <colgroup>
+
+                            <col class="pl-col-description">
+
+                            <col class="pl-col-beginning">
+
+                            <col class="pl-col-month">
+                            <col class="pl-col-month">
+                            <col class="pl-col-month">
+                            <col class="pl-col-month">
+                            <col class="pl-col-month">
+                            <col class="pl-col-month">
+
+                            <col class="pl-col-month">
+                            <col class="pl-col-month">
+                            <col class="pl-col-month">
+                            <col class="pl-col-month">
+                            <col class="pl-col-month">
+                            <col class="pl-col-month">
+
+                        </colgroup>
+
+
+                        <!-- ==================================
+                             HEADER
+                        =================================== -->
+
+                        <thead>
+
+                            <tr>
+
+                                <th
+                                    class="
+                                        finova-table-name
+                                        pl-description-header
+                                    ">
+
+                                    Description
+
+                                </th>
+
+
+                                <th
+                                    class="
+                                        finova-table-number
+                                        pl-period-header
+                                    ">
+
+                                    Beginning Year
+
+                                </th>
+
+
+                                <th
+                                    id="pl-month-header-1"
+                                    class="finova-table-number pl-period-header">
+
+                                    Jan
+
+                                </th>
+
+
+                                <th
+                                    id="pl-month-header-2"
+                                    class="finova-table-number pl-period-header">
+
+                                    Feb
+
+                                </th>
+
+
+                                <th
+                                    id="pl-month-header-3"
+                                    class="finova-table-number pl-period-header">
+
+                                    Mar
+
+                                </th>
+
+
+                                <th
+                                    id="pl-month-header-4"
+                                    class="finova-table-number pl-period-header">
+
+                                    Apr
+
+                                </th>
+
+
+                                <th
+                                    id="pl-month-header-5"
+                                    class="finova-table-number pl-period-header">
+
+                                    May
+
+                                </th>
+
+
+                                <th
+                                    id="pl-month-header-6"
+                                    class="finova-table-number pl-period-header">
+
+                                    Jun
+
+                                </th>
+
+
+                                <th
+                                    id="pl-month-header-7"
+                                    class="finova-table-number pl-period-header">
+
+                                    Jul
+
+                                </th>
+
+
+                                <th
+                                    id="pl-month-header-8"
+                                    class="finova-table-number pl-period-header">
+
+                                    Aug
+
+                                </th>
+
+
+                                <th
+                                    id="pl-month-header-9"
+                                    class="finova-table-number pl-period-header">
+
+                                    Sep
+
+                                </th>
+
+
+                                <th
+                                    id="pl-month-header-10"
+                                    class="finova-table-number pl-period-header">
+
+                                    Oct
+
+                                </th>
+
+
+                                <th
+                                    id="pl-month-header-11"
+                                    class="finova-table-number pl-period-header">
+
+                                    Nov
+
+                                </th>
+
+
+                                <th
+                                    id="pl-month-header-12"
+                                    class="finova-table-number pl-period-header">
+
+                                    Dec
+
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <!-- ==================================
+                             BODY
+                        =================================== -->
+
+                        <tbody id="profit-loss-tbody">
+
+                        </tbody>
+
+
+                        <!-- ==================================
+                             TOTAL
+                        =================================== -->
+
+                        <tfoot>
+
+                            <tr>
+
+                                <th class="pl-total-label">
+
+                                    TOTAL NET BALANCE
+
+                                </th>
+
+
+                                <th
+                                    id="pl-total-beginning"
+                                    class="finova-table-number">
+
+                                    0
+
+                                </th>
+
+
+                                <th
+                                    id="pl-total-month-1"
+                                    class="finova-table-number">
+
+                                    0
+
+                                </th>
+
+
+                                <th
+                                    id="pl-total-month-2"
+                                    class="finova-table-number">
+
+                                    0
+
+                                </th>
+
+
+                                <th
+                                    id="pl-total-month-3"
+                                    class="finova-table-number">
+
+                                    0
+
+                                </th>
+
+
+                                <th
+                                    id="pl-total-month-4"
+                                    class="finova-table-number">
+
+                                    0
+
+                                </th>
+
+
+                                <th
+                                    id="pl-total-month-5"
+                                    class="finova-table-number">
+
+                                    0
+
+                                </th>
+
+
+                                <th
+                                    id="pl-total-month-6"
+                                    class="finova-table-number">
+
+                                    0
+
+                                </th>
+
+
+                                <th
+                                    id="pl-total-month-7"
+                                    class="finova-table-number">
+
+                                    0
+
+                                </th>
+
+
+                                <th
+                                    id="pl-total-month-8"
+                                    class="finova-table-number">
+
+                                    0
+
+                                </th>
+
+
+                                <th
+                                    id="pl-total-month-9"
+                                    class="finova-table-number">
+
+                                    0
+
+                                </th>
+
+
+                                <th
+                                    id="pl-total-month-10"
+                                    class="finova-table-number">
+
+                                    0
+
+                                </th>
+
+
+                                <th
+                                    id="pl-total-month-11"
+                                    class="finova-table-number">
+
+                                    0
+
+                                </th>
+
+
+                                <th
+                                    id="pl-total-month-12"
+                                    class="finova-table-number">
+
+                                    0
+
+                                </th>
+
+                            </tr>
+
+                        </tfoot>
+
+                    </table>
+
+                </div>
+
+
+                <!-- ==================================================
+                     PAGINATION
+                =================================================== -->
+
+                <div class="finova-pagination-wrapper">
+
+
+                    <div class="finova-pagination-left">
+
+
+                        <!-- FIRST -->
+
+                        <button
+                            type="button"
+                            id="profit-loss-page-first"
+                            class="finova-pagination-btn"
+                            title="First Page"
+                            disabled>
+
+                            <i class="fa-solid fa-angles-left"></i>
+
+                        </button>
+
+
+                        <!-- PREVIOUS -->
+
+                        <button
+                            type="button"
+                            id="profit-loss-page-prev"
+                            class="finova-pagination-btn"
+                            title="Previous Page"
+                            disabled>
+
+                            <i class="fa-solid fa-angle-left"></i>
+
+                        </button>
+
+
+                        <span class="finova-pagination-label">
+
+                            Page
+
+                        </span>
+
+
+                        <!-- CURRENT PAGE -->
+
+                        <input
+                            type="number"
+                            id="profit-loss-current-page"
+                            class="finova-pagination-input"
+                            value="1"
+                            min="1"
+                            step="1"
+                            autocomplete="off">
+
+
+                        <span class="finova-pagination-label">
+
+                            of
+
+                        </span>
+
+
+                        <span
+                            id="profit-loss-total-pages"
+                            class="finova-pagination-total">
+
+                            1
+
+                        </span>
+
+
+                        <!-- NEXT -->
+
+                        <button
+                            type="button"
+                            id="profit-loss-page-next"
+                            class="finova-pagination-btn"
+                            title="Next Page"
+                            disabled>
+
+                            <i class="fa-solid fa-angle-right"></i>
+
+                        </button>
+
+
+                        <!-- LAST -->
+
+                        <button
+                            type="button"
+                            id="profit-loss-page-last"
+                            class="finova-pagination-btn"
+                            title="Last Page"
+                            disabled>
+
+                            <i class="fa-solid fa-angles-right"></i>
+
+                        </button>
+
+
+                    </div>
+
+
+                    <!-- ======================================
+                         RECORD INFORMATION
+                    ======================================= -->
+
+                    <div
+                        id="profit-loss-record-info"
+                        class="finova-pagination-info">
+
+                        Displaying Record 0 - 0 of 0
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

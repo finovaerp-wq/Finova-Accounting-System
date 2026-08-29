@@ -782,7 +782,7 @@ async init() {
     }
 
 
-  /*
+ /*
 ==========================================================
 LOAD DATA
 ==========================================================
@@ -806,7 +806,7 @@ async loadData(
 
         /*
         ======================================================
-        LOADING
+        SHOW TABLE LOADING
         ======================================================
         */
 
@@ -853,13 +853,21 @@ async loadData(
         }
 
 
+        /*
+        ======================================================
+        NORMALIZE SOURCE
+        ======================================================
+        */
+
         const source =
 
             Array.isArray(result)
 
                 ? result
 
-                : Array.isArray(result?.data)
+                : Array.isArray(
+                    result?.data
+                )
 
                     ? result.data
 
@@ -893,9 +901,6 @@ async loadData(
         /*
         ======================================================
         TEMP DATA
-
-        IMPORTANT:
-        Jangan langsung push ke this.data selama async loop.
         ======================================================
         */
 
@@ -1016,7 +1021,7 @@ async loadData(
 
             /*
             ==================================================
-            NORMALIZE
+            NORMALIZE ROW
             ==================================================
             */
 
@@ -1026,13 +1031,19 @@ async loadData(
                     ...row,
 
                     account_holder:
-                        bankInfo.account_holder,
+                        bankInfo?.account_holder
+                        ??
+                        "",
 
                     bank_name:
-                        bankInfo.bank_name,
+                        bankInfo?.bank_name
+                        ??
+                        "",
 
                     bank_account:
-                        bankInfo.bank_account
+                        bankInfo?.bank_account
+                        ??
+                        ""
 
                 });
 
@@ -1062,7 +1073,7 @@ async loadData(
 
         /*
         ======================================================
-        FINAL CHECK
+        FINAL OLD LOAD CHECK
         ======================================================
         */
 
@@ -1077,9 +1088,7 @@ async loadData(
 
         /*
         ======================================================
-        SET DATA ONCE
-
-        Jangan update this.data sedikit-sedikit.
+        SET FINAL DATA
         ======================================================
         */
 
@@ -1097,12 +1106,18 @@ async loadData(
 
         /*
         ======================================================
-        FILTER / RENDER
+        APPLY FILTER + RENDER
         ======================================================
         */
 
         this.applyFilter();
 
+
+        /*
+        ======================================================
+        DEBUG
+        ======================================================
+        */
 
         console.log(
             "AGING PAYABLE FINAL ROW COUNT:",
@@ -1115,7 +1130,7 @@ async loadData(
 
         /*
         ======================================================
-        IGNORE ERROR FROM OLD LOAD
+        IGNORE OLD LOAD ERROR
         ======================================================
         */
 
@@ -1134,6 +1149,12 @@ async loadData(
         );
 
 
+        /*
+        ======================================================
+        RESET DATA
+        ======================================================
+        */
+
         this.data =
             [];
 
@@ -1146,8 +1167,20 @@ async loadData(
             1;
 
 
+        /*
+        ======================================================
+        RENDER EMPTY TABLE
+        ======================================================
+        */
+
         this.refreshView();
 
+
+        /*
+        ======================================================
+        SHOW ERROR
+        ======================================================
+        */
 
         this.showError(
 
@@ -3817,211 +3850,90 @@ async getVendorBankInfo(
     }
 
 
+   /*
+==========================================================
+SHOW TABLE LOADING
+==========================================================
+*/
+
+showTableLoading() {
+
+    if (
+        !this.tableBody
+    ) {
+
+        return;
+
+    }
+
+
     /*
-    ==========================================================
-    SHOW TABLE LOADING
-    ==========================================================
+    ======================================================
+    TABLE LOADING
+    SAME STYLE AS ACCOUNT PAYABLE
+    ======================================================
     */
 
-    showTableLoading() {
+    this.tableBody.innerHTML = `
 
-        if (
-            !this.tableBody
-        ) {
+        <tr>
 
-            return;
+            <td
+                colspan="20"
+                class="text-center py-5"
+            >
 
-        }
-
-
-        /*
-        ======================================================
-        TABLE LOADING
-        ======================================================
-        */
-
-        this.tableBody.innerHTML = `
-
-            <tr>
-
-                <td
-                    colspan="20"
-                    class="text-center py-5">
+                <div
+                    class="
+                        d-flex
+                        flex-column
+                        align-items-center
+                        justify-content-center
+                        gap-2
+                    "
+                >
 
                     <div
                         class="
-                            d-flex
-                            flex-column
-                            align-items-center
-                            justify-content-center
-                            gap-2
-                        ">
+                            spinner-border
+                            spinner-border-sm
+                            text-primary
+                        "
+                        role="status"
+                    >
 
-                        <div
-                            class="
-                                spinner-border
-                                spinner-border-sm
-                                text-primary
-                            "
-                            role="status">
+                        <span
+                            class="visually-hidden"
+                        >
 
-                            <span class="visually-hidden">
-                                Loading...
-                            </span>
+                            Loading...
 
-                        </div>
-
-
-                        <div
-                            class="
-                                small
-                                text-muted
-                            ">
-
-                            Loading Aging Payable...
-
-                        </div>
+                        </span>
 
                     </div>
 
-                </td>
 
-            </tr>
+                    <div
+                        class="
+                            text-muted
+                            small
+                        "
+                    >
 
-        `;
+                        Loading Aging Payable...
 
-
-        /*
-        ======================================================
-        RESET TOTAL
-        ======================================================
-        */
-
-        const totalElements = [
-
-            this.totalOutstanding,
-
-            this.totalCurrent,
-
-            this.total1to30,
-
-            this.total31to60,
-
-            this.total61to90,
-
-            this.total90plus,
-
-            this.totalAmount,
-
-            this.totalBeforeTax,
-
-            this.totalTaxPlus,
-
-            this.totalTaxMinus
-
-        ];
+                    </div>
 
 
-        totalElements.forEach(
+                </div>
 
-            element => {
+            </td>
 
-                if (
-                    element
-                ) {
+        </tr>
 
-                    element.textContent =
-                        "0";
+    `;
 
-                }
-
-            }
-
-        );
-
-
-        /*
-        ======================================================
-        RESET PAGINATION DISPLAY
-        ======================================================
-        */
-
-        if (
-            this.currentPageInput
-        ) {
-
-            this.currentPageInput.value =
-                1;
-
-        }
-
-
-        if (
-            this.totalPagesLabel
-        ) {
-
-            this.totalPagesLabel.textContent =
-                "1";
-
-        }
-
-
-        if (
-            this.displayRecord
-        ) {
-
-            this.displayRecord.textContent =
-                "Loading data...";
-
-        }
-
-
-        /*
-        ======================================================
-        DISABLE PAGINATION
-        ======================================================
-        */
-
-        if (
-            this.btnFirst
-        ) {
-
-            this.btnFirst.disabled =
-                true;
-
-        }
-
-
-        if (
-            this.btnPrev
-        ) {
-
-            this.btnPrev.disabled =
-                true;
-
-        }
-
-
-        if (
-            this.btnNext
-        ) {
-
-            this.btnNext.disabled =
-                true;
-
-        }
-
-
-        if (
-            this.btnLast
-        ) {
-
-            this.btnLast.disabled =
-                true;
-
-        }
-
-    }
+}
         /*
     ==========================================================
     PREVIEW HTML
