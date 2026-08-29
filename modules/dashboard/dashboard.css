@@ -1,343 +1,390 @@
 /*
-===========================================
+==========================================================
 FINOVA ACCOUNTING SYSTEM
-Dashboard
-Version : 1.0.0
-===========================================
+Module  : Dashboard
+Version : 2.0.0 Executive Summary
+==========================================================
 */
 
-
-/* ===========================================
-   DASHBOARD
-=========================================== */
-
-.finova-dashboard {
-
-    width:100%;
-
+.dashboard-page {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    min-height: 0;
 }
 
-
-/* ===========================================
-   WELCOME CARD
-=========================================== */
-
-.finova-dashboard-welcome {
-
-    margin-top:var(--space-md);
-
-    margin-bottom:var(--space-lg);
-
-    padding:var(--space-xl);
-
-    background:linear-gradient(
-        135deg,
-        var(--primary),
-        #1D4ED8
-    );
-
-    border-radius:var(--radius-lg);
-
-    color:#FFFFFF;
-
-    box-shadow:var(--shadow-md);
-
+.dashboard-page-header {
+    margin-bottom: 0;
+    align-items: center;
 }
 
-
-.finova-dashboard-welcome-content h3 {
-
-    margin-bottom:var(--space-sm);
-
-    color:#FFFFFF;
-
-    font-size:var(--font-size-xxl);
-
-    font-weight:var(--font-weight-bold);
-
+.dashboard-header-meta {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
 }
 
-
-.finova-dashboard-welcome-content p {
-
-    margin:0;
-
-    color:rgba(255,255,255,.90);
-
-    font-size:var(--font-size-md);
-
+.dashboard-period-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: 0 13px;
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 8px;
+    color: #6B7280;
+    font-size: 12px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .03);
 }
 
+.dashboard-period-chip i { color: var(--primary); }
+.dashboard-period-chip strong { color: #111827; font-weight: 600; }
 
+/* ========================================================
+   WELCOME
+======================================================== */
+.dashboard-welcome-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    min-height: 128px;
+    padding: 24px 28px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #173A77 0%, #244494 55%, #315BB8 100%);
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(36, 68, 148, .16);
+    color: #FFFFFF;
+}
 
-/* ===========================================
-   SUMMARY CARD
-=========================================== */
+.dashboard-welcome-card::after {
+    content: "";
+    position: absolute;
+    width: 220px;
+    height: 220px;
+    right: -60px;
+    top: -110px;
+    border: 42px solid rgba(255,255,255,.06);
+    border-radius: 50%;
+}
 
-.finova-summary-card {
+.dashboard-welcome-copy,
+.dashboard-welcome-date { position: relative; z-index: 1; }
 
+.dashboard-welcome-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 7px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .8px;
+    opacity: .85;
+}
+
+.dashboard-welcome-copy h3 {
+    margin: 0 0 5px;
+    color: #FFFFFF;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.dashboard-welcome-copy p {
+    max-width: 720px;
+    margin: 0;
+    color: rgba(255,255,255,.84);
+    font-size: 12px;
+    line-height: 1.65;
+}
+
+.dashboard-welcome-date {
+    min-width: 190px;
+    padding: 13px 16px;
+    border: 1px solid rgba(255,255,255,.16);
+    border-radius: 8px;
+    background: rgba(255,255,255,.09);
+    backdrop-filter: blur(5px);
+}
+
+.dashboard-welcome-date span,
+.dashboard-welcome-date strong { display: block; }
+.dashboard-welcome-date span { margin-bottom: 3px; font-size: 10px; opacity: .75; text-transform: uppercase; letter-spacing: .6px; }
+.dashboard-welcome-date strong { font-size: 12px; font-weight: 600; }
+
+/* ========================================================
+   KPI
+======================================================== */
+.dashboard-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.dashboard-kpi-card {
+    min-width: 0;
+    padding: 17px 17px 15px;
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 9px;
+    box-shadow: 0 2px 7px rgba(15,23,42,.04);
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.dashboard-kpi-card:hover {
+    transform: translateY(-2px);
+    border-color: #D7DDE8;
+    box-shadow: 0 7px 18px rgba(15,23,42,.07);
+}
+
+.dashboard-kpi-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.dashboard-kpi-label { display: block; color: #374151; font-size: 11px; font-weight: 600; }
+.dashboard-kpi-head small { display: block; margin-top: 2px; color: #9CA3AF; font-size: 9px; }
+
+.dashboard-kpi-icon,
+.dashboard-mini-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    border-radius: 8px;
+}
+
+.dashboard-kpi-icon { width: 34px; height: 34px; font-size: 13px; }
+.dashboard-kpi-icon.is-blue, .dashboard-mini-icon.is-blue { color: #2563EB; background: #EFF6FF; }
+.dashboard-kpi-icon.is-red, .dashboard-mini-icon.is-red { color: #DC2626; background: #FEF2F2; }
+.dashboard-kpi-icon.is-purple, .dashboard-mini-icon.is-purple { color: #7C3AED; background: #F5F3FF; }
+.dashboard-kpi-icon.is-green, .dashboard-mini-icon.is-green { color: #059669; background: #ECFDF5; }
+.dashboard-kpi-icon.is-cyan { color: #0891B2; background: #ECFEFF; }
+
+.dashboard-kpi-value {
+    margin-top: 18px;
+    color: #111827;
+    font-size: 20px;
+    line-height: 1.2;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dashboard-kpi-foot {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 10px;
+    color: #059669;
+    font-size: 9.5px;
+    font-weight: 500;
+}
+.dashboard-kpi-foot.is-negative { color: #DC2626; }
+.dashboard-kpi-foot.is-neutral { color: #9CA3AF; }
+
+/* ========================================================
+   PANEL BASE
+======================================================== */
+.dashboard-section-grid {
+    display: grid;
+    gap: 14px;
+}
+
+.dashboard-trend-section { grid-template-columns: minmax(0, 2.1fr) minmax(280px, .9fr); }
+.dashboard-summary-section { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+.dashboard-panel {
+    min-width: 0;
+    background: #FFFFFF;
+    border: 1px solid #E5E7EB;
+    border-radius: 9px;
+    box-shadow: 0 2px 7px rgba(15,23,42,.035);
+    overflow: hidden;
+}
+
+.dashboard-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    min-height: 66px;
+    padding: 14px 17px;
+    border-bottom: 1px solid #EEF0F3;
+}
+
+.dashboard-panel-header h5 { margin: 0; color: #111827; font-size: 13px; font-weight: 650; }
+.dashboard-panel-header p { margin: 3px 0 0; color: #9CA3AF; font-size: 9.5px; }
+
+.dashboard-panel-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 31px;
+    height: 31px;
+    flex: 0 0 31px;
+    border-radius: 8px;
+    background: #F4F7FB;
+    color: #52627A;
+    font-size: 12px;
+}
+
+.dashboard-panel-body { padding: 17px; }
+
+/* ========================================================
+   CHART
+======================================================== */
+.dashboard-chart-legend { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.dashboard-chart-legend span { display: flex; align-items: center; gap: 5px; color: #6B7280; font-size: 9px; }
+.legend-dot { width: 7px; height: 7px; border-radius: 50%; }
+.legend-dot.revenue { background: #315BB8; }
+.legend-dot.expense { background: #EF6B6B; }
+.legend-dot.profit { background: #3BA272; }
+
+.dashboard-chart-body { height: 260px; padding: 16px 18px 13px; }
+.dashboard-chart-area { position: relative; width: 100%; height: 100%; }
+.dashboard-chart-svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.dashboard-chart-grid { stroke: #EEF1F5; stroke-width: 1; }
+.dashboard-chart-line-revenue { fill: none; stroke: #315BB8; stroke-width: 2.1; }
+.dashboard-chart-line-expense { fill: none; stroke: #EF6B6B; stroke-width: 2.1; }
+.dashboard-chart-line-profit { fill: none; stroke: #3BA272; stroke-width: 2.1; }
+.dashboard-chart-point-revenue { fill: #315BB8; }
+.dashboard-chart-point-expense { fill: #EF6B6B; }
+.dashboard-chart-point-profit { fill: #3BA272; }
+.dashboard-chart-label { fill: #9CA3AF; font-family: Poppins, sans-serif; font-size: 8px; }
+.dashboard-chart-empty { display:flex; height:100%; align-items:center; justify-content:center; color:#9CA3AF; font-size:11px; }
+
+/* ========================================================
+   POSITION / DONUT
+======================================================== */
+.dashboard-position-panel .dashboard-panel-body { display: flex; flex-direction: column; align-items: center; }
+.dashboard-donut-wrap { display: flex; align-items: center; justify-content: center; min-height: 148px; }
+.dashboard-donut {
+    position: relative;
+    width: 126px;
+    height: 126px;
+    border-radius: 50%;
+    background: conic-gradient(#315BB8 0deg 120deg, #EF6B6B 120deg 235deg, #7C3AED 235deg 360deg);
+}
+.dashboard-donut::after {
+    content:"";
+    position:absolute;
+    inset:17px;
+    border-radius:50%;
+    background:#FFFFFF;
+}
+.dashboard-donut-center {
+    position:absolute;
+    z-index:2;
+    inset:0;
     display:flex;
-
+    flex-direction:column;
     align-items:center;
-
-    gap:var(--space-md);
-
-    padding:var(--space-lg);
-
-    background:var(--card-bg);
-
-    border-radius:var(--radius-lg);
-
-    box-shadow:var(--shadow-sm);
-
-    transition:all var(--transition-fast);
-
-    cursor:default;
-
-}
-
-
-.finova-summary-card:hover {
-
-    transform:translateY(-4px);
-
-    box-shadow:var(--shadow-md);
-
-}
-
-
-
-/* ===========================================
-   SUMMARY ICON
-=========================================== */
-
-.finova-summary-icon {
-
-    display:flex;
-
-    align-items:center;
-
     justify-content:center;
-
-    width:54px;
-
-    height:54px;
-
-    border-radius:14px;
-
-    background:#EFF6FF;
-
-    color:#2563EB;
-
-    font-size:22px;
-
-    flex-shrink:0;
-
-    transition:all .25s ease;
-
+    text-align:center;
 }
-
-
-.finova-summary-card:hover
-.finova-summary-icon {
-
-    background:#2563EB;
-
-    color:#FFFFFF;
-
-    transform:rotate(-8deg);
-
-}
-
-
-
-/* ===========================================
-   SUMMARY CONTENT
-=========================================== */
-
-.finova-summary-content {
-
-    flex:1;
-
-}
-
-
-.finova-summary-content span {
-
-    display:block;
-
-    color:var(--text-secondary);
-
-    font-size:var(--font-size-sm);
-
-    margin-bottom:4px;
-
-}
-
-
-.finova-summary-content h3 {
-
-    margin:0;
-
-    color:var(--text-primary);
-
-    font-size:28px;
-
-    font-weight:var(--font-weight-bold);
-
-}
-
-
-
-/* ===========================================
-   SYSTEM INFORMATION
-=========================================== */
-
-.finova-system-info {
-
-    display:flex;
-
-    flex-direction:column;
-
-    gap:2px;
-
-}
-
-
-.finova-system-item {
-
-    padding:8px 0;
-
-}
-
-
-.finova-system-label {
-
-    margin-bottom:6px;
-
-    font-size:12px;
-
-    font-weight:600;
-
-    color:#6B7280;
-
-    text-transform:uppercase;
-
-    letter-spacing:.5px;
-
-}
-
-
-.finova-system-value {
-
-    display:flex;
-
-    flex-direction:column;
-
-    gap:4px;
-
-    font-size:14px;
-
-    color:#111827;
-
-}
-
-
-
-/* ===========================================
-   SYSTEM DATE
-=========================================== */
-
-.finova-system-date {
-
-    font-size:14px;
-
-    font-weight:600;
-
-    color:#111827;
-
-}
-
-
-
-/* ===========================================
-   SYSTEM TIME
-=========================================== */
-
-.finova-system-time {
-
-    font-size:20px;
-
-    font-weight:700;
-
-    color:var(--primary);
-
-    letter-spacing:.5px;
-
-}
-
-
-.finova-system-info hr {
-
-    margin:4px 0;
-
-    border:0;
-
-    border-top:1px solid #ECEFF3;
-
-}
-
-
-
-/* ===========================================
+.dashboard-donut-center span { color:#9CA3AF; font-size:8px; }
+.dashboard-donut-center strong { max-width:82px; margin-top:2px; color:#111827; font-size:11px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+.dashboard-position-list { width: 100%; margin-top: 5px; }
+.dashboard-position-item { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:7px 0; border-top:1px solid #F0F2F5; font-size:10px; }
+.dashboard-position-item span { display:flex; align-items:center; gap:7px; color:#6B7280; }
+.dashboard-position-item strong { color:#374151; font-size:10px; font-weight:600; }
+.position-dot { width:7px; height:7px; border-radius:2px; }
+.position-dot.asset { background:#315BB8; }
+.position-dot.liability { background:#EF6B6B; }
+.position-dot.equity { background:#7C3AED; }
+
+/* ========================================================
+   SUMMARY / INSIGHTS
+======================================================== */
+.dashboard-summary-list { padding-top: 10px; padding-bottom: 10px; }
+.dashboard-summary-row { display:flex; align-items:center; justify-content:space-between; gap:16px; min-height:38px; border-bottom:1px solid #F1F3F5; }
+.dashboard-summary-row:last-child { border-bottom:0; }
+.dashboard-summary-row span { color:#6B7280; font-size:10px; }
+.dashboard-summary-row strong { color:#111827; font-size:10.5px; font-weight:600; text-align:right; }
+.dashboard-summary-row.dashboard-summary-total span,
+.dashboard-summary-row.dashboard-summary-total strong { color:#244494; font-weight:700; }
+
+.dashboard-insight-list { display:flex; flex-direction:column; gap:9px; }
+.dashboard-insight-item { display:flex; gap:10px; padding:10px; border-radius:7px; background:#F8FAFC; }
+.dashboard-insight-icon { display:flex; align-items:center; justify-content:center; width:25px; height:25px; flex:0 0 25px; border-radius:6px; }
+.dashboard-insight-item.is-info .dashboard-insight-icon { background:#EFF6FF; color:#2563EB; }
+.dashboard-insight-item.is-warning .dashboard-insight-icon { background:#FFF7ED; color:#EA580C; }
+.dashboard-insight-item.is-danger .dashboard-insight-icon { background:#FEF2F2; color:#DC2626; }
+.dashboard-insight-item.is-success .dashboard-insight-icon { background:#ECFDF5; color:#059669; }
+.dashboard-insight-item strong { display:block; margin-bottom:2px; color:#374151; font-size:9.5px; font-weight:600; }
+.dashboard-insight-item span { display:block; color:#8B95A5; font-size:8.5px; line-height:1.5; }
+
+/* ========================================================
+   OPERATIONAL SNAPSHOT
+======================================================== */
+.dashboard-operational-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; }
+.dashboard-mini-card { display:flex; align-items:center; gap:12px; min-width:0; padding:14px 15px; background:#FFFFFF; border:1px solid #E5E7EB; border-radius:9px; box-shadow:0 2px 6px rgba(15,23,42,.03); }
+.dashboard-mini-icon { width:38px; height:38px; font-size:14px; }
+.dashboard-mini-card > div:last-child { min-width:0; }
+.dashboard-mini-card span { display:block; color:#6B7280; font-size:9.5px; }
+.dashboard-mini-card strong { display:block; margin-top:2px; color:#111827; font-size:13px; font-weight:650; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dashboard-mini-card small { display:block; margin-top:2px; color:#9CA3AF; font-size:8px; }
+
+/* ========================================================
+   BOTTOM
+======================================================== */
+.dashboard-bottom-grid { display:grid; grid-template-columns:minmax(0,2.2fr) minmax(270px,.8fr); gap:14px; }
+.dashboard-table-body { padding:0; }
+.dashboard-activity-table { width:100%; font-size:9.5px; }
+.dashboard-activity-table thead th { padding:10px 12px; background:#FAFBFC; border-bottom:1px solid #E8EBEF; color:#64748B; font-size:8.5px; font-weight:600; white-space:nowrap; }
+.dashboard-activity-table tbody td { padding:10px 12px; color:#475569; border-color:#F0F2F5; vertical-align:middle; }
+.dashboard-empty-state { height:116px; text-align:center !important; color:#9CA3AF !important; }
+.dashboard-empty-state i { display:block; margin-bottom:7px; font-size:19px; color:#CBD5E1; }
+.dashboard-status-badge { display:inline-flex; align-items:center; justify-content:center; min-width:54px; min-height:20px; padding:2px 7px; border-radius:999px; font-size:8px; font-weight:600; }
+.dashboard-status-badge.posted, .dashboard-status-badge.paid { color:#047857; background:#ECFDF5; }
+.dashboard-status-badge.draft { color:#B45309; background:#FFFBEB; }
+.dashboard-status-badge.void { color:#B91C1C; background:#FEF2F2; }
+
+.dashboard-system-list { display:flex; flex-direction:column; padding-top:8px; padding-bottom:8px; }
+.dashboard-system-item { display:flex; align-items:center; gap:11px; min-height:52px; border-bottom:1px solid #F0F2F5; }
+.dashboard-system-item:last-child { border-bottom:0; }
+.dashboard-system-icon { display:flex; align-items:center; justify-content:center; width:30px; height:30px; flex:0 0 30px; border-radius:7px; background:#F5F7FA; color:#52627A; font-size:11px; }
+.dashboard-system-item span { display:block; color:#9CA3AF; font-size:8.5px; }
+.dashboard-system-item strong { display:block; margin-top:2px; color:#374151; font-size:10px; font-weight:600; }
+
+/* ========================================================
    RESPONSIVE
-=========================================== */
-
-@media (max-width:992px) {
-
-
-    .finova-dashboard-welcome {
-
-        padding:var(--space-lg);
-
-    }
-
-
-    .finova-dashboard-welcome-content h3 {
-
-        font-size:var(--font-size-xl);
-
-    }
-
-
-    .finova-summary-card {
-
-        margin-bottom:var(--space-md);
-
-    }
-
-
+======================================================== */
+@media (max-width: 1399.98px) {
+    .dashboard-kpi-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
 }
 
+@media (max-width: 1199.98px) {
+    .dashboard-summary-section { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .dashboard-summary-section .dashboard-panel:last-child { grid-column:1 / -1; }
+    .dashboard-operational-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
 
+@media (max-width: 991.98px) {
+    .dashboard-page-header { align-items:flex-start; }
+    .dashboard-trend-section,
+    .dashboard-bottom-grid { grid-template-columns:1fr; }
+    .dashboard-kpi-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
 
-@media (max-width:768px) {
+@media (max-width: 767.98px) {
+    .dashboard-welcome-card { align-items:flex-start; flex-direction:column; padding:20px; }
+    .dashboard-welcome-date { min-width:0; width:100%; }
+    .dashboard-summary-section,
+    .dashboard-operational-grid { grid-template-columns:1fr; }
+    .dashboard-summary-section .dashboard-panel:last-child { grid-column:auto; }
+}
 
-
-    .finova-summary-card {
-
-        flex-direction:column;
-
-        text-align:center;
-
-    }
-
-
-    .finova-summary-content {
-
-        text-align:center;
-
-    }
-
-
+@media (max-width: 575.98px) {
+    .dashboard-kpi-grid { grid-template-columns:1fr; }
+    .dashboard-header-meta { width:100%; justify-content:flex-start; margin-top:8px; }
+    .dashboard-period-chip { width:100%; }
+    .dashboard-chart-legend { display:none; }
+    .dashboard-chart-body { height:220px; }
 }

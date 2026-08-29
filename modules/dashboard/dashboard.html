@@ -1,346 +1,465 @@
 <!--
-===========================================
+==========================================================
 FINOVA ACCOUNTING SYSTEM
-Dashboard Module
-Version : 1.0.0
-===========================================
+Module  : Dashboard
+Version : 2.0.0 Executive Summary
+==========================================================
 -->
 
-<div class="finova-page">
+<div class="finova-page dashboard-page">
 
-    <!-- ==========================================
+    <!-- ======================================================
          PAGE HEADER
-    =========================================== -->
-
-    <div class="finova-page-header">
+    ======================================================= -->
+    <div class="finova-page-header dashboard-page-header">
 
         <div>
-
-            <h2 class="finova-page-title">
-                Dashboard
-            </h2>
-
-            <p>
-                Welcome to FINOVA Accounting System
+            <h2 class="finova-page-title">Dashboard</h2>
+            <p class="finova-page-subtitle mb-0">
+                Executive financial summary and accounting overview
             </p>
+        </div>
 
+        <div class="dashboard-header-meta">
+            <div class="dashboard-period-chip">
+                <i class="fa-regular fa-calendar"></i>
+                <span>Period</span>
+                <strong id="dashboard-period-label">Current Period</strong>
+            </div>
         </div>
 
     </div>
 
-    <!-- ==========================================
-         WELCOME CARD
-    =========================================== -->
+    <!-- ======================================================
+         WELCOME / EXECUTIVE HEADER
+    ======================================================= -->
+    <section class="dashboard-welcome-card">
 
-    <div class="finova-dashboard-welcome">
+        <div class="dashboard-welcome-copy">
+            <div class="dashboard-welcome-eyebrow">
+                <i class="fa-solid fa-chart-line"></i>
+                FINANCIAL OVERVIEW
+            </div>
 
-        <div class="finova-dashboard-welcome-content">
-
-            <h3>
-                Welcome Back, Administrator
-            </h3>
+            <h3>Executive Summary</h3>
 
             <p>
-
-                Monitor your accounting activities,
-                financial transactions and reports
-                from one dashboard.
-
+                Monitor financial position, performance, outstanding balances,
+                and recent accounting activity from one dashboard.
             </p>
-
         </div>
 
-    </div>
+        <div class="dashboard-welcome-date">
+            <span>Today</span>
+            <strong id="dashboard-header-date">-</strong>
+        </div>
 
-    <!-- ==========================================
-         SUMMARY
-    =========================================== -->
+    </section>
 
-    <div class="row g-4 mt-1">
+    <!-- ======================================================
+         KPI SUMMARY
+    ======================================================= -->
+    <section class="dashboard-kpi-grid">
 
-        <!-- AP -->
+        <article class="dashboard-kpi-card">
+            <div class="dashboard-kpi-head">
+                <div>
+                    <span class="dashboard-kpi-label">Total Asset</span>
+                    <small>Financial Position</small>
+                </div>
+                <div class="dashboard-kpi-icon is-blue">
+                    <i class="fa-solid fa-building-columns"></i>
+                </div>
+            </div>
+            <div class="dashboard-kpi-value" id="dashboard-total-asset">Rp 0</div>
+            <div class="dashboard-kpi-foot is-neutral">
+                <i class="fa-solid fa-circle-info"></i>
+                Balance Sheet
+            </div>
+        </article>
 
-<div class="col-xl-3 col-lg-6">
+        <article class="dashboard-kpi-card">
+            <div class="dashboard-kpi-head">
+                <div>
+                    <span class="dashboard-kpi-label">Total Liability</span>
+                    <small>Financial Position</small>
+                </div>
+                <div class="dashboard-kpi-icon is-red">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                </div>
+            </div>
+            <div class="dashboard-kpi-value" id="dashboard-total-liability">Rp 0</div>
+            <div class="dashboard-kpi-foot is-neutral">
+                <i class="fa-solid fa-circle-info"></i>
+                Balance Sheet
+            </div>
+        </article>
 
-    <div class="finova-summary-card">
+        <article class="dashboard-kpi-card">
+            <div class="dashboard-kpi-head">
+                <div>
+                    <span class="dashboard-kpi-label">Equity</span>
+                    <small>Financial Position</small>
+                </div>
+                <div class="dashboard-kpi-icon is-purple">
+                    <i class="fa-solid fa-scale-balanced"></i>
+                </div>
+            </div>
+            <div class="dashboard-kpi-value" id="dashboard-equity">Rp 0</div>
+            <div class="dashboard-kpi-foot is-neutral">
+                <i class="fa-solid fa-circle-info"></i>
+                Balance Sheet
+            </div>
+        </article>
 
-        <div class="finova-summary-top">
+        <article class="dashboard-kpi-card">
+            <div class="dashboard-kpi-head">
+                <div>
+                    <span class="dashboard-kpi-label">Net Profit (YTD)</span>
+                    <small>Performance</small>
+                </div>
+                <div class="dashboard-kpi-icon is-green">
+                    <i class="fa-solid fa-arrow-trend-up"></i>
+                </div>
+            </div>
+            <div class="dashboard-kpi-value" id="dashboard-net-profit">Rp 0</div>
+            <div class="dashboard-kpi-foot" id="dashboard-net-profit-status">
+                <i class="fa-solid fa-minus"></i>
+                No movement
+            </div>
+        </article>
 
-            <div class="finova-summary-icon">
+        <article class="dashboard-kpi-card">
+            <div class="dashboard-kpi-head">
+                <div>
+                    <span class="dashboard-kpi-label">Net Margin</span>
+                    <small>Profitability</small>
+                </div>
+                <div class="dashboard-kpi-icon is-cyan">
+                    <i class="fa-solid fa-percent"></i>
+                </div>
+            </div>
+            <div class="dashboard-kpi-value" id="dashboard-net-margin">0,00%</div>
+            <div class="dashboard-kpi-foot is-neutral">
+                <i class="fa-solid fa-chart-pie"></i>
+                Revenue based
+            </div>
+        </article>
 
+    </section>
+
+    <!-- ======================================================
+         PERFORMANCE TREND
+    ======================================================= -->
+    <section class="dashboard-section-grid dashboard-trend-section">
+
+        <article class="dashboard-panel dashboard-trend-panel">
+
+            <div class="dashboard-panel-header">
+                <div>
+                    <h5>Financial Performance Trend</h5>
+                    <p>Revenue, expense, and profit movement by month</p>
+                </div>
+
+                <div class="dashboard-chart-legend">
+                    <span><i class="legend-dot revenue"></i>Revenue</span>
+                    <span><i class="legend-dot expense"></i>Expense</span>
+                    <span><i class="legend-dot profit"></i>Profit</span>
+                </div>
+            </div>
+
+            <div class="dashboard-panel-body dashboard-chart-body">
+                <div class="dashboard-chart-area" id="dashboard-performance-chart"></div>
+            </div>
+
+        </article>
+
+        <article class="dashboard-panel dashboard-position-panel">
+
+            <div class="dashboard-panel-header">
+                <div>
+                    <h5>Financial Position</h5>
+                    <p>Balance Sheet composition</p>
+                </div>
+                <div class="dashboard-panel-icon">
+                    <i class="fa-solid fa-chart-pie"></i>
+                </div>
+            </div>
+
+            <div class="dashboard-panel-body">
+
+                <div class="dashboard-donut-wrap">
+                    <div class="dashboard-donut" id="dashboard-position-donut">
+                        <div class="dashboard-donut-center">
+                            <span>Total Asset</span>
+                            <strong id="dashboard-donut-total">Rp 0</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-position-list">
+                    <div class="dashboard-position-item">
+                        <span><i class="position-dot asset"></i>Asset</span>
+                        <strong id="dashboard-position-asset">Rp 0</strong>
+                    </div>
+                    <div class="dashboard-position-item">
+                        <span><i class="position-dot liability"></i>Liability</span>
+                        <strong id="dashboard-position-liability">Rp 0</strong>
+                    </div>
+                    <div class="dashboard-position-item">
+                        <span><i class="position-dot equity"></i>Equity</span>
+                        <strong id="dashboard-position-equity">Rp 0</strong>
+                    </div>
+                </div>
+
+            </div>
+
+        </article>
+
+    </section>
+
+    <!-- ======================================================
+         ACCOUNTING SUMMARY
+    ======================================================= -->
+    <section class="dashboard-section-grid dashboard-summary-section">
+
+        <article class="dashboard-panel">
+            <div class="dashboard-panel-header">
+                <div>
+                    <h5>Balance Sheet Summary</h5>
+                    <p>Current financial position</p>
+                </div>
+                <div class="dashboard-panel-icon">
+                    <i class="fa-solid fa-scale-balanced"></i>
+                </div>
+            </div>
+
+            <div class="dashboard-panel-body dashboard-summary-list">
+                <div class="dashboard-summary-row">
+                    <span>Total Asset</span>
+                    <strong id="dashboard-bs-asset">Rp 0</strong>
+                </div>
+                <div class="dashboard-summary-row">
+                    <span>Total Liability</span>
+                    <strong id="dashboard-bs-liability">Rp 0</strong>
+                </div>
+                <div class="dashboard-summary-row">
+                    <span>Equity</span>
+                    <strong id="dashboard-bs-equity">Rp 0</strong>
+                </div>
+                <div class="dashboard-summary-row dashboard-summary-total">
+                    <span>Balance Difference</span>
+                    <strong id="dashboard-bs-difference">Rp 0</strong>
+                </div>
+            </div>
+        </article>
+
+        <article class="dashboard-panel">
+            <div class="dashboard-panel-header">
+                <div>
+                    <h5>Profit &amp; Loss Summary</h5>
+                    <p>Year-to-date performance</p>
+                </div>
+                <div class="dashboard-panel-icon">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+            </div>
+
+            <div class="dashboard-panel-body dashboard-summary-list">
+                <div class="dashboard-summary-row">
+                    <span>Revenue</span>
+                    <strong id="dashboard-pl-revenue">Rp 0</strong>
+                </div>
+                <div class="dashboard-summary-row">
+                    <span>Expense</span>
+                    <strong id="dashboard-pl-expense">Rp 0</strong>
+                </div>
+                <div class="dashboard-summary-row dashboard-summary-total">
+                    <span>Net Profit</span>
+                    <strong id="dashboard-pl-profit">Rp 0</strong>
+                </div>
+                <div class="dashboard-summary-row">
+                    <span>Net Margin</span>
+                    <strong id="dashboard-pl-margin">0,00%</strong>
+                </div>
+            </div>
+        </article>
+
+        <article class="dashboard-panel">
+            <div class="dashboard-panel-header">
+                <div>
+                    <h5>Quick Insights</h5>
+                    <p>Items requiring attention</p>
+                </div>
+                <div class="dashboard-panel-icon">
+                    <i class="fa-regular fa-lightbulb"></i>
+                </div>
+            </div>
+
+            <div class="dashboard-panel-body dashboard-insight-list" id="dashboard-insight-list">
+                <div class="dashboard-insight-item is-info">
+                    <div class="dashboard-insight-icon">
+                        <i class="fa-solid fa-circle-info"></i>
+                    </div>
+                    <div>
+                        <strong>Dashboard ready</strong>
+                        <span>Financial insights will appear when accounting data is loaded.</span>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+    </section>
+
+    <!-- ======================================================
+         OPERATIONAL SNAPSHOT
+    ======================================================= -->
+    <section class="dashboard-operational-grid">
+
+        <article class="dashboard-mini-card">
+            <div class="dashboard-mini-icon is-blue">
+                <i class="fa-solid fa-money-check-dollar"></i>
+            </div>
+            <div>
+                <span>Account Receivable</span>
+                <strong id="dashboard-ar-outstanding">Rp 0</strong>
+                <small id="dashboard-ar-overdue">0 overdue</small>
+            </div>
+        </article>
+
+        <article class="dashboard-mini-card">
+            <div class="dashboard-mini-icon is-red">
                 <i class="fa-solid fa-file-invoice-dollar"></i>
+            </div>
+            <div>
+                <span>Account Payable</span>
+                <strong id="dashboard-ap-outstanding">Rp 0</strong>
+                <small id="dashboard-ap-overdue">0 overdue</small>
+            </div>
+        </article>
 
+        <article class="dashboard-mini-card">
+            <div class="dashboard-mini-icon is-purple">
+                <i class="fa-solid fa-book-open"></i>
+            </div>
+            <div>
+                <span>Draft Journal</span>
+                <strong id="dashboard-draft-journal">0</strong>
+                <small>Waiting for posting</small>
+            </div>
+        </article>
+
+        <article class="dashboard-mini-card">
+            <div class="dashboard-mini-icon is-green">
+                <i class="fa-solid fa-users"></i>
+            </div>
+            <div>
+                <span>Active Business Partner</span>
+                <strong id="dashboard-active-bp">0</strong>
+                <small>Customer, Vendor, Employee</small>
+            </div>
+        </article>
+
+    </section>
+
+    <!-- ======================================================
+         RECENT ACTIVITY + SYSTEM INFO
+    ======================================================= -->
+    <section class="dashboard-bottom-grid">
+
+        <article class="dashboard-panel dashboard-activity-panel">
+            <div class="dashboard-panel-header">
+                <div>
+                    <h5>Recent Financial Activity</h5>
+                    <p>Latest transactions across accounting modules</p>
+                </div>
+                <div class="dashboard-panel-icon">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                </div>
             </div>
 
-            <div class="finova-summary-title">
+            <div class="dashboard-panel-body dashboard-table-body">
+                <div class="table-responsive">
+                    <table class="table dashboard-activity-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Module</th>
+                                <th>Document</th>
+                                <th>Description</th>
+                                <th class="text-end">Amount</th>
+                                <th class="text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashboard-activity-tbody">
+                            <tr>
+                                <td colspan="6" class="dashboard-empty-state">
+                                    <i class="fa-regular fa-folder-open"></i>
+                                    <span>No recent financial activity.</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </article>
 
-                Account Payable
-
+        <article class="dashboard-panel dashboard-system-panel">
+            <div class="dashboard-panel-header">
+                <div>
+                    <h5>System Information</h5>
+                    <p>Current accounting environment</p>
+                </div>
+                <div class="dashboard-panel-icon">
+                    <i class="fa-solid fa-gear"></i>
+                </div>
             </div>
 
-        </div>
+            <div class="dashboard-panel-body dashboard-system-list">
 
-        <div class="finova-summary-number">
+                <div class="dashboard-system-item">
+                    <div class="dashboard-system-icon">
+                        <i class="fa-regular fa-clock"></i>
+                    </div>
+                    <div>
+                        <span>Current Time</span>
+                        <strong id="dashboard-current-time">-</strong>
+                    </div>
+                </div>
 
-            0
+                <div class="dashboard-system-item">
+                    <div class="dashboard-system-icon">
+                        <i class="fa-regular fa-calendar-check"></i>
+                    </div>
+                    <div>
+                        <span>Financial Period</span>
+                        <strong id="dashboard-period">Current Period</strong>
+                    </div>
+                </div>
 
-        </div>
+                <div class="dashboard-system-item">
+                    <div class="dashboard-system-icon">
+                        <i class="fa-solid fa-building"></i>
+                    </div>
+                    <div>
+                        <span>Branch</span>
+                        <strong id="dashboard-branch">-</strong>
+                    </div>
+                </div>
 
-        <div class="finova-summary-status">
+                <div class="dashboard-system-item">
+                    <div class="dashboard-system-icon">
+                        <i class="fa-solid fa-coins"></i>
+                    </div>
+                    <div>
+                        <span>Default Currency</span>
+                        <strong id="dashboard-currency">IDR</strong>
+                    </div>
+                </div>
 
-            Outstanding Invoice
+            </div>
+        </article>
 
-        </div>
-
-    </div>
+    </section>
 
 </div>
-
-        <!-- AR -->
-
-        <div class="col-xl-3 col-lg-6">
-
-            <div class="finova-summary-card">
-
-                <div class="finova-summary-icon">
-
-                    <i class="fa-solid fa-money-check-dollar"></i>
-
-                </div>
-
-                <div class="finova-summary-content">
-
-                    <span>
-
-                        Account Receivable
-
-                    </span>
-
-                    <h3>
-
-                        0
-
-                    </h3>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- JOURNAL -->
-
-        <div class="col-xl-3 col-lg-6">
-
-            <div class="finova-summary-card">
-
-                <div class="finova-summary-icon">
-
-                    <i class="fa-solid fa-book-open"></i>
-
-                </div>
-
-                <div class="finova-summary-content">
-
-                    <span>
-
-                        GL Journal
-
-                    </span>
-
-                    <h3>
-
-                        0
-
-                    </h3>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- BP -->
-
-        <div class="col-xl-3 col-lg-6">
-
-            <div class="finova-summary-card">
-
-                <div class="finova-summary-icon">
-
-                    <i class="fa-solid fa-users"></i>
-
-                </div>
-
-                <div class="finova-summary-content">
-
-                    <span>
-
-                        Business Partner
-
-                    </span>
-
-                    <h3>
-
-                        0
-
-                    </h3>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <!-- ==========================================
-         CONTENT
-    =========================================== -->
-
-    <div class="row mt-4">
-
-        <!-- Recent Activity -->
-
-        <div class="col-lg-8">
-
-            <div class="finova-card">
-
-                <div class="finova-card-header">
-
-                    <h5>
-
-                        Recent Activity
-
-                    </h5>
-
-                </div>
-
-                <div class="finova-card-body">
-
-                    <p>
-
-                        No activity available.
-
-                    </p>
-
-                </div>
-
-            </div>
-
-        </div>
-
-                <!-- ==========================================
-             SYSTEM INFORMATION
-        =========================================== -->
-
-        <div class="col-lg-4">
-
-            <div class="finova-card">
-
-                <div class="finova-card-header">
-
-                    <h5>
-
-                        System Information
-
-                    </h5>
-
-                </div>
-
-                <div class="finova-card-body">
-
-                    <div class="finova-system-info">
-
-                        <!-- TODAY -->
-
-                        <div class="finova-system-item">
-
-                            <div class="finova-system-label">
-
-                                🕒 Today
-
-                            </div>
-
-                            <div
-                                id="dashboard-current-time"
-                                class="finova-system-value">
-
-                                Loading...
-
-                            </div>
-
-                        </div>
-
-                        <hr>
-
-                        <!-- FINANCIAL PERIOD -->
-
-                        <div class="finova-system-item">
-
-                            <div class="finova-system-label">
-
-                                📅 Active Financial Period
-
-                            </div>
-
-                            <div
-                                class="finova-system-value"
-                                id="dashboard-period">
-
-                                Loading...
-
-                            </div>
-
-                        </div>
-
-                        <hr>
-
-                        <!-- BRANCH -->
-
-                        <div class="finova-system-item">
-
-                            <div class="finova-system-label">
-
-                                🏢 Branch
-
-                            </div>
-
-                            <div
-                                class="finova-system-value"
-                                id="dashboard-branch">
-
-                                Loading...
-
-                            </div>
-
-                        </div>
-
-                        <hr>
-
-                        <!-- CURRENCY -->
-
-                        <div class="finova-system-item">
-
-                            <div class="finova-system-label">
-
-                                💰 Default Currency
-
-                            </div>
-
-                            <div
-                                class="finova-system-value"
-                                id="dashboard-currency">
-
-                                Loading...
-
-                            </div>
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
