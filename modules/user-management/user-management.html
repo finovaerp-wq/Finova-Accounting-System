@@ -1,0 +1,478 @@
+<!--
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+MODULE  : USER MANAGEMENT
+FILE    : user-management.html
+VERSION : 2.0.0 FINAL
+==========================================================
+-->
+
+<div class="finova-page user-management-page">
+
+    <!-- ==================================================
+         PAGE HEADER
+    =================================================== -->
+    <div class="finova-page-header">
+
+        <div class="finova-page-header-left">
+            <h1 class="finova-page-title">User Management</h1>
+            <p class="finova-page-subtitle">
+                Master Data / User Management
+            </p>
+        </div>
+
+        <div class="finova-page-header-right">
+
+            <button
+                type="button"
+                id="btn-add-user"
+                class="btn btn-primary finova-btn d-none">
+                <i class="fa-solid fa-user-plus me-1"></i>
+                Add User
+            </button>
+
+            <button
+                type="button"
+                id="btn-refresh-user"
+                class="btn btn-outline-secondary finova-btn">
+                <i class="fa-solid fa-rotate me-1"></i>
+                Refresh
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         ACCESS INFO
+    =================================================== -->
+    <div
+        id="user-access-info"
+        class="user-access-info d-none"
+        role="status">
+    </div>
+
+
+    <!-- ==================================================
+         FILTER CARD
+    =================================================== -->
+    <div class="finova-card user-management-filter-card mb-2">
+
+        <div class="finova-card-body">
+
+            <div class="row g-3 align-items-end">
+
+                <div class="col-md-5">
+                    <label
+                        for="user-search-keyword"
+                        class="form-label">
+                        Search
+                    </label>
+
+                    <input
+                        type="text"
+                        id="user-search-keyword"
+                        class="form-control finova-control"
+                        placeholder="Search Full Name or Email...">
+                </div>
+
+                <div class="col-md-2">
+                    <label
+                        for="user-filter-role"
+                        class="form-label">
+                        Role
+                    </label>
+
+                    <select
+                        id="user-filter-role"
+                        class="form-select finova-control">
+                        <option value="all">All Role</option>
+                        <option value="Manager">Manager</option>
+                        <option value="Staff">Staff</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label
+                        for="user-filter-status"
+                        class="form-label">
+                        Status
+                    </label>
+
+                    <select
+                        id="user-filter-status"
+                        class="form-select finova-control">
+                        <option value="all">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <button
+                        type="button"
+                        id="btn-find-user"
+                        class="btn btn-primary finova-btn w-100">
+                        <i class="fa-solid fa-magnifying-glass me-1"></i>
+                        Search
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         TABLE CARD
+    =================================================== -->
+    <div class="finova-card finova-table-card user-management-table-card">
+
+        <div class="finova-card-body no-padding">
+
+            <div class="finova-table-container">
+
+                <div class="table-responsive">
+
+                    <table
+                        id="user-management-table"
+                        class="table finova-table table-hover align-middle mb-0">
+
+                        <thead>
+                            <tr>
+                                <th class="finova-table-index um-col-no">No</th>
+                                <th class="finova-table-name um-col-name">Full Name</th>
+                                <th class="finova-table-name um-col-email">Email</th>
+                                <th class="finova-table-status um-col-role">Role</th>
+                                <th class="finova-table-status um-col-status">Status</th>
+                                <th class="finova-table-date um-col-updated">Last Updated</th>
+                                <th class="finova-table-action um-col-action">Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="user-management-tbody">
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-5">
+                                    Loading User Management...
+                                </td>
+                            </tr>
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <!-- ==========================================
+                     GLOBAL PAGINATION
+                =========================================== -->
+                <div class="finova-pagination-wrapper">
+
+                    <div class="finova-pagination-left">
+
+                        <button
+                            type="button"
+                            id="user-page-first"
+                            class="finova-pagination-btn"
+                            title="First Page"
+                            disabled>
+                            <i class="fa-solid fa-angles-left"></i>
+                        </button>
+
+                        <button
+                            type="button"
+                            id="user-page-prev"
+                            class="finova-pagination-btn"
+                            title="Previous Page"
+                            disabled>
+                            <i class="fa-solid fa-angle-left"></i>
+                        </button>
+
+                        <span class="finova-pagination-label">Page</span>
+
+                        <input
+                            type="number"
+                            id="user-current-page"
+                            class="finova-pagination-input"
+                            value="1"
+                            min="1"
+                            step="1"
+                            autocomplete="off">
+
+                        <span class="finova-pagination-label">of</span>
+
+                        <span
+                            id="user-total-pages"
+                            class="finova-pagination-total">
+                            1
+                        </span>
+
+                        <button
+                            type="button"
+                            id="user-page-next"
+                            class="finova-pagination-btn"
+                            title="Next Page"
+                            disabled>
+                            <i class="fa-solid fa-angle-right"></i>
+                        </button>
+
+                        <button
+                            type="button"
+                            id="user-page-last"
+                            class="finova-pagination-btn"
+                            title="Last Page"
+                            disabled>
+                            <i class="fa-solid fa-angles-right"></i>
+                        </button>
+
+                    </div>
+
+                    <div
+                        id="user-record-info"
+                        class="finova-pagination-info">
+                        Displaying Record 0 - 0 of 0
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ==========================================================
+     ADD / EDIT / VIEW USER MODAL
+========================================================== -->
+<div
+    class="modal fade"
+    id="user-management-modal"
+    tabindex="-1"
+    data-bs-backdrop="static"
+    data-bs-keyboard="false">
+
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5
+                    class="modal-title"
+                    id="user-management-modal-title">
+                    User Information
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close">
+                </button>
+            </div>
+
+            <div class="modal-body">
+
+                <form id="user-management-form" autocomplete="off">
+
+                    <input type="hidden" id="user-id">
+                    <input type="hidden" id="user-uid">
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <label
+                                for="user-full-name"
+                                class="form-label">
+                                Full Name
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <input
+                                type="text"
+                                id="user-full-name"
+                                class="form-control finova-control"
+                                maxlength="150"
+                                required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label
+                                for="user-email"
+                                class="form-label">
+                                Email
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <input
+                                type="email"
+                                id="user-email"
+                                class="form-control finova-control"
+                                maxlength="255"
+                                required>
+                        </div>
+
+                        <div
+                            id="user-password-column"
+                            class="col-md-6">
+                            <label
+                                for="user-password"
+                                class="form-label">
+                                Temporary Password
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <input
+                                type="password"
+                                id="user-password"
+                                class="form-control finova-control"
+                                minlength="8"
+                                autocomplete="new-password">
+
+                            <div class="form-text">
+                                Minimum 8 characters. Used only when creating a new user.
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label
+                                for="user-role"
+                                class="form-label">
+                                Role
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <select
+                                id="user-role"
+                                class="form-select finova-control"
+                                required>
+                                <option value="Staff">Staff</option>
+                                <option value="Manager">Manager</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label d-block">
+                                Status
+                            </label>
+
+                            <div class="form-check form-switch user-status-switch">
+                                <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    role="switch"
+                                    id="user-status"
+                                    checked>
+
+                                <label
+                                    class="form-check-label"
+                                    for="user-status">
+                                    Active
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal">
+                    Close
+                </button>
+
+                <button
+                    type="button"
+                    id="btn-save-user"
+                    class="btn btn-primary d-none">
+                    <i class="fa-solid fa-floppy-disk me-1"></i>
+                    Save
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ==========================================================
+     DELETE CONFIRMATION MODAL
+========================================================== -->
+<div
+    class="modal fade"
+    id="user-delete-modal"
+    tabindex="-1"
+    data-bs-backdrop="static"
+    data-bs-keyboard="false">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Delete User</h5>
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close">
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <p class="mb-2">
+                    Are you sure you want to delete this user?
+                </p>
+
+                <div class="user-delete-information">
+                    <div>
+                        <strong>Name:</strong>
+                        <span id="delete-user-name">-</span>
+                    </div>
+                    <div>
+                        <strong>Email:</strong>
+                        <span id="delete-user-email">-</span>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning py-2 mt-3 mb-0 small">
+                    This will remove both the FINOVA profile and Supabase Auth account.
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal">
+                    Cancel
+                </button>
+
+                <button
+                    type="button"
+                    id="btn-confirm-delete-user"
+                    class="btn btn-danger">
+                    <i class="fa-solid fa-trash me-1"></i>
+                    Delete
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

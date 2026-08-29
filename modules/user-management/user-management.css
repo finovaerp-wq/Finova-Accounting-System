@@ -1,0 +1,797 @@
+/* 
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+MODULE : USER MANAGEMENT
+
+Version : 2.1 Enterprise
+
+TABLE STANDARD :
+GLOBAL TABLE COMPONENT
+
+VISUAL STANDARD :
+BUSINESS PARTNER
+
+NOTE :
+- Header aligned with Business Partner
+- Filter aligned with Business Partner
+- Table visual controlled by Global Table CSS
+- Pagination controlled by Global Pagination CSS
+==========================================================
+*/
+
+
+/* ==========================================================
+   USER MANAGEMENT PAGE
+========================================================== */
+
+.user-management-page {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    width: 100%;
+
+}
+
+
+/* ==========================================================
+   PAGE HEADER
+   SAME AS BUSINESS PARTNER
+========================================================== */
+
+.user-management-page
+> .finova-page-header {
+
+    width: 100%;
+
+    margin-bottom: 8px !important;
+
+    flex-shrink: 0;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   FILTER CARD
+   SAME AS BUSINESS PARTNER
+========================================================== */
+
+.user-management-page
+> .user-management-filter-card {
+
+    width: 100% !important;
+
+    max-width: none !important;
+
+    margin: 0 !important;
+
+    flex: 0 0 auto;
+
+    box-sizing: border-box;
+
+    border-radius: 12px;
+
+}
+
+
+/* ==========================================================
+   FILTER CARD BODY
+========================================================== */
+
+.user-management-filter-card
+> .finova-card-body {
+
+    width: 100%;
+
+    padding: 8px 20px 8px 20px !important;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   FILTER ROW
+========================================================== */
+
+.user-management-filter-card
+> .finova-card-body
+> .row {
+
+    width: 100% !important;
+
+    margin: 0 !important;
+
+    padding: 0 !important;
+
+    box-sizing: border-box;
+
+    align-items: end !important;
+
+}
+
+
+/* ==========================================================
+   FILTER COLUMN
+========================================================== */
+
+.user-management-filter-card
+> .finova-card-body
+> .row
+> [class*="col-"] {
+
+    min-width: 0;
+
+    margin: 0;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   FILTER LABEL
+========================================================== */
+
+.user-management-filter-card
+.form-label {
+
+    display: block;
+
+    margin-top: 0 !important;
+
+    margin-bottom: 6px !important;
+
+    color: #1F2937;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    line-height: 1.2;
+
+    text-align: left;
+
+}
+
+
+/* ==========================================================
+   FILTER INPUT & SELECT
+========================================================== */
+
+.user-management-filter-card
+.form-control,
+
+.user-management-filter-card
+.form-select {
+
+    width: 100% !important;
+
+    height: 46px !important;
+
+    min-height: 46px !important;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   FILTER BUTTON
+========================================================== */
+
+.user-management-filter-card
+.btn {
+
+    height: 46px;
+
+    min-height: 46px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+}
+
+
+/* ==========================================================
+   TABLE CARD
+========================================================== */
+
+.user-management-table-card {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    width: 100%;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   TABLE CARD BODY
+========================================================== */
+
+.user-management-table-card
+.finova-card-body {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    padding: 0 !important;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   TABLE CONTAINER
+========================================================== */
+
+.user-management-table-card
+.finova-table-container {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    width: 100%;
+
+    height: 100%;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   TABLE RESPONSIVE
+========================================================== */
+
+.user-management-table-card
+.finova-table-container
+.table-responsive {
+
+    display: block;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    width: 100%;
+
+    overflow: auto;
+
+}
+
+
+/* ==========================================================
+   TABLE
+========================================================== */
+
+.user-management-table-card
+.finova-table {
+
+    width: 100%;
+
+    margin-bottom: 0;
+
+    vertical-align: middle;
+
+}
+
+
+/* ==========================================================
+   TABLE HEADER
+========================================================== */
+
+.user-management-table-card
+.finova-table
+thead
+th {
+
+    font-weight: 700 !important;
+
+    color: #111827 !important;
+
+}
+
+
+/* ==========================================================
+   TABLE BODY
+========================================================== */
+
+.user-management-table-card
+.finova-table
+tbody
+td {
+
+    font-weight: 400 !important;
+
+    color: #1F2937 !important;
+
+}
+
+
+/* ==========================================================
+   REMOVE UNWANTED BOLD IN BODY
+========================================================== */
+
+.user-management-table-card
+.finova-table
+tbody
+td strong,
+
+.user-management-table-card
+.finova-table
+tbody
+td b,
+
+.user-management-table-card
+.finova-table
+tbody
+td .fw-bold,
+
+.user-management-table-card
+.finova-table
+tbody
+td .fw-semibold {
+
+    font-weight: 400 !important;
+
+}
+
+
+/* ==========================================================
+   COLUMN WIDTH
+========================================================== */
+
+.user-management-table-card
+.user-col-no {
+
+    width: 64px;
+
+    min-width: 64px;
+
+    text-align: center;
+
+}
+
+
+.user-management-table-card
+.user-col-name {
+
+    min-width: 260px;
+
+}
+
+
+.user-management-table-card
+.user-col-email {
+
+    min-width: 300px;
+
+}
+
+
+.user-management-table-card
+.user-col-role {
+
+    width: 120px;
+
+    min-width: 120px;
+
+    text-align: center;
+
+}
+
+
+.user-management-table-card
+.user-col-status {
+
+    width: 120px;
+
+    min-width: 120px;
+
+    text-align: center;
+
+}
+
+
+.user-management-table-card
+.user-col-updated {
+
+    width: 165px;
+
+    min-width: 165px;
+
+    text-align: center;
+
+}
+
+
+.user-management-table-card
+.user-col-action {
+
+    width: 150px;
+
+    min-width: 150px;
+
+    text-align: center;
+
+}
+
+
+/* ==========================================================
+   ROLE BADGE
+========================================================== */
+
+.user-role-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-width: 76px;
+
+    height: 22px;
+
+    padding: 0 10px;
+
+    border-radius: 999px;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    line-height: 1;
+
+}
+
+
+.user-role-manager {
+
+    background: #DBEAFE;
+
+    color: #1D4ED8;
+
+}
+
+
+.user-role-staff {
+
+    background: #EEF2F7;
+
+    color: #475569;
+
+}
+
+
+/* ==========================================================
+   STATUS BADGE
+========================================================== */
+
+.user-status-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-width: 76px;
+
+    height: 22px;
+
+    padding: 0 10px;
+
+    border-radius: 999px;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    line-height: 1;
+
+}
+
+
+.user-status-active {
+
+    background: #DCFCE7;
+
+    color: #15803D;
+
+}
+
+
+.user-status-inactive {
+
+    background: #FEE2E2;
+
+    color: #B91C1C;
+
+}
+
+
+/* ==========================================================
+   ACTION BUTTON GROUP
+========================================================== */
+
+.user-management-table-card
+.user-action-group {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 5px;
+
+}
+
+
+/* ==========================================================
+   ACTION BUTTON
+========================================================== */
+
+.user-management-table-card
+.user-action-btn {
+
+    width: 32px;
+
+    height: 32px;
+
+    padding: 0;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 5px;
+
+}
+
+
+/* ==========================================================
+   USER MODAL
+========================================================== */
+
+#user-management-modal
+.modal-content {
+
+    border: 0;
+
+    border-radius: 12px;
+
+    overflow: hidden;
+
+}
+
+
+#user-management-modal
+.modal-header {
+
+    padding: 16px 20px;
+
+}
+
+
+#user-management-modal
+.modal-body {
+
+    padding: 20px;
+
+}
+
+
+#user-management-modal
+.modal-footer {
+
+    padding: 12px 20px;
+
+}
+
+
+/* ==========================================================
+   VIEW MODE
+========================================================== */
+
+.user-management-view-mode
+.form-control:disabled,
+
+.user-management-view-mode
+.form-select:disabled {
+
+    background: #F8FAFC;
+
+    color: #475569;
+
+    opacity: 1;
+
+}
+
+
+/* ==========================================================
+   PAGINATION
+   SAME AS BUSINESS PARTNER
+========================================================== */
+
+.user-management-table-card
+.finova-table-container
+.finova-pagination-wrapper {
+
+    flex: 0 0 auto;
+
+    width: 100%;
+
+    margin-top: auto;
+
+}
+
+
+/* ==========================================================
+   PAGINATION LEFT
+========================================================== */
+
+.user-management-table-card
+.finova-pagination-left {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+}
+
+
+/* ==========================================================
+   PAGINATION LABEL
+========================================================== */
+
+.user-management-table-card
+.finova-pagination-label {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   PAGINATION TOTAL
+========================================================== */
+
+.user-management-table-card
+.finova-pagination-total {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    min-width: 18px;
+
+    margin-left: 2px;
+
+}
+
+
+/* ==========================================================
+   EMPTY STATE
+========================================================== */
+
+.user-management-empty {
+
+    padding: 30px 15px !important;
+
+    text-align: center;
+
+    color: #6B7280 !important;
+
+}
+
+
+/* ==========================================================
+   TABLET
+========================================================== */
+
+@media (max-width: 1200px) {
+
+    .user-management-filter-card
+    > .finova-card-body {
+
+        padding-left: 16px !important;
+
+        padding-right: 16px !important;
+
+    }
+
+}
+
+
+/* ==========================================================
+   MOBILE
+========================================================== */
+
+@media (max-width: 768px) {
+
+    .user-management-filter-card
+    > .finova-card-body {
+
+        padding: 8px 16px !important;
+
+    }
+
+
+    .user-management-page
+    > .finova-page-header {
+
+        gap: 10px;
+
+    }
+
+
+    .user-management-page
+    .finova-page-header-right {
+
+        flex-wrap: wrap;
+
+    }
+
+
+    .user-management-table-card
+    .user-col-name {
+
+        min-width: 200px;
+
+    }
+
+
+    .user-management-table-card
+    .user-col-email {
+
+        min-width: 240px;
+
+    }
+
+}
+
+
+/* ==========================================================
+   END USER MANAGEMENT CSS
+========================================================== */
