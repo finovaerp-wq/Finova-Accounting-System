@@ -3,7 +3,7 @@
 FINOVA ACCOUNTING SYSTEM
 MODULE  : AGING PAYABLE
 FILE    : aging-payable.html
-VERSION : 3.0.0
+VERSION : 4.1.0
 ==========================================================
 -->
 
@@ -255,7 +255,7 @@ VERSION : 3.0.0
                             type="text"
                             id="aging-payable-keyword"
                             class="form-control finova-control"
-                            placeholder="Search Invoice No or Vendor...">
+                            placeholder="Search Invoice No, PO No or Vendor...">
 
                         <button
                             type="button"
@@ -318,197 +318,247 @@ VERSION : 3.0.0
                             mb-0
                         ">
 
+
+                        <!-- ==============================
+                             TABLE HEADER
+                        =============================== -->
+
                         <thead>
 
                             <tr>
-
-
-                                <!-- NO -->
 
                                 <th
                                     class="
                                         finova-table-index
                                         aging-col-no
                                     ">
-
                                     No
-
                                 </th>
 
-
-                                <!-- VENDOR -->
 
                                 <th
                                     class="
                                         finova-table-name
                                         aging-col-vendor
                                     ">
-
                                     Vendor
-
                                 </th>
 
-
-                                <!-- INVOICE NO -->
 
                                 <th
                                     class="
                                         finova-table-code
                                         aging-col-invoice
                                     ">
-
                                     Invoice No
-
                                 </th>
 
 
-                                <!-- INVOICE DATE -->
+                                <!-- ======================
+                                     NEW : PO NO
+                                ======================= -->
+
+                                <th
+                                    class="
+                                        finova-table-code
+                                        aging-col-po
+                                    ">
+                                    PO No
+                                </th>
+
+
+                                <th
+                                    class="
+                                        finova-table-name
+                                        aging-col-description
+                                    ">
+                                    Description
+                                </th>
+
+
+                                <th
+                                    class="
+                                        finova-table-name
+                                        aging-col-account-holder
+                                    ">
+                                    Account Holder
+                                </th>
+
+
+                                <th
+                                    class="
+                                        finova-table-name
+                                        aging-col-bank-name
+                                    ">
+                                    Bank Name
+                                </th>
+
+
+                                <th
+                                    class="
+                                        finova-table-code
+                                        aging-col-bank-account
+                                    ">
+                                    Bank Account
+                                </th>
+
 
                                 <th
                                     class="
                                         finova-table-date
                                         aging-col-date
                                     ">
-
                                     Invoice Date
-
                                 </th>
 
-
-                                <!-- DUE DATE -->
 
                                 <th
                                     class="
                                         finova-table-date
                                         aging-col-date
                                     ">
-
                                     Due Date
-
                                 </th>
 
-
-                                <!-- OUTSTANDING -->
 
                                 <th
                                     class="
                                         finova-table-number
                                         aging-col-amount
                                     ">
-
                                     Outstanding
-
                                 </th>
 
-
-                                <!-- CURRENT -->
 
                                 <th
                                     class="
                                         finova-table-number
                                         aging-col-amount
                                     ">
-
                                     Current
-
                                 </th>
 
-
-                                <!-- 1 - 30 -->
 
                                 <th
                                     class="
                                         finova-table-number
                                         aging-col-amount
                                     ">
-
                                     1 - 30
-
                                 </th>
 
-
-                                <!-- 31 - 60 -->
 
                                 <th
                                     class="
                                         finova-table-number
                                         aging-col-amount
                                     ">
-
                                     31 - 60
-
                                 </th>
 
-
-                                <!-- 61 - 90 -->
 
                                 <th
                                     class="
                                         finova-table-number
                                         aging-col-amount
                                     ">
-
                                     61 - 90
-
                                 </th>
 
-
-                                <!-- > 90 -->
 
                                 <th
                                     class="
                                         finova-table-number
                                         aging-col-amount
                                     ">
-
                                     &gt; 90
-
                                 </th>
 
-
-                                <!-- STATUS -->
 
                                 <th
                                     class="
-                                        finova-table-status
-                                        aging-col-status
+                                        finova-table-number
+                                        aging-col-amount-wide
                                     ">
-
-                                    Status
-
+                                    Total Amount
                                 </th>
 
+
+                                <th
+                                    class="
+                                        finova-table-number
+                                        aging-col-amount-wide
+                                    ">
+                                    Before Tax Amount
+                                </th>
+
+
+                                <th
+                                    class="
+                                        finova-table-number
+                                        aging-col-amount
+                                    ">
+                                    Tax (+)
+                                </th>
+
+
+                                <th
+                                    class="
+                                        finova-table-number
+                                        aging-col-amount
+                                    ">
+                                    Tax (-)
+                                </th>
 
                             </tr>
 
                         </thead>
 
 
-                        <!-- ==================================
-                             BODY
-                        =================================== -->
+                        <!-- ==============================
+                             TABLE BODY
+                        =============================== -->
 
-                        <tbody id="aging-payable-tbody">
-
+                        <tbody
+                            id="aging-payable-tbody">
                         </tbody>
 
 
-                        <!-- ==================================
-                             TOTAL
-                        =================================== -->
+                        <!-- ==============================
+                             TABLE FOOTER
+                        =============================== -->
 
                         <tfoot>
 
                             <tr>
 
+                                <!--
+                                ==================================
+                                10 NON-AMOUNT COLUMNS:
+
+                                1. No
+                                2. Vendor
+                                3. Invoice No
+                                4. PO No
+                                5. Description
+                                6. Account Holder
+                                7. Bank Name
+                                8. Bank Account
+                                9. Invoice Date
+                                10. Due Date
+                                ==================================
+                                -->
+
                                 <th
-                                    colspan="5"
+                                    colspan="10"
                                     class="text-end">
 
                                     TOTAL
 
                                 </th>
 
+
+                                <!-- OUTSTANDING -->
 
                                 <th
                                     id="aging-total-outstanding"
@@ -519,6 +569,8 @@ VERSION : 3.0.0
                                 </th>
 
 
+                                <!-- CURRENT -->
+
                                 <th
                                     id="aging-total-current"
                                     class="finova-table-number">
@@ -527,6 +579,8 @@ VERSION : 3.0.0
 
                                 </th>
 
+
+                                <!-- 1 - 30 -->
 
                                 <th
                                     id="aging-total-1-30"
@@ -537,6 +591,8 @@ VERSION : 3.0.0
                                 </th>
 
 
+                                <!-- 31 - 60 -->
+
                                 <th
                                     id="aging-total-31-60"
                                     class="finova-table-number">
@@ -545,6 +601,8 @@ VERSION : 3.0.0
 
                                 </th>
 
+
+                                <!-- 61 - 90 -->
 
                                 <th
                                     id="aging-total-61-90"
@@ -555,6 +613,8 @@ VERSION : 3.0.0
                                 </th>
 
 
+                                <!-- > 90 -->
+
                                 <th
                                     id="aging-total-90-plus"
                                     class="finova-table-number">
@@ -564,12 +624,53 @@ VERSION : 3.0.0
                                 </th>
 
 
-                                <th>
+                                <!-- TOTAL AMOUNT -->
+
+                                <th
+                                    id="aging-total-amount"
+                                    class="finova-table-number">
+
+                                    0
+
+                                </th>
+
+
+                                <!-- BEFORE TAX -->
+
+                                <th
+                                    id="aging-total-before-tax"
+                                    class="finova-table-number">
+
+                                    0
+
+                                </th>
+
+
+                                <!-- TAX + -->
+
+                                <th
+                                    id="aging-total-tax-plus"
+                                    class="finova-table-number">
+
+                                    0
+
+                                </th>
+
+
+                                <!-- TAX - -->
+
+                                <th
+                                    id="aging-total-tax-minus"
+                                    class="finova-table-number">
+
+                                    0
+
                                 </th>
 
                             </tr>
 
                         </tfoot>
+
 
                     </table>
 

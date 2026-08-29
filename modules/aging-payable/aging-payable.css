@@ -2,14 +2,8 @@
 ==========================================================
 FINOVA ACCOUNTING SYSTEM
 MODULE : AGING PAYABLE
-Version : 2.0 Enterprise
-
+VERSION : 4.1.0 FINAL
 VISUAL STANDARD : ACCOUNT PAYABLE
-
-- Header same as AP
-- Filter same as AP
-- Global Table
-- Global Pagination
 ==========================================================
 */
 
@@ -34,8 +28,7 @@ VISUAL STANDARD : ACCOUNT PAYABLE
 
 
 /* ==========================================================
-   PAGE HEADER
-   SAME AS ACCOUNT PAYABLE
+   HEADER
 ========================================================== */
 
 .aging-payable-page
@@ -47,14 +40,8 @@ VISUAL STANDARD : ACCOUNT PAYABLE
 
     flex: 0 0 auto;
 
-    box-sizing: border-box;
-
 }
 
-
-/* ==========================================================
-   PAGE HEADER RIGHT
-========================================================== */
 
 .aging-payable-page
 > .finova-page-header
@@ -70,10 +57,6 @@ VISUAL STANDARD : ACCOUNT PAYABLE
 
 }
 
-
-/* ==========================================================
-   HEADER BUTTON
-========================================================== */
 
 .aging-payable-page
 > .finova-page-header
@@ -97,11 +80,9 @@ VISUAL STANDARD : ACCOUNT PAYABLE
 
 /* ==========================================================
    FILTER CARD
-   SAME AS ACCOUNT PAYABLE
 ========================================================== */
 
-.aging-payable-page
-> .aging-payable-filter-card {
+.aging-payable-filter-card {
 
     width: 100% !important;
 
@@ -111,16 +92,10 @@ VISUAL STANDARD : ACCOUNT PAYABLE
 
     flex: 0 0 auto;
 
-    box-sizing: border-box;
-
     border-radius: 12px;
 
 }
 
-
-/* ==========================================================
-   FILTER CARD BODY
-========================================================== */
 
 .aging-payable-filter-card
 > .finova-card-body {
@@ -129,14 +104,8 @@ VISUAL STANDARD : ACCOUNT PAYABLE
 
     padding: 8px 20px !important;
 
-    box-sizing: border-box;
-
 }
 
-
-/* ==========================================================
-   FILTER ROW
-========================================================== */
 
 .aging-payable-filter-card
 > .finova-card-body
@@ -148,34 +117,10 @@ VISUAL STANDARD : ACCOUNT PAYABLE
 
     padding: 0 !important;
 
-    box-sizing: border-box;
-
     align-items: end !important;
 
 }
 
-
-/* ==========================================================
-   FILTER COLUMN
-========================================================== */
-
-.aging-payable-filter-card
-> .finova-card-body
-> .row
-> [class*="col-"] {
-
-    min-width: 0;
-
-    margin: 0;
-
-    box-sizing: border-box;
-
-}
-
-
-/* ==========================================================
-   FILTER LABEL
-========================================================== */
 
 .aging-payable-filter-card
 .form-label {
@@ -194,13 +139,11 @@ VISUAL STANDARD : ACCOUNT PAYABLE
 
     line-height: 1.2;
 
-    text-align: left;
-
 }
 
 
 /* ==========================================================
-   FILTER INPUT & SELECT
+   FILTER CONTROL
 ========================================================== */
 
 .aging-payable-filter-card
@@ -215,14 +158,8 @@ VISUAL STANDARD : ACCOUNT PAYABLE
 
     min-height: 46px !important;
 
-    box-sizing: border-box;
-
 }
 
-
-/* ==========================================================
-   FILTER INPUT GROUP
-========================================================== */
 
 .aging-payable-filter-card
 .input-group {
@@ -239,17 +176,10 @@ VISUAL STANDARD : ACCOUNT PAYABLE
 
     margin: 0 !important;
 
-    box-sizing: border-box;
-
 }
 
 
-/* ==========================================================
-   KEYWORD INPUT
-========================================================== */
-
 .aging-payable-filter-card
-.input-group
 #aging-payable-keyword {
 
     flex: 1 1 auto !important;
@@ -267,12 +197,7 @@ VISUAL STANDARD : ACCOUNT PAYABLE
 }
 
 
-/* ==========================================================
-   FIND BUTTON
-========================================================== */
-
 .aging-payable-filter-card
-.input-group
 #btn-find-aging-payable {
 
     display: inline-flex !important;
@@ -321,10 +246,6 @@ VISUAL STANDARD : ACCOUNT PAYABLE
 }
 
 
-/* ==========================================================
-   TABLE CARD BODY
-========================================================== */
-
 .aging-payable-table-card
 .finova-card-body {
 
@@ -342,10 +263,6 @@ VISUAL STANDARD : ACCOUNT PAYABLE
 
 }
 
-
-/* ==========================================================
-   TABLE CONTAINER
-========================================================== */
 
 .aging-payable-table-card
 .finova-table-container {
@@ -367,12 +284,7 @@ VISUAL STANDARD : ACCOUNT PAYABLE
 }
 
 
-/* ==========================================================
-   TABLE RESPONSIVE
-========================================================== */
-
 .aging-payable-table-card
-.finova-table-container
 .table-responsive {
 
     display: block;
@@ -392,6 +304,7 @@ VISUAL STANDARD : ACCOUNT PAYABLE
 
 /* ==========================================================
    TABLE
+   20 COLUMNS
 ========================================================== */
 
 .aging-payable-table-card
@@ -399,7 +312,14 @@ VISUAL STANDARD : ACCOUNT PAYABLE
 
     width: 100%;
 
-    min-width: 1450px;
+    /*
+    ======================================================
+    OLD : 2675px
+    NEW : + PO NO 160px
+    ======================================================
+    */
+
+    min-width: 2835px;
 
     margin-bottom: 0;
 
@@ -407,10 +327,6 @@ VISUAL STANDARD : ACCOUNT PAYABLE
 
 }
 
-
-/* ==========================================================
-   TABLE HEADER
-========================================================== */
 
 .aging-payable-table-card
 .finova-table
@@ -428,10 +344,6 @@ th {
 }
 
 
-/* ==========================================================
-   TABLE BODY
-========================================================== */
-
 .aging-payable-table-card
 .finova-table
 tbody
@@ -447,79 +359,12 @@ td {
 
 
 /* ==========================================================
-   FIRST COLUMN
+   COLUMN WIDTHS
 ========================================================== */
-
-.aging-payable-table-card
-.finova-table
-th:first-child,
-
-.aging-payable-table-card
-.finova-table
-td:first-child {
-
-    text-align: center !important;
-
-    vertical-align: middle !important;
-
-}
 
 
 /* ==========================================================
-   CENTER COLUMN
-========================================================== */
-
-.aging-payable-table-card
-.text-center {
-
-    text-align: center !important;
-
-}
-
-
-/* ==========================================================
-   NUMBER / AMOUNT COLUMN
-========================================================== */
-
-.aging-payable-table-card
-.text-end {
-
-    text-align: right !important;
-
-}
-
-
-/* ==========================================================
-   TABLE FOOTER
-========================================================== */
-
-.aging-payable-table-card
-tfoot
-th,
-
-.aging-payable-table-card
-tfoot
-td {
-
-    position: sticky;
-
-    bottom: 0;
-
-    z-index: 4;
-
-    background: #F8FAFC;
-
-    font-size: 12px;
-
-    font-weight: 700;
-
-    white-space: nowrap;
-
-}
-
-
-/* ==========================================================
-   COLUMN WIDTH
+   NO
 ========================================================== */
 
 .aging-col-no {
@@ -547,23 +392,23 @@ td {
 
 
 /* ==========================================================
-   PO NO
+   INVOICE NO
 ========================================================== */
 
-.aging-col-po {
+.aging-col-invoice {
 
-    width: 170px;
+    width: 160px;
 
-    min-width: 170px;
+    min-width: 160px;
 
 }
 
 
 /* ==========================================================
-   INVOICE
+   PO NO
 ========================================================== */
 
-.aging-col-invoice {
+.aging-col-po {
 
     width: 160px;
 
@@ -581,6 +426,45 @@ td {
     width: 280px;
 
     min-width: 280px;
+
+}
+
+
+/* ==========================================================
+   ACCOUNT HOLDER
+========================================================== */
+
+.aging-col-account-holder {
+
+    width: 190px;
+
+    min-width: 190px;
+
+}
+
+
+/* ==========================================================
+   BANK NAME
+========================================================== */
+
+.aging-col-bank-name {
+
+    width: 170px;
+
+    min-width: 170px;
+
+}
+
+
+/* ==========================================================
+   BANK ACCOUNT
+========================================================== */
+
+.aging-col-bank-account {
+
+    width: 180px;
+
+    min-width: 180px;
 
 }
 
@@ -612,20 +496,20 @@ td {
 
 
 /* ==========================================================
-   STATUS
+   WIDE AMOUNT
 ========================================================== */
 
-.aging-col-status {
+.aging-col-amount-wide {
 
-    width: 110px;
+    width: 150px;
 
-    min-width: 110px;
+    min-width: 150px;
 
 }
 
 
 /* ==========================================================
-   DESCRIPTION BODY
+   DESCRIPTION
 ========================================================== */
 
 .aging-payable-description {
@@ -635,6 +519,22 @@ td {
     word-break: break-word;
 
     line-height: 1.45;
+
+}
+
+
+/* ==========================================================
+   AMOUNT ALIGNMENT
+========================================================== */
+
+.aging-payable-table-card
+.finova-table-number {
+
+    text-align: right !important;
+
+    white-space: nowrap;
+
+    font-variant-numeric: tabular-nums;
 
 }
 
@@ -651,29 +551,54 @@ td {
 
 
 /* ==========================================================
-   STATUS BADGE
+   TABLE FOOTER
 ========================================================== */
 
-.aging-payable-status {
+.aging-payable-table-card
+tfoot
+th,
 
-    display: inline-flex;
+.aging-payable-table-card
+tfoot
+td {
 
-    align-items: center;
+    position: sticky;
 
-    justify-content: center;
+    bottom: 0;
 
-    min-width: 72px;
+    z-index: 4;
+
+    background: #F8FAFC;
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+
+    vertical-align: middle;
+
+}
+
+
+/* ==========================================================
+   TOTAL LABEL
+========================================================== */
+
+.aging-payable-table-card
+tfoot
+th[colspan] {
+
+    text-align: right !important;
 
 }
 
 
 /* ==========================================================
    PAGINATION
-   SAME AS ACCOUNT PAYABLE / GLOBAL PAGINATION
 ========================================================== */
 
 .aging-payable-table-card
-.finova-table-container
 .finova-pagination-wrapper {
 
     display: flex;
@@ -691,10 +616,6 @@ td {
 }
 
 
-/* ==========================================================
-   PAGINATION LEFT
-========================================================== */
-
 .aging-payable-table-card
 .finova-pagination-left {
 
@@ -707,10 +628,6 @@ td {
 }
 
 
-/* ==========================================================
-   PAGINATION LABEL
-========================================================== */
-
 .aging-payable-table-card
 .finova-pagination-label {
 
@@ -722,10 +639,6 @@ td {
 
 }
 
-
-/* ==========================================================
-   PAGINATION TOTAL
-========================================================== */
 
 .aging-payable-table-card
 .finova-pagination-total {
@@ -741,10 +654,6 @@ td {
 }
 
 
-/* ==========================================================
-   PAGINATION INFO
-========================================================== */
-
 .aging-payable-table-card
 .finova-pagination-info {
 
@@ -759,12 +668,8 @@ td {
 }
 
 
-/* ==========================================================
-   PAGINATION INPUT
-========================================================== */
-
 .aging-payable-table-card
-.finova-pagination-page-input {
+.finova-pagination-input {
 
     width: 42px;
 
@@ -776,20 +681,17 @@ td {
 
 
 /* ==========================================================
-   EMPTY TABLE
+   PAGINATION BUTTON
 ========================================================== */
 
 .aging-payable-table-card
-.aging-payable-empty-row
-td {
+.finova-pagination-btn {
 
-    height: 180px;
+    display: inline-flex;
 
-    text-align: center;
+    align-items: center;
 
-    vertical-align: middle;
-
-    color: var(--text-secondary);
+    justify-content: center;
 
 }
 
@@ -807,6 +709,46 @@ td {
 
 
 /* ==========================================================
+   WEBKIT HORIZONTAL SCROLLBAR
+========================================================== */
+
+.aging-payable-table-card
+.table-responsive::-webkit-scrollbar {
+
+    width: 8px;
+
+    height: 8px;
+
+}
+
+
+.aging-payable-table-card
+.table-responsive::-webkit-scrollbar-track {
+
+    background: #F1F5F9;
+
+}
+
+
+.aging-payable-table-card
+.table-responsive::-webkit-scrollbar-thumb {
+
+    background: #CBD5E1;
+
+    border-radius: 4px;
+
+}
+
+
+.aging-payable-table-card
+.table-responsive::-webkit-scrollbar-thumb:hover {
+
+    background: #94A3B8;
+
+}
+
+
+/* ==========================================================
    RESPONSIVE
 ========================================================== */
 
@@ -815,7 +757,7 @@ td {
     .aging-payable-table-card
     .finova-table {
 
-        min-width: 1400px;
+        min-width: 2835px;
 
     }
 
@@ -826,7 +768,7 @@ td {
 
     /*
     ======================================================
-    PAGE HEADER
+    HEADER
     ======================================================
     */
 
@@ -837,12 +779,6 @@ td {
 
     }
 
-
-    /*
-    ======================================================
-    HEADER BUTTONS
-    ======================================================
-    */
 
     .aging-payable-page
     > .finova-page-header
@@ -864,9 +800,7 @@ td {
     .aging-payable-filter-card
     > .finova-card-body {
 
-        padding:
-
-            10px 14px !important;
+        padding: 10px 14px !important;
 
     }
 
@@ -880,7 +814,7 @@ td {
     .aging-payable-table-card
     .finova-table {
 
-        min-width: 1350px;
+        min-width: 2835px;
 
     }
 
@@ -932,3 +866,9 @@ td {
     }
 
 }
+
+
+/* ==========================================================
+   END
+   FINOVA AGING PAYABLE
+========================================================== */

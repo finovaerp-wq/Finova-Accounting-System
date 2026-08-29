@@ -133,62 +133,34 @@ async getAll() {
                     bp_type,
                     top_id,
                     is_active
-                ),
-
-                trx_gl_journal (
-                    id,
-                    journal_no,
-                    journal_date,
-                    status
                 )
 
             `)
 
-            
-.order(
-    "created_at",
-    {
-        ascending: true
-    }
-);
-
-
-        if (error) {
-
-            console.error(
-                "ACCOUNT PAYABLE GET ALL ERROR:",
+            .order(
+                "invoice_date",
                 {
-                    message:
-                        error.message,
-
-                    details:
-                        error.details,
-
-                    hint:
-                        error.hint,
-
-                    code:
-                        error.code
+                    ascending: false
                 }
             );
 
+
+        if (
+            error
+        ) {
 
             throw error;
 
         }
 
 
-        console.log(
-            "ACCOUNT PAYABLE GET ALL:",
-            data
-        );
-
-
         return data || [];
 
     }
 
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
             "AccountPayableService.getAll:",
