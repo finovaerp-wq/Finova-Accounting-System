@@ -3099,6 +3099,11 @@ SOURCE:
 - AR Invoice
 - AR Payment
 - GL Journal
+
+DESCRIPTION:
+- AUTO PREFIX BY SOURCE
+- SUPPORT OLD JOURNAL DATA
+- SUPPORT MULTI LINE
 ==========================================================
 */
 
@@ -3145,6 +3150,38 @@ createTableRow(
 
     /*
     ======================================================
+    SOURCE MODULE
+    ======================================================
+    */
+
+    const sourceModule =
+        String(
+            journal?.source_module
+            ||
+            ""
+        )
+        .trim()
+        .toUpperCase();
+
+
+    /*
+    ======================================================
+    SOURCE DOCUMENT TYPE
+    ======================================================
+    */
+
+    const sourceDocumentType =
+        String(
+            journal?.source_document_type
+            ||
+            ""
+        )
+        .trim()
+        .toUpperCase();
+
+
+    /*
+    ======================================================
     INVOICE NUMBER
     ======================================================
     */
@@ -3181,14 +3218,244 @@ createTableRow(
 
     /*
     ======================================================
-    DESCRIPTION
+    RAW DESCRIPTION
     ======================================================
     */
 
-    const description =
-        journal?.description
+    const rawDescription =
+        String(
+            journal?.description
+            ||
+            ""
+        )
+        .trim();
+
+
+    /*
+    ======================================================
+    DESCRIPTION DISPLAY
+    ======================================================
+
+    AP INVOICE:
+
+    [AUTO] INV AP
+    DESCRIPTION HEADER AP
+
+    IMPORTANT:
+
+    Support journal baru:
+    [AUTO] INV AP sudah tersimpan di DB
+
+    Support journal lama:
+    prefix belum tersimpan di DB
+    ======================================================
+    */
+
+    let description =
+        rawDescription;
+
+
+    /*
+======================================================
+AUTO DESCRIPTION BY SOURCE
+======================================================
+*/
+
+
+/*
+======================================================
+AP INVOICE
+======================================================
+*/
+
+if (
+    sourceModule === "AP"
+    &&
+    sourceDocumentType === "AP_INVOICE"
+) {
+
+    const hasAutoPrefix =
+        /^\[AUTO\]\s*INV\s*AP/i
+            .test(
+                rawDescription
+            );
+
+
+    if (
+        !hasAutoPrefix
+    ) {
+
+        description =
+            rawDescription
+                ? `[AUTO] INV AP\n${rawDescription}`
+                : `[AUTO] INV AP`;
+
+    }
+
+}
+
+
+/*
+======================================================
+AP PAYMENT
+======================================================
+*/
+
+else if (
+    sourceModule === "AP"
+    &&
+    sourceDocumentType === "AP_PAYMENT"
+) {
+
+    const hasAutoPrefix =
+        /^\[AUTO\]\s*PAYMENT\s*AP/i
+            .test(
+                rawDescription
+            );
+
+
+    if (
+        !hasAutoPrefix
+    ) {
+
+        description =
+            rawDescription
+                ? `[AUTO] PAYMENT AP\n${rawDescription}`
+                : `[AUTO] PAYMENT AP`;
+
+    }
+
+}
+/*
+======================================================
+AR INVOICE
+======================================================
+*/
+
+else if (
+    sourceModule === "AR"
+    &&
+    sourceDocumentType === "AR_INVOICE"
+) {
+
+    const hasAutoPrefix =
+        /^\[AUTO\]\s*INV\s*AR/i
+            .test(
+                rawDescription
+            );
+
+
+    if (
+        !hasAutoPrefix
+    ) {
+
+        description =
+            rawDescription
+                ? `[AUTO] INV AR\n${rawDescription}`
+                : `[AUTO] INV AR`;
+
+    }
+
+}
+/*
+======================================================
+AR PAYMENT
+======================================================
+*/
+
+else if (
+    sourceModule === "AR"
+    &&
+    sourceDocumentType === "AR_PAYMENT"
+) {
+
+    const hasAutoPrefix =
+        /^\[AUTO\]\s*PAYMENT\s*AR/i
+            .test(
+                rawDescription
+            );
+
+
+    if (
+        !hasAutoPrefix
+    ) {
+
+        description =
+            rawDescription
+                ? `[AUTO] PAYMENT AR\n${rawDescription}`
+                : `[AUTO] PAYMENT AR`;
+
+    }
+
+}
+/*
+======================================================
+ROW STATUS
+======================================================
+*/
+
+const rowStatus =
+    String(
+        journal?.status
         ||
-        "-";
+        ""
+    )
+    .trim()
+    .toLowerCase();
+
+
+    /*
+    ======================================================
+    EMPTY DESCRIPTION
+    ======================================================
+    */
+
+    if (
+        !description
+    ) {
+
+        description =
+            "-";
+
+    }
+
+
+    /*
+    ======================================================
+    DESCRIPTION HTML
+    ======================================================
+
+    ESCAPE HTML FIRST.
+
+    THEN CONVERT:
+    \n
+    \r\n
+
+    INTO:
+    <br>
+    ======================================================
+    */
+
+    const descriptionHTML =
+        this.escapeHTML(
+            description
+        )
+        .replace(
+            /\r?\n/g,
+            "<br>"
+        );
+
+
+    /*
+    ======================================================
+    DESCRIPTION TITLE
+    ======================================================
+    */
+
+    const descriptionTitle =
+        this.escapeHTML(
+            description
+        );
 
 
     /*
@@ -3254,9 +3521,10 @@ createTableRow(
     return `
 
         <tr
-            class="gl-journal-row"
-            data-id="${journal.id}"
-        >
+    class="gl-journal-row"
+    data-id="${journal.id}"
+    data-status="${rowStatus}"
+>
 
 
             <!-- ==========================================
@@ -3305,14 +3573,18 @@ createTableRow(
                         "
                     >
 
-                        <span class="gl-journal-info-label">
+                        <span
+                            class="gl-journal-info-label"
+                        >
 
                             Items
 
                         </span>
 
 
-                        <span class="gl-journal-info-separator">
+                        <span
+                            class="gl-journal-info-separator"
+                        >
 
                             :
 
@@ -3343,16 +3615,22 @@ createTableRow(
                          JOURNAL NO
                     =================================== -->
 
-                    <div class="gl-journal-info-line">
+                    <div
+                        class="gl-journal-info-line"
+                    >
 
-                        <span class="gl-journal-info-label">
+                        <span
+                            class="gl-journal-info-label"
+                        >
 
                             No
 
                         </span>
 
 
-                        <span class="gl-journal-info-separator">
+                        <span
+                            class="gl-journal-info-separator"
+                        >
 
                             :
 
@@ -3381,23 +3659,31 @@ createTableRow(
                          INVOICE NO
                     =================================== -->
 
-                    <div class="gl-journal-info-line">
+                    <div
+                        class="gl-journal-info-line"
+                    >
 
-                        <span class="gl-journal-info-label">
+                        <span
+                            class="gl-journal-info-label"
+                        >
 
                             Inv No
 
                         </span>
 
 
-                        <span class="gl-journal-info-separator">
+                        <span
+                            class="gl-journal-info-separator"
+                        >
 
                             :
 
                         </span>
 
 
-                        <span class="gl-journal-info-value">
+                        <span
+                            class="gl-journal-info-value"
+                        >
 
                             ${
                                 invoiceNo
@@ -3416,29 +3702,39 @@ createTableRow(
                          PO NO
                     =================================== -->
 
-                    <div class="gl-journal-info-line">
+                    <div
+                        class="gl-journal-info-line"
+                    >
 
-                        <span class="gl-journal-info-label">
+                        <span
+                            class="gl-journal-info-label"
+                        >
 
                             PO No
 
                         </span>
 
 
-                        <span class="gl-journal-info-separator">
+                        <span
+                            class="gl-journal-info-separator"
+                        >
 
                             :
 
                         </span>
 
 
-                        <span class="gl-journal-info-value">
+                        <span
+                            class="gl-journal-info-value"
+                        >
 
                             ${
                                 poNo
-                                    ? `PO/${this.escapeHTML(
-                                        poNo
-                                    )}`
+                                    ? `PO/${
+                                        this.escapeHTML(
+                                            poNo
+                                        )
+                                    }`
                                     : "-"
                             }
 
@@ -3451,16 +3747,25 @@ createTableRow(
                          DESCRIPTION
                     =================================== -->
 
-                    <div class="gl-journal-info-line">
+                    <div
+                        class="
+                            gl-journal-info-line
+                            gl-journal-description-line
+                        "
+                    >
 
-                        <span class="gl-journal-info-label">
+                        <span
+                            class="gl-journal-info-label"
+                        >
 
                             Desc
 
                         </span>
 
 
-                        <span class="gl-journal-info-separator">
+                        <span
+                            class="gl-journal-info-separator"
+                        >
 
                             :
 
@@ -3472,18 +3777,10 @@ createTableRow(
                                 gl-journal-info-value
                                 gl-journal-description
                             "
-                            title="${
-                                this.escapeHTML(
-                                    description
-                                )
-                            }"
+                            title="${descriptionTitle}"
                         >
 
-                            ${
-                                this.escapeHTML(
-                                    description
-                                )
-                            }
+                            ${descriptionHTML}
 
                         </span>
 
@@ -3501,7 +3798,9 @@ createTableRow(
 
             <td class="gl-journal-source-cell">
 
-                <div class="gl-journal-source-wrapper">
+                <div
+                    class="gl-journal-source-wrapper"
+                >
 
                     <span
                         class="
@@ -3537,23 +3836,31 @@ createTableRow(
 
                 <!-- DEBIT -->
 
-                <div class="gl-journal-summary-line">
+                <div
+                    class="gl-journal-summary-line"
+                >
 
-                    <span class="gl-journal-summary-label">
+                    <span
+                        class="gl-journal-summary-label"
+                    >
 
                         Debits
 
                     </span>
 
 
-                    <span class="gl-journal-summary-separator">
+                    <span
+                        class="gl-journal-summary-separator"
+                    >
 
                         :
 
                     </span>
 
 
-                    <strong class="gl-journal-summary-value">
+                    <strong
+                        class="gl-journal-summary-value"
+                    >
 
                         ${
                             this.formatCurrency(
@@ -3568,23 +3875,31 @@ createTableRow(
 
                 <!-- CREDIT -->
 
-                <div class="gl-journal-summary-line">
+                <div
+                    class="gl-journal-summary-line"
+                >
 
-                    <span class="gl-journal-summary-label">
+                    <span
+                        class="gl-journal-summary-label"
+                    >
 
                         Credits
 
                     </span>
 
 
-                    <span class="gl-journal-summary-separator">
+                    <span
+                        class="gl-journal-summary-separator"
+                    >
 
                         :
 
                     </span>
 
 
-                    <strong class="gl-journal-summary-value">
+                    <strong
+                        class="gl-journal-summary-value"
+                    >
 
                         ${
                             this.formatCurrency(
@@ -3652,7 +3967,9 @@ createTableRow(
                         title="Actions"
                     >
 
-                        <i class="fa-solid fa-gear"></i>
+                        <i
+                            class="fa-solid fa-gear"
+                        ></i>
 
                     </button>
 
@@ -14076,17 +14393,7 @@ async postJournal(id) {
 
         }
 
-        /*
-        ======================================================
-        SUCCESS
-        ======================================================
-        */
-
-        alert(
-
-            "Journal posted successfully."
-
-        );
+        
 
         /*
         ======================================================
@@ -14170,11 +14477,11 @@ async voidJournal(id) {
 
         if (!reason) {
 
-            alert(
-                "Alasan Void wajib diisi."
-            );
+            this.showError(
+    "Alasan Void wajib diisi."
+);
 
-            return;
+return;
 
         }
 
@@ -14189,15 +14496,7 @@ async voidJournal(id) {
             reason
         );
 
-        /*
-        ======================================================
-        SUCCESS
-        ======================================================
-        */
-
-        alert(
-            "Journal berhasil di-VOID."
-        );
+       
 
         /*
         ======================================================
@@ -14216,10 +14515,10 @@ async voidJournal(id) {
             error
         );
 
-        alert(
-            error?.message ||
-            "Gagal melakukan Void Journal."
-        );
+        this.showError(
+    error?.message ||
+    "Gagal melakukan Void Journal."
+);
 
     }
 

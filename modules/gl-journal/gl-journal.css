@@ -4439,3 +4439,253 @@ COLUMN WIDTH IS CONTROLLED BY COLGROUP
     color: #0D6EFD;
 
 }
+/* ==========================================================
+   FINOVA ACCOUNTING SYSTEM
+   GENERAL JOURNAL
+   FINAL ROW STATUS
+========================================================== */
+
+
+/* ==========================================================
+   DRAFT ROW
+========================================================== */
+
+#gl-journal-table
+#gl-journal-tbody
+tr.gl-journal-row[data-status="draft"]
+> td {
+
+    background: #FFFFFF !important;
+
+    background-color: #FFFFFF !important;
+
+    color: #1F2937 !important;
+
+}
+
+
+/* ==========================================================
+   POSTED ROW
+   SAME AS AP / AR COMPLETE
+========================================================== */
+
+#gl-journal-table
+#gl-journal-tbody
+tr.gl-journal-row[data-status="posted"]
+> td {
+
+    background: #E9ECEF !important;
+
+    background-color: #E9ECEF !important;
+
+    color: #6C757D !important;
+
+}
+
+
+/* ==========================================================
+   POSTED - DATE
+========================================================== */
+
+#gl-journal-table
+#gl-journal-tbody
+tr.gl-journal-row[data-status="posted"]
+.gl-journal-date {
+
+    color: #6C757D !important;
+
+}
+
+
+/* ==========================================================
+   POSTED - JOURNAL INFORMATION
+========================================================== */
+
+#gl-journal-table
+#gl-journal-tbody
+tr.gl-journal-row[data-status="posted"]
+.gl-journal-info-label,
+
+#gl-journal-table
+#gl-journal-tbody
+tr.gl-journal-row[data-status="posted"]
+.gl-journal-info-separator,
+
+#gl-journal-table
+#gl-journal-tbody
+tr.gl-journal-row[data-status="posted"]
+.gl-journal-info-value,
+
+#gl-journal-table
+#gl-journal-tbody
+tr.gl-journal-row[data-status="posted"]
+.gl-journal-number,
+
+#gl-journal-table
+#gl-journal-tbody
+tr.gl-journal-row[data-status="posted"]
+.gl-journal-transaction-count,
+
+#gl-journal-table
+#gl-journal-tbody
+tr.gl-journal-row[data-status="posted"]
+.gl-journal-description {
+
+    color: #6C757D !important;
+
+}
+
+
+/* ==========================================================
+   POSTED - AMOUNT
+========================================================== */
+
+#gl-journal-table
+#gl-journal-tbody
+tr.gl-journal-row[data-status="posted"]
+.gl-journal-summary-label,
+
+#gl-journal-table
+#gl-journal-tbody
+tr.gl-journal-row[data-status="posted"]
+.gl-journal-summary-separator,
+
+#gl-journal-table
+#gl-journal-tbody
+tr.gl-journal-row[data-status="posted"]
+.gl-journal-summary-value {
+
+    color: #6C757D !important;
+
+}
+
+
+/* ==========================================================
+   POSTED - CREATED
+========================================================== */
+
+#gl-journal-table
+#gl-journal-tbody
+tr.gl-journal-row[data-status="posted"]
+.gl-journal-created-cell,
+
+#gl-journal-table
+#gl-journal-tbody
+tr.gl-journal-row[data-status="posted"]
+.gl-created-date,
+
+#gl-journal-table
+#gl-journal-tbody
+tr.gl-journal-row[data-status="posted"]
+.gl-created-time {
+
+    color: #6C757D !important;
+
+}
+
+
+/* ==========================================================
+   POSTED - ACTION BUTTON
+========================================================== */
+
+#gl-journal-table
+#gl-journal-tbody
+tr.gl-journal-row[data-status="posted"]
+.gl-action-trigger {
+
+    color: #6C757D !important;
+
+}
+
+
+/* ==========================================================
+   POSTED - KEEP STATUS BADGE NORMAL
+========================================================== */
+
+#gl-journal-table
+#gl-journal-tbody
+tr.gl-journal-row[data-status="posted"]
+.gl-journal-status-cell
+.badge {
+
+    opacity: 1 !important;
+
+}
+
+
+/* ==========================================================
+   POSTED - KEEP SOURCE BADGE NORMAL
+========================================================== */
+
+#gl-journal-table
+#gl-journal-tbody
+tr.gl-journal-row[data-status="posted"]
+.gl-journal-source-cell
+.badge {
+
+    opacity: 1 !important;
+
+}
+
+
+/* ==========================================================
+   VOID ROW
+   SAME AS DRAFT
+========================================================== */
+
+#gl-journal-table
+#gl-journal-tbody
+tr.gl-journal-row[data-status="void"]
+> td {
+
+    background: #FFFFFF !important;
+
+    background-color: #FFFFFF !important;
+
+    color: #1F2937 !important;
+
+}
+
+
+/* ==========================================================
+   VOID ROW CONTENT
+   SAME AS DRAFT
+========================================================== */
+
+#gl-journal-table
+#gl-journal-tbody
+tr.gl-journal-row[data-status="void"] {
+
+    opacity: 1 !important;
+
+}
+
+
+/* ==========================================================
+   VOID OPACITY
+========================================================== */
+
+#gl-journal-table
+#gl-journal-tbody
+tr.gl-journal-row[data-status="void"] {
+
+    opacity: .45;
+
+}
+
+
+/* ==========================================================
+   POSTED HOVER
+   KEEP GRAY
+========================================================== */
+
+#gl-journal-table
+#gl-journal-tbody
+tr.gl-journal-row[data-status="posted"]:hover
+> td {
+
+    background: #E9ECEF !important;
+
+    background-color: #E9ECEF !important;
+
+}
