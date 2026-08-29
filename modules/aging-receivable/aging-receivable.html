@@ -3,7 +3,8 @@
 FINOVA ACCOUNTING SYSTEM
 MODULE  : AGING RECEIVABLE
 FILE    : aging-receivable.html
-VERSION : 3.0.0
+VERSION : 4.1.0 FINAL
+VISUAL STANDARD : AGING PAYABLE
 ==========================================================
 -->
 
@@ -16,6 +17,10 @@ VERSION : 3.0.0
 
     <div class="finova-page-header">
 
+
+        <!-- ==============================================
+             LEFT
+        =============================================== -->
 
         <div class="finova-page-header-left">
 
@@ -34,8 +39,14 @@ VERSION : 3.0.0
         </div>
 
 
+        <!-- ==============================================
+             RIGHT
+        =============================================== -->
+
         <div class="finova-page-header-right">
 
+
+            <!-- DOWNLOAD EXCEL -->
 
             <button
                 type="button"
@@ -49,6 +60,8 @@ VERSION : 3.0.0
             </button>
 
 
+            <!-- PREVIEW HTML -->
+
             <button
                 type="button"
                 id="btn-preview-html-aging-receivable"
@@ -60,6 +73,8 @@ VERSION : 3.0.0
 
             </button>
 
+
+            <!-- REFRESH -->
 
             <button
                 type="button"
@@ -95,7 +110,9 @@ VERSION : 3.0.0
             <div class="row g-3 align-items-end">
 
 
-                <!-- INVOICE DATE FROM -->
+                <!-- ======================================
+                     INVOICE DATE FROM
+                ======================================= -->
 
                 <div class="col-md-2">
 
@@ -115,7 +132,9 @@ VERSION : 3.0.0
                 </div>
 
 
-                <!-- INVOICE DATE TO -->
+                <!-- ======================================
+                     INVOICE DATE TO
+                ======================================= -->
 
                 <div class="col-md-2">
 
@@ -135,7 +154,9 @@ VERSION : 3.0.0
                 </div>
 
 
-                <!-- SHOW -->
+                <!-- ======================================
+                     SHOW
+                ======================================= -->
 
                 <div class="col-md-2">
 
@@ -174,7 +195,9 @@ VERSION : 3.0.0
                 </div>
 
 
-                <!-- FIND BY -->
+                <!-- ======================================
+                     FIND BY
+                ======================================= -->
 
                 <div class="col-md-2">
 
@@ -213,7 +236,9 @@ VERSION : 3.0.0
                 </div>
 
 
-                <!-- KEYWORD -->
+                <!-- ======================================
+                     KEYWORD
+                ======================================= -->
 
                 <div class="col-md-4">
 
@@ -231,14 +256,20 @@ VERSION : 3.0.0
                             type="text"
                             id="aging-receivable-keyword"
                             class="form-control finova-control"
-                            placeholder="Search Invoice No or Customer...">
+                            placeholder="Search Invoice No, PO No or Customer...">
 
                         <button
                             type="button"
                             id="btn-find-aging-receivable"
                             class="btn btn-primary">
 
-                            <i class="fa-solid fa-magnifying-glass me-1"></i>
+                            <i
+                                class="
+                                    fa-solid
+                                    fa-magnifying-glass
+                                    me-1
+                                ">
+                            </i>
 
                             Find
 
@@ -257,7 +288,7 @@ VERSION : 3.0.0
 
 
     <!-- ==================================================
-         TABLE CARD
+         AGING RECEIVABLE TABLE CARD
     =================================================== -->
 
     <div
@@ -272,6 +303,10 @@ VERSION : 3.0.0
             <div class="finova-table-container">
 
 
+                <!-- ======================================
+                     TABLE SCROLL AREA
+                ======================================= -->
+
                 <div class="table-responsive">
 
                     <table
@@ -284,121 +319,439 @@ VERSION : 3.0.0
                             mb-0
                         ">
 
+
+                        <!-- ==============================
+                             TABLE HEADER
+                        =============================== -->
+
                         <thead>
 
                             <tr>
 
-                                <th class="finova-table-index aging-ar-col-no">
+
+                                <!-- NO -->
+
+                                <th
+                                    class="
+                                        finova-table-index
+                                        aging-ar-col-no
+                                    ">
+
                                     No
+
                                 </th>
 
-                                <th class="finova-table-name aging-ar-col-customer">
+
+                                <!-- CUSTOMER -->
+
+                                <th
+                                    class="
+                                        finova-table-name
+                                        aging-ar-col-customer
+                                    ">
+
                                     Customer
+
                                 </th>
 
-                                <th class="finova-table-code aging-ar-col-invoice">
+
+                                <!-- INVOICE NO -->
+
+                                <th
+                                    class="
+                                        finova-table-code
+                                        aging-ar-col-invoice
+                                    ">
+
                                     Invoice No
+
                                 </th>
 
-                                <th class="finova-table-date aging-ar-col-date">
+
+                                <!-- PO NO -->
+
+                                <th
+                                    class="
+                                        finova-table-code
+                                        aging-ar-col-po
+                                    ">
+
+                                    PO No
+
+                                </th>
+
+
+                                <!-- DESCRIPTION -->
+
+                                <th
+                                    class="
+                                        finova-table-name
+                                        aging-ar-col-description
+                                    ">
+
+                                    Description
+
+                                </th>
+
+
+                                <!-- ACCOUNT HOLDER -->
+
+                                <th
+                                    class="
+                                        finova-table-name
+                                        aging-ar-col-account-holder
+                                    ">
+
+                                    Account Holder
+
+                                </th>
+
+
+                                <!-- BANK NAME -->
+
+                                <th
+                                    class="
+                                        finova-table-name
+                                        aging-ar-col-bank-name
+                                    ">
+
+                                    Bank Name
+
+                                </th>
+
+
+                                <!-- BANK ACCOUNT -->
+
+                                <th
+                                    class="
+                                        finova-table-code
+                                        aging-ar-col-bank-account
+                                    ">
+
+                                    Bank Account
+
+                                </th>
+
+
+                                <!-- INVOICE DATE -->
+
+                                <th
+                                    class="
+                                        finova-table-date
+                                        aging-ar-col-date
+                                    ">
+
                                     Invoice Date
+
                                 </th>
 
-                                <th class="finova-table-date aging-ar-col-date">
+
+                                <!-- DUE DATE -->
+
+                                <th
+                                    class="
+                                        finova-table-date
+                                        aging-ar-col-date
+                                    ">
+
                                     Due Date
+
                                 </th>
 
-                                <th class="finova-table-number aging-ar-col-amount">
+
+                                <!-- OUTSTANDING -->
+
+                                <th
+                                    class="
+                                        finova-table-number
+                                        aging-ar-col-amount
+                                    ">
+
                                     Outstanding
+
                                 </th>
 
-                                <th class="finova-table-number aging-ar-col-amount">
+
+                                <!-- CURRENT -->
+
+                                <th
+                                    class="
+                                        finova-table-number
+                                        aging-ar-col-amount
+                                    ">
+
                                     Current
+
                                 </th>
 
-                                <th class="finova-table-number aging-ar-col-amount">
+
+                                <!-- 1 - 30 -->
+
+                                <th
+                                    class="
+                                        finova-table-number
+                                        aging-ar-col-amount
+                                    ">
+
                                     1 - 30
+
                                 </th>
 
-                                <th class="finova-table-number aging-ar-col-amount">
+
+                                <!-- 31 - 60 -->
+
+                                <th
+                                    class="
+                                        finova-table-number
+                                        aging-ar-col-amount
+                                    ">
+
                                     31 - 60
+
                                 </th>
 
-                                <th class="finova-table-number aging-ar-col-amount">
+
+                                <!-- 61 - 90 -->
+
+                                <th
+                                    class="
+                                        finova-table-number
+                                        aging-ar-col-amount
+                                    ">
+
                                     61 - 90
+
                                 </th>
 
-                                <th class="finova-table-number aging-ar-col-amount">
+
+                                <!-- > 90 -->
+
+                                <th
+                                    class="
+                                        finova-table-number
+                                        aging-ar-col-amount
+                                    ">
+
                                     &gt; 90
+
                                 </th>
 
-                                <th class="finova-table-status aging-ar-col-status">
-                                    Status
+
+                                <!-- TOTAL AMOUNT -->
+
+                                <th
+                                    class="
+                                        finova-table-number
+                                        aging-ar-col-amount-wide
+                                    ">
+
+                                    Total Amount
+
                                 </th>
+
+
+                                <!-- BEFORE TAX AMOUNT -->
+
+                                <th
+                                    class="
+                                        finova-table-number
+                                        aging-ar-col-amount-wide
+                                    ">
+
+                                    Before Tax Amount
+
+                                </th>
+
+
+                                <!-- TAX + -->
+
+                                <th
+                                    class="
+                                        finova-table-number
+                                        aging-ar-col-amount
+                                    ">
+
+                                    Tax (+)
+
+                                </th>
+
+
+                                <!-- TAX - -->
+
+                                <th
+                                    class="
+                                        finova-table-number
+                                        aging-ar-col-amount
+                                    ">
+
+                                    Tax (-)
+
+                                </th>
+
 
                             </tr>
 
                         </thead>
 
 
-                        <tbody id="aging-receivable-tbody">
+                        <!-- ==============================
+                             TABLE BODY
+                        =============================== -->
+
+                        <tbody
+                            id="aging-receivable-tbody">
                         </tbody>
 
+
+                        <!-- ==============================
+                             TABLE FOOTER
+                        =============================== -->
 
                         <tfoot>
 
                             <tr>
 
+
+                                <!--
+                                ==================================
+                                10 NON-AMOUNT COLUMNS
+
+                                1. No
+                                2. Customer
+                                3. Invoice No
+                                4. PO No
+                                5. Description
+                                6. Account Holder
+                                7. Bank Name
+                                8. Bank Account
+                                9. Invoice Date
+                                10. Due Date
+                                ==================================
+                                -->
+
                                 <th
-                                    colspan="5"
+                                    colspan="10"
                                     class="text-end">
 
                                     TOTAL
 
                                 </th>
 
+
+                                <!-- OUTSTANDING -->
+
                                 <th
                                     id="aging-ar-total-outstanding"
                                     class="finova-table-number">
+
                                     0
+
                                 </th>
+
+
+                                <!-- CURRENT -->
 
                                 <th
                                     id="aging-ar-total-current"
                                     class="finova-table-number">
+
                                     0
+
                                 </th>
+
+
+                                <!-- 1 - 30 -->
 
                                 <th
                                     id="aging-ar-total-1-30"
                                     class="finova-table-number">
+
                                     0
+
                                 </th>
+
+
+                                <!-- 31 - 60 -->
 
                                 <th
                                     id="aging-ar-total-31-60"
                                     class="finova-table-number">
+
                                     0
+
                                 </th>
+
+
+                                <!-- 61 - 90 -->
 
                                 <th
                                     id="aging-ar-total-61-90"
                                     class="finova-table-number">
+
                                     0
+
                                 </th>
+
+
+                                <!-- > 90 -->
 
                                 <th
                                     id="aging-ar-total-90-plus"
                                     class="finova-table-number">
+
                                     0
+
                                 </th>
 
-                                <th>
+
+                                <!-- TOTAL AMOUNT -->
+
+                                <th
+                                    id="aging-ar-total-amount"
+                                    class="finova-table-number">
+
+                                    0
+
                                 </th>
+
+
+                                <!-- BEFORE TAX -->
+
+                                <th
+                                    id="aging-ar-total-before-tax"
+                                    class="finova-table-number">
+
+                                    0
+
+                                </th>
+
+
+                                <!-- TAX + -->
+
+                                <th
+                                    id="aging-ar-total-tax-plus"
+                                    class="finova-table-number">
+
+                                    0
+
+                                </th>
+
+
+                                <!-- TAX - -->
+
+                                <th
+                                    id="aging-ar-total-tax-minus"
+                                    class="finova-table-number">
+
+                                    0
+
+                                </th>
+
 
                             </tr>
 
                         </tfoot>
+
 
                     </table>
 
@@ -407,12 +760,20 @@ VERSION : 3.0.0
 
                 <!-- ==================================================
                      GLOBAL PAGINATION
+                     SAME AS AGING PAYABLE
                 =================================================== -->
 
                 <div class="finova-pagination-wrapper">
 
+
+                    <!-- ======================================
+                         PAGINATION LEFT
+                    ======================================= -->
+
                     <div class="finova-pagination-left">
 
+
+                        <!-- FIRST -->
 
                         <button
                             type="button"
@@ -426,6 +787,8 @@ VERSION : 3.0.0
                         </button>
 
 
+                        <!-- PREVIOUS -->
+
                         <button
                             type="button"
                             id="aging-ar-page-prev"
@@ -438,10 +801,16 @@ VERSION : 3.0.0
                         </button>
 
 
+                        <!-- PAGE -->
+
                         <span class="finova-pagination-label">
+
                             Page
+
                         </span>
 
+
+                        <!-- CURRENT PAGE -->
 
                         <input
                             type="number"
@@ -454,10 +823,16 @@ VERSION : 3.0.0
                             title="Enter page number">
 
 
+                        <!-- OF -->
+
                         <span class="finova-pagination-label">
+
                             of
+
                         </span>
 
+
+                        <!-- TOTAL PAGE -->
 
                         <span
                             id="aging-ar-total-pages"
@@ -467,6 +842,8 @@ VERSION : 3.0.0
 
                         </span>
 
+
+                        <!-- NEXT -->
 
                         <button
                             type="button"
@@ -479,6 +856,8 @@ VERSION : 3.0.0
 
                         </button>
 
+
+                        <!-- LAST -->
 
                         <button
                             type="button"
@@ -495,6 +874,10 @@ VERSION : 3.0.0
                     </div>
 
 
+                    <!-- ======================================
+                         RECORD INFO
+                    ======================================= -->
+
                     <div
                         id="aging-ar-record-info"
                         class="finova-pagination-info">
@@ -503,8 +886,8 @@ VERSION : 3.0.0
 
                     </div>
 
-                </div>
 
+                </div>
 
             </div>
 

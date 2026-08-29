@@ -1,14 +1,26 @@
 /*
 ==========================================================
 FINOVA ACCOUNTING SYSTEM
-MODULE : AGING RECEIVABLE
-Version : 3.0 Enterprise
+MODULE  : AGING RECEIVABLE
+FILE    : aging-receivable.js
+VERSION : 4.1.0 FINAL
+STANDARD: AGING PAYABLE
 ==========================================================
 */
 
 import {
     AccountReceivableService
 } from "../../service/account-receivable.service.js";
+
+
+import {
+    BusinessPartnerBankService
+} from "../../service/business-partner-bank.service.js";
+
+
+import {
+    BankService
+} from "../../service/bank.service.js";
 
 
 import {
@@ -31,10 +43,22 @@ export class AgingReceivable {
             new AccountReceivableService();
 
 
+        /*
+        ======================================================
+        DATA
+        ======================================================
+        */
+
         this.data = [];
 
         this.filteredData = [];
 
+
+        /*
+        ======================================================
+        PAGINATION
+        ======================================================
+        */
 
         this.currentPage = 1;
 
@@ -51,9 +75,27 @@ export class AgingReceivable {
         ======================================================
         */
 
-        this.asOfDateValue =
-            null;
+        this.asOfDateValue = null;
 
+
+        /*
+        ======================================================
+        BANK CACHE
+        ======================================================
+        */
+
+        this.bankMasterMap =
+            new Map();
+
+        this.customerBankCache =
+            new Map();
+
+
+        /*
+        ======================================================
+        INITIALIZE
+        ======================================================
+        */
 
         this.init();
 
@@ -122,6 +164,7 @@ export class AgingReceivable {
     */
 
     cacheDom() {
+
 
         /*
         ======================================================
@@ -203,7 +246,7 @@ export class AgingReceivable {
 
         /*
         ======================================================
-        TOTAL
+        TOTAL - AGING
         ======================================================
         */
 
@@ -240,6 +283,36 @@ export class AgingReceivable {
         this.total90plus =
             document.getElementById(
                 "aging-ar-total-90-plus"
+            );
+
+
+        /*
+        ======================================================
+        TOTAL - INVOICE
+        ======================================================
+        */
+
+        this.totalAmount =
+            document.getElementById(
+                "aging-ar-total-amount"
+            );
+
+
+        this.totalBeforeTax =
+            document.getElementById(
+                "aging-ar-total-before-tax"
+            );
+
+
+        this.totalTaxPlus =
+            document.getElementById(
+                "aging-ar-total-tax-plus"
+            );
+
+
+        this.totalTaxMinus =
+            document.getElementById(
+                "aging-ar-total-tax-minus"
             );
 
 
@@ -364,6 +437,13 @@ export class AgingReceivable {
 
     bindEvents() {
 
+
+        /*
+        ======================================================
+        FIND
+        ======================================================
+        */
+
         this.btnFind?.addEventListener(
 
             "click",
@@ -378,6 +458,12 @@ export class AgingReceivable {
 
         );
 
+
+        /*
+        ======================================================
+        KEYWORD ENTER
+        ======================================================
+        */
 
         this.filterKeyword?.addEventListener(
 
@@ -400,6 +486,12 @@ export class AgingReceivable {
         );
 
 
+        /*
+        ======================================================
+        DATE FROM
+        ======================================================
+        */
+
         this.filterDateFrom?.addEventListener(
 
             "change",
@@ -412,6 +504,12 @@ export class AgingReceivable {
 
         );
 
+
+        /*
+        ======================================================
+        DATE TO
+        ======================================================
+        */
 
         this.filterDateTo?.addEventListener(
 
@@ -426,6 +524,12 @@ export class AgingReceivable {
         );
 
 
+        /*
+        ======================================================
+        STATUS
+        ======================================================
+        */
+
         this.filterStatus?.addEventListener(
 
             "change",
@@ -438,6 +542,12 @@ export class AgingReceivable {
 
         );
 
+
+        /*
+        ======================================================
+        REFRESH
+        ======================================================
+        */
 
         this.btnRefresh?.addEventListener(
 
@@ -454,6 +564,12 @@ export class AgingReceivable {
         );
 
 
+        /*
+        ======================================================
+        PREVIEW
+        ======================================================
+        */
+
         this.btnPreview?.addEventListener(
 
             "click",
@@ -468,6 +584,12 @@ export class AgingReceivable {
 
         );
 
+
+        /*
+        ======================================================
+        DOWNLOAD
+        ======================================================
+        */
 
         this.btnDownload?.addEventListener(
 
@@ -484,33 +606,57 @@ export class AgingReceivable {
         );
 
 
+        /*
+        ======================================================
+        PAGINATION
+        ======================================================
+        */
+
         this.btnFirst?.addEventListener(
+
             "click",
-            () => this.goToPage(1)
+
+            () =>
+                this.goToPage(
+                    1
+                )
+
         );
 
 
         this.btnPrev?.addEventListener(
+
             "click",
-            () => this.goToPage(
-                this.currentPage - 1
-            )
+
+            () =>
+                this.goToPage(
+                    this.currentPage - 1
+                )
+
         );
 
 
         this.btnNext?.addEventListener(
+
             "click",
-            () => this.goToPage(
-                this.currentPage + 1
-            )
+
+            () =>
+                this.goToPage(
+                    this.currentPage + 1
+                )
+
         );
 
 
         this.btnLast?.addEventListener(
+
             "click",
-            () => this.goToPage(
-                this.totalPages
-            )
+
+            () =>
+                this.goToPage(
+                    this.totalPages
+                )
+
         );
 
 
@@ -561,100 +707,184 @@ export class AgingReceivable {
             this.showTableLoading();
 
 
-            const rows =
+            /*
+            ======================================================
+            LOAD ACCOUNT RECEIVABLE
+            ======================================================
+            */
+
+            const result =
                 await this.service.getAll();
 
 
             const source =
                 Array.isArray(
-                    rows
+                    result
                 )
-                    ? rows
-                    : [];
+                    ? result
+
+                    : Array.isArray(
+                        result?.data
+                    )
+                        ? result.data
+
+                        : [];
 
 
             /*
             ======================================================
-            ONLY OUTSTANDING AR
-
-            Draft = not valid receivable yet
-            Paid  = no outstanding
-            Void  = cancelled
+            LOAD BANK MASTER
             ======================================================
             */
 
-            this.data =
-                source
-                    .filter(
+            await this.loadBankMaster();
 
-                        row => {
 
-                            const status =
-                                String(
-                                    row?.status
-                                    ||
-                                    ""
-                                )
+            /*
+            ======================================================
+            RESET CUSTOMER BANK CACHE
+            ======================================================
+            */
+
+            this.customerBankCache.clear();
+
+
+            /*
+            ======================================================
+            FILTER VALID RECEIVABLE
+            ======================================================
+
+            Draft = belum menjadi receivable resmi
+            Paid  = outstanding sudah habis
+            Void  = dibatalkan
+
+            ======================================================
+            */
+
+            const validRows =
+                source.filter(
+
+                    row => {
+
+                        const status =
+                            String(
+                                row?.status
+                                ||
+                                ""
+                            )
                                 .trim()
                                 .toLowerCase();
 
 
-                            if (
-                                status === "draft"
-                                ||
-                                status === "paid"
-                                ||
-                                status === "void"
-                            ) {
+                        if (
+                            status === "draft"
+                            ||
+                            status === "paid"
+                            ||
+                            status === "void"
+                        ) {
 
-                                return false;
-
-                            }
-
-
-                            const total =
-                                Number(
-                                    row?.total_amount
-                                    ||
-                                    0
-                                );
-
-
-                            const paid =
-                                Number(
-                                    row?.paid_amount
-                                    ||
-                                    0
-                                );
-
-
-                            const outstanding =
-                                Number(
-
-                                    row?.outstanding_amount
-                                    ??
-                                    (
-                                        total
-                                        -
-                                        paid
-                                    )
-
-                                );
-
-
-                            return outstanding > 0;
+                            return false;
 
                         }
 
-                    )
-                    .map(
 
-                        row =>
-                            this.normalizeRow(
-                                row
-                            )
+                        const total =
+                            this.toNumber(
+                                row?.total_amount
+                            );
 
+
+                        const paid =
+                            this.toNumber(
+                                row?.paid_amount
+                            );
+
+
+                        const explicitOutstanding =
+                            row?.outstanding_amount;
+
+
+                        const outstanding =
+                            explicitOutstanding !== null
+                            &&
+                            explicitOutstanding !== undefined
+
+                                ? this.toNumber(
+                                    explicitOutstanding
+                                )
+
+                                : Math.max(
+                                    total - paid,
+                                    0
+                                );
+
+
+                        return outstanding > 0;
+
+                    }
+
+                );
+
+
+            /*
+            ======================================================
+            LOAD CUSTOMER BANK
+            ======================================================
+            */
+
+            const normalizedRows = [];
+
+
+            for (
+                const row
+                of validRows
+            ) {
+
+                const customer =
+                    row?.mst_business_partner
+                    ||
+                    row?.customer
+                    ||
+                    {};
+
+
+                const customerId =
+                    row?.customer_id
+                    ??
+                    row?.business_partner_id
+                    ??
+                    customer?.id
+                    ??
+                    null;
+
+
+                const bankInfo =
+                    await this.getCustomerBankInfo(
+                        customerId
                     );
+
+
+                normalizedRows.push(
+
+                    this.normalizeRow(
+                        row,
+                        bankInfo
+                    )
+
+                );
+
+            }
+
+
+            this.data =
+                normalizedRows;
+
+
+            console.log(
+                "AGING RECEIVABLE FINAL DATA:",
+                this.data
+            );
 
 
             this.applyFilter();
@@ -679,7 +909,13 @@ export class AgingReceivable {
             this.refreshView();
 
 
-            throw error;
+            this.showError(
+
+                error?.message
+                ||
+                "Failed to load Aging Receivable."
+
+            );
 
         }
 
@@ -700,13 +936,386 @@ export class AgingReceivable {
 
     /*
     ==========================================================
+    LOAD BANK MASTER
+    ==========================================================
+    */
+
+    async loadBankMaster() {
+
+        this.bankMasterMap =
+            new Map();
+
+
+        try {
+
+            const result =
+                await BankService.getAll();
+
+
+            const rows =
+                Array.isArray(
+                    result
+                )
+                    ? result
+
+                    : Array.isArray(
+                        result?.data
+                    )
+                        ? result.data
+
+                        : [];
+
+
+            rows.forEach(
+
+                bank => {
+
+                    const id =
+                        bank?.id;
+
+
+                    if (
+                        id !== null
+                        &&
+                        id !== undefined
+                    ) {
+
+                        this.bankMasterMap.set(
+
+                            String(id),
+
+                            bank
+
+                        );
+
+                    }
+
+                }
+
+            );
+
+
+            console.log(
+                "AGING RECEIVABLE BANK MASTER COUNT:",
+                this.bankMasterMap.size
+            );
+
+        }
+
+        catch (
+            error
+        ) {
+
+            /*
+            ======================================================
+            BANK MUST NOT BLOCK AGING RECEIVABLE
+            ======================================================
+            */
+
+            console.error(
+                "AgingReceivable.loadBankMaster",
+                error
+            );
+
+
+            this.bankMasterMap =
+                new Map();
+
+        }
+
+    }
+
+
+    /*
+    ==========================================================
+    GET CUSTOMER BANK INFO
+    ==========================================================
+    */
+
+    async getCustomerBankInfo(
+        customerId
+    ) {
+
+        const emptyResult = {
+
+            account_holder:
+                "-",
+
+            bank_name:
+                "-",
+
+            bank_account:
+                "-"
+
+        };
+
+
+        if (
+            customerId === null
+            ||
+            customerId === undefined
+            ||
+            customerId === ""
+        ) {
+
+            return emptyResult;
+
+        }
+
+
+        const cacheKey =
+            String(
+                customerId
+            );
+
+
+        /*
+        ======================================================
+        RETURN CACHE
+        ======================================================
+        */
+
+        if (
+            this.customerBankCache.has(
+                cacheKey
+            )
+        ) {
+
+            return this.customerBankCache.get(
+                cacheKey
+            );
+
+        }
+
+
+        try {
+
+            /*
+            ======================================================
+            SAME SERVICE USED BY BUSINESS PARTNER MODULE
+            ======================================================
+            */
+
+            const result =
+                await BusinessPartnerBankService
+                    .getByBusinessPartner(
+                        customerId
+                    );
+
+
+            const banks =
+                Array.isArray(
+                    result
+                )
+                    ? result
+
+                    : Array.isArray(
+                        result?.data
+                    )
+                        ? result.data
+
+                        : [];
+
+
+            /*
+            ======================================================
+            DEFAULT BANK
+
+            1. is_default = true
+            2. fallback first bank
+            ======================================================
+            */
+
+            const selectedBank =
+                banks.find(
+
+                    bank =>
+                        bank?.is_default === true
+
+                )
+                ||
+                banks[0]
+                ||
+                null;
+
+
+            if (
+                !selectedBank
+            ) {
+
+                this.customerBankCache.set(
+
+                    cacheKey,
+
+                    emptyResult
+
+                );
+
+
+                return emptyResult;
+
+            }
+
+
+            /*
+            ======================================================
+            BANK MASTER
+            ======================================================
+            */
+
+            const bankId =
+                selectedBank?.bank_id
+                ??
+                selectedBank?.mst_bank_id
+                ??
+                null;
+
+
+            const bankMaster =
+                bankId !== null
+                &&
+                bankId !== undefined
+
+                    ? this.bankMasterMap.get(
+                        String(bankId)
+                    )
+
+                    : null;
+
+
+            const bankInfo = {
+
+                account_holder:
+
+                    selectedBank?.account_name
+                    ||
+                    selectedBank?.account_holder
+                    ||
+                    "-",
+
+
+                bank_name:
+
+                    bankMaster?.bank_name
+                    ||
+                    selectedBank?.bank_name
+                    ||
+                    selectedBank?.mst_bank?.bank_name
+                    ||
+                    "-",
+
+
+                bank_account:
+
+                    selectedBank?.account_number
+                    ||
+                    selectedBank?.bank_account
+                    ||
+                    "-"
+
+            };
+
+
+            this.customerBankCache.set(
+
+                cacheKey,
+
+                bankInfo
+
+            );
+
+
+            console.log(
+                "AGING RECEIVABLE BANK MAPPING:",
+                {
+
+                    customer_id:
+                        customerId,
+
+                    bank_id:
+                        bankId,
+
+                    account_holder:
+                        bankInfo.account_holder,
+
+                    bank_name:
+                        bankInfo.bank_name,
+
+                    bank_account:
+                        bankInfo.bank_account,
+
+                    is_default:
+                        selectedBank?.is_default
+
+                }
+            );
+
+
+            return bankInfo;
+
+        }
+
+        catch (
+            error
+        ) {
+
+            /*
+            ======================================================
+            BANK ERROR MUST NOT BLOCK AGING RECEIVABLE
+            ======================================================
+            */
+
+            console.error(
+                "AgingReceivable.getCustomerBankInfo",
+                {
+
+                    customerId,
+
+                    message:
+                        error?.message,
+
+                    details:
+                        error?.details,
+
+                    hint:
+                        error?.hint,
+
+                    code:
+                        error?.code,
+
+                    error
+
+                }
+            );
+
+
+            this.customerBankCache.set(
+
+                cacheKey,
+
+                emptyResult
+
+            );
+
+
+            return emptyResult;
+
+        }
+
+    }
+
+
+    /*
+    ==========================================================
     NORMALIZE ROW
     ==========================================================
     */
 
     normalizeRow(
-        row
+        row,
+        bankInfo = {}
     ) {
+
 
         /*
         ======================================================
@@ -724,12 +1333,12 @@ export class AgingReceivable {
 
         /*
         ======================================================
-        TOTAL
+        TOTAL AMOUNT
         ======================================================
         */
 
-        const invoiceTotal =
-            Number(
+        const totalAmount =
+            this.toNumber(
 
                 row?.total_amount
                 ??
@@ -746,12 +1355,74 @@ export class AgingReceivable {
 
         /*
         ======================================================
+        BEFORE TAX AMOUNT
+        ======================================================
+        */
+
+        const beforeTaxAmount =
+            this.toNumber(
+
+                row?.subtotal
+                ??
+                row?.before_tax_amount
+                ??
+                row?.dpp_amount
+                ??
+                0
+
+            );
+
+
+        /*
+        ======================================================
+        TAX (+)
+        ======================================================
+        */
+
+        const taxPlusAmount =
+            this.toNumber(
+
+                row?.tax_output_amount
+                ??
+                row?.tax_input_amount
+                ??
+                row?.tax_plus_amount
+                ??
+                row?.vat_amount
+                ??
+                0
+
+            );
+
+
+        /*
+        ======================================================
+        TAX (-)
+        ======================================================
+        */
+
+        const taxMinusAmount =
+            this.toNumber(
+
+                row?.withholding_tax_amount
+                ??
+                row?.tax_minus_amount
+                ??
+                row?.wht_amount
+                ??
+                0
+
+            );
+
+
+        /*
+        ======================================================
         PAID
         ======================================================
         */
 
         const paidAmount =
-            Number(
+            this.toNumber(
 
                 row?.paid_amount
                 ??
@@ -767,35 +1438,57 @@ export class AgingReceivable {
         /*
         ======================================================
         OUTSTANDING
+
+        Important:
+        Payment rollback / payment update can change paid_amount.
+        Therefore fallback is always:
+
+        Total Amount - Paid Amount
         ======================================================
         */
 
-        const outstanding =
+        const hasExplicitOutstanding =
+            row?.outstanding_amount !== null
+            &&
+            row?.outstanding_amount !== undefined
+            &&
+            row?.outstanding_amount !== "";
+
+
+        const outstandingAmount =
             Math.max(
 
-                0,
+                hasExplicitOutstanding
 
-                Number(
-
-                    row?.outstanding_amount
-                    ??
-                    (
-                        invoiceTotal
-                        -
-                        paidAmount
+                    ? this.toNumber(
+                        row?.outstanding_amount
                     )
 
-                )
-                ||
+                    : totalAmount
+                    -
+                    paidAmount,
+
                 0
 
             );
 
 
+        /*
+        ======================================================
+        NORMALIZED RESULT
+        ======================================================
+        */
+
         return {
 
             ...row,
 
+
+            /*
+            ==================================================
+            CUSTOMER
+            ==================================================
+            */
 
             customer_name:
 
@@ -807,6 +1500,12 @@ export class AgingReceivable {
                 ||
                 "-",
 
+
+            /*
+            ==================================================
+            DOCUMENT
+            ==================================================
+            */
 
             invoice_no:
 
@@ -822,6 +1521,46 @@ export class AgingReceivable {
                 "-",
 
 
+            description:
+
+                row?.description
+                ||
+                "-",
+
+
+            /*
+            ==================================================
+            CUSTOMER BANK
+            ==================================================
+            */
+
+            account_holder:
+
+                bankInfo?.account_holder
+                ||
+                "-",
+
+
+            bank_name:
+
+                bankInfo?.bank_name
+                ||
+                "-",
+
+
+            bank_account:
+
+                bankInfo?.bank_account
+                ||
+                "-",
+
+
+            /*
+            ==================================================
+            DATE
+            ==================================================
+            */
+
             invoice_date:
 
                 row?.invoice_date
@@ -836,14 +1575,54 @@ export class AgingReceivable {
                 null,
 
 
+            /*
+            ==================================================
+            AMOUNT
+            ==================================================
+            */
+
+            total_amount:
+
+                totalAmount,
+
+
+            before_tax_amount:
+
+                beforeTaxAmount,
+
+
+            tax_plus_amount:
+
+                taxPlusAmount,
+
+
+            tax_minus_amount:
+
+                taxMinusAmount,
+
+
+            paid_amount:
+
+                paidAmount,
+
+
             outstanding_amount:
 
-                outstanding,
+                outstandingAmount,
 
+
+            /*
+            ==================================================
+            AGING BUCKET
+            ==================================================
+            */
 
             ...this.calculateBucket(
+
                 row?.due_date,
-                outstanding
+
+                outstandingAmount
+
             )
 
         };
@@ -867,8 +1646,11 @@ export class AgingReceivable {
                     ...row,
 
                     ...this.calculateBucket(
+
                         row?.due_date,
+
                         row?.outstanding_amount
+
                     )
 
                 })
@@ -894,31 +1676,41 @@ export class AgingReceivable {
 
         const result = {
 
-            aging_days: 0,
+            aging_days:
+                0,
 
             bucket:
                 "current",
 
-            current: 0,
+            current:
+                0,
 
-            days_1_30: 0,
+            days_1_30:
+                0,
 
-            days_31_60: 0,
+            days_31_60:
+                0,
 
-            days_61_90: 0,
+            days_61_90:
+                0,
 
-            days_90_plus: 0
+            days_90_plus:
+                0
 
         };
 
 
         const amount =
-            Number(
+            this.toNumber(
                 outstanding
-                ||
-                0
             );
 
+
+        /*
+        ======================================================
+        NO DUE DATE
+        ======================================================
+        */
 
         if (
             !dueDate
@@ -929,10 +1721,17 @@ export class AgingReceivable {
             result.current =
                 amount;
 
+
             return result;
 
         }
 
+
+        /*
+        ======================================================
+        PARSE DATE
+        ======================================================
+        */
 
         const asOf =
             this.parseDate(
@@ -955,10 +1754,17 @@ export class AgingReceivable {
             result.current =
                 amount;
 
+
             return result;
 
         }
 
+
+        /*
+        ======================================================
+        DIFFERENCE DAYS
+        ======================================================
+        */
 
         const days =
             Math.floor(
@@ -981,6 +1787,12 @@ export class AgingReceivable {
             );
 
 
+        /*
+        ======================================================
+        CURRENT
+        ======================================================
+        */
+
         if (
             days <= 0
         ) {
@@ -988,10 +1800,18 @@ export class AgingReceivable {
             result.current =
                 amount;
 
+
             result.bucket =
                 "current";
 
         }
+
+
+        /*
+        ======================================================
+        1 - 30
+        ======================================================
+        */
 
         else if (
             days <= 30
@@ -1000,10 +1820,18 @@ export class AgingReceivable {
             result.days_1_30 =
                 amount;
 
+
             result.bucket =
                 "1-30";
 
         }
+
+
+        /*
+        ======================================================
+        31 - 60
+        ======================================================
+        */
 
         else if (
             days <= 60
@@ -1012,10 +1840,18 @@ export class AgingReceivable {
             result.days_31_60 =
                 amount;
 
+
             result.bucket =
                 "31-60";
 
         }
+
+
+        /*
+        ======================================================
+        61 - 90
+        ======================================================
+        */
 
         else if (
             days <= 90
@@ -1024,15 +1860,24 @@ export class AgingReceivable {
             result.days_61_90 =
                 amount;
 
+
             result.bucket =
                 "61-90";
 
         }
 
+
+        /*
+        ======================================================
+        > 90
+        ======================================================
+        */
+
         else {
 
             result.days_90_plus =
                 amount;
+
 
             result.bucket =
                 "90+";
@@ -1083,8 +1928,8 @@ export class AgingReceivable {
                 ||
                 ""
             )
-            .trim()
-            .toLowerCase();
+                .trim()
+                .toLowerCase();
 
 
         this.filteredData =
@@ -1092,21 +1937,24 @@ export class AgingReceivable {
 
                 row => {
 
+
                     /*
                     ==============================================
-                    DATE
+                    INVOICE DATE
                     ==============================================
                     */
 
                     const invoiceDate =
                         row?.invoice_date
+
                             ? String(
                                 row.invoice_date
                             )
-                            .slice(
-                                0,
-                                10
-                            )
+                                .slice(
+                                    0,
+                                    10
+                                )
+
                             : "";
 
 
@@ -1150,20 +1998,26 @@ export class AgingReceivable {
                             ||
                             ""
                         )
-                        .trim()
-                        .toLowerCase()
+                            .trim()
+                            .toLowerCase()
                         !==
                         String(
                             status
                         )
-                        .trim()
-                        .toLowerCase()
+                            .trim()
+                            .toLowerCase()
                     ) {
 
                         return false;
 
                     }
 
+
+                    /*
+                    ==============================================
+                    NO KEYWORD
+                    ==============================================
+                    */
 
                     if (
                         !keyword
@@ -1195,6 +2049,7 @@ export class AgingReceivable {
 
                     }
 
+
                     else if (
                         findBy === "po"
                     ) {
@@ -1205,6 +2060,7 @@ export class AgingReceivable {
                             "";
 
                     }
+
 
                     else {
 
@@ -1219,10 +2075,10 @@ export class AgingReceivable {
                     return String(
                         value
                     )
-                    .toLowerCase()
-                    .includes(
-                        keyword
-                    );
+                        .toLowerCase()
+                        .includes(
+                            keyword
+                        );
 
                 }
 
@@ -1331,6 +2187,12 @@ export class AgingReceivable {
             );
 
 
+        /*
+        ======================================================
+        EMPTY
+        ======================================================
+        */
+
         if (
             !rows.length
         ) {
@@ -1340,7 +2202,7 @@ export class AgingReceivable {
                 <tr>
 
                     <td
-                        colspan="12"
+                        colspan="20"
                         class="text-center py-5 text-muted">
 
                         No Aging Receivable record found.
@@ -1351,10 +2213,17 @@ export class AgingReceivable {
 
             `;
 
+
             return;
 
         }
 
+
+        /*
+        ======================================================
+        ROW
+        ======================================================
+        */
 
         rows.forEach(
 
@@ -1404,6 +2273,11 @@ export class AgingReceivable {
 
             <tr>
 
+
+                <!-- ==========================================
+                     NO
+                =========================================== -->
+
                 <td class="finova-table-index">
 
                     ${number}
@@ -1411,27 +2285,128 @@ export class AgingReceivable {
                 </td>
 
 
+                <!-- ==========================================
+                     CUSTOMER
+                =========================================== -->
+
                 <td class="finova-table-name">
 
                     ${
                         this.escapeHTML(
                             row?.customer_name
+                            ||
+                            "-"
                         )
                     }
 
                 </td>
 
+
+                <!-- ==========================================
+                     INVOICE NO
+                =========================================== -->
 
                 <td class="finova-table-code">
 
                     ${
                         this.escapeHTML(
                             row?.invoice_no
+                            ||
+                            "-"
                         )
                     }
 
                 </td>
 
+
+                <!-- ==========================================
+                     PO NO
+                =========================================== -->
+
+                <td class="finova-table-code">
+
+                    ${
+                        this.escapeHTML(
+                            row?.po_no
+                            ||
+                            "-"
+                        )
+                    }
+
+                </td>
+
+
+                <!-- ==========================================
+                     DESCRIPTION
+                =========================================== -->
+
+                <td class="finova-table-name">
+
+                    ${
+                        this.escapeHTML(
+                            row?.description
+                            ||
+                            "-"
+                        )
+                    }
+
+                </td>
+
+
+                <!-- ==========================================
+                     ACCOUNT HOLDER
+                =========================================== -->
+
+                <td class="finova-table-name">
+
+                    ${
+                        this.escapeHTML(
+                            row?.account_holder
+                            ||
+                            "-"
+                        )
+                    }
+
+                </td>
+
+
+                <!-- ==========================================
+                     BANK NAME
+                =========================================== -->
+
+                <td class="finova-table-name">
+
+                    ${
+                        this.escapeHTML(
+                            row?.bank_name
+                            ||
+                            "-"
+                        )
+                    }
+
+                </td>
+
+
+                <!-- ==========================================
+                     BANK ACCOUNT
+                =========================================== -->
+
+                <td class="finova-table-code">
+
+                    ${
+                        this.escapeHTML(
+                            row?.bank_account
+                            ||
+                            "-"
+                        )
+                    }
+
+                </td>
+
+
+                <!-- ==========================================
+                     INVOICE DATE
+                =========================================== -->
 
                 <td class="finova-table-date">
 
@@ -1444,6 +2419,10 @@ export class AgingReceivable {
                 </td>
 
 
+                <!-- ==========================================
+                     DUE DATE
+                =========================================== -->
+
                 <td class="finova-table-date">
 
                     ${
@@ -1454,6 +2433,10 @@ export class AgingReceivable {
 
                 </td>
 
+
+                <!-- ==========================================
+                     OUTSTANDING
+                =========================================== -->
 
                 <td class="finova-table-number">
 
@@ -1466,6 +2449,10 @@ export class AgingReceivable {
                 </td>
 
 
+                <!-- ==========================================
+                     CURRENT
+                =========================================== -->
+
                 <td class="finova-table-number">
 
                     ${
@@ -1476,6 +2463,10 @@ export class AgingReceivable {
 
                 </td>
 
+
+                <!-- ==========================================
+                     1 - 30
+                =========================================== -->
 
                 <td class="finova-table-number">
 
@@ -1488,6 +2479,10 @@ export class AgingReceivable {
                 </td>
 
 
+                <!-- ==========================================
+                     31 - 60
+                =========================================== -->
+
                 <td class="finova-table-number">
 
                     ${
@@ -1499,6 +2494,10 @@ export class AgingReceivable {
                 </td>
 
 
+                <!-- ==========================================
+                     61 - 90
+                =========================================== -->
+
                 <td class="finova-table-number">
 
                     ${
@@ -1509,6 +2508,10 @@ export class AgingReceivable {
 
                 </td>
 
+
+                <!-- ==========================================
+                     > 90
+                =========================================== -->
 
                 <td
                     class="
@@ -1525,15 +2528,65 @@ export class AgingReceivable {
                 </td>
 
 
-                <td class="finova-table-status">
+                <!-- ==========================================
+                     TOTAL AMOUNT
+                =========================================== -->
+
+                <td class="finova-table-number">
 
                     ${
-                        this.renderStatus(
-                            row?.status
+                        this.formatAmount(
+                            row?.total_amount
                         )
                     }
 
                 </td>
+
+
+                <!-- ==========================================
+                     BEFORE TAX AMOUNT
+                =========================================== -->
+
+                <td class="finova-table-number">
+
+                    ${
+                        this.formatAmount(
+                            row?.before_tax_amount
+                        )
+                    }
+
+                </td>
+
+
+                <!-- ==========================================
+                     TAX (+)
+                =========================================== -->
+
+                <td class="finova-table-number">
+
+                    ${
+                        this.formatAmount(
+                            row?.tax_plus_amount
+                        )
+                    }
+
+                </td>
+
+
+                <!-- ==========================================
+                     TAX (-)
+                =========================================== -->
+
+                <td class="finova-table-number">
+
+                    ${
+                        this.formatAmount(
+                            row?.tax_minus_amount
+                        )
+                    }
+
+                </td>
+
 
             </tr>
 
@@ -1558,51 +2611,76 @@ export class AgingReceivable {
                     row
                 ) => {
 
+
+                    /*
+                    ==============================================
+                    AGING
+                    ==============================================
+                    */
+
                     total.outstanding +=
-                        Number(
+                        this.toNumber(
                             row?.outstanding_amount
-                            ||
-                            0
                         );
 
 
                     total.current +=
-                        Number(
+                        this.toNumber(
                             row?.current
-                            ||
-                            0
                         );
 
 
                     total.d1 +=
-                        Number(
+                        this.toNumber(
                             row?.days_1_30
-                            ||
-                            0
                         );
 
 
                     total.d31 +=
-                        Number(
+                        this.toNumber(
                             row?.days_31_60
-                            ||
-                            0
                         );
 
 
                     total.d61 +=
-                        Number(
+                        this.toNumber(
                             row?.days_61_90
-                            ||
-                            0
                         );
 
 
                     total.d90 +=
-                        Number(
+                        this.toNumber(
                             row?.days_90_plus
-                            ||
-                            0
+                        );
+
+
+                    /*
+                    ==============================================
+                    INVOICE
+                    ==============================================
+                    */
+
+                    total.totalAmount +=
+                        this.toNumber(
+                            row?.total_amount
+                        );
+
+
+                    total.beforeTax +=
+                        this.toNumber(
+                            row?.before_tax_amount
+                        );
+
+
+                    total.taxPlus +=
+                        this.toNumber(
+                            row?.tax_plus_amount
+                        );
+
+
+                    total.taxMinus +=
+                        this.toNumber(
+                            row?.tax_minus_amount
                         );
 
 
@@ -1612,22 +2690,46 @@ export class AgingReceivable {
 
                 {
 
-                    outstanding: 0,
+                    outstanding:
+                        0,
 
-                    current: 0,
+                    current:
+                        0,
 
-                    d1: 0,
+                    d1:
+                        0,
 
-                    d31: 0,
+                    d31:
+                        0,
 
-                    d61: 0,
+                    d61:
+                        0,
 
-                    d90: 0
+                    d90:
+                        0,
+
+                    totalAmount:
+                        0,
+
+                    beforeTax:
+                        0,
+
+                    taxPlus:
+                        0,
+
+                    taxMinus:
+                        0
 
                 }
 
             );
 
+
+        /*
+        ======================================================
+        AGING TOTAL
+        ======================================================
+        */
 
         if (
             this.totalOutstanding
@@ -1700,6 +2802,60 @@ export class AgingReceivable {
 
         }
 
+
+        /*
+        ======================================================
+        INVOICE TOTAL
+        ======================================================
+        */
+
+        if (
+            this.totalAmount
+        ) {
+
+            this.totalAmount.textContent =
+                this.formatAmount(
+                    totals.totalAmount
+                );
+
+        }
+
+
+        if (
+            this.totalBeforeTax
+        ) {
+
+            this.totalBeforeTax.textContent =
+                this.formatAmount(
+                    totals.beforeTax
+                );
+
+        }
+
+
+        if (
+            this.totalTaxPlus
+        ) {
+
+            this.totalTaxPlus.textContent =
+                this.formatAmount(
+                    totals.taxPlus
+                );
+
+        }
+
+
+        if (
+            this.totalTaxMinus
+        ) {
+
+            this.totalTaxMinus.textContent =
+                this.formatAmount(
+                    totals.taxMinus
+                );
+
+        }
+
     }
 
 
@@ -1713,6 +2869,7 @@ export class AgingReceivable {
 
         const start =
             this.totalRows
+
                 ? (
                     (
                         this.currentPage
@@ -1724,6 +2881,7 @@ export class AgingReceivable {
                 )
                 +
                 1
+
                 : 0;
 
 
@@ -1739,6 +2897,12 @@ export class AgingReceivable {
             );
 
 
+        /*
+        ======================================================
+        CURRENT PAGE
+        ======================================================
+        */
+
         if (
             this.currentPageInput
         ) {
@@ -1748,6 +2912,12 @@ export class AgingReceivable {
 
         }
 
+
+        /*
+        ======================================================
+        TOTAL PAGE
+        ======================================================
+        */
 
         if (
             this.totalPagesLabel
@@ -1759,6 +2929,12 @@ export class AgingReceivable {
         }
 
 
+        /*
+        ======================================================
+        RECORD INFO
+        ======================================================
+        */
+
         if (
             this.displayRecord
         ) {
@@ -1766,12 +2942,18 @@ export class AgingReceivable {
             this.displayRecord.textContent =
                 this.totalRows
 
-                    ? `Records ${start} - ${end} of ${this.totalRows}`
+                    ? `Displaying Record ${start} - ${end} of ${this.totalRows}`
 
-                    : "Records 0 - 0 of 0";
+                    : "Displaying Record 0 - 0 of 0";
 
         }
 
+
+        /*
+        ======================================================
+        BUTTON STATE
+        ======================================================
+        */
 
         if (
             this.btnFirst
@@ -1833,10 +3015,15 @@ export class AgingReceivable {
             Math.min(
 
                 Math.max(
-                    Number(page)
+
+                    Number(
+                        page
+                    )
                     ||
                     1,
+
                     1
+
                 ),
 
                 this.totalPages
@@ -1853,13 +3040,20 @@ export class AgingReceivable {
 
     /*
     ==========================================================
-    RESET
+    RESET AND RELOAD
     ==========================================================
     */
 
     async resetAndReload() {
 
         try {
+
+
+            /*
+            ======================================================
+            RESET DATE
+            ======================================================
+            */
 
             if (
                 this.filterDateFrom
@@ -1881,6 +3075,12 @@ export class AgingReceivable {
             }
 
 
+            /*
+            ======================================================
+            RESET STATUS
+            ======================================================
+            */
+
             if (
                 this.filterStatus
             ) {
@@ -1890,6 +3090,12 @@ export class AgingReceivable {
 
             }
 
+
+            /*
+            ======================================================
+            RESET FIND BY
+            ======================================================
+            */
 
             if (
                 this.filterFindBy
@@ -1901,6 +3107,12 @@ export class AgingReceivable {
             }
 
 
+            /*
+            ======================================================
+            RESET KEYWORD
+            ======================================================
+            */
+
             if (
                 this.filterKeyword
             ) {
@@ -1911,8 +3123,20 @@ export class AgingReceivable {
             }
 
 
+            /*
+            ======================================================
+            RESET AGING DATE
+            ======================================================
+            */
+
             this.setDefaultFilterDates();
 
+
+            /*
+            ======================================================
+            RELOAD
+            ======================================================
+            */
 
             await this.loadData(
                 true
@@ -1956,7 +3180,7 @@ export class AgingReceivable {
             <tr>
 
                 <td
-                    colspan="12"
+                    colspan="20"
                     class="text-center py-5">
 
                     <div
@@ -2009,10 +3233,17 @@ export class AgingReceivable {
                     "No Aging Receivable data available to export."
                 );
 
+
                 return;
 
             }
 
+
+            /*
+            ======================================================
+            EXPORT DATA
+            ======================================================
+            */
 
             const data =
                 rows.map(
@@ -2025,89 +3256,119 @@ export class AgingReceivable {
                         "No":
                             index + 1,
 
+
                         "Customer":
                             row?.customer_name
                             ||
                             "",
+
 
                         "Invoice No":
                             row?.invoice_no
                             ||
                             "",
 
+
                         "PO No":
                             row?.po_no
                             ||
                             "",
+
 
                         "Description":
                             row?.description
                             ||
                             "",
 
+
+                        "Account Holder":
+                            row?.account_holder
+                            ||
+                            "",
+
+
+                        "Bank Name":
+                            row?.bank_name
+                            ||
+                            "",
+
+
+                        "Bank Account":
+                            row?.bank_account
+                            ||
+                            "",
+
+
                         "Invoice Date":
                             row?.invoice_date
                             ||
                             "",
+
 
                         "Due Date":
                             row?.due_date
                             ||
                             "",
 
-                        "Aging Days":
-                            Number(
-                                row?.aging_days
-                                ||
-                                0
-                            ),
 
                         "Outstanding":
-                            Number(
+                            this.toNumber(
                                 row?.outstanding_amount
-                                ||
-                                0
                             ),
+
 
                         "Current":
-                            Number(
+                            this.toNumber(
                                 row?.current
-                                ||
-                                0
                             ),
+
 
                         "1 - 30":
-                            Number(
+                            this.toNumber(
                                 row?.days_1_30
-                                ||
-                                0
                             ),
+
 
                         "31 - 60":
-                            Number(
+                            this.toNumber(
                                 row?.days_31_60
-                                ||
-                                0
                             ),
+
 
                         "61 - 90":
-                            Number(
+                            this.toNumber(
                                 row?.days_61_90
-                                ||
-                                0
                             ),
+
 
                         "> 90":
-                            Number(
+                            this.toNumber(
                                 row?.days_90_plus
-                                ||
-                                0
                             ),
 
-                        "Status":
-                            row?.status
-                            ||
-                            ""
+
+                        "Total Amount":
+                            this.toNumber(
+                                row?.total_amount
+                            ),
+
+
+                        "Before Tax Amount":
+                            this.toNumber(
+                                row?.before_tax_amount
+                            ),
+
+
+                        "Tax (+)":
+                            this.toNumber(
+                                row?.tax_plus_amount
+                            ),
+
+
+                        "Tax (-)":
+                            this.toNumber(
+                                row?.tax_minus_amount
+                            )
 
                     })
 
@@ -2175,10 +3436,18 @@ export class AgingReceivable {
                     "No Aging Receivable data available to preview."
                 );
 
+
                 return;
 
             }
 
+
+            /*
+            ======================================================
+            OPEN WINDOW FIRST
+            POPUP SAFE
+            ======================================================
+            */
 
             const previewWindow =
                 window.open(
@@ -2198,10 +3467,17 @@ export class AgingReceivable {
                     "Browser blocked the preview window. Please allow pop-ups for FINOVA."
                 );
 
+
                 return;
 
             }
 
+
+            /*
+            ======================================================
+            PREVIEW DATE
+            ======================================================
+            */
 
             const previewDate =
                 new Date()
@@ -2209,6 +3485,127 @@ export class AgingReceivable {
                         "id-ID"
                     );
 
+
+            /*
+            ======================================================
+            TOTAL
+            ======================================================
+            */
+
+            const totals =
+                rows.reduce(
+
+                    (
+                        total,
+                        row
+                    ) => {
+
+                        total.outstanding +=
+                            this.toNumber(
+                                row?.outstanding_amount
+                            );
+
+
+                        total.current +=
+                            this.toNumber(
+                                row?.current
+                            );
+
+
+                        total.d1 +=
+                            this.toNumber(
+                                row?.days_1_30
+                            );
+
+
+                        total.d31 +=
+                            this.toNumber(
+                                row?.days_31_60
+                            );
+
+
+                        total.d61 +=
+                            this.toNumber(
+                                row?.days_61_90
+                            );
+
+
+                        total.d90 +=
+                            this.toNumber(
+                                row?.days_90_plus
+                            );
+
+
+                        total.totalAmount +=
+                            this.toNumber(
+                                row?.total_amount
+                            );
+
+
+                        total.beforeTax +=
+                            this.toNumber(
+                                row?.before_tax_amount
+                            );
+
+
+                        total.taxPlus +=
+                            this.toNumber(
+                                row?.tax_plus_amount
+                            );
+
+
+                        total.taxMinus +=
+                            this.toNumber(
+                                row?.tax_minus_amount
+                            );
+
+
+                        return total;
+
+                    },
+
+                    {
+
+                        outstanding:
+                            0,
+
+                        current:
+                            0,
+
+                        d1:
+                            0,
+
+                        d31:
+                            0,
+
+                        d61:
+                            0,
+
+                        d90:
+                            0,
+
+                        totalAmount:
+                            0,
+
+                        beforeTax:
+                            0,
+
+                        taxPlus:
+                            0,
+
+                        taxMinus:
+                            0
+
+                    }
+
+                );
+
+
+            /*
+            ======================================================
+            REPORT ROWS
+            ======================================================
+            */
 
             const reportRows =
                 rows
@@ -2222,59 +3619,232 @@ export class AgingReceivable {
                             <tr>
 
                                 <td class="center">
+
                                     ${index + 1}
+
                                 </td>
 
-                                <td>
-                                    ${this.escapeHTML(row?.customer_name || "-")}
-                                </td>
 
                                 <td>
-                                    ${this.escapeHTML(row?.po_no || "-")}
+
+                                    ${
+                                        this.escapeHTML(
+                                            row?.customer_name
+                                            ||
+                                            "-"
+                                        )
+                                    }
+
                                 </td>
 
+
                                 <td>
-                                    ${this.escapeHTML(row?.invoice_no || "-")}
+
+                                    ${
+                                        this.escapeHTML(
+                                            row?.invoice_no
+                                            ||
+                                            "-"
+                                        )
+                                    }
+
                                 </td>
+
+
+                                <td>
+
+                                    ${
+                                        this.escapeHTML(
+                                            row?.po_no
+                                            ||
+                                            "-"
+                                        )
+                                    }
+
+                                </td>
+
 
                                 <td class="description">
-                                    ${this.escapeHTML(row?.description || "-")}
+
+                                    ${
+                                        this.escapeHTML(
+                                            row?.description
+                                            ||
+                                            "-"
+                                        )
+                                    }
+
                                 </td>
+
+
+                                <td>
+
+                                    ${
+                                        this.escapeHTML(
+                                            row?.account_holder
+                                            ||
+                                            "-"
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <td>
+
+                                    ${
+                                        this.escapeHTML(
+                                            row?.bank_name
+                                            ||
+                                            "-"
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <td>
+
+                                    ${
+                                        this.escapeHTML(
+                                            row?.bank_account
+                                            ||
+                                            "-"
+                                        )
+                                    }
+
+                                </td>
+
 
                                 <td class="center">
-                                    ${this.formatDate(row?.invoice_date)}
+
+                                    ${
+                                        this.formatDate(
+                                            row?.invoice_date
+                                        )
+                                    }
+
                                 </td>
+
 
                                 <td class="center">
-                                    ${this.formatDate(row?.due_date)}
+
+                                    ${
+                                        this.formatDate(
+                                            row?.due_date
+                                        )
+                                    }
+
                                 </td>
+
 
                                 <td class="amount">
-                                    ${this.formatAmount(row?.outstanding_amount)}
+
+                                    ${
+                                        this.formatAmount(
+                                            row?.outstanding_amount
+                                        )
+                                    }
+
                                 </td>
+
 
                                 <td class="amount">
-                                    ${this.formatAmount(row?.current)}
+
+                                    ${
+                                        this.formatAmount(
+                                            row?.current
+                                        )
+                                    }
+
                                 </td>
+
 
                                 <td class="amount">
-                                    ${this.formatAmount(row?.days_1_30)}
+
+                                    ${
+                                        this.formatAmount(
+                                            row?.days_1_30
+                                        )
+                                    }
+
                                 </td>
+
 
                                 <td class="amount">
-                                    ${this.formatAmount(row?.days_31_60)}
+
+                                    ${
+                                        this.formatAmount(
+                                            row?.days_31_60
+                                        )
+                                    }
+
                                 </td>
+
 
                                 <td class="amount">
-                                    ${this.formatAmount(row?.days_61_90)}
+
+                                    ${
+                                        this.formatAmount(
+                                            row?.days_61_90
+                                        )
+                                    }
+
                                 </td>
+
 
                                 <td class="amount">
-                                    ${this.formatAmount(row?.days_90_plus)}
+
+                                    ${
+                                        this.formatAmount(
+                                            row?.days_90_plus
+                                        )
+                                    }
+
                                 </td>
 
-                                <td class="center">
-                                    ${this.escapeHTML(row?.status || "-")}
+
+                                <td class="amount">
+
+                                    ${
+                                        this.formatAmount(
+                                            row?.total_amount
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <td class="amount">
+
+                                    ${
+                                        this.formatAmount(
+                                            row?.before_tax_amount
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <td class="amount">
+
+                                    ${
+                                        this.formatAmount(
+                                            row?.tax_plus_amount
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <td class="amount">
+
+                                    ${
+                                        this.formatAmount(
+                                            row?.tax_minus_amount
+                                        )
+                                    }
+
                                 </td>
 
                             </tr>
@@ -2284,6 +3854,12 @@ export class AgingReceivable {
                     )
                     .join("");
 
+
+            /*
+            ======================================================
+            PREVIEW HTML
+            ======================================================
+            */
 
             const html = `
 
@@ -2303,150 +3879,340 @@ export class AgingReceivable {
     box-sizing: border-box;
 }
 
+
 html {
+
     margin: 0;
+
     padding: 0;
+
     width: 100%;
+
     min-height: 100%;
+
     overflow-x: auto;
+
     overflow-y: auto;
+
 }
+
 
 body {
+
     margin: 0;
+
     padding: 28px 32px 42px;
+
     width: max-content;
+
     min-width: 100%;
+
     min-height: 100vh;
+
     background: #ffffff;
+
     color: #1f2937;
-    font-family: Tahoma, Arial, sans-serif;
+
+    font-family:
+        Tahoma,
+        Arial,
+        sans-serif;
+
     font-size: 12px;
+
 }
+
 
 .report {
+
     width: max-content;
-    min-width: calc(100vw - 64px);
+
+    min-width:
+        calc(
+            100vw - 64px
+        );
+
 }
+
 
 .report-header {
+
     width: 100%;
+
     padding-bottom: 16px;
+
     margin-bottom: 20px;
-    border-bottom: 2px solid #244494;
+
+    border-bottom:
+        2px solid #244494;
+
 }
+
 
 .report-title {
+
     margin: 0;
+
     font-size: 22px;
+
     font-weight: 700;
+
 }
+
 
 .report-subtitle {
+
     margin-top: 6px;
+
     font-size: 16px;
+
     font-weight: 700;
+
     color: #244494;
+
 }
+
 
 .report-description {
+
     margin-top: 5px;
+
     color: #6b7280;
+
 }
+
 
 .report-date {
+
     margin-top: 6px;
+
     font-size: 11px;
+
     color: #6b7280;
+
 }
 
-.table-container,
-.table-wrapper {
+
+.table-container {
+
     width: max-content;
+
     min-width: 100%;
+
+    border:
+        1px solid #d1d5db;
+
+    border-radius: 4px;
+
+    background: #ffffff;
+
     overflow: visible;
+
 }
+
+
+.table-wrapper {
+
+    width: max-content;
+
+    min-width: 100%;
+
+    overflow: visible !important;
+
+}
+
 
 table {
+
     width: max-content;
+
     min-width: 100%;
+
+    margin: 0;
+
     border-collapse: collapse;
+
+    table-layout: auto;
+
 }
+
 
 th {
-    padding: 10px 9px;
-    background: #244494;
-    color: #ffffff;
-    border: 1px solid #d1d5db;
-    font-size: 11px;
-    text-align: center;
-    white-space: nowrap;
+
+    padding:
+        10px
+        9px;
+
+    background:
+        #244494;
+
+    color:
+        #ffffff;
+
+    border:
+        1px solid #d1d5db;
+
+    font-size:
+        11px;
+
+    text-align:
+        center;
+
+    white-space:
+        nowrap;
+
 }
+
 
 td {
-    padding: 9px;
-    border: 1px solid #d1d5db;
-    background: #ffffff;
-    white-space: nowrap;
+
+    padding:
+        9px;
+
+    border:
+        1px solid #d1d5db;
+
+    background:
+        #ffffff;
+
+    white-space:
+        nowrap;
+
 }
 
-tbody tr:nth-child(even) td {
-    background: #f8fafc;
+
+tbody
+tr:nth-child(even)
+td {
+
+    background:
+        #f8fafc;
+
 }
+
+
+tfoot
+td {
+
+    background:
+        #f1f5f9;
+
+    font-weight:
+        700;
+
+}
+
 
 .center {
-    text-align: center;
+
+    text-align:
+        center;
+
 }
+
 
 .amount {
-    min-width: 120px;
-    text-align: right;
+
+    min-width:
+        120px;
+
+    text-align:
+        right;
+
 }
+
 
 .description {
-    min-width: 300px;
-    max-width: 450px;
-    white-space: normal;
-    word-break: break-word;
-    line-height: 1.5;
+
+    min-width:
+        300px;
+
+    max-width:
+        450px;
+
+    white-space:
+        normal;
+
+    word-break:
+        break-word;
+
+    line-height:
+        1.5;
+
 }
 
+
 .report-footer {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 18px;
-    padding-top: 12px;
-    border-top: 1px solid #e5e7eb;
-    color: #6b7280;
-    font-size: 11px;
+
+    display:
+        flex;
+
+    justify-content:
+        space-between;
+
+    margin-top:
+        18px;
+
+    padding-top:
+        12px;
+
+    border-top:
+        1px solid #e5e7eb;
+
+    color:
+        #6b7280;
+
+    font-size:
+        11px;
+
 }
 
 </style>
 
 </head>
 
+
 <body>
 
+
 <div class="report">
+
+
+    <!-- ==============================================
+         HEADER
+    =============================================== -->
 
     <div class="report-header">
 
         <h1 class="report-title">
+
             FINOVA ACCOUNTING SYSTEM
+
         </h1>
 
+
         <div class="report-subtitle">
+
             Aging Receivable
+
         </div>
 
+
         <div class="report-description">
+
             Accounting / Aging Receivable
+
         </div>
+
 
         <div class="report-date">
 
             As Of Date :
-            ${this.formatDate(this.asOfDateValue)}
+            ${
+                this.formatDate(
+                    this.asOfDateValue
+                )
+            }
 
             &nbsp; | &nbsp;
 
@@ -2458,11 +4224,20 @@ tbody tr:nth-child(even) td {
     </div>
 
 
+    <!-- ==============================================
+         TABLE
+    =============================================== -->
+
     <div class="table-container">
 
         <div class="table-wrapper">
 
             <table>
+
+
+                <!-- ==================================
+                     HEADER
+                =================================== -->
 
                 <thead>
 
@@ -2472,11 +4247,17 @@ tbody tr:nth-child(even) td {
 
                         <th>Customer</th>
 
-                        <th>PO No</th>
-
                         <th>Invoice No</th>
 
+                        <th>PO No</th>
+
                         <th>Description</th>
+
+                        <th>Account Holder</th>
+
+                        <th>Bank Name</th>
+
+                        <th>Bank Account</th>
 
                         <th>Invoice Date</th>
 
@@ -2494,17 +4275,160 @@ tbody tr:nth-child(even) td {
 
                         <th>&gt; 90</th>
 
-                        <th>Status</th>
+                        <th>Total Amount</th>
+
+                        <th>Before Tax Amount</th>
+
+                        <th>Tax (+)</th>
+
+                        <th>Tax (-)</th>
 
                     </tr>
 
                 </thead>
+
+
+                <!-- ==================================
+                     BODY
+                =================================== -->
 
                 <tbody>
 
                     ${reportRows}
 
                 </tbody>
+
+
+                <!-- ==================================
+                     TOTAL
+                =================================== -->
+
+                <tfoot>
+
+                    <tr>
+
+                        <td
+                            colspan="10"
+                            class="amount">
+
+                            TOTAL
+
+                        </td>
+
+
+                        <td class="amount">
+
+                            ${
+                                this.formatAmount(
+                                    totals.outstanding
+                                )
+                            }
+
+                        </td>
+
+
+                        <td class="amount">
+
+                            ${
+                                this.formatAmount(
+                                    totals.current
+                                )
+                            }
+
+                        </td>
+
+
+                        <td class="amount">
+
+                            ${
+                                this.formatAmount(
+                                    totals.d1
+                                )
+                            }
+
+                        </td>
+
+
+                        <td class="amount">
+
+                            ${
+                                this.formatAmount(
+                                    totals.d31
+                                )
+                            }
+
+                        </td>
+
+
+                        <td class="amount">
+
+                            ${
+                                this.formatAmount(
+                                    totals.d61
+                                )
+                            }
+
+                        </td>
+
+
+                        <td class="amount">
+
+                            ${
+                                this.formatAmount(
+                                    totals.d90
+                                )
+                            }
+
+                        </td>
+
+
+                        <td class="amount">
+
+                            ${
+                                this.formatAmount(
+                                    totals.totalAmount
+                                )
+                            }
+
+                        </td>
+
+
+                        <td class="amount">
+
+                            ${
+                                this.formatAmount(
+                                    totals.beforeTax
+                                )
+                            }
+
+                        </td>
+
+
+                        <td class="amount">
+
+                            ${
+                                this.formatAmount(
+                                    totals.taxPlus
+                                )
+                            }
+
+                        </td>
+
+
+                        <td class="amount">
+
+                            ${
+                                this.formatAmount(
+                                    totals.taxMinus
+                                )
+                            }
+
+                        </td>
+
+                    </tr>
+
+                </tfoot>
+
 
             </table>
 
@@ -2513,19 +4437,31 @@ tbody tr:nth-child(even) td {
     </div>
 
 
+    <!-- ==============================================
+         FOOTER
+    =============================================== -->
+
     <div class="report-footer">
 
         <div>
-            Total Record : ${rows.length}
+
+            Total Record :
+            ${rows.length}
+
         </div>
 
+
         <div>
+
             Generated by FINOVA Accounting System
+
         </div>
 
     </div>
 
+
 </div>
+
 
 </body>
 
@@ -2534,11 +4470,19 @@ tbody tr:nth-child(even) td {
             `;
 
 
+            /*
+            ======================================================
+            WRITE PREVIEW
+            ======================================================
+            */
+
             previewWindow.document.open();
+
 
             previewWindow.document.write(
                 html
             );
+
 
             previewWindow.document.close();
 
@@ -2576,61 +4520,111 @@ tbody tr:nth-child(even) td {
 
     /*
     ==========================================================
-    STATUS
+    TO NUMBER
     ==========================================================
     */
 
-    renderStatus(
-        status
+    toNumber(
+        value
     ) {
 
-        const value =
-            String(
-                status
-                ||
-                "-"
-            );
+        if (
+            typeof value === "number"
+        ) {
 
+            return Number.isFinite(
+                value
+            )
+                ? value
+                : 0;
 
-        const key =
-            value
-                .trim()
-                .toLowerCase();
-
-
-        let cssClass =
-            "bg-secondary";
+        }
 
 
         if (
-            key === "complete"
+            value === null
+            ||
+            value === undefined
+            ||
+            value === ""
         ) {
 
-            cssClass =
-                "bg-success";
+            return 0;
 
         }
 
 
-        else if (
-            key === "partial paid"
+        const text =
+            String(
+                value
+            )
+                .trim();
+
+
+        /*
+        ======================================================
+        NORMAL DATABASE NUMBER
+
+        Example:
+        50000000
+        50000000.50
+        ======================================================
+        */
+
+        if (
+            /^-?\d+(\.\d+)?$/.test(
+                text
+            )
         ) {
 
-            cssClass =
-                "bg-warning text-dark";
+            const number =
+                Number(
+                    text
+                );
+
+
+            return Number.isFinite(
+                number
+            )
+                ? number
+                : 0;
 
         }
 
 
-        return `
+        /*
+        ======================================================
+        INDONESIAN FORMAT
 
-            <span class="badge ${cssClass}">
+        Example:
+        50.000.000
+        50.000.000,50
+        ======================================================
+        */
 
-                ${this.escapeHTML(value)}
+        const normalized =
+            text
+                .replace(
+                    /\./g,
+                    ""
+                )
+                .replace(
+                    ",",
+                    "."
+                );
 
-            </span>
 
-        `;
+        const number =
+            Number(
+                normalized
+            );
+
+
+        return Number.isFinite(
+            number
+        )
+            ? number
+            : 0;
 
     }
 
@@ -2658,7 +4652,9 @@ tbody tr:nth-child(even) td {
             new Date(
 
                 `${
-                    String(value)
+                    String(
+                        value
+                    )
                         .slice(
                             0,
                             10
@@ -2676,6 +4672,12 @@ tbody tr:nth-child(even) td {
 
     }
 
+
+    /*
+    ==========================================================
+    FORMAT DATE
+    ==========================================================
+    */
 
     formatDate(
         value
@@ -2721,7 +4723,7 @@ tbody tr:nth-child(even) td {
 
     /*
     ==========================================================
-    AMOUNT
+    FORMAT AMOUNT
     ==========================================================
     */
 
@@ -2731,10 +4733,8 @@ tbody tr:nth-child(even) td {
 
         return Math
             .round(
-                Number(
+                this.toNumber(
                     value
-                    ||
-                    0
                 )
             )
             .toLocaleString(
@@ -2759,26 +4759,26 @@ tbody tr:nth-child(even) td {
             ??
             ""
         )
-        .replaceAll(
-            "&",
-            "&amp;"
-        )
-        .replaceAll(
-            "<",
-            "&lt;"
-        )
-        .replaceAll(
-            ">",
-            "&gt;"
-        )
-        .replaceAll(
-            '"',
-            "&quot;"
-        )
-        .replaceAll(
-            "'",
-            "&#039;"
-        );
+            .replaceAll(
+                "&",
+                "&amp;"
+            )
+            .replaceAll(
+                "<",
+                "&lt;"
+            )
+            .replaceAll(
+                ">",
+                "&gt;"
+            )
+            .replaceAll(
+                '"',
+                "&quot;"
+            )
+            .replaceAll(
+                "'",
+                "&#039;"
+            );
 
     }
 
@@ -2800,6 +4800,7 @@ tbody tr:nth-child(even) td {
             window.App.showError(
                 message
             );
+
 
             return;
 

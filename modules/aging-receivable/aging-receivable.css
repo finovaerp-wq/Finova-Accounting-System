@@ -1,9 +1,9 @@
 /*
 ==========================================================
 FINOVA ACCOUNTING SYSTEM
-MODULE : AGING RECEIVABLE
-Version : 3.0 Enterprise
-
+MODULE  : AGING RECEIVABLE
+FILE    : aging-receivable.css
+VERSION : 4.1.0 FINAL
 VISUAL STANDARD : AGING PAYABLE
 ==========================================================
 */
@@ -200,9 +200,13 @@ VISUAL STANDARD : AGING PAYABLE
 
     flex-wrap: nowrap !important;
 
+    align-items: stretch;
+
     width: 100% !important;
 
     height: 46px !important;
+
+    margin: 0 !important;
 
 }
 
@@ -312,6 +316,10 @@ VISUAL STANDARD : AGING PAYABLE
 }
 
 
+/* ==========================================================
+   TABLE SCROLL AREA
+========================================================== */
+
 .aging-receivable-table-card
 .table-responsive {
 
@@ -339,7 +347,7 @@ VISUAL STANDARD : AGING PAYABLE
 
     width: 100%;
 
-    min-width: 1450px;
+    min-width: 2795px;
 
     margin-bottom: 0;
 
@@ -347,6 +355,10 @@ VISUAL STANDARD : AGING PAYABLE
 
 }
 
+
+/* ==========================================================
+   TABLE HEADER
+========================================================== */
 
 .aging-receivable-table-card
 .finova-table
@@ -364,6 +376,10 @@ th {
 }
 
 
+/* ==========================================================
+   TABLE BODY
+========================================================== */
+
 .aging-receivable-table-card
 .finova-table
 tbody
@@ -374,6 +390,198 @@ td {
     color: #1F2937 !important;
 
     vertical-align: middle;
+
+}
+
+
+/* ==========================================================
+   COLUMN WIDTH
+========================================================== */
+
+
+/* ==========================================================
+   NO
+========================================================== */
+
+.aging-ar-col-no {
+
+    width: 55px;
+
+    min-width: 55px;
+
+    max-width: 55px;
+
+}
+
+
+/* ==========================================================
+   CUSTOMER
+========================================================== */
+
+.aging-ar-col-customer {
+
+    width: 220px;
+
+    min-width: 220px;
+
+}
+
+
+/* ==========================================================
+   INVOICE NO
+========================================================== */
+
+.aging-ar-col-invoice {
+
+    width: 160px;
+
+    min-width: 160px;
+
+}
+
+
+/* ==========================================================
+   PO NO
+========================================================== */
+
+.aging-ar-col-po {
+
+    width: 160px;
+
+    min-width: 160px;
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION
+========================================================== */
+
+.aging-ar-col-description {
+
+    width: 280px;
+
+    min-width: 280px;
+
+}
+
+
+/* ==========================================================
+   ACCOUNT HOLDER
+========================================================== */
+
+.aging-ar-col-account-holder {
+
+    width: 190px;
+
+    min-width: 190px;
+
+}
+
+
+/* ==========================================================
+   BANK NAME
+========================================================== */
+
+.aging-ar-col-bank-name {
+
+    width: 170px;
+
+    min-width: 170px;
+
+}
+
+
+/* ==========================================================
+   BANK ACCOUNT
+========================================================== */
+
+.aging-ar-col-bank-account {
+
+    width: 180px;
+
+    min-width: 180px;
+
+}
+
+
+/* ==========================================================
+   DATE
+========================================================== */
+
+.aging-ar-col-date {
+
+    width: 120px;
+
+    min-width: 120px;
+
+}
+
+
+/* ==========================================================
+   AMOUNT
+========================================================== */
+
+.aging-ar-col-amount {
+
+    width: 125px;
+
+    min-width: 125px;
+
+}
+
+
+/* ==========================================================
+   WIDE AMOUNT
+========================================================== */
+
+.aging-ar-col-amount-wide {
+
+    width: 150px;
+
+    min-width: 150px;
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION BODY
+========================================================== */
+
+.aging-receivable-description {
+
+    white-space: normal !important;
+
+    word-break: break-word;
+
+    line-height: 1.45;
+
+}
+
+
+/* ==========================================================
+   AMOUNT ALIGNMENT
+========================================================== */
+
+.aging-receivable-table-card
+.finova-table-number {
+
+    text-align: right !important;
+
+    white-space: nowrap;
+
+    font-variant-numeric: tabular-nums;
+
+}
+
+
+/* ==========================================================
+   OVERDUE
+========================================================== */
+
+.aging-receivable-overdue {
+
+    font-weight: 600 !important;
 
 }
 
@@ -408,68 +616,16 @@ td {
 
 
 /* ==========================================================
-   COLUMN WIDTH
+   FOOTER AMOUNT ALIGNMENT
 ========================================================== */
 
-.aging-ar-col-no {
+.aging-receivable-table-card
+tfoot
+.finova-table-number {
 
-    width: 55px;
+    text-align: right !important;
 
-    min-width: 55px;
-
-    max-width: 55px;
-
-}
-
-
-.aging-ar-col-customer {
-
-    width: 220px;
-
-    min-width: 220px;
-
-}
-
-
-.aging-ar-col-invoice {
-
-    width: 160px;
-
-    min-width: 160px;
-
-}
-
-
-.aging-ar-col-date {
-
-    width: 120px;
-
-    min-width: 120px;
-
-}
-
-
-.aging-ar-col-amount {
-
-    width: 125px;
-
-    min-width: 125px;
-
-}
-
-
-.aging-ar-col-status {
-
-    width: 110px;
-
-    min-width: 110px;
-
-}
-
-
-.aging-receivable-overdue {
-
-    font-weight: 600 !important;
+    font-variant-numeric: tabular-nums;
 
 }
 
@@ -496,6 +652,10 @@ td {
 }
 
 
+/* ==========================================================
+   PAGINATION LEFT
+========================================================== */
+
 .aging-receivable-table-card
 .finova-pagination-left {
 
@@ -507,6 +667,44 @@ td {
 
 }
 
+
+/* ==========================================================
+   PAGINATION LABEL
+========================================================== */
+
+.aging-receivable-table-card
+.finova-pagination-label {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   PAGINATION TOTAL PAGE
+========================================================== */
+
+.aging-receivable-table-card
+.finova-pagination-total {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    min-width: 18px;
+
+    margin-left: 2px;
+
+}
+
+
+/* ==========================================================
+   PAGINATION INFO
+========================================================== */
 
 .aging-receivable-table-card
 .finova-pagination-info {
@@ -523,7 +721,51 @@ td {
 
 
 /* ==========================================================
+   PAGINATION INPUT
+========================================================== */
+
+.aging-receivable-table-card
+.finova-pagination-input {
+
+    width: 42px;
+
+    min-width: 42px;
+
+    text-align: center;
+
+}
+
+
+/* ==========================================================
+   SCROLLBAR
+========================================================== */
+
+.aging-receivable-table-card
+.table-responsive {
+
+    scrollbar-width: thin;
+
+}
+
+
+/* ==========================================================
    RESPONSIVE
+========================================================== */
+
+@media (max-width: 1199.98px) {
+
+    .aging-receivable-table-card
+    .finova-table {
+
+        min-width: 2795px;
+
+    }
+
+}
+
+
+/* ==========================================================
+   TABLET
 ========================================================== */
 
 @media (max-width: 991.98px) {
@@ -554,10 +796,31 @@ td {
 
     }
 
+
+    .aging-receivable-table-card
+    .finova-table {
+
+        min-width: 2795px;
+
+    }
+
 }
 
 
+/* ==========================================================
+   MOBILE
+========================================================== */
+
 @media (max-width: 767.98px) {
+
+    .aging-receivable-page
+    > .finova-page-header
+    .finova-page-header-right {
+
+        width: 100%;
+
+    }
+
 
     .aging-receivable-table-card
     .finova-pagination-wrapper {
@@ -577,6 +840,14 @@ td {
         margin-left: 0;
 
         justify-content: flex-end;
+
+    }
+
+
+    .aging-receivable-table-card
+    .finova-table {
+
+        min-width: 2795px;
 
     }
 

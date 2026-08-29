@@ -3,7 +3,8 @@
 FINOVA ACCOUNTING SYSTEM
 MODULE : AGING PAYABLE
 VERSION : 4.1.0 FINAL
-VISUAL STANDARD : ACCOUNT PAYABLE
+
+HEADER & FILTER STANDARD : AGING RECEIVABLE
 ==========================================================
 */
 
@@ -28,7 +29,7 @@ VISUAL STANDARD : ACCOUNT PAYABLE
 
 
 /* ==========================================================
-   HEADER
+   PAGE HEADER
 ========================================================== */
 
 .aging-payable-page
@@ -39,6 +40,8 @@ VISUAL STANDARD : ACCOUNT PAYABLE
     margin-bottom: 8px !important;
 
     flex: 0 0 auto;
+
+    box-sizing: border-box;
 
 }
 
@@ -82,7 +85,8 @@ VISUAL STANDARD : ACCOUNT PAYABLE
    FILTER CARD
 ========================================================== */
 
-.aging-payable-filter-card {
+.aging-payable-page
+> .aging-payable-filter-card {
 
     width: 100% !important;
 
@@ -91,6 +95,8 @@ VISUAL STANDARD : ACCOUNT PAYABLE
     margin: 0 !important;
 
     flex: 0 0 auto;
+
+    box-sizing: border-box;
 
     border-radius: 12px;
 
@@ -103,6 +109,8 @@ VISUAL STANDARD : ACCOUNT PAYABLE
     width: 100%;
 
     padding: 8px 20px !important;
+
+    box-sizing: border-box;
 
 }
 
@@ -117,10 +125,30 @@ VISUAL STANDARD : ACCOUNT PAYABLE
 
     padding: 0 !important;
 
+    box-sizing: border-box;
+
     align-items: end !important;
 
 }
 
+
+.aging-payable-filter-card
+> .finova-card-body
+> .row
+> [class*="col-"] {
+
+    min-width: 0;
+
+    margin: 0;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   FILTER LABEL
+========================================================== */
 
 .aging-payable-filter-card
 .form-label {
@@ -161,6 +189,10 @@ VISUAL STANDARD : ACCOUNT PAYABLE
 }
 
 
+/* ==========================================================
+   INPUT GROUP
+========================================================== */
+
 .aging-payable-filter-card
 .input-group {
 
@@ -168,16 +200,16 @@ VISUAL STANDARD : ACCOUNT PAYABLE
 
     flex-wrap: nowrap !important;
 
-    align-items: stretch;
-
     width: 100% !important;
 
     height: 46px !important;
 
-    margin: 0 !important;
-
 }
 
+
+/* ==========================================================
+   KEYWORD
+========================================================== */
 
 .aging-payable-filter-card
 #aging-payable-keyword {
@@ -196,6 +228,10 @@ VISUAL STANDARD : ACCOUNT PAYABLE
 
 }
 
+
+/* ==========================================================
+   FIND BUTTON
+========================================================== */
 
 .aging-payable-filter-card
 #btn-find-aging-payable {
@@ -223,7 +259,6 @@ VISUAL STANDARD : ACCOUNT PAYABLE
     border-bottom-left-radius: 0 !important;
 
 }
-
 
 /* ==========================================================
    TABLE CARD
