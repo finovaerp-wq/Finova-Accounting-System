@@ -1,0 +1,26 @@
+FINOVA USER MANAGEMENT - FINAL DEPLOY
+
+1. Copy folder:
+   supabase/functions/admin-user-management/index.ts
+   into the FINOVA project root.
+
+2. Copy:
+   modules/user-management/user-management.js
+   to replace the existing file.
+
+3. Open PowerShell in the FINOVA project root and run:
+
+   supabase login
+   supabase link --project-ref YOUR_PROJECT_REF
+   supabase functions deploy admin-user-management
+
+4. Check deployment:
+
+   supabase functions list
+
+5. Reload FINOVA with Ctrl + F5 and test Add User.
+
+IMPORTANT:
+- Do not place SUPABASE_SERVICE_ROLE_KEY in frontend JavaScript.
+- Supabase Edge Functions receive SUPABASE_URL, SUPABASE_ANON_KEY,
+  and SUPABASE_SERVICE_ROLE_KEY as server-side environment variables.

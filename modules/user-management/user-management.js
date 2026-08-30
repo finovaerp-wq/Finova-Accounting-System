@@ -151,6 +151,15 @@ export class UserManagement {
 
         this.inputPassword =
             document.getElementById("user-password");
+        this.btnTogglePassword =
+    document.getElementById(
+        "btn-toggle-user-password"
+    );
+
+this.iconTogglePassword =
+    document.getElementById(
+        "icon-toggle-user-password"
+    );
 
         this.passwordColumn =
             document.getElementById("user-password-column");
@@ -236,6 +245,10 @@ export class UserManagement {
             "change",
             () => this.applyFilter()
         );
+        this.btnTogglePassword?.addEventListener(
+    "click",
+    () => this.togglePasswordVisibility()
+);
 
         this.tableBody?.addEventListener(
             "click",
@@ -282,6 +295,97 @@ export class UserManagement {
             }
         );
     }
+    /*
+==========================================================
+TOGGLE PASSWORD VISIBILITY
+==========================================================
+*/
+
+togglePasswordVisibility() {
+
+    if (
+        !this.inputPassword
+        ||
+        !this.btnTogglePassword
+        ||
+        !this.iconTogglePassword
+    ) {
+        return;
+    }
+
+
+    /*
+    ======================================================
+    CURRENT STATE
+    ======================================================
+    */
+
+    const isHidden =
+        this.inputPassword.type
+        ===
+        "password";
+
+
+    /*
+    ======================================================
+    INPUT TYPE
+    ======================================================
+    */
+
+    this.inputPassword.type =
+        isHidden
+            ? "text"
+            : "password";
+
+
+    /*
+    ======================================================
+    ICON
+    ======================================================
+    */
+
+    this.iconTogglePassword.classList.toggle(
+        "fa-eye",
+        !isHidden
+    );
+
+    this.iconTogglePassword.classList.toggle(
+        "fa-eye-slash",
+        isHidden
+    );
+
+
+    /*
+    ======================================================
+    BUTTON INFORMATION
+    ======================================================
+    */
+
+    const title =
+        isHidden
+            ? "Hide Password"
+            : "Show Password";
+
+
+    this.btnTogglePassword.title =
+        title;
+
+
+    this.btnTogglePassword.setAttribute(
+        "aria-label",
+        title
+    );
+
+
+    /*
+    ======================================================
+    KEEP FOCUS
+    ======================================================
+    */
+
+    this.inputPassword.focus();
+
+}
 
 
     /* ==========================================================
@@ -729,9 +833,46 @@ export class UserManagement {
             this.inputStatus.checked = true;
         }
 
-        if (this.inputPassword) {
-            this.inputPassword.value = "";
-        }
+        if (
+    this.inputPassword
+) {
+
+    this.inputPassword.value = "";
+
+    this.inputPassword.type =
+        "password";
+
+}
+
+
+if (
+    this.iconTogglePassword
+) {
+
+    this.iconTogglePassword.classList.remove(
+        "fa-eye-slash"
+    );
+
+    this.iconTogglePassword.classList.add(
+        "fa-eye"
+    );
+
+}
+
+
+if (
+    this.btnTogglePassword
+) {
+
+    this.btnTogglePassword.title =
+        "Show Password";
+
+    this.btnTogglePassword.setAttribute(
+        "aria-label",
+        "Show Password"
+    );
+
+}
 
         this.currentUserUid = null;
     }
@@ -1258,33 +1399,318 @@ export class UserManagement {
 
 
     showError(message) {
-        if (window.App?.showError) {
-            window.App.showError(message);
-            return;
-        }
 
-        const modalElement =
-            document.getElementById(
-                "finovaErrorModal"
+    /*
+    ==========================================================
+    GLOBAL APP ERROR
+    ==========================================================
+    */
+
+    if (
+        window.App?.showError
+    ) {
+
+        window.App.showError(
+            message
+        );
+
+        return;
+
+    }
+
+
+    /*
+    ==========================================================
+    GLOBAL FINOVA ERROR MODAL
+    ==========================================================
+    */
+
+    const globalModalElement =
+        document.getElementById(
+            "finovaErrorModal"
+        );
+
+
+    if (
+        globalModalElement
+    ) {
+
+        const globalMessageElement =
+            globalModalElement.querySelector(
+                ".finova-error-message"
             );
 
-        if (modalElement) {
-            const messageElement =
-                modalElement.querySelector(
-                    ".finova-error-message"
-                );
 
-            if (messageElement) {
-                messageElement.textContent = message;
-            }
+        if (
+            globalMessageElement
+        ) {
 
-            bootstrap.Modal
-                .getOrCreateInstance(modalElement)
-                .show();
+            globalMessageElement.textContent =
+                message;
 
-            return;
         }
 
-        alert(message);
+
+        bootstrap.Modal
+            .getOrCreateInstance(
+                globalModalElement
+            )
+            .show();
+
+
+        return;
+
     }
+
+
+    /*
+    ==========================================================
+    USER MANAGEMENT FALLBACK MODAL
+
+    IMPORTANT:
+    NO NATIVE alert()
+    ==========================================================
+    */
+
+    console.error(
+        "FINOVA ERROR:",
+        message
+    );
+
+
+    /*
+    ==========================================================
+    REMOVE OLD FALLBACK MODAL
+    ==========================================================
+    */
+
+    const oldModal =
+        document.getElementById(
+            "finovaUserManagementErrorModal"
+        );
+
+
+    if (
+        oldModal
+    ) {
+
+        const oldInstance =
+            bootstrap.Modal.getInstance(
+                oldModal
+            );
+
+
+        oldInstance?.dispose();
+
+        oldModal.remove();
+
+    }
+
+
+    /*
+    ==========================================================
+    CREATE MODAL WRAPPER
+    ==========================================================
+    */
+
+    const wrapper =
+        document.createElement(
+            "div"
+        );
+
+
+    wrapper.innerHTML = `
+
+        <div
+            class="modal fade"
+            id="finovaUserManagementErrorModal"
+            tabindex="-1"
+            aria-hidden="true">
+
+            <div
+                class="modal-dialog modal-dialog-centered">
+
+                <div class="modal-content">
+
+
+                    <!-- ======================================
+                         HEADER
+                    ======================================= -->
+
+                    <div class="modal-header">
+
+                        <h5 class="modal-title">
+
+                            <i
+                                class="
+                                    fa-solid
+                                    fa-circle-exclamation
+                                    text-danger
+                                    me-2
+                                ">
+                            </i>
+
+                            Error
+
+                        </h5>
+
+
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close">
+                        </button>
+
+                    </div>
+
+
+                    <!-- ======================================
+                         BODY
+                    ======================================= -->
+
+                    <div class="modal-body">
+
+                        <div
+                            class="
+                                finova-user-management-error-message
+                            ">
+                        </div>
+
+                    </div>
+
+
+                    <!-- ======================================
+                         FOOTER
+                    ======================================= -->
+
+                    <div class="modal-footer">
+
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            data-bs-dismiss="modal">
+
+                            OK
+
+                        </button>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    /*
+    ==========================================================
+    GET CREATED MODAL
+    ==========================================================
+    */
+
+    const fallbackModalElement =
+        wrapper.firstElementChild;
+
+
+    if (
+        !fallbackModalElement
+    ) {
+
+        console.error(
+            "Failed to create FINOVA error modal."
+        );
+
+        return;
+
+    }
+
+
+    /*
+    ==========================================================
+    APPEND TO BODY
+    ==========================================================
+    */
+
+    document.body.appendChild(
+        fallbackModalElement
+    );
+
+
+    /*
+    ==========================================================
+    SET MESSAGE
+    ==========================================================
+    */
+
+    const fallbackMessageElement =
+        fallbackModalElement.querySelector(
+            ".finova-user-management-error-message"
+        );
+
+
+    if (
+        fallbackMessageElement
+    ) {
+
+        fallbackMessageElement.textContent =
+            String(
+                message
+                ||
+                "An unexpected error occurred."
+            );
+
+    }
+
+
+    /*
+    ==========================================================
+    BOOTSTRAP INSTANCE
+    ==========================================================
+    */
+
+    const fallbackModal =
+        bootstrap.Modal.getOrCreateInstance(
+            fallbackModalElement
+        );
+
+
+    /*
+    ==========================================================
+    CLEANUP AFTER CLOSE
+    ==========================================================
+    */
+
+    fallbackModalElement.addEventListener(
+
+        "hidden.bs.modal",
+
+        () => {
+
+            fallbackModal.dispose();
+
+            fallbackModalElement.remove();
+
+        },
+
+        {
+            once: true
+        }
+
+    );
+
+
+    /*
+    ==========================================================
+    SHOW
+    ==========================================================
+    */
+
+    fallbackModal.show();
+
+}
 }
