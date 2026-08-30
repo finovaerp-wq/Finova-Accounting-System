@@ -137,10 +137,17 @@ async getAll() {
 
             `)
 
+            /*
+            ==================================================
+            ORDER
+            NEWEST CREATED AP AT BOTTOM
+            ==================================================
+            */
+
             .order(
-                "invoice_date",
+                "created_at",
                 {
-                    ascending: false
+                    ascending: true
                 }
             );
 
