@@ -327,42 +327,46 @@ async loadModule(route) {
 
 
         /*
-        ==============================================
-        CREATE INSTANCE
-        ==============================================
-        */
+==============================================
+CREATE INSTANCE
+==============================================
+*/
 
-        const page =
-            new PageClass();
-
-
-        console.log(
-            "MODULE INSTANCE :",
-            page
-        );
+const page =
+    new PageClass();
 
 
-        /*
-        ==============================================
-        INIT
-        ==============================================
-        */
-
-        if (
-            typeof page.init
-            ===
-            "function"
-        ) {
-
-            await page.init();
-
-        }
+console.log(
+    "MODULE INSTANCE :",
+    page
+);
 
 
-        console.log(
-            "MODULE INITIALIZED :",
-            route.className
-        );
+/*
+==============================================
+MODULE INITIALIZED
+==============================================
+
+IMPORTANT:
+
+Initialization dilakukan oleh
+constructor masing-masing module.
+
+Router TIDAK memanggil init() kembali
+untuk mencegah:
+
+- duplicate event listener
+- duplicate data loading
+- duplicate rendering
+- duplicate download
+
+==============================================
+*/
+
+console.log(
+    "MODULE INITIALIZED :",
+    route.className
+);
 
 
         console.log(

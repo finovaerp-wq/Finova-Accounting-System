@@ -220,6 +220,7 @@ this.btnSaveAPPayment = null;
         this.btnLastPage = null;
 
         this.recordInfo = null;
+        this.init();
 
     }
     /*

@@ -372,6 +372,7 @@ this.btnSaveARPayment = null;
         this.arFormWHT = null;
 
         this.arFormTotal = null;
+        this.init();
 
     }
 

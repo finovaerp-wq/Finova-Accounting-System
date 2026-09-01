@@ -2,17 +2,34 @@
 ==========================================================
 FINOVA ACCOUNTING SYSTEM
 Application
-Version : 2.0 Enterprise
+Version : 2.1 Enterprise
+
+FINAL :
+- AUTHENTICATION VIA AUTHSERVICE
+- GLOBAL LAYOUT
+- GLOBAL COMPONENTS
+- ROUTER
+- AUTH STATE LISTENER
+- AUTO LOGOUT HANDLED BY AUTHSERVICE
 ==========================================================
 */
 
-import { FinovaSidebar } from "../components/sidebar.js";
-import { FinovaTopbar } from "../components/topbar.js";
+import {
+    FinovaSidebar
+} from "../components/sidebar.js";
 
+import {
+    FinovaTopbar
+} from "../components/topbar.js";
 
-import { FinovaRouter } from "./router.js";
+import {
+    FinovaRouter
+} from "./router.js";
 
-import { AuthService } from "../../../service/auth.service.js";
+import {
+    AuthService
+} from "../../../service/auth.service.js";
+
 
 /*
 ==========================================================
@@ -36,7 +53,18 @@ class FinovaApp {
         ==========================================
         */
 
-        
+        this.sidebar =
+            null;
+
+        this.topbar =
+            null;
+
+        this.router =
+            null;
+
+        this.authSubscription =
+            null;
+
 
         /*
         ==========================================
@@ -47,6 +75,7 @@ class FinovaApp {
         this.initialize();
 
     }
+
 
     /*
     ======================================================
@@ -65,14 +94,17 @@ class FinovaApp {
             */
 
             const authenticated =
-
                 await this.checkAuthentication();
 
-            if (!authenticated) {
+
+            if (
+                !authenticated
+            ) {
 
                 return;
 
             }
+
 
             /*
             ==========================================
@@ -82,6 +114,7 @@ class FinovaApp {
 
             this.renderLayout();
 
+
             /*
             ==========================================
             COMPONENTS
@@ -89,6 +122,7 @@ class FinovaApp {
             */
 
             this.initializeComponents();
+
 
             /*
             ==========================================
@@ -98,6 +132,7 @@ class FinovaApp {
 
             this.initializeRouter();
 
+
             /*
             ==========================================
             APPLICATION
@@ -106,26 +141,33 @@ class FinovaApp {
 
             this.initializeApplication();
 
+
+            /*
+            ==========================================
+            READY
+            ==========================================
+            */
+
             console.log(
-
                 "FINOVA Accounting System Ready."
-
             );
 
         }
 
-        catch (error) {
+        catch (
+            error
+        ) {
 
-            console.error(
-
+            this.handleError(
                 error
-
             );
 
         }
 
     }
-        /*
+
+
+    /*
     ======================================================
     CHECK AUTHENTICATION
     ======================================================
@@ -133,41 +175,75 @@ class FinovaApp {
 
     async checkAuthentication() {
 
-        /*
-        ==========================================
-        CHECK SESSION
-        ==========================================
-        */
+        try {
 
-        const authenticated =
+            /*
+            ==========================================
+            CHECK SESSION
+            ==========================================
+            */
 
-            await AuthService.initialize();
+            const authenticated =
+                await AuthService.initialize();
 
-        if (
 
-            authenticated
+            /*
+            ==========================================
+            AUTHENTICATED
+            ==========================================
+            */
 
-        ) {
+            if (
+                authenticated
+            ) {
 
-            return true;
+                return true;
+
+            }
+
+
+            /*
+            ==========================================
+            NOT AUTHENTICATED
+            ==========================================
+            */
+
+            window.location.replace(
+                "login.html"
+            );
+
+
+            return false;
 
         }
 
-        /*
-        ==========================================
-        REDIRECT
-        ==========================================
-        */
+        catch (
+            error
+        ) {
 
-        window.location.replace(
+            console.error(
+                "FINOVA Authentication Error :",
+                error
+            );
 
-            "login.html"
 
-        );
+            /*
+            ==========================================
+            FORCE LOGIN PAGE
+            ==========================================
+            */
 
-        return false;
+            window.location.replace(
+                "login.html"
+            );
+
+
+            return false;
+
+        }
 
     }
+
 
     /*
     ======================================================
@@ -177,23 +253,40 @@ class FinovaApp {
 
     renderLayout() {
 
+        /*
+        ==========================================
+        APPLICATION CONTAINER
+        ==========================================
+        */
+
         const app =
-
             document.getElementById(
-
                 "finova-app"
-
             );
 
-        if (!app) {
+
+        /*
+        ==========================================
+        VALIDATION
+        ==========================================
+        */
+
+        if (
+            !app
+        ) {
 
             throw new Error(
-
                 "Container #finova-app not found."
-
             );
 
         }
+
+
+        /*
+        ==========================================
+        LAYOUT
+        ==========================================
+        */
 
         app.innerHTML = `
 
@@ -212,7 +305,6 @@ class FinovaApp {
                     <main
                         id="finova-content">
                     </main>
-                                        
 
                 </div>
 
@@ -221,7 +313,9 @@ class FinovaApp {
         `;
 
     }
-        /*
+
+
+    /*
     ======================================================
     INITIALIZE COMPONENTS
     ======================================================
@@ -236,8 +330,8 @@ class FinovaApp {
         */
 
         this.sidebar =
-
             new FinovaSidebar();
+
 
         /*
         ==========================================
@@ -246,10 +340,9 @@ class FinovaApp {
         */
 
         this.topbar =
-
             new FinovaTopbar();
 
-       
+
         /*
         ==========================================
         GLOBAL ACCESS
@@ -257,18 +350,13 @@ class FinovaApp {
         */
 
         window.finovaSidebar =
-
             this.sidebar;
 
         window.finovaTopbar =
-
             this.topbar;
 
-        window.finovaFooter =
-
-            this.footer;
-
     }
+
 
     /*
     ======================================================
@@ -278,9 +366,15 @@ class FinovaApp {
 
     initializeRouter() {
 
-        this.router =
+        /*
+        ==========================================
+        ROUTER
+        ==========================================
+        */
 
+        this.router =
             new FinovaRouter();
+
 
         /*
         ==========================================
@@ -289,10 +383,10 @@ class FinovaApp {
         */
 
         window.finovaRouter =
-
             this.router;
 
     }
+
 
     /*
     ======================================================
@@ -308,43 +402,38 @@ class FinovaApp {
         ==========================================
         */
 
-        AuthService.onAuthStateChange(
+        const authListener =
+            AuthService.onAuthStateChange(
 
-            (event) => {
+                (
+                    event,
+                    session
+                ) => {
 
-                console.log(
+                    this.handleAuthStateChange(
 
-                    "AUTH EVENT :",
+                        event,
 
-                    event
-
-                );
-
-                /*
-                ==================================
-                SESSION EXPIRED
-                ==================================
-                */
-
-                if (
-
-                    event ===
-
-                    "SIGNED_OUT"
-
-                ) {
-
-                    window.location.replace(
-
-                        "login.html"
+                        session
 
                     );
 
                 }
 
-            }
+            );
 
-        );
+
+        /*
+        ==========================================
+        STORE SUBSCRIPTION
+        ==========================================
+        */
+
+        this.authSubscription =
+            authListener?.data?.subscription
+            ??
+            null;
+
 
         /*
         ==========================================
@@ -353,13 +442,152 @@ class FinovaApp {
         */
 
         console.log(
-
             "Application Initialized."
-
         );
 
     }
+
+
+    /*
+    ======================================================
+    HANDLE AUTH STATE CHANGE
+    ======================================================
+    */
+
+    handleAuthStateChange(
+
+        event,
+
+        session
+
+    ) {
+
         /*
+        ==========================================
+        DEBUG
+        ==========================================
+        */
+
+        console.log(
+
+            "AUTH EVENT :",
+
+            event
+
+        );
+
+
+        /*
+        ==========================================
+        SIGNED OUT
+        ==========================================
+        */
+
+        if (
+            event ===
+            "SIGNED_OUT"
+        ) {
+
+            /*
+            ======================================
+            STOP APPLICATION INSTANCE
+            ======================================
+            */
+
+            this.destroy();
+
+
+            /*
+            ======================================
+            REDIRECT LOGIN
+            ======================================
+            */
+
+            window.location.replace(
+                "login.html"
+            );
+
+
+            return;
+
+        }
+
+
+        /*
+        ==========================================
+        TOKEN REFRESHED
+        ==========================================
+        */
+
+        if (
+            event ===
+            "TOKEN_REFRESHED"
+        ) {
+
+            console.log(
+                "FINOVA session token refreshed."
+            );
+
+
+            return;
+
+        }
+
+
+        /*
+        ==========================================
+        USER UPDATED
+        ==========================================
+        */
+
+        if (
+            event ===
+            "USER_UPDATED"
+        ) {
+
+            console.log(
+                "FINOVA user session updated."
+            );
+
+
+            return;
+
+        }
+
+
+        /*
+        ==========================================
+        SIGNED IN
+        ==========================================
+        */
+
+        if (
+            event ===
+            "SIGNED_IN"
+        ) {
+
+            /*
+            ======================================
+            SESSION AVAILABLE
+            ======================================
+            */
+
+            if (
+                session
+            ) {
+
+                console.log(
+                    "FINOVA user authenticated."
+                );
+
+            }
+
+        }
+
+    }
+
+
+    /*
     ======================================================
     DESTROY
     ======================================================
@@ -369,17 +597,53 @@ class FinovaApp {
 
         /*
         ==========================================
+        UNSUBSCRIBE AUTH LISTENER
+        ==========================================
+        */
+
+        if (
+            this.authSubscription
+        ) {
+
+            try {
+
+                this.authSubscription.unsubscribe();
+
+            }
+
+            catch (
+                error
+            ) {
+
+                console.warn(
+                    "FINOVA Auth Subscription Cleanup :",
+                    error
+                );
+
+            }
+
+
+            this.authSubscription =
+                null;
+
+        }
+
+
+        /*
+        ==========================================
         CLEAR GLOBAL OBJECT
         ==========================================
         */
 
-        window.finovaSidebar = null;
+        window.finovaSidebar =
+            null;
 
-        window.finovaTopbar = null;
+        window.finovaTopbar =
+            null;
 
-        
+        window.finovaRouter =
+            null;
 
-        window.finovaRouter = null;
 
         /*
         ==========================================
@@ -387,21 +651,28 @@ class FinovaApp {
         ==========================================
         */
 
-        this.sidebar = null;
+        this.sidebar =
+            null;
 
-        this.topbar = null;
+        this.topbar =
+            null;
 
-        
+        this.router =
+            null;
 
-        this.router = null;
+
+        /*
+        ==========================================
+        READY
+        ==========================================
+        */
 
         console.log(
-
             "Application Destroyed."
-
         );
 
     }
+
 
     /*
     ======================================================
@@ -409,7 +680,15 @@ class FinovaApp {
     ======================================================
     */
 
-    handleError(error) {
+    handleError(
+        error
+    ) {
+
+        /*
+        ==========================================
+        CONSOLE
+        ==========================================
+        */
 
         console.error(
 
@@ -419,38 +698,54 @@ class FinovaApp {
 
         );
 
+
+        /*
+        ==========================================
+        TOAST
+        ==========================================
+        */
+
         if (
-
             window.Toast
-
         ) {
 
             Toast.fire({
 
-                icon: "error",
+                icon:
+                    "error",
 
-                title: error.message ??
-
+                title:
+                    error?.message
+                    ??
                     "Unexpected Error"
 
             });
+
 
             return;
 
         }
 
+
+        /*
+        ==========================================
+        FALLBACK ALERT
+        ==========================================
+        */
+
         alert(
 
-            error.message ??
-
+            error?.message
+            ??
             "Unexpected Error"
 
         );
 
     }
 
-
 }
+
+
 /*
 ==========================================================
 START APPLICATION
@@ -463,8 +758,13 @@ document.addEventListener(
 
     () => {
 
-        window.finovaApp =
+        /*
+        ==========================================
+        CREATE APPLICATION
+        ==========================================
+        */
 
+        window.finovaApp =
             new FinovaApp();
 
     }

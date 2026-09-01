@@ -14,6 +14,9 @@ import {
 import {
     ExcelExportService
 } from "../../service/excel-export.service.js";
+import {
+    PreviewService
+} from "../../service/preview.service.js";
 
 import {
     BusinessPartnerBankService
@@ -627,25 +630,26 @@ async init() {
         );
 
 
-        /*
-        ======================================================
-        PREVIEW
-        ======================================================
-        */
+      /*
+======================================================
+PREVIEW
+======================================================
+*/
 
-        this.btnPreview?.addEventListener(
+if (
+    this.btnPreview
+) {
 
-            "click",
+    this.btnPreview.onclick =
+        event => {
 
-            event => {
+            event.preventDefault();
 
-                event.preventDefault();
+            this.previewHTML();
 
-                this.previewHTML();
+        };
 
-            }
-
-        );
+}
 
 
         /*

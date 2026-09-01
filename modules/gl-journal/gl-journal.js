@@ -140,6 +140,7 @@ constructor() {
 
     this.detailModalEventsBound = false;
     this.editDetailIndex = -1;
+    this.init();
 
 }
 /*

@@ -2,73 +2,103 @@
 ===========================================
 FINOVA ACCOUNTING SYSTEM
 Sidebar Component
-Version : 1.0.0
+Version : 1.1.0
 ===========================================
 */
 
+import {
+    AuthService
+} from "../../../service/auth.service.js";
 
-import { AuthService } from "../../../service/auth.service.js";
-import { ChangePassword } from "../ui/change-password.js";
+import {
+    ChangePassword
+} from "../ui/change-password.js";
+
+
 export class FinovaSidebar {
+
+    /*
+    ======================================================
+    CONSTRUCTOR
+    ======================================================
+    */
 
     constructor() {
 
+        /*
+        ======================================================
+        CHANGE PASSWORD
+        ======================================================
+        */
+
+        this.changePassword =
+            null;
+
+
+        /*
+        ======================================================
+        MOBILE
+        ======================================================
+        */
+
+        this.mobileBreakpoint =
+            991.98;
+
+
+        /*
+        ======================================================
+        LOGOUT MODAL
+        ======================================================
+        */
+
+        this.logoutModal =
+            null;
+
+        this.logoutConfirmHandler =
+            null;
+
+
+        /*
+        ======================================================
+        INITIALIZE
+        ======================================================
+        */
+
+        this.render();
+
+        this.createMobileBackdrop();
+
+        this.createLogoutModal();
+
+        this.bindEvents();
+
+        this.bindMobileEvents();
+
+    }
+
+
     /*
     ======================================================
-    CHANGE PASSWORD
+    RENDER
     ======================================================
     */
-
-    this.changePassword =
-        null;
-
-
-    /*
-    ======================================================
-    MOBILE
-    ======================================================
-    */
-
-    this.mobileBreakpoint =
-        991.98;
-
-
-    /*
-    ======================================================
-    LOGOUT MODAL
-    ======================================================
-    */
-
-    this.logoutModal =
-        null;
-
-    this.logoutConfirmHandler =
-        null;
-
-
-    /*
-    ======================================================
-    INITIALIZE
-    ======================================================
-    */
-
-    this.render();
-
-    this.createMobileBackdrop();
-
-    this.createLogoutModal();
-
-    this.bindEvents();
-
-    this.bindMobileEvents();
-
-}
 
     render() {
 
-        const sidebar = document.getElementById("finova-sidebar");
+        const sidebar =
+            document.getElementById(
+                "finova-sidebar"
+            );
 
-        if (!sidebar) return;
+
+        if (
+            !sidebar
+        ) {
+
+            return;
+
+        }
+
 
         sidebar.innerHTML = `
 
@@ -76,34 +106,36 @@ export class FinovaSidebar {
 
                 <div class="finova-sidebar-logo">
 
-    <img
-    src="assets/images/brand/sidebar-logo.png"
-    alt="FINOVA"
-    class="finova-sidebar-logo-image">
+                    <img
+                        src="assets/images/brand/sidebar-logo.png"
+                        alt="FINOVA"
+                        class="finova-sidebar-logo-image">
 
-    <div class="finova-sidebar-brand">
+                    <div class="finova-sidebar-brand">
 
-        <div class="finova-sidebar-title">
+                        <div class="finova-sidebar-title">
 
-            FINOVA
+                            FINOVA
 
-        </div>
+                        </div>
 
-        <div class="finova-sidebar-subtitle">
+                        <div class="finova-sidebar-subtitle">
 
-            Accounting System
+                            Accounting System
 
-        </div>
+                        </div>
 
-    </div>
+                    </div>
 
-</div>
+                </div>
+
 
                 <div class="finova-sidebar-menu">
 
                     ${this.generateMenu()}
 
                 </div>
+
 
                 <div class="finova-sidebar-footer">
 
@@ -121,186 +153,213 @@ export class FinovaSidebar {
 
     }
 
+
+    /*
+    ======================================================
+    GENERATE MENU
+    ======================================================
+    */
+
     generateMenu() {
 
-    return `
+        return `
 
-        ${this.menuItem(
-            "Dashboard",
-            "fa-solid fa-gauge-high",
-            "dashboard"
-        )}
+            ${this.menuItem(
+                "Dashboard",
+                "fa-solid fa-gauge-high",
+                "dashboard"
+            )}
 
-        ${this.menuGroup(
-    "Master Data",
-    "fa-solid fa-layer-group",
-    [
 
-        this.menuItem(
-            "User Management",
-            "fa-solid fa-users-gear",
-            "user-management",
-            true
-        ),
+            ${this.menuGroup(
+                "Master Data",
+                "fa-solid fa-layer-group",
+                [
 
-        this.menuItem(
-            "Business Partner",
-            "fa-solid fa-handshake",
-            "business-partner",
-            true
-        ),
+                    this.menuItem(
+                        "User Management",
+                        "fa-solid fa-users-gear",
+                        "user-management",
+                        true
+                    ),
 
-        this.menuItem(
-            "Chart Of Accounts",
-            "fa-solid fa-book-open",
-            "chart-of-accounts",
-            true
-        ),
+                    this.menuItem(
+                        "Business Partner",
+                        "fa-solid fa-handshake",
+                        "business-partner",
+                        true
+                    ),
 
-        this.menuItem(
-            "Tax Master",
-            "fa-solid fa-percent",
-            "tax",
-            true
-        )
+                    this.menuItem(
+                        "Chart Of Accounts",
+                        "fa-solid fa-book-open",
+                        "chart-of-accounts",
+                        true
+                    ),
 
-    ]
-)}
+                    this.menuItem(
+                        "Tax Master",
+                        "fa-solid fa-percent",
+                        "tax",
+                        true
+                    )
 
-       ${this.menuGroup(
-    "Finance",
-    "fa-solid fa-building-columns",
-    [
+                ]
+            )}
 
-        this.menuItem(
-            "Account Payable",
-            "fa-solid fa-file-invoice-dollar",
-            "account-payable",
-            true
-        ),
 
-        this.menuItem(
-            "Account Receivable",
-            "fa-solid fa-money-check",
-            "account-receivable",
-            true
-        ),
+            ${this.menuGroup(
+                "Finance",
+                "fa-solid fa-building-columns",
+                [
 
-        this.menuItem(
-            "Aging Payable",
-            "fa-solid fa-hourglass-half",
-            "aging-payable",
-            true
-        ),
+                    this.menuItem(
+                        "Account Payable",
+                        "fa-solid fa-file-invoice-dollar",
+                        "account-payable",
+                        true
+                    ),
 
-        this.menuItem(
-            "Aging Receivable",
-            "fa-solid fa-business-time",
-            "aging-receivable",
-            true
-        )
+                    this.menuItem(
+                        "Account Receivable",
+                        "fa-solid fa-money-check",
+                        "account-receivable",
+                        true
+                    ),
 
-    ]
-)}
+                    this.menuItem(
+                        "Aging Payable",
+                        "fa-solid fa-hourglass-half",
+                        "aging-payable",
+                        true
+                    ),
 
-        ${this.menuGroup(
-    "Accounting",
-    "fa-solid fa-calculator",
-    [
+                    this.menuItem(
+                        "Aging Receivable",
+                        "fa-solid fa-business-time",
+                        "aging-receivable",
+                        true
+                    )
 
-        this.menuItem(
-            "GL Journal",
-            "fa-solid fa-book-journal-whills",
-            "gl-journal",
-            true
-        )
+                ]
+            )}
 
-    ]
-)}
-        ${this.menuGroup(
-    "Payment",
-    "fa-solid fa-wallet",
-    [
 
-        this.menuItem(
-            "AP Payment",
-            "fa-solid fa-money-check-dollar",
-            "ap-payment",
-            true
-        ),
+            ${this.menuGroup(
+                "Accounting",
+                "fa-solid fa-calculator",
+                [
 
-        this.menuItem(
-            "AR Payment",
-            "fa-solid fa-money-bill-transfer",
-            "ar-payment",
-            true
-        )
+                    this.menuItem(
+                        "GL Journal",
+                        "fa-solid fa-book-journal-whills",
+                        "gl-journal",
+                        true
+                    )
 
-    ]
-)}
+                ]
+            )}
 
-        ${this.menuGroup(
-    "Report",
-    "fa-solid fa-chart-column",
-    [
 
-        this.menuItem(
-            "General Ledger",
-            "fa-solid fa-book-bookmark",
-            "general-ledger",
-            true
-        ),
+            ${this.menuGroup(
+                "Payment",
+                "fa-solid fa-wallet",
+                [
 
-        this.menuItem(
-            "Trial Balance Year",
-            "fa-solid fa-scale-balanced",
-            "trial-balance-year",
-            true
-        ),
+                    this.menuItem(
+                        "AP Payment",
+                        "fa-solid fa-money-check-dollar",
+                        "ap-payment",
+                        true
+                    ),
 
-        this.menuItem(
-            "Income Statement",
-            "fa-solid fa-chart-line",
-            "income-statement",
-            true
-        ),
+                    this.menuItem(
+                        "AR Payment",
+                        "fa-solid fa-money-bill-transfer",
+                        "ar-payment",
+                        true
+                    )
 
-        this.menuItem(
-            "Balance Sheet",
-            "fa-solid fa-table",
-            "balance-sheet",
-            true
-        ),
+                ]
+            )}
 
-        this.menuItem(
-            "Profit & Loss",
-            "fa-solid fa-chart-pie",
-            "profit-loss",
-            true
-        )
 
-    ]
-)}
+            ${this.menuGroup(
+                "Report",
+                "fa-solid fa-chart-column",
+                [
 
-        ${this.menuHeader("Settings")}
+                    this.menuItem(
+                        "General Ledger",
+                        "fa-solid fa-book-bookmark",
+                        "general-ledger",
+                        true
+                    ),
 
-        ${this.menuItem(
-            "Change Password",
-            "fa-solid fa-key",
-            "change-password"
-        )}
+                    this.menuItem(
+                        "Trial Balance Year",
+                        "fa-solid fa-scale-balanced",
+                        "trial-balance-year",
+                        true
+                    ),
 
-        ${this.menuItem(
-            "Logout",
-            "fa-solid fa-right-from-bracket",
-            "logout"
-        )}
+                    this.menuItem(
+                        "Income Statement",
+                        "fa-solid fa-chart-line",
+                        "income-statement",
+                        true
+                    ),
 
-    `;
+                    this.menuItem(
+                        "Balance Sheet",
+                        "fa-solid fa-table",
+                        "balance-sheet",
+                        true
+                    ),
 
-}
+                    this.menuItem(
+                        "Profit & Loss",
+                        "fa-solid fa-chart-pie",
+                        "profit-loss",
+                        true
+                    )
 
-    menuHeader(title) {
+                ]
+            )}
+
+
+            ${this.menuHeader(
+                "Settings"
+            )}
+
+
+            ${this.menuItem(
+                "Change Password",
+                "fa-solid fa-key",
+                "change-password"
+            )}
+
+
+            ${this.menuItem(
+                "Logout",
+                "fa-solid fa-right-from-bracket",
+                "logout"
+            )}
+
+        `;
+
+    }
+
+
+    /*
+    ======================================================
+    MENU HEADER
+    ======================================================
+    */
+
+    menuHeader(
+        title
+    ) {
 
         return `
 
@@ -314,104 +373,108 @@ export class FinovaSidebar {
 
     }
 
-    menuItem(title, icon, module, isSubmenu = false) {
 
-    return `
+    /*
+    ======================================================
+    MENU ITEM
+    ======================================================
+    */
 
-        <div
-            class="${isSubmenu ? "finova-submenu-item" : "finova-menu-item"}"
-            data-module="${module}">
+    menuItem(
 
-            <i class="${icon}"></i>
+        title,
 
-            <span>${title}</span>
+        icon,
 
-        </div>
+        module,
 
-    `;
+        isSubmenu = false
 
-}
-menuGroup(title, icon, children) {
+    ) {
 
-    return `
+        return `
 
-        <div class="finova-menu-group">
+            <div
+                class="${
+                    isSubmenu
+                        ?
+                        "finova-submenu-item"
+                        :
+                        "finova-menu-item"
+                }"
+                data-module="${module}">
 
-            <div class="finova-menu-group-header">
+                <i class="${icon}"></i>
 
-                <div class="finova-menu-group-left">
+                <span>
 
-                    <i class="${icon}"></i>
+                    ${title}
 
-                    <span>${title}</span>
-
-                </div>
-
-                <i class="fa-solid fa-chevron-right finova-menu-arrow"></i>
-
-            </div>
-
-            <div class="finova-submenu">
-
-                ${children.join("")}
+                </span>
 
             </div>
 
-        </div>
+        `;
 
-    `;
-
-}
-/*
-==========================================================
-SET ACTIVE MENU
-==========================================================
-*/
-
-setActiveMenu(module) {
-
-    const sidebar =
-        document.querySelector(
-            ".finova-sidebar"
-        );
-
-    if (!sidebar) {
-        return;
     }
 
 
     /*
     ======================================================
-    REMOVE ALL ACTIVE MENU
+    MENU GROUP
     ======================================================
     */
 
-    sidebar
-        .querySelectorAll(
-            ".finova-menu-item, .finova-submenu-item"
-        )
-        .forEach(item => {
+    menuGroup(
 
-            item.classList.remove(
-                "active"
-            );
+        title,
 
-        });
+        icon,
+
+        children
+
+    ) {
+
+        return `
+
+            <div class="finova-menu-group">
+
+                <div class="finova-menu-group-header">
+
+                    <div class="finova-menu-group-left">
+
+                        <i class="${icon}"></i>
+
+                        <span>
+
+                            ${title}
+
+                        </span>
+
+                    </div>
 
 
-    /*
-    ======================================================
-    FIND CURRENT MENU
-    ======================================================
-    */
+                    <i
+                        class="
+                            fa-solid
+                            fa-chevron-right
+                            finova-menu-arrow
+                        ">
+                    </i>
 
-    const activeMenu =
-        sidebar.querySelector(
-            `[data-module="${module}"]`
-        );
+                </div>
 
-    if (!activeMenu) {
-        return;
+
+                <div class="finova-submenu">
+
+                    ${children.join("")}
+
+                </div>
+
+            </div>
+
+        `;
+
     }
 
 
@@ -421,189 +484,252 @@ setActiveMenu(module) {
     ======================================================
     */
 
-    activeMenu.classList.add(
-        "active"
-    );
+    setActiveMenu(
+        module
+    ) {
 
-
-    /*
-    ======================================================
-    OPEN PARENT GROUP
-    ======================================================
-    */
-
-    const parentGroup =
-        activeMenu.closest(
-            ".finova-menu-group"
-        );
-
-    if (parentGroup) {
-
-        parentGroup.classList.add(
-            "open"
-        );
-
-        const submenu =
-            parentGroup.querySelector(
-                ".finova-submenu"
+        const sidebar =
+            document.querySelector(
+                ".finova-sidebar"
             );
 
-        if (submenu) {
 
-            submenu.classList.add(
+        if (
+            !sidebar
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+        ======================================================
+        REMOVE ALL ACTIVE MENU
+        ======================================================
+        */
+
+        sidebar
+            .querySelectorAll(
+                ".finova-menu-item, .finova-submenu-item"
+            )
+            .forEach(
+
+                item => {
+
+                    item.classList.remove(
+                        "active"
+                    );
+
+                }
+
+            );
+
+
+        /*
+        ======================================================
+        FIND CURRENT MENU
+        ======================================================
+        */
+
+        const activeMenu =
+            sidebar.querySelector(
+                `[data-module="${module}"]`
+            );
+
+
+        if (
+            !activeMenu
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+        ======================================================
+        SET ACTIVE MENU
+        ======================================================
+        */
+
+        activeMenu.classList.add(
+            "active"
+        );
+
+
+        /*
+        ======================================================
+        OPEN PARENT GROUP
+        ======================================================
+        */
+
+        const parentGroup =
+            activeMenu.closest(
+                ".finova-menu-group"
+            );
+
+
+        if (
+            parentGroup
+        ) {
+
+            parentGroup.classList.add(
                 "open"
             );
+
+
+            const submenu =
+                parentGroup.querySelector(
+                    ".finova-submenu"
+                );
+
+
+            if (
+                submenu
+            ) {
+
+                submenu.classList.add(
+                    "open"
+                );
+
+            }
 
         }
 
     }
 
-}
-/*
-==========================================================
-CREATE LOGOUT MODAL
-==========================================================
-*/
-
-createLogoutModal() {
 
     /*
-    ======================================================
-    CHECK EXISTING MODAL
-    ======================================================
+    ==========================================================
+    CREATE LOGOUT MODAL
+    ==========================================================
     */
 
-    let modalElement =
-        document.getElementById(
-            "logoutConfirmModal"
-        );
+    createLogoutModal() {
+
+        /*
+        ======================================================
+        CHECK EXISTING MODAL
+        ======================================================
+        */
+
+        let modalElement =
+            document.getElementById(
+                "logoutConfirmModal"
+            );
 
 
-    if (
-        modalElement
-    ) {
+        if (
+            modalElement
+        ) {
 
-        return;
+            return;
 
-    }
-
-
-    /*
-    ======================================================
-    CREATE MODAL CONTAINER
-    ======================================================
-    */
-
-    const wrapper =
-        document.createElement(
-            "div"
-        );
+        }
 
 
-    wrapper.innerHTML = `
+        /*
+        ======================================================
+        CREATE MODAL CONTAINER
+        ======================================================
+        */
 
-        <!-- ==================================================
-             LOGOUT CONFIRMATION MODAL
-        =================================================== -->
+        const wrapper =
+            document.createElement(
+                "div"
+            );
 
-        <div
-            class="modal fade"
-            id="logoutConfirmModal"
-            tabindex="-1"
-            aria-labelledby="logoutConfirmModalLabel"
-            aria-hidden="true"
-            data-bs-backdrop="static"
-            data-bs-keyboard="false"
-        >
+
+        wrapper.innerHTML = `
 
             <div
-                class="
-                    modal-dialog
-                    modal-dialog-centered
-                "
+                class="modal fade"
+                id="logoutConfirmModal"
+                tabindex="-1"
+                aria-labelledby="logoutConfirmModalLabel"
+                aria-hidden="true"
+                data-bs-backdrop="static"
+                data-bs-keyboard="false"
             >
 
-                <div class="modal-content">
+                <div
+                    class="
+                        modal-dialog
+                        modal-dialog-centered
+                    "
+                >
+
+                    <div class="modal-content">
 
 
-                    <!-- ======================================
-                         HEADER
-                    ======================================= -->
+                        <div class="modal-header">
 
-                    <div class="modal-header">
+                            <h5
+                                class="modal-title"
+                                id="logoutConfirmModalLabel"
+                            >
 
-                        <h5
-                            class="modal-title"
-                            id="logoutConfirmModalLabel"
-                        >
+                                Confirm Logout
 
-                            Confirm Logout
-
-                        </h5>
+                            </h5>
 
 
-                        <button
-                            type="button"
-                            class="btn-close"
-                            data-bs-dismiss="modal"
-                            aria-label="Close"
-                        >
-                        </button>
+                            <button
+                                type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close">
+                            </button>
 
-                    </div>
-
-
-                    <!-- ======================================
-                         BODY
-                    ======================================= -->
-
-                    <div class="modal-body">
-
-                        Are you sure you want to logout?
-
-                    </div>
+                        </div>
 
 
-                    <!-- ======================================
-                         FOOTER
-                    ======================================= -->
+                        <div class="modal-body">
 
-                    <div class="modal-footer">
+                            Are you sure you want to logout?
 
-                        <button
-                            type="button"
-                            class="
-                                btn
-                                btn-outline-secondary
-                            "
-                            data-bs-dismiss="modal"
-                        >
-
-                            Cancel
-
-                        </button>
+                        </div>
 
 
-                        <button
-                            type="button"
-                            class="
-                                btn
-                                btn-danger
-                            "
-                            id="btn-confirm-logout"
-                        >
+                        <div class="modal-footer">
 
-                            <i
+                            <button
+                                type="button"
                                 class="
-                                    fa-solid
-                                    fa-right-from-bracket
-                                    me-1
+                                    btn
+                                    btn-outline-secondary
                                 "
-                            ></i>
+                                data-bs-dismiss="modal"
+                            >
 
-                            Logout
+                                Cancel
 
-                        </button>
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="
+                                    btn
+                                    btn-danger
+                                "
+                                id="btn-confirm-logout"
+                            >
+
+                                <i
+                                    class="
+                                        fa-solid
+                                        fa-right-from-bracket
+                                        me-1
+                                    ">
+                                </i>
+
+                                Logout
+
+                            </button>
+
+                        </div>
 
                     </div>
 
@@ -611,247 +737,245 @@ createLogoutModal() {
 
             </div>
 
-        </div>
-
-    `;
+        `;
 
 
-    /*
-    ======================================================
-    APPEND MODAL
-    ======================================================
-    */
+        /*
+        ======================================================
+        APPEND MODAL
+        ======================================================
+        */
 
-    modalElement =
-        wrapper.firstElementChild;
-
-
-    document.body.appendChild(
-        modalElement
-    );
-
-}
+        modalElement =
+            wrapper.firstElementChild;
 
 
-   /*
-==========================================================
-BIND EVENTS
-==========================================================
-*/
-
-bindEvents() {
-
-    const sidebar =
-        document.querySelector(
-            ".finova-sidebar"
+        document.body.appendChild(
+            modalElement
         );
-
-
-    if (
-        !sidebar
-    ) {
-
-        return;
 
     }
 
 
-    sidebar.addEventListener(
+    /*
+    ==========================================================
+    BIND EVENTS
+    ==========================================================
+    */
 
-        "click",
+    bindEvents() {
 
-        (event) => {
-
-
-            /*
-            ==================================================
-            GROUP HEADER
-            ==================================================
-            */
-
-            const groupHeader =
-                event.target.closest(
-                    ".finova-menu-group-header"
-                );
+        const sidebar =
+            document.querySelector(
+                ".finova-sidebar"
+            );
 
 
-            if (
-                groupHeader
-            ) {
+        if (
+            !sidebar
+        ) {
 
-                const submenu =
-                    groupHeader.nextElementSibling;
+            return;
+
+        }
+
+
+        sidebar.addEventListener(
+
+            "click",
+
+            event => {
+
+                /*
+                ==================================================
+                GROUP HEADER
+                ==================================================
+                */
+
+                const groupHeader =
+                    event.target.closest(
+                        ".finova-menu-group-header"
+                    );
 
 
                 if (
-                    submenu
+                    groupHeader
                 ) {
 
-                    const group =
-                        groupHeader.parentElement;
+                    const submenu =
+                        groupHeader.nextElementSibling;
 
 
-                    const isOpen =
-                        submenu.classList.contains(
+                    if (
+                        submenu
+                    ) {
+
+                        const group =
+                            groupHeader.parentElement;
+
+
+                        group.classList.toggle(
                             "open"
                         );
 
 
-                    group.classList.toggle(
-                        "open"
-                    );
+                        submenu.classList.toggle(
+                            "open"
+                        );
+
+                    }
 
 
-                    submenu.classList.toggle(
-                        "open"
-                    );
+                    return;
 
                 }
 
 
-                return;
+                /*
+                ==================================================
+                MENU / SUBMENU
+                ==================================================
+                */
 
-            }
-
-
-            /*
-            ==================================================
-            MENU / SUBMENU
-            ==================================================
-            */
-
-            const menu =
-                event.target.closest(
-                    ".finova-menu-item, .finova-submenu-item"
-                );
+                const menu =
+                    event.target.closest(
+                        ".finova-menu-item, .finova-submenu-item"
+                    );
 
 
-            if (
-                !menu
-            ) {
+                if (
+                    !menu
+                ) {
 
-                return;
+                    return;
 
-            }
-
-
-            const module =
-                menu.dataset.module;
+                }
 
 
-            if (
-                !module
-            ) {
-
-                return;
-
-            }
+                const module =
+                    menu.dataset.module;
 
 
-            /*
-            ==================================================
-            CHANGE PASSWORD
-            ==================================================
-            */
+                if (
+                    !module
+                ) {
 
-            if (
-                module ===
-                "change-password"
-            ) {
+                    return;
 
-                event.preventDefault();
+                }
 
 
-                this.openChangePasswordModal();
+                /*
+                ==================================================
+                CHANGE PASSWORD
+                ==================================================
+                */
+
+                if (
+                    module ===
+                    "change-password"
+                ) {
+
+                    event.preventDefault();
 
 
-                return;
-
-            }
+                    this.openChangePasswordModal();
 
 
-            /*
-            ==================================================
-            LOGOUT
-            ==================================================
-            */
+                    return;
 
-            if (
-                module ===
-                "logout"
-            ) {
-
-                event.preventDefault();
+                }
 
 
-                this.showLogoutConfirmation();
+                /*
+                ==================================================
+                LOGOUT
+                ==================================================
+                */
+
+                if (
+                    module ===
+                    "logout"
+                ) {
+
+                    event.preventDefault();
 
 
-                return;
-
-            }
+                    this.showLogoutConfirmation();
 
 
-            /*
-            ==================================================
-            ACTIVE MENU
-            ==================================================
-            */
+                    return;
 
-            this.setActiveMenu(
-                module
-            );
+                }
 
 
-            /*
-            ==================================================
-            ROUTER
-            ==================================================
-            */
+                /*
+                ==================================================
+                ACTIVE MENU
+                ==================================================
+                */
 
-            if (
-                window.finovaRouter
-            ) {
-
-                window.finovaRouter.navigate(
+                this.setActiveMenu(
                     module
                 );
 
+
+                /*
+                ==================================================
+                ROUTER
+                ==================================================
+                */
+
+                if (
+                    window.finovaRouter
+                ) {
+
+                    window.finovaRouter.navigate(
+                        module
+                    );
+
+                }
+
             }
 
-        }
+        );
 
-    );
+    }
 
-}
-/*
+
+    /*
 ==========================================================
-SHOW LOGOUT CONFIRMATION
+OPEN CHANGE PASSWORD MODAL
 ==========================================================
 */
 
-showLogoutConfirmation() {
+openChangePasswordModal() {
 
     /*
     ======================================================
-    GET MODAL
+    GET MODAL ELEMENT
     ======================================================
     */
 
     const modalElement =
         document.getElementById(
-            "logoutConfirmModal"
+            "change-password-modal"
         );
 
+
+    /*
+    ======================================================
+    VALIDATION
+    ======================================================
+    */
 
     if (
         !modalElement
     ) {
 
         console.error(
-            "Logout confirmation modal not found."
+            "Change Password Modal not found."
         );
-
 
         return;
 
@@ -860,28 +984,49 @@ showLogoutConfirmation() {
 
     /*
     ======================================================
-    GET CONFIRM BUTTON
+    INITIALIZE CHANGE PASSWORD
     ======================================================
     */
 
-    const btnConfirmLogout =
+    if (
+        !this.changePassword
+    ) {
+
+        this.changePassword =
+            new ChangePassword();
+
+    }
+
+
+    /*
+    ======================================================
+    RESET FORM
+    ======================================================
+    */
+
+    const form =
         document.getElementById(
-            "btn-confirm-logout"
+            "change-password-form"
         );
 
 
     if (
-        !btnConfirmLogout
+        form
     ) {
 
-        console.error(
-            "Confirm Logout button not found."
-        );
-
-
-        return;
+        form.reset();
 
     }
+
+
+    /*
+    ======================================================
+    RESET PASSWORD VISIBILITY
+    ======================================================
+    */
+
+    this.changePassword
+        ?.resetPasswordVisibility();
 
 
     /*
@@ -890,99 +1035,10 @@ showLogoutConfirmation() {
     ======================================================
     */
 
-    this.logoutModal =
+    const modal =
         bootstrap.Modal.getOrCreateInstance(
             modalElement
         );
-
-
-    /*
-    ======================================================
-    REMOVE OLD HANDLER
-    ======================================================
-    */
-
-    if (
-        this.logoutConfirmHandler
-    ) {
-
-        btnConfirmLogout.removeEventListener(
-            "click",
-            this.logoutConfirmHandler
-        );
-
-    }
-
-
-    /*
-    ======================================================
-    CREATE HANDLER
-    ======================================================
-    */
-
-    this.logoutConfirmHandler =
-        async () => {
-
-            /*
-            ==============================================
-            PREVENT DOUBLE CLICK
-            ==============================================
-            */
-
-            if (
-                btnConfirmLogout.disabled
-            ) {
-
-                return;
-
-            }
-
-
-            btnConfirmLogout.disabled =
-                true;
-
-
-            try {
-
-                /*
-                ==========================================
-                HIDE MODAL
-                ==========================================
-                */
-
-                this.logoutModal.hide();
-
-
-                /*
-                ==========================================
-                LOGOUT
-                ==========================================
-                */
-
-                await this.logout();
-
-            }
-
-            finally {
-
-                btnConfirmLogout.disabled =
-                    false;
-
-            }
-
-        };
-
-
-    /*
-    ======================================================
-    BIND CONFIRM BUTTON
-    ======================================================
-    */
-
-    btnConfirmLogout.addEventListener(
-        "click",
-        this.logoutConfirmHandler
-    );
 
 
     /*
@@ -991,445 +1047,682 @@ showLogoutConfirmation() {
     ======================================================
     */
 
-    this.logoutModal.show();
-
-}
-/*
-==========================================================
-CREATE MOBILE BACKDROP
-==========================================================
-*/
-
-createMobileBackdrop() {
-
-    let backdrop =
-        document.getElementById(
-            "finova-sidebar-backdrop"
-        );
-
-    if (backdrop) {
-        return;
-    }
+    modal.show();
 
 
-    backdrop =
-        document.createElement(
-            "div"
-        );
+    /*
+    ======================================================
+    FOCUS CURRENT PASSWORD
+    ======================================================
+    */
 
-    backdrop.id =
-        "finova-sidebar-backdrop";
+    window.setTimeout(
 
-    backdrop.className =
-        "finova-sidebar-backdrop";
+        () => {
 
-    document.body.appendChild(
-        backdrop
+            document
+                .getElementById(
+                    "current-password"
+                )
+                ?.focus();
+
+        },
+
+        150
+
     );
 
 }
-
-
-/*
-==========================================================
-BIND MOBILE EVENTS
-==========================================================
-*/
-
-bindMobileEvents() {
-
     /*
-    ======================================================
-    SIDEBAR
-    ======================================================
+    ==========================================================
+    SHOW LOGOUT CONFIRMATION
+    ==========================================================
     */
 
-    const sidebarHost =
-        document.getElementById(
-            "finova-sidebar"
-        );
+    showLogoutConfirmation() {
+
+        /*
+        ======================================================
+        GET MODAL
+        ======================================================
+        */
+
+        const modalElement =
+            document.getElementById(
+                "logoutConfirmModal"
+            );
 
 
-    /*
-    ======================================================
-    BACKDROP
-    ======================================================
-    */
+        if (
+            !modalElement
+        ) {
 
-    const backdrop =
-        document.getElementById(
-            "finova-sidebar-backdrop"
-        );
+            console.error(
+                "Logout confirmation modal not found."
+            );
 
 
-    /*
-    ======================================================
-    MOBILE MENU BUTTON
+            return;
 
-    Support beberapa ID agar kompatibel dengan topbar.
-    ======================================================
-    */
-
-    const menuButton =
-        document.getElementById(
-            "btn-mobile-sidebar"
-        )
-        ||
-        document.getElementById(
-            "sidebar-toggle"
-        )
-        ||
-        document.getElementById(
-            "btn-sidebar-toggle"
-        )
-        ||
-        document.querySelector(
-            "[data-finova-sidebar-toggle]"
-        );
+        }
 
 
-    /*
-    ======================================================
-    OPEN / TOGGLE
-    ======================================================
-    */
+        /*
+        ======================================================
+        GET CONFIRM BUTTON
+        ======================================================
+        */
 
-    if (menuButton) {
-
-        menuButton.addEventListener(
-            "click",
-            (event) => {
-
-                event.preventDefault();
-
-                event.stopPropagation();
-
-                this.toggleMobileSidebar();
-
-            }
-        );
-
-    }
+        const btnConfirmLogout =
+            document.getElementById(
+                "btn-confirm-logout"
+            );
 
 
-    /*
-    ======================================================
-    BACKDROP CLICK
-    ======================================================
-    */
+        if (
+            !btnConfirmLogout
+        ) {
 
-    if (backdrop) {
-
-        backdrop.addEventListener(
-            "click",
-            () => {
-
-                this.closeMobileSidebar();
-
-            }
-        );
-
-    }
+            console.error(
+                "Confirm Logout button not found."
+            );
 
 
-    /*
-    ======================================================
-    CLOSE AFTER MENU NAVIGATION
-    ======================================================
-    */
+            return;
 
-    if (sidebarHost) {
-
-        sidebarHost.addEventListener(
-            "click",
-            (event) => {
-
-                const menu =
-                    event.target.closest(
-                        ".finova-menu-item, .finova-submenu-item"
-                    );
-
-                if (!menu) {
-                    return;
-                }
+        }
 
 
-                const module =
-                    menu.dataset.module;
+        /*
+        ======================================================
+        BOOTSTRAP MODAL
+        ======================================================
+        */
 
+        this.logoutModal =
+            bootstrap.Modal.getOrCreateInstance(
+                modalElement
+            );
+
+
+        /*
+        ======================================================
+        REMOVE OLD HANDLER
+        ======================================================
+        */
+
+        if (
+            this.logoutConfirmHandler
+        ) {
+
+            btnConfirmLogout.removeEventListener(
+
+                "click",
+
+                this.logoutConfirmHandler
+
+            );
+
+        }
+
+
+        /*
+        ======================================================
+        CREATE HANDLER
+        ======================================================
+        */
+
+        this.logoutConfirmHandler =
+            async () => {
 
                 /*
-                ==========================================
-                GROUP HEADER IS NOT NAVIGATION
-                ==========================================
-                */
-
-                if (!module) {
-                    return;
-                }
-
-
-                /*
-                ==========================================
-                ONLY MOBILE
-                ==========================================
+                ==============================================
+                PREVENT DOUBLE CLICK
+                ==============================================
                 */
 
                 if (
-                    window.innerWidth
-                    <=
-                    this.mobileBreakpoint
+                    btnConfirmLogout.disabled
                 ) {
 
+                    return;
+
+                }
+
+
+                btnConfirmLogout.disabled =
+                    true;
+
+
+                try {
+
                     /*
-                    --------------------------------------
-                    Small delay allows router click
-                    to execute first.
-                    --------------------------------------
+                    ==========================================
+                    HIDE MODAL
+                    ==========================================
                     */
 
-                    window.setTimeout(
-                        () => {
+                    this.logoutModal.hide();
 
-                            this.closeMobileSidebar();
 
-                        },
-                        50
-                    );
+                    /*
+                    ==========================================
+                    LOGOUT
+                    ==========================================
+                    */
+
+                    await this.logout();
+
+                }
+
+                finally {
+
+                    btnConfirmLogout.disabled =
+                        false;
+
+                }
+
+            };
+
+
+        /*
+        ======================================================
+        BIND CONFIRM BUTTON
+        ======================================================
+        */
+
+        btnConfirmLogout.addEventListener(
+
+            "click",
+
+            this.logoutConfirmHandler
+
+        );
+
+
+        /*
+        ======================================================
+        SHOW MODAL
+        ======================================================
+        */
+
+        this.logoutModal.show();
+
+    }
+
+
+    /*
+    ==========================================================
+    CREATE MOBILE BACKDROP
+    ==========================================================
+    */
+
+    createMobileBackdrop() {
+
+        let backdrop =
+            document.getElementById(
+                "finova-sidebar-backdrop"
+            );
+
+
+        if (
+            backdrop
+        ) {
+
+            return;
+
+        }
+
+
+        backdrop =
+            document.createElement(
+                "div"
+            );
+
+
+        backdrop.id =
+            "finova-sidebar-backdrop";
+
+
+        backdrop.className =
+            "finova-sidebar-backdrop";
+
+
+        document.body.appendChild(
+            backdrop
+        );
+
+    }
+
+
+    /*
+    ==========================================================
+    BIND MOBILE EVENTS
+    ==========================================================
+    */
+
+    bindMobileEvents() {
+
+        /*
+        ======================================================
+        SIDEBAR
+        ======================================================
+        */
+
+        const sidebarHost =
+            document.getElementById(
+                "finova-sidebar"
+            );
+
+
+        /*
+        ======================================================
+        BACKDROP
+        ======================================================
+        */
+
+        const backdrop =
+            document.getElementById(
+                "finova-sidebar-backdrop"
+            );
+
+
+        /*
+        ======================================================
+        MOBILE MENU BUTTON
+        ======================================================
+        */
+
+        const menuButton =
+            document.getElementById(
+                "btn-mobile-sidebar"
+            )
+            ||
+            document.getElementById(
+                "sidebar-toggle"
+            )
+            ||
+            document.getElementById(
+                "btn-sidebar-toggle"
+            )
+            ||
+            document.querySelector(
+                "[data-finova-sidebar-toggle]"
+            );
+
+
+        /*
+        ======================================================
+        OPEN / TOGGLE
+        ======================================================
+        */
+
+        if (
+            menuButton
+        ) {
+
+            menuButton.addEventListener(
+
+                "click",
+
+                event => {
+
+                    event.preventDefault();
+
+                    event.stopPropagation();
+
+                    this.toggleMobileSidebar();
+
+                }
+
+            );
+
+        }
+
+
+        /*
+        ======================================================
+        BACKDROP CLICK
+        ======================================================
+        */
+
+        if (
+            backdrop
+        ) {
+
+            backdrop.addEventListener(
+
+                "click",
+
+                () => {
+
+                    this.closeMobileSidebar();
+
+                }
+
+            );
+
+        }
+
+
+        /*
+        ======================================================
+        CLOSE AFTER MENU NAVIGATION
+        ======================================================
+        */
+
+        if (
+            sidebarHost
+        ) {
+
+            sidebarHost.addEventListener(
+
+                "click",
+
+                event => {
+
+                    const menu =
+                        event.target.closest(
+                            ".finova-menu-item, .finova-submenu-item"
+                        );
+
+
+                    if (
+                        !menu
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    const module =
+                        menu.dataset.module;
+
+
+                    if (
+                        !module
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    if (
+                        window.innerWidth
+                        <=
+                        this.mobileBreakpoint
+                    ) {
+
+                        window.setTimeout(
+
+                            () => {
+
+                                this.closeMobileSidebar();
+
+                            },
+
+                            50
+
+                        );
+
+                    }
+
+                }
+
+            );
+
+        }
+
+
+        /*
+        ======================================================
+        ESC KEY
+        ======================================================
+        */
+
+        document.addEventListener(
+
+            "keydown",
+
+            event => {
+
+                if (
+                    event.key ===
+                    "Escape"
+                ) {
+
+                    this.closeMobileSidebar();
 
                 }
 
             }
+
         );
-
-    }
-
-
-    /*
-    ======================================================
-    ESC KEY
-    ======================================================
-    */
-
-    document.addEventListener(
-        "keydown",
-        (event) => {
-
-            if (
-                event.key ===
-                "Escape"
-            ) {
-
-                this.closeMobileSidebar();
-
-            }
-
-        }
-    );
-
-
-    /*
-    ======================================================
-    WINDOW RESIZE
-    ======================================================
-    */
-
-    window.addEventListener(
-        "resize",
-        () => {
-
-            if (
-                window.innerWidth
-                >
-                this.mobileBreakpoint
-            ) {
-
-                this.closeMobileSidebar();
-
-            }
-
-        }
-    );
-
-}
-
-
-/*
-==========================================================
-OPEN MOBILE SIDEBAR
-==========================================================
-*/
-
-openMobileSidebar() {
-
-    const sidebarHost =
-        document.getElementById(
-            "finova-sidebar"
-        );
-
-    const backdrop =
-        document.getElementById(
-            "finova-sidebar-backdrop"
-        );
-
-
-    if (!sidebarHost) {
-        return;
-    }
-
-
-    sidebarHost.classList.add(
-        "mobile-open"
-    );
-
-
-    sidebarHost
-        .querySelector(
-            ".finova-sidebar"
-        )
-        ?.classList.add(
-            "mobile-open"
-        );
-
-
-    backdrop?.classList.add(
-        "show"
-    );
-
-
-    document.body.classList.add(
-        "finova-sidebar-open"
-    );
-
-}
-
-
-/*
-==========================================================
-CLOSE MOBILE SIDEBAR
-==========================================================
-*/
-
-closeMobileSidebar() {
-
-    const sidebarHost =
-        document.getElementById(
-            "finova-sidebar"
-        );
-
-    const backdrop =
-        document.getElementById(
-            "finova-sidebar-backdrop"
-        );
-
-
-    sidebarHost?.classList.remove(
-        "mobile-open"
-    );
-
-
-    sidebarHost
-        ?.querySelector(
-            ".finova-sidebar"
-        )
-        ?.classList.remove(
-            "mobile-open"
-        );
-
-
-    backdrop?.classList.remove(
-        "show"
-    );
-
-
-    document.body.classList.remove(
-        "finova-sidebar-open"
-    );
-
-}
-
-
-/*
-==========================================================
-TOGGLE MOBILE SIDEBAR
-==========================================================
-*/
-
-toggleMobileSidebar() {
-
-    const sidebarHost =
-        document.getElementById(
-            "finova-sidebar"
-        );
-
-
-    if (!sidebarHost) {
-        return;
-    }
-
-
-    const isOpen =
-        sidebarHost.classList.contains(
-            "mobile-open"
-        );
-
-
-    if (isOpen) {
-
-        this.closeMobileSidebar();
-
-    }
-    else {
-
-        this.openMobileSidebar();
-
-    }
-
-}
-    /*
-==========================================================
-LOGOUT
-FINAL
-NO NATIVE CONFIRM
-NO NATIVE ALERT
-==========================================================
-*/
-
-async logout() {
-
-    try {
-
-        /*
-        ======================================================
-        AUTH LOGOUT
-        ======================================================
-        */
-
-        await AuthService.logout();
 
 
         /*
         ======================================================
-        REDIRECT LOGIN
+        WINDOW RESIZE
         ======================================================
         */
 
-        window.location.replace(
-            "login.html"
+        window.addEventListener(
+
+            "resize",
+
+            () => {
+
+                if (
+                    window.innerWidth
+                    >
+                    this.mobileBreakpoint
+                ) {
+
+                    this.closeMobileSidebar();
+
+                }
+
+            }
+
         );
 
     }
 
-    catch (
-        error
-    ) {
 
-        console.error(
-            "FinovaSidebar.logout:",
+    /*
+    ==========================================================
+    OPEN MOBILE SIDEBAR
+    ==========================================================
+    */
+
+    openMobileSidebar() {
+
+        const sidebarHost =
+            document.getElementById(
+                "finova-sidebar"
+            );
+
+
+        const backdrop =
+            document.getElementById(
+                "finova-sidebar-backdrop"
+            );
+
+
+        if (
+            !sidebarHost
+        ) {
+
+            return;
+
+        }
+
+
+        sidebarHost.classList.add(
+            "mobile-open"
+        );
+
+
+        sidebarHost
+            .querySelector(
+                ".finova-sidebar"
+            )
+            ?.classList.add(
+                "mobile-open"
+            );
+
+
+        backdrop?.classList.add(
+            "show"
+        );
+
+
+        document.body.classList.add(
+            "finova-sidebar-open"
+        );
+
+    }
+
+
+    /*
+    ==========================================================
+    CLOSE MOBILE SIDEBAR
+    ==========================================================
+    */
+
+    closeMobileSidebar() {
+
+        const sidebarHost =
+            document.getElementById(
+                "finova-sidebar"
+            );
+
+
+        const backdrop =
+            document.getElementById(
+                "finova-sidebar-backdrop"
+            );
+
+
+        sidebarHost?.classList.remove(
+            "mobile-open"
+        );
+
+
+        sidebarHost
+            ?.querySelector(
+                ".finova-sidebar"
+            )
+            ?.classList.remove(
+                "mobile-open"
+            );
+
+
+        backdrop?.classList.remove(
+            "show"
+        );
+
+
+        document.body.classList.remove(
+            "finova-sidebar-open"
+        );
+
+    }
+
+
+    /*
+    ==========================================================
+    TOGGLE MOBILE SIDEBAR
+    ==========================================================
+    */
+
+    toggleMobileSidebar() {
+
+        const sidebarHost =
+            document.getElementById(
+                "finova-sidebar"
+            );
+
+
+        if (
+            !sidebarHost
+        ) {
+
+            return;
+
+        }
+
+
+        const isOpen =
+            sidebarHost.classList.contains(
+                "mobile-open"
+            );
+
+
+        if (
+            isOpen
+        ) {
+
+            this.closeMobileSidebar();
+
+        }
+
+        else {
+
+            this.openMobileSidebar();
+
+        }
+
+    }
+
+
+    /*
+    ==========================================================
+    LOGOUT
+    FINAL
+    NO NATIVE CONFIRM
+    NO NATIVE ALERT
+    ==========================================================
+    */
+
+    async logout() {
+
+        try {
+
+            /*
+            ======================================================
+            AUTH LOGOUT
+            ======================================================
+            */
+
+            await AuthService.logout();
+
+
+            /*
+            ======================================================
+            REDIRECT LOGIN
+            ======================================================
+            */
+
+            window.location.replace(
+                "login.html"
+            );
+
+        }
+
+        catch (
             error
-        );
+        ) {
+
+            console.error(
+                "FinovaSidebar.logout:",
+                error
+            );
+
+        }
 
     }
 
-}
 }
