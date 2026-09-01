@@ -474,162 +474,184 @@ export class TrialBalanceYear {
     }
 
 
+   /*
+==========================================================
+GET CURRENT REPORT MONTH
+==========================================================
+*/
+
+getCurrentReportMonth(
+    year
+) {
+
+    const today =
+        new Date();
+
+
+    const currentYear =
+        today.getFullYear();
+
+
+    const currentMonth =
+        today.getMonth() + 1;
+
+
     /*
-    ==========================================================
-    GET CURRENT REPORT MONTH
-    ==========================================================
+    ======================================================
+    PAST YEAR
+
+    Full year.
+    ======================================================
     */
 
-    getCurrentReportMonth(
-        year
+    if (
+        year < currentYear
     ) {
 
-        const today =
-            new Date();
-
-
-        const currentYear =
-            today.getFullYear();
-
-
-        const currentMonth =
-            today.getMonth() + 1;
-
-
-        /*
-        ======================================================
-        PAST YEAR
-
-        Past fiscal year shows Jan - Dec.
-        ======================================================
-        */
-
-        if (
-            year < currentYear
-        ) {
-
-            return 12;
-
-        }
-
-
-        /*
-        ======================================================
-        FUTURE YEAR
-
-        No current month exists yet.
-        ======================================================
-        */
-
-        if (
-            year > currentYear
-        ) {
-
-            return 0;
-
-        }
-
-
-        /*
-        ======================================================
-        CURRENT YEAR
-
-        Example:
-        August 2026 = 8
-        ======================================================
-        */
-
-        return currentMonth;
+        return 12;
 
     }
 
 
     /*
-    ==========================================================
-    UPDATE MONTH HEADERS
-    ==========================================================
+    ======================================================
+    FUTURE YEAR
+    ======================================================
     */
 
-    updateMonthHeaders() {
+    if (
+        year > currentYear
+    ) {
 
-        const year =
-            Number(
+        return 0;
 
-                this.filterYear?.value
-
-                ||
-
-                new Date()
-                    .getFullYear()
-
-            );
+    }
 
 
-        const shortYear =
-            String(
-                year
-            )
-            .slice(
-                -2
-            );
+    /*
+    ======================================================
+    CURRENT YEAR
 
+    REALTIME CURRENT MONTH
 
-        const currentReportMonth =
-            this.getCurrentReportMonth(
-                year
-            );
+    Example:
 
+    September 2026
+    =
+    September = 9
+    ======================================================
+    */
 
-        this.monthHeaders.forEach(
+    return currentMonth;
 
-            (
-                element,
-                index
-            ) => {
+}
 
-                if (
-                    !element
-                ) {
+    /*
+==========================================================
+UPDATE MONTH HEADERS
+==========================================================
+*/
 
-                    return;
+updateMonthHeaders() {
 
-                }
+    const year =
+        Number(
 
+            this.filterYear?.value
 
-                element.textContent =
-                    `${
-                        this.monthNames[
-                            index
-                        ]
-                    }-${shortYear}`;
+            ||
 
-
-                /*
-                ==================================================
-                FUTURE MONTH HEADER
-                ==================================================
-                */
-
-                const monthNumber =
-                    index + 1;
-
-
-                element.classList.toggle(
-
-                    "tb-future-period-header",
-
-                    monthNumber
-                    >
-                    currentReportMonth
-
-                );
-
-            }
+            new Date()
+                .getFullYear()
 
         );
 
-    }
 
+    const shortYear =
+        String(
+            year
+        )
+        .slice(
+            -2
+        );
+
+
+    const currentReportMonth =
+        this.getCurrentReportMonth(
+            year
+        );
+
+
+    this.monthHeaders.forEach(
+
+        (
+            element,
+            index
+        ) => {
+
+            if (
+                !element
+            ) {
+
+                return;
+
+            }
+
+
+            const monthNumber =
+                index + 1;
+
+
+            /*
+            ==================================================
+            HEADER TEXT
+            ==================================================
+            */
+
+            element.textContent =
+                `${
+                    this.monthNames[
+                        index
+                    ]
+                }-${shortYear}`;
+
+
+            /*
+            ==================================================
+            ALWAYS SHOW JAN - DEC
+            ==================================================
+            */
+
+            element.style.display =
+                "";
+
+
+            /*
+            ==================================================
+            FUTURE PERIOD CLASS
+
+            Future column stays visible.
+
+            Example September:
+            Oct - Dec = future.
+            ==================================================
+            */
+
+            element.classList.toggle(
+
+                "tb-future-period-header",
+
+                monthNumber
+                >
+                currentReportMonth
+
+            );
+
+        }
+
+    );
+
+}
 
     /*
     ==========================================================
@@ -1127,6 +1149,271 @@ export class TrialBalanceYear {
         };
 
     }
+    /*
+==========================================================
+RESOLVE ACCOUNT GROUP
+==========================================================
+*/
+
+resolveAccountGroup(
+    account,
+    accountMap
+) {
+
+    if (
+        !account
+    ) {
+
+        return null;
+
+    }
+
+
+    let current =
+        account;
+
+
+    const visited =
+        new Set();
+
+
+    /*
+    ======================================================
+    WALK TO ROOT ACCOUNT
+    ======================================================
+    */
+
+    while (
+        current
+    ) {
+
+        const key =
+            String(
+                current.id
+                ??
+                ""
+            );
+
+
+        if (
+            visited.has(
+                key
+            )
+        ) {
+
+            break;
+
+        }
+
+
+        visited.add(
+            key
+        );
+
+
+        const name =
+            String(
+                current.account_name
+                ||
+                ""
+            )
+            .trim()
+            .toUpperCase();
+
+
+        /*
+        ==================================================
+        ACCOUNT GROUP FROM NAME
+        ==================================================
+        */
+
+        if (
+            name.includes(
+                "ASSET"
+            )
+        ) {
+
+            return "asset";
+
+        }
+
+
+        if (
+            name.includes(
+                "LIABILIT"
+            )
+        ) {
+
+            return "liability";
+
+        }
+
+
+        if (
+            name.includes(
+                "EQUITY"
+            )
+            ||
+            name.includes(
+                "CAPITAL"
+            )
+        ) {
+
+            return "equity";
+
+        }
+
+
+        if (
+            name.includes(
+                "REVENUE"
+            )
+            ||
+            name.includes(
+                "INCOME"
+            )
+        ) {
+
+            return "revenue";
+
+        }
+
+
+        if (
+            name.includes(
+                "EXPENSE"
+            )
+            ||
+            name.includes(
+                "COST"
+            )
+        ) {
+
+            return "expense";
+
+        }
+
+
+        /*
+        ==================================================
+        MOVE TO PARENT
+        ==================================================
+        */
+
+        const parentId =
+            current.parent_id;
+
+
+        if (
+            parentId === null
+            ||
+            parentId === undefined
+            ||
+            parentId === ""
+        ) {
+
+            break;
+
+        }
+
+
+        current =
+            accountMap.get(
+                String(
+                    parentId
+                )
+            );
+
+    }
+
+
+    /*
+    ======================================================
+    FALLBACK ACCOUNT CODE
+
+    1 = Asset
+    2 = Liability
+    3 = Equity
+    4 = Revenue
+    5 / 6 / 7 = Expense / Other / Tax
+    ======================================================
+    */
+
+    const code =
+        String(
+            account.account_code
+            ||
+            ""
+        )
+        .trim();
+
+
+    if (
+        code.startsWith(
+            "1"
+        )
+    ) {
+
+        return "asset";
+
+    }
+
+
+    if (
+        code.startsWith(
+            "2"
+        )
+    ) {
+
+        return "liability";
+
+    }
+
+
+    if (
+        code.startsWith(
+            "3"
+        )
+    ) {
+
+        return "equity";
+
+    }
+
+
+    if (
+        code.startsWith(
+            "4"
+        )
+    ) {
+
+        return "revenue";
+
+    }
+
+
+    if (
+        code.startsWith(
+            "5"
+        )
+        ||
+        code.startsWith(
+            "6"
+        )
+        ||
+        code.startsWith(
+            "7"
+        )
+    ) {
+
+        return "expense";
+
+    }
+
+
+    return null;
+
+}
 
 
     /*
@@ -1798,81 +2085,252 @@ export class TrialBalanceYear {
 
 
     /*
-    ==========================================================
-    BUILD TRIAL BALANCE YEAR
-    ==========================================================
+==========================================================
+BUILD TRIAL BALANCE YEAR
+==========================================================
+*/
+
+buildTrialBalance(
+    year
+) {
+
+    /*
+    ======================================================
+    CURRENT REPORT MONTH
+    ======================================================
     */
 
-    buildTrialBalance(
-        year
-    ) {
-
-        /*
-        ======================================================
-        CURRENT REPORT MONTH
-
-        Example:
-        August = 8
-
-        Jan - Aug = value
-        Sep - Dec = null
-        ======================================================
-        */
-
-        const currentReportMonth =
-            this.getCurrentReportMonth(
-                year
-            );
-
-
-        /*
-        ======================================================
-        JOURNAL LOOKUP
-        ======================================================
-        */
-
-        const journalMap =
-            new Map();
-
-
-        this.journals.forEach(
-
-            journal => {
-
-                journalMap.set(
-
-                    String(
-                        journal.id
-                    ),
-
-                    journal
-
-                );
-
-            }
-
+    const currentReportMonth =
+        this.getCurrentReportMonth(
+            year
         );
 
 
-        /*
-        ======================================================
-        DIRECT BALANCE MAP
-        ======================================================
-        */
+    /*
+    ======================================================
+    ACCOUNT MAP
+    ======================================================
+    */
 
-        const directMap =
-            new Map();
+    const accountMap =
+        new Map();
 
 
-        this.accounts.forEach(
+    this.accounts.forEach(
 
-            account => {
+        account => {
+
+            accountMap.set(
+
+                String(
+                    account.id
+                ),
+
+                account
+
+            );
+
+        }
+
+    );
+
+
+    /*
+    ======================================================
+    JOURNAL MAP
+    ======================================================
+    */
+
+    const journalMap =
+        new Map();
+
+
+    this.journals.forEach(
+
+        journal => {
+
+            journalMap.set(
+
+                String(
+                    journal.id
+                ),
+
+                journal
+
+            );
+
+        }
+
+    );
+
+
+    /*
+    ======================================================
+    DIRECT BALANCE MAP
+    ======================================================
+    */
+
+    const directMap =
+        new Map();
+
+
+    this.accounts.forEach(
+
+        account => {
+
+            const group =
+                this.resolveAccountGroup(
+
+                    account,
+
+                    accountMap
+
+                );
+
+
+            directMap.set(
+
+                String(
+                    account.id
+                ),
+
+                {
+
+                    beginning:
+                        0,
+
+                    movements:
+                        new Array(
+                            12
+                        )
+                        .fill(
+                            0
+                        ),
+
+                    group
+
+                }
+
+            );
+
+        }
+
+    );
+
+
+    /*
+    ======================================================
+    CALCULATE DIRECT ACCOUNT MOVEMENT
+    ======================================================
+    */
+
+    this.postings.forEach(
+
+        posting => {
+
+            const journal =
+                journalMap.get(
+
+                    String(
+                        posting.journal_id
+                    )
+
+                );
+
+
+            if (
+                !journal
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+            ==================================================
+            JOURNAL DATE
+            ==================================================
+            */
+
+            const journalDate =
+                String(
+
+                    journal?.journal_date
+
+                    ??
+
+                    journal?.accounting_date
+
+                    ??
+
+                    ""
+
+                )
+                .slice(
+                    0,
+                    10
+                );
+
+
+            if (
+                !journalDate
+            ) {
+
+                return;
+
+            }
+
+
+            const postingYear =
+                Number(
+
+                    journalDate.slice(
+                        0,
+                        4
+                    )
+
+                );
+
+
+            const postingMonth =
+                Number(
+
+                    journalDate.slice(
+                        5,
+                        7
+                    )
+
+                );
+
+
+            const accountKey =
+                String(
+                    posting.account_id
+                );
+
+
+            const account =
+                accountMap.get(
+                    accountKey
+                );
+
+
+            /*
+            ==================================================
+            UNKNOWN ACCOUNT
+            ==================================================
+            */
+
+            if (
+                !directMap.has(
+                    accountKey
+                )
+            ) {
 
                 directMap.set(
 
-                    String(
-                        account.id
-                    ),
+                    accountKey,
 
                     {
 
@@ -1880,13 +2338,15 @@ export class TrialBalanceYear {
                             0,
 
                         movements:
-
                             new Array(
                                 12
                             )
                             .fill(
                                 0
-                            )
+                            ),
+
+                        group:
+                            null
 
                     }
 
@@ -1894,721 +2354,565 @@ export class TrialBalanceYear {
 
             }
 
-        );
+
+            const balance =
+                directMap.get(
+                    accountKey
+                );
 
 
-        /*
-        ======================================================
-        CALCULATE DIRECT ACCOUNT MOVEMENT
-        ======================================================
-        */
+            /*
+            ==================================================
+            ACCOUNT GROUP
+            ==================================================
+            */
 
-        this.postings.forEach(
+            const group =
+                balance.group
 
-            posting => {
+                ||
 
-                const journal =
-                    journalMap.get(
+                this.resolveAccountGroup(
 
-                        String(
-                            posting.journal_id
-                        )
+                    account,
 
-                    );
+                    accountMap
 
-
-                if (
-                    !journal
-                ) {
-
-                    return;
-
-                }
+                );
 
 
-                /*
-                ==================================================
-                JOURNAL DATE
-                ==================================================
-                */
-
-                const journalDate =
-                    String(
-
-                        journal?.journal_date
-
-                        ??
-
-                        journal?.accounting_date
-
-                        ??
-
-                        ""
-
-                    )
-                    .slice(
-                        0,
-                        10
-                    );
+            balance.group =
+                group;
 
 
-                if (
-                    !journalDate
-                ) {
+            /*
+            ==================================================
+            RAW DEBIT / CREDIT
+            ==================================================
+            */
 
-                    return;
-
-                }
-
-
-                /*
-                ==================================================
-                DATE PART
-                ==================================================
-                */
-
-                const postingYear =
-                    Number(
-                        journalDate.slice(
-                            0,
-                            4
-                        )
-                    );
+            const debit =
+                this.toNumber(
+                    posting.debit
+                );
 
 
-                const postingMonth =
-                    Number(
-                        journalDate.slice(
-                            5,
-                            7
-                        )
-                    );
+            const credit =
+                this.toNumber(
+                    posting.credit
+                );
 
 
-                const accountKey =
-                    String(
-                        posting.account_id
-                    );
+            /*
+            ==================================================
+            PRESENTATION AMOUNT
+
+            Asset
+            =
+            Debit - Credit
+
+            Expense
+            =
+            Debit - Credit
+
+            Liability
+            =
+            Credit - Debit
+
+            Equity
+            =
+            Credit - Debit
+
+            Revenue
+            =
+            Credit - Debit
+            ==================================================
+            */
+
+            let movement;
 
 
-                /*
-                ==================================================
-                ACCOUNT NOT FOUND IN COA
-                ==================================================
-                */
+            if (
+                group === "liability"
+                ||
+                group === "equity"
+                ||
+                group === "revenue"
+            ) {
 
-                if (
-                    !directMap.has(
-                        accountKey
-                    )
-                ) {
-
-                    directMap.set(
-
-                        accountKey,
-
-                        {
-
-                            beginning:
-                                0,
-
-                            movements:
-
-                                new Array(
-                                    12
-                                )
-                                .fill(
-                                    0
-                                )
-
-                        }
-
-                    );
-
-                }
-
-
-                const balance =
-                    directMap.get(
-                        accountKey
-                    );
-
-
-                /*
-                ==================================================
-                NET MOVEMENT
-
-                Debit  = positive
-                Credit = negative
-                ==================================================
-                */
-
-                const netMovement =
-
-                    this.toNumber(
-                        posting.debit
-                    )
-
+                movement =
+                    credit
                     -
+                    debit;
 
-                    this.toNumber(
-                        posting.credit
-                    );
+            }
+
+            else {
+
+                movement =
+                    debit
+                    -
+                    credit;
+
+            }
 
 
-                /*
-                ==================================================
-                BEGINNING YEAR
+            /*
+            ==================================================
+            BEGINNING YEAR
 
-                All transactions before Jan 1 selected year.
-                ==================================================
-                */
+            Permanent account:
+            Asset
+            Liability
+            Equity
+
+            carry opening balance.
+
+            Revenue / Expense:
+            opening = 0
+            ==================================================
+            */
+
+            if (
+                postingYear < year
+            ) {
 
                 if (
-                    postingYear < year
+                    group !== "revenue"
+                    &&
+                    group !== "expense"
                 ) {
 
                     balance.beginning +=
-                        netMovement;
-
-
-                    return;
+                        movement;
 
                 }
 
 
-                /*
-                ==================================================
-                SELECTED YEAR
-                ==================================================
-                */
-
-                if (
-                    postingYear === year
-                    &&
-                    postingMonth >= 1
-                    &&
-                    postingMonth <= 12
-                ) {
-
-                    balance.movements[
-                        postingMonth - 1
-                    ] +=
-                        netMovement;
-
-                }
+                return;
 
             }
 
-        );
+
+            /*
+            ==================================================
+            SELECTED YEAR
+            ==================================================
+            */
+
+            if (
+                postingYear === year
+                &&
+                postingMonth >= 1
+                &&
+                postingMonth <= 12
+            ) {
+
+                balance.movements[
+                    postingMonth - 1
+                ] +=
+                    movement;
+
+            }
+
+        }
+
+    );
 
 
-        /*
-        ======================================================
-        REPORT MAP
-        ======================================================
-        */
+    /*
+    ======================================================
+    REPORT MAP
+    ======================================================
+    */
 
-        const reportMap =
-            new Map();
+    const reportMap =
+        new Map();
 
 
-        /*
-        ======================================================
-        CREATE COA ROWS
-        ======================================================
-        */
+    /*
+    ======================================================
+    CREATE ACCOUNT ROWS
+    ======================================================
+    */
 
-        this.accounts.forEach(
+    this.accounts.forEach(
 
-            account => {
+        account => {
 
-                const directBalance =
-                    directMap.get(
+            const accountKey =
+                String(
+                    account.id
+                );
 
-                        String(
-                            account.id
+
+            const directBalance =
+                directMap.get(
+                    accountKey
+                )
+                ||
+                {
+
+                    beginning:
+                        0,
+
+                    movements:
+                        new Array(
+                            12
+                        )
+                        .fill(
+                            0
+                        ),
+
+                    group:
+                        this.resolveAccountGroup(
+
+                            account,
+
+                            accountMap
+
                         )
 
-                    )
-                    ||
-                    {
-
-                        beginning:
-                            0,
-
-                        movements:
-
-                            new Array(
-                                12
-                            )
-                            .fill(
-                                0
-                            )
-
-                    };
+                };
 
 
-                /*
-                ==================================================
-                BUILD MONTH END BALANCES
-                ==================================================
-                */
+            const group =
+                directBalance.group
 
-                const months =
-                    this.buildMonthlyBalances(
+                ||
 
-                        directBalance.beginning,
+                this.resolveAccountGroup(
 
-                        directBalance.movements,
+                    account,
 
-                        currentReportMonth
+                    accountMap
 
-                    );
+                );
 
 
-                /*
-                ==================================================
-                REPORT ROW
-                ==================================================
-                */
+            const isPeriodic =
+                group === "revenue"
+                ||
+                group === "expense";
 
-                reportMap.set(
 
-                    String(
-                        account.id
-                    ),
+            /*
+            ==================================================
+            MONTH VALUES
+            ==================================================
+            */
 
-                    {
+            const months =
+                this.buildMonthlyBalances(
 
-                        id:
-                            account.id,
+                    directBalance.beginning,
 
-                        account_code:
-                            account.account_code,
+                    directBalance.movements,
 
-                        account_name:
-                            account.account_name,
+                    currentReportMonth,
 
-                        parent_id:
-                            account.parent_id,
+                    isPeriodic
 
-                        allow_transaction:
-                            account.allow_transaction,
+                );
 
-                        status:
-                            account.status,
 
-                        beginning:
-                            this.cleanNumber(
+            reportMap.set(
+
+                accountKey,
+
+                {
+
+                    id:
+                        account.id,
+
+                    account_code:
+                        account.account_code,
+
+                    account_name:
+                        account.account_name,
+
+                    parent_id:
+                        account.parent_id,
+
+                    allow_transaction:
+                        account.allow_transaction,
+
+                    status:
+                        account.status,
+
+                    group,
+
+                    is_periodic:
+                        isPeriodic,
+
+                    beginning:
+                        isPeriodic
+
+                            ? 0
+
+                            : this.cleanNumber(
                                 directBalance.beginning
                             ),
 
-                        movements:
-                            [
-                                ...directBalance.movements
-                            ],
+                    movements:
+                        [
+                            ...directBalance.movements
+                        ],
 
-                        months,
+                    months,
 
-                        level:
-                            0,
+                    level:
+                        0,
 
-                        has_children:
-                            false,
+                    has_children:
+                        false,
 
-                        is_root:
-                            false
+                    is_root:
+                        false,
 
-                    }
-
-                );
-
-            }
-
-        );
-
-
-        /*
-        ======================================================
-        UNKNOWN ACCOUNTS REFERENCED BY JOURNAL
-
-        Normally prevented by FK.
-        ======================================================
-        */
-
-        directMap.forEach(
-
-            (
-                directBalance,
-                key
-            ) => {
-
-                if (
-                    reportMap.has(
-                        key
-                    )
-                ) {
-
-                    return;
+                    is_calculated:
+                        false
 
                 }
 
+            );
 
-                const months =
-                    this.buildMonthlyBalances(
+        }
 
-                        directBalance.beginning,
+    );
 
-                        directBalance.movements,
 
-                        currentReportMonth
+    /*
+    ======================================================
+    UNKNOWN ACCOUNTS
+    ======================================================
+    */
 
-                    );
+    directMap.forEach(
 
+        (
+            directBalance,
+            key
+        ) => {
 
-                reportMap.set(
-
-                    key,
-
-                    {
-
-                        id:
-                            key,
-
-                        account_code:
-                            key,
-
-                        account_name:
-                            "Unknown Account",
-
-                        parent_id:
-                            null,
-
-                        allow_transaction:
-                            true,
-
-                        status:
-                            true,
-
-                        beginning:
-                            this.cleanNumber(
-                                directBalance.beginning
-                            ),
-
-                        movements:
-                            [
-                                ...directBalance.movements
-                            ],
-
-                        months,
-
-                        level:
-                            0,
-
-                        has_children:
-                            false,
-
-                        is_root:
-                            true
-
-                    }
-
-                );
-
-            }
-
-        );
-
-
-        /*
-        ======================================================
-        CHILD LOOKUP
-        ======================================================
-        */
-
-        const childrenMap =
-            new Map();
-
-
-        reportMap.forEach(
-
-            row => {
-
-                if (
-                    row.parent_id === null
-                    ||
-                    row.parent_id === undefined
-                    ||
-                    row.parent_id === ""
-                ) {
-
-                    return;
-
-                }
-
-
-                const parentKey =
-                    String(
-                        row.parent_id
-                    );
-
-
-                if (
-                    !childrenMap.has(
-                        parentKey
-                    )
-                ) {
-
-                    childrenMap.set(
-                        parentKey,
-                        []
-                    );
-
-                }
-
-
-                childrenMap
-                    .get(
-                        parentKey
-                    )
-                    .push(
-                        row
-                    );
-
-            }
-
-        );
-
-
-        /*
-        ======================================================
-        SORT CHILDREN
-        ======================================================
-        */
-
-        childrenMap.forEach(
-
-            children => {
-
-                children.sort(
-
-                    (
-                        a,
-                        b
-                    ) => {
-
-                        return this.compareAccountCode(
-
-                            a.account_code,
-
-                            b.account_code
-
-                        );
-
-                    }
-
-                );
-
-            }
-
-        );
-
-
-        /*
-        ======================================================
-        RECURSIVE AGGREGATION
-
-        Parent contains:
-        Own direct balance
-        +
-        All descendant balances
-        ======================================================
-        */
-
-        const aggregateAccount =
-            (
-                row,
-                visited = new Set()
-            ) => {
-
-                const key =
-                    String(
-                        row.id
-                    );
-
-
-                /*
-                ==================================================
-                CIRCULAR PROTECTION
-                ==================================================
-                */
-
-                if (
-                    visited.has(
-                        key
-                    )
-                ) {
-
-                    return {
-
-                        beginning:
-                            row.beginning,
-
-                        movements:
-                            [
-                                ...row.movements
-                            ]
-
-                    };
-
-                }
-
-
-                const nextVisited =
-                    new Set(
-                        visited
-                    );
-
-
-                nextVisited.add(
+            if (
+                reportMap.has(
                     key
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            const isPeriodic =
+                directBalance.group === "revenue"
+                ||
+                directBalance.group === "expense";
+
+
+            reportMap.set(
+
+                key,
+
+                {
+
+                    id:
+                        key,
+
+                    account_code:
+                        key,
+
+                    account_name:
+                        "Unknown Account",
+
+                    parent_id:
+                        null,
+
+                    allow_transaction:
+                        true,
+
+                    status:
+                        true,
+
+                    group:
+                        directBalance.group,
+
+                    is_periodic:
+                        isPeriodic,
+
+                    beginning:
+                        isPeriodic
+
+                            ? 0
+
+                            : this.cleanNumber(
+                                directBalance.beginning
+                            ),
+
+                    movements:
+                        [
+                            ...directBalance.movements
+                        ],
+
+                    months:
+                        this.buildMonthlyBalances(
+
+                            directBalance.beginning,
+
+                            directBalance.movements,
+
+                            currentReportMonth,
+
+                            isPeriodic
+
+                        ),
+
+                    level:
+                        0,
+
+                    has_children:
+                        false,
+
+                    is_root:
+                        true,
+
+                    is_calculated:
+                        false
+
+                }
+
+            );
+
+        }
+
+    );
+
+
+    /*
+    ======================================================
+    CHILD LOOKUP
+    ======================================================
+    */
+
+    const childrenMap =
+        new Map();
+
+
+    reportMap.forEach(
+
+        row => {
+
+            if (
+                row.parent_id === null
+                ||
+                row.parent_id === undefined
+                ||
+                row.parent_id === ""
+            ) {
+
+                return;
+
+            }
+
+
+            const parentKey =
+                String(
+                    row.parent_id
                 );
 
 
-                const children =
-                    childrenMap.get(
-                        key
-                    )
-                    ||
-                    [];
+            if (
+                !childrenMap.has(
+                    parentKey
+                )
+            ) {
+
+                childrenMap.set(
+                    parentKey,
+                    []
+                );
+
+            }
 
 
-                row.has_children =
-                    children.length > 0;
+            childrenMap
+                .get(
+                    parentKey
+                )
+                .push(
+                    row
+                );
+
+        }
+
+    );
 
 
-                /*
-                ==================================================
-                START FROM DIRECT BALANCE
-                ==================================================
-                */
+    /*
+    ======================================================
+    SORT CHILDREN
+    ======================================================
+    */
 
-                let beginning =
-                    this.toNumber(
-                        row.beginning
+    childrenMap.forEach(
+
+        children => {
+
+            children.sort(
+
+                (
+                    a,
+                    b
+                ) => {
+
+                    return this.compareAccountCode(
+
+                        a.account_code,
+
+                        b.account_code
+
                     );
 
+                }
 
-                const movements =
-                    [
-                        ...row.movements
-                    ]
-                    .map(
-                        value =>
-                            this.toNumber(
-                                value
-                            )
-                    );
+            );
+
+        }
+
+    );
 
 
-                /*
-                ==================================================
-                ADD CHILDREN
-                ==================================================
-                */
+    /*
+    ======================================================
+    RECURSIVE AGGREGATION
+    ======================================================
+    */
 
-                children.forEach(
+    const aggregateAccount =
+        (
+            row,
+            visited = new Set()
+        ) => {
 
-                    child => {
-
-                        const childValue =
-                            aggregateAccount(
-
-                                child,
-
-                                nextVisited
-
-                            );
-
-
-                        beginning +=
-                            childValue.beginning;
-
-
-                        for (
-                            let month = 0;
-                            month < 12;
-                            month++
-                        ) {
-
-                            movements[
-                                month
-                            ] +=
-
-                                this.toNumber(
-
-                                    childValue
-                                        .movements[
-                                            month
-                                        ]
-
-                                );
-
-                        }
-
-                    }
-
+            const key =
+                String(
+                    row.id
                 );
 
 
-                /*
-                ==================================================
-                CLEAN
-                ==================================================
-                */
+            /*
+            ==================================================
+            CIRCULAR PROTECTION
+            ==================================================
+            */
 
-                row.beginning =
-                    this.cleanNumber(
-                        beginning
-                    );
-
-
-                row.movements =
-                    movements.map(
-
-                        value =>
-                            this.cleanNumber(
-                                value
-                            )
-
-                    );
-
-
-                /*
-                ==================================================
-                IMPORTANT
-
-                Rebuild month values using current report month.
-
-                Therefore if current period = August:
-
-                Jan - Aug = balance
-                Sep - Dec = null
-                ==================================================
-                */
-
-                row.months =
-                    this.buildMonthlyBalances(
-
-                        row.beginning,
-
-                        row.movements,
-
-                        currentReportMonth
-
-                    );
-
+            if (
+                visited.has(
+                    key
+                )
+            ) {
 
                 return {
 
@@ -2622,152 +2926,457 @@ export class TrialBalanceYear {
 
                 };
 
+            }
+
+
+            const nextVisited =
+                new Set(
+                    visited
+                );
+
+
+            nextVisited.add(
+                key
+            );
+
+
+            const children =
+                childrenMap.get(
+                    key
+                )
+                ||
+                [];
+
+
+            row.has_children =
+                children.length > 0;
+
+
+            /*
+            ==================================================
+            DIRECT VALUE
+            ==================================================
+            */
+
+            let beginning =
+                row.is_periodic
+
+                    ? 0
+
+                    : this.toNumber(
+                        row.beginning
+                    );
+
+
+            const movements =
+                [
+                    ...row.movements
+                ]
+                .map(
+
+                    value =>
+                        this.toNumber(
+                            value
+                        )
+
+                );
+
+
+            /*
+            ==================================================
+            ADD DESCENDANTS
+            ==================================================
+            */
+
+            children.forEach(
+
+                child => {
+
+                    const childValue =
+                        aggregateAccount(
+
+                            child,
+
+                            nextVisited
+
+                        );
+
+
+                    /*
+                    ==============================================
+                    BEGINNING BALANCE
+
+                    Periodic account does not carry opening.
+                    ==============================================
+                    */
+
+                    if (
+                        !row.is_periodic
+                    ) {
+
+                        beginning +=
+                            this.toNumber(
+                                childValue.beginning
+                            );
+
+                    }
+
+
+                    /*
+                    ==============================================
+                    MONTH MOVEMENT
+                    ==============================================
+                    */
+
+                    for (
+                        let month = 0;
+                        month < 12;
+                        month++
+                    ) {
+
+                        movements[
+                            month
+                        ] +=
+
+                            this.toNumber(
+
+                                childValue.movements[
+                                    month
+                                ]
+
+                            );
+
+                    }
+
+                }
+
+            );
+
+
+            /*
+            ==================================================
+            CLEAN BEGINNING
+            ==================================================
+            */
+
+            row.beginning =
+                row.is_periodic
+
+                    ? 0
+
+                    : this.cleanNumber(
+                        beginning
+                    );
+
+
+            /*
+            ==================================================
+            CLEAN MOVEMENT
+            ==================================================
+            */
+
+            row.movements =
+                movements.map(
+
+                    value =>
+                        this.cleanNumber(
+                            value
+                        )
+
+                );
+
+
+            /*
+            ==================================================
+            REBUILD MONTH VALUES
+            ==================================================
+            */
+
+            row.months =
+                this.buildMonthlyBalances(
+
+                    row.beginning,
+
+                    row.movements,
+
+                    currentReportMonth,
+
+                    row.is_periodic
+
+                );
+
+
+            return {
+
+                beginning:
+                    row.beginning,
+
+                movements:
+                    [
+                        ...row.movements
+                    ]
+
             };
 
-
-        /*
-        ======================================================
-        ROOT ACCOUNTS
-        ======================================================
-        */
-
-        const roots = [];
+        };
 
 
-        reportMap.forEach(
+    /*
+    ======================================================
+    ROOT ACCOUNTS
+    ======================================================
+    */
 
-            row => {
-
-                const hasParent =
-                    row.parent_id !== null
-                    &&
-                    row.parent_id !== undefined
-                    &&
-                    row.parent_id !== "";
+    const roots =
+        [];
 
 
-                const parentExists =
-                    hasParent
-                    &&
-                    reportMap.has(
-                        String(
-                            row.parent_id
-                        )
-                    );
+    reportMap.forEach(
+
+        row => {
+
+            const hasParent =
+                row.parent_id !== null
+                &&
+                row.parent_id !== undefined
+                &&
+                row.parent_id !== "";
 
 
-                if (
-                    !parentExists
-                ) {
+            const parentExists =
+                hasParent
+                &&
+                reportMap.has(
 
-                    row.is_root =
-                        true;
+                    String(
+                        row.parent_id
+                    )
+
+                );
 
 
-                    roots.push(
-                        row
+            if (
+                !parentExists
+            ) {
+
+                row.is_root =
+                    true;
+
+
+                roots.push(
+                    row
+                );
+
+            }
+
+        }
+
+    );
+
+
+    /*
+    ======================================================
+    SORT ROOT
+    ======================================================
+    */
+
+    roots.sort(
+
+        (
+            a,
+            b
+        ) => {
+
+            return this.compareAccountCode(
+
+                a.account_code,
+
+                b.account_code
+
+            );
+
+        }
+
+    );
+
+
+    /*
+    ======================================================
+    AGGREGATE ROOTS
+    ======================================================
+    */
+
+    roots.forEach(
+
+        root => {
+
+            aggregateAccount(
+                root
+            );
+
+        }
+
+    );
+
+
+    /*
+    ======================================================
+    FLATTEN HIERARCHY
+    ======================================================
+    */
+
+    const flattened =
+        [];
+
+
+    const appendHierarchy =
+        (
+            row,
+            level = 0,
+            visited = new Set()
+        ) => {
+
+            const key =
+                String(
+                    row.id
+                );
+
+
+            if (
+                visited.has(
+                    key
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            const nextVisited =
+                new Set(
+                    visited
+                );
+
+
+            nextVisited.add(
+                key
+            );
+
+
+            row.level =
+                Math.min(
+                    level,
+                    5
+                );
+
+
+            flattened.push(
+                row
+            );
+
+
+            const children =
+                childrenMap.get(
+                    key
+                )
+                ||
+                [];
+
+
+            children.forEach(
+
+                child => {
+
+                    appendHierarchy(
+
+                        child,
+
+                        level + 1,
+
+                        nextVisited
+
                     );
 
                 }
 
-            }
+            );
 
-        );
-
-
-        /*
-        ======================================================
-        SORT ROOT
-        ======================================================
-        */
-
-        roots.sort(
-
-            (
-                a,
-                b
-            ) => {
-
-                return this.compareAccountCode(
-
-                    a.account_code,
-
-                    b.account_code
-
-                );
-
-            }
-
-        );
+        };
 
 
-        /*
-        ======================================================
-        AGGREGATE ROOT
-        ======================================================
-        */
+    /*
+    ======================================================
+    APPEND ROOT
+    ======================================================
+    */
 
-        roots.forEach(
+    roots.forEach(
 
-            root => {
+        root => {
 
-                aggregateAccount(
-                    root
-                );
+            appendHierarchy(
+                root,
+                0
+            );
 
-            }
+        }
 
-        );
-
-
-        /*
-        ======================================================
-        FLATTEN HIERARCHY
-        ======================================================
-        */
-
-        const flattened = [];
+    );
 
 
-        const appendHierarchy =
-            (
-                row,
-                level = 0,
-                visited = new Set()
-            ) => {
+    /*
+    ======================================================
+    ORPHAN PROTECTION
+    ======================================================
+    */
 
-                const key =
+    const flattenedIds =
+        new Set(
+
+            flattened.map(
+
+                row =>
                     String(
                         row.id
-                    );
-
-
-                if (
-                    visited.has(
-                        key
                     )
-                ) {
 
-                    return;
+            )
 
-                }
-
-
-                const nextVisited =
-                    new Set(
-                        visited
-                    );
+        );
 
 
-                nextVisited.add(
-                    key
-                );
+    reportMap.forEach(
 
+        row => {
+
+            if (
+                !flattenedIds.has(
+                    String(
+                        row.id
+                    )
+                )
+            ) {
 
                 row.level =
-                    Math.min(
-                        level,
-                        5
+                    0;
+
+
+                row.is_root =
+                    true;
+
+
+                row.months =
+                    this.buildMonthlyBalances(
+
+                        row.beginning,
+
+                        row.movements,
+
+                        currentReportMonth,
+
+                        row.is_periodic
+
                     );
 
 
@@ -2775,168 +3384,902 @@ export class TrialBalanceYear {
                     row
                 );
 
-
-                const children =
-                    childrenMap.get(
-                        key
-                    )
-                    ||
-                    [];
-
-
-                children.forEach(
-
-                    child => {
-
-                        appendHierarchy(
-
-                            child,
-
-                            level + 1,
-
-                            nextVisited
-
-                        );
-
-                    }
-
-                );
-
-            };
-
-
-        /*
-        ======================================================
-        APPEND ROOTS
-        ======================================================
-        */
-
-        roots.forEach(
-
-            root => {
-
-                appendHierarchy(
-                    root,
-                    0
-                );
-
             }
 
+        }
+
+    );
+
+
+    /*
+    ======================================================
+    FINANCIAL CALCULATED ROWS
+    ======================================================
+
+    COA STRUCTURE REFERENCE
+
+    4xxxxx
+    =
+    OPERATING REVENUE
+
+    5xxxxx
+    =
+    OPERATING EXPENSES
+
+    6xxxxx
+    =
+    GA EXPENSES
+
+    701xxx
+    =
+    OTHER REVENUE
+
+    702xxx
+    =
+    OTHER EXPENSE
+
+    703xxx
+    =
+    TAX EXPENSE
+    ======================================================
+    */
+
+
+    /*
+    ======================================================
+    SUMMARY ARRAY
+    ======================================================
+    */
+
+    const operatingRevenue =
+        new Array(
+            12
+        )
+        .fill(
+            0
         );
 
 
-        /*
-        ======================================================
-        ORPHAN PROTECTION
-        ======================================================
-        */
+    const operatingExpense =
+        new Array(
+            12
+        )
+        .fill(
+            0
+        );
 
-        const flattenedIds =
-            new Set(
 
-                flattened.map(
+    const gaExpense =
+        new Array(
+            12
+        )
+        .fill(
+            0
+        );
 
-                    row =>
-                        String(
-                            row.id
-                        )
 
+    const otherRevenue =
+        new Array(
+            12
+        )
+        .fill(
+            0
+        );
+
+
+    const otherExpense =
+        new Array(
+            12
+        )
+        .fill(
+            0
+        );
+
+
+    const taxExpense =
+        new Array(
+            12
+        )
+        .fill(
+            0
+        );
+
+
+    /*
+    ======================================================
+    READ DIRECT GL MOVEMENT
+
+    IMPORTANT:
+
+    Use directMap.
+
+    Do not total flattened hierarchy because parent
+    already contains child values.
+    ======================================================
+    */
+
+    directMap.forEach(
+
+        (
+            balance,
+            accountKey
+        ) => {
+
+            const account =
+                accountMap.get(
+                    String(
+                        accountKey
+                    )
+                );
+
+
+            if (
+                !account
+            ) {
+
+                return;
+
+            }
+
+
+            const code =
+                String(
+                    account.account_code
+                    ||
+                    ""
+                )
+                .trim();
+
+
+            const movements =
+                Array.isArray(
+                    balance.movements
                 )
 
-            );
+                    ? balance.movements
+
+                    : [];
 
 
-        reportMap.forEach(
+            for (
+                let month = 0;
+                month < 12;
+                month++
+            ) {
 
-            row => {
+                const amount =
+                    this.toNumber(
+                        movements[
+                            month
+                        ]
+                    );
+
+
+                /*
+                ==============================================
+                OPERATING REVENUE
+                ==============================================
+                */
 
                 if (
-                    !flattenedIds.has(
-                        String(
-                            row.id
-                        )
+                    code.startsWith(
+                        "4"
                     )
                 ) {
 
-                    row.level =
-                        0;
+                    operatingRevenue[
+                        month
+                    ] +=
+                        amount;
 
 
-                    row.is_root =
-                        true;
+                    continue;
+
+                }
 
 
-                    /*
-                    ==============================================
-                    Also ensure future periods are null.
-                    ==============================================
-                    */
+                /*
+                ==============================================
+                OPERATING EXPENSE
+                ==============================================
+                */
 
-                    row.months =
-                        this.buildMonthlyBalances(
+                if (
+                    code.startsWith(
+                        "5"
+                    )
+                ) {
 
-                            row.beginning,
-
-                            row.movements,
-
-                            currentReportMonth
-
-                        );
+                    operatingExpense[
+                        month
+                    ] +=
+                        amount;
 
 
-                    flattened.push(
-                        row
-                    );
+                    continue;
+
+                }
+
+
+                /*
+                ==============================================
+                GA EXPENSE
+                ==============================================
+                */
+
+                if (
+                    code.startsWith(
+                        "6"
+                    )
+                ) {
+
+                    gaExpense[
+                        month
+                    ] +=
+                        amount;
+
+
+                    continue;
+
+                }
+
+
+                /*
+                ==============================================
+                OTHER REVENUE
+                ==============================================
+                */
+
+                if (
+                    code.startsWith(
+                        "701"
+                    )
+                ) {
+
+                    otherRevenue[
+                        month
+                    ] +=
+                        amount;
+
+
+                    continue;
+
+                }
+
+
+                /*
+                ==============================================
+                OTHER EXPENSE
+                ==============================================
+                */
+
+                if (
+                    code.startsWith(
+                        "702"
+                    )
+                ) {
+
+                    otherExpense[
+                        month
+                    ] +=
+                        amount;
+
+
+                    continue;
+
+                }
+
+
+                /*
+                ==============================================
+                TAX EXPENSE
+                ==============================================
+                */
+
+                if (
+                    code.startsWith(
+                        "703"
+                    )
+                ) {
+
+                    taxExpense[
+                        month
+                    ] +=
+                        amount;
 
                 }
 
             }
 
-        );
+        }
+
+    );
 
 
-        return flattened;
+    /*
+    ======================================================
+    CLEAN SUMMARY
+    ======================================================
+    */
+
+    for (
+        let month = 0;
+        month < 12;
+        month++
+    ) {
+
+        operatingRevenue[
+            month
+        ] =
+            this.cleanNumber(
+                operatingRevenue[
+                    month
+                ]
+            );
+
+
+        operatingExpense[
+            month
+        ] =
+            this.cleanNumber(
+                operatingExpense[
+                    month
+                ]
+            );
+
+
+        gaExpense[
+            month
+        ] =
+            this.cleanNumber(
+                gaExpense[
+                    month
+                ]
+            );
+
+
+        otherRevenue[
+            month
+        ] =
+            this.cleanNumber(
+                otherRevenue[
+                    month
+                ]
+            );
+
+
+        otherExpense[
+            month
+        ] =
+            this.cleanNumber(
+                otherExpense[
+                    month
+                ]
+            );
+
+
+        taxExpense[
+            month
+        ] =
+            this.cleanNumber(
+                taxExpense[
+                    month
+                ]
+            );
 
     }
 
 
     /*
-    ==========================================================
-    BUILD MONTHLY BALANCES
-    ==========================================================
-
-    This method is the MAIN protection for future periods.
-
-    Example:
-    Selected year : 2026
-    Current month : August
-
-    Output:
-    Jan = value
-    Feb = value
-    ...
-    Aug = value
-    Sep = null
-    Oct = null
-    Nov = null
-    Dec = null
-    ==========================================================
+    ======================================================
+    CALCULATED ARRAYS
+    ======================================================
     */
 
-    buildMonthlyBalances(
-        beginning,
-        movements,
-        currentReportMonth
+    const operatingProfit =
+        new Array(
+            12
+        )
+        .fill(
+            null
+        );
+
+
+    const otherRevenueExpense =
+        new Array(
+            12
+        )
+        .fill(
+            null
+        );
+
+
+    const ebit =
+        new Array(
+            12
+        )
+        .fill(
+            null
+        );
+
+
+    const netProfit =
+        new Array(
+            12
+        )
+        .fill(
+            null
+        );
+
+
+    const currentEarning =
+        new Array(
+            12
+        )
+        .fill(
+            null
+        );
+
+
+    /*
+    ======================================================
+    CALCULATE MONTHLY RESULT
+    ======================================================
+    */
+
+    for (
+        let month = 0;
+        month < 12;
+        month++
     ) {
 
-        let running =
-            this.toNumber(
-                beginning
+        const monthNumber =
+            month + 1;
+
+
+        /*
+        ==================================================
+        FUTURE PERIOD
+        ==================================================
+        */
+
+        if (
+            monthNumber
+            >
+            currentReportMonth
+        ) {
+
+            operatingProfit[
+                month
+            ] =
+                null;
+
+
+            otherRevenueExpense[
+                month
+            ] =
+                null;
+
+
+            ebit[
+                month
+            ] =
+                null;
+
+
+            netProfit[
+                month
+            ] =
+                null;
+
+
+            currentEarning[
+                month
+            ] =
+                null;
+
+
+            continue;
+
+        }
+
+
+        /*
+        ==================================================
+        OPERATING PROFIT
+
+        Operating Revenue
+        -
+        Operating Expense
+        ==================================================
+        */
+
+        operatingProfit[
+            month
+        ] =
+            this.cleanNumber(
+
+                operatingRevenue[
+                    month
+                ]
+
+                -
+
+                operatingExpense[
+                    month
+                ]
+
             );
 
 
-        const months = [];
+        /*
+        ==================================================
+        OTHER REVENUE & EXPENSE
 
+        Other Revenue
+        -
+        Other Expense
+        ==================================================
+        */
+
+        otherRevenueExpense[
+            month
+        ] =
+            this.cleanNumber(
+
+                otherRevenue[
+                    month
+                ]
+
+                -
+
+                otherExpense[
+                    month
+                ]
+
+            );
+
+
+        /*
+        ==================================================
+        EBIT
+
+        Operating Profit
+        -
+        GA Expense
+        +
+        Other Revenue
+        -
+        Other Expense
+        ==================================================
+        */
+
+        ebit[
+            month
+        ] =
+            this.cleanNumber(
+
+                operatingProfit[
+                    month
+                ]
+
+                -
+
+                gaExpense[
+                    month
+                ]
+
+                +
+
+                otherRevenueExpense[
+                    month
+                ]
+
+            );
+
+
+        /*
+        ==================================================
+        NET PROFIT
+
+        EBIT
+        -
+        Tax Expense
+        ==================================================
+        */
+
+        netProfit[
+            month
+        ] =
+            this.cleanNumber(
+
+                ebit[
+                    month
+                ]
+
+                -
+
+                taxExpense[
+                    month
+                ]
+
+            );
+
+
+        /*
+        ==================================================
+        CURRENT EARNING BALANCE
+
+        Reference TB:
+        Only current report period carries current earning.
+        Previous month = 0.
+        ==================================================
+        */
+
+        currentEarning[
+            month
+        ] =
+
+            monthNumber
+            ===
+            currentReportMonth
+
+                ? netProfit[
+                    month
+                ]
+
+                : 0;
+
+    }
+
+
+    /*
+    ======================================================
+    CREATE CALCULATED ROW
+    ======================================================
+    */
+
+    const createCalculatedRow =
+        (
+            id,
+            name,
+            months
+        ) => {
+
+            return {
+
+                id,
+
+                account_code:
+                    "",
+
+                account_name:
+                    name,
+
+                parent_id:
+                    null,
+
+                allow_transaction:
+                    false,
+
+                status:
+                    true,
+
+                group:
+                    "calculated",
+
+                is_periodic:
+                    true,
+
+                beginning:
+                    0,
+
+                movements:
+                    months.map(
+
+                        value => {
+
+                            if (
+                                value === null
+                                ||
+                                value === undefined
+                            ) {
+
+                                return 0;
+
+                            }
+
+
+                            return this.toNumber(
+                                value
+                            );
+
+                        }
+
+                    ),
+
+                months:
+                    [
+                        ...months
+                    ],
+
+                level:
+                    0,
+
+                has_children:
+                    true,
+
+                is_root:
+                    false,
+
+                is_calculated:
+                    true
+
+            };
+
+        };
+
+
+    /*
+    ======================================================
+    APPEND CALCULATED ROWS
+    ======================================================
+    */
+
+
+    /*
+    ======================================================
+    OPERATING PROFIT
+    ======================================================
+    */
+
+    flattened.push(
+
+        createCalculatedRow(
+
+            "__TB_OPERATING_PROFIT__",
+
+            "OPERATING PROFIT",
+
+            operatingProfit
+
+        )
+
+    );
+
+
+    /*
+    ======================================================
+    EBIT
+    ======================================================
+    */
+
+    flattened.push(
+
+        createCalculatedRow(
+
+            "__TB_EBIT__",
+
+            "EBIT",
+
+            ebit
+
+        )
+
+    );
+
+
+    /*
+    ======================================================
+    NET PROFIT
+    ======================================================
+    */
+
+    flattened.push(
+
+        createCalculatedRow(
+
+            "__TB_NET_PROFIT__",
+
+            "NET PROFIT",
+
+            netProfit
+
+        )
+
+    );
+
+
+    /*
+    ======================================================
+    CURRENT EARNING
+    ======================================================
+    */
+
+    flattened.push(
+
+        createCalculatedRow(
+
+            "__TB_CURRENT_EARNING__",
+
+            "CURRENT EARNING (BALANCE)",
+
+            currentEarning
+
+        )
+
+    );
+
+
+    /*
+    ======================================================
+    RETURN
+    ======================================================
+    */
+
+    return flattened;
+
+}
+   /*
+==========================================================
+BUILD MONTHLY BALANCES
+==========================================================
+
+BALANCE SHEET ACCOUNT
+Asset / Liability / Equity
+
+Jan - Current Month
+=
+Closing Balance
+
+Current Month
+=
+Previous Closing Balance
++
+Current Month Movement
+
+Future Month
+=
+0
+
+
+PROFIT & LOSS ACCOUNT
+Revenue / Expense
+
+Jan - Current Month
+=
+Monthly Activity
+
+Future Month
+=
+0
+==========================================================
+*/
+
+buildMonthlyBalances(
+    beginning,
+    movements,
+    currentReportMonth,
+    isPeriodic = false
+) {
+
+    const months =
+        [];
+
+
+    /*
+    ======================================================
+    PERIODIC ACCOUNT
+
+    Revenue / Expense
+
+    No carry forward.
+    ======================================================
+    */
+
+    if (
+        isPeriodic
+    ) {
 
         for (
             let index = 0;
@@ -2950,10 +4293,9 @@ export class TrialBalanceYear {
 
             /*
             ==================================================
-            FUTURE PERIOD
+            FUTURE MONTH
 
-            IMPORTANT:
-            Do not calculate and do not carry forward.
+            Always display 0.
             ==================================================
             */
 
@@ -2964,7 +4306,7 @@ export class TrialBalanceYear {
             ) {
 
                 months.push(
-                    null
+                    0
                 );
 
 
@@ -2975,24 +4317,24 @@ export class TrialBalanceYear {
 
             /*
             ==================================================
-            CURRENT / COMPLETED PERIOD
+            CURRENT / COMPLETED MONTH
+
+            Monthly movement only.
             ==================================================
             */
-
-            running +=
-                this.toNumber(
-
-                    movements?.[
-                        index
-                    ]
-
-                );
-
 
             months.push(
 
                 this.cleanNumber(
-                    running
+
+                    this.toNumber(
+
+                        movements?.[
+                            index
+                        ]
+
+                    )
+
                 )
 
             );
@@ -3003,6 +4345,104 @@ export class TrialBalanceYear {
         return months;
 
     }
+
+
+    /*
+    ======================================================
+    BALANCE SHEET ACCOUNT
+
+    Asset / Liability / Equity
+    ======================================================
+    */
+
+    let running =
+        this.toNumber(
+            beginning
+        );
+
+
+    for (
+        let index = 0;
+        index < 12;
+        index++
+    ) {
+
+        const monthNumber =
+            index + 1;
+
+
+        /*
+        ==================================================
+        FUTURE MONTH
+
+        Oct / Nov / Dec etc
+        =
+        0
+
+        Do NOT carry current balance into future month.
+        ==================================================
+        */
+
+        if (
+            monthNumber
+            >
+            currentReportMonth
+        ) {
+
+            months.push(
+                0
+            );
+
+
+            continue;
+
+        }
+
+
+        /*
+        ==================================================
+        CURRENT / COMPLETED MONTH
+
+        Closing Balance
+        =
+        Previous Balance
+        +
+        Current Month Movement
+
+        Therefore:
+
+        August Closing = 100
+
+        September movement = 0
+
+        September Closing = 100
+        ==================================================
+        */
+
+        running +=
+            this.toNumber(
+
+                movements?.[
+                    index
+                ]
+
+            );
+
+
+        months.push(
+
+            this.cleanNumber(
+                running
+            )
+
+        );
+
+    }
+
+
+    return months;
+
+}
 
 
     /*
@@ -3457,208 +4897,261 @@ export class TrialBalanceYear {
     }
 
 
+   /*
+==========================================================
+CREATE ROW
+==========================================================
+*/
+
+createRow(
+    row
+) {
+
+    const rowClass =
+        this.getRowClass(
+            row
+        );
+
+
     /*
-    ==========================================================
-    CREATE ROW
-    ==========================================================
+    ======================================================
+    MONTH CELLS
+
+    ALWAYS SHOW JAN - DEC
+    ======================================================
     */
 
-    createRow(
-        row
-    ) {
+    const monthCells =
+        row.months
 
-        const rowClass =
-            this.getRowClass(
-                row
-            );
+            .map(
 
+                amount => `
 
-        /*
-        ======================================================
-        MONTH CELLS
-        ======================================================
-        */
-
-        const monthCells =
-            row.months
-
-                .map(
-
-                    amount => `
-
-                        <td
-                            class="
-                                finova-table-number
-                                tb-number
-                                ${
-                                    this.getAmountClass(
-                                        amount
-                                    )
-                                }
-                            ">
-
+                    <td
+                        class="
+                            finova-table-number
+                            tb-number
                             ${
-                                this.formatAmount(
+                                this.getAmountClass(
                                     amount
                                 )
                             }
+                        ">
 
-                        </td>
+                        ${
+                            this.formatAmount(
+                                amount
+                            )
+                        }
 
-                    `
+                    </td>
 
-                )
-                .join("");
+                `
+
+            )
+            .join("");
 
 
-        /*
-        ======================================================
-        ROW
-        ======================================================
-        */
+    /*
+    ======================================================
+    BEGINNING YEAR
 
-        return `
+    Revenue / Expense blank.
+    ======================================================
+    */
 
-            <tr
+    const beginningValue =
+
+        row.is_periodic
+
+            ? ""
+
+            : this.formatAmount(
+                row.beginning
+            );
+
+
+    /*
+    ======================================================
+    ROW
+    ======================================================
+    */
+
+    return `
+
+        <tr
+            class="
+                ${rowClass}
+                tb-level-${
+                    Math.min(
+                        row.level
+                        ||
+                        0,
+                        5
+                    )
+                }
+            ">
+
+
+            <!-- ======================================
+                 DESCRIPTION
+            ======================================= -->
+
+            <td class="tb-description-cell">
+
+                <div class="tb-description-text">
+
+
+                    <span class="tb-account-code">
+
+                        ${
+                            this.escapeHTML(
+                                row.account_code
+                                ||
+                                ""
+                            )
+                        }
+
+                    </span>
+
+
+                    ${
+                        row.account_code
+                        &&
+                        row.account_name
+
+                            ? `
+
+                                <span class="tb-account-separator">
+                                    ::
+                                </span>
+
+                            `
+
+                            : ""
+                    }
+
+
+                    <span class="tb-account-name">
+
+                        ${
+                            this.escapeHTML(
+                                row.account_name
+                                ||
+                                "-"
+                            )
+                        }
+
+                    </span>
+
+
+                </div>
+
+            </td>
+
+
+            <!-- ======================================
+                 BEGINNING YEAR
+            ======================================= -->
+
+            <td
                 class="
-                    ${rowClass}
-                    tb-level-${
-                        Math.min(
-                            row.level
-                            ||
-                            0,
-                            5
-                        )
+                    finova-table-number
+                    tb-number
+                    ${
+                        row.is_periodic
+
+                            ? ""
+
+                            : this.getAmountClass(
+                                row.beginning
+                            )
                     }
                 ">
 
+                ${beginningValue}
 
-                <!-- ======================================
-                     DESCRIPTION
-                ======================================= -->
-
-                <td class="tb-description-cell">
-
-                    <div class="tb-description-text">
+            </td>
 
 
-                        <span class="tb-account-code">
+            <!-- ======================================
+                 JAN - DEC
+            ======================================= -->
 
-                            ${
-                                this.escapeHTML(
-                                    row.account_code
-                                    ||
-                                    ""
-                                )
-                            }
-
-                        </span>
+            ${monthCells}
 
 
-                        ${
-                            row.account_code
-                            &&
-                            row.account_name
+        </tr>
 
-                                ? `
+    `;
 
-                                    <span class="tb-account-separator">
-                                        ::
-                                    </span>
+}
 
-                                `
+    /*
+==========================================================
+GET ROW CLASS
+==========================================================
+*/
 
-                                : ""
-                        }
+getRowClass(
+    row
+) {
 
+    /*
+    ======================================================
+    CALCULATED FINANCIAL ROW
+    ======================================================
+    */
 
-                        <span class="tb-account-name">
+    if (
+        row.is_calculated
+    ) {
 
-                            ${
-                                this.escapeHTML(
-                                    row.account_name
-                                    ||
-                                    "-"
-                                )
-                            }
-
-                        </span>
-
-
-                    </div>
-
-                </td>
-
-
-                <!-- ======================================
-                     BEGINNING YEAR
-                ======================================= -->
-
-                <td
-                    class="
-                        finova-table-number
-                        tb-number
-                        ${
-                            this.getAmountClass(
-                                row.beginning
-                            )
-                        }
-                    ">
-
-                    ${
-                        this.formatAmount(
-                            row.beginning
-                        )
-                    }
-
-                </td>
-
-
-                <!-- ======================================
-                     JAN - DEC
-                ======================================= -->
-
-                ${monthCells}
-
-
-            </tr>
-
-        `;
+        return "tb-parent-row tb-calculated-row";
 
     }
 
 
     /*
-    ==========================================================
-    GET ROW CLASS
-    ==========================================================
+    ======================================================
+    ROOT
+    ======================================================
     */
 
-    getRowClass(
-        row
+    if (
+        row.is_root
     ) {
 
-        if (
-            row.is_root
-        ) {
-
-            return "tb-root-row";
-
-        }
-
-
-        if (
-            row.has_children
-        ) {
-
-            return "tb-parent-row";
-
-        }
-
-
-        return "tb-leaf-row";
+        return "tb-root-row";
 
     }
+
+
+    /*
+    ======================================================
+    PARENT
+    ======================================================
+    */
+
+    if (
+        row.has_children
+    ) {
+
+        return "tb-parent-row";
+
+    }
+
+
+    /*
+    ======================================================
+    LEAF
+    ======================================================
+    */
+
+    return "tb-leaf-row";
+
+}
 
 
     /*
@@ -4062,92 +5555,110 @@ export class TrialBalanceYear {
     }
 
 
+   /*
+==========================================================
+RENDER TOTALS
+==========================================================
+*/
+
+renderTotals() {
+
+    const totals =
+        this.calculateTotals();
+
+
     /*
-    ==========================================================
-    RENDER TOTALS
-    ==========================================================
+    ======================================================
+    BEGINNING
+    ======================================================
     */
 
-    renderTotals() {
+    if (
+        this.totalBeginning
+    ) {
 
-        const totals =
-            this.calculateTotals();
-
-
-        /*
-        ======================================================
-        BEGINNING
-        ======================================================
-        */
-
-        if (
-            this.totalBeginning
-        ) {
-
-            this.totalBeginning.textContent =
-                this.formatAmount(
-                    totals.beginning
-                );
-
-        }
-
-
-        /*
-        ======================================================
-        MONTH TOTAL
-
-        IMPORTANT:
-        Do not use:
-        value || 0
-
-        because null future periods would become zero.
-        ======================================================
-        */
-
-        this.totalMonths.forEach(
-
-            (
-                element,
-                index
-            ) => {
-
-                if (
-                    !element
-                ) {
-
-                    return;
-
-                }
-
-
-                const value =
-                    totals.months[
-                        index
-                    ];
-
-
-                element.textContent =
-                    this.formatAmount(
-                        value
-                    );
-
-
-                element.classList.toggle(
-
-                    "tb-future-period",
-
-                    value === null
-                    ||
-                    value === undefined
-
-                );
-
-            }
-
-        );
+        this.totalBeginning.textContent =
+            this.formatAmount(
+                totals.beginning
+            );
 
     }
 
+
+    /*
+    ======================================================
+    MONTH TOTAL
+
+    ALWAYS SHOW JAN - DEC
+    ======================================================
+    */
+
+    this.totalMonths.forEach(
+
+        (
+            element,
+            index
+        ) => {
+
+            if (
+                !element
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+            ==================================================
+            ALWAYS VISIBLE
+            ==================================================
+            */
+
+            element.style.display =
+                "";
+
+
+            const value =
+                totals.months[
+                    index
+                ];
+
+
+            /*
+            ==================================================
+            NULL / UNDEFINED
+            =
+            ZERO
+            ==================================================
+            */
+
+            const displayValue =
+
+                value === null
+                ||
+                value === undefined
+
+                    ? 0
+
+                    : value;
+
+
+            element.textContent =
+                this.formatAmount(
+                    displayValue
+                );
+
+
+            element.classList.remove(
+                "tb-future-period"
+            );
+
+        }
+
+    );
+
+}
 
     /*
     ==========================================================

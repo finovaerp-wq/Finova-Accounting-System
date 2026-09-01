@@ -31,6 +31,146 @@ export class GeneralJournalService {
     constructor() {
 
     }
+    /*
+==========================================================
+CHECK ACCOUNTING PERIOD
+==========================================================
+*/
+
+async getAccountingPeriod(accountingDate) {
+
+    if (!accountingDate) {
+
+        throw new Error(
+            "Accounting Date is required."
+        );
+
+    }
+
+
+    const {
+
+        data,
+        error
+
+    } = await supabase
+
+        .from(
+            "mst_accounting_period"
+        )
+
+        .select(`
+            id,
+            period,
+            month,
+            year,
+            start_date,
+            end_date,
+            status
+        `)
+
+        .lte(
+            "start_date",
+            accountingDate
+        )
+
+        .gte(
+            "end_date",
+            accountingDate
+        )
+
+        .maybeSingle();
+
+
+    if (error) {
+
+        console.error(
+            "GeneralJournalService.getAccountingPeriod",
+            error
+        );
+
+        throw error;
+
+    }
+
+
+    /*
+    ======================================================
+    PERIOD NOT FOUND
+    ======================================================
+    */
+
+    if (!data) {
+
+        throw new Error(
+            `Accounting Period for ${accountingDate} is not configured.`
+        );
+
+    }
+
+
+    return data;
+
+}
+
+
+/*
+==========================================================
+VALIDATE ACCOUNTING PERIOD OPEN
+==========================================================
+*/
+
+async validateAccountingPeriod(accountingDate) {
+
+    const period =
+        await this.getAccountingPeriod(
+            accountingDate
+        );
+
+
+    const status =
+        String(
+            period.status || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    /*
+    ======================================================
+    CLOSED PERIOD
+    ======================================================
+    */
+
+    if (status === "closed") {
+
+        throw new Error(
+            `Accounting Period ${period.period} is Closed. ` +
+            `Transaction dated ${accountingDate} cannot be processed.`
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    UNKNOWN STATUS
+    FAIL CLOSED
+    ======================================================
+    */
+
+    if (status !== "open") {
+
+        throw new Error(
+            `Accounting Period ${period.period} is not Open.`
+        );
+
+    }
+
+
+    return period;
+
+}
 
     /*
     ==========================================================
@@ -448,6 +588,17 @@ header.source_po_no ??=
 
         this.validateDetail(details);
 
+
+        /*
+        ==========================================================
+        ACCOUNTING PERIOD LOCK
+        ==========================================================
+        */
+
+        await this.validateAccountingPeriod(
+            header.journal_date
+        );
+
         /*
         ======================================================
         BUILD GL DETAIL
@@ -773,6 +924,17 @@ async update(id, header, details = []) {
 
         this.validateDetail(details);
 
+
+        /*
+        ==========================================================
+        ACCOUNTING PERIOD LOCK
+        ==========================================================
+        */
+
+        await this.validateAccountingPeriod(
+            header.journal_date
+        );
+
         /*
         ======================================================
         BUILD DETAIL
@@ -939,13 +1101,19 @@ async update(id, header, details = []) {
 /*
 ==========================================================
 DELETE GENERAL JOURNAL
-RESET LINKED ACCOUNT PAYABLE
+WITH ACCOUNTING PERIOD LOCK
 ==========================================================
 */
 
 async delete(id) {
 
     try {
+
+        /*
+        ======================================================
+        VALIDATE ID
+        ======================================================
+        */
 
         if (!id) {
 
@@ -958,13 +1126,45 @@ async delete(id) {
 
         /*
         ======================================================
+        GET JOURNAL
+        ======================================================
+        */
+
+        const journal =
+            await this.getById(id);
+
+
+        if (!journal) {
+
+            throw new Error(
+                "General Journal not found."
+            );
+
+        }
+
+
+        /*
+        ======================================================
+        ACCOUNTING PERIOD LOCK
+        ======================================================
+        */
+
+        await this.validateAccountingPeriod(
+            journal.journal_date
+        );
+
+
+        /*
+        ======================================================
         RESET LINKED ACCOUNT PAYABLE
         ======================================================
         */
 
         const {
+
             data: resetAP,
             error: apError
+
         } = await supabase
 
             .from(
@@ -1011,7 +1211,9 @@ async delete(id) {
         */
 
         const {
+
             error: detailError
+
         } = await supabase
 
             .from(
@@ -1040,7 +1242,9 @@ async delete(id) {
         */
 
         const {
+
             error: headerError
+
         } = await supabase
 
             .from(
@@ -1071,11 +1275,13 @@ async delete(id) {
         console.log(
             "GENERAL JOURNAL DELETED:",
             {
+
                 journal_id:
                     id,
 
                 linked_ap_count:
                     resetAP?.length || 0
+
             }
         );
 
@@ -1933,20 +2139,41 @@ checkBalance(details = []) {
 /*
 ==========================================================
 POST JOURNAL
+WITH ACCOUNTING PERIOD LOCK
 ==========================================================
 */
 
 async post(id) {
 
-    const journal = await this.getById(id);
+    /*
+    ======================================================
+    GET JOURNAL
+    ======================================================
+    */
+
+    const journal =
+        await this.getById(id);
+
 
     if (!journal) {
 
-        throw new Error("Journal not found.");
+        throw new Error(
+            "Journal not found."
+        );
 
     }
 
-    if (journal.status !== this.STATUS.DRAFT) {
+
+    /*
+    ======================================================
+    VALIDATE STATUS
+    ======================================================
+    */
+
+    if (
+        journal.status !==
+        this.STATUS.DRAFT
+    ) {
 
         throw new Error(
             "Only Draft Journal can be posted."
@@ -1954,21 +2181,54 @@ async post(id) {
 
     }
 
-    const { error } = await supabase
 
-        .from(TABLE.GL_JOURNAL)
+    /*
+    ======================================================
+    ACCOUNTING PERIOD LOCK
+    ======================================================
+    */
+
+    await this.validateAccountingPeriod(
+        journal.journal_date
+    );
+
+
+    /*
+    ======================================================
+    POST JOURNAL
+    ======================================================
+    */
+
+    const {
+        error
+    } = await supabase
+
+        .from(
+            TABLE.GL_JOURNAL
+        )
 
         .update({
 
-            status: this.STATUS.POSTED,
+            status:
+                this.STATUS.POSTED,
 
-            Posted_at: new Date().toISOString()
+            Posted_at:
+                new Date().toISOString()
 
         })
 
-        .eq("id", id);
+        .eq(
+            "id",
+            id
+        );
 
-    if (error) throw error;
+
+    if (error) {
+
+        throw error;
+
+    }
+
 
     return true;
 
@@ -1976,6 +2236,7 @@ async post(id) {
 /*
 ==========================================================
 VOID JOURNAL
+WITH ACCOUNTING PERIOD LOCK
 ==========================================================
 */
 
@@ -1983,41 +2244,93 @@ async voidJournal(id, reason = "") {
 
     try {
 
-        const journal = await this.getById(id);
+        /*
+        ======================================================
+        GET JOURNAL
+        ======================================================
+        */
+
+        const journal =
+            await this.getById(id);
+
 
         if (!journal) {
 
-            throw new Error("Journal not found.");
+            throw new Error(
+                "Journal not found."
+            );
 
         }
 
-        if (journal.status !== this.STATUS.POSTED) {
 
-            throw new Error("Only Posted Journal can be void.");
+        /*
+        ======================================================
+        VALIDATE STATUS
+        ======================================================
+        */
+
+        if (
+            journal.status !==
+            this.STATUS.POSTED
+        ) {
+
+            throw new Error(
+                "Only Posted Journal can be void."
+            );
 
         }
 
-        const { error } = await supabase
 
-            .from(TABLE.GL_JOURNAL)
+        /*
+        ======================================================
+        ACCOUNTING PERIOD LOCK
+        ======================================================
+        */
+
+        await this.validateAccountingPeriod(
+            journal.journal_date
+        );
+
+
+        /*
+        ======================================================
+        VOID
+        ======================================================
+        */
+
+        const {
+            error
+        } = await supabase
+
+            .from(
+                TABLE.GL_JOURNAL
+            )
 
             .update({
 
-    status: this.STATUS.VOID,
+                status:
+                    this.STATUS.VOID,
 
-    void_reason: reason,
+                void_reason:
+                    reason,
 
-    void_at: new Date().toISOString()
+                void_at:
+                    new Date().toISOString()
 
-})
+            })
 
-            .eq("id", id);
+            .eq(
+                "id",
+                id
+            );
+
 
         if (error) {
 
             throw error;
 
         }
+
 
         return true;
 
