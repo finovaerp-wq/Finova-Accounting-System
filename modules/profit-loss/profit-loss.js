@@ -4464,199 +4464,199 @@ export class ProfitLoss {
 
 
     /*
-    ==========================================================
-    DOWNLOAD EXCEL
-    ==========================================================
-    */
+==========================================================
+DOWNLOAD EXCEL
+==========================================================
+*/
 
-    downloadExcel() {
+downloadExcel() {
 
-        try {
+    try {
 
-            /*
-            ==================================================
-            VALIDATE DATA
-            ==================================================
-            */
+        /*
+        ==================================================
+        VALIDATE DATA
+        ==================================================
+        */
 
-            if (
-                !this.filteredData.length
-            ) {
+        if (
+            !this.filteredData.length
+        ) {
 
-                this.showError(
-                    "No Profit & Loss data available to export."
-                );
+            this.showError(
+                "No Profit & Loss data available to export."
+            );
 
-                return;
+            return;
 
-            }
-
-
-            /*
-            ==================================================
-            XLSX LIBRARY
-            ==================================================
-            */
-
-            if (
-                typeof XLSX === "undefined"
-            ) {
-
-                this.showError(
-                    "Excel library is not available."
-                );
-
-                return;
-
-            }
+        }
 
 
-            const year =
-                Number(
+        /*
+        ==================================================
+        XLSX LIBRARY
+        ==================================================
+        */
 
-                    this.filterYear?.value
+        if (
+            typeof XLSX === "undefined"
+        ) {
 
-                    ||
+            this.showError(
+                "Excel library is not available."
+            );
 
-                    new Date()
-                        .getFullYear()
+            return;
 
-                );
-
-
-            const shortYear =
-                String(
-                    year
-                )
-                .slice(
-                    -2
-                );
+        }
 
 
-            /*
-            ==================================================
-            HEADER
-            ==================================================
-            */
+        const year =
+            Number(
 
-            const headers = [
+                this.filterYear?.value
 
-                "Description",
+                ||
 
-                "Beginning Year",
+                new Date()
+                    .getFullYear()
 
-                ...this.monthNames.map(
-
-                    month =>
-                        `${month}-${shortYear}`
-
-                )
-
-            ];
+            );
 
 
-            /*
-            ==================================================
-            DATA ROWS
+        const shortYear =
+            String(
+                year
+            )
+            .slice(
+                -2
+            );
 
-            IMPORTANT:
-            Future period null stays null.
-            Do not pass through toNumber().
-            ==================================================
-            */
 
-            const rows =
-                this.filteredData.map(
+        /*
+        ==================================================
+        HEADER
+        ==================================================
+        */
 
-                    row => {
+        const headers = [
 
-                        const description =
+            "Description",
 
-                            `${
-                                "    ".repeat(
+            "Beginning Year",
 
-                                    Math.max(
-                                        0,
-                                        row.level
-                                        ||
-                                        0
-                                    )
+            ...this.monthNames.map(
 
+                month =>
+                    `${month}-${shortYear}`
+
+            )
+
+        ];
+
+
+        /*
+        ==================================================
+        DATA ROWS
+
+        IMPORTANT:
+        Future period null stays null.
+        Do not pass through toNumber().
+        ==================================================
+        */
+
+        const rows =
+            this.filteredData.map(
+
+                row => {
+
+                    const description =
+
+                        `${
+                            "    ".repeat(
+
+                                Math.max(
+                                    0,
+                                    row.level
+                                    ||
+                                    0
                                 )
-                            }${
-                                row.account_code
-                                ||
-                                ""
-                            }${
-                                row.account_code
-                                &&
-                                row.account_name
 
-                                    ? " :: "
+                            )
+                        }${
+                            row.account_code
+                            ||
+                            ""
+                        }${
+                            row.account_code
+                            &&
+                            row.account_name
 
-                                    : ""
-                            }${
-                                row.account_name
-                                ||
-                                ""
-                            }`;
+                                ? " :: "
 
-
-                        const monthValues =
-                            row.months.map(
-
-                                amount => {
-
-                                    if (
-                                        amount === null
-                                        ||
-                                        amount === undefined
-                                    ) {
-
-                                        return null;
-
-                                    }
+                                : ""
+                        }${
+                            row.account_name
+                            ||
+                            ""
+                        }`;
 
 
-                                    return this.toNumber(
-                                        amount
-                                    );
+                    const monthValues =
+                        row.months.map(
+
+                            amount => {
+
+                                if (
+                                    amount === null
+                                    ||
+                                    amount === undefined
+                                ) {
+
+                                    return null;
 
                                 }
 
-                            );
+
+                                return this.toNumber(
+                                    amount
+                                );
+
+                            }
+
+                        );
 
 
-                        return [
+                    return [
 
-                            description,
+                        description,
 
-                            this.toNumber(
-                                row.beginning
-                            ),
+                        this.toNumber(
+                            row.beginning
+                        ),
 
-                            ...monthValues
+                        ...monthValues
 
-                        ];
+                    ];
 
-                    }
+                }
 
-                );
-
-
-            /*
-            ==================================================
-            REPORT INFORMATION
-            ==================================================
-            */
-
-            const currentReportMonth =
-                this.getCurrentReportMonth(
-                    year
-                );
+            );
 
 
-            const currentPeriodText =
+        /*
+        ==================================================
+        REPORT INFORMATION
+        ==================================================
+        */
+
+        const currentReportMonth =
+            this.getCurrentReportMonth(
+                year
+            );
+
+
+        const currentPeriodText =
             currentReportMonth > 0
 
                 ? `${
@@ -4670,138 +4670,136 @@ export class ProfitLoss {
                 : "-";
 
 
-            /*
-            ==================================================
-            WORKSHEET
-            ==================================================
-            */
+        /*
+        ==================================================
+        WORKSHEET
+        ==================================================
+        */
 
-            const worksheet =
-                XLSX.utils.aoa_to_sheet([
+        const worksheet =
+            XLSX.utils.aoa_to_sheet([
 
-                    [
-                        "FINOVA ACCOUNTING SYSTEM"
-                    ],
+                [
+                    "FINOVA ACCOUNTING SYSTEM"
+                ],
 
-                    [
-                        "PROFIT & LOSS"
-                    ],
+                [
+                    "PROFIT & LOSS"
+                ],
 
-                    [
-                        `Fiscal Year : ${year}`
-                    ],
+                [
+                    `Fiscal Year : ${year}`
+                ],
 
-                    [
-                        `Current Period : ${currentPeriodText}`
-                    ],
+                [
+                    `Current Period : ${currentPeriodText}`
+                ],
 
-                    [],
+                [],
 
-                    headers,
+                headers,
 
-                    ...rows
+                ...rows
 
-                ]);
+            ]);
 
 
-            /*
-            ==================================================
-            COLUMN WIDTH
-            ==================================================
-            */
+        /*
+        ==================================================
+        COLUMN WIDTH
+        ==================================================
+        */
 
-            worksheet["!cols"] = [
+        worksheet["!cols"] = [
 
-                {
-                    wch: 50
-                },
+            {
+                wch: 50
+            },
 
-                {
+            {
+                wch: 18
+            },
+
+            ...new Array(
+                12
+            )
+            .fill(
+                null
+            )
+            .map(
+
+                () => ({
+
                     wch: 18
-                },
 
-                ...new Array(
-                    12
-                )
-                .fill(
-                    null
-                )
-                .map(
+                })
 
-                    () => ({
+            )
 
-                        wch: 18
+        ];
 
-                    })
 
-                )
+        /*
+        ==================================================
+        NUMBER FORMAT
+        ==================================================
+        */
 
-            ];
+        if (
+            worksheet["!ref"]
+        ) {
+
+            const range =
+                XLSX.utils.decode_range(
+                    worksheet["!ref"]
+                );
 
 
             /*
             ==================================================
-            NUMBER FORMAT
+            DATA START ROW = 7 IN EXCEL
+            0 BASE INDEX = 6
             ==================================================
             */
 
-            if (
-                worksheet["!ref"]
+            for (
+                let row = 6;
+                row <= range.e.r;
+                row++
             ) {
 
-                const range =
-                    XLSX.utils.decode_range(
-                        worksheet["!ref"]
-                    );
-
-
-                /*
-                ==================================================
-                DATA START ROW = 7 IN EXCEL
-                0 BASE INDEX = 6
-                ==================================================
-                */
-
                 for (
-                    let row = 6;
-                    row <= range.e.r;
-                    row++
+                    let column = 1;
+                    column <= 13;
+                    column++
                 ) {
 
-                    for (
-                        let column = 1;
-                        column <= 13;
-                        column++
+                    const address =
+                        XLSX.utils.encode_cell({
+
+                            r:
+                                row,
+
+                            c:
+                                column
+
+                        });
+
+
+                    const cell =
+                        worksheet[
+                            address
+                        ];
+
+
+                    if (
+                        cell
+                        &&
+                        typeof cell.v === "number"
                     ) {
 
-                        const address =
-                            XLSX.utils.encode_cell({
-
-                                r:
-                                    row,
-
-                                c:
-                                    column
-
-                            });
-
-
-                        const cell =
-                            worksheet[
-                                address
-                            ];
-
-
-                        if (
-                            cell
-                            &&
-                            typeof cell.v === "number"
-                        ) {
-
-                            cell.z =
-                                '#,##0;[Red]-#,##0';
-
-                        }
+                        cell.z =
+                            '#,##0;[Red]-#,##0';
 
                     }
 
@@ -4809,62 +4807,125 @@ export class ProfitLoss {
 
             }
 
-
-            /*
-            ==================================================
-            WORKBOOK
-            ==================================================
-            */
-
-            const workbook =
-                XLSX.utils.book_new();
-
-
-            XLSX.utils.book_append_sheet(
-
-                workbook,
-
-                worksheet,
-
-                "Profit & Loss"
-
-            );
-
-
-            /*
-            ==================================================
-            FILE
-            ==================================================
-            */
-
-            XLSX.writeFile(
-                workbook,
-                `Profit_Loss_${year}.xlsx`
-            );
-
         }
 
-        catch (
-            error
-        ) {
 
-            console.error(
-                "ProfitLoss.downloadExcel:",
-                error
+        /*
+        ==================================================
+        WORKBOOK
+        ==================================================
+        */
+
+        const workbook =
+            XLSX.utils.book_new();
+
+
+        XLSX.utils.book_append_sheet(
+
+            workbook,
+
+            worksheet,
+
+            "Profit & Loss"
+
+        );
+
+
+        /*
+        ==================================================
+        FILE NAME TIMESTAMP WIB
+        ==================================================
+        */
+
+        const now =
+            new Date();
+
+
+        const parts =
+            new Intl.DateTimeFormat(
+                "en-GB",
+                {
+                    day:
+                        "2-digit",
+
+                    month:
+                        "2-digit",
+
+                    year:
+                        "numeric",
+
+                    hour:
+                        "2-digit",
+
+                    minute:
+                        "2-digit",
+
+                    hourCycle:
+                        "h23",
+
+                    timeZone:
+                        "Asia/Jakarta"
+                }
+            )
+            .formatToParts(
+                now
             );
 
 
-            this.showError(
+        const getPart =
+            type =>
+                parts.find(
+                    part =>
+                        part.type === type
+                )?.value
+                ?? "";
 
-                error?.message
-                ||
-                "Failed to download Profit & Loss Excel."
 
-            );
+        const timestamp =
+            `${getPart("day")}.` +
+            `${getPart("month")}.` +
+            `${getPart("year")} ` +
+            `${getPart("hour")}_` +
+            `${getPart("minute")} WIB`;
 
-        }
+
+        /*
+        ==================================================
+        DOWNLOAD
+        ==================================================
+        */
+
+        XLSX.writeFile(
+
+            workbook,
+
+            `Profit & Loss ${timestamp}.xlsx`
+
+        );
 
     }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "ProfitLoss.downloadExcel:",
+            error
+        );
+
+
+        this.showError(
+
+            error?.message
+            ||
+            "Failed to download Profit & Loss Excel."
+
+        );
+
+    }
+
+}
 
 
     /*

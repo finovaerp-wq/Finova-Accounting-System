@@ -3429,279 +3429,343 @@ initializeAccountTomSelect() {
 
 
     /*
-    ==========================================================
-    DOWNLOAD EXCEL
-    ==========================================================
-    */
+==========================================================
+DOWNLOAD EXCEL
+==========================================================
+*/
 
-    downloadExcel() {
+downloadExcel() {
 
-        try {
+    try {
 
-            if (
-                !this.filteredData.length
-            ) {
-
-                this.showError(
-                    "No General Ledger data available to export."
-                );
-
-                return;
-
-            }
-
-
-            if (
-                typeof XLSX === "undefined"
-            ) {
-
-                this.showError(
-                    "Excel library is not available."
-                );
-
-                return;
-
-            }
-
-
-            /*
-            ==================================================
-            DATA
-            ==================================================
-            */
-
-            const rows =
-                this.filteredData.map(
-
-                    (
-                        row,
-                        index
-                    ) => [
-
-                        index + 1,
-
-                        this.formatDate(
-                            row.date
-                        ),
-
-                        row.journal_no,
-
-                        row.account_code,
-
-                        row.account_name,
-
-                        row.business_partner,
-
-                        row.description,
-
-                        this.toNumber(
-                            row.debit
-                        ),
-
-                        this.toNumber(
-                            row.credit
-                        ),
-
-                        this.toNumber(
-                            row.balance
-                        )
-
-                    ]
-
-                );
-
-
-            const totals =
-                this.calculateTotals();
-
-
-            /*
-            ==================================================
-            WORKSHEET
-            ==================================================
-            */
-
-            const worksheet =
-                XLSX.utils.aoa_to_sheet([
-
-
-                    [
-                        "FINOVA ACCOUNTING SYSTEM"
-                    ],
-
-
-                    [
-                        "GENERAL LEDGER"
-                    ],
-
-
-                    [
-                        `Period : ${
-                            this.dateFrom?.value
-                            ||
-                            "-"
-                        } to ${
-                            this.dateTo?.value
-                            ||
-                            "-"
-                        }`
-                    ],
-
-
-                    [],
-
-
-                    [
-                        "No",
-                        "Date",
-                        "Journal No",
-                        "Account Code",
-                        "Account Name",
-                        "Business Partner",
-                        "Description",
-                        "Debit",
-                        "Credit",
-                        "Balance"
-                    ],
-
-
-                    ...rows,
-
-
-                    [
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        "",
-                        "TOTAL",
-
-                        totals.debit,
-
-                        totals.credit,
-
-                        totals.debit
-                        -
-                        totals.credit
-                    ]
-
-                ]);
-
-
-            /*
-            ==================================================
-            COLUMN WIDTH
-            ==================================================
-            */
-
-            worksheet["!cols"] = [
-
-                {
-                    wch:
-                        8
-                },
-
-                {
-                    wch:
-                        14
-                },
-
-                {
-                    wch:
-                        20
-                },
-
-                {
-                    wch:
-                        16
-                },
-
-                {
-                    wch:
-                        32
-                },
-
-                {
-                    wch:
-                        28
-                },
-
-                {
-                    wch:
-                        40
-                },
-
-                {
-                    wch:
-                        18
-                },
-
-                {
-                    wch:
-                        18
-                },
-
-                {
-                    wch:
-                        18
-                }
-
-            ];
-
-
-            /*
-            ==================================================
-            WORKBOOK
-            ==================================================
-            */
-
-            const workbook =
-                XLSX.utils.book_new();
-
-
-            XLSX.utils.book_append_sheet(
-
-                workbook,
-
-                worksheet,
-
-                "General Ledger"
-
-            );
-
-
-            XLSX.writeFile(
-
-                workbook,
-
-                "General_Ledger.xlsx"
-
-            );
-
-        }
-
-        catch (error) {
-
-            console.error(
-                "GeneralLedger.downloadExcel:",
-                error
-            );
-
+        if (
+            !this.filteredData.length
+        ) {
 
             this.showError(
-
-                error?.message
-
-                ||
-
-                "Failed to download General Ledger Excel."
-
+                "No General Ledger data available to export."
             );
+
+            return;
 
         }
 
+
+        if (
+            typeof XLSX === "undefined"
+        ) {
+
+            this.showError(
+                "Excel library is not available."
+            );
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        DATA
+        ==================================================
+        */
+
+        const rows =
+            this.filteredData.map(
+
+                (
+                    row,
+                    index
+                ) => [
+
+                    index + 1,
+
+                    this.formatDate(
+                        row.date
+                    ),
+
+                    row.journal_no,
+
+                    row.account_code,
+
+                    row.account_name,
+
+                    row.business_partner,
+
+                    row.description,
+
+                    this.toNumber(
+                        row.debit
+                    ),
+
+                    this.toNumber(
+                        row.credit
+                    ),
+
+                    this.toNumber(
+                        row.balance
+                    )
+
+                ]
+
+            );
+
+
+        const totals =
+            this.calculateTotals();
+
+
+        /*
+        ==================================================
+        WORKSHEET
+        ==================================================
+        */
+
+        const worksheet =
+            XLSX.utils.aoa_to_sheet([
+
+
+                [
+                    "FINOVA ACCOUNTING SYSTEM"
+                ],
+
+
+                [
+                    "GENERAL LEDGER"
+                ],
+
+
+                [
+                    `Period : ${
+                        this.dateFrom?.value
+                        ||
+                        "-"
+                    } to ${
+                        this.dateTo?.value
+                        ||
+                        "-"
+                    }`
+                ],
+
+
+                [],
+
+
+                [
+                    "No",
+                    "Date",
+                    "Journal No",
+                    "Account Code",
+                    "Account Name",
+                    "Business Partner",
+                    "Description",
+                    "Debit",
+                    "Credit",
+                    "Balance"
+                ],
+
+
+                ...rows,
+
+
+                [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "TOTAL",
+
+                    totals.debit,
+
+                    totals.credit,
+
+                    totals.debit
+                    -
+                    totals.credit
+                ]
+
+            ]);
+
+
+        /*
+        ==================================================
+        COLUMN WIDTH
+        ==================================================
+        */
+
+        worksheet["!cols"] = [
+
+            {
+                wch:
+                    8
+            },
+
+            {
+                wch:
+                    14
+            },
+
+            {
+                wch:
+                    20
+            },
+
+            {
+                wch:
+                    16
+            },
+
+            {
+                wch:
+                    32
+            },
+
+            {
+                wch:
+                    28
+            },
+
+            {
+                wch:
+                    40
+            },
+
+            {
+                wch:
+                    18
+            },
+
+            {
+                wch:
+                    18
+            },
+
+            {
+                wch:
+                    18
+            }
+
+        ];
+
+
+        /*
+        ==================================================
+        WORKBOOK
+        ==================================================
+        */
+
+        const workbook =
+            XLSX.utils.book_new();
+
+
+        XLSX.utils.book_append_sheet(
+
+            workbook,
+
+            worksheet,
+
+            "General Ledger"
+
+        );
+
+
+        /*
+        ==================================================
+        FILE NAME TIMESTAMP WIB
+        ==================================================
+        */
+
+        const now =
+            new Date();
+
+
+        const parts =
+            new Intl.DateTimeFormat(
+                "en-GB",
+                {
+                    day:
+                        "2-digit",
+
+                    month:
+                        "2-digit",
+
+                    year:
+                        "numeric",
+
+                    hour:
+                        "2-digit",
+
+                    minute:
+                        "2-digit",
+
+                    hourCycle:
+                        "h23",
+
+                    timeZone:
+                        "Asia/Jakarta"
+                }
+            )
+            .formatToParts(
+                now
+            );
+
+
+        const getPart =
+            type =>
+                parts.find(
+                    part =>
+                        part.type === type
+                )?.value
+                ?? "";
+
+
+        const timestamp =
+            `${getPart("day")}.` +
+            `${getPart("month")}.` +
+            `${getPart("year")} ` +
+            `${getPart("hour")}_` +
+            `${getPart("minute")} WIB`;
+
+
+        /*
+        ==================================================
+        DOWNLOAD
+        ==================================================
+        */
+
+        XLSX.writeFile(
+
+            workbook,
+
+            `General Ledger ${timestamp}.xlsx`
+
+        );
+
     }
+
+    catch (error) {
+
+        console.error(
+            "GeneralLedger.downloadExcel:",
+            error
+        );
+
+
+        this.showError(
+
+            error?.message
+
+            ||
+
+            "Failed to download General Ledger Excel."
+
+        );
+
+    }
+
+}
 
 
     /*
