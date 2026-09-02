@@ -4401,28 +4401,12 @@ async generateAPJournal(
                 "",
 
 
-            /*
-            ==============================================
-            ACCOUNTING DATE
-            ==============================================
-            */
-
             journal_date:
-                invoice.invoice_date,
-
-
-            /*
-            ==============================================
-            POSTING PERIOD
-            ==============================================
-            */
+                invoice.date_received,
 
             posting_period:
-                invoice.invoice_date
-                    ? invoice.invoice_date.substring(
-                        0,
-                        7
-                    )
+                invoice.date_received
+                    ? invoice.date_received.substring(0, 7)
                     : "",
 
 

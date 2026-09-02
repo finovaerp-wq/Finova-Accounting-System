@@ -3087,27 +3087,6 @@ getJournalSourceInfo(
 
 }
 
-/*
-==========================================================
-CREATE TABLE ROW
-FINAL
-
-ITEMS = JOURNAL DETAIL TOTAL LINE
-
-SOURCE:
-- AP Invoice
-- AP Payment
-- AR Invoice
-- AR Payment
-- GL Journal
-
-DESCRIPTION:
-- AUTO PREFIX BY SOURCE
-- SUPPORT OLD JOURNAL DATA
-- SUPPORT MULTI LINE
-==========================================================
-*/
-
 createTableRow(
     journal,
     rowNumber
@@ -3196,25 +3175,17 @@ createTableRow(
     /*
     ======================================================
     PO NUMBER
+    DISPLAY EXACTLY AS SOURCE
     ======================================================
     */
 
-    const rawPoNo =
+    const poNo =
         String(
             journal?.source_po_no
             ||
             ""
         )
         .trim();
-
-
-    const poNo =
-        rawPoNo
-            ? rawPoNo.replace(
-                /^PO\s*\/\s*/i,
-                ""
-            )
-            : "";
 
 
     /*
@@ -3257,152 +3228,158 @@ createTableRow(
 
 
     /*
-======================================================
-AUTO DESCRIPTION BY SOURCE
-======================================================
-*/
+    ======================================================
+    AUTO DESCRIPTION BY SOURCE
+    ======================================================
+    */
 
 
-/*
-======================================================
-AP INVOICE
-======================================================
-*/
-
-if (
-    sourceModule === "AP"
-    &&
-    sourceDocumentType === "AP_INVOICE"
-) {
-
-    const hasAutoPrefix =
-        /^\[AUTO\]\s*INV\s*AP/i
-            .test(
-                rawDescription
-            );
-
+    /*
+    ======================================================
+    AP INVOICE
+    ======================================================
+    */
 
     if (
-        !hasAutoPrefix
+        sourceModule === "AP"
+        &&
+        sourceDocumentType === "AP_INVOICE"
     ) {
 
-        description =
-            rawDescription
-                ? `[AUTO] INV AP\n${rawDescription}`
-                : `[AUTO] INV AP`;
+        const hasAutoPrefix =
+            /^\[AUTO\]\s*INV\s*AP/i
+                .test(
+                    rawDescription
+                );
+
+
+        if (
+            !hasAutoPrefix
+        ) {
+
+            description =
+                rawDescription
+                    ? `[AUTO] INV AP\n${rawDescription}`
+                    : `[AUTO] INV AP`;
+
+        }
 
     }
 
-}
 
+    /*
+    ======================================================
+    AP PAYMENT
+    ======================================================
+    */
 
-/*
-======================================================
-AP PAYMENT
-======================================================
-*/
-
-else if (
-    sourceModule === "AP"
-    &&
-    sourceDocumentType === "AP_PAYMENT"
-) {
-
-    const hasAutoPrefix =
-        /^\[AUTO\]\s*PAYMENT\s*AP/i
-            .test(
-                rawDescription
-            );
-
-
-    if (
-        !hasAutoPrefix
+    else if (
+        sourceModule === "AP"
+        &&
+        sourceDocumentType === "AP_PAYMENT"
     ) {
 
-        description =
-            rawDescription
-                ? `[AUTO] PAYMENT AP\n${rawDescription}`
-                : `[AUTO] PAYMENT AP`;
+        const hasAutoPrefix =
+            /^\[AUTO\]\s*PAYMENT\s*AP/i
+                .test(
+                    rawDescription
+                );
+
+
+        if (
+            !hasAutoPrefix
+        ) {
+
+            description =
+                rawDescription
+                    ? `[AUTO] PAYMENT AP\n${rawDescription}`
+                    : `[AUTO] PAYMENT AP`;
+
+        }
 
     }
 
-}
-/*
-======================================================
-AR INVOICE
-======================================================
-*/
 
-else if (
-    sourceModule === "AR"
-    &&
-    sourceDocumentType === "AR_INVOICE"
-) {
+    /*
+    ======================================================
+    AR INVOICE
+    ======================================================
+    */
 
-    const hasAutoPrefix =
-        /^\[AUTO\]\s*INV\s*AR/i
-            .test(
-                rawDescription
-            );
-
-
-    if (
-        !hasAutoPrefix
+    else if (
+        sourceModule === "AR"
+        &&
+        sourceDocumentType === "AR_INVOICE"
     ) {
 
-        description =
-            rawDescription
-                ? `[AUTO] INV AR\n${rawDescription}`
-                : `[AUTO] INV AR`;
+        const hasAutoPrefix =
+            /^\[AUTO\]\s*INV\s*AR/i
+                .test(
+                    rawDescription
+                );
+
+
+        if (
+            !hasAutoPrefix
+        ) {
+
+            description =
+                rawDescription
+                    ? `[AUTO] INV AR\n${rawDescription}`
+                    : `[AUTO] INV AR`;
+
+        }
 
     }
 
-}
-/*
-======================================================
-AR PAYMENT
-======================================================
-*/
 
-else if (
-    sourceModule === "AR"
-    &&
-    sourceDocumentType === "AR_PAYMENT"
-) {
+    /*
+    ======================================================
+    AR PAYMENT
+    ======================================================
+    */
 
-    const hasAutoPrefix =
-        /^\[AUTO\]\s*PAYMENT\s*AR/i
-            .test(
-                rawDescription
-            );
-
-
-    if (
-        !hasAutoPrefix
+    else if (
+        sourceModule === "AR"
+        &&
+        sourceDocumentType === "AR_PAYMENT"
     ) {
 
-        description =
-            rawDescription
-                ? `[AUTO] PAYMENT AR\n${rawDescription}`
-                : `[AUTO] PAYMENT AR`;
+        const hasAutoPrefix =
+            /^\[AUTO\]\s*PAYMENT\s*AR/i
+                .test(
+                    rawDescription
+                );
+
+
+        if (
+            !hasAutoPrefix
+        ) {
+
+            description =
+                rawDescription
+                    ? `[AUTO] PAYMENT AR\n${rawDescription}`
+                    : `[AUTO] PAYMENT AR`;
+
+        }
 
     }
 
-}
-/*
-======================================================
-ROW STATUS
-======================================================
-*/
 
-const rowStatus =
-    String(
-        journal?.status
-        ||
-        ""
-    )
-    .trim()
-    .toLowerCase();
+    /*
+    ======================================================
+    ROW STATUS
+    ======================================================
+    */
+
+    const rowStatus =
+        String(
+            journal?.status
+            ||
+            ""
+        )
+        .trim()
+        .toLowerCase();
 
 
     /*
@@ -3522,10 +3499,10 @@ const rowStatus =
     return `
 
         <tr
-    class="gl-journal-row"
-    data-id="${journal.id}"
-    data-status="${rowStatus}"
->
+            class="gl-journal-row"
+            data-id="${journal.id}"
+            data-status="${rowStatus}"
+        >
 
 
             <!-- ==========================================
@@ -3731,11 +3708,9 @@ const rowStatus =
 
                             ${
                                 poNo
-                                    ? `PO/${
-                                        this.escapeHTML(
-                                            poNo
-                                        )
-                                    }`
+                                    ? this.escapeHTML(
+                                        poNo
+                                    )
                                     : "-"
                             }
 

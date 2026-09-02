@@ -248,6 +248,198 @@ async validateAccountingPeriod(dateReceived) {
     return period;
 
 }
+/*
+==========================================================
+GET ACCOUNTING PERIOD
+AP PAYMENT
+PAYMENT DATE = ACCOUNTING DATE
+==========================================================
+*/
+
+async getPaymentAccountingPeriod(paymentDate) {
+
+    /*
+    ======================================================
+    VALIDATE PAYMENT DATE
+    ======================================================
+    */
+
+    if (!paymentDate) {
+
+        throw new Error(
+            "Payment Date is required."
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    GET ACCOUNTING PERIOD
+    ======================================================
+    */
+
+    const {
+        data,
+        error
+    } = await supabase
+
+        .from(
+            "mst_accounting_period"
+        )
+
+        .select(`
+            id,
+            period,
+            month,
+            year,
+            start_date,
+            end_date,
+            status
+        `)
+
+        .lte(
+            "start_date",
+            paymentDate
+        )
+
+        .gte(
+            "end_date",
+            paymentDate
+        )
+
+        .maybeSingle();
+
+
+    /*
+    ======================================================
+    DATABASE ERROR
+    ======================================================
+    */
+
+    if (error) {
+
+        console.error(
+            "AccountPayableService.getPaymentAccountingPeriod:",
+            error
+        );
+
+        throw error;
+
+    }
+
+
+    /*
+    ======================================================
+    PERIOD NOT CONFIGURED
+    ======================================================
+    */
+
+    if (!data) {
+
+        throw new Error(
+            `Accounting Period for Payment Date ${paymentDate} is not configured.`
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    RETURN
+    ======================================================
+    */
+
+    return data;
+
+}
+
+
+/*
+==========================================================
+VALIDATE ACCOUNTING PERIOD
+AP PAYMENT
+
+PAYMENT DATE = ACCOUNTING DATE
+==========================================================
+*/
+
+async validatePaymentAccountingPeriod(paymentDate) {
+
+    /*
+    ======================================================
+    GET PERIOD
+    ======================================================
+    */
+
+    const period =
+        await this.getPaymentAccountingPeriod(
+            paymentDate
+        );
+
+
+    /*
+    ======================================================
+    NORMALIZE STATUS
+    ======================================================
+    */
+
+    const status =
+        String(
+            period.status || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    /*
+    ======================================================
+    CLOSED PERIOD
+    ======================================================
+    */
+
+    if (
+        status === "closed"
+    ) {
+
+        throw new Error(
+
+            `Accounting Period ${period.period} is Closed. ` +
+
+            `AP Payment with Payment Date ${paymentDate} cannot be processed.`
+
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    UNKNOWN STATUS
+    FAIL CLOSED
+    ======================================================
+    */
+
+    if (
+        status !== "open"
+    ) {
+
+        throw new Error(
+            `Accounting Period ${period.period} is not Open.`
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    RETURN
+    ======================================================
+    */
+
+    return period;
+
+}
 
    /*
 ======================================================
@@ -294,15 +486,17 @@ get STATUS() {
 
 }
 
-   /*
-======================================================
-GET ALL
-======================================================
-*/
-
-async getAll() {
+   async getAll() {
 
     try {
+
+        /*
+        ======================================================
+        GET ACCOUNT PAYABLE
+        WITH BUSINESS PARTNER
+        WITH GL JOURNAL
+        ======================================================
+        */
 
         const {
 
@@ -327,6 +521,13 @@ async getAll() {
                     bp_type,
                     top_id,
                     is_active
+                ),
+
+                trx_gl_journal (
+                    id,
+                    journal_no,
+                    journal_date,
+                    status
                 )
 
             `)
@@ -341,21 +542,55 @@ async getAll() {
             .order(
                 "created_at",
                 {
-                    ascending: true
+                    ascending:
+                        true
                 }
             );
 
 
+        /*
+        ======================================================
+        DATABASE ERROR
+        ======================================================
+        */
+
         if (
             error
         ) {
+
+            console.error(
+                "AccountPayableService.getAll:",
+                error
+            );
 
             throw error;
 
         }
 
 
-        return data || [];
+        /*
+        ======================================================
+        DEBUG
+        ======================================================
+        */
+
+        console.log(
+            "ACCOUNT PAYABLE GET ALL:",
+            data
+        );
+
+
+        /*
+        ======================================================
+        RETURN
+        ======================================================
+        */
+
+        return (
+            data
+            ||
+            []
+        );
 
     }
 
@@ -2317,6 +2552,7 @@ async create(
 
         }
 
+
         /*
         ==================================================
         ACCOUNTING PERIOD LOCK
@@ -2327,6 +2563,7 @@ async create(
         await this.validateAccountingPeriod(
             header.date_received
         );
+
 
         /*
         ==================================================
@@ -2580,19 +2817,12 @@ async create(
 
                     /*
                     ==========================================
-                    REMOVE TEMP / EMPTY ID
+                    REMOVE TEMPORARY UI ID
+                    DATABASE GENERATES DETAIL ID
                     ==========================================
                     */
 
-                    if (
-                        row.id == null
-                        ||
-                        row.id === ""
-                    ) {
-
-                        delete row.id;
-
-                    }
+                    delete row.id;
 
 
                     /*
@@ -2603,7 +2833,10 @@ async create(
 
                     row.tax_plus_id =
                         row.tax_plus_id
-                        || null;
+                        ? Number(
+                            row.tax_plus_id
+                        )
+                        : null;
 
 
                     row.tax_plus_account_id =
@@ -2616,7 +2849,10 @@ async create(
 
                     row.tax_minus_id =
                         row.tax_minus_id
-                        || null;
+                        ? Number(
+                            row.tax_minus_id
+                        )
+                        : null;
 
 
                     row.tax_minus_account_id =
@@ -2629,7 +2865,7 @@ async create(
 
                     /*
                     ==========================================
-                    NORMALIZE ACCOUNT
+                    NORMALIZE CHARGE ACCOUNT
                     ==========================================
                     */
 
