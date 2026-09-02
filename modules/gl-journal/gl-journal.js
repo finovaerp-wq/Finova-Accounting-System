@@ -7025,6 +7025,7 @@ async validateAccountingDatePeriod() {
 /*
 ==========================================================
 INITIALIZE JOURNAL HEADER
+FINAL WITH ACCOUNTING PERIOD VALIDATION
 ==========================================================
 */
 
@@ -7046,13 +7047,17 @@ async initializeJournalHeader() {
 
     }
 
+
     /*
     ======================================================
     ADD MODE
     ======================================================
     */
 
-    if (this.currentMode === "add") {
+    if (
+        this.currentMode ===
+        "add"
+    ) {
 
         /*
         ==================================================
@@ -7061,7 +7066,9 @@ async initializeJournalHeader() {
         */
 
         this.txtJournalNo.value =
-            await this.service.generateDocumentNumber();
+            await this.service
+                .generateDocumentNumber();
+
 
         /*
         ==================================================
@@ -7070,18 +7077,23 @@ async initializeJournalHeader() {
         */
 
         this.txtAccountingDate.value =
-         new Date()
-        .toISOString()
-        .substring(0, 10);
+            new Date()
+                .toISOString()
+                .substring(
+                    0,
+                    10
+                );
 
 
         /*
-        ======================================================
+        ==================================================
         POSTING PERIOD
-        ======================================================
+        ==================================================
         */
 
-        if (this.txtPostingPeriod) {
+        if (
+            this.txtPostingPeriod
+        ) {
 
             this.txtPostingPeriod.value =
                 this.getPostingPeriod(
@@ -7091,12 +7103,35 @@ async initializeJournalHeader() {
         }
 
 
+        /*
+        ==================================================
+        STATUS
+        ==================================================
+        */
+
         this.cboStatus.value =
             "Draft";
+
+
+        this.updateJournalHeaderStatus(
+            "Draft"
+        );
+
+
+        /*
+        ==================================================
+        VALIDATE ACCOUNTING PERIOD
+        BASED ON DEFAULT ACCOUNTING DATE
+        ==================================================
+        */
+
+        await this.validateAccountingDatePeriod();
+
 
         return;
 
     }
+
 
     /*
     ======================================================
@@ -7104,11 +7139,14 @@ async initializeJournalHeader() {
     ======================================================
     */
 
-    if (!this.currentJournal) {
+    if (
+        !this.currentJournal
+    ) {
 
         return;
 
     }
+
 
     /*
     ======================================================
@@ -7117,7 +7155,11 @@ async initializeJournalHeader() {
     */
 
     this.txtJournalNo.value =
-        this.currentJournal.journal_no ?? "";
+        this.currentJournal
+            .journal_no
+        ??
+        "";
+
 
     /*
     ======================================================
@@ -7126,26 +7168,36 @@ async initializeJournalHeader() {
     */
 
     this.txtAccountingDate.value =
-        this.currentJournal.journal_date ?? "";
+        this.currentJournal
+            .journal_date
+        ??
+        "";
 
 
-        /*
+    /*
     ======================================================
     POSTING PERIOD
     ======================================================
     */
 
-    if (this.txtPostingPeriod) {
+    if (
+        this.txtPostingPeriod
+    ) {
 
         this.txtPostingPeriod.value =
 
-            this.currentJournal.posting_period ||
+            this.currentJournal
+                .posting_period
+
+            ||
 
             this.getPostingPeriod(
-                this.currentJournal.journal_date
+                this.currentJournal
+                    .journal_date
             );
 
     }
+
 
     /*
     ======================================================
@@ -7153,32 +7205,45 @@ async initializeJournalHeader() {
     ======================================================
     */
 
-    if (this.txtDescription) {
+    if (
+        this.txtDescription
+    ) {
 
         this.txtDescription.value =
-            this.currentJournal.description ?? "";
+            this.currentJournal
+                .description
+        ??
+        "";
 
     }
 
+
     /*
-======================================================
-STATUS
-======================================================
-*/
+    ======================================================
+    STATUS
+    ======================================================
+    */
 
-if (this.cboStatus) {
+    if (
+        this.cboStatus
+    ) {
 
-    const status =
-        this.currentJournal.status ?? "Draft";
+        const status =
+            this.currentJournal
+                .status
+        ??
+        "Draft";
 
-    this.cboStatus.value =
-        status;
 
-    this.updateJournalHeaderStatus(
-        status
-    );
+        this.cboStatus.value =
+            status;
 
-}
+
+        this.updateJournalHeaderStatus(
+            status
+        );
+
+    }
 
 }
 /*

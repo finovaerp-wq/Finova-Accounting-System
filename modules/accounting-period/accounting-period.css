@@ -1,0 +1,71 @@
+/*
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+MODULE : ACCOUNTING PERIOD
+VERSION : 1.0.0
+==========================================================
+*/
+
+
+.accounting-period-page {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1;
+
+    min-height: 0;
+
+}
+
+
+.accounting-period-page .finova-table-card {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1;
+
+    min-height: 0;
+
+}
+
+
+.accounting-period-page .finova-table-container {
+
+    flex: 1;
+
+    min-height: 0;
+
+}
+
+
+.accounting-period-page .table-responsive {
+
+    flex: 1;
+
+    min-height: 0;
+
+    overflow: auto;
+
+}
+
+
+.accounting-period-page
+#accounting-period-table
+th {
+
+    white-space: nowrap;
+
+}
+
+
+.accounting-period-page
+#accounting-period-table
+td {
+
+    vertical-align: middle;
+
+}

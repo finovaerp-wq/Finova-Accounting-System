@@ -202,7 +202,13 @@ export class FinovaSidebar {
                         "fa-solid fa-percent",
                         "tax",
                         true
-                    )
+                    ),
+                    this.menuItem(
+                    "Accounting Period",
+                    "fa-solid fa-calendar-days",
+                    "accounting-period",
+                    true
+                )
 
                 ]
             )}

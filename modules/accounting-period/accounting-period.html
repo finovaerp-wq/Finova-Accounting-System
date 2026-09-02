@@ -1,0 +1,615 @@
+<!--
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+MODULE  : ACCOUNTING PERIOD
+FILE    : accounting-period.html
+VERSION : 1.0.0 FINAL
+==========================================================
+-->
+
+<div class="finova-page accounting-period-page">
+
+
+    <!-- ==================================================
+         PAGE HEADER
+    =================================================== -->
+
+    <div class="finova-page-header">
+
+        <div class="finova-page-header-left">
+
+            <h1 class="finova-page-title">
+                Accounting Period
+            </h1>
+
+            <p class="finova-page-subtitle">
+                Master Data / Accounting Period
+            </p>
+
+        </div>
+
+
+        <div class="finova-page-header-right">
+
+            <button
+                type="button"
+                id="btn-refresh-accounting-period"
+                class="btn btn-outline-secondary finova-btn">
+
+                <i class="fa-solid fa-rotate me-1"></i>
+
+                Refresh
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         PERIOD INFORMATION
+    =================================================== -->
+
+    <div class="finova-card mb-2">
+
+        <div class="finova-card-body">
+
+            <div
+                class="
+                    d-flex
+                    align-items-center
+                    gap-2
+                    text-muted
+                    small
+                ">
+
+                <i class="fa-solid fa-circle-info"></i>
+
+                <span>
+                    Open period allows accounting transactions.
+                    Closed period blocks accounting transactions
+                    until the period is opened or reopened.
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         FILTER
+    =================================================== -->
+
+    <div class="finova-card mb-2">
+
+        <div class="finova-card-body">
+
+            <div class="row g-3 align-items-end">
+
+
+                <!-- YEAR -->
+
+                <div class="col-md-3">
+
+                    <label
+                        for="accounting-period-year"
+                        class="form-label">
+
+                        Year
+
+                    </label>
+
+                    <select
+                        id="accounting-period-year"
+                        class="form-select finova-control">
+
+                        <option value="">
+                            All Year
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- STATUS -->
+
+                <div class="col-md-3">
+
+                    <label
+                        for="accounting-period-status"
+                        class="form-label">
+
+                        Status
+
+                    </label>
+
+                    <select
+                        id="accounting-period-status"
+                        class="form-select finova-control">
+
+                        <option value="">
+                            All Status
+                        </option>
+
+                        <option value="Open">
+                            Open
+                        </option>
+
+                        <option value="Closed">
+                            Closed
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- SEARCH -->
+
+                <div class="col-md-4">
+
+                    <label
+                        for="accounting-period-search"
+                        class="form-label">
+
+                        Search
+
+                    </label>
+
+                    <input
+                        type="text"
+                        id="accounting-period-search"
+                        class="form-control finova-control"
+                        placeholder="Search Period">
+
+                </div>
+
+
+                <!-- FIND -->
+
+                <div class="col-md-2">
+
+                    <button
+                        type="button"
+                        id="btn-find-accounting-period"
+                        class="
+                            btn
+                            btn-primary
+                            finova-btn
+                            w-100
+                        ">
+
+                        <i class="fa-solid fa-magnifying-glass me-1"></i>
+
+                        Find
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         TABLE
+    =================================================== -->
+
+    <div
+        class="
+            finova-card
+            finova-table-card
+            flex-grow-1
+        ">
+
+        <div class="finova-card-body p-0">
+
+            <div class="finova-table-container">
+
+                <div class="table-responsive">
+
+                    <table
+                        class="
+                            table
+                            finova-table
+                            mb-0
+                        "
+                        id="accounting-period-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th class="finova-table-index">
+                                    No
+                                </th>
+
+                                <th class="finova-table-code">
+                                    Period
+                                </th>
+
+                                <th class="finova-table-date">
+                                    Start Date
+                                </th>
+
+                                <th class="finova-table-date">
+                                    End Date
+                                </th>
+
+                                <th class="finova-table-status">
+                                    Status
+                                </th>
+
+                                <th class="finova-table-date">
+                                    Last Closed
+                                </th>
+
+                                <th class="finova-table-date">
+                                    Last Reopened
+                                </th>
+
+                                <th class="finova-table-action">
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="accounting-period-tbody">
+
+                            <tr>
+
+                                <td
+                                    colspan="8"
+                                    class="text-center text-muted py-5">
+
+                                    Loading Accounting Period...
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         ACCOUNTING PERIOD ACTION MODAL
+         OPEN / CLOSE / REOPEN
+    =================================================== -->
+
+    <div
+        class="modal fade"
+        id="accountingPeriodActionModal"
+        tabindex="-1"
+        aria-labelledby="accountingPeriodActionModalLabel"
+        aria-hidden="true"
+        data-bs-backdrop="static"
+        data-bs-keyboard="false">
+
+        <div
+            class="
+                modal-dialog
+                modal-dialog-centered
+            ">
+
+            <div class="modal-content">
+
+
+                <!-- ==========================================
+                     HEADER
+                =========================================== -->
+
+                <div class="modal-header">
+
+                    <h5
+                        class="modal-title"
+                        id="accountingPeriodActionModalLabel">
+
+                        Accounting Period
+
+                    </h5>
+
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                    </button>
+
+                </div>
+
+
+                <!-- ==========================================
+                     BODY
+                =========================================== -->
+
+                <div class="modal-body">
+
+
+                    <!-- ======================================
+                         ICON
+                    ======================================= -->
+
+                    <div class="text-center mb-3">
+
+                        <div
+                            id="accounting-period-action-icon"
+                            class="fs-1">
+
+                            <i class="fa-solid fa-calendar-days"></i>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ======================================
+                         TITLE / MESSAGE
+                    ======================================= -->
+
+                    <div class="text-center mb-3">
+
+                        <h6
+                            id="accounting-period-action-title"
+                            class="fw-semibold mb-2">
+
+                            Accounting Period
+
+                        </h6>
+
+
+                        <p
+                            id="accounting-period-action-message"
+                            class="text-muted mb-0">
+
+                            Confirm Accounting Period action.
+
+                        </p>
+
+                    </div>
+
+
+                    <!-- ======================================
+                         PERIOD INFORMATION
+                    ======================================= -->
+
+                    <div
+                        class="
+                            border
+                            rounded
+                            p-3
+                            bg-light
+                            mb-3
+                        ">
+
+
+                        <!-- PERIOD -->
+
+                        <div
+                            class="
+                                d-flex
+                                justify-content-between
+                                align-items-center
+                                mb-2
+                            ">
+
+                            <span class="text-muted">
+                                Period
+                            </span>
+
+                            <strong
+                                id="accounting-period-modal-period">
+
+                                -
+
+                            </strong>
+
+                        </div>
+
+
+                        <!-- START DATE -->
+
+                        <div
+                            class="
+                                d-flex
+                                justify-content-between
+                                align-items-center
+                                mb-2
+                            ">
+
+                            <span class="text-muted">
+                                Start Date
+                            </span>
+
+                            <span
+                                id="accounting-period-modal-start-date">
+
+                                -
+
+                            </span>
+
+                        </div>
+
+
+                        <!-- END DATE -->
+
+                        <div
+                            class="
+                                d-flex
+                                justify-content-between
+                                align-items-center
+                                mb-2
+                            ">
+
+                            <span class="text-muted">
+                                End Date
+                            </span>
+
+                            <span
+                                id="accounting-period-modal-end-date">
+
+                                -
+
+                            </span>
+
+                        </div>
+
+
+                        <!-- CURRENT STATUS -->
+
+                        <div
+                            class="
+                                d-flex
+                                justify-content-between
+                                align-items-center
+                            ">
+
+                            <span class="text-muted">
+                                Current Status
+                            </span>
+
+                            <span
+                                id="accounting-period-modal-status">
+
+                                -
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ======================================
+                         REASON
+                    ======================================= -->
+
+                    <div>
+
+                        <label
+                            for="accounting-period-action-reason"
+                            class="form-label">
+
+                            Reason
+
+                            <span
+                                id="accounting-period-reason-required"
+                                class="text-danger">
+
+                                *
+
+                            </span>
+
+                        </label>
+
+
+                        <textarea
+                            id="accounting-period-action-reason"
+                            class="form-control finova-control"
+                            rows="3"
+                            maxlength="500"
+                            placeholder="Enter reason"></textarea>
+
+
+                        <div
+                            id="accounting-period-reason-help"
+                            class="form-text">
+
+                            Reason is required.
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ======================================
+                         MODAL ERROR
+                    ======================================= -->
+
+                    <div
+                        id="accounting-period-modal-error"
+                        class="
+                            alert
+                            alert-danger
+                            mt-3
+                            mb-0
+                            d-none
+                        "
+                        role="alert">
+                    </div>
+
+                </div>
+
+
+                <!-- ==========================================
+                     FOOTER
+                =========================================== -->
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="
+                            btn
+                            btn-outline-secondary
+                            finova-btn
+                        "
+                        data-bs-dismiss="modal">
+
+                        Cancel
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        id="btn-confirm-accounting-period-action"
+                        class="
+                            btn
+                            btn-primary
+                            finova-btn
+                        ">
+
+                        <i
+                            id="accounting-period-confirm-icon"
+                            class="fa-solid fa-check me-1">
+                        </i>
+
+                        <span
+                            id="accounting-period-confirm-text">
+
+                            Confirm
+
+                        </span>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

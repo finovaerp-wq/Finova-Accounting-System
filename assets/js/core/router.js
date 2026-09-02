@@ -45,6 +45,23 @@ export class FinovaRouter {
                 html: "modules/tax/tax.html",
                 js: "modules/tax/tax.js",
                 className: "Tax"
+
+                
+            },
+            "accounting-period": {
+
+                title:
+                    "Accounting Period",
+
+                html:
+                    "modules/accounting-period/accounting-period.html",
+
+                js:
+                    "modules/accounting-period/accounting-period.js",
+
+                className:
+                    "AccountingPeriod"
+
             },
 
             "account-payable": {
