@@ -128,36 +128,37 @@ this.taxMinusData = [];
         this.apDetailUnitPrice = null;
         this.accountPayableCompleteModal = null;
         this.apDetailCOASelect = null;
+        this.apVendorSelect = null;
 
         this.pendingCompleteAPId = null;
         this.currentPaymentAPId = null;
 
-this.accountPayablePaymentModal = null;
+        this.accountPayablePaymentModal = null;
 
-this.apPaymentAPId = null;
+        this.apPaymentAPId = null;
 
-this.apPaymentInvoiceNo = null;
-this.apPaymentPoNo = null;
+        this.apPaymentInvoiceNo = null;
+        this.apPaymentPoNo = null;
 
-this.apPaymentVendor = null;
+        this.apPaymentVendor = null;
 
-this.apPaymentDate = null;
+        this.apPaymentDate = null;
 
-this.apPaymentBankAccount = null;
+        this.apPaymentBankAccount = null;
 
-this.apPaymentDPP = null;
+        this.apPaymentDPP = null;
 
-this.apPaymentTaxPlus = null;
+        this.apPaymentTaxPlus = null;
 
-this.apPaymentTaxMinus = null;
+        this.apPaymentTaxMinus = null;
 
-this.apPaymentAmount = null;
+        this.apPaymentAmount = null;
 
-this.apPaymentReferenceNo = null;
+        this.apPaymentReferenceNo = null;
 
-this.apPaymentDescription = null;
+        this.apPaymentDescription = null;
 
-this.btnSaveAPPayment = null;
+        this.btnSaveAPPayment = null;
 
 
         this.apDetailTaxInputRate = null;
@@ -225,7 +226,7 @@ this.btnSaveAPPayment = null;
     }
     /*
 ======================================================
-INITIALIZE SEARCHABLE DETAIL COA
+INITIALIZE DETAIL COA SEARCH
 ======================================================
 */
 
@@ -235,11 +236,13 @@ initializeDetailCOASearch() {
 
         /*
         ==================================================
-        CHECK DOM
+        VALIDATE ELEMENT
         ==================================================
         */
 
-        if (!this.apDetailCOA) {
+        if (
+            !this.apDetailCOA
+        ) {
 
             console.warn(
                 "AP Detail COA element not found."
@@ -252,7 +255,7 @@ initializeDetailCOASearch() {
 
         /*
         ==================================================
-        CHECK TOM SELECT
+        VALIDATE TOM SELECT
         ==================================================
         */
 
@@ -262,7 +265,7 @@ initializeDetailCOASearch() {
             "undefined"
         ) {
 
-            console.error(
+            console.warn(
                 "TomSelect library is not loaded."
             );
 
@@ -273,20 +276,60 @@ initializeDetailCOASearch() {
 
         /*
         ==================================================
-        DESTROY EXISTING INSTANCE
+        IMPORTANT
+
+        CHECK INSTANCE DIRECTLY FROM DOM
+
+        Tom Select stores its active instance in:
+        element.tomselect
+        ==================================================
+        */
+
+        const existingInstance =
+            this.apDetailCOA.tomselect
+            ||
+            null;
+
+
+        /*
+        ==================================================
+        IF ALREADY INITIALIZED
+
+        DO NOT CREATE NEW TOM SELECT
+        JUST REUSE EXISTING INSTANCE
         ==================================================
         */
 
         if (
-            this.apDetailCOASelect
+            existingInstance
         ) {
 
-            this.apDetailCOASelect.destroy();
-
             this.apDetailCOASelect =
-                null;
+                existingInstance;
+
+
+            console.log(
+                "AP Detail COA TomSelect reused."
+            );
+
+
+            return;
 
         }
+
+
+        /*
+        ==================================================
+        CLEAR STALE CLASS / WRAPPER STATE
+
+        ONLY RUN WHEN THERE IS NO ACTIVE INSTANCE
+        ==================================================
+        */
+
+        this.apDetailCOA.classList.remove(
+            "tomselected",
+            "ts-hidden-accessible"
+        );
 
 
         /*
@@ -307,7 +350,7 @@ initializeDetailCOASearch() {
                         true,
 
                     placeholder:
-                        "Select Chart of Account",
+                        "Select or type Account",
 
                     searchField: [
                         "text"
@@ -325,9 +368,13 @@ initializeDetailCOASearch() {
                     selectOnTab:
                         true,
 
+                    persist:
+                        false,
+
+
                     /*
                     ======================================
-                    CLEAR SEARCH AFTER SELECT
+                    ITEM SELECTED
                     ======================================
                     */
 
@@ -345,8 +392,7 @@ initializeDetailCOASearch() {
 
         /*
         ==================================================
-        CLEAR INITIAL VALUE
-        KEEP PLACEHOLDER ONLY
+        INITIAL VALUE
         ==================================================
         */
 
@@ -360,13 +406,21 @@ initializeDetailCOASearch() {
         );
 
 
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
         console.log(
-            "AP Searchable COA initialized."
+            "AP Detail COA TomSelect initialized."
         );
 
     }
 
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
             "AccountPayable.initializeDetailCOASearch:",
@@ -6505,6 +6559,7 @@ async loadVendors() {
         const data =
             await this.service.getVendors();
 
+
         console.log(
             "AP Vendors:",
             data
@@ -6518,7 +6573,9 @@ async loadVendors() {
         */
 
         this.vendorData =
-            Array.isArray(data)
+            Array.isArray(
+                data
+            )
                 ? data
                 : [];
 
@@ -6531,18 +6588,36 @@ async loadVendors() {
 
         this.renderVendorOptions();
 
+
+        /*
+        ==================================================
+        INITIALIZE SEARCHABLE VENDOR
+        ==================================================
+        */
+
+        this.initializeVendorSearch();
+
     }
 
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
             "AccountPayable.loadVendors:",
             error
         );
 
-        this.vendorData = [];
+
+        this.vendorData =
+            [];
+
 
         this.renderVendorOptions();
+
+
+        this.initializeVendorSearch();
+
 
         this.showError(
             "Failed to load Vendor."
@@ -6559,9 +6634,30 @@ RENDER VENDOR OPTIONS
 
 renderVendorOptions() {
 
-    if (!this.apFormVendor) {
+    if (
+        !this.apFormVendor
+    ) {
 
         return;
+
+    }
+
+
+    /*
+    ==================================================
+    DESTROY OLD TOM SELECT
+    BEFORE REBUILD OPTIONS
+    ==================================================
+    */
+
+    if (
+        this.apVendorSelect
+    ) {
+
+        this.apVendorSelect.destroy();
+
+        this.apVendorSelect =
+            null;
 
     }
 
@@ -6588,21 +6684,26 @@ renderVendorOptions() {
     */
 
     this.vendorData.forEach(
+
         vendor => {
 
             const id =
                 vendor?.id;
 
+
             const code =
                 vendor?.bp_code
                 || "";
+
 
             const name =
                 vendor?.bp_name
                 || "";
 
 
-            if (!id) {
+            if (
+                !id
+            ) {
 
                 return;
 
@@ -6614,15 +6715,20 @@ renderVendorOptions() {
                 <option
                     value="${id}">
 
-                    ${code}
-                    :: 
-                    ${name}
+                    ${this.escapeHtml(
+                        code
+                    )}
+                    ::
+                    ${this.escapeHtml(
+                        name
+                    )}
 
                 </option>
 
             `;
 
         }
+
     );
 
 
@@ -6636,7 +6742,199 @@ renderVendorOptions() {
         options;
 
 }
+/*
+======================================================
+INITIALIZE SEARCHABLE VENDOR
+======================================================
+*/
 
+initializeVendorSearch() {
+
+    try {
+
+        /*
+        ==================================================
+        CHECK DOM
+        ==================================================
+        */
+
+        if (
+            !this.apFormVendor
+        ) {
+
+            console.warn(
+                "AP Vendor element not found."
+            );
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        CHECK TOM SELECT
+        ==================================================
+        */
+
+        if (
+            typeof TomSelect
+            ===
+            "undefined"
+        ) {
+
+            console.error(
+                "TomSelect library is not loaded."
+            );
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        DESTROY EXISTING INSTANCE
+        ==================================================
+        */
+
+        if (
+            this.apVendorSelect
+        ) {
+
+            this.apVendorSelect.destroy();
+
+            this.apVendorSelect =
+                null;
+
+        }
+
+
+        /*
+        ==================================================
+        INITIALIZE
+        ==================================================
+        */
+
+        this.apVendorSelect =
+            new TomSelect(
+                this.apFormVendor,
+                {
+
+                    create:
+                        false,
+
+                    allowEmptyOption:
+                        true,
+
+                    placeholder:
+                        "Select or type Vendor",
+
+                    searchField:
+                    [
+                        "text"
+                    ],
+
+                    maxOptions:
+                        100,
+
+                    closeAfterSelect:
+                        true,
+
+                    hideSelected:
+                        false,
+
+                    selectOnTab:
+                        true,
+
+                    /*
+                    ======================================
+                    USER SELECT VENDOR
+                    ======================================
+                    */
+
+                    onChange:
+                        value => {
+
+                            /*
+                            ==================================
+                            ENSURE ORIGINAL SELECT VALUE
+                            ==================================
+                            */
+
+                            if (
+                                this.apFormVendor
+                            ) {
+
+                                this.apFormVendor.value =
+                                    value
+                                    || "";
+
+                            }
+
+
+                            /*
+                            ==================================
+                            VENDOR -> TOP -> DUE DATE
+                            ==================================
+                            */
+
+                            this.handleVendorChange();
+
+                        },
+
+                    /*
+                    ======================================
+                    CLEAR SEARCH AFTER SELECT
+                    ======================================
+                    */
+
+                    onItemAdd() {
+
+                        this.setTextboxValue(
+                            ""
+                        );
+
+                    }
+
+                }
+            );
+
+
+        /*
+        ==================================================
+        INITIAL EMPTY VALUE
+        ==================================================
+        */
+
+        this.apVendorSelect.clear(
+            true
+        );
+
+
+        this.apVendorSelect.setTextboxValue(
+            ""
+        );
+
+
+        console.log(
+            "AP Searchable Vendor initialized."
+        );
+
+    }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "AccountPayable.initializeVendorSearch:",
+            error
+        );
+
+    }
+
+}
   /*
 ==================================================
 BIND EVENTS
@@ -12581,7 +12879,7 @@ resetInvoiceDetailForm() {
         null;
 
 }
-    /*
+/*
 ======================================================
 HANDLE VENDOR CHANGE
 ======================================================
@@ -12589,9 +12887,20 @@ HANDLE VENDOR CHANGE
 
 handleVendorChange() {
 
+    /*
+    ==================================================
+    GET VENDOR ID
+    TOM SELECT / NATIVE SELECT
+    ==================================================
+    */
+
     const vendorId =
-        this.apFormVendor?.value
-        || "";
+        this.apVendorSelect
+            ? this.apVendorSelect.getValue()
+            : (
+                this.apFormVendor?.value
+                || ""
+            );
 
 
     /*
@@ -12600,7 +12909,9 @@ handleVendorChange() {
     ==================================================
     */
 
-    if (!vendorId) {
+    if (
+        !vendorId
+    ) {
 
         this.clearVendorTerms();
 
@@ -12617,9 +12928,17 @@ handleVendorChange() {
 
     const vendor =
         this.vendorData.find(
+
             item =>
-                String(item.id) ===
-                String(vendorId)
+
+                String(
+                    item.id
+                )
+                ===
+                String(
+                    vendorId
+                )
+
         );
 
 
@@ -12629,7 +12948,9 @@ handleVendorChange() {
     ==================================================
     */
 
-    if (!vendor) {
+    if (
+        !vendor
+    ) {
 
         this.clearVendorTerms();
 
@@ -12751,21 +13072,39 @@ CALCULATE AP DUE DATE
 
 calculateAPDueDate() {
 
-    if (!this.apFormDueDate) {
+    if (
+        !this.apFormDueDate
+    ) {
 
         return;
 
     }
 
 
+    /*
+    ==================================================
+    DATE RECEIVED
+    ==================================================
+    */
+
     const dateReceived =
         this.apFormDateReceived?.value
         || "";
 
 
+    /*
+    ==================================================
+    VENDOR
+    ==================================================
+    */
+
     const vendorId =
-        this.apFormVendor?.value
-        || "";
+        this.apVendorSelect
+            ? this.apVendorSelect.getValue()
+            : (
+                this.apFormVendor?.value
+                || ""
+            );
 
 
     /*
@@ -12775,7 +13114,8 @@ calculateAPDueDate() {
     */
 
     if (
-        !dateReceived ||
+        !dateReceived
+        ||
         !vendorId
     ) {
 
@@ -12795,13 +13135,23 @@ calculateAPDueDate() {
 
     const vendor =
         this.vendorData.find(
+
             item =>
-                String(item.id) ===
-                String(vendorId)
+
+                String(
+                    item.id
+                )
+                ===
+                String(
+                    vendorId
+                )
+
         );
 
 
-    if (!vendor) {
+    if (
+        !vendor
+    ) {
 
         this.apFormDueDate.value =
             "";
@@ -12831,7 +13181,8 @@ calculateAPDueDate() {
     */
 
     this.apFormDueDate.value =
-        dueDate || "";
+        dueDate
+        || "";
 
 }
 /*
@@ -13148,6 +13499,22 @@ resetAddForm() {
 
         this.apFormVendor.value =
             "";
+
+
+        if (
+            this.apVendorSelect
+        ) {
+
+            this.apVendorSelect.clear(
+                true
+            );
+
+
+            this.apVendorSelect.setTextboxValue(
+                ""
+            );
+
+        }
 
     }
 
@@ -16898,6 +17265,20 @@ async editInvoice(id) {
         /*
         ==================================================
         VENDOR
+        NATIVE SELECT + TOM SELECT
+        ==================================================
+        */
+
+        const vendorValue =
+            String(
+                header.vendor_id
+                || ""
+            );
+
+
+        /*
+        ==================================================
+        SET ORIGINAL SELECT
         ==================================================
         */
 
@@ -16906,10 +17287,28 @@ async editInvoice(id) {
         ) {
 
             this.apFormVendor.value =
-                String(
-                    header.vendor_id
-                    || ""
-                );
+                vendorValue;
+
+        }
+
+
+        /*
+        ==================================================
+        SET TOM SELECT DISPLAY
+
+        TRUE = SILENT
+        DO NOT TRIGGER VENDOR CHANGE AGAIN
+        ==================================================
+        */
+
+        if (
+            this.apVendorSelect
+        ) {
+
+            this.apVendorSelect.setValue(
+                vendorValue,
+                true
+            );
 
         }
 

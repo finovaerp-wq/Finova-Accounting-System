@@ -227,6 +227,8 @@ this.btnSaveARPayment = null;
 
         this.arDetailCOASelect = null;
 
+        this.arDetailCOASelect = null;
+
 
         /*
         ==================================================
@@ -3775,140 +3777,491 @@ if (!paymentAccountId) {
 
 }
     /*
-    ======================================================
-    LOAD CUSTOMERS
-    ======================================================
-    */
+======================================================
+LOAD CUSTOMERS
+======================================================
+*/
 
-    async loadCustomers() {
+async loadCustomers() {
 
-        try {
+    try {
 
-            const {
-                data,
-                error
-            } =
-                await supabase
+        /*
+        ==================================================
+        LOAD ACTIVE BUSINESS PARTNER
+        ==================================================
+        */
 
-                    .from(
-                        "mst_business_partner"
-                    )
+        const {
+            data,
+            error
+        } =
+            await supabase
 
-                    .select(`
-                        id,
-                        bp_code,
-                        bp_name,
-                        bp_type,
-                        top_id,
-                        is_active
-                    `)
+                .from(
+                    "mst_business_partner"
+                )
 
-                    .eq(
-                        "is_active",
-                        true
-                    )
+                .select(`
+                    id,
+                    bp_code,
+                    bp_name,
+                    bp_type,
+                    top_id,
+                    is_active
+                `)
 
-                    .order(
-                        "bp_name",
-                        {
-                            ascending:
-                                true
-                        }
-                    );
+                .eq(
+                    "is_active",
+                    true
+                )
 
-
-            if (error) {
-
-                throw error;
-
-            }
-
-
-            this.customerData =
-                (data || [])
-                .filter(
-                    item => {
-
-                        const type =
-                            String(
-                                item.bp_type
-                                || ""
-                            )
-                            .trim()
-                            .toLowerCase();
-
-
-                        return (
-                            type === "customer"
-                            ||
-                            type === "both"
-                        );
-
+                .order(
+                    "bp_name",
+                    {
+                        ascending:
+                            true
                     }
                 );
 
 
-            if (
-                this.arFormCustomer
-            ) {
-
-                this.arFormCustomer.innerHTML = `
-
-                    <option value="">
-                        Select Customer
-                    </option>
-
-                `;
-
-
-                this.customerData.forEach(
-                    customer => {
-
-                        const option =
-                            document.createElement(
-                                "option"
-                            );
-
-
-                        option.value =
-                            customer.id;
-
-
-                        option.textContent =
-                            `${
-                                customer.bp_code
-                                || ""
-                            } - ${
-                                customer.bp_name
-                                || ""
-                            }`;
-
-
-                        this.arFormCustomer
-                            .appendChild(
-                                option
-                            );
-
-                    }
-                );
-
-            }
-
-        }
-
-        catch (error) {
-
-            console.error(
-                "AccountReceivable.loadCustomers:",
-                error
-            );
-
+        if (
+            error
+        ) {
 
             throw error;
 
         }
 
+
+        /*
+        ==================================================
+        CUSTOMER ONLY
+        ==================================================
+        */
+
+        this.customerData =
+            (
+                data
+                ||
+                []
+            )
+            .filter(
+                item => {
+
+                    const type =
+                        String(
+                            item.bp_type
+                            ||
+                            ""
+                        )
+                        .trim()
+                        .toLowerCase();
+
+
+                    return (
+                        type ===
+                        "customer"
+                        ||
+                        type ===
+                        "both"
+                    );
+
+                }
+            );
+
+
+        /*
+        ==================================================
+        RENDER CUSTOMER
+        ==================================================
+        */
+
+        this.renderCustomerOptions();
+
+
+        /*
+        ==================================================
+        INITIALIZE SEARCHABLE CUSTOMER
+        ==================================================
+        */
+
+        this.initializeCustomerSearch();
+
     }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "AccountReceivable.loadCustomers:",
+            error
+        );
+
+
+        this.customerData =
+            [];
+
+
+        this.renderCustomerOptions();
+
+
+        this.initializeCustomerSearch();
+
+
+        throw error;
+
+    }
+
+}
+/*
+======================================================
+RENDER CUSTOMER OPTIONS
+======================================================
+*/
+
+renderCustomerOptions() {
+
+    if (
+        !this.arFormCustomer
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+    ==================================================
+    DESTROY EXISTING TOM SELECT
+    ==================================================
+    */
+
+    if (
+        this.arCustomerSelect
+    ) {
+
+        try {
+
+            this.arCustomerSelect.destroy();
+
+        }
+
+        catch (
+            error
+        ) {
+
+            console.warn(
+                "Failed to destroy previous AR Customer TomSelect:",
+                error
+            );
+
+        }
+
+
+        this.arCustomerSelect =
+            null;
+
+    }
+
+
+    /*
+    ==================================================
+    DESTROY DOM TOM SELECT INSTANCE
+    ==================================================
+    */
+
+    if (
+        this.arFormCustomer.tomselect
+    ) {
+
+        try {
+
+            this.arFormCustomer
+                .tomselect
+                .destroy();
+
+        }
+
+        catch (
+            error
+        ) {
+
+            console.warn(
+                "Failed to destroy AR Customer TomSelect from DOM:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /*
+    ==================================================
+    RESET OPTIONS
+    ==================================================
+    */
+
+    this.arFormCustomer.innerHTML = `
+
+        <option value="">
+            Select Customer
+        </option>
+
+    `;
+
+
+    /*
+    ==================================================
+    BUILD CUSTOMER OPTIONS
+    ==================================================
+    */
+
+    this.customerData.forEach(
+        customer => {
+
+            if (
+                !customer?.id
+            ) {
+
+                return;
+
+            }
+
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+
+            option.value =
+                customer.id;
+
+
+            option.textContent =
+                `${
+                    customer.bp_code
+                    ||
+                    ""
+                } :: ${
+                    customer.bp_name
+                    ||
+                    ""
+                }`;
+
+
+            this.arFormCustomer
+                .appendChild(
+                    option
+                );
+
+        }
+    );
+
+}
+/*
+======================================================
+INITIALIZE SEARCHABLE CUSTOMER
+======================================================
+*/
+
+initializeCustomerSearch() {
+
+    try {
+
+        /*
+        ==================================================
+        CHECK ELEMENT
+        ==================================================
+        */
+
+        if (
+            !this.arFormCustomer
+        ) {
+
+            console.warn(
+                "AR Customer element not found."
+            );
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        CHECK TOM SELECT
+        ==================================================
+        */
+
+        if (
+            typeof TomSelect
+            ===
+            "undefined"
+        ) {
+
+            console.warn(
+                "TomSelect library is not loaded."
+            );
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        DESTROY EXISTING INSTANCE
+        ==================================================
+        */
+
+        if (
+            this.arCustomerSelect
+        ) {
+
+            try {
+
+                this.arCustomerSelect.destroy();
+
+            }
+
+            catch (
+                error
+            ) {
+
+                console.warn(
+                    "Failed to destroy previous AR Customer TomSelect:",
+                    error
+                );
+
+            }
+
+
+            this.arCustomerSelect =
+                null;
+
+        }
+
+
+        /*
+        ==================================================
+        INITIALIZE TOM SELECT
+        ==================================================
+        */
+
+        this.arCustomerSelect =
+            new TomSelect(
+                this.arFormCustomer,
+                {
+
+                    create:
+                        false,
+
+                    allowEmptyOption:
+                        true,
+
+                    placeholder:
+                        "Select or type Customer",
+
+                    searchField: [
+                        "text"
+                    ],
+
+                    maxOptions:
+                        100,
+
+                    closeAfterSelect:
+                        true,
+
+                    hideSelected:
+                        false,
+
+                    selectOnTab:
+                        true,
+
+                    persist:
+                        false,
+
+                    /*
+                    ======================================
+                    CUSTOMER CHANGE
+                    ======================================
+                    */
+
+                    onChange:
+                        async value => {
+
+                            if (
+                                this.arFormCustomer
+                            ) {
+
+                                this.arFormCustomer.value =
+                                    value
+                                    ||
+                                    "";
+
+                            }
+
+
+                            await this.handleCustomerChange();
+
+                        },
+
+                    /*
+                    ======================================
+                    CLEAR SEARCH TEXT AFTER SELECT
+                    ======================================
+                    */
+
+                    onItemAdd() {
+
+                        this.setTextboxValue(
+                            ""
+                        );
+
+                    }
+
+                }
+            );
+
+
+        /*
+        ==================================================
+        INITIAL EMPTY VALUE
+        ==================================================
+        */
+
+        this.arCustomerSelect.clear(
+            true
+        );
+
+
+        this.arCustomerSelect.setTextboxValue(
+            ""
+        );
+
+
+        console.log(
+            "AR Searchable Customer initialized."
+        );
+
+    }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "AccountReceivable.initializeCustomerSearch:",
+            error
+        );
+
+    }
+
+}
 
 
     /*
@@ -4242,8 +4595,20 @@ async handleCustomerChange() {
 
     try {
 
+        /*
+        ==================================================
+        CUSTOMER ID
+        ==================================================
+        */
+
         const customerId =
-            this.arFormCustomer?.value;
+            this.arCustomerSelect
+                ? this.arCustomerSelect.getValue()
+                : (
+                    this.arFormCustomer?.value
+                    ||
+                    ""
+                );
 
 
         /*
@@ -4252,7 +4617,9 @@ async handleCustomerChange() {
         ==================================================
         */
 
-        if (!customerId) {
+        if (
+            !customerId
+        ) {
 
             if (
                 this.arFormTop
@@ -4291,7 +4658,9 @@ async handleCustomerChange() {
             );
 
 
-        if (!customer) {
+        if (
+            !customer
+        ) {
 
             throw new Error(
                 "Customer not found."
@@ -4314,15 +4683,19 @@ async handleCustomerChange() {
             this.arFormTop
         ) {
 
-            if (top) {
+            if (
+                top
+            ) {
 
                 this.arFormTop.value =
                     `${
                         top.top_code
-                        || ""
+                        ||
+                        ""
                     } - ${
                         top.top_name
-                        || ""
+                        ||
+                        ""
                     }`;
 
             }
@@ -4343,11 +4716,13 @@ async handleCustomerChange() {
         ==================================================
         */
 
-        this.calculateARDueDate();
+        await this.calculateARDueDate();
 
     }
 
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
             "AccountReceivable.handleCustomerChange:",
@@ -4398,7 +4773,13 @@ async calculateARDueDate() {
         */
 
         const customerId =
-            this.arFormCustomer?.value;
+            this.arCustomerSelect
+                ? this.arCustomerSelect.getValue()
+                : (
+                    this.arFormCustomer?.value
+                    ||
+                    ""
+                );
 
 
         /*
@@ -4408,7 +4789,9 @@ async calculateARDueDate() {
         */
 
         const invoiceDate =
-            this.arFormInvoiceDate?.value;
+            this.arFormInvoiceDate?.value
+            ||
+            "";
 
 
         /*
@@ -4463,7 +4846,7 @@ async calculateARDueDate() {
 
         /*
         ==================================================
-        CALCULATE FROM SERVICE
+        CALCULATE
 
         DUE DATE
         =
@@ -4490,66 +4873,10 @@ async calculateARDueDate() {
 
             this.arFormDueDate.value =
                 dueDate
-                || "";
+                ||
+                "";
 
         }
-
-
-        /*
-        ==================================================
-        TOP DISPLAY
-        ==================================================
-        */
-
-        const top =
-            customer.mst_term_of_payment;
-
-
-        if (
-            this.arFormTop
-        ) {
-
-            this.arFormTop.value =
-                top
-                    ? `${
-                        top.top_code
-                        || ""
-                    } - ${
-                        top.top_name
-                        || ""
-                    }`
-                    : "";
-
-        }
-
-
-        /*
-        ==================================================
-        DEBUG
-        ==================================================
-        */
-
-        console.log(
-            "AR DUE DATE:",
-            {
-
-                customer_id:
-                    customerId,
-
-                invoice_date:
-                    invoiceDate,
-
-                top_days:
-                    Number(
-                        top?.days
-                        || 0
-                    ),
-
-                due_date:
-                    dueDate
-
-            }
-        );
 
     }
 
@@ -4571,9 +4898,6 @@ async calculateARDueDate() {
                 "";
 
         }
-
-
-        throw error;
 
     }
 
@@ -9764,127 +10088,213 @@ async addInvoice() {
 
 }
     /*
-    ======================================================
-    RESET FORM
-    ======================================================
+======================================================
+RESET FORM
+======================================================
+*/
+
+resetForm() {
+
+    /*
+    ==================================================
+    ID
+    ==================================================
     */
 
-    resetForm() {
+    if (
+        this.arFormId
+    ) {
 
-        if (
-            this.arFormId
-        ) {
-
-            this.arFormId.value =
-                "";
-
-        }
-
-
-        if (
-            this.arFormCustomer
-        ) {
-
-            this.arFormCustomer.value =
-                "";
-
-        }
-
-
-        if (
-            this.arFormTop
-        ) {
-
-            this.arFormTop.value =
-                "";
-
-        }
-
-
-        if (
-            this.arFormInvoiceNo
-        ) {
-
-            this.arFormInvoiceNo.value =
-                "";
-
-        }
-
-
-        if (
-            this.arFormPoNo
-        ) {
-
-            this.arFormPoNo.value =
-                "";
-
-        }
-
-
-        if (
-            this.arFormInvoiceDate
-        ) {
-
-            this.arFormInvoiceDate.value =
-                "";
-
-        }
-
-
-       
-
-
-        if (
-            this.arFormDueDate
-        ) {
-
-            this.arFormDueDate.value =
-                "";
-
-        }
-
-
-        if (
-            this.arFormJournalNo
-        ) {
-
-            this.arFormJournalNo.value =
-                "";
-
-        }
-
-
-        if (
-            this.arFormStatus
-        ) {
-
-            this.arFormStatus.value =
-                "Draft";
-
-        }
-
-
-        if (
-            this.arFormDescription
-        ) {
-
-            this.arFormDescription.value =
-                "";
-
-        }
-
-
-        this.invoiceDetails =
-            [];
-
-
-        this.currentDetailId =
-            null;
-
-
-        this.updateInvoiceSummary();
+        this.arFormId.value =
+            "";
 
     }
+
+
+    /*
+    ==================================================
+    CUSTOMER
+    NATIVE SELECT + TOM SELECT
+    ==================================================
+    */
+
+    if (
+        this.arFormCustomer
+    ) {
+
+        this.arFormCustomer.value =
+            "";
+
+    }
+
+
+    if (
+        this.arCustomerSelect
+    ) {
+
+        this.arCustomerSelect.clear(
+            true
+        );
+
+
+        this.arCustomerSelect.setTextboxValue(
+            ""
+        );
+
+    }
+
+
+    /*
+    ==================================================
+    TERM OF PAYMENT
+    ==================================================
+    */
+
+    if (
+        this.arFormTop
+    ) {
+
+        this.arFormTop.value =
+            "";
+
+    }
+
+
+    /*
+    ==================================================
+    INVOICE NO
+    ==================================================
+    */
+
+    if (
+        this.arFormInvoiceNo
+    ) {
+
+        this.arFormInvoiceNo.value =
+            "";
+
+    }
+
+
+    /*
+    ==================================================
+    PO NO
+    ==================================================
+    */
+
+    if (
+        this.arFormPoNo
+    ) {
+
+        this.arFormPoNo.value =
+            "";
+
+    }
+
+
+    /*
+    ==================================================
+    INVOICE DATE
+    ==================================================
+    */
+
+    if (
+        this.arFormInvoiceDate
+    ) {
+
+        this.arFormInvoiceDate.value =
+            "";
+
+    }
+
+
+    /*
+    ==================================================
+    DUE DATE
+    ==================================================
+    */
+
+    if (
+        this.arFormDueDate
+    ) {
+
+        this.arFormDueDate.value =
+            "";
+
+    }
+
+
+    /*
+    ==================================================
+    JOURNAL NO
+    ==================================================
+    */
+
+    if (
+        this.arFormJournalNo
+    ) {
+
+        this.arFormJournalNo.value =
+            "";
+
+    }
+
+
+    /*
+    ==================================================
+    STATUS
+    ==================================================
+    */
+
+    if (
+        this.arFormStatus
+    ) {
+
+        this.arFormStatus.value =
+            "Draft";
+
+    }
+
+
+    /*
+    ==================================================
+    DESCRIPTION
+    ==================================================
+    */
+
+    if (
+        this.arFormDescription
+    ) {
+
+        this.arFormDescription.value =
+            "";
+
+    }
+
+
+    /*
+    ==================================================
+    RESET DETAIL DATA
+    ==================================================
+    */
+
+    this.invoiceDetails =
+        [];
+
+
+    this.currentDetailId =
+        null;
+
+
+    /*
+    ==================================================
+    UPDATE SUMMARY
+    ==================================================
+    */
+
+    this.updateInvoiceSummary();
+
+}
 
 
     /*
@@ -11982,7 +12392,9 @@ async editInvoice(id) {
         ==================================================
         */
 
-        if (!header) {
+        if (
+            !header
+        ) {
 
             throw new Error(
                 "Account Receivable data not found."
@@ -12021,7 +12433,6 @@ async editInvoice(id) {
 
             this.arFormInvoiceDate,
 
-           
             this.arFormDueDate,
 
             this.arFormDescription,
@@ -12032,9 +12443,12 @@ async editInvoice(id) {
 
 
         editableFields.forEach(
+
             field => {
 
-                if (field) {
+                if (
+                    field
+                ) {
 
                     field.disabled =
                         false;
@@ -12042,7 +12456,23 @@ async editInvoice(id) {
                 }
 
             }
+
         );
+
+
+        /*
+        ==================================================
+        ENABLE CUSTOMER TOM SELECT
+        ==================================================
+        */
+
+        if (
+            this.arCustomerSelect
+        ) {
+
+            this.arCustomerSelect.enable();
+
+        }
 
 
         /*
@@ -12094,18 +12524,36 @@ async editInvoice(id) {
         /*
         ==================================================
         CUSTOMER
+        NATIVE SELECT + TOM SELECT
         ==================================================
         */
+
+        const customerValue =
+            String(
+                header.customer_id
+                ||
+                ""
+            );
+
 
         if (
             this.arFormCustomer
         ) {
 
             this.arFormCustomer.value =
-                String(
-                    header.customer_id
-                    || ""
-                );
+                customerValue;
+
+        }
+
+
+        if (
+            this.arCustomerSelect
+        ) {
+
+            this.arCustomerSelect.setValue(
+                customerValue,
+                true
+            );
 
         }
 
@@ -12159,9 +12607,6 @@ async editInvoice(id) {
                 || "";
 
         }
-
-
-        
 
 
         /*
@@ -12286,6 +12731,7 @@ async editInvoice(id) {
 
         this.invoiceDetails =
             details.map(
+
                 item => {
 
                     /*
@@ -12304,12 +12750,6 @@ async editInvoice(id) {
                     /*
                     ==========================================
                     FIND REVENUE ACCOUNT
-
-                    FIRST:
-                    use currentCOA
-
-                    FALLBACK:
-                    use joined revenue_account
                     ==========================================
                     */
 
@@ -12319,12 +12759,15 @@ async editInvoice(id) {
                         )
 
                             ? this.currentCOA.find(
+
                                 account =>
+
                                     Number(
                                         account.id
                                     )
                                     ===
                                     revenueAccountId
+
                             )
 
                             : null;
@@ -12569,6 +13012,7 @@ async editInvoice(id) {
                     };
 
                 }
+
             );
 
 
@@ -12661,7 +13105,9 @@ async editInvoice(id) {
 
     }
 
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
             "AccountReceivable.editInvoice:",
@@ -12678,7 +13124,6 @@ async editInvoice(id) {
     }
 
 }
-
 
     /*
 ======================================================
