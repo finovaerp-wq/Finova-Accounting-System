@@ -116,12 +116,6 @@ export class FinovaRouter {
                 className: "TrialBalanceYear"
             },
 
-            "income-statement": {
-                title: "Income Statement",
-                html: "modules/income-statement/income-statement.html",
-                js: "modules/income-statement/income-statement.js",
-                className: "IncomeStatement"
-            },
 
             "balance-sheet": {
                 title: "Balance Sheet",

@@ -289,12 +289,6 @@ export class FinovaSidebar {
                         true
                     ),
 
-                    this.menuItem(
-                        "Income Statement",
-                        "fa-solid fa-chart-line",
-                        "income-statement",
-                        true
-                    ),
 
                     this.menuItem(
                         "Balance Sheet",
