@@ -11,6 +11,10 @@ import {
     AccountingPeriodService
 } from "../../service/accounting-period.service.js";
 
+import {
+    supabase
+} from "../../assets/js/core/supabase.js";
+
 
 export class AccountingPeriod {
 
@@ -88,6 +92,21 @@ export class AccountingPeriod {
 
         this.periodHistoryCache =
             new Map();
+        
+        /*
+        ==================================================
+        ACCESS CONTROL
+        ==================================================
+        */
+
+        this.currentUser =
+            null;
+
+        this.currentUserProfile =
+            null;
+
+        this.isManager =
+            false;
 
 
         /*
@@ -101,43 +120,205 @@ export class AccountingPeriod {
     }
 
 
+    async init() {
+
+    try {
+
+        this.cacheDom();
+
+        /*
+        ==================================================
+        LOAD CURRENT USER ACCESS
+        ==================================================
+        */
+
+        await this.loadCurrentUserAccess();
+
+        this.bindEvents();
+
+        await this.loadData();
+
+    }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "AccountingPeriod.init:",
+            error
+        );
+
+
+        this.showError(
+            error?.message
+            ||
+            "Failed to initialize Accounting Period."
+        );
+
+    }
+
+}
+/*
+==========================================================
+LOAD CURRENT USER ACCESS
+==========================================================
+*/
+
+async loadCurrentUserAccess() {
+
     /*
     ======================================================
-    INITIALIZE
+    DEFAULT ACCESS
     ======================================================
     */
 
-    async init() {
+    this.currentUser =
+        null;
 
-        try {
+    this.currentUserProfile =
+        null;
 
-            this.cacheDom();
-
-            this.bindEvents();
-
-            await this.loadData();
-
-        }
-
-        catch (
-            error
-        ) {
-
-            console.error(
-                "AccountingPeriod.init:",
-                error
-            );
+    this.isManager =
+        false;
 
 
-            this.showError(
-                error?.message
-                ||
-                "Failed to initialize Accounting Period."
-            );
+    /*
+    ======================================================
+    GET AUTH USER
+    ======================================================
+    */
 
-        }
+    const {
+        data: authData,
+        error: authError
+    } =
+        await supabase.auth.getUser();
+
+
+    if (
+        authError
+    ) {
+
+        throw authError;
 
     }
+
+
+    const user =
+        authData?.user;
+
+
+    if (
+        !user?.id
+    ) {
+
+        throw new Error(
+            "Authenticated user not found."
+        );
+
+    }
+
+
+    this.currentUser =
+        user;
+
+
+    /*
+    ======================================================
+    GET USER PROFILE
+    ======================================================
+    */
+
+    const {
+        data: profile,
+        error: profileError
+    } =
+        await supabase
+
+            .from(
+                "mst_users"
+            )
+
+            .select(`
+                id,
+                user_uid,
+                full_name,
+                email,
+                role,
+                status
+            `)
+
+            .eq(
+                "user_uid",
+                user.id
+            )
+
+            .maybeSingle();
+
+
+    if (
+        profileError
+    ) {
+
+        throw profileError;
+
+    }
+
+
+    if (
+        !profile
+    ) {
+
+        throw new Error(
+            "User profile not found."
+        );
+
+    }
+
+
+    this.currentUserProfile =
+        profile;
+
+
+    /*
+    ======================================================
+    ACTIVE MANAGER ONLY
+    ======================================================
+    */
+
+    this.isManager =
+        profile.status === true
+        &&
+        String(
+            profile.role
+            ||
+            ""
+        )
+        .trim()
+        .toLowerCase()
+        ===
+        "manager";
+
+
+    console.log(
+        "Accounting Period Access:",
+        {
+            email:
+                profile.email,
+
+            role:
+                profile.role,
+
+            status:
+                profile.status,
+
+            isManager:
+                this.isManager
+        }
+    );
+
+}
 
 
     /*
@@ -455,6 +636,23 @@ export class AccountingPeriod {
                 if (
                     !button
                 ) {
+
+                    return;
+
+                }
+                /*
+                ==================================================
+                MANAGER ONLY
+                ==================================================
+                */
+
+                if (
+                    !this.isManager
+                ) {
+
+                    this.showError(
+                        "Access denied. Only Manager can manage Accounting Period."
+                    );
 
                     return;
 
@@ -1383,88 +1581,124 @@ export class AccountingPeriod {
 
 
         let actionButton =
-            "";
+    "";
 
 
-        if (
-            periodAction ===
-            "close"
-        ) {
+/*
+==================================================
+NON MANAGER
+VIEW ONLY
+==================================================
+*/
 
-            actionButton = `
+if (
+    !this.isManager
+) {
 
-                <button
-                    type="button"
-                    class="
-                        btn
-                        btn-sm
-                        btn-outline-danger
-                    "
-                    data-period-action="close"
-                    data-id="${item.id}">
+    actionButton = `
 
-                    <i class="fa-solid fa-lock me-1"></i>
+        <span
+            class="
+                text-muted
+                small
+            ">
 
-                    Close
+            <i class="fa-solid fa-eye me-1"></i>
 
-                </button>
+            View Only
 
-            `;
+        </span>
 
-        }
+    `;
 
-
-        else if (
-            periodAction ===
-            "reopen"
-        ) {
-
-            actionButton = `
-
-                <button
-                    type="button"
-                    class="
-                        btn
-                        btn-sm
-                        btn-outline-warning
-                    "
-                    data-period-action="reopen"
-                    data-id="${item.id}">
-
-                    <i class="fa-solid fa-rotate-left me-1"></i>
-
-                    Reopen
-
-                </button>
-
-            `;
-
-        }
+}
 
 
-        else {
+/*
+==================================================
+MANAGER
+==================================================
+*/
 
-            actionButton = `
+else if (
+    periodAction ===
+    "close"
+) {
 
-                <button
-                    type="button"
-                    class="
-                        btn
-                        btn-sm
-                        btn-outline-success
-                    "
-                    data-period-action="open"
-                    data-id="${item.id}">
+    actionButton = `
 
-                    <i class="fa-solid fa-lock-open me-1"></i>
+        <button
+            type="button"
+            class="
+                btn
+                btn-sm
+                btn-outline-danger
+            "
+            data-period-action="close"
+            data-id="${item.id}">
 
-                    Open
+            <i class="fa-solid fa-lock me-1"></i>
 
-                </button>
+            Close
 
-            `;
+        </button>
 
-        }
+    `;
+
+}
+
+
+else if (
+    periodAction ===
+    "reopen"
+) {
+
+    actionButton = `
+
+        <button
+            type="button"
+            class="
+                btn
+                btn-sm
+                btn-outline-warning
+            "
+            data-period-action="reopen"
+            data-id="${item.id}">
+
+            <i class="fa-solid fa-rotate-left me-1"></i>
+
+            Reopen
+
+        </button>
+
+    `;
+
+}
+
+
+else {
+
+    actionButton = `
+
+        <button
+            type="button"
+            class="
+                btn
+                btn-sm
+                btn-outline-success
+            "
+            data-period-action="open"
+            data-id="${item.id}">
+
+            <i class="fa-solid fa-lock-open me-1"></i>
+
+            Open
+
+        </button>
+
+    `;
+
+}
 
 
         /*
@@ -2248,6 +2482,24 @@ export class AccountingPeriod {
     */
 
     async confirmPeriodAction() {
+
+        /*
+        ==========================================================
+        MANAGER ACCESS
+        ==========================================================
+        */
+
+        if (
+            !this.isManager
+        ) {
+
+            this.showModalError(
+                "Access denied. Only Manager can manage Accounting Period."
+            );
+
+            return;
+
+        }
 
         if (
             !this.selectedPeriod
