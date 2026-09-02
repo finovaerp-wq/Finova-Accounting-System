@@ -3,7 +3,7 @@
 FINOVA ACCOUNTING SYSTEM
 MODULE  : ACCOUNTING PERIOD
 FILE    : accounting-period.service.js
-VERSION : 1.0.0 FINAL
+VERSION : 1.1.0 FINAL
 ==========================================================
 */
 
@@ -57,6 +57,14 @@ export class AccountingPeriodService {
                         updated_at
                     `)
 
+                    /*
+                    ==========================================
+                    ORDER
+                    2026 -> 2030
+                    JANUARY -> DECEMBER
+                    ==========================================
+                    */
+
                     .order(
                         "year",
                         {
@@ -108,7 +116,7 @@ export class AccountingPeriodService {
 
     /*
     ======================================================
-    GET PERIOD BY ID
+    GET ACCOUNTING PERIOD BY ID
     ======================================================
     */
 
@@ -195,7 +203,7 @@ export class AccountingPeriodService {
 
     /*
     ======================================================
-    GET HISTORY
+    GET ACCOUNTING PERIOD HISTORY
     ======================================================
     */
 
@@ -285,16 +293,28 @@ export class AccountingPeriodService {
 
     /*
     ======================================================
-    CLOSE ACCOUNTING PERIOD
+    OPEN ACCOUNTING PERIOD
+
+    USED FOR:
+    CLOSED PERIOD THAT HAS NEVER BEEN CLOSED BEFORE
+
+    DATABASE RPC:
+    open_accounting_period
     ======================================================
     */
 
-    async closePeriod(
+    async openPeriod(
         periodId,
-        reason = null
+        reason
     ) {
 
         try {
+
+            /*
+            ==================================================
+            VALIDATE PERIOD ID
+            ==================================================
+            */
 
             if (
                 !periodId
@@ -306,6 +326,142 @@ export class AccountingPeriodService {
 
             }
 
+
+            /*
+            ==================================================
+            VALIDATE REASON
+            ==================================================
+            */
+
+            const openReason =
+                String(
+                    reason
+                    ||
+                    ""
+                )
+                .trim();
+
+
+            if (
+                !openReason
+            ) {
+
+                throw new Error(
+                    "Reason is required to open Accounting Period."
+                );
+
+            }
+
+
+            /*
+            ==================================================
+            CALL DATABASE RPC
+            ==================================================
+            */
+
+            const {
+                data,
+                error
+            } =
+                await supabase.rpc(
+                    "open_accounting_period",
+                    {
+
+                        p_period_id:
+                            periodId,
+
+                        p_reason:
+                            openReason
+
+                    }
+                );
+
+
+            if (
+                error
+            ) {
+
+                throw error;
+
+            }
+
+
+            return data;
+
+        }
+
+        catch (
+            error
+        ) {
+
+            console.error(
+                "AccountingPeriodService.openPeriod:",
+                error
+            );
+
+
+            throw error;
+
+        }
+
+    }
+
+
+    /*
+    ======================================================
+    CLOSE ACCOUNTING PERIOD
+
+    DATABASE RPC:
+    close_accounting_period
+    ======================================================
+    */
+
+    async closePeriod(
+        periodId,
+        reason = null
+    ) {
+
+        try {
+
+            /*
+            ==================================================
+            VALIDATE PERIOD ID
+            ==================================================
+            */
+
+            if (
+                !periodId
+            ) {
+
+                throw new Error(
+                    "Accounting Period ID is required."
+                );
+
+            }
+
+
+            /*
+            ==================================================
+            PREPARE REASON
+            ==================================================
+            */
+
+            const closeReason =
+                reason
+                    ?
+                    String(
+                        reason
+                    )
+                    .trim()
+                    :
+                    null;
+
+
+            /*
+            ==================================================
+            CALL DATABASE RPC
+            ==================================================
+            */
 
             const {
                 data,
@@ -319,12 +475,8 @@ export class AccountingPeriodService {
                             periodId,
 
                         p_reason:
-                            reason
-                            ?
-                            String(
-                                reason
-                            ).trim()
-                            :
+                            closeReason
+                            ||
                             null
 
                     }
@@ -364,6 +516,12 @@ export class AccountingPeriodService {
     /*
     ======================================================
     REOPEN ACCOUNTING PERIOD
+
+    USED FOR:
+    PERIOD THAT HAS PREVIOUSLY BEEN CLOSED
+
+    DATABASE RPC:
+    reopen_accounting_period
     ======================================================
     */
 
@@ -373,6 +531,12 @@ export class AccountingPeriodService {
     ) {
 
         try {
+
+            /*
+            ==================================================
+            VALIDATE PERIOD ID
+            ==================================================
+            */
 
             if (
                 !periodId
@@ -384,6 +548,12 @@ export class AccountingPeriodService {
 
             }
 
+
+            /*
+            ==================================================
+            VALIDATE REASON
+            ==================================================
+            */
 
             const reopenReason =
                 String(
@@ -404,6 +574,12 @@ export class AccountingPeriodService {
 
             }
 
+
+            /*
+            ==================================================
+            CALL DATABASE RPC
+            ==================================================
+            */
 
             const {
                 data,

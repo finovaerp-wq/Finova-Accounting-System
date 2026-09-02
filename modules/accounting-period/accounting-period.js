@@ -2415,22 +2415,18 @@ export class AccountingPeriod {
             ==================================================
             */
 
-            else if (
+           else if (
                 action ===
                 "OPEN"
             ) {
 
                 await this.service
-                    .reopenPeriod(
-
+                    .openPeriod(
                         period.id,
-
                         reason
-
                     );
 
             }
-
 
             /*
             ==================================================
