@@ -44,6 +44,7 @@
 
                     </h5>
 
+
                     <div
                         class="text-muted small">
 
@@ -65,538 +66,1344 @@
 
 
             <!-- ==================================================
-     MODAL BODY
-=================================================== -->
+                 MODAL BODY
+            =================================================== -->
 
-<div class="modal-body p-0">
+            <div class="modal-body p-0">
 
 
-    <!-- ==================================================
-     AP MODAL TABS
-     SAME VISUAL AS ACCOUNT RECEIVABLE
-=================================================== -->
+                <!-- ==================================================
+                     AP MODAL TABS
+                =================================================== -->
 
-<div class="ap-modern-tabs-wrapper">
+                <div class="ap-modern-tabs-wrapper">
 
-    <ul
-        class="nav nav-tabs nav-fill"
-        id="ap-modal-tabs"
-        role="tablist"
-    >
+                    <ul
+                        class="nav nav-tabs nav-fill"
+                        id="ap-modal-tabs"
+                        role="tablist"
+                    >
 
 
-        <!-- ==============================================
-             HEADER INFO TAB
-        =============================================== -->
+                        <!-- ==============================================
+                             HEADER INFO TAB
+                        =============================================== -->
 
-        <li
-            class="nav-item"
-            role="presentation"
-        >
-
-            <button
-                class="nav-link active"
-                id="ap-header-info-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#ap-header-info-pane"
-                type="button"
-                role="tab"
-                aria-controls="ap-header-info-pane"
-                aria-selected="true"
-            >
-
-                Header Info
-
-            </button>
-
-        </li>
-
-
-        <!-- ==============================================
-             INVOICE DETAILS TAB
-        =============================================== -->
-
-        <li
-            class="nav-item"
-            role="presentation"
-        >
-
-            <button
-                class="nav-link"
-                id="ap-invoice-details-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#ap-invoice-details-pane"
-                type="button"
-                role="tab"
-                aria-controls="ap-invoice-details-pane"
-                aria-selected="false"
-            >
-
-                Invoice Details
-
-            </button>
-
-        </li>
-
-
-        <!-- ==============================================
-             TAX PLUS TAB
-        =============================================== -->
-
-        <li
-            class="nav-item"
-            role="presentation"
-        >
-
-            <button
-                class="nav-link"
-                id="ap-tax-plus-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#ap-tax-plus-pane"
-                type="button"
-                role="tab"
-                aria-controls="ap-tax-plus-pane"
-                aria-selected="false"
-            >
-
-                Tax (+)
-
-            </button>
-
-        </li>
-
-
-        <!-- ==============================================
-             TAX MINUS TAB
-        =============================================== -->
-
-        <li
-            class="nav-item"
-            role="presentation"
-        >
-
-            <button
-                class="nav-link"
-                id="ap-tax-minus-tab"
-                data-bs-toggle="tab"
-                data-bs-target="#ap-tax-minus-pane"
-                type="button"
-                role="tab"
-                aria-controls="ap-tax-minus-pane"
-                aria-selected="false"
-            >
-
-                Tax (-)
-
-            </button>
-
-        </li>
-
-
-    </ul>
-
-</div>
-    <!-- ==================================================
-         TAB CONTENT
-    =================================================== -->
-
-    <div
-        class="tab-content"
-        id="ap-modal-tab-content">
-
-
-        <!-- ==============================================
-             TAB 1 : HEADER INFO
-        =============================================== -->
-
-        <div
-            class="tab-pane fade show active"
-            id="ap-header-info-pane"
-            role="tabpanel"
-            aria-labelledby="ap-header-info-tab"
-            tabindex="0">
-
-
-            <div class="p-4">
-
-                <div class="finova-card">
-
-                    <div class="finova-card-body">
-
-                        <div class="row g-3">
-
-
-                            <!-- VENDOR -->
-
-                            <div class="col-md-6">
-
-                                <label
-                                    for="ap-form-vendor"
-                                    class="form-label">
-
-                                    Vendor
-                                    <span class="text-danger">*</span>
-
-                                </label>
-
-                                <select
-                                    id="ap-form-vendor"
-                                    class="form-select">
-
-                                    <option value="">
-                                        Select Vendor
-                                    </option>
-
-                                </select>
-
-                            </div>
-
-
-                            <!-- PO NO -->
-
-                            <div class="col-md-6">
-
-                                <label
-                                    for="ap-form-po-no"
-                                    class="form-label">
-
-                                    PO No
-
-                                </label>
-
-                                <input
-                                    type="text"
-                                    id="ap-form-po-no"
-                                    class="form-control"
-                                    placeholder="Enter PO number">
-
-                            </div>
-
-
-                            <!-- INVOICE NO -->
-
-                            <div class="col-md-6">
-
-                                <label
-                                    for="ap-form-invoice-no"
-                                    class="form-label">
-
-                                    Invoice No
-                                    <span class="text-danger">*</span>
-
-                                </label>
-
-                                <input
-                                    type="text"
-                                    id="ap-form-invoice-no"
-                                    class="form-control"
-                                    placeholder="Enter invoice number">
-
-                            </div>
-
-
-                            <!-- NO JOURNAL -->
-
-                            <div class="col-md-6">
-
-                                <label
-                                    for="ap-form-journal-no"
-                                    class="form-label">
-
-                                    No. Journal
-
-                                </label>
-
-                                <input
-                                    type="text"
-                                    id="ap-form-journal-no"
-                                    name="journal_no"
-                                    class="form-control"
-                                    placeholder="AUTO"
-                                    readonly>
-
-                            </div>
-
-
-                            <!-- INVOICE DATE -->
-
-                            <div class="col-md-6">
-
-                                <label
-                                    for="ap-form-invoice-date"
-                                    class="form-label">
-
-                                    Invoice Date
-                                    <span class="text-danger">*</span>
-
-                                </label>
-
-                                <input
-                                    type="date"
-                                    id="ap-form-invoice-date"
-                                    class="form-control">
-
-                            </div>
-
-
-                            <!-- DATE RECEIVED -->
-
-                            <div class="col-md-6">
-
-                                <label
-                                    for="ap-form-date-received"
-                                    class="form-label">
-
-                                    Date Received
-                                    <span class="text-danger">*</span>
-
-                                </label>
-
-                                <input
-                                    type="date"
-                                    id="ap-form-date-received"
-                                    class="form-control">
-
-                            </div>
-
-
-                            <!-- TERM OF PAYMENT -->
-
-                            <div class="col-md-6">
-
-                                <label
-                                    for="ap-form-top"
-                                    class="form-label">
-
-                                    Term of Payment
-
-                                </label>
-
-                                <input
-                                    type="text"
-                                    id="ap-form-top"
-                                    class="form-control"
-                                    readonly
-                                    placeholder="Auto from Vendor">
-
-                            </div>
-
-
-                            <!-- DUE DATE -->
-
-                            <div class="col-md-6">
-
-                                <label
-                                    for="ap-form-due-date"
-                                    class="form-label">
-
-                                    Due Date
-
-                                </label>
-
-                                <input
-                                    type="date"
-                                    id="ap-form-due-date"
-                                    class="form-control"
-                                    readonly>
-
-                            </div>
-
-
-                            <!-- DESCRIPTION -->
-
-                            <div class="col-12">
-
-                                <label
-                                    for="ap-form-description"
-                                    class="form-label">
-
-                                    Description
-
-                                </label>
-
-                                <textarea
-                                    id="ap-form-description"
-                                    class="form-control"
-                                    rows="2"
-                                    placeholder="Enter description">
-                                </textarea>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- ==============================================
-             TAB 2 : INVOICE DETAILS
-        =============================================== -->
-
-        <div
-            class="tab-pane fade"
-            id="ap-invoice-details-pane"
-            role="tabpanel"
-            aria-labelledby="ap-invoice-details-tab"
-            tabindex="0">
-
-
-            <div class="p-4">
-
-                <div class="finova-card">
-
-                    <div class="finova-card-body">
-
-
-                        <!-- DETAIL HEADER -->
-
-                        <div
-                            class="d-flex
-                                   justify-content-between
-                                   align-items-center
-                                   mb-3">
-
-                            <div>
-
-                                <div class="fw-semibold">
-                                    Invoice Details
-                                </div>
-
-                                <div class="text-muted small">
-                                    Add account payable detail
-                                </div>
-
-                            </div>
-
+                        <li
+                            class="nav-item"
+                            role="presentation"
+                        >
 
                             <button
+                                class="nav-link active"
+                                id="ap-header-info-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#ap-header-info-pane"
                                 type="button"
-                                class="btn btn-sm btn-primary"
-                                id="btn-add-ap-detail">
+                                role="tab"
+                                aria-controls="ap-header-info-pane"
+                                aria-selected="true"
+                            >
 
-                                <i class="fa-solid fa-plus me-1"></i>
-
-                                Add Detail
+                                Header Info
 
                             </button>
 
-                        </div>
+                        </li>
 
 
-                        <!-- ==========================================================
-                                DETAIL TABLE
-                            =========================================================== -->
+                        <!-- ==============================================
+                             INVOICE DETAILS TAB
+                        =============================================== -->
 
-                            <div class="table-responsive ap-invoice-detail-table-wrapper">
+                        <li
+                            class="nav-item"
+                            role="presentation"
+                        >
 
-                                <table
-                                    class="table
-                                        table-sm
-                                        table-hover
-                                        align-middle
-                                        mb-0
-                                        ap-invoice-detail-table">
+                            <button
+                                class="nav-link"
+                                id="ap-invoice-details-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#ap-invoice-details-pane"
+                                type="button"
+                                role="tab"
+                                aria-controls="ap-invoice-details-pane"
+                                aria-selected="false"
+                            >
 
-                                    <!-- ==================================================
-                                        COLUMN WIDTH
-                                    =================================================== -->
+                                Invoice Details
 
-                                    <colgroup>
+                            </button>
 
-                                        <!-- NO -->
-                                        <col style="width: 5%;">
+                        </li>
 
-                                        <!-- ACCOUNT -->
-                                        <col style="width: 25%;">
+
+                        <!-- ==============================================
+                             TAX PLUS TAB
+                        =============================================== -->
+
+                        <li
+                            class="nav-item"
+                            role="presentation"
+                        >
+
+                            <button
+                                class="nav-link"
+                                id="ap-tax-plus-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#ap-tax-plus-pane"
+                                type="button"
+                                role="tab"
+                                aria-controls="ap-tax-plus-pane"
+                                aria-selected="false"
+                            >
+
+                                Tax (+)
+
+                            </button>
+
+                        </li>
+
+
+                        <!-- ==============================================
+                             TAX MINUS TAB
+                        =============================================== -->
+
+                        <li
+                            class="nav-item"
+                            role="presentation"
+                        >
+
+                            <button
+                                class="nav-link"
+                                id="ap-tax-minus-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#ap-tax-minus-pane"
+                                type="button"
+                                role="tab"
+                                aria-controls="ap-tax-minus-pane"
+                                aria-selected="false"
+                            >
+
+                                Tax (-)
+
+                            </button>
+
+                        </li>
+
+
+                        <!-- ==============================================
+                             ACCOUNTING PREVIEW TAB
+                        =============================================== -->
+
+                        <li
+                            class="nav-item"
+                            role="presentation"
+                        >
+
+                            <button
+                                class="nav-link"
+                                id="ap-accounting-preview-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#ap-accounting-preview-pane"
+                                type="button"
+                                role="tab"
+                                aria-controls="ap-accounting-preview-pane"
+                                aria-selected="false"
+                            >
+
+                                Accounting Preview
+
+                            </button>
+
+                        </li>
+
+
+                    </ul>
+
+                </div>
+
+
+                <!-- ==================================================
+                     TAB CONTENT
+                =================================================== -->
+
+                <div
+                    class="tab-content"
+                    id="ap-modal-tab-content">
+
+
+                    <!-- ==============================================
+                         TAB 1 : HEADER INFO
+                    =============================================== -->
+
+                    <div
+                        class="tab-pane fade show active"
+                        id="ap-header-info-pane"
+                        role="tabpanel"
+                        aria-labelledby="ap-header-info-tab"
+                        tabindex="0">
+
+
+                        <div class="p-4">
+
+                            <div class="finova-card">
+
+                                <div class="finova-card-body">
+
+                                    <div class="row g-3">
+
+
+                                        <!-- VENDOR -->
+
+                                        <div class="col-md-6">
+
+                                            <label
+                                                for="ap-form-vendor"
+                                                class="form-label">
+
+                                                Vendor
+                                                <span class="text-danger">*</span>
+
+                                            </label>
+
+                                            <select
+                                                id="ap-form-vendor"
+                                                class="form-select">
+
+                                                <option value="">
+                                                    Select Vendor
+                                                </option>
+
+                                            </select>
+
+                                        </div>
+
+
+                                        <!-- PO NO -->
+
+                                        <div class="col-md-6">
+
+                                            <label
+                                                for="ap-form-po-no"
+                                                class="form-label">
+
+                                                PO No
+
+                                            </label>
+
+                                            <input
+                                                type="text"
+                                                id="ap-form-po-no"
+                                                class="form-control"
+                                                placeholder="Enter PO number">
+
+                                        </div>
+
+
+                                        <!-- INVOICE NO -->
+
+                                        <div class="col-md-6">
+
+                                            <label
+                                                for="ap-form-invoice-no"
+                                                class="form-label">
+
+                                                Invoice No
+                                                <span class="text-danger">*</span>
+
+                                            </label>
+
+                                            <input
+                                                type="text"
+                                                id="ap-form-invoice-no"
+                                                class="form-control"
+                                                placeholder="Enter invoice number">
+
+                                        </div>
+
+
+                                        <!-- NO JOURNAL -->
+
+                                        <div class="col-md-6">
+
+                                            <label
+                                                for="ap-form-journal-no"
+                                                class="form-label">
+
+                                                No. Journal
+
+                                            </label>
+
+                                            <input
+                                                type="text"
+                                                id="ap-form-journal-no"
+                                                name="journal_no"
+                                                class="form-control"
+                                                placeholder="AUTO"
+                                                readonly>
+
+                                        </div>
+
+
+                                        <!-- INVOICE DATE -->
+
+                                        <div class="col-md-6">
+
+                                            <label
+                                                for="ap-form-invoice-date"
+                                                class="form-label">
+
+                                                Invoice Date
+                                                <span class="text-danger">*</span>
+
+                                            </label>
+
+                                            <input
+                                                type="date"
+                                                id="ap-form-invoice-date"
+                                                class="form-control">
+
+                                        </div>
+
+
+                                        <!-- DATE RECEIVED -->
+
+                                        <div class="col-md-6">
+
+                                            <label
+                                                for="ap-form-date-received"
+                                                class="form-label">
+
+                                                Date Received
+                                                <span class="text-danger">*</span>
+
+                                            </label>
+
+                                            <input
+                                                type="date"
+                                                id="ap-form-date-received"
+                                                class="form-control">
+
+                                        </div>
+
+
+                                        <!-- TERM OF PAYMENT -->
+
+                                        <div class="col-md-6">
+
+                                            <label
+                                                for="ap-form-top"
+                                                class="form-label">
+
+                                                Term of Payment
+
+                                            </label>
+
+                                            <input
+                                                type="text"
+                                                id="ap-form-top"
+                                                class="form-control"
+                                                readonly
+                                                placeholder="Auto from Vendor">
+
+                                        </div>
+
+
+                                        <!-- DUE DATE -->
+
+                                        <div class="col-md-6">
+
+                                            <label
+                                                for="ap-form-due-date"
+                                                class="form-label">
+
+                                                Due Date
+
+                                            </label>
+
+                                            <input
+                                                type="date"
+                                                id="ap-form-due-date"
+                                                class="form-control"
+                                                readonly>
+
+                                        </div>
+
 
                                         <!-- DESCRIPTION -->
-                                        <col style="width: 31%;">
 
-                                        <!-- QTY -->
-                                        <col style="width: 8%;">
+                                        <div class="col-12">
 
-                                        <!-- UNIT PRICE -->
-                                        <col style="width: 11%;">
+                                            <label
+                                                for="ap-form-description"
+                                                class="form-label">
 
-                                        <!-- AMOUNT -->
-                                        <col style="width: 13%;">
-
-                                        <!-- ACTION -->
-                                        <col style="width: 7%;">
-
-                                    </colgroup>
-
-
-                                    <!-- ==================================================
-                                        TABLE HEADER
-                                    =================================================== -->
-
-                                    <thead>
-
-                                        <tr>
-
-                                            <th class="text-center">
-                                                No
-                                            </th>
-
-                                            <th class="text-start">
-                                                Account
-                                            </th>
-
-                                            <th class="text-start">
                                                 Description
-                                            </th>
 
-                                            <th class="text-end">
-                                                Qty
-                                            </th>
+                                            </label>
 
-                                            <th class="text-end">
-                                                Unit Price
-                                            </th>
+                                            <textarea
+                                                id="ap-form-description"
+                                                class="form-control"
+                                                rows="2"
+                                                placeholder="Enter description">
+                                            </textarea>
 
-                                            <th class="text-end">
-                                                Amount
-                                            </th>
-
-                                            <th class="text-center">
-                                                Action
-                                            </th>
-
-                                        </tr>
-
-                                    </thead>
+                                        </div>
 
 
-                                    <!-- ==================================================
-                                        TABLE BODY
-                                    =================================================== -->
+                                    </div>
 
-                                    <tbody id="ap-detail-body">
-
-                                        <tr id="ap-detail-empty">
-
-                                            <td
-                                                colspan="7"
-                                                class="text-center text-muted py-4">
-
-                                                No detail added.
-
-                                            </td>
-
-                                        </tr>
-
-                                    </tbody>
-
-                                </table>
+                                </div>
 
                             </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ==============================================
+                         TAB 2 : INVOICE DETAILS
+                    =============================================== -->
+
+                    <div
+                        class="tab-pane fade"
+                        id="ap-invoice-details-pane"
+                        role="tabpanel"
+                        aria-labelledby="ap-invoice-details-tab"
+                        tabindex="0">
+
+
+                        <div class="p-4">
+
+                            <div class="finova-card">
+
+                                <div class="finova-card-body">
+
+
+                                    <!-- DETAIL HEADER -->
+
+                                    <div
+                                        class="
+                                            d-flex
+                                            justify-content-between
+                                            align-items-center
+                                            mb-3
+                                        "
+                                    >
+
+                                        <div>
+
+                                            <div class="fw-semibold">
+                                                Invoice Details
+                                            </div>
+
+                                            <div class="text-muted small">
+                                                Add account payable detail
+                                            </div>
+
+                                        </div>
+
+
+                                        <button
+                                            type="button"
+                                            class="btn btn-sm btn-primary"
+                                            id="btn-add-ap-detail">
+
+                                            <i
+                                                class="fa-solid fa-plus me-1">
+                                            </i>
+
+                                            Add Detail
+
+                                        </button>
+
+                                    </div>
+
+
+                                    <!-- DETAIL TABLE -->
+
+                                    <div
+                                        class="
+                                            table-responsive
+                                            ap-invoice-detail-table-wrapper
+                                        "
+                                    >
+
+                                        <table
+                                            class="
+                                                table
+                                                table-sm
+                                                table-hover
+                                                align-middle
+                                                mb-0
+                                                ap-invoice-detail-table
+                                            "
+                                        >
+
+                                            <colgroup>
+
+                                                <col style="width: 5%;">
+                                                <col style="width: 25%;">
+                                                <col style="width: 31%;">
+                                                <col style="width: 8%;">
+                                                <col style="width: 11%;">
+                                                <col style="width: 13%;">
+                                                <col style="width: 7%;">
+
+                                            </colgroup>
+
+
+                                            <thead>
+
+                                                <tr>
+
+                                                    <th class="text-center">
+                                                        No
+                                                    </th>
+
+                                                    <th class="text-start">
+                                                        Account
+                                                    </th>
+
+                                                    <th class="text-start">
+                                                        Description
+                                                    </th>
+
+                                                    <th class="text-end">
+                                                        Qty
+                                                    </th>
+
+                                                    <th class="text-end">
+                                                        Unit Price
+                                                    </th>
+
+                                                    <th class="text-end">
+                                                        Amount
+                                                    </th>
+
+                                                    <th class="text-center">
+                                                        Action
+                                                    </th>
+
+                                                </tr>
+
+                                            </thead>
+
+
+                                            <tbody id="ap-detail-body">
+
+                                                <tr id="ap-detail-empty">
+
+                                                    <td
+                                                        colspan="7"
+                                                        class="
+                                                            text-center
+                                                            text-muted
+                                                            py-4
+                                                        "
+                                                    >
+
+                                                        No detail added.
+
+                                                    </td>
+
+                                                </tr>
+
+                                            </tbody>
+
+                                        </table>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ==============================================
+                         TAB 3 : TAX PLUS
+                    =============================================== -->
+
+                    <div
+                        class="tab-pane fade"
+                        id="ap-tax-plus-pane"
+                        role="tabpanel"
+                        aria-labelledby="ap-tax-plus-tab"
+                        tabindex="0">
+
+
+                        <div class="p-4">
+
+                            <div class="finova-card">
+
+                                <div class="finova-card-body">
+
+
+                                    <div class="mb-3">
+
+                                        <div class="fw-semibold">
+                                            Tax (+)
+                                        </div>
+
+                                        <div class="text-muted small">
+                                            Automatically generated from Invoice Details
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="table-responsive">
+
+                                        <table
+                                            class="
+                                                table
+                                                table-sm
+                                                table-hover
+                                                align-middle
+                                                mb-0
+                                            "
+                                        >
+
+                                            <thead>
+
+                                                <tr>
+
+                                                    <th>No</th>
+                                                    <th>Tax Code</th>
+                                                    <th>Tax Name</th>
+                                                    <th>Tax Account</th>
+
+                                                    <th class="text-end">
+                                                        Tax Base
+                                                    </th>
+
+                                                    <th class="text-end">
+                                                        Rate
+                                                    </th>
+
+                                                    <th class="text-end">
+                                                        Tax Amount
+                                                    </th>
+
+                                                </tr>
+
+                                            </thead>
+
+
+                                            <tbody id="ap-tax-plus-body">
+
+                                                <tr id="ap-tax-plus-empty">
+
+                                                    <td
+                                                        colspan="7"
+                                                        class="
+                                                            text-center
+                                                            text-muted
+                                                            py-4
+                                                        "
+                                                    >
+
+                                                        No Tax (+) found from Invoice Details.
+
+                                                    </td>
+
+                                                </tr>
+
+                                            </tbody>
+
+                                        </table>
+
+                                    </div>
+
+
+                                    <!-- TAX PLUS JOURNAL INFO -->
+
+                                    <div
+                                        class="
+                                            alert
+                                            alert-light
+                                            border
+                                            mt-3
+                                            mb-0
+                                        "
+                                    >
+
+                                        <div class="ap-tax-journal-preview"></div>
+
+
+                                        <div class="fw-semibold mb-1">
+
+                                            Journal Preview
+
+                                        </div>
+
+
+                                        <div class="small text-muted">
+
+                                            Debit:
+
+                                            <strong
+                                                id="ap-tax-plus-preview-debit">
+                                                -
+                                            </strong>
+
+                                            <span class="mx-2">
+                                                |
+                                            </span>
+
+                                            Credit:
+
+                                            <strong
+                                                id="ap-tax-plus-preview-credit">
+
+                                                HUTANG USAHA
+
+                                            </strong>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ==============================================
+                         TAB 4 : TAX MINUS
+                    =============================================== -->
+
+                    <div
+                        class="tab-pane fade"
+                        id="ap-tax-minus-pane"
+                        role="tabpanel"
+                        aria-labelledby="ap-tax-minus-tab"
+                        tabindex="0">
+
+
+                        <div class="p-4">
+
+                            <div class="finova-card">
+
+                                <div class="finova-card-body">
+
+
+                                    <div class="mb-3">
+
+                                        <div class="fw-semibold">
+                                            Tax (-)
+                                        </div>
+
+                                        <div class="text-muted small">
+                                            Automatically generated from Invoice Details
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="table-responsive">
+
+                                        <table
+                                            class="
+                                                table
+                                                table-sm
+                                                table-hover
+                                                align-middle
+                                                mb-0
+                                            "
+                                        >
+
+                                            <thead>
+
+                                                <tr>
+
+                                                    <th>No</th>
+                                                    <th>Tax Code</th>
+                                                    <th>Tax Name</th>
+                                                    <th>Tax Account</th>
+
+                                                    <th class="text-end">
+                                                        Tax Base
+                                                    </th>
+
+                                                    <th class="text-end">
+                                                        Rate
+                                                    </th>
+
+                                                    <th class="text-end">
+                                                        Tax Amount
+                                                    </th>
+
+                                                </tr>
+
+                                            </thead>
+
+
+                                            <tbody id="ap-tax-minus-body">
+
+                                                <tr id="ap-tax-minus-empty">
+
+                                                    <td
+                                                        colspan="7"
+                                                        class="
+                                                            text-center
+                                                            text-muted
+                                                            py-4
+                                                        "
+                                                    >
+
+                                                        No Tax (-) found from Invoice Details.
+
+                                                    </td>
+
+                                                </tr>
+
+                                            </tbody>
+
+                                        </table>
+
+                                    </div>
+
+
+                                    <!-- TAX MINUS JOURNAL INFO -->
+
+                                    <div
+                                        class="
+                                            alert
+                                            alert-light
+                                            border
+                                            mt-3
+                                            mb-0
+                                        "
+                                    >
+
+                                        <div class="fw-semibold mb-1">
+
+                                            Journal Preview
+
+                                        </div>
+
+
+                                        <div class="small text-muted">
+
+                                            Debit:
+
+                                            <strong>
+                                                HUTANG USAHA
+                                            </strong>
+
+                                            <span class="mx-2">
+                                                |
+                                            </span>
+
+                                            Credit:
+
+                                            <strong>
+                                                HUTANG PPH 22/23
+                                            </strong>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ==============================================
+                         TAB 5 : ACCOUNTING PREVIEW
+                    =============================================== -->
+
+                    <div
+                        class="tab-pane fade"
+                        id="ap-accounting-preview-pane"
+                        role="tabpanel"
+                        aria-labelledby="ap-accounting-preview-tab"
+                        tabindex="0"
+                    >
+
+                        <div class="p-4">
+
+                            <div class="finova-card">
+
+                                <div class="finova-card-body">
+
+
+                                    <!-- ==========================================
+                                         HEADER
+                                    =========================================== -->
+
+                                    <div class="mb-3">
+
+                                        <div class="fw-semibold">
+
+                                            Accounting Preview
+
+                                        </div>
+
+
+                                        <div class="text-muted small">
+
+                                            Preview journal entries based on
+                                            Invoice Details, Tax (+), and Tax (-)
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <!-- ==========================================
+                                         JOURNAL TABLE
+                                    =========================================== -->
+
+                                    <div class="table-responsive">
+
+                                        <table
+                                            class="
+                                                table
+                                                table-sm
+                                                table-hover
+                                                align-middle
+                                                mb-0
+                                            "
+                                        >
+
+                                            <colgroup>
+
+                                                <col style="width: 6%;">
+                                                <col style="width: 24%;">
+                                                <col style="width: 38%;">
+                                                <col style="width: 16%;">
+                                                <col style="width: 16%;">
+
+                                            </colgroup>
+
+
+                                            <thead>
+
+                                                <tr>
+
+                                                    <th class="text-center">
+
+                                                        No
+
+                                                    </th>
+
+
+                                                    <th class="text-start">
+
+                                                        Account
+
+                                                    </th>
+
+
+                                                    <th class="text-start">
+
+                                                        Account Name / Description
+
+                                                    </th>
+
+
+                                                    <th class="text-end">
+
+                                                        Debit
+
+                                                    </th>
+
+
+                                                    <th class="text-end">
+
+                                                        Credit
+
+                                                    </th>
+
+                                                </tr>
+
+                                            </thead>
+
+
+                                            <tbody
+                                                id="ap-accounting-preview-body"
+                                            >
+
+                                                <tr
+                                                    id="ap-accounting-preview-empty"
+                                                >
+
+                                                    <td
+                                                        colspan="5"
+                                                        class="
+                                                            text-center
+                                                            text-muted
+                                                            py-4
+                                                        "
+                                                    >
+
+                                                        No accounting preview available.
+
+                                                    </td>
+
+                                                </tr>
+
+                                            </tbody>
+
+
+                                            <tfoot>
+
+                                                <tr class="fw-semibold">
+
+                                                    <td
+                                                        colspan="3"
+                                                        class="text-end"
+                                                    >
+
+                                                        TOTAL
+
+                                                    </td>
+
+
+                                                    <td
+                                                        class="text-end"
+                                                        id="ap-accounting-preview-total-debit"
+                                                    >
+
+                                                        0
+
+                                                    </td>
+
+
+                                                    <td
+                                                        class="text-end"
+                                                        id="ap-accounting-preview-total-credit"
+                                                    >
+
+                                                        0
+
+                                                    </td>
+
+                                                </tr>
+
+                                            </tfoot>
+
+                                        </table>
+
+                                    </div>
+
+
+                                    <!-- ==========================================
+                                         ACCOUNTING SUMMARY
+                                    =========================================== -->
+
+                                    <div class="row g-3 mt-3">
+
+
+                                        <!-- TOTAL -->
+
+                                        <div class="col-lg-6">
+
+                                            <div
+                                                class="
+                                                    border
+                                                    rounded
+                                                    p-3
+                                                    h-100
+                                                "
+                                            >
+
+
+                                                <div
+                                                    class="
+                                                        d-flex
+                                                        justify-content-between
+                                                        align-items-center
+                                                        mb-2
+                                                    "
+                                                >
+
+                                                    <span>
+
+                                                        Total Debit
+
+                                                    </span>
+
+
+                                                    <strong
+                                                        id="ap-accounting-preview-summary-debit"
+                                                    >
+
+                                                        0
+
+                                                    </strong>
+
+                                                </div>
+
+
+                                                <div
+                                                    class="
+                                                        d-flex
+                                                        justify-content-between
+                                                        align-items-center
+                                                        mb-2
+                                                    "
+                                                >
+
+                                                    <span>
+
+                                                        Total Credit
+
+                                                    </span>
+
+
+                                                    <strong
+                                                        id="ap-accounting-preview-summary-credit"
+                                                    >
+
+                                                        0
+
+                                                    </strong>
+
+                                                </div>
+
+
+                                                <hr>
+
+
+                                                <div
+                                                    class="
+                                                        d-flex
+                                                        justify-content-between
+                                                        align-items-center
+                                                    "
+                                                >
+
+                                                    <span class="fw-semibold">
+
+                                                        Difference
+
+                                                    </span>
+
+
+                                                    <strong
+                                                        id="ap-accounting-preview-difference"
+                                                    >
+
+                                                        0
+
+                                                    </strong>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+
+                                        <!-- STATUS -->
+
+                                        <div class="col-lg-6">
+
+                                            <div
+                                                id="ap-accounting-preview-status"
+                                                class="
+                                                    alert
+                                                    alert-secondary
+                                                    border
+                                                    h-100
+                                                    mb-0
+                                                    d-flex
+                                                    align-items-center
+                                                "
+                                            >
+
+                                                <div>
+
+                                                    <div
+                                                        class="
+                                                            fw-semibold
+                                                            mb-1
+                                                        "
+                                                        id="ap-accounting-preview-status-title"
+                                                    >
+
+                                                        Waiting for Transaction
+
+                                                    </div>
+
+
+                                                    <div
+                                                        class="small"
+                                                        id="ap-accounting-preview-status-message"
+                                                    >
+
+                                                        Add Invoice Detail to generate
+                                                        the accounting preview.
+
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- ==================================================
+                     TOTAL SUMMARY
+                =================================================== -->
+
+                <div class="border-top p-4">
+
+                    <div class="d-flex justify-content-end">
+
+                        <div
+                            class="finova-card"
+                            style="
+                                width: 420px;
+                                max-width: 100%;
+                            "
+                        >
+
+                            <div class="finova-card-body">
+
+
+                                <!-- SUBTOTAL -->
+
+                                <div
+                                    class="
+                                        d-flex
+                                        justify-content-between
+                                        align-items-center
+                                        mb-2
+                                    "
+                                >
+
+                                    <span>
+                                        Subtotal
+                                    </span>
+
+                                    <strong
+                                        id="ap-form-subtotal">
+
+                                        0
+
+                                    </strong>
+
+                                </div>
+
+
+                                <!-- TAX PLUS -->
+
+                                <div
+                                    class="
+                                        d-flex
+                                        justify-content-between
+                                        align-items-center
+                                        mb-2
+                                    "
+                                >
+
+                                    <span>
+                                        Tax (+)
+                                    </span>
+
+                                    <strong
+                                        id="ap-form-tax">
+
+                                        0
+
+                                    </strong>
+
+                                </div>
+
+
+                                <!-- TAX MINUS -->
+
+                                <div
+                                    class="
+                                        d-flex
+                                        justify-content-between
+                                        align-items-center
+                                        mb-2
+                                    "
+                                >
+
+                                    <span>
+                                        Tax (-)
+                                    </span>
+
+                                    <strong
+                                        id="ap-form-wht">
+
+                                        0
+
+                                    </strong>
+
+                                </div>
+
+
+                                <hr>
+
+
+                                <!-- TOTAL PAYABLE -->
+
+                                <div
+                                    class="
+                                        d-flex
+                                        justify-content-between
+                                        align-items-center
+                                    "
+                                >
+
+                                    <span class="fw-semibold">
+
+                                        Total Payable
+
+                                    </span>
+
+
+                                    <strong
+                                        id="ap-form-total"
+                                        class="fs-5">
+
+                                        0
+
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+                        </div>
 
                     </div>
 
@@ -604,384 +1411,6 @@
 
             </div>
 
-        </div>
-
-
-        <!-- ==============================================
-             TAB 3 : TAX PLUS
-        =============================================== -->
-
-        <div
-            class="tab-pane fade"
-            id="ap-tax-plus-pane"
-            role="tabpanel"
-            aria-labelledby="ap-tax-plus-tab"
-            tabindex="0">
-
-
-            <div class="p-4">
-
-                <div class="finova-card">
-
-                    <div class="finova-card-body">
-
-
-                        <div class="mb-3">
-
-                            <div class="fw-semibold">
-                                Tax (+)
-                            </div>
-
-                            <div class="text-muted small">
-                                Automatically generated from Invoice Details
-                            </div>
-
-                        </div>
-
-
-                        <div class="table-responsive">
-
-                            <table
-                                class="table
-                                       table-sm
-                                       table-hover
-                                       align-middle
-                                       mb-0">
-
-                                <thead>
-
-                                    <tr>
-
-                                        <th>No</th>
-
-                                        <th>Tax Code</th>
-
-                                        <th>Tax Name</th>
-
-                                        <th>Tax Account</th>
-
-                                        <th class="text-end">
-                                            Tax Base
-                                        </th>
-
-                                        <th class="text-end">
-                                            Rate
-                                        </th>
-
-                                        <th class="text-end">
-                                            Tax Amount
-                                        </th>
-
-                                    </tr>
-
-                                </thead>
-
-
-                                <tbody id="ap-tax-plus-body">
-
-                                    <tr id="ap-tax-plus-empty">
-
-                                        <td
-                                            colspan="7"
-                                            class="text-center
-                                                   text-muted
-                                                   py-4">
-
-                                            No Tax (+) found from Invoice Details.
-
-                                        </td>
-
-                                    </tr>
-
-                                </tbody>
-
-                            </table>
-
-                        </div>
-
-
-                        <!-- TAX PLUS JOURNAL INFO -->
-
-                        <div class="alert alert-light border mt-3 mb-0">
-                        <!-- ==================================================
-                            JOURNAL PREVIEW
-                        =================================================== -->
-
-                        <div class="ap-tax-journal-preview"></div>
-
-                            <div class="fw-semibold mb-1">
-                                Journal Preview
-                            </div>
-
-                            <div class="small text-muted">
-
-                                Debit:
-
-                                <strong
-                                    id="ap-tax-plus-preview-debit">
-
-                                    -
-
-                                </strong>
-
-                                <span class="mx-2">
-                                    |
-                                </span>
-
-                                Credit:
-
-                                <strong
-                                    id="ap-tax-plus-preview-credit">
-
-                                    HUTANG USAHA
-
-                                </strong>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- ==============================================
-             TAB 4 : TAX MINUS
-        =============================================== -->
-
-        <div
-            class="tab-pane fade"
-            id="ap-tax-minus-pane"
-            role="tabpanel"
-            aria-labelledby="ap-tax-minus-tab"
-            tabindex="0">
-
-
-            <div class="p-4">
-
-                <div class="finova-card">
-
-                    <div class="finova-card-body">
-
-
-                        <div class="mb-3">
-
-                            <div class="fw-semibold">
-                                Tax (-)
-                            </div>
-
-                            <div class="text-muted small">
-                                Automatically generated from Invoice Details
-                            </div>
-
-                        </div>
-
-
-                        <div class="table-responsive">
-
-                            <table
-                                class="table
-                                       table-sm
-                                       table-hover
-                                       align-middle
-                                       mb-0">
-
-                                <thead>
-
-                                    <tr>
-
-                                        <th>No</th>
-
-                                        <th>Tax Code</th>
-
-                                        <th>Tax Name</th>
-
-                                        <th>Tax Account</th>
-
-                                        <th class="text-end">
-                                            Tax Base
-                                        </th>
-
-                                        <th class="text-end">
-                                            Rate
-                                        </th>
-
-                                        <th class="text-end">
-                                            Tax Amount
-                                        </th>
-
-                                    </tr>
-
-                                </thead>
-
-
-                                <tbody id="ap-tax-minus-body">
-
-                                    <tr id="ap-tax-minus-empty">
-
-                                        <td
-                                            colspan="7"
-                                            class="text-center
-                                                   text-muted
-                                                   py-4">
-
-                                            No Tax (-) found from Invoice Details.
-
-                                        </td>
-
-                                    </tr>
-
-                                </tbody>
-
-                            </table>
-
-                        </div>
-
-
-                        <!-- TAX MINUS JOURNAL INFO -->
-
-                        <div class="alert alert-light border mt-3 mb-0">
-
-                            <div class="fw-semibold mb-1">
-                                Journal Preview
-                            </div>
-
-                            <div class="small text-muted">
-
-                                Debit:
-                                <strong>HUTANG USAHA</strong>
-
-                                <span class="mx-2">|</span>
-
-                                Credit:
-                                <strong>HUTANG PPH 22/23</strong>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-    </div>
-
-
-    <!-- ==================================================
-         TOTAL SUMMARY
-    =================================================== -->
-
-    <div class="border-top p-4">
-
-        <div class="d-flex justify-content-end">
-
-            <div
-                class="finova-card"
-                style="width: 420px; max-width: 100%;">
-
-                <div class="finova-card-body">
-
-
-                    <!-- SUBTOTAL -->
-
-                    <div
-                        class="d-flex
-                               justify-content-between
-                               align-items-center
-                               mb-2">
-
-                        <span>
-                            Subtotal
-                        </span>
-
-                        <strong id="ap-form-subtotal">
-                            0
-                        </strong>
-
-                    </div>
-
-
-                    <!-- TAX PLUS -->
-
-                    <div
-                        class="d-flex
-                               justify-content-between
-                               align-items-center
-                               mb-2">
-
-                        <span>
-                            Tax (+)
-                        </span>
-
-                        <strong id="ap-form-tax">
-                            0
-                        </strong>
-
-                    </div>
-
-
-                    <!-- TAX MINUS -->
-
-                    <div
-                        class="d-flex
-                               justify-content-between
-                               align-items-center
-                               mb-2">
-
-                        <span>
-                            Tax (-)
-                        </span>
-
-                        <strong id="ap-form-wht">
-                            0
-                        </strong>
-
-                    </div>
-
-
-                    <hr>
-
-
-                    <!-- TOTAL PAYABLE -->
-
-                    <div
-                        class="d-flex
-                               justify-content-between
-                               align-items-center">
-
-                        <span class="fw-semibold">
-                            Total Payable
-                        </span>
-
-                        <strong
-                            id="ap-form-total"
-                            class="fs-5">
-
-                            0
-
-                        </strong>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
 
             <!-- ==================================================
                  MODAL FOOTER
@@ -1019,7 +1448,6 @@
     </div>
 
 </div>
-
 
 
 <!-- ==========================================================

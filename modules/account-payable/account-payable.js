@@ -94,6 +94,37 @@ this.taxMinusData = [];
         this.currentInvoiceId = null;
         this.currentMode = "add";
         this.currentDetailId = null;
+        this.apAccountingPreviewRequestId = 0;
+        /*
+==================================================
+ACCOUNTING PREVIEW VALIDATION STATE
+==================================================
+*/
+
+this.apAccountingPreviewState = {
+
+    status:
+        "WAITING",
+
+    isReady:
+        false,
+
+    isBalanced:
+        false,
+
+    totalDebit:
+        0,
+
+    totalCredit:
+        0,
+
+    difference:
+        0,
+
+    issues:
+        []
+
+};
         
         this.pendingDeleteDetailId = null;
 
@@ -1179,95 +1210,7 @@ async init() {
                             : [];
 
 
-                    /*
-                    ==========================================
-                    CHECK / GENERATE GL JOURNAL
-                    ==========================================
-                    */
-
-                    let journalId =
-                        invoice.gl_journal_id;
-
-
-                    if (
-                        !journalId
-                    ) {
-
-                        const journal =
-                            await this.generateAPJournal(
-                                invoice,
-                                details
-                            );
-
-
-                        if (
-                            !journal
-                        ) {
-
-                            throw new Error(
-                                "Failed to generate GL Journal."
-                            );
-
-                        }
-
-
-                        journalId =
-                            journal.id;
-
-
-                        await this.service.linkGLJournal(
-                            id,
-                            journalId
-                        );
-
-                    }
-
-
-                    /*
-                    ==========================================
-                    COMPLETE ACCOUNT PAYABLE
-                    ==========================================
-                    */
-
-                    await this.service.completeInvoice(
-                        id
-                    );
-
-
-                    /*
-                    ==========================================
-                    GENERATE GL JOURNAL
-                    ==========================================
-                    */
-
-                    const journal =
-                        await this.generateAPJournal(
-                            invoice,
-                            details
-                        );
-
-
-                    if (
-                        !journal
-                    ) {
-
-                        throw new Error(
-                            "Failed to generate GL Journal."
-                        );
-
-                    }
-
-
-                    /*
-                    ==========================================
-                    LINK GL JOURNAL
-                    ==========================================
-                    */
-
-                    await this.service.linkGLJournal(
-                        id,
-                        journal.id
-                    );
+                    
 
 
                     /*
@@ -3573,6 +3516,921 @@ async loadCompleteModalHTML() {
     }
 
 }
+
+
+/*
+======================================================
+BUILD AP JOURNAL LINES
+SINGLE SOURCE OF TRUTH
+
+USED BY:
+1. ACCOUNTING PREVIEW
+2. GENERATE AP GL JOURNAL
+======================================================
+*/
+
+async buildAPJournalLines(
+    invoice,
+    details,
+    {
+        reloadTaxMaster = false,
+        strictValidation = false
+    } = {}
+) {
+
+    /*
+    ==================================================
+    VALIDATION
+    ==================================================
+    */
+
+    if (!invoice) {
+
+        throw new Error(
+            "Account Payable header is required."
+        );
+
+    }
+
+
+    if (
+        !Array.isArray(details)
+        ||
+        !details.length
+    ) {
+
+        return [];
+
+    }
+
+
+    /*
+    ==================================================
+    ACCOUNT PAYABLE
+    HUTANG USAHA
+    ==================================================
+    */
+
+    const payableAccountId =
+        39;
+
+
+    if (!payableAccountId) {
+
+        throw new Error(
+            "Account Payable account is not configured."
+        );
+
+    }
+
+
+    /*
+    ==================================================
+    BUSINESS PARTNER
+    ==================================================
+    */
+
+    const businessPartnerId =
+        invoice.vendor_id
+            ? Number(
+                invoice.vendor_id
+            )
+            : null;
+
+
+    /*
+    ==================================================
+    TAX MASTER
+
+    REAL JOURNAL:
+    reloadTaxMaster = true
+
+    ACCOUNTING PREVIEW:
+    reloadTaxMaster = false
+    ==================================================
+    */
+
+    if (
+        reloadTaxMaster
+        &&
+        typeof this.loadTaxMaster
+        ===
+        "function"
+    ) {
+
+        await this.loadTaxMaster();
+
+    }
+
+
+    /*
+    ==================================================
+    DEBUG TAX MASTER
+    ==================================================
+    */
+
+    console.log(
+        "AP JOURNAL BUILDER TAX PLUS MASTER:",
+        this.taxPlusData
+    );
+
+
+    console.log(
+        "AP JOURNAL BUILDER TAX MINUS MASTER:",
+        this.taxMinusData
+    );
+
+
+    /*
+    ==================================================
+    JOURNAL DETAILS
+    ==================================================
+    */
+
+    const journalDetails =
+        [];
+
+
+    /*
+    ==================================================
+    LOOP AP DETAILS
+    ==================================================
+    */
+
+    for (
+        const detail
+        of details
+    ) {
+
+        /*
+        ==================================================
+        DEBUG DETAIL
+        ==================================================
+        */
+
+        console.log(
+            "AP JOURNAL BUILDER DETAIL:",
+            detail
+        );
+
+
+        /*
+        ==================================================
+        BASE TRANSACTION
+        ==================================================
+        */
+
+        const chargeAccountId =
+            Number(
+                detail.charge_account_id
+                || 0
+            );
+
+
+        const lineAmount =
+            Number(
+                detail.line_amount
+                || 0
+            );
+
+
+        /*
+        ==================================================
+        CHARGE ACCOUNT VALIDATION
+        ==================================================
+        */
+
+        if (
+            lineAmount > 0
+            &&
+            !chargeAccountId
+        ) {
+
+            if (
+                strictValidation
+            ) {
+
+                throw new Error(
+                    `Debit Account is missing on AP detail: ${
+                        detail.description
+                        || ""
+                    }`
+                );
+
+            }
+
+
+            console.warn(
+                "AP Accounting Preview: Debit Account missing.",
+                detail
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        BASE JOURNAL
+
+        DR CHARGE ACCOUNT
+        CR HUTANG USAHA
+        ==================================================
+        */
+
+        if (
+            chargeAccountId
+            &&
+            lineAmount > 0
+        ) {
+
+            journalDetails.push({
+
+                debit_account_id:
+                    chargeAccountId,
+
+                credit_account_id:
+                    payableAccountId,
+
+                business_partner_id:
+                    businessPartnerId,
+
+                description:
+                    detail.description
+                    ||
+                    invoice.invoice_no
+                    ||
+                    "AP Invoice",
+
+                amount:
+                    lineAmount,
+
+                preview_source:
+                    "BASE"
+
+            });
+
+        }
+
+
+        /*
+        ==================================================
+        TAX (+)
+        ==================================================
+        */
+
+        const taxPlusAmount =
+            Number(
+                detail.tax_input_amount
+                || 0
+            );
+
+
+        const taxPlusRate =
+            Number(
+                detail.tax_input_rate
+                || 0
+            );
+
+
+        let taxPlusId =
+            detail.tax_plus_id
+            || null;
+
+
+        let taxPlusAccountId =
+            Number(
+                detail.tax_plus_account_id
+                || 0
+            );
+
+
+        let taxPlusName =
+            detail.tax_plus_name
+            ||
+            "Tax (+)";
+
+
+        /*
+        ==================================================
+        TAX (+)
+        FIND MASTER
+        ==================================================
+        */
+
+        let taxPlusMaster =
+            null;
+
+
+        /*
+        ==================================================
+        TAX (+)
+        FIND BY TAX ID
+        ==================================================
+        */
+
+        if (
+            taxPlusId
+            &&
+            Array.isArray(
+                this.taxPlusData
+            )
+        ) {
+
+            taxPlusMaster =
+                this.taxPlusData.find(
+                    tax =>
+                        String(
+                            tax.id
+                        )
+                        ===
+                        String(
+                            taxPlusId
+                        )
+                )
+                || null;
+
+        }
+
+
+        /*
+        ==================================================
+        TAX (+)
+        FALLBACK BY RATE
+
+        SUPPORT OLD AP DATA
+        ==================================================
+        */
+
+        if (
+            !taxPlusMaster
+            &&
+            taxPlusRate > 0
+            &&
+            Array.isArray(
+                this.taxPlusData
+            )
+        ) {
+
+            taxPlusMaster =
+                this.taxPlusData.find(
+                    tax =>
+                        Number(
+                            tax.tax_rate
+                            || 0
+                        )
+                        ===
+                        taxPlusRate
+                )
+                || null;
+
+        }
+
+
+        /*
+        ==================================================
+        TAX (+)
+        TAX MASTER SOURCE OF TRUTH
+        ==================================================
+        */
+
+        if (
+            taxPlusMaster
+        ) {
+
+            taxPlusId =
+                taxPlusMaster.id
+                ||
+                taxPlusId;
+
+
+            taxPlusAccountId =
+                Number(
+                    taxPlusMaster.tax_account_id
+                    ||
+                    taxPlusAccountId
+                    ||
+                    0
+                );
+
+
+            taxPlusName =
+                taxPlusMaster.tax_name
+                ||
+                taxPlusName;
+
+        }
+
+
+        /*
+        ==================================================
+        TAX (+)
+        LAST FALLBACK DIRECT DATABASE
+
+        ONLY USED BY REAL JOURNAL
+        ==================================================
+        */
+
+        if (
+            strictValidation
+            &&
+            taxPlusAmount > 0
+            &&
+            !taxPlusAccountId
+            &&
+            taxPlusId
+            &&
+            this.taxService
+            &&
+            typeof this.taxService.getById
+            ===
+            "function"
+        ) {
+
+            const freshTax =
+                await this.taxService.getById(
+                    taxPlusId
+                );
+
+
+            if (
+                freshTax
+            ) {
+
+                taxPlusAccountId =
+                    Number(
+                        freshTax.tax_account_id
+                        || 0
+                    );
+
+
+                taxPlusName =
+                    freshTax.tax_name
+                    ||
+                    taxPlusName;
+
+            }
+
+        }
+
+
+        /*
+        ==================================================
+        TAX (+)
+        DEBUG FINAL RESOLUTION
+        ==================================================
+        */
+
+        console.log(
+            "AP TAX (+) BUILDER RESOLUTION:",
+            {
+
+                detail_tax_plus_id:
+                    detail.tax_plus_id,
+
+                resolved_tax_plus_id:
+                    taxPlusId,
+
+                rate:
+                    taxPlusRate,
+
+                amount:
+                    taxPlusAmount,
+
+                account_id:
+                    taxPlusAccountId,
+
+                tax_name:
+                    taxPlusName,
+
+                master:
+                    taxPlusMaster
+
+            }
+        );
+
+
+        /*
+        ==================================================
+        TAX (+)
+        VALIDATION
+        ==================================================
+        */
+
+        if (
+            taxPlusAmount > 0
+            &&
+            !taxPlusAccountId
+        ) {
+
+            if (
+                strictValidation
+            ) {
+
+                throw new Error(
+                    `Tax (+) Account is missing for ${taxPlusName}. Check Tax Master configuration.`
+                );
+
+            }
+
+
+            console.warn(
+                "AP Accounting Preview: Tax (+) Account missing.",
+                {
+                    detail,
+                    taxPlusId,
+                    taxPlusRate,
+                    taxPlusAmount
+                }
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        TAX (+) JOURNAL
+
+        DR TAX ACCOUNT
+        CR HUTANG USAHA
+        ==================================================
+        */
+
+        if (
+            taxPlusAmount > 0
+            &&
+            taxPlusAccountId
+        ) {
+
+            journalDetails.push({
+
+                debit_account_id:
+                    taxPlusAccountId,
+
+                credit_account_id:
+                    payableAccountId,
+
+                business_partner_id:
+                    businessPartnerId,
+
+                description:
+                    `${taxPlusName} - ${
+                        invoice.invoice_no
+                        || ""
+                    }`,
+
+                amount:
+                    taxPlusAmount,
+
+                preview_source:
+                    "TAX_PLUS"
+
+            });
+
+        }
+
+
+        /*
+        ==================================================
+        TAX (-)
+        ==================================================
+        */
+
+        const taxMinusAmount =
+            Number(
+                detail.withholding_tax_amount
+                || 0
+            );
+
+
+        const taxMinusRate =
+            Number(
+                detail.withholding_tax_rate
+                || 0
+            );
+
+
+        let taxMinusId =
+            detail.tax_minus_id
+            || null;
+
+
+        let taxMinusAccountId =
+            Number(
+                detail.tax_minus_account_id
+                || 0
+            );
+
+
+        let taxMinusName =
+            detail.tax_minus_name
+            ||
+            "Tax (-)";
+
+
+        /*
+        ==================================================
+        TAX (-)
+        FIND MASTER
+        ==================================================
+        */
+
+        let taxMinusMaster =
+            null;
+
+
+        /*
+        ==================================================
+        TAX (-)
+        FIND BY TAX ID
+        ==================================================
+        */
+
+        if (
+            taxMinusId
+            &&
+            Array.isArray(
+                this.taxMinusData
+            )
+        ) {
+
+            taxMinusMaster =
+                this.taxMinusData.find(
+                    tax =>
+                        String(
+                            tax.id
+                        )
+                        ===
+                        String(
+                            taxMinusId
+                        )
+                )
+                || null;
+
+        }
+
+
+        /*
+        ==================================================
+        TAX (-)
+        FALLBACK BY RATE
+
+        SUPPORT OLD AP DATA
+        ==================================================
+        */
+
+        if (
+            !taxMinusMaster
+            &&
+            taxMinusRate > 0
+            &&
+            Array.isArray(
+                this.taxMinusData
+            )
+        ) {
+
+            taxMinusMaster =
+                this.taxMinusData.find(
+                    tax =>
+                        Number(
+                            tax.tax_rate
+                            || 0
+                        )
+                        ===
+                        taxMinusRate
+                )
+                || null;
+
+        }
+
+
+        /*
+        ==================================================
+        TAX (-)
+        TAX MASTER SOURCE OF TRUTH
+        ==================================================
+        */
+
+        if (
+            taxMinusMaster
+        ) {
+
+            taxMinusId =
+                taxMinusMaster.id
+                ||
+                taxMinusId;
+
+
+            taxMinusAccountId =
+                Number(
+                    taxMinusMaster.tax_account_id
+                    ||
+                    taxMinusAccountId
+                    ||
+                    0
+                );
+
+
+            taxMinusName =
+                taxMinusMaster.tax_name
+                ||
+                taxMinusName;
+
+        }
+
+
+        /*
+        ==================================================
+        TAX (-)
+        LAST FALLBACK DIRECT DATABASE
+
+        ONLY USED BY REAL JOURNAL
+        ==================================================
+        */
+
+        if (
+            strictValidation
+            &&
+            taxMinusAmount > 0
+            &&
+            !taxMinusAccountId
+            &&
+            taxMinusId
+            &&
+            this.taxService
+            &&
+            typeof this.taxService.getById
+            ===
+            "function"
+        ) {
+
+            const freshTax =
+                await this.taxService.getById(
+                    taxMinusId
+                );
+
+
+            if (
+                freshTax
+            ) {
+
+                taxMinusAccountId =
+                    Number(
+                        freshTax.tax_account_id
+                        || 0
+                    );
+
+
+                taxMinusName =
+                    freshTax.tax_name
+                    ||
+                    taxMinusName;
+
+            }
+
+        }
+
+
+        /*
+        ==================================================
+        TAX (-)
+        DEBUG FINAL RESOLUTION
+        ==================================================
+        */
+
+        console.log(
+            "AP TAX (-) BUILDER RESOLUTION:",
+            {
+
+                detail_tax_minus_id:
+                    detail.tax_minus_id,
+
+                resolved_tax_minus_id:
+                    taxMinusId,
+
+                rate:
+                    taxMinusRate,
+
+                amount:
+                    taxMinusAmount,
+
+                account_id:
+                    taxMinusAccountId,
+
+                tax_name:
+                    taxMinusName,
+
+                master:
+                    taxMinusMaster
+
+            }
+        );
+
+
+        /*
+        ==================================================
+        TAX (-)
+        VALIDATION
+        ==================================================
+        */
+
+        if (
+            taxMinusAmount > 0
+            &&
+            !taxMinusAccountId
+        ) {
+
+            if (
+                strictValidation
+            ) {
+
+                throw new Error(
+                    `Tax (-) Account is missing for ${taxMinusName}. Check Tax Master configuration.`
+                );
+
+            }
+
+
+            console.warn(
+                "AP Accounting Preview: Tax (-) Account missing.",
+                {
+                    detail,
+                    taxMinusId,
+                    taxMinusRate,
+                    taxMinusAmount
+                }
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        TAX (-) JOURNAL
+
+        DR HUTANG USAHA
+        CR TAX (-) ACCOUNT
+        ==================================================
+        */
+
+        if (
+            taxMinusAmount > 0
+            &&
+            taxMinusAccountId
+        ) {
+
+            journalDetails.push({
+
+                debit_account_id:
+                    payableAccountId,
+
+                credit_account_id:
+                    taxMinusAccountId,
+
+                business_partner_id:
+                    businessPartnerId,
+
+                description:
+                    `${taxMinusName} - ${
+                        invoice.invoice_no
+                        || ""
+                    }`,
+
+                amount:
+                    taxMinusAmount,
+
+                preview_source:
+                    "TAX_MINUS"
+
+            });
+
+        }
+
+    }
+
+
+    /*
+    ==================================================
+    DEBUG FINAL BUILDER
+    ==================================================
+    */
+
+    console.log(
+        "AP BUILT JOURNAL LINES:",
+        journalDetails
+    );
+
+
+    /*
+    ==================================================
+    RETURN
+    ==================================================
+    */
+
+    return journalDetails;
+
+}
+
+
 /*
 ======================================================
 GENERATE GL JOURNAL FROM ACCOUNT PAYABLE
@@ -3616,782 +4474,73 @@ async generateAPJournal(
 
         /*
         ==================================================
-        ACCOUNT PAYABLE
-        HUTANG USAHA
+        BUILD JOURNAL DETAILS
+        SINGLE SOURCE OF TRUTH
         ==================================================
         */
 
-        const payableAccountId =
-            39;
+        const builtJournalDetails =
+            await this.buildAPJournalLines(
+                invoice,
+                details,
+                {
+
+                    /*
+                    ==========================================
+                    REAL JOURNAL MUST USE FRESH TAX MASTER
+                    ==========================================
+                    */
+
+                    reloadTaxMaster:
+                        true,
 
 
-        if (!payableAccountId) {
+                    /*
+                    ==========================================
+                    REAL JOURNAL MUST FAIL
+                    IF ACCOUNT CONFIGURATION INVALID
+                    ==========================================
+                    */
 
-            throw new Error(
-                "Account Payable account is not configured."
+                    strictValidation:
+                        true
+
+                }
             );
 
-        }
-
 
         /*
         ==================================================
-        BUSINESS PARTNER
-        ==================================================
-        */
+        REMOVE INTERNAL PREVIEW PROPERTY
 
-        const businessPartnerId =
-            invoice.vendor_id
-                ? Number(
-                    invoice.vendor_id
-                )
-                : null;
-
-
-        /*
-        ==================================================
-        IMPORTANT
-        FORCE RELOAD TAX MASTER FROM DATABASE
-
-        DO NOT RELY ON OLD CACHE
-        ==================================================
-        */
-
-        await this.loadTaxMaster();
-
-
-        /*
-        ==================================================
-        DEBUG TAX MASTER
-        ==================================================
-        */
-
-        console.log(
-            "AP JOURNAL TAX PLUS MASTER:",
-            JSON.stringify(
-                this.taxPlusData,
-                null,
-                2
-            )
-        );
-
-
-        console.log(
-            "AP JOURNAL TAX MINUS MASTER:",
-            JSON.stringify(
-                this.taxMinusData,
-                null,
-                2
-            )
-        );
-
-
-        /*
-        ==================================================
-        JOURNAL DETAILS
+        GL SERVICE ONLY RECEIVES REAL DATABASE FIELDS
         ==================================================
         */
 
         const journalDetails =
-            [];
-
-
-        /*
-        ==================================================
-        LOOP AP DETAILS
-        ==================================================
-        */
-
-        for (
-            const detail
-            of details
-        ) {
-
-            /*
-            ==============================================
-            DEBUG CURRENT DETAIL
-            ==============================================
-            */
-
-            console.log(
-                "AP JOURNAL CURRENT DETAIL:",
-                JSON.stringify(
-                    detail,
-                    null,
-                    2
-                )
-            );
-
-
-            /*
-            ==============================================
-            BASE TRANSACTION
-            ==============================================
-            */
-
-            const chargeAccountId =
-                Number(
-                    detail.charge_account_id
-                    || 0
-                );
-
-
-            const lineAmount =
-                Number(
-                    detail.line_amount
-                    || 0
-                );
-
-
-            if (!chargeAccountId) {
-
-                throw new Error(
-                    `Debit Account is missing on AP detail: ${
-                        detail.description
-                        || ""
-                    }`
-                );
-
-            }
-
-
-            /*
-            ==============================================
-            BASE JOURNAL
-
-            DR CHARGE ACCOUNT
-            CR HUTANG USAHA
-            ==============================================
-            */
-
-            if (
-                lineAmount > 0
-            ) {
-
-                journalDetails.push({
+            builtJournalDetails.map(
+                line => ({
 
                     debit_account_id:
-                        chargeAccountId,
+                        line.debit_account_id,
 
                     credit_account_id:
-                        payableAccountId,
+                        line.credit_account_id,
 
                     business_partner_id:
-                        businessPartnerId,
+                        line.business_partner_id,
 
                     description:
-                        detail.description
-                        ||
-                        invoice.invoice_no
-                        ||
-                        "AP Invoice",
+                        line.description,
 
                     amount:
-                        lineAmount
-
-                });
-
-            }
-
-
-            /*
-            ==================================================
-            TAX (+)
-            ==================================================
-            */
-
-            const taxPlusAmount =
-                Number(
-                    detail.tax_input_amount
-                    || 0
-                );
-
-
-            const taxPlusRate =
-                Number(
-                    detail.tax_input_rate
-                    || 0
-                );
-
-
-            let taxPlusId =
-                detail.tax_plus_id
-                || null;
-
-
-            let taxPlusAccountId =
-                Number(
-                    detail.tax_plus_account_id
-                    || 0
-                );
-
-
-            let taxPlusName =
-                detail.tax_plus_name
-                || "Tax (+)";
-
-
-            /*
-            ==============================================
-            TAX (+)
-            FIND MASTER BY TAX ID
-            ==============================================
-            */
-
-            let taxPlusMaster =
-                null;
-
-
-            if (
-                taxPlusId
-            ) {
-
-                taxPlusMaster =
-                    this.taxPlusData.find(
-                        tax =>
-                            String(
-                                tax.id
-                            )
-                            ===
-                            String(
-                                taxPlusId
-                            )
-                    )
-                    || null;
-
-            }
-
-
-            /*
-            ==============================================
-            TAX (+)
-            FALLBACK BY RATE
-
-            OLD AP DATA SUPPORT
-            ==============================================
-            */
-
-            if (
-                !taxPlusMaster
-                &&
-                taxPlusRate > 0
-            ) {
-
-                taxPlusMaster =
-                    this.taxPlusData.find(
-                        tax =>
-                            Number(
-                                tax.tax_rate
-                                || 0
-                            )
-                            ===
-                            taxPlusRate
-                    )
-                    || null;
-
-            }
-
-
-            /*
-            ==============================================
-            TAX (+)
-            USE TAX MASTER
-            ==============================================
-            */
-
-            if (
-                taxPlusMaster
-            ) {
-
-                taxPlusId =
-                    taxPlusMaster.id
-                    ||
-                    taxPlusId;
-
-
-                /*
-                ==========================================
-                IMPORTANT
-
-                TAX MASTER IS SOURCE OF TRUTH
-                ==========================================
-                */
-
-                taxPlusAccountId =
-                    Number(
-                        taxPlusMaster.tax_account_id
-                        ||
-                        taxPlusAccountId
-                        ||
-                        0
-                    );
-
-
-                taxPlusName =
-                    taxPlusMaster.tax_name
-                    ||
-                    taxPlusName;
-
-            }
-
-
-            /*
-            ==============================================
-            TAX (+)
-            LAST FALLBACK DIRECT DATABASE BY ID
-            ==============================================
-            */
-
-            if (
-                taxPlusAmount > 0
-                &&
-                !taxPlusAccountId
-                &&
-                taxPlusId
-            ) {
-
-                const freshTax =
-                    await this.taxService.getById(
-                        taxPlusId
-                    );
-
-
-                if (freshTax) {
-
-                    taxPlusAccountId =
                         Number(
-                            freshTax.tax_account_id
+                            line.amount
                             || 0
-                        );
+                        )
 
-
-                    taxPlusName =
-                        freshTax.tax_name
-                        ||
-                        taxPlusName;
-
-                }
-
-            }
-
-
-            /*
-            ==============================================
-            TAX (+)
-            DEBUG FINAL RESOLUTION
-            ==============================================
-            */
-
-            console.log(
-                "AP TAX (+) FINAL RESOLUTION:",
-                {
-
-                    detail_tax_plus_id:
-                        detail.tax_plus_id,
-
-                    resolved_tax_plus_id:
-                        taxPlusId,
-
-                    rate:
-                        taxPlusRate,
-
-                    amount:
-                        taxPlusAmount,
-
-                    account_id:
-                        taxPlusAccountId,
-
-                    tax_name:
-                        taxPlusName,
-
-                    master:
-                        taxPlusMaster
-
-                }
+                })
             );
-
-
-            /*
-            ==============================================
-            TAX (+)
-            VALIDATION
-            ==============================================
-            */
-
-            if (
-                taxPlusAmount > 0
-                &&
-                !taxPlusAccountId
-            ) {
-
-                console.error(
-                    "AP TAX (+) ACCOUNT RESOLUTION FAILED:",
-                    {
-
-                        detail,
-
-                        tax_plus_id:
-                            taxPlusId,
-
-                        tax_input_rate:
-                            taxPlusRate,
-
-                        tax_input_amount:
-                            taxPlusAmount,
-
-                        tax_plus_account_id:
-                            taxPlusAccountId,
-
-                        tax_master:
-                            taxPlusMaster,
-
-                        taxPlusData:
-                            this.taxPlusData
-
-                    }
-                );
-
-
-                throw new Error(
-                    `Tax (+) Account is missing for ${taxPlusName}. Check Tax Master configuration.`
-                );
-
-            }
-
-
-            /*
-            ==============================================
-            TAX (+) JOURNAL
-
-            DR PPN MASUKAN
-            CR HUTANG USAHA
-            ==============================================
-            */
-
-            if (
-                taxPlusAmount > 0
-            ) {
-
-                journalDetails.push({
-
-                    debit_account_id:
-                        taxPlusAccountId,
-
-                    credit_account_id:
-                        payableAccountId,
-
-                    business_partner_id:
-                        businessPartnerId,
-
-                    description:
-                        `${taxPlusName} - ${
-                            invoice.invoice_no
-                            || ""
-                        }`,
-
-                    amount:
-                        taxPlusAmount
-
-                });
-
-            }
-
-
-            /*
-            ==================================================
-            TAX (-)
-            ==================================================
-            */
-
-            const taxMinusAmount =
-                Number(
-                    detail.withholding_tax_amount
-                    || 0
-                );
-
-
-            const taxMinusRate =
-                Number(
-                    detail.withholding_tax_rate
-                    || 0
-                );
-
-
-            let taxMinusId =
-                detail.tax_minus_id
-                || null;
-
-
-            let taxMinusAccountId =
-                Number(
-                    detail.tax_minus_account_id
-                    || 0
-                );
-
-
-            let taxMinusName =
-                detail.tax_minus_name
-                || "Tax (-)";
-
-
-            /*
-            ==============================================
-            TAX (-)
-            FIND MASTER BY TAX ID
-            ==============================================
-            */
-
-            let taxMinusMaster =
-                null;
-
-
-            if (
-                taxMinusId
-            ) {
-
-                taxMinusMaster =
-                    this.taxMinusData.find(
-                        tax =>
-                            String(
-                                tax.id
-                            )
-                            ===
-                            String(
-                                taxMinusId
-                            )
-                    )
-                    || null;
-
-            }
-
-
-            /*
-            ==============================================
-            TAX (-)
-            FALLBACK BY RATE
-
-            OLD AP DATA SUPPORT
-            ==============================================
-            */
-
-            if (
-                !taxMinusMaster
-                &&
-                taxMinusRate > 0
-            ) {
-
-                taxMinusMaster =
-                    this.taxMinusData.find(
-                        tax =>
-                            Number(
-                                tax.tax_rate
-                                || 0
-                            )
-                            ===
-                            taxMinusRate
-                    )
-                    || null;
-
-            }
-
-
-            /*
-            ==============================================
-            TAX (-)
-            USE TAX MASTER
-            ==============================================
-            */
-
-            if (
-                taxMinusMaster
-            ) {
-
-                taxMinusId =
-                    taxMinusMaster.id
-                    ||
-                    taxMinusId;
-
-
-                taxMinusAccountId =
-                    Number(
-                        taxMinusMaster.tax_account_id
-                        ||
-                        taxMinusAccountId
-                        ||
-                        0
-                    );
-
-
-                taxMinusName =
-                    taxMinusMaster.tax_name
-                    ||
-                    taxMinusName;
-
-            }
-
-
-            /*
-            ==============================================
-            TAX (-)
-            LAST FALLBACK DIRECT DATABASE BY ID
-            ==============================================
-            */
-
-            if (
-                taxMinusAmount > 0
-                &&
-                !taxMinusAccountId
-                &&
-                taxMinusId
-            ) {
-
-                const freshTax =
-                    await this.taxService.getById(
-                        taxMinusId
-                    );
-
-
-                if (freshTax) {
-
-                    taxMinusAccountId =
-                        Number(
-                            freshTax.tax_account_id
-                            || 0
-                        );
-
-
-                    taxMinusName =
-                        freshTax.tax_name
-                        ||
-                        taxMinusName;
-
-                }
-
-            }
-
-
-            /*
-            ==============================================
-            TAX (-)
-            DEBUG FINAL RESOLUTION
-            ==============================================
-            */
-
-            console.log(
-                "AP TAX (-) FINAL RESOLUTION:",
-                {
-
-                    detail_tax_minus_id:
-                        detail.tax_minus_id,
-
-                    resolved_tax_minus_id:
-                        taxMinusId,
-
-                    rate:
-                        taxMinusRate,
-
-                    amount:
-                        taxMinusAmount,
-
-                    account_id:
-                        taxMinusAccountId,
-
-                    tax_name:
-                        taxMinusName,
-
-                    master:
-                        taxMinusMaster
-
-                }
-            );
-
-
-            /*
-            ==============================================
-            TAX (-)
-            VALIDATION
-            ==============================================
-            */
-
-            if (
-                taxMinusAmount > 0
-                &&
-                !taxMinusAccountId
-            ) {
-
-                console.error(
-                    "AP TAX (-) ACCOUNT RESOLUTION FAILED:",
-                    {
-
-                        detail,
-
-                        tax_minus_id:
-                            taxMinusId,
-
-                        withholding_tax_rate:
-                            taxMinusRate,
-
-                        withholding_tax_amount:
-                            taxMinusAmount,
-
-                        tax_minus_account_id:
-                            taxMinusAccountId,
-
-                        tax_master:
-                            taxMinusMaster,
-
-                        taxMinusData:
-                            this.taxMinusData
-
-                    }
-                );
-
-
-                throw new Error(
-                    `Tax (-) Account is missing for ${taxMinusName}. Check Tax Master configuration.`
-                );
-
-            }
-
-
-            /*
-            ==============================================
-            TAX (-) JOURNAL
-
-            DR HUTANG USAHA
-            CR HUTANG PPH
-            ==============================================
-            */
-
-            if (
-                taxMinusAmount > 0
-            ) {
-
-                journalDetails.push({
-
-                    debit_account_id:
-                        payableAccountId,
-
-                    credit_account_id:
-                        taxMinusAccountId,
-
-                    business_partner_id:
-                        businessPartnerId,
-
-                    description:
-                        `${taxMinusName} - ${
-                            invoice.invoice_no
-                            || ""
-                        }`,
-
-                    amount:
-                        taxMinusAmount
-
-                });
-
-            }
-
-        }
 
 
         /*
@@ -4455,12 +4604,30 @@ async generateAPJournal(
                 "",
 
 
+            /*
+            ==============================================
+            ACCOUNTING DATE
+
+            AP USES DATE RECEIVED
+            ==============================================
+            */
+
             journal_date:
                 invoice.date_received,
 
+
+            /*
+            ==============================================
+            POSTING PERIOD
+            ==============================================
+            */
+
             posting_period:
                 invoice.date_received
-                    ? invoice.date_received.substring(0, 7)
+                    ? invoice.date_received.substring(
+                        0,
+                        7
+                    )
                     : "",
 
 
@@ -4529,6 +4696,8 @@ async generateAPJournal(
             /*
             ==============================================
             STATUS
+
+            NEW GENERATED JOURNAL = DRAFT
             ==============================================
             */
 
@@ -4571,6 +4740,12 @@ async generateAPJournal(
             );
 
 
+        /*
+        ==================================================
+        VALIDATE CREATED JOURNAL
+        ==================================================
+        */
+
         if (!journal) {
 
             throw new Error(
@@ -4592,11 +4767,19 @@ async generateAPJournal(
         );
 
 
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
+
         return journal;
 
     }
 
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
             "AccountPayable.generateAPJournal:",
@@ -5302,6 +5485,298 @@ showCompleteConfirmation(id) {
 }
 /*
 ======================================================
+VALIDATE AP ACCOUNTING
+BEFORE COMPLETE / GENERATE GL JOURNAL
+
+USES SAME JOURNAL BUILDER AS:
+1. ACCOUNTING PREVIEW
+2. GENERATE AP JOURNAL
+======================================================
+*/
+
+async validateAPAccounting(
+    invoice,
+    details
+) {
+
+    /*
+    ==================================================
+    VALIDATE HEADER
+    ==================================================
+    */
+
+    if (!invoice) {
+
+        throw new Error(
+            "Account Payable header is required."
+        );
+
+    }
+
+
+    /*
+    ==================================================
+    VALIDATE DETAIL
+    ==================================================
+    */
+
+    if (
+        !Array.isArray(details)
+        ||
+        !details.length
+    ) {
+
+        throw new Error(
+            "Account Payable detail cannot be empty."
+        );
+
+    }
+
+
+    /*
+    ==================================================
+    BUILD JOURNAL LINES
+
+    STRICT VALIDATION:
+    - CHARGE ACCOUNT REQUIRED
+    - TAX (+) ACCOUNT REQUIRED
+    - TAX (-) ACCOUNT REQUIRED
+    - FRESH TAX MASTER
+    ==================================================
+    */
+
+    const journalDetails =
+        await this.buildAPJournalLines(
+            invoice,
+            details,
+            {
+                reloadTaxMaster:
+                    true,
+
+                strictValidation:
+                    true
+            }
+        );
+
+
+    /*
+    ==================================================
+    VALIDATE JOURNAL LINES
+    ==================================================
+    */
+
+    if (
+        !Array.isArray(journalDetails)
+        ||
+        !journalDetails.length
+    ) {
+
+        throw new Error(
+            "No valid AP journal lines were generated."
+        );
+
+    }
+
+
+    /*
+    ==================================================
+    CALCULATE DEBIT / CREDIT
+
+    BUILDER FORMAT:
+    debit_account_id
+    credit_account_id
+    amount
+
+    EACH LINE IS BALANCED PAIR
+    ==================================================
+    */
+
+    let totalDebit =
+        0;
+
+
+    let totalCredit =
+        0;
+
+
+    journalDetails.forEach(
+        line => {
+
+            const amount =
+                Number(
+                    line.amount
+                    || 0
+                );
+
+
+            /*
+            ==============================================
+            AMOUNT MUST BE VALID
+            ==============================================
+            */
+
+            if (
+                !Number.isFinite(amount)
+                ||
+                amount <= 0
+            ) {
+
+                throw new Error(
+                    `Invalid journal amount found: ${
+                        line.description
+                        || "AP Journal"
+                    }.`
+                );
+
+            }
+
+
+            /*
+            ==============================================
+            DEBIT ACCOUNT REQUIRED
+            ==============================================
+            */
+
+            if (
+                !line.debit_account_id
+            ) {
+
+                throw new Error(
+                    `Debit Account is missing: ${
+                        line.description
+                        || "AP Journal"
+                    }.`
+                );
+
+            }
+
+
+            /*
+            ==============================================
+            CREDIT ACCOUNT REQUIRED
+            ==============================================
+            */
+
+            if (
+                !line.credit_account_id
+            ) {
+
+                throw new Error(
+                    `Credit Account is missing: ${
+                        line.description
+                        || "AP Journal"
+                    }.`
+                );
+
+            }
+
+
+            totalDebit +=
+                amount;
+
+
+            totalCredit +=
+                amount;
+
+        }
+    );
+
+
+    /*
+    ==================================================
+    DIFFERENCE
+    ==================================================
+    */
+
+    const difference =
+        Math.abs(
+            totalDebit
+            -
+            totalCredit
+        );
+
+
+    /*
+    ==================================================
+    BALANCED
+    ==================================================
+    */
+
+    const isBalanced =
+        totalDebit > 0
+        &&
+        totalCredit > 0
+        &&
+        difference < 0.5;
+
+
+    /*
+    ==================================================
+    BLOCK COMPLETE
+    ==================================================
+    */
+
+    if (
+        !isBalanced
+    ) {
+
+        throw new Error(
+            `Accounting Preview is NOT BALANCED. Debit: ${
+                this.formatCurrency(
+                    totalDebit
+                )
+            }, Credit: ${
+                this.formatCurrency(
+                    totalCredit
+                )
+            }, Difference: ${
+                this.formatCurrency(
+                    difference
+                )
+            }.`
+        );
+
+    }
+
+
+    /*
+    ==================================================
+    SUCCESS
+    ==================================================
+    */
+
+    console.log(
+        "AP ACCOUNTING VALIDATION:",
+        {
+            journalDetails,
+            totalDebit,
+            totalCredit,
+            difference,
+            isBalanced
+        }
+    );
+
+
+    return {
+
+        valid:
+            true,
+
+        journalDetails,
+
+        totalDebit,
+
+        totalCredit,
+
+        difference,
+
+        isBalanced
+
+    };
+
+}
+/*
+======================================================
 COMPLETE ACCOUNT PAYABLE
 GENERATE GL JOURNAL AS DRAFT
 ======================================================
@@ -5417,6 +5892,43 @@ async completeInvoice(id) {
             );
 
         }
+        /*
+==================================================
+VALIDATE ACCOUNTING
+BEFORE GENERATE / LINK GL JOURNAL
+==================================================
+*/
+
+const accountingValidation =
+    await this.validateAPAccounting(
+        invoice,
+        details
+    );
+
+
+if (
+    !accountingValidation
+    ||
+    accountingValidation.valid !== true
+) {
+
+    throw new Error(
+        "Account Payable accounting validation failed."
+    );
+
+}
+
+
+/*
+==================================================
+DEBUG ACCOUNTING VALIDATION
+==================================================
+*/
+
+console.log(
+    "AP COMPLETE ACCOUNTING VALIDATION:",
+    accountingValidation
+);
 
 
         /*
@@ -6361,6 +6873,65 @@ this.btnSaveAPPayment =
         "btn-save-ap-payment"
     );
 
+    /*
+==================================================
+ACCOUNTING PREVIEW
+==================================================
+*/
+
+this.apAccountingPreviewBody =
+    document.getElementById(
+        "ap-accounting-preview-body"
+    );
+
+
+this.apAccountingPreviewTotalDebit =
+    document.getElementById(
+        "ap-accounting-preview-total-debit"
+    );
+
+
+this.apAccountingPreviewTotalCredit =
+    document.getElementById(
+        "ap-accounting-preview-total-credit"
+    );
+
+
+this.apAccountingPreviewSummaryDebit =
+    document.getElementById(
+        "ap-accounting-preview-summary-debit"
+    );
+
+
+this.apAccountingPreviewSummaryCredit =
+    document.getElementById(
+        "ap-accounting-preview-summary-credit"
+    );
+
+
+this.apAccountingPreviewDifference =
+    document.getElementById(
+        "ap-accounting-preview-difference"
+    );
+
+
+this.apAccountingPreviewStatus =
+    document.getElementById(
+        "ap-accounting-preview-status"
+    );
+
+
+this.apAccountingPreviewStatusTitle =
+    document.getElementById(
+        "ap-accounting-preview-status-title"
+    );
+
+
+this.apAccountingPreviewStatusMessage =
+    document.getElementById(
+        "ap-accounting-preview-status-message"
+    );
+
 }
    /*
 ======================================================
@@ -6982,34 +7553,137 @@ if (btnConfirmCompleteAP) {
 
             /*
             ==========================================
-            CLOSE MODAL
+            PREVENT DOUBLE CLICK
             ==========================================
             */
 
             if (
-                this.accountPayableCompleteModal
+                btnConfirmCompleteAP.disabled
             ) {
 
-                this.accountPayableCompleteModal.hide();
+                return;
 
             }
 
 
-            /*
-            ==========================================
-            COMPLETE AP
-            ==========================================
-            */
+            const originalHTML =
+                btnConfirmCompleteAP.innerHTML;
 
-            await this.completeInvoice(
-                id
-            );
+
+            try {
+
+                /*
+                ======================================
+                LOADING
+                ======================================
+                */
+
+                btnConfirmCompleteAP.disabled =
+                    true;
+
+
+                btnConfirmCompleteAP.innerHTML = `
+
+                    <span
+                        class="spinner-border spinner-border-sm me-2"
+                        aria-hidden="true"
+                    ></span>
+
+                    Completing...
+
+                `;
+
+
+                /*
+                ======================================
+                AUTHORITATIVE COMPLETE
+
+                completeInvoice() WILL:
+                - LOAD DATABASE AP
+                - VALIDATE DRAFT
+                - VALIDATE ACCOUNTING
+                - GENERATE GL
+                - LINK GL
+                - COMPLETE AP
+                ======================================
+                */
+
+                await this.completeInvoice(
+                    id
+                );
+
+
+                /*
+                ======================================
+                CLOSE CONFIRMATION
+                ONLY AFTER SUCCESS
+                ======================================
+                */
+
+                if (
+                    this.accountPayableCompleteModal
+                ) {
+
+                    this.accountPayableCompleteModal.hide();
+
+                }
+
+
+                /*
+                ======================================
+                CLEAR PENDING
+                ======================================
+                */
+
+                this.pendingCompleteAPId =
+                    null;
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "AccountPayable.confirmComplete:",
+                    error
+                );
+
+
+                /*
+                ======================================
+                KEEP CONFIRMATION MODAL OPEN
+                WHEN VALIDATION FAILS
+                ======================================
+                */
+
+                this.showError(
+                    error?.message
+                    ||
+                    "Failed to complete Account Payable."
+                );
+
+            }
+
+            finally {
+
+                /*
+                ======================================
+                RESTORE BUTTON
+                ======================================
+                */
+
+                btnConfirmCompleteAP.disabled =
+                    false;
+
+
+                btnConfirmCompleteAP.innerHTML =
+                    originalHTML;
+
+            }
 
         }
     );
 
 }
-
     /*
 ======================================================
 CONFIRM DELETE DETAIL
@@ -10503,6 +11177,16 @@ this.renderTaxMinus();
 
 /*
 ==================================================
+SYNC ACCOUNTING PREVIEW
+REALTIME
+==================================================
+*/
+
+this.renderAccountingPreview();
+
+
+/*
+==================================================
 DEBUG
 ==================================================
 */
@@ -11622,6 +12306,1712 @@ renderTaxMinus() {
 
         console.error(
             "AccountPayable.renderTaxMinus:",
+            error
+        );
+
+    }
+
+}
+/*
+======================================================
+CHECK AP ACCOUNTING PREVIEW READINESS
+
+NO DATABASE WRITE
+USED BY REALTIME ACCOUNTING PREVIEW
+======================================================
+*/
+
+checkAPAccountingPreviewReadiness(
+    details
+) {
+
+    const issues = [];
+
+
+    /*
+    ==================================================
+    VALIDATE DETAILS
+    ==================================================
+    */
+
+    if (
+        !Array.isArray(details)
+        ||
+        !details.length
+    ) {
+
+        issues.push(
+            "Invoice Detail is empty."
+        );
+
+
+        return {
+            ready: false,
+            issues
+        };
+
+    }
+
+
+    /*
+    ==================================================
+    LOOP DETAILS
+    ==================================================
+    */
+
+    details.forEach(
+        (
+            detail,
+            index
+        ) => {
+
+            const rowNo =
+                index + 1;
+
+
+            /*
+            ==============================================
+            BASE AMOUNT
+            ==============================================
+            */
+
+            const lineAmount =
+                Number(
+                    detail.line_amount
+                    || 0
+                );
+
+
+            /*
+            ==============================================
+            CHARGE ACCOUNT
+            ==============================================
+            */
+
+            const chargeAccountId =
+                Number(
+                    detail.charge_account_id
+                    || 0
+                );
+
+
+            if (
+                lineAmount > 0
+                &&
+                !chargeAccountId
+            ) {
+
+                issues.push(
+                    `Invoice Detail row ${rowNo}: Charge Account is missing.`
+                );
+
+            }
+
+
+            /*
+            ==============================================
+            TAX (+)
+            ==============================================
+            */
+
+            const taxPlusAmount =
+                Number(
+                    detail.tax_input_amount
+                    || 0
+                );
+
+
+            if (
+                taxPlusAmount > 0
+            ) {
+
+                let taxPlusAccountId =
+                    Number(
+                        detail.tax_plus_account_id
+                        || 0
+                    );
+
+
+                const taxPlusId =
+                    detail.tax_plus_id
+                    || null;
+
+
+                /*
+                ==========================================
+                RESOLVE FROM CURRENT TAX MASTER
+                ==========================================
+                */
+
+                if (
+                    !taxPlusAccountId
+                    &&
+                    taxPlusId
+                    &&
+                    Array.isArray(
+                        this.taxPlusData
+                    )
+                ) {
+
+                    const taxMaster =
+                        this.taxPlusData.find(
+                            tax =>
+                                String(
+                                    tax.id
+                                )
+                                ===
+                                String(
+                                    taxPlusId
+                                )
+                        );
+
+
+                    taxPlusAccountId =
+                        Number(
+                            taxMaster
+                                ?.tax_account_id
+                            || 0
+                        );
+
+                }
+
+
+                if (
+                    !taxPlusAccountId
+                ) {
+
+                    issues.push(
+                        `Invoice Detail row ${rowNo}: Tax (+) Account is not configured.`
+                    );
+
+                }
+
+            }
+
+
+            /*
+            ==============================================
+            TAX (-)
+            ==============================================
+            */
+
+            const taxMinusAmount =
+                Number(
+                    detail.withholding_tax_amount
+                    || 0
+                );
+
+
+            if (
+                taxMinusAmount > 0
+            ) {
+
+                let taxMinusAccountId =
+                    Number(
+                        detail.tax_minus_account_id
+                        || 0
+                    );
+
+
+                const taxMinusId =
+                    detail.tax_minus_id
+                    || null;
+
+
+                /*
+                ==========================================
+                RESOLVE FROM CURRENT TAX MASTER
+                ==========================================
+                */
+
+                if (
+                    !taxMinusAccountId
+                    &&
+                    taxMinusId
+                    &&
+                    Array.isArray(
+                        this.taxMinusData
+                    )
+                ) {
+
+                    const taxMaster =
+                        this.taxMinusData.find(
+                            tax =>
+                                String(
+                                    tax.id
+                                )
+                                ===
+                                String(
+                                    taxMinusId
+                                )
+                        );
+
+
+                    taxMinusAccountId =
+                        Number(
+                            taxMaster
+                                ?.tax_account_id
+                            || 0
+                        );
+
+                }
+
+
+                if (
+                    !taxMinusAccountId
+                ) {
+
+                    issues.push(
+                        `Invoice Detail row ${rowNo}: Tax (-) Account is not configured.`
+                    );
+
+                }
+
+            }
+
+        }
+    );
+
+
+    /*
+    ==================================================
+    RETURN
+    ==================================================
+    */
+
+    return {
+
+        ready:
+            issues.length === 0,
+
+        issues
+
+    };
+
+}
+/*
+======================================================
+SET AP ACCOUNTING PREVIEW STATE
+======================================================
+*/
+
+setAPAccountingPreviewState({
+
+    status = "WAITING",
+
+    isReady = false,
+
+    isBalanced = false,
+
+    totalDebit = 0,
+
+    totalCredit = 0,
+
+    difference = 0,
+
+    issues = []
+
+} = {}) {
+
+    this.apAccountingPreviewState = {
+
+        status,
+
+        isReady:
+            isReady === true,
+
+        isBalanced:
+            isBalanced === true,
+
+        totalDebit:
+            Number(
+                totalDebit
+                || 0
+            ),
+
+        totalCredit:
+            Number(
+                totalCredit
+                || 0
+            ),
+
+        difference:
+            Number(
+                difference
+                || 0
+            ),
+
+        issues:
+            Array.isArray(
+                issues
+            )
+                ? [...issues]
+                : []
+
+    };
+
+}
+/*
+======================================================
+CHECK AP COMPLETE READINESS
+FROM CURRENT ACCOUNTING PREVIEW
+
+UI VALIDATION ONLY
+
+AUTHORITATIVE VALIDATION REMAINS:
+validateAPAccounting()
+======================================================
+*/
+
+canCompleteAPFromPreview() {
+
+    const state =
+        this.apAccountingPreviewState
+        || {};
+
+
+    /*
+    ==================================================
+    BALANCED
+    ==================================================
+    */
+
+    if (
+        state.status === "BALANCED"
+        &&
+        state.isReady === true
+        &&
+        state.isBalanced === true
+        &&
+        Number(
+            state.totalDebit
+            || 0
+        ) > 0
+        &&
+        Number(
+            state.totalCredit
+            || 0
+        ) > 0
+        &&
+        Number(
+            state.difference
+            || 0
+        ) < 0.5
+    ) {
+
+        return {
+
+            allowed:
+                true,
+
+            message:
+                ""
+
+        };
+
+    }
+
+
+    /*
+    ==================================================
+    WAITING
+    ==================================================
+    */
+
+    if (
+        state.status === "WAITING"
+    ) {
+
+        return {
+
+            allowed:
+                false,
+
+            message:
+                "Accounting Preview is not ready. Please add Invoice Detail first."
+
+        };
+
+    }
+
+
+    /*
+    ==================================================
+    NOT READY
+    ==================================================
+    */
+
+    if (
+        state.status === "NOT_READY"
+    ) {
+
+        const issues =
+            Array.isArray(
+                state.issues
+            )
+                ? state.issues
+                : [];
+
+
+        return {
+
+            allowed:
+                false,
+
+            message:
+                issues.length
+                    ? `Accounting configuration is not ready: ${issues.join(" ")}`
+                    : "Accounting configuration is not ready."
+
+        };
+
+    }
+
+
+    /*
+    ==================================================
+    NOT BALANCED
+    ==================================================
+    */
+
+    if (
+        state.status === "NOT_BALANCED"
+    ) {
+
+        return {
+
+            allowed:
+                false,
+
+            message:
+                `Accounting Preview is not balanced. Difference: ${
+                    this.formatCurrency(
+                        Number(
+                            state.difference
+                            || 0
+                        )
+                    )
+                }.`
+
+        };
+
+    }
+
+
+    /*
+    ==================================================
+    FALLBACK
+    ==================================================
+    */
+
+    return {
+
+        allowed:
+            false,
+
+        message:
+            "Accounting Preview must be BALANCED before Account Payable can be completed."
+
+    };
+
+}
+
+/*
+======================================================
+RENDER ACCOUNTING PREVIEW
+ACCOUNT PAYABLE
+
+USES buildAPJournalLines()
+SAME SOURCE AS REAL GL JOURNAL
+======================================================
+*/
+
+async renderAccountingPreview() {
+
+    /*
+    ==================================================
+    REQUEST ID
+
+    PREVENT OLD ASYNC RESULT
+    FROM OVERWRITING NEW PREVIEW
+    ==================================================
+    */
+
+    const requestId =
+        ++this.apAccountingPreviewRequestId;
+
+
+    try {
+
+        /*
+        ==================================================
+        GET DOM
+        ==================================================
+        */
+
+        const body =
+            this.apAccountingPreviewBody
+            ||
+            document.getElementById(
+                "ap-accounting-preview-body"
+            );
+
+
+        const totalDebitElement =
+            this.apAccountingPreviewTotalDebit
+            ||
+            document.getElementById(
+                "ap-accounting-preview-total-debit"
+            );
+
+
+        const totalCreditElement =
+            this.apAccountingPreviewTotalCredit
+            ||
+            document.getElementById(
+                "ap-accounting-preview-total-credit"
+            );
+
+
+        const summaryDebitElement =
+            this.apAccountingPreviewSummaryDebit
+            ||
+            document.getElementById(
+                "ap-accounting-preview-summary-debit"
+            );
+
+
+        const summaryCreditElement =
+            this.apAccountingPreviewSummaryCredit
+            ||
+            document.getElementById(
+                "ap-accounting-preview-summary-credit"
+            );
+
+
+        const differenceElement =
+            this.apAccountingPreviewDifference
+            ||
+            document.getElementById(
+                "ap-accounting-preview-difference"
+            );
+
+
+        const statusElement =
+            this.apAccountingPreviewStatus
+            ||
+            document.getElementById(
+                "ap-accounting-preview-status"
+            );
+
+
+        const statusTitleElement =
+            this.apAccountingPreviewStatusTitle
+            ||
+            document.getElementById(
+                "ap-accounting-preview-status-title"
+            );
+
+
+        const statusMessageElement =
+            this.apAccountingPreviewStatusMessage
+            ||
+            document.getElementById(
+                "ap-accounting-preview-status-message"
+            );
+
+
+        if (!body) {
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        DETAILS
+        ==================================================
+        */
+
+        const details =
+            Array.isArray(
+                this.invoiceDetails
+            )
+                ? this.invoiceDetails
+                : [];
+
+        /*
+==================================================
+CHECK ACCOUNTING CONFIGURATION
+==================================================
+*/
+
+const readiness =
+    this.checkAPAccountingPreviewReadiness(
+        details
+    );
+
+
+        /*
+        ==================================================
+        EMPTY
+        ==================================================
+        */
+
+        if (
+            !details.length
+        ) {
+
+            body.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="5"
+                        class="
+                            text-center
+                            text-muted
+                            py-4
+                        "
+                    >
+
+                        No accounting preview available.
+
+                    </td>
+
+                </tr>
+
+            `;
+
+
+            if (totalDebitElement) {
+                totalDebitElement.textContent = "0";
+            }
+
+
+            if (totalCreditElement) {
+                totalCreditElement.textContent = "0";
+            }
+
+
+            if (summaryDebitElement) {
+                summaryDebitElement.textContent = "0";
+            }
+
+
+            if (summaryCreditElement) {
+                summaryCreditElement.textContent = "0";
+            }
+
+
+            if (differenceElement) {
+
+                differenceElement.textContent =
+                    "0";
+
+                differenceElement.classList.remove(
+                    "text-success",
+                    "text-danger"
+                );
+
+            }
+
+
+            if (statusElement) {
+
+                statusElement.className =
+                    "alert alert-secondary border h-100 mb-0 d-flex align-items-center";
+
+            }
+
+
+            if (statusTitleElement) {
+
+                statusTitleElement.textContent =
+                    "Waiting for Transaction";
+
+            }
+
+
+            if (statusMessageElement) {
+
+                statusMessageElement.textContent =
+                    "Add Invoice Detail to generate the accounting preview.";
+
+            }
+            /*
+==================================================
+SYNC PREVIEW STATE
+==================================================
+*/
+
+this.setAPAccountingPreviewState({
+
+    status:
+        "WAITING",
+
+    isReady:
+        false,
+
+    isBalanced:
+        false,
+
+    totalDebit:
+        0,
+
+    totalCredit:
+        0,
+
+    difference:
+        0,
+
+    issues: [
+        "Invoice Detail is empty."
+    ]
+
+});
+
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        BUILD TEMPORARY INVOICE HEADER
+
+        PREVIEW DOES NOT REQUIRE SAVED AP ID
+        ==================================================
+        */
+
+        const invoice = {
+
+            id:
+                this.currentInvoiceId
+                || null,
+
+            vendor_id:
+                this.apVendorSelect
+                    ? this.apVendorSelect.getValue()
+                    : this.apFormVendor?.value
+                      || null,
+
+            invoice_no:
+                this.apFormInvoiceNo?.value
+                ||
+                "",
+
+            po_no:
+                this.apFormPoNo?.value
+                ||
+                "",
+
+            date_received:
+                this.apFormDateReceived?.value
+                ||
+                "",
+
+            description:
+                this.apFormDescription?.value
+                ||
+                ""
+
+        };
+
+
+        /*
+        ==================================================
+        BUILD REAL JOURNAL LINES
+
+        SAME FUNCTION AS generateAPJournal()
+
+        NO DATABASE WRITE
+        NO TAX MASTER RELOAD
+        NO STRICT THROW
+        ==================================================
+        */
+
+        const journalDetails =
+            await this.buildAPJournalLines(
+                invoice,
+                details,
+                {
+                    reloadTaxMaster:
+                        false,
+
+                    strictValidation:
+                        false
+                }
+            );
+        /*
+==================================================
+IGNORE STALE PREVIEW RESULT
+==================================================
+*/
+
+if (
+    requestId
+    !==
+    this.apAccountingPreviewRequestId
+) {
+
+    return;
+
+}
+
+        /*
+        ==================================================
+        EMPTY VALID JOURNAL
+        ==================================================
+        */
+
+        if (
+            !journalDetails.length
+        ) {
+
+            body.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="5"
+                        class="
+                            text-center
+                            text-muted
+                            py-4
+                        "
+                    >
+
+                        No valid journal lines available.
+
+                    </td>
+
+                </tr>
+
+            `;
+
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        CONVERT GL JOURNAL PAIRS
+        INTO ACCOUNT-SIDE PREVIEW LINES
+        ==================================================
+        */
+
+        const accountMap =
+            new Map();
+
+
+        const addAccountAmount = (
+            accountId,
+            debit,
+            credit,
+            description
+        ) => {
+
+            const id =
+                Number(
+                    accountId
+                    || 0
+                );
+
+
+            if (!id) {
+
+                return;
+
+            }
+
+
+            const coa =
+                Array.isArray(
+                    this.currentCOA
+                )
+                    ? this.currentCOA.find(
+                        account =>
+                            Number(
+                                account.id
+                            )
+                            ===
+                            id
+                    )
+                    : null;
+
+
+            const key =
+                String(
+                    id
+                );
+
+
+            if (
+                !accountMap.has(
+                    key
+                )
+            ) {
+
+                accountMap.set(
+                    key,
+                    {
+                        account_id:
+                            id,
+
+                        account_code:
+                            coa?.account_code
+                            ||
+                            "-",
+
+                        account_name:
+                            coa?.account_name
+                            ||
+                            (
+                                id === 39
+                                    ? "HUTANG USAHA"
+                                    : "-"
+                            ),
+
+                        debit:
+                            0,
+
+                        credit:
+                            0,
+
+                        descriptions:
+                            []
+                    }
+                );
+
+            }
+
+
+            const current =
+                accountMap.get(
+                    key
+                );
+
+
+            current.debit +=
+                Number(
+                    debit
+                    || 0
+                );
+
+
+            current.credit +=
+                Number(
+                    credit
+                    || 0
+                );
+
+
+            if (
+                description
+                &&
+                !current.descriptions.includes(
+                    description
+                )
+            ) {
+
+                current.descriptions.push(
+                    description
+                );
+
+            }
+
+        };
+
+
+        /*
+        ==================================================
+        SPLIT EACH GL LINE
+
+        journalDetails format:
+        DR ACCOUNT
+        CR ACCOUNT
+        amount
+        ==================================================
+        */
+
+        journalDetails.forEach(
+            line => {
+
+                const amount =
+                    Number(
+                        line.amount
+                        || 0
+                    );
+
+
+                addAccountAmount(
+
+                    line.debit_account_id,
+
+                    amount,
+
+                    0,
+
+                    line.description
+
+                );
+
+
+                addAccountAmount(
+
+                    line.credit_account_id,
+
+                    0,
+
+                    amount,
+
+                    line.description
+
+                );
+
+            }
+        );
+
+
+        /*
+        ==================================================
+        NET SAME ACCOUNT
+
+        EXAMPLE HUTANG USAHA:
+        CREDIT BASE
+        + CREDIT TAX(+)
+        - DEBIT TAX(-)
+        ==================================================
+        */
+
+        const previewLines =
+            Array.from(
+                accountMap.values()
+            )
+            .map(
+                line => {
+
+                    const debit =
+                        Number(
+                            line.debit
+                            || 0
+                        );
+
+
+                    const credit =
+                        Number(
+                            line.credit
+                            || 0
+                        );
+
+
+                    if (
+                        debit > credit
+                    ) {
+
+                        return {
+                            ...line,
+
+                            debit:
+                                debit - credit,
+
+                            credit:
+                                0
+                        };
+
+                    }
+
+
+                    if (
+                        credit > debit
+                    ) {
+
+                        return {
+                            ...line,
+
+                            debit:
+                                0,
+
+                            credit:
+                                credit - debit
+                        };
+
+                    }
+
+
+                    return {
+                        ...line,
+
+                        debit:
+                            0,
+
+                        credit:
+                            0
+                    };
+
+                }
+            )
+            .filter(
+                line =>
+                    Number(
+                        line.debit
+                        || 0
+                    ) > 0
+                    ||
+                    Number(
+                        line.credit
+                        || 0
+                    ) > 0
+            );
+
+
+        /*
+        ==================================================
+        TOTAL
+        ==================================================
+        */
+
+        const totalDebit =
+            previewLines.reduce(
+                (
+                    total,
+                    line
+                ) =>
+                    total
+                    +
+                    Number(
+                        line.debit
+                        || 0
+                    ),
+                0
+            );
+
+
+        const totalCredit =
+            previewLines.reduce(
+                (
+                    total,
+                    line
+                ) =>
+                    total
+                    +
+                    Number(
+                        line.credit
+                        || 0
+                    ),
+                0
+            );
+
+
+        const difference =
+            Math.abs(
+                totalDebit
+                -
+                totalCredit
+            );
+
+
+        /*
+==================================================
+ACCOUNTING STATUS
+==================================================
+*/
+
+const isReady =
+    readiness.ready === true;
+
+
+const isBalanced =
+    isReady
+    &&
+    difference < 0.5
+    &&
+    totalDebit > 0
+    &&
+    totalCredit > 0;
+
+
+const accountingStatus =
+    !isReady
+        ? "NOT_READY"
+        : isBalanced
+            ? "BALANCED"
+            : "NOT_BALANCED";
+        /*
+==================================================
+SYNC ACCOUNTING PREVIEW STATE
+==================================================
+*/
+
+this.setAPAccountingPreviewState({
+
+    status:
+        accountingStatus,
+
+    isReady,
+
+    isBalanced,
+
+    totalDebit,
+
+    totalCredit,
+
+    difference,
+
+    issues:
+        readiness.issues
+
+});
+
+
+        /*
+        ==================================================
+        RENDER PREVIEW TABLE
+        ==================================================
+        */
+
+        body.innerHTML =
+            previewLines
+                .map(
+                    (
+                        line,
+                        index
+                    ) => {
+
+                        const description =
+                            Array.isArray(
+                                line.descriptions
+                            )
+                                ? line.descriptions
+                                    .filter(
+                                        Boolean
+                                    )
+                                    .join(
+                                        " / "
+                                    )
+                                : "-";
+
+
+                        return `
+
+                            <tr>
+
+                                <td
+                                    class="
+                                        text-center
+                                        align-top
+                                    "
+                                >
+
+                                    ${index + 1}
+
+                                </td>
+
+
+                                <td
+                                    class="
+                                        text-start
+                                        align-top
+                                    "
+                                >
+
+                                    <div
+                                        class="
+                                            fw-semibold
+                                        "
+                                    >
+
+                                        ${
+                                            this.escapeHtml(
+                                                line.account_code
+                                                || "-"
+                                            )
+                                        }
+
+                                    </div>
+
+                                </td>
+
+
+                                <td
+                                    class="
+                                        text-start
+                                        align-top
+                                    "
+                                >
+
+                                    <div
+                                        class="
+                                            fw-semibold
+                                        "
+                                    >
+
+                                        ${
+                                            this.escapeHtml(
+                                                line.account_name
+                                                || "-"
+                                            )
+                                        }
+
+                                    </div>
+
+
+                                    <div
+                                        class="
+                                            small
+                                            text-muted
+                                            mt-1
+                                        "
+                                    >
+
+                                        ${
+                                            this.escapeHtml(
+                                                description
+                                                || "-"
+                                            )
+                                        }
+
+                                    </div>
+
+                                </td>
+
+
+                                <td
+                                    class="
+                                        text-end
+                                        align-top
+                                        ${
+                                            Number(
+                                                line.debit
+                                                || 0
+                                            ) > 0
+                                                ? "fw-semibold"
+                                                : ""
+                                        }
+                                    "
+                                >
+
+                                    ${
+                                        Number(
+                                            line.debit
+                                            || 0
+                                        ) > 0
+                                            ? this.formatCurrency(
+                                                line.debit
+                                            )
+                                            : "-"
+                                    }
+
+                                </td>
+
+
+                                <td
+                                    class="
+                                        text-end
+                                        align-top
+                                        ${
+                                            Number(
+                                                line.credit
+                                                || 0
+                                            ) > 0
+                                                ? "fw-semibold"
+                                                : ""
+                                        }
+                                    "
+                                >
+
+                                    ${
+                                        Number(
+                                            line.credit
+                                            || 0
+                                        ) > 0
+                                            ? this.formatCurrency(
+                                                line.credit
+                                            )
+                                            : "-"
+                                    }
+
+                                </td>
+
+                            </tr>
+
+                        `;
+
+                    }
+                )
+                .join("");
+
+
+        /*
+        ==================================================
+        TOTAL FOOTER
+        ==================================================
+        */
+
+        if (
+            totalDebitElement
+        ) {
+
+            totalDebitElement.textContent =
+                this.formatCurrency(
+                    totalDebit
+                );
+
+        }
+
+
+        if (
+            totalCreditElement
+        ) {
+
+            totalCreditElement.textContent =
+                this.formatCurrency(
+                    totalCredit
+                );
+
+        }
+
+
+        /*
+        ==================================================
+        SUMMARY
+        ==================================================
+        */
+
+        if (
+            summaryDebitElement
+        ) {
+
+            summaryDebitElement.textContent =
+                this.formatCurrency(
+                    totalDebit
+                );
+
+        }
+
+
+        if (
+            summaryCreditElement
+        ) {
+
+            summaryCreditElement.textContent =
+                this.formatCurrency(
+                    totalCredit
+                );
+
+        }
+
+
+        if (
+            differenceElement
+        ) {
+
+            differenceElement.textContent =
+                this.formatCurrency(
+                    difference
+                );
+
+
+            differenceElement.classList.remove(
+                "text-success",
+                "text-danger"
+            );
+
+
+            differenceElement.classList.add(
+                isBalanced
+                    ? "text-success"
+                    : "text-danger"
+            );
+
+        }
+
+
+        /*
+==================================================
+STATUS
+==================================================
+*/
+
+if (
+    statusElement
+) {
+
+    switch (
+        accountingStatus
+    ) {
+
+        /*
+        ==============================================
+        BALANCED
+        ==============================================
+        */
+
+        case "BALANCED":
+
+            statusElement.className =
+                "alert alert-success border h-100 mb-0 d-flex align-items-center";
+
+            break;
+
+
+        /*
+        ==============================================
+        NOT READY
+        ==============================================
+        */
+
+        case "NOT_READY":
+
+            statusElement.className =
+                "alert alert-warning border h-100 mb-0 d-flex align-items-center";
+
+            break;
+
+
+        /*
+        ==============================================
+        NOT BALANCED
+        ==============================================
+        */
+
+        default:
+
+            statusElement.className =
+                "alert alert-danger border h-100 mb-0 d-flex align-items-center";
+
+            break;
+
+    }
+
+}
+
+
+/*
+==================================================
+STATUS TITLE
+==================================================
+*/
+
+if (
+    statusTitleElement
+) {
+
+    switch (
+        accountingStatus
+    ) {
+
+        case "BALANCED":
+
+            statusTitleElement.textContent =
+                "BALANCED";
+
+            break;
+
+
+        case "NOT_READY":
+
+            statusTitleElement.textContent =
+                "NOT READY";
+
+            break;
+
+
+        default:
+
+            statusTitleElement.textContent =
+                "NOT BALANCED";
+
+            break;
+
+    }
+
+}
+
+
+/*
+==================================================
+STATUS MESSAGE
+==================================================
+*/
+
+if (
+    statusMessageElement
+) {
+
+    if (
+        accountingStatus ===
+        "BALANCED"
+    ) {
+
+        statusMessageElement.textContent =
+            "Accounting Preview is ready for Complete.";
+
+    }
+
+    else if (
+        accountingStatus ===
+        "NOT_READY"
+    ) {
+
+        statusMessageElement.innerHTML =
+            readiness.issues
+                .map(
+                    issue =>
+                        `<div>• ${
+                            this.escapeHtml(
+                                issue
+                            )
+                        }</div>`
+                )
+                .join("");
+
+    }
+
+    else {
+
+        statusMessageElement.textContent =
+            `Journal difference: ${
+                this.formatCurrency(
+                    difference
+                )
+            }`;
+
+    }
+
+}
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "AP ACCOUNTING PREVIEW:",
+            {
+                journalDetails,
+                previewLines,
+                totalDebit,
+                totalCredit,
+                difference,
+                isBalanced
+            }
+        );
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "AccountPayable.renderAccountingPreview:",
             error
         );
 
@@ -13655,6 +16045,14 @@ resetAddForm() {
 
     this.resetAPTaxTables();
 
+    /*
+==================================================
+RESET ACCOUNTING PREVIEW
+==================================================
+*/
+
+this.resetAccountingPreview();
+
 
     /*
     ==================================================
@@ -13849,11 +16247,24 @@ resetAPTaxTables() {
 /*
 ======================================================
 RESET AP MODAL TAB
-Always start from Header Info
+ALWAYS START FROM HEADER INFO
+
+SUPPORT:
+1. HEADER INFO
+2. INVOICE DETAILS
+3. TAX (+)
+4. TAX (-)
+5. ACCOUNTING PREVIEW
 ======================================================
 */
 
 resetAPModalTab() {
+
+    /*
+    ==================================================
+    HEADER TAB
+    ==================================================
+    */
 
     const headerTab =
         document.getElementById(
@@ -13861,19 +16272,45 @@ resetAPModalTab() {
         );
 
 
+    /*
+    ==================================================
+    ALL TAB BUTTONS
+    ==================================================
+    */
+
     const tabs = [
+
         "ap-header-info-tab",
+
         "ap-invoice-details-tab",
+
         "ap-tax-plus-tab",
-        "ap-tax-minus-tab"
+
+        "ap-tax-minus-tab",
+
+        "ap-accounting-preview-tab"
+
     ];
 
 
+    /*
+    ==================================================
+    ALL TAB PANES
+    ==================================================
+    */
+
     const panes = [
+
         "ap-header-info-pane",
+
         "ap-invoice-details-pane",
+
         "ap-tax-plus-pane",
-        "ap-tax-minus-pane"
+
+        "ap-tax-minus-pane",
+
+        "ap-accounting-preview-pane"
+
     ];
 
 
@@ -13887,7 +16324,9 @@ resetAPModalTab() {
         id => {
 
             const element =
-                document.getElementById(id);
+                document.getElementById(
+                    id
+                );
 
 
             if (!element) {
@@ -13897,7 +16336,10 @@ resetAPModalTab() {
             }
 
 
-            element.classList.remove("active");
+            element.classList.remove(
+                "active"
+            );
+
 
             element.setAttribute(
                 "aria-selected",
@@ -13918,7 +16360,9 @@ resetAPModalTab() {
         id => {
 
             const element =
-                document.getElementById(id);
+                document.getElementById(
+                    id
+                );
 
 
             if (!element) {
@@ -13943,7 +16387,9 @@ resetAPModalTab() {
     ==================================================
     */
 
-    if (headerTab) {
+    if (
+        headerTab
+    ) {
 
         const tab =
             bootstrap.Tab.getOrCreateInstance(
@@ -13954,6 +16400,292 @@ resetAPModalTab() {
         tab.show();
 
     }
+
+}
+/*
+======================================================
+RESET ACCOUNTING PREVIEW
+ACCOUNT PAYABLE
+======================================================
+*/
+
+resetAccountingPreview() {
+
+    /*
+    ==================================================
+    BODY
+    ==================================================
+    */
+
+    const body =
+        this.apAccountingPreviewBody
+        ||
+        document.getElementById(
+            "ap-accounting-preview-body"
+        );
+
+
+    /*
+    ==================================================
+    RESET TABLE
+    ==================================================
+    */
+
+    if (
+        body
+    ) {
+
+        body.innerHTML = `
+
+            <tr
+                id="ap-accounting-preview-empty"
+            >
+
+                <td
+                    colspan="5"
+                    class="
+                        text-center
+                        text-muted
+                        py-4
+                    "
+                >
+
+                    No accounting preview available.
+
+                </td>
+
+            </tr>
+
+        `;
+
+    }
+
+
+    /*
+    ==================================================
+    TOTAL DEBIT
+    ==================================================
+    */
+
+    const totalDebit =
+        this.apAccountingPreviewTotalDebit
+        ||
+        document.getElementById(
+            "ap-accounting-preview-total-debit"
+        );
+
+
+    if (
+        totalDebit
+    ) {
+
+        totalDebit.textContent =
+            "0";
+
+    }
+
+
+    /*
+    ==================================================
+    TOTAL CREDIT
+    ==================================================
+    */
+
+    const totalCredit =
+        this.apAccountingPreviewTotalCredit
+        ||
+        document.getElementById(
+            "ap-accounting-preview-total-credit"
+        );
+
+
+    if (
+        totalCredit
+    ) {
+
+        totalCredit.textContent =
+            "0";
+
+    }
+
+
+    /*
+    ==================================================
+    SUMMARY DEBIT
+    ==================================================
+    */
+
+    const summaryDebit =
+        this.apAccountingPreviewSummaryDebit
+        ||
+        document.getElementById(
+            "ap-accounting-preview-summary-debit"
+        );
+
+
+    if (
+        summaryDebit
+    ) {
+
+        summaryDebit.textContent =
+            "0";
+
+    }
+
+
+    /*
+    ==================================================
+    SUMMARY CREDIT
+    ==================================================
+    */
+
+    const summaryCredit =
+        this.apAccountingPreviewSummaryCredit
+        ||
+        document.getElementById(
+            "ap-accounting-preview-summary-credit"
+        );
+
+
+    if (
+        summaryCredit
+    ) {
+
+        summaryCredit.textContent =
+            "0";
+
+    }
+
+
+    /*
+    ==================================================
+    DIFFERENCE
+    ==================================================
+    */
+
+    const difference =
+        this.apAccountingPreviewDifference
+        ||
+        document.getElementById(
+            "ap-accounting-preview-difference"
+        );
+
+
+    if (
+        difference
+    ) {
+
+        difference.textContent =
+            "0";
+
+
+        difference.classList.remove(
+            "text-success",
+            "text-danger"
+        );
+
+    }
+
+
+    /*
+    ==================================================
+    STATUS
+    ==================================================
+    */
+
+    const status =
+        this.apAccountingPreviewStatus
+        ||
+        document.getElementById(
+            "ap-accounting-preview-status"
+        );
+
+
+    if (
+        status
+    ) {
+
+        status.className =
+            "alert alert-secondary border h-100 mb-0 d-flex align-items-center";
+
+    }
+
+
+    /*
+    ==================================================
+    STATUS TITLE
+    ==================================================
+    */
+
+    const statusTitle =
+        this.apAccountingPreviewStatusTitle
+        ||
+        document.getElementById(
+            "ap-accounting-preview-status-title"
+        );
+
+
+    if (
+        statusTitle
+    ) {
+
+        statusTitle.textContent =
+            "Waiting for Transaction";
+
+    }
+
+
+    /*
+    ==================================================
+    STATUS MESSAGE
+    ==================================================
+    */
+
+    const statusMessage =
+        this.apAccountingPreviewStatusMessage
+        ||
+        document.getElementById(
+            "ap-accounting-preview-status-message"
+        );
+
+
+    if (
+        statusMessage
+    ) {
+
+        statusMessage.textContent =
+            "Add Invoice Detail to generate the accounting preview.";
+
+    }
+    /*
+==================================================
+RESET ACCOUNTING PREVIEW STATE
+==================================================
+*/
+
+this.setAPAccountingPreviewState({
+
+    status:
+        "WAITING",
+
+    isReady:
+        false,
+
+    isBalanced:
+        false,
+
+    totalDebit:
+        0,
+
+    totalCredit:
+        0,
+
+    difference:
+        0,
+
+    issues: []
+
+});
 
 }
   /*
@@ -16065,596 +18797,70 @@ async postInvoice(id) {
 
 }
 
-     /*
-======================================================
-VIEW ACCOUNT PAYABLE
-READ ONLY
-======================================================
-*/
-
-async viewInvoice(id) {
-
-    try {
-
         /*
-        ==================================================
-        VALIDATION
-        ==================================================
-        */
+    ======================================================
+    VIEW ACCOUNT PAYABLE
+    READ ONLY
+    ======================================================
+    */
 
-        if (!id) {
+    async viewInvoice(id) {
 
-            throw new Error(
-                "Account Payable ID is required."
-            );
+        try {
 
-        }
+            /*
+            ==================================================
+            VALIDATION
+            ==================================================
+            */
 
+            if (!id) {
 
-        /*
-        ==================================================
-        LOAD MODALS
-        ==================================================
-        */
-
-        await this.loadModalHTML();
-
-        await this.loadDetailModalHTML();
-
-
-        /*
-        ==================================================
-        CACHE DOM
-        ==================================================
-        */
-
-        this.cacheDOM();
-
-
-        /*
-        ==================================================
-        RESET PREVIOUS VIEW STATE
-        IMPORTANT
-        ==================================================
-        */
-
-        this.currentInvoiceId =
-            null;
-
-        this.currentDetailId =
-            null;
-
-        this.currentMode =
-            "view";
-
-        this.invoiceDetails =
-            [];
-
-        this.selectedVendor =
-            null;
-
-        this.selectedTopId =
-            null;
-
-
-        /*
-        ==================================================
-        CLEAR HEADER FORM
-        ==================================================
-        */
-
-        if (this.apFormVendor) {
-
-            this.apFormVendor.value =
-                "";
-
-        }
-
-
-        if (this.apFormPoNo) {
-
-            this.apFormPoNo.value =
-                "";
-
-        }
-
-
-        if (this.apFormInvoiceNo) {
-
-            this.apFormInvoiceNo.value =
-                "";
-
-        }
-
-
-        if (this.apFormJournalNo) {
-
-            this.apFormJournalNo.value =
-                "";
-
-        }
-
-
-        if (this.apFormInvoiceDate) {
-
-            this.apFormInvoiceDate.value =
-                "";
-
-        }
-
-
-        if (this.apFormDateReceived) {
-
-            this.apFormDateReceived.value =
-                "";
-
-        }
-
-
-        if (this.apFormTop) {
-
-            this.apFormTop.value =
-                "";
-
-        }
-
-
-        if (this.apFormDueDate) {
-
-            this.apFormDueDate.value =
-                "";
-
-        }
-
-
-        if (this.apFormDescription) {
-
-            this.apFormDescription.value =
-                "";
-
-        }
-
-
-        /*
-        ==================================================
-        CLEAR DETAIL TABLE
-        ==================================================
-        */
-
-        if (this.apDetailBody) {
-
-            this.apDetailBody.innerHTML = `
-
-                <tr>
-
-                    <td
-                        colspan="9"
-                        class="text-center text-muted py-4">
-
-                        Loading...
-
-                    </td>
-
-                </tr>
-
-            `;
-
-        }
-
-
-        /*
-        ==================================================
-        RESET TAX TABLE
-        ==================================================
-        */
-
-        this.resetAPTaxTables?.();
-
-
-        /*
-        ==================================================
-        RESET TOTAL
-        ==================================================
-        */
-
-        if (this.apFormSubtotal) {
-
-            this.apFormSubtotal.textContent =
-                "0";
-
-        }
-
-
-        if (this.apFormTax) {
-
-            this.apFormTax.textContent =
-                "0";
-
-        }
-
-
-        if (this.apFormWht) {
-
-            this.apFormWht.textContent =
-                "0";
-
-        }
-
-
-        if (this.apFormTotal) {
-
-            this.apFormTotal.textContent =
-                "0";
-
-        }
-
-
-        /*
-        ==================================================
-        LOAD VENDORS
-        ==================================================
-        */
-
-        if (
-            !Array.isArray(
-                this.vendorData
-            )
-            ||
-            !this.vendorData.length
-        ) {
-
-            await this.loadVendors();
-
-        }
-
-
-        /*
-        ==================================================
-        LOAD CHART OF ACCOUNTS
-        ==================================================
-        */
-
-        await this.loadDetailCOA();
-
-
-        /*
-        ==================================================
-        LOAD TAX MASTER
-        ==================================================
-        */
-
-        await this.loadTaxMaster();
-
-
-        /*
-        ==================================================
-        LOAD ACCOUNT PAYABLE
-        ALWAYS USE CURRENT CLICKED ID
-        ==================================================
-        */
-
-        const result =
-            await this.service.getById(
-                id
-            );
-
-
-        if (!result) {
-
-            throw new Error(
-                "Account Payable not found."
-            );
-
-        }
-
-
-        const header =
-            result.header;
-
-
-        const details =
-            Array.isArray(
-                result.details
-            )
-                ? result.details
-                : [];
-
-
-        if (!header) {
-
-            throw new Error(
-                "Account Payable header not found."
-            );
-
-        }
-
-
-        /*
-        ==================================================
-        SET CURRENT VIEW ID
-        ONLY AFTER DATA SUCCESSFULLY LOADED
-        ==================================================
-        */
-
-        this.currentInvoiceId =
-            id;
-
-
-        /*
-        ==================================================
-        GL JOURNAL REFERENCE
-        ==================================================
-        */
-
-        const journalId =
-            header.gl_journal_id
-            || null;
-
-
-        let journalNo =
-            "";
-
-
-        if (
-            journalId
-        ) {
-
-            journalNo =
-                await this.getAPJournalNo(
-                    journalId
+                throw new Error(
+                    "Account Payable ID is required."
                 );
 
-        }
+            }
 
 
-        if (
-            this.apFormJournalNo
-        ) {
+            /*
+            ==================================================
+            LOAD MODALS
+            ==================================================
+            */
 
-            this.apFormJournalNo.value =
-                journalNo;
+            await this.loadModalHTML();
 
-        }
-
-
-        /*
-        ==================================================
-        MAP INVOICE DETAILS
-        ==================================================
-        */
-
-        this.invoiceDetails =
-            details.map(
-                detail => {
-
-                    /*
-                    ==========================================
-                    COA RELATION
-                    ==========================================
-                    */
-
-                    const relationCOA =
-                        detail.charge_account
-                        || {};
+            await this.loadDetailModalHTML();
 
 
-                    /*
-                    ==========================================
-                    FALLBACK COA MASTER
-                    ==========================================
-                    */
+            /*
+            ==================================================
+            CACHE DOM
+            ==================================================
+            */
 
-                    const masterCOA =
-                        Array.isArray(
-                            this.currentCOA
-                        )
-                            ? this.currentCOA.find(
-                                account =>
-                                    String(account.id)
-                                    ===
-                                    String(
-                                        detail.charge_account_id
-                                    )
-                            )
-                            : null;
+            this.cacheDOM();
 
 
-                    return {
+            /*
+            ==================================================
+            RESET PREVIOUS VIEW STATE
+            IMPORTANT
+            ==================================================
+            */
 
-                        id:
-                            detail.id
-                            ||
-                            crypto.randomUUID(),
+            this.currentInvoiceId =
+                null;
 
-                        charge_account_id:
-                            Number(
-                                detail.charge_account_id
-                                ||
-                                relationCOA.id
-                                ||
-                                masterCOA?.id
-                                ||
-                                0
-                            ),
+            this.currentDetailId =
+                null;
 
-                        account_code:
-                            detail.account_code
-                            ||
-                            relationCOA.account_code
-                            ||
-                            masterCOA?.account_code
-                            ||
-                            "",
+            this.currentMode =
+                "view";
 
-                        account_name:
-                            detail.account_name
-                            ||
-                            relationCOA.account_name
-                            ||
-                            masterCOA?.account_name
-                            ||
-                            "",
-
-                        description:
-                            detail.description
-                            || "",
-
-                        quantity:
-                            Number(
-                                detail.quantity
-                                || 0
-                            ),
-
-                        unit_price:
-                            Number(
-                                detail.unit_price
-                                || 0
-                            ),
-
-
-                        /*
-                        ======================================
-                        TAX (+)
-                        ======================================
-                        */
-
-                        tax_plus_id:
-                            detail.tax_plus_id
-                                ? Number(
-                                    detail.tax_plus_id
-                                )
-                                : null,
-
-                        tax_plus_account_id:
-                            detail.tax_plus_account_id
-                                ? Number(
-                                    detail.tax_plus_account_id
-                                )
-                                : null,
-
-                        tax_input_rate:
-                            Number(
-                                detail.tax_input_rate
-                                || 0
-                            ),
-
-                        tax_input_amount:
-                            Number(
-                                detail.tax_input_amount
-                                || 0
-                            ),
-
-
-                        /*
-                        ======================================
-                        TAX (-)
-                        ======================================
-                        */
-
-                        tax_minus_id:
-                            detail.tax_minus_id
-                                ? Number(
-                                    detail.tax_minus_id
-                                )
-                                : null,
-
-                        tax_minus_account_id:
-                            detail.tax_minus_account_id
-                                ? Number(
-                                    detail.tax_minus_account_id
-                                )
-                                : null,
-
-                        withholding_tax_rate:
-                            Number(
-                                detail.withholding_tax_rate
-                                || 0
-                            ),
-
-                        withholding_tax_amount:
-                            Number(
-                                detail.withholding_tax_amount
-                                || 0
-                            ),
-
-
-                        /*
-                        ======================================
-                        AMOUNT
-                        ======================================
-                        */
-
-                        line_amount:
-                            Number(
-                                detail.line_amount
-                                || 0
-                            ),
-
-                        total_amount:
-                            Number(
-                                detail.total_amount
-                                || 0
-                            )
-
-                    };
-
-                }
-            );
-
-
-        /*
-        ==================================================
-        VENDOR
-        ==================================================
-        */
-
-        if (
-            this.apFormVendor
-        ) {
-
-            this.apFormVendor.value =
-                String(
-                    header.vendor_id
-                    || ""
-                );
-
-        }
-
-
-        /*
-        ==================================================
-        TERM OF PAYMENT
-        ==================================================
-        */
-
-        const vendor =
-            this.vendorData.find(
-                item =>
-                    String(item.id)
-                    ===
-                    String(
-                        header.vendor_id
-                    )
-            )
-            || null;
-
-
-        if (
-            vendor
-        ) {
-
-            this.selectedVendor =
-                vendor;
-
-
-            this.renderVendorTOP(
-                vendor
-            );
-
-        }
-        else if (
-            this.apFormTop
-        ) {
+            this.invoiceDetails =
+                [];
 
             this.selectedVendor =
                 null;
@@ -16662,361 +18868,933 @@ async viewInvoice(id) {
             this.selectedTopId =
                 null;
 
-            this.apFormTop.value =
-                "No Term of Payment";
 
-        }
+            /*
+            ==================================================
+            CLEAR HEADER FORM
+            ==================================================
+            */
 
+            if (this.apFormVendor) {
 
-        /*
-        ==================================================
-        PO NO
-        ==================================================
-        */
-
-        if (
-            this.apFormPoNo
-        ) {
-
-            this.apFormPoNo.value =
-                header.po_no
-                || "";
-
-        }
-
-
-        /*
-        ==================================================
-        INVOICE NO
-        ==================================================
-        */
-
-        if (
-            this.apFormInvoiceNo
-        ) {
-
-            this.apFormInvoiceNo.value =
-                header.invoice_no
-                || "";
-
-        }
-
-
-        /*
-        ==================================================
-        INVOICE DATE
-        ==================================================
-        */
-
-        if (
-            this.apFormInvoiceDate
-        ) {
-
-            this.apFormInvoiceDate.value =
-                header.invoice_date
-                || "";
-
-        }
-
-
-        /*
-        ==================================================
-        DATE RECEIVED
-        ==================================================
-        */
-
-        if (
-            this.apFormDateReceived
-        ) {
-
-            this.apFormDateReceived.value =
-                header.date_received
-                || "";
-
-        }
-
-
-        /*
-        ==================================================
-        DUE DATE
-        ==================================================
-        */
-
-        if (
-            this.apFormDueDate
-        ) {
-
-            this.apFormDueDate.value =
-                header.due_date
-                || "";
-
-        }
-
-
-        /*
-        ==================================================
-        DESCRIPTION
-        ==================================================
-        */
-
-        if (
-            this.apFormDescription
-        ) {
-
-            this.apFormDescription.value =
-                header.description
-                || "";
-
-        }
-
-
-        /*
-        ==================================================
-        RENDER DETAILS
-        ==================================================
-        */
-
-        this.renderInvoiceDetails();
-
-
-        /*
-        ==================================================
-        RENDER TAX (+)
-        ==================================================
-        */
-
-        this.renderTaxPlus();
-
-
-        /*
-        ==================================================
-        RENDER TAX (-)
-        ==================================================
-        */
-
-        this.renderTaxMinus();
-
-
-        /*
-        ==================================================
-        UPDATE SUMMARY
-        ==================================================
-        */
-
-        this.updateInvoiceSummary();
-
-
-        /*
-        ==================================================
-        READ ONLY
-        ==================================================
-        */
-
-        const viewFields = [
-
-            this.apFormVendor,
-            this.apFormPoNo,
-            this.apFormInvoiceNo,
-            this.apFormInvoiceDate,
-            this.apFormDateReceived,
-            this.apFormTop,
-            this.apFormDueDate,
-            this.apFormDescription
-
-        ];
-
-
-        viewFields.forEach(
-            field => {
-
-                if (!field) {
-
-                    return;
-
-                }
-
-
-                field.disabled =
-                    true;
-
-
-                field.readOnly =
-                    true;
+                this.apFormVendor.value =
+                    "";
 
             }
-        );
 
 
-        /*
-        ==================================================
-        DISABLE DETAIL ACTION
-        ==================================================
-        */
+            if (this.apFormPoNo) {
 
-        document
-            .querySelectorAll(
-                "#ap-detail-body [data-detail-action]"
+                this.apFormPoNo.value =
+                    "";
+
+            }
+
+
+            if (this.apFormInvoiceNo) {
+
+                this.apFormInvoiceNo.value =
+                    "";
+
+            }
+
+
+            if (this.apFormJournalNo) {
+
+                this.apFormJournalNo.value =
+                    "";
+
+            }
+
+
+            if (this.apFormInvoiceDate) {
+
+                this.apFormInvoiceDate.value =
+                    "";
+
+            }
+
+
+            if (this.apFormDateReceived) {
+
+                this.apFormDateReceived.value =
+                    "";
+
+            }
+
+
+            if (this.apFormTop) {
+
+                this.apFormTop.value =
+                    "";
+
+            }
+
+
+            if (this.apFormDueDate) {
+
+                this.apFormDueDate.value =
+                    "";
+
+            }
+
+
+            if (this.apFormDescription) {
+
+                this.apFormDescription.value =
+                    "";
+
+            }
+
+
+            /*
+            ==================================================
+            CLEAR DETAIL TABLE
+            ==================================================
+            */
+
+            if (this.apDetailBody) {
+
+                this.apDetailBody.innerHTML = `
+
+                    <tr>
+
+                        <td
+                            colspan="9"
+                            class="text-center text-muted py-4">
+
+                            Loading...
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+
+
+            /*
+            ==================================================
+            RESET TAX TABLE
+            ==================================================
+            */
+
+            this.resetAPTaxTables?.();
+
+
+            /*
+            ==================================================
+            RESET TOTAL
+            ==================================================
+            */
+
+            if (this.apFormSubtotal) {
+
+                this.apFormSubtotal.textContent =
+                    "0";
+
+            }
+
+
+            if (this.apFormTax) {
+
+                this.apFormTax.textContent =
+                    "0";
+
+            }
+
+
+            if (this.apFormWht) {
+
+                this.apFormWht.textContent =
+                    "0";
+
+            }
+
+
+            if (this.apFormTotal) {
+
+                this.apFormTotal.textContent =
+                    "0";
+
+            }
+
+
+            /*
+            ==================================================
+            LOAD VENDORS
+            ==================================================
+            */
+
+            if (
+                !Array.isArray(
+                    this.vendorData
+                )
+                ||
+                !this.vendorData.length
+            ) {
+
+                await this.loadVendors();
+
+            }
+
+
+            /*
+            ==================================================
+            LOAD CHART OF ACCOUNTS
+            ==================================================
+            */
+
+            await this.loadDetailCOA();
+
+
+            /*
+            ==================================================
+            LOAD TAX MASTER
+            ==================================================
+            */
+
+            await this.loadTaxMaster();
+
+
+            /*
+            ==================================================
+            LOAD ACCOUNT PAYABLE
+            ALWAYS USE CURRENT CLICKED ID
+            ==================================================
+            */
+
+            const result =
+                await this.service.getById(
+                    id
+                );
+
+
+            if (!result) {
+
+                throw new Error(
+                    "Account Payable not found."
+                );
+
+            }
+
+
+            const header =
+                result.header;
+
+
+            const details =
+                Array.isArray(
+                    result.details
+                )
+                    ? result.details
+                    : [];
+
+
+            if (!header) {
+
+                throw new Error(
+                    "Account Payable header not found."
+                );
+
+            }
+
+
+            /*
+            ==================================================
+            SET CURRENT VIEW ID
+            ONLY AFTER DATA SUCCESSFULLY LOADED
+            ==================================================
+            */
+
+            this.currentInvoiceId =
+                id;
+
+
+            /*
+            ==================================================
+            GL JOURNAL REFERENCE
+            ==================================================
+            */
+
+            const journalId =
+                header.gl_journal_id
+                || null;
+
+
+            let journalNo =
+                "";
+
+
+            if (
+                journalId
+            ) {
+
+                journalNo =
+                    await this.getAPJournalNo(
+                        journalId
+                    );
+
+            }
+
+
+            if (
+                this.apFormJournalNo
+            ) {
+
+                this.apFormJournalNo.value =
+                    journalNo;
+
+            }
+
+
+            /*
+            ==================================================
+            MAP INVOICE DETAILS
+            ==================================================
+            */
+
+            this.invoiceDetails =
+                details.map(
+                    detail => {
+
+                        /*
+                        ==========================================
+                        COA RELATION
+                        ==========================================
+                        */
+
+                        const relationCOA =
+                            detail.charge_account
+                            || {};
+
+
+                        /*
+                        ==========================================
+                        FALLBACK COA MASTER
+                        ==========================================
+                        */
+
+                        const masterCOA =
+                            Array.isArray(
+                                this.currentCOA
+                            )
+                                ? this.currentCOA.find(
+                                    account =>
+                                        String(account.id)
+                                        ===
+                                        String(
+                                            detail.charge_account_id
+                                        )
+                                )
+                                : null;
+
+
+                        return {
+
+                            id:
+                                detail.id
+                                ||
+                                crypto.randomUUID(),
+
+                            charge_account_id:
+                                Number(
+                                    detail.charge_account_id
+                                    ||
+                                    relationCOA.id
+                                    ||
+                                    masterCOA?.id
+                                    ||
+                                    0
+                                ),
+
+                            account_code:
+                                detail.account_code
+                                ||
+                                relationCOA.account_code
+                                ||
+                                masterCOA?.account_code
+                                ||
+                                "",
+
+                            account_name:
+                                detail.account_name
+                                ||
+                                relationCOA.account_name
+                                ||
+                                masterCOA?.account_name
+                                ||
+                                "",
+
+                            description:
+                                detail.description
+                                || "",
+
+                            quantity:
+                                Number(
+                                    detail.quantity
+                                    || 0
+                                ),
+
+                            unit_price:
+                                Number(
+                                    detail.unit_price
+                                    || 0
+                                ),
+
+
+                            /*
+                            ======================================
+                            TAX (+)
+                            ======================================
+                            */
+
+                            tax_plus_id:
+                                detail.tax_plus_id
+                                    ? Number(
+                                        detail.tax_plus_id
+                                    )
+                                    : null,
+
+                            tax_plus_account_id:
+                                detail.tax_plus_account_id
+                                    ? Number(
+                                        detail.tax_plus_account_id
+                                    )
+                                    : null,
+
+                            tax_input_rate:
+                                Number(
+                                    detail.tax_input_rate
+                                    || 0
+                                ),
+
+                            tax_input_amount:
+                                Number(
+                                    detail.tax_input_amount
+                                    || 0
+                                ),
+
+
+                            /*
+                            ======================================
+                            TAX (-)
+                            ======================================
+                            */
+
+                            tax_minus_id:
+                                detail.tax_minus_id
+                                    ? Number(
+                                        detail.tax_minus_id
+                                    )
+                                    : null,
+
+                            tax_minus_account_id:
+                                detail.tax_minus_account_id
+                                    ? Number(
+                                        detail.tax_minus_account_id
+                                    )
+                                    : null,
+
+                            withholding_tax_rate:
+                                Number(
+                                    detail.withholding_tax_rate
+                                    || 0
+                                ),
+
+                            withholding_tax_amount:
+                                Number(
+                                    detail.withholding_tax_amount
+                                    || 0
+                                ),
+
+
+                            /*
+                            ======================================
+                            AMOUNT
+                            ======================================
+                            */
+
+                            line_amount:
+                                Number(
+                                    detail.line_amount
+                                    || 0
+                                ),
+
+                            total_amount:
+                                Number(
+                                    detail.total_amount
+                                    || 0
+                                )
+
+                        };
+
+                    }
+                );
+
+
+            /*
+==================================================
+VENDOR
+NATIVE SELECT + TOM SELECT
+==================================================
+*/
+
+const vendorValue =
+    String(
+        header.vendor_id
+        || ""
+    );
+
+
+/*
+==================================================
+SET ORIGINAL SELECT
+==================================================
+*/
+
+if (
+    this.apFormVendor
+) {
+
+    this.apFormVendor.value =
+        vendorValue;
+
+}
+
+
+/*
+==================================================
+SET TOM SELECT DISPLAY
+
+TRUE = SILENT
+DO NOT TRIGGER VENDOR CHANGE
+==================================================
+*/
+
+if (
+    this.apVendorSelect
+) {
+
+    this.apVendorSelect.setValue(
+        vendorValue,
+        true
+    );
+
+}
+
+
+/*
+==================================================
+FIND VENDOR
+==================================================
+*/
+
+const vendor =
+    this.vendorData.find(
+        item =>
+            String(
+                item.id
             )
-            .forEach(
-                button => {
+            ===
+            String(
+                header.vendor_id
+            )
+    )
+    || null;
 
-                    button.disabled =
+
+/*
+==================================================
+TERM OF PAYMENT
+==================================================
+*/
+
+if (
+    vendor
+) {
+
+    this.selectedVendor =
+        vendor;
+
+
+    this.renderVendorTOP(
+        vendor
+    );
+
+}
+
+else {
+
+    this.selectedVendor =
+        null;
+
+    this.selectedTopId =
+        null;
+
+
+    if (
+        this.apFormTop
+    ) {
+
+        this.apFormTop.value =
+            "No Term of Payment";
+
+    }
+
+}
+
+
+            /*
+            ==================================================
+            PO NO
+            ==================================================
+            */
+
+            if (
+                this.apFormPoNo
+            ) {
+
+                this.apFormPoNo.value =
+                    header.po_no
+                    || "";
+
+            }
+
+
+            /*
+            ==================================================
+            INVOICE NO
+            ==================================================
+            */
+
+            if (
+                this.apFormInvoiceNo
+            ) {
+
+                this.apFormInvoiceNo.value =
+                    header.invoice_no
+                    || "";
+
+            }
+
+
+            /*
+            ==================================================
+            INVOICE DATE
+            ==================================================
+            */
+
+            if (
+                this.apFormInvoiceDate
+            ) {
+
+                this.apFormInvoiceDate.value =
+                    header.invoice_date
+                    || "";
+
+            }
+
+
+            /*
+            ==================================================
+            DATE RECEIVED
+            ==================================================
+            */
+
+            if (
+                this.apFormDateReceived
+            ) {
+
+                this.apFormDateReceived.value =
+                    header.date_received
+                    || "";
+
+            }
+
+
+            /*
+            ==================================================
+            DUE DATE
+            ==================================================
+            */
+
+            if (
+                this.apFormDueDate
+            ) {
+
+                this.apFormDueDate.value =
+                    header.due_date
+                    || "";
+
+            }
+
+
+            /*
+            ==================================================
+            DESCRIPTION
+            ==================================================
+            */
+
+            if (
+                this.apFormDescription
+            ) {
+
+                this.apFormDescription.value =
+                    header.description
+                    || "";
+
+            }
+
+
+            /*
+            ==================================================
+            RENDER DETAILS
+            ==================================================
+            */
+
+            this.renderInvoiceDetails();
+
+
+            /*
+            ==================================================
+            RENDER TAX (+)
+            ==================================================
+            */
+
+            this.renderTaxPlus();
+
+
+            /*
+            ==================================================
+            RENDER TAX (-)
+            ==================================================
+            */
+
+            this.renderTaxMinus();
+
+
+            /*
+            ==================================================
+            UPDATE SUMMARY
+            ==================================================
+            */
+
+            this.updateInvoiceSummary();
+
+
+            /*
+            ==================================================
+            READ ONLY
+            ==================================================
+            */
+
+            const viewFields = [
+
+                this.apFormVendor,
+                this.apFormPoNo,
+                this.apFormInvoiceNo,
+                this.apFormInvoiceDate,
+                this.apFormDateReceived,
+                this.apFormTop,
+                this.apFormDueDate,
+                this.apFormDescription
+
+            ];
+
+
+            viewFields.forEach(
+                field => {
+
+                    if (!field) {
+
+                        return;
+
+                    }
+
+
+                    field.disabled =
+                        true;
+
+
+                    field.readOnly =
                         true;
 
                 }
             );
 
 
-        /*
-        ==================================================
-        DISABLE ADD DETAIL
-        ==================================================
-        */
+            /*
+            ==================================================
+            DISABLE DETAIL ACTION
+            ==================================================
+            */
 
-        if (
-            this.btnAddDetail
-        ) {
+            document
+                .querySelectorAll(
+                    "#ap-detail-body [data-detail-action]"
+                )
+                .forEach(
+                    button => {
 
-            this.btnAddDetail.disabled =
-                true;
+                        button.disabled =
+                            true;
 
-        }
-
-
-        /*
-        ==================================================
-        DISABLE SAVE
-        ==================================================
-        */
-
-        if (
-            this.btnSaveDraft
-        ) {
-
-            this.btnSaveDraft.disabled =
-                true;
-
-        }
-
-
-        /*
-        ==================================================
-        RESET TAB TO HEADER
-        ==================================================
-        */
-
-        this.resetAPModalTab();
-
-
-        /*
-        ==================================================
-        MODAL TITLE
-        ==================================================
-        */
-
-        const modalElement =
-            document.getElementById(
-                "accountPayableModal"
-            );
-
-
-        const titleElement =
-            modalElement?.querySelector(
-                ".modal-title"
-            );
-
-
-        if (
-            titleElement
-        ) {
-
-            titleElement.innerHTML = `
-                <i class="fa-solid fa-eye me-2"></i>
-                View Account Payable
-            `;
-
-        }
-
-
-        const subtitleElement =
-            modalElement?.querySelector(
-                ".modal-subtitle"
-            );
-
-
-        if (
-            subtitleElement
-        ) {
-
-            subtitleElement.textContent =
-                "View Account Payable";
-
-        }
-
-
-        /*
-        ==================================================
-        SHOW MODAL
-        ==================================================
-        */
-
-        if (
-            modalElement
-        ) {
-
-            const modal =
-                bootstrap.Modal.getOrCreateInstance(
-                    modalElement
+                    }
                 );
 
 
-            modal.show();
+            /*
+            ==================================================
+            DISABLE ADD DETAIL
+            ==================================================
+            */
+
+            if (
+                this.btnAddDetail
+            ) {
+
+                this.btnAddDetail.disabled =
+                    true;
+
+            }
+
+
+            /*
+            ==================================================
+            DISABLE SAVE
+            ==================================================
+            */
+
+            if (
+                this.btnSaveDraft
+            ) {
+
+                this.btnSaveDraft.disabled =
+                    true;
+
+            }
+
+
+            /*
+            ==================================================
+            RESET TAB TO HEADER
+            ==================================================
+            */
+
+            this.resetAPModalTab();
+
+
+            /*
+            ==================================================
+            MODAL TITLE
+            ==================================================
+            */
+
+            const modalElement =
+                document.getElementById(
+                    "accountPayableModal"
+                );
+
+
+            const titleElement =
+                modalElement?.querySelector(
+                    ".modal-title"
+                );
+
+
+            if (
+                titleElement
+            ) {
+
+                titleElement.innerHTML = `
+                    <i class="fa-solid fa-eye me-2"></i>
+                    View Account Payable
+                `;
+
+            }
+
+
+            const subtitleElement =
+                modalElement?.querySelector(
+                    ".modal-subtitle"
+                );
+
+
+            if (
+                subtitleElement
+            ) {
+
+                subtitleElement.textContent =
+                    "View Account Payable";
+
+            }
+
+
+            /*
+            ==================================================
+            SHOW MODAL
+            ==================================================
+            */
+
+            if (
+                modalElement
+            ) {
+
+                const modal =
+                    bootstrap.Modal.getOrCreateInstance(
+                        modalElement
+                    );
+
+
+                modal.show();
+
+            }
+
+
+            /*
+            ==================================================
+            DEBUG
+            ==================================================
+            */
+
+            console.log(
+                "AP VIEW LOADED:",
+                {
+                    requested_id:
+                        id,
+
+                    loaded_id:
+                        header.id,
+
+                    invoice_no:
+                        header.invoice_no,
+
+                    detail_count:
+                        this.invoiceDetails.length
+                }
+            );
 
         }
 
+        catch (error) {
 
-        /*
-        ==================================================
-        DEBUG
-        ==================================================
-        */
+            console.error(
+                "AccountPayable.viewInvoice:",
+                error
+            );
 
-        console.log(
-            "AP VIEW LOADED:",
-            {
-                requested_id:
-                    id,
 
-                loaded_id:
-                    header.id,
+            this.showError(
+                error.message
+                ||
+                "Failed to view Account Payable."
+            );
 
-                invoice_no:
-                    header.invoice_no,
-
-                detail_count:
-                    this.invoiceDetails.length
-            }
-        );
+        }
 
     }
-
-    catch (error) {
-
-        console.error(
-            "AccountPayable.viewInvoice:",
-            error
-        );
-
-
-        this.showError(
-            error.message
-            ||
-            "Failed to view Account Payable."
-        );
-
-    }
-
-}
 /*
 ======================================================
 GET GL JOURNAL NUMBER
