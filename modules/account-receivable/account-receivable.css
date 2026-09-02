@@ -4218,3 +4218,245 @@ table {
     }
 
 }
+/* ==========================================================
+   FINOVA ACCOUNTING SYSTEM
+   ACCOUNT RECEIVABLE MODAL
+   REMOVE EMPTY SPACE BETWEEN TAB CONTENT AND SUMMARY
+========================================================== */
+
+
+/* ==========================================================
+   MAIN MODAL CONTENT
+========================================================== */
+
+#accountReceivableModal
+.modal-content {
+
+    height: auto !important;
+
+    min-height: 0 !important;
+
+}
+
+
+/* ==========================================================
+   MODAL BODY
+========================================================== */
+
+#accountReceivableModal
+.modal-body {
+
+    display: block !important;
+
+    height: auto !important;
+
+    min-height: 0 !important;
+
+    max-height: calc(100vh - 150px) !important;
+
+    overflow-y: auto !important;
+
+}
+
+
+/* ==========================================================
+   TAB CONTENT
+   MUST FOLLOW ACTIVE TAB CONTENT HEIGHT
+========================================================== */
+
+#accountReceivableModal
+#ar-modal-tab-content {
+
+    display: block !important;
+
+    width: 100% !important;
+
+    height: auto !important;
+
+    min-height: 0 !important;
+
+    max-height: none !important;
+
+    flex: none !important;
+
+}
+
+
+/* ==========================================================
+   TAB PANE
+========================================================== */
+
+#accountReceivableModal
+#ar-modal-tab-content
+.tab-pane {
+
+    width: 100% !important;
+
+    height: auto !important;
+
+    min-height: 0 !important;
+
+    max-height: none !important;
+
+    flex: none !important;
+
+}
+
+
+/* ==========================================================
+   ACTIVE TAB
+========================================================== */
+
+#accountReceivableModal
+#ar-modal-tab-content
+.tab-pane.active {
+
+    display: block !important;
+
+}
+
+
+/* ==========================================================
+   HIDDEN TAB
+========================================================== */
+
+#accountReceivableModal
+#ar-modal-tab-content
+.tab-pane:not(.active) {
+
+    display: none !important;
+
+}
+
+
+/* ==========================================================
+   INVOICE DETAIL PANE
+========================================================== */
+
+#accountReceivableModal
+#ar-invoice-details-pane {
+
+    height: auto !important;
+
+    min-height: 0 !important;
+
+    max-height: none !important;
+
+}
+
+
+/* ==========================================================
+   INVOICE DETAIL CONTENT
+========================================================== */
+
+#accountReceivableModal
+#ar-invoice-details-pane
+> .p-4 {
+
+    height: auto !important;
+
+    min-height: 0 !important;
+
+    padding: 20px !important;
+
+}
+
+
+/* ==========================================================
+   INVOICE DETAIL CARD
+========================================================== */
+
+#accountReceivableModal
+#ar-invoice-details-pane
+.finova-card {
+
+    display: block !important;
+
+    height: auto !important;
+
+    min-height: 0 !important;
+
+    max-height: none !important;
+
+    margin-bottom: 0 !important;
+
+}
+
+
+/* ==========================================================
+   INVOICE DETAIL CARD BODY
+========================================================== */
+
+#accountReceivableModal
+#ar-invoice-details-pane
+.finova-card-body {
+
+    display: block !important;
+
+    height: auto !important;
+
+    min-height: 0 !important;
+
+    max-height: none !important;
+
+}
+
+
+/* ==========================================================
+   INVOICE DETAIL TABLE WRAPPER
+========================================================== */
+
+#accountReceivableModal
+.ar-invoice-detail-table-wrapper {
+
+    display: block !important;
+
+    width: 100% !important;
+
+    height: auto !important;
+
+    min-height: 0 !important;
+
+    max-height: none !important;
+
+    overflow-x: auto !important;
+
+    overflow-y: visible !important;
+
+}
+
+
+/* ==========================================================
+   TOTAL SUMMARY
+   DIRECTLY FOLLOW TAB CONTENT
+========================================================== */
+
+#accountReceivableModal
+#ar-modal-tab-content
++ .border-top {
+
+    margin-top: 0 !important;
+
+    padding-top: 20px !important;
+
+    padding-bottom: 20px !important;
+
+}
+
+
+/* ==========================================================
+   SUMMARY CARD
+========================================================== */
+
+#accountReceivableModal
+#ar-modal-tab-content
++ .border-top
+.finova-card {
+
+    height: auto !important;
+
+    min-height: 0 !important;
+
+    margin-bottom: 0 !important;
+
+}

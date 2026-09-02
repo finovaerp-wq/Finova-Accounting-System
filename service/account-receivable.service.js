@@ -50,7 +50,453 @@ export class AccountReceivableService {
 
     }
 
+    /*
+======================================================
+GET ACCOUNTING PERIOD
+ACCOUNT RECEIVABLE
+BASIS : INVOICE DATE
+======================================================
+*/
 
+async getAccountingPeriod(
+    invoiceDate
+) {
+
+    try {
+
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
+
+        if (
+            !invoiceDate
+        ) {
+
+            throw new Error(
+                "Invoice Date is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        GET ACCOUNTING PERIOD
+        ==================================================
+        */
+
+        const {
+
+            data,
+
+            error
+
+        } = await supabase
+
+            .from(
+                "mst_accounting_period"
+            )
+
+            .select(`
+                id,
+                period,
+                month,
+                year,
+                start_date,
+                end_date,
+                status
+            `)
+
+            .lte(
+                "start_date",
+                invoiceDate
+            )
+
+            .gte(
+                "end_date",
+                invoiceDate
+            )
+
+            .limit(
+                1
+            )
+
+            .maybeSingle();
+
+
+        /*
+        ==================================================
+        DATABASE ERROR
+        ==================================================
+        */
+
+        if (
+            error
+        ) {
+
+            console.error(
+                "AR GET ACCOUNTING PERIOD ERROR:",
+                error
+            );
+
+            throw error;
+
+        }
+
+
+        /*
+        ==================================================
+        PERIOD NOT CONFIGURED
+        ==================================================
+        */
+
+        if (
+            !data
+        ) {
+
+            throw new Error(
+                `Accounting Period for Invoice Date ${invoiceDate} is not configured.`
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
+
+        return data;
+
+    }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "AccountReceivableService.getAccountingPeriod:",
+            error
+        );
+
+        throw error;
+
+    }
+
+}
+
+
+/*
+======================================================
+VALIDATE ACCOUNTING PERIOD
+ACCOUNT RECEIVABLE
+BASIS : INVOICE DATE
+======================================================
+*/
+
+async validateAccountingPeriod(
+    invoiceDate
+) {
+
+    try {
+
+        /*
+        ==================================================
+        GET PERIOD
+        ==================================================
+        */
+
+        const period =
+            await this.getAccountingPeriod(
+                invoiceDate
+            );
+
+
+        /*
+        ==================================================
+        VALIDATE STATUS
+        ==================================================
+        */
+
+        const status =
+            String(
+                period?.status
+                ||
+                ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        /*
+        ==================================================
+        PERIOD MUST BE OPEN
+        ==================================================
+        */
+
+        if (
+            status !== "open"
+        ) {
+
+            throw new Error(
+                `Accounting Period ${period.period} is Closed. Invoice Date ${invoiceDate} cannot be processed.`
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
+
+        return period;
+
+    }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "AccountReceivableService.validateAccountingPeriod:",
+            error
+        );
+
+        throw error;
+
+    }
+
+}
+/*
+======================================================
+GET PAYMENT ACCOUNTING PERIOD
+ACCOUNT RECEIVABLE PAYMENT
+BASIS : PAYMENT DATE
+======================================================
+*/
+
+async getPaymentAccountingPeriod(
+    paymentDate
+) {
+
+    try {
+
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
+
+        if (
+            !paymentDate
+        ) {
+
+            throw new Error(
+                "Payment Date is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        GET ACCOUNTING PERIOD
+        ==================================================
+        */
+
+        const {
+
+            data,
+
+            error
+
+        } = await supabase
+
+            .from(
+                "mst_accounting_period"
+            )
+
+            .select(`
+                id,
+                period,
+                month,
+                year,
+                start_date,
+                end_date,
+                status
+            `)
+
+            .lte(
+                "start_date",
+                paymentDate
+            )
+
+            .gte(
+                "end_date",
+                paymentDate
+            )
+
+            .limit(
+                1
+            )
+
+            .maybeSingle();
+
+
+        /*
+        ==================================================
+        DATABASE ERROR
+        ==================================================
+        */
+
+        if (
+            error
+        ) {
+
+            console.error(
+                "AR PAYMENT GET ACCOUNTING PERIOD ERROR:",
+                error
+            );
+
+
+            throw error;
+
+        }
+
+
+        /*
+        ==================================================
+        PERIOD NOT CONFIGURED
+        ==================================================
+        */
+
+        if (
+            !data
+        ) {
+
+            throw new Error(
+                `Accounting Period for Payment Date ${paymentDate} is not configured.`
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
+
+        return data;
+
+    }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "AccountReceivableService.getPaymentAccountingPeriod:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
+
+
+/*
+======================================================
+VALIDATE PAYMENT ACCOUNTING PERIOD
+ACCOUNT RECEIVABLE PAYMENT
+BASIS : PAYMENT DATE
+======================================================
+*/
+
+async validatePaymentAccountingPeriod(
+    paymentDate
+) {
+
+    try {
+
+        /*
+        ==================================================
+        GET ACCOUNTING PERIOD
+        ==================================================
+        */
+
+        const period =
+            await this.getPaymentAccountingPeriod(
+                paymentDate
+            );
+
+
+        /*
+        ==================================================
+        NORMALIZE STATUS
+        ==================================================
+        */
+
+        const status =
+            String(
+                period?.status
+                ||
+                ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        /*
+        ==================================================
+        PERIOD MUST BE OPEN
+        ==================================================
+        */
+
+        if (
+            status !== "open"
+        ) {
+
+            throw new Error(
+                `Accounting Period ${period.period} is Closed. Payment Date ${paymentDate} cannot be processed.`
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
+
+        return period;
+
+    }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "AccountReceivableService.validatePaymentAccountingPeriod:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
     /*
 ======================================================
 STATUS
@@ -989,12 +1435,9 @@ async search(
             ) {
 
                 query =
-                    query.in(
+                    query.eq(
                         "status",
-                        [
-                            this.STATUS.DRAFT,
-                            this.STATUS.UNPAID
-                        ]
+                        this.STATUS.DRAFT
                     );
 
             }
@@ -1006,7 +1449,6 @@ async search(
             COMPATIBILITY WITH AP LOGIC
             ==============================================
             */
-
             else if (
                 normalizedStatus ===
                 "completed"
@@ -1015,7 +1457,7 @@ async search(
                 query =
                     query.eq(
                         "status",
-                        this.STATUS.PAID
+                        this.STATUS.COMPLETE
                     );
 
             }
@@ -1488,94 +1930,143 @@ async search(
 
 
     /*
-    ======================================================
-    GET CUSTOMER BY ID
-    ======================================================
-    */
+======================================================
+GET CUSTOMER BY ID
+WITH TERM OF PAYMENT
+======================================================
+*/
 
-    async getCustomerById(id) {
+async getCustomerById(id) {
 
-        try {
+    try {
 
-            if (!id) {
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
 
-                throw new Error(
-                    "Customer ID is required."
-                );
+        if (!id) {
 
-            }
-
-
-            const {
-
-                data,
-
-                error
-
-            } = await supabase
-
-                .from(
-                    TABLE.BUSINESS_PARTNER
-                )
-
-                .select(`
-                    id,
-                    bp_code,
-                    bp_name,
-                    bp_type,
-                    top_id,
-                    is_active,
-                    mst_term_of_payment (
-                        id,
-                        top_code,
-                        top_name,
-                        days,
-                        status
-                    )
-                `)
-
-                .eq(
-                    "id",
-                    id
-                )
-
-                .eq(
-                    "bp_type",
-                    "Customer"
-                )
-
-                .eq(
-                    "is_active",
-                    true
-                )
-
-                .single();
-
-
-            if (error) {
-
-                throw error;
-
-            }
-
-
-            return data;
+            throw new Error(
+                "Customer ID is required."
+            );
 
         }
 
-        catch (error) {
+
+        /*
+        ==================================================
+        GET CUSTOMER
+        ==================================================
+        */
+
+        const {
+
+            data,
+
+            error
+
+        } = await supabase
+
+            .from(
+                TABLE.BUSINESS_PARTNER
+            )
+
+            .select(`
+                id,
+                bp_code,
+                bp_name,
+                bp_type,
+                top_id,
+                is_active,
+
+                mst_term_of_payment!fk_bp_top (
+                    id,
+                    top_code,
+                    top_name,
+                    days,
+                    status
+                )
+            `)
+
+            .eq(
+                "id",
+                id
+            )
+
+            .eq(
+                "bp_type",
+                "Customer"
+            )
+
+            .eq(
+                "is_active",
+                true
+            )
+
+            .single();
+
+
+        /*
+        ==================================================
+        DATABASE ERROR
+        ==================================================
+        */
+
+        if (error) {
 
             console.error(
-                "AccountReceivableService.getCustomerById:",
+                "AR GET CUSTOMER BY ID ERROR:",
                 error
             );
-
 
             throw error;
 
         }
 
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "AR CUSTOMER:",
+            data
+        );
+
+
+        console.log(
+            "AR CUSTOMER TOP:",
+            data?.mst_term_of_payment
+        );
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
+
+        return data;
+
     }
+
+    catch (error) {
+
+        console.error(
+            "AccountReceivableService.getCustomerById:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
 
 
     /*
@@ -1658,66 +2149,102 @@ async search(
 
 
     /*
-    ======================================================
-    CALCULATE DUE DATE
-    ======================================================
+======================================================
+CALCULATE DUE DATE
+ACCOUNT RECEIVABLE
+
+BASIS:
+INVOICE DATE + TERM OF PAYMENT DAYS
+======================================================
+*/
+
+calculateDueDate(
+    invoiceDate,
+    customer
+) {
+
+    /*
+    ==================================================
+    VALIDATE INVOICE DATE
+    ==================================================
     */
 
-    calculateDueDate(
-        dateReceived,
-        customer
+    if (
+        !invoiceDate
     ) {
 
-        if (!dateReceived) {
+        return "";
 
-            return "";
-
-        }
+    }
 
 
-        const top =
-            customer
-                ?.mst_term_of_payment;
+    /*
+    ==================================================
+    TERM OF PAYMENT
+    ==================================================
+    */
+
+    const top =
+        customer
+            ?.mst_term_of_payment;
 
 
-        const days =
-            Number(
-                top?.days
-                || 0
-            );
-
-
-        const date =
-            new Date(
-                `${dateReceived}T00:00:00`
-            );
-
-
-        if (
-            Number.isNaN(
-                date.getTime()
-            )
-        ) {
-
-            return "";
-
-        }
-
-
-        date.setDate(
-            date.getDate()
-            +
-            days
+    const days =
+        Number(
+            top?.days
+            || 0
         );
 
 
-        return date
-            .toISOString()
-            .split(
-                "T"
-            )[0];
+    /*
+    ==================================================
+    CREATE DATE
+    ==================================================
+    */
+
+    const date =
+        new Date(
+            `${invoiceDate}T00:00:00`
+        );
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return "";
 
     }
+
+
+    /*
+    ==================================================
+    ADD TOP DAYS
+    ==================================================
+    */
+
+    date.setDate(
+        date.getDate()
+        +
+        days
+    );
+
+
+    /*
+    ==================================================
+    RETURN YYYY-MM-DD
+    ==================================================
+    */
+
+    return date
+        .toISOString()
+        .split(
+            "T"
+        )[0];
+
+}
 
 
     /*
@@ -2101,175 +2628,638 @@ exportExcel() {
 
 }
     /*
-    ======================================================
-    CREATE
-    ======================================================
-    */
+======================================================
+CREATE
+ACCOUNT RECEIVABLE
+WITH ACCOUNTING PERIOD VALIDATION
+BASIS : INVOICE DATE
+======================================================
+*/
 
-    async create(
-        header,
-        details = []
-    ) {
+async create(
+    header,
+    details = []
+) {
 
-        try {
+    try {
 
-            if (!header) {
+        /*
+        ==================================================
+        VALIDATE HEADER
+        ==================================================
+        */
 
-                throw new Error(
-                    "Account Receivable header is required."
-                );
+        if (!header) {
 
-            }
+            throw new Error(
+                "Account Receivable header is required."
+            );
 
-
-            if (
-                !header.customer_id
-            ) {
-
-                throw new Error(
-                    "Customer is required."
-                );
-
-            }
+        }
 
 
-            if (
-                !header.invoice_no
-            ) {
+        if (
+            !header.customer_id
+        ) {
 
-                throw new Error(
-                    "Document No. is required."
-                );
+            throw new Error(
+                "Customer is required."
+            );
 
-            }
-
-
-            if (
-                !header.invoice_date
-            ) {
-
-                throw new Error(
-                    "Invoice Date is required."
-                );
-
-            }
+        }
 
 
-            if (
-                !header.due_date
-            ) {
+        if (
+            !header.invoice_no
+        ) {
 
-                throw new Error(
-                    "Due Date is required."
-                );
+            throw new Error(
+                "Document No. is required."
+            );
 
-            }
-
-
-            if (
-                !details.length
-            ) {
-
-                throw new Error(
-                    "At least one invoice detail is required."
-                );
-
-            }
+        }
 
 
-            /*
-            ==================================================
-            CALCULATE DETAILS
-            ==================================================
-            */
+        if (
+            !header.invoice_date
+        ) {
 
-            const calculatedDetails =
-                details.map(
-                    detail => {
+            throw new Error(
+                "Invoice Date is required."
+            );
 
-                        const calculated =
-                            this.calculateDetailAmount(
-                                detail
-                            );
+        }
 
 
-                        return {
+        if (
+            !header.due_date
+        ) {
 
-                            ...detail,
+            throw new Error(
+                "Due Date is required."
+            );
 
-                            ...calculated
-
-                        };
-
-                    }
-                );
-
-
-            /*
-            ==================================================
-            CALCULATE HEADER
-            ==================================================
-            */
-
-            const totals =
-                this.calculateTotals(
-                    calculatedDetails
-                );
+        }
 
 
-            /*
-            ==================================================
-            INSERT HEADER
-            ==================================================
-            */
+        if (
+            !details.length
+        ) {
 
-            const {
+            throw new Error(
+                "At least one invoice detail is required."
+            );
 
-                data: invoice,
+        }
 
-                error: invoiceError
 
-            } = await supabase
+        /*
+        ==================================================
+        ACCOUNTING PERIOD VALIDATION
+        AR ACCOUNTING DATE = INVOICE DATE
+        ==================================================
+        */
+
+        await this.validateAccountingPeriod(
+            header.invoice_date
+        );
+
+
+        /*
+        ==================================================
+        CALCULATE DETAILS
+        ==================================================
+        */
+
+        const calculatedDetails =
+            details.map(
+                detail => {
+
+                    const calculated =
+                        this.calculateDetailAmount(
+                            detail
+                        );
+
+
+                    return {
+
+                        ...detail,
+
+                        ...calculated
+
+                    };
+
+                }
+            );
+
+
+        /*
+        ==================================================
+        CALCULATE HEADER
+        ==================================================
+        */
+
+        const totals =
+            this.calculateTotals(
+                calculatedDetails
+            );
+
+
+        /*
+        ==================================================
+        INSERT HEADER
+        ==================================================
+        */
+
+        const {
+
+            data: invoice,
+
+            error: invoiceError
+
+        } = await supabase
+
+            .from(
+                this.table
+            )
+
+            .insert({
+
+                ...header,
+
+                ...totals,
+
+                status:
+                    header.status
+                    ||
+                    this.STATUS.DRAFT,
+
+                gl_journal_id:
+                    header.gl_journal_id
+                    ||
+                    null
+
+            })
+
+            .select()
+
+            .single();
+
+
+        /*
+        ==================================================
+        HEADER ERROR
+        ==================================================
+        */
+
+        if (
+            invoiceError
+        ) {
+
+            throw invoiceError;
+
+        }
+
+
+        /*
+        ==================================================
+        PREPARE DETAILS
+        ==================================================
+        */
+
+        const detailRows =
+            calculatedDetails.map(
+                detail => ({
+
+                    ...detail,
+
+                    account_receivable_id:
+                        invoice.id
+
+                })
+            );
+
+
+        /*
+        ==================================================
+        INSERT DETAILS
+        ==================================================
+        */
+
+        const {
+
+            data: insertedDetails,
+
+            error: detailError
+
+        } = await supabase
+
+            .from(
+                this.detailTable
+            )
+
+            .insert(
+                detailRows
+            )
+
+            .select();
+
+
+        /*
+        ==================================================
+        DETAIL ERROR
+        CLEAN HEADER
+        ==================================================
+        */
+
+        if (
+            detailError
+        ) {
+
+            await supabase
 
                 .from(
                     this.table
                 )
 
-                .insert({
+                .delete()
 
-                    ...header,
-
-                    ...totals,
-
-                    status:
-                        header.status
-                        ||
-                        this.STATUS.DRAFT,
-
-                    gl_journal_id:
-                        header.gl_journal_id
-                        ||
-                        null
-
-                })
-
-                .select()
-
-                .single();
+                .eq(
+                    "id",
+                    invoice.id
+                );
 
 
-            if (invoiceError) {
+            throw detailError;
 
-                throw invoiceError;
-
-            }
+        }
 
 
-            /*
-            ==================================================
-            PREPARE DETAILS
-            ==================================================
-            */
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
+
+        return {
+
+            ...invoice,
+
+            details:
+                insertedDetails
+                ||
+                []
+
+        };
+
+    }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "AccountReceivableService.create:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
+
+
+    /*
+======================================================
+UPDATE
+ACCOUNT RECEIVABLE
+WITH ACCOUNTING PERIOD VALIDATION
+BASIS : INVOICE DATE
+======================================================
+*/
+
+async update(
+    id,
+    header,
+    details = []
+) {
+
+    try {
+
+        /*
+        ==================================================
+        VALIDATE ID
+        ==================================================
+        */
+
+        if (
+            !id
+        ) {
+
+            throw new Error(
+                "Account Receivable ID is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        VALIDATE HEADER
+        ==================================================
+        */
+
+        if (
+            !header
+        ) {
+
+            throw new Error(
+                "Account Receivable header is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        GET CURRENT ACCOUNT RECEIVABLE
+        ==================================================
+        */
+
+        const current =
+            await this.getById(
+                id
+            );
+
+
+        const currentHeader =
+            current?.header
+            ||
+            null;
+
+
+        if (
+            !currentHeader
+        ) {
+
+            throw new Error(
+                "Account Receivable not found."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        OLD INVOICE DATE
+        ==================================================
+        */
+
+        const oldInvoiceDate =
+            currentHeader.invoice_date;
+
+
+        if (
+            !oldInvoiceDate
+        ) {
+
+            throw new Error(
+                "Current Account Receivable Invoice Date is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        NEW INVOICE DATE
+
+        If invoice_date is not supplied in header,
+        keep current invoice date.
+        ==================================================
+        */
+
+        const newInvoiceDate =
+            header.invoice_date
+            ||
+            oldInvoiceDate;
+
+
+        /*
+        ==================================================
+        VALIDATE OLD ACCOUNTING PERIOD
+
+        IMPORTANT:
+        Prevent editing an AR that already belongs
+        to a Closed accounting period.
+        ==================================================
+        */
+
+        await this.validateAccountingPeriod(
+            oldInvoiceDate
+        );
+
+
+        /*
+        ==================================================
+        VALIDATE NEW ACCOUNTING PERIOD
+
+        IMPORTANT:
+        Prevent moving AR into Closed or
+        unconfigured accounting period.
+        ==================================================
+        */
+
+        await this.validateAccountingPeriod(
+            newInvoiceDate
+        );
+
+
+        /*
+        ==================================================
+        CALCULATE DETAILS
+        ==================================================
+        */
+
+        const calculatedDetails =
+            details.map(
+                detail => {
+
+                    const calculated =
+                        this.calculateDetailAmount(
+                            detail
+                        );
+
+
+                    return {
+
+                        ...detail,
+
+                        ...calculated
+
+                    };
+
+                }
+            );
+
+
+        /*
+        ==================================================
+        CALCULATE TOTALS
+        ==================================================
+        */
+
+        const totals =
+            this.calculateTotals(
+                calculatedDetails
+            );
+
+
+        /*
+        ==================================================
+        CURRENT PAID AMOUNT
+        ==================================================
+        */
+
+        const currentPaid =
+            Number(
+                currentHeader.paid_amount
+                ||
+                0
+            );
+
+
+        /*
+        ==================================================
+        OUTSTANDING
+        ==================================================
+        */
+
+        const outstanding =
+            Math.max(
+                Number(
+                    totals.total_amount
+                )
+                -
+                currentPaid,
+                0
+            );
+
+
+        /*
+        ==================================================
+        UPDATE HEADER
+        ==================================================
+        */
+
+        const {
+
+            data: invoice,
+
+            error: invoiceError
+
+        } = await supabase
+
+            .from(
+                this.table
+            )
+
+            .update({
+
+                ...header,
+
+                invoice_date:
+                    newInvoiceDate,
+
+                subtotal:
+                    totals.subtotal,
+
+                tax_output_amount:
+                    totals.tax_output_amount,
+
+                withholding_tax_amount:
+                    totals.withholding_tax_amount,
+
+                total_amount:
+                    totals.total_amount,
+
+                paid_amount:
+                    currentPaid,
+
+                outstanding_amount:
+                    outstanding
+
+            })
+
+            .eq(
+                "id",
+                id
+            )
+
+            .select()
+
+            .single();
+
+
+        /*
+        ==================================================
+        HEADER UPDATE ERROR
+        ==================================================
+        */
+
+        if (
+            invoiceError
+        ) {
+
+            throw invoiceError;
+
+        }
+
+
+        /*
+        ==================================================
+        DELETE OLD DETAILS
+        ==================================================
+        */
+
+        const {
+
+            error: deleteError
+
+        } = await supabase
+
+            .from(
+                this.detailTable
+            )
+
+            .delete()
+
+            .eq(
+                "account_receivable_id",
+                id
+            );
+
+
+        if (
+            deleteError
+        ) {
+
+            throw deleteError;
+
+        }
+
+
+        /*
+        ==================================================
+        INSERT NEW DETAILS
+        ==================================================
+        */
+
+        if (
+            calculatedDetails.length
+        ) {
 
             const detailRows =
                 calculatedDetails.map(
@@ -2278,23 +3268,15 @@ exportExcel() {
                         ...detail,
 
                         account_receivable_id:
-                            invoice.id
+                            id
 
                     })
                 );
 
 
-            /*
-            ==================================================
-            INSERT DETAILS
-            ==================================================
-            */
-
             const {
 
-                data: insertedDetails,
-
-                error: detailError
+                error: insertError
 
             } = await supabase
 
@@ -2304,678 +3286,491 @@ exportExcel() {
 
                 .insert(
                     detailRows
-                )
-
-                .select();
+                );
 
 
-            if (detailError) {
+            if (
+                insertError
+            ) {
 
-                /*
-                ==============================================
-                CLEAN HEADER IF DETAIL INSERT FAILS
-                ==============================================
-                */
-
-                await supabase
-
-                    .from(
-                        this.table
-                    )
-
-                    .delete()
-
-                    .eq(
-                        "id",
-                        invoice.id
-                    );
-
-
-                throw detailError;
+                throw insertError;
 
             }
 
-
-            return {
-
-                ...invoice,
-
-                details:
-                    insertedDetails
-                    || []
-
-            };
-
         }
 
-        catch (error) {
 
-            console.error(
-                "AccountReceivableService.create:",
-                error
-            );
+        /*
+        ==================================================
+        RETURN UPDATED ACCOUNT RECEIVABLE
+        ==================================================
+        */
 
-
-            throw error;
-
-        }
+        return this.getById(
+            id
+        );
 
     }
 
-
-    /*
-    ======================================================
-    UPDATE
-    ======================================================
-    */
-
-    async update(
-        id,
-        header,
-        details = []
+    catch (
+        error
     ) {
 
-        try {
+        console.error(
+            "AccountReceivableService.update:",
+            error
+        );
 
-            if (!id) {
 
-                throw new Error(
-                    "Account Receivable ID is required."
-                );
+        throw error;
 
-            }
+    }
 
+}
 
-            /*
-            ==================================================
-            CALCULATE DETAILS
-            ==================================================
-            */
 
-            const calculatedDetails =
-                details.map(
-                    detail => {
+    /*
+======================================================
+DELETE
+ACCOUNT RECEIVABLE
+WITH ACCOUNTING PERIOD VALIDATION
+BASIS : INVOICE DATE
+======================================================
+*/
 
-                        const calculated =
-                            this.calculateDetailAmount(
-                                detail
-                            );
+async delete(id) {
 
+    try {
 
-                        return {
+        /*
+        ==================================================
+        VALIDATE ID
+        ==================================================
+        */
 
-                            ...detail,
+        if (!id) {
 
-                            ...calculated
+            throw new Error(
+                "Account Receivable ID is required."
+            );
 
-                        };
+        }
 
-                    }
-                );
 
+        /*
+        ==================================================
+        CHECK INVOICE
+        ==================================================
+        */
 
-            /*
-            ==================================================
-            CALCULATE TOTALS
-            ==================================================
-            */
+        const {
 
-            const totals =
-                this.calculateTotals(
-                    calculatedDetails
-                );
+            data: invoice,
 
+            error: findError
 
-            /*
-            ==================================================
-            CURRENT HEADER
-            ==================================================
-            */
+        } = await supabase
 
-            const current =
-                await this.getById(
-                    id
-                );
+            .from(
+                this.table
+            )
 
+            .select(`
+                id,
+                invoice_no,
+                invoice_date,
+                status
+            `)
 
-            const currentPaid =
-                Number(
-                    current?.header?.paid_amount
-                    || 0
-                );
+            .eq(
+                "id",
+                id
+            )
 
+            .single();
 
-            const outstanding =
-                Math.max(
-                    Number(
-                        totals.total_amount
-                    )
-                    -
-                    currentPaid,
-                    0
-                );
 
+        /*
+        ==================================================
+        FIND ERROR
+        ==================================================
+        */
 
-            /*
-            ==================================================
-            UPDATE HEADER
-            ==================================================
-            */
+        if (
+            findError
+        ) {
 
-            const {
+            throw findError;
 
-                data: invoice,
+        }
 
-                error: invoiceError
 
-            } = await supabase
+        if (
+            !invoice
+        ) {
 
-                .from(
-                    this.table
-                )
+            throw new Error(
+                "Account Receivable not found."
+            );
 
-                .update({
+        }
 
-                    ...header,
 
-                    subtotal:
-                        totals.subtotal,
+        /*
+        ==================================================
+        ACCOUNTING PERIOD VALIDATION
+        ==================================================
+        */
 
-                    tax_output_amount:
-                        totals.tax_output_amount,
+        if (
+            !invoice.invoice_date
+        ) {
 
-                    withholding_tax_amount:
-                        totals.withholding_tax_amount,
+            throw new Error(
+                "Account Receivable Invoice Date is required."
+            );
 
-                    total_amount:
-                        totals.total_amount,
+        }
 
-                    paid_amount:
-                        currentPaid,
 
-                    outstanding_amount:
-                        outstanding
+        await this.validateAccountingPeriod(
+            invoice.invoice_date
+        );
 
-                })
 
-                .eq(
-                    "id",
-                    id
-                )
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
 
-                .select()
+        console.log(
+            "AR DELETE TARGET:",
+            invoice
+        );
 
-                .single();
 
+        /*
+        ==================================================
+        ONLY DRAFT / VOID CAN BE DELETED
+        ==================================================
+        */
 
-            if (invoiceError) {
+        if (
+            invoice.status
+                !==
+                this.STATUS.DRAFT
+            &&
+            invoice.status
+                !==
+                this.STATUS.VOID
+        ) {
 
-                throw invoiceError;
+            throw new Error(
+                "Only Draft or Void Account Receivable can be deleted."
+            );
 
-            }
+        }
 
 
-            /*
-            ==================================================
-            DELETE OLD DETAILS
-            ==================================================
-            */
+        /*
+        ==================================================
+        DELETE HEADER
 
-            const {
+        DETAIL AUTO DELETE BY CASCADE
+        ==================================================
+        */
 
-                error: deleteError
+        const {
 
-            } = await supabase
+            error: deleteError
 
-                .from(
-                    this.detailTable
-                )
+        } = await supabase
 
-                .delete()
+            .from(
+                this.table
+            )
 
-                .eq(
-                    "account_receivable_id",
-                    id
-                );
+            .delete()
 
-
-            if (deleteError) {
-
-                throw deleteError;
-
-            }
-
-
-            /*
-            ==================================================
-            INSERT NEW DETAILS
-            ==================================================
-            */
-
-            if (
-                calculatedDetails.length
-            ) {
-
-                const detailRows =
-                    calculatedDetails.map(
-                        detail => ({
-
-                            ...detail,
-
-                            account_receivable_id:
-                                id
-
-                        })
-                    );
-
-
-                const {
-
-                    error: insertError
-
-                } = await supabase
-
-                    .from(
-                        this.detailTable
-                    )
-
-                    .insert(
-                        detailRows
-                    );
-
-
-                if (insertError) {
-
-                    throw insertError;
-
-                }
-
-            }
-
-
-            return this.getById(
+            .eq(
+                "id",
                 id
             );
 
-        }
 
-        catch (error) {
+        /*
+        ==================================================
+        DATABASE ERROR
+        ==================================================
+        */
+
+        if (
+            deleteError
+        ) {
 
             console.error(
-                "AccountReceivableService.update:",
-                error
+                "AR DELETE DATABASE ERROR:",
+                deleteError
             );
 
 
-            throw error;
+            throw deleteError;
 
         }
+
+
+        /*
+        ==================================================
+        SUCCESS
+        ==================================================
+        */
+
+        console.log(
+            "ACCOUNT RECEIVABLE DELETED SUCCESSFULLY:",
+            {
+                id:
+                    invoice.id,
+
+                invoice_no:
+                    invoice.invoice_no
+            }
+        );
+
+
+        return true;
 
     }
 
+    catch (error) {
+
+        console.error(
+            "AccountReceivableService.delete:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
+
 
     /*
-    ======================================================
-    DELETE
-    ======================================================
-    */
+======================================================
+VOID ACCOUNT RECEIVABLE
+WITH ACCOUNTING PERIOD VALIDATION
+BASIS : INVOICE DATE
+======================================================
+*/
 
-    async delete(id) {
+async voidInvoice(
+    id,
+    reason = ""
+) {
 
-        try {
+    try {
 
-            if (!id) {
+        /*
+        ==================================================
+        VALIDATE ID
+        ==================================================
+        */
 
-                throw new Error(
-                    "Account Receivable ID is required."
-                );
+        if (!id) {
 
-            }
-
-
-            /*
-            ==================================================
-            CHECK INVOICE
-            ==================================================
-            */
-
-            const {
-
-                data: invoice,
-
-                error: findError
-
-            } = await supabase
-
-                .from(
-                    this.table
-                )
-
-                .select(`
-                    id,
-                    invoice_no,
-                    status
-                `)
-
-                .eq(
-                    "id",
-                    id
-                )
-
-                .single();
-
-
-            if (findError) {
-
-                throw findError;
-
-            }
-
-
-            if (!invoice) {
-
-                throw new Error(
-                    "Account Receivable not found."
-                );
-
-            }
-
-
-            console.log(
-                "AR DELETE TARGET:",
-                invoice
+            throw new Error(
+                "Account Receivable ID is required."
             );
 
+        }
 
-            /*
-            ==================================================
-            ONLY DRAFT / VOID CAN BE DELETED
-            ==================================================
-            */
 
-            if (
-                invoice.status
-                    !==
-                    this.STATUS.DRAFT
-                &&
-                invoice.status
-                    !==
+        /*
+        ==================================================
+        GET INVOICE
+        ==================================================
+        */
+
+        const {
+
+            data: invoice,
+
+            error: findError
+
+        } = await supabase
+
+            .from(
+                this.table
+            )
+
+            .select(`
+                id,
+                invoice_no,
+                invoice_date,
+                status,
+                paid_amount,
+                outstanding_amount
+            `)
+
+            .eq(
+                "id",
+                id
+            )
+
+            .single();
+
+
+        if (findError) {
+
+            throw findError;
+
+        }
+
+
+        if (!invoice) {
+
+            throw new Error(
+                "Account Receivable not found."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        ACCOUNTING PERIOD VALIDATION
+        ==================================================
+        */
+
+        if (
+            !invoice.invoice_date
+        ) {
+
+            throw new Error(
+                "Account Receivable Invoice Date is required."
+            );
+
+        }
+
+
+        await this.validateAccountingPeriod(
+            invoice.invoice_date
+        );
+
+
+        /*
+        ==================================================
+        ONLY COMPLETE CAN BE VOIDED
+        ==================================================
+        */
+
+        if (
+            invoice.status
+            !==
+            this.STATUS.COMPLETE
+        ) {
+
+            throw new Error(
+                "Only Complete Account Receivable can be voided."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        PAYMENT VALIDATION
+        ==================================================
+        */
+
+        if (
+            Number(
+                invoice.paid_amount
+                || 0
+            )
+            >
+            0
+        ) {
+
+            throw new Error(
+                "Account Receivable with payment cannot be voided."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        UPDATE STATUS
+        ==================================================
+        */
+
+        const {
+
+            data,
+
+            error: updateError
+
+        } = await supabase
+
+            .from(
+                this.table
+            )
+
+            .update({
+
+                status:
                     this.STATUS.VOID
-            ) {
 
-                throw new Error(
-                    "Only Draft or Void Account Receivable can be deleted."
-                );
+            })
 
-            }
+            .eq(
+                "id",
+                id
+            )
 
+            .select()
 
-            /*
-            ==================================================
-            DELETE HEADER
-            DETAIL AUTO DELETE BY CASCADE
-            ==================================================
-            */
-
-            const {
-
-                data: deletedInvoice,
-
-                error: deleteError
-
-            } = await supabase
-
-                .from(
-                    this.table
-                )
-
-                .delete()
-
-                .eq(
-                    "id",
-                    id
-                )
-
-                .select(`
-                    id,
-                    invoice_no
-                `);
+            .single();
 
 
-            if (deleteError) {
+        if (updateError) {
 
-                console.error(
-                    "AR DELETE DATABASE ERROR:",
-                    deleteError
-                );
-
-
-                throw deleteError;
-
-            }
-
-
-            if (
-                !deletedInvoice
-                ||
-                deletedInvoice.length === 0
-            ) {
-
-                throw new Error(
-                    "Account Receivable was not deleted from database."
-                );
-
-            }
-
-
-            console.log(
-                "ACCOUNT RECEIVABLE DELETED SUCCESSFULLY:",
-                deletedInvoice[0]
-            );
-
-
-            return true;
+            throw updateError;
 
         }
 
-        catch (error) {
 
-            console.error(
-                "AccountReceivableService.delete:",
-                error
-            );
+        console.log(
+            "AR VOID:",
+            {
+                id,
+                reason,
+                result:
+                    data
+            }
+        );
 
 
-            throw error;
-
-        }
+        return data;
 
     }
 
+    catch (error) {
 
-    /*
-    ======================================================
-    VOID ACCOUNT RECEIVABLE
-    ======================================================
-    */
-
-    async voidInvoice(
-        id,
-        reason = ""
-    ) {
-
-        try {
-
-            if (!id) {
-
-                throw new Error(
-                    "Account Receivable ID is required."
-                );
-
-            }
+        console.error(
+            "AccountReceivableService.voidInvoice:",
+            error
+        );
 
 
-            /*
-            ==================================================
-            GET INVOICE
-            ==================================================
-            */
-
-            const {
-
-                data: invoice,
-
-                error: findError
-
-            } = await supabase
-
-                .from(
-                    this.table
-                )
-
-                .select(`
-                    id,
-                    invoice_no,
-                    status,
-                    paid_amount,
-                    outstanding_amount
-                `)
-
-                .eq(
-                    "id",
-                    id
-                )
-
-                .single();
-
-
-            if (findError) {
-
-                throw findError;
-
-            }
-
-
-            if (!invoice) {
-
-                throw new Error(
-                    "Account Receivable not found."
-                );
-
-            }
-
-
-            /*
-            ==================================================
-            ONLY UNPAID CAN BE VOIDED
-            ==================================================
-            */
-
-            if (
-                invoice.status
-                !==
-                this.STATUS.UNPAID
-            ) {
-
-                throw new Error(
-                    "Only Unpaid Account Receivable can be voided."
-                );
-
-            }
-
-
-            /*
-            ==================================================
-            PAYMENT VALIDATION
-            ==================================================
-            */
-
-            if (
-                Number(
-                    invoice.paid_amount
-                    || 0
-                )
-                >
-                0
-            ) {
-
-                throw new Error(
-                    "Account Receivable with payment cannot be voided."
-                );
-
-            }
-
-
-            /*
-            ==================================================
-            UPDATE STATUS
-            ==================================================
-            */
-
-            const {
-
-                data,
-
-                error: updateError
-
-            } = await supabase
-
-                .from(
-                    this.table
-                )
-
-                .update({
-
-                    status:
-                        this.STATUS.VOID
-
-                })
-
-                .eq(
-                    "id",
-                    id
-                )
-
-                .select()
-
-                .single();
-
-
-            if (updateError) {
-
-                throw updateError;
-
-            }
-
-
-            console.log(
-                "AR VOID:",
-                {
-                    id,
-                    reason,
-                    result:
-                        data
-                }
-            );
-
-
-            return data;
-
-        }
-
-        catch (error) {
-
-            console.error(
-                "AccountReceivableService.voidInvoice:",
-                error
-            );
-
-
-            throw error;
-
-        }
+        throw error;
 
     }
+
+}
     /*
 ======================================================
 GET PAYMENT TOTAL
@@ -3479,150 +4274,220 @@ async markPaid(
 
 
     /*
-    ======================================================
-    CREATE PAYMENT
-    ======================================================
-    */
+======================================================
+CREATE PAYMENT
+ACCOUNT RECEIVABLE
+WITH ACCOUNTING PERIOD VALIDATION
+BASIS : PAYMENT DATE
+======================================================
+*/
 
-    async createPayment(
-        payment
-    ) {
+async createPayment(
+    payment
+) {
 
-        try {
+    try {
 
-            if (
-                !payment
-            ) {
+        /*
+        ==================================================
+        VALIDATE PAYMENT DATA
+        ==================================================
+        */
 
-                throw new Error(
-                    "Payment data is required."
-                );
+        if (
+            !payment
+        ) {
 
-            }
-
-
-            if (
-                !payment.account_receivable_id
-            ) {
-
-                throw new Error(
-                    "Account Receivable ID is required."
-                );
-
-            }
-
-
-            if (
-                !payment.payment_date
-            ) {
-
-                throw new Error(
-                    "Payment Date is required."
-                );
-
-            }
-
-
-            if (
-                !payment.payment_account_id
-            ) {
-
-                throw new Error(
-                    "Payment Account is required."
-                );
-
-            }
-
-
-            if (
-                Number(
-                    payment.amount
-                    || 0
-                )
-                <=
-                0
-            ) {
-
-                throw new Error(
-                    "Payment Amount must be greater than 0."
-                );
-
-            }
-
-
-            const {
-
-                data,
-
-                error
-
-            } = await supabase
-
-                .from(
-                    this.paymentTable
-                )
-
-                .insert({
-
-                    account_receivable_id:
-                        payment.account_receivable_id,
-
-                    payment_date:
-                        payment.payment_date,
-
-                    payment_account_id:
-                        Number(
-                            payment.payment_account_id
-                        ),
-
-                    amount:
-                        Number(
-                            payment.amount
-                        ),
-
-                    reference_no:
-                        payment.reference_no
-                        || null,
-
-                    description:
-                        payment.description
-                        || null,
-
-                    gl_journal_id:
-                        payment.gl_journal_id
-                        || null
-
-                })
-
-                .select()
-
-                .single();
-
-
-            if (error) {
-
-                throw error;
-
-            }
-
-
-            return data;
+            throw new Error(
+                "Payment data is required."
+            );
 
         }
 
-        catch (error) {
 
-            console.error(
-                "AccountReceivableService.createPayment:",
-                error
+        /*
+        ==================================================
+        VALIDATE ACCOUNT RECEIVABLE
+        ==================================================
+        */
+
+        if (
+            !payment.account_receivable_id
+        ) {
+
+            throw new Error(
+                "Account Receivable ID is required."
             );
 
+        }
+
+
+        /*
+        ==================================================
+        VALIDATE PAYMENT DATE
+        ==================================================
+        */
+
+        if (
+            !payment.payment_date
+        ) {
+
+            throw new Error(
+                "Payment Date is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        VALIDATE PAYMENT ACCOUNT
+        ==================================================
+        */
+
+        if (
+            !payment.payment_account_id
+        ) {
+
+            throw new Error(
+                "Payment Account is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        VALIDATE PAYMENT AMOUNT
+        ==================================================
+        */
+
+        if (
+            Number(
+                payment.amount
+                || 0
+            )
+            <=
+            0
+        ) {
+
+            throw new Error(
+                "Payment Amount must be greater than 0."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        ACCOUNTING PERIOD VALIDATION
+
+        AR PAYMENT ACCOUNTING DATE
+        =
+        PAYMENT DATE
+        ==================================================
+        */
+
+        await this.validatePaymentAccountingPeriod(
+            payment.payment_date
+        );
+
+
+        /*
+        ==================================================
+        INSERT PAYMENT
+        ==================================================
+        */
+
+        const {
+
+            data,
+
+            error
+
+        } = await supabase
+
+            .from(
+                this.paymentTable
+            )
+
+            .insert({
+
+                account_receivable_id:
+                    payment.account_receivable_id,
+
+                payment_date:
+                    payment.payment_date,
+
+                payment_account_id:
+                    Number(
+                        payment.payment_account_id
+                    ),
+
+                amount:
+                    Number(
+                        payment.amount
+                    ),
+
+                reference_no:
+                    payment.reference_no
+                    || null,
+
+                description:
+                    payment.description
+                    || null,
+
+                gl_journal_id:
+                    payment.gl_journal_id
+                    || null
+
+            })
+
+            .select()
+
+            .single();
+
+
+        /*
+        ==================================================
+        DATABASE ERROR
+        ==================================================
+        */
+
+        if (
+            error
+        ) {
 
             throw error;
 
         }
 
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
+
+        return data;
+
     }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "AccountReceivableService.createPayment:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
 
 
     /*

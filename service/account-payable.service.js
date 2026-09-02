@@ -3529,12 +3529,12 @@ async delete(id) {
         /*
         ==================================================
         DELETE HEADER
+
+        DETAIL AUTO DELETE BY CASCADE
         ==================================================
         */
 
         const {
-
-            data: deletedInvoice,
 
             error: deleteError
 
@@ -3549,12 +3549,7 @@ async delete(id) {
             .eq(
                 "id",
                 id
-            )
-
-            .select(`
-                id,
-                invoice_no
-            `);
+            );
 
 
         /*
@@ -3563,33 +3558,17 @@ async delete(id) {
         ==================================================
         */
 
-        if (deleteError) {
+        if (
+            deleteError
+        ) {
 
             console.error(
                 "DELETE DATABASE ERROR:",
                 deleteError
             );
 
+
             throw deleteError;
-
-        }
-
-
-        /*
-        ==================================================
-        VERIFY DELETE
-        ==================================================
-        */
-
-        if (
-            !deletedInvoice
-            ||
-            deletedInvoice.length === 0
-        ) {
-
-            throw new Error(
-                "Account Payable was not deleted from database."
-            );
 
         }
 
@@ -3602,7 +3581,13 @@ async delete(id) {
 
         console.log(
             "ACCOUNT PAYABLE DELETED SUCCESSFULLY:",
-            deletedInvoice[0]
+            {
+                id:
+                    invoice.id,
+
+                invoice_no:
+                    invoice.invoice_no
+            }
         );
 
 
@@ -3616,6 +3601,7 @@ async delete(id) {
             "AccountPayableService.delete:",
             error
         );
+
 
         throw error;
 

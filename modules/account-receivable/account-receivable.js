@@ -310,7 +310,6 @@ this.btnSaveARPayment = null;
 
         this.arFormInvoiceDate = null;
 
-        this.arFormDateReceived = null;
 
         this.arFormDueDate = null;
 
@@ -1019,11 +1018,6 @@ cacheDOM() {
             "ar-form-invoice-date"
         );
 
-
-    this.arFormDateReceived =
-        document.getElementById(
-            "ar-form-date-received"
-        );
 
 
     this.arFormDueDate =
@@ -4387,6 +4381,9 @@ async handleCustomerChange() {
 /*
 ======================================================
 CALCULATE AR DUE DATE
+
+BASIS:
+INVOICE DATE + TERM OF PAYMENT
 ======================================================
 */
 
@@ -4394,12 +4391,24 @@ async calculateARDueDate() {
 
     try {
 
+        /*
+        ==================================================
+        CUSTOMER
+        ==================================================
+        */
+
         const customerId =
             this.arFormCustomer?.value;
 
 
-        const dateReceived =
-            this.arFormDateReceived?.value;
+        /*
+        ==================================================
+        INVOICE DATE
+        ==================================================
+        */
+
+        const invoiceDate =
+            this.arFormInvoiceDate?.value;
 
 
         /*
@@ -4411,7 +4420,7 @@ async calculateARDueDate() {
         if (
             !customerId
             ||
-            !dateReceived
+            !invoiceDate
         ) {
 
             if (
@@ -4441,7 +4450,9 @@ async calculateARDueDate() {
             );
 
 
-        if (!customer) {
+        if (
+            !customer
+        ) {
 
             throw new Error(
                 "Customer not found."
@@ -4453,12 +4464,16 @@ async calculateARDueDate() {
         /*
         ==================================================
         CALCULATE FROM SERVICE
+
+        DUE DATE
+        =
+        INVOICE DATE + TOP DAYS
         ==================================================
         */
 
         const dueDate =
             this.service.calculateDueDate(
-                dateReceived,
+                invoiceDate,
                 customer
             );
 
@@ -4508,14 +4523,21 @@ async calculateARDueDate() {
         }
 
 
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
         console.log(
             "AR DUE DATE:",
             {
+
                 customer_id:
                     customerId,
 
-                date_received:
-                    dateReceived,
+                invoice_date:
+                    invoiceDate,
 
                 top_days:
                     Number(
@@ -4525,12 +4547,15 @@ async calculateARDueDate() {
 
                 due_date:
                     dueDate
+
             }
         );
 
     }
 
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
             "AccountReceivable.calculateARDueDate:",
@@ -4546,6 +4571,9 @@ async calculateARDueDate() {
                 "";
 
         }
+
+
+        throw error;
 
     }
 
@@ -6162,12 +6190,6 @@ createTableRow(
         "-";
 
 
-    const dateReceived =
-        item?.date_received
-        ||
-        "-";
-
-
     const dueDate =
         item?.due_date
         ||
@@ -6571,31 +6593,7 @@ createTableRow(
                     </div>
 
 
-                    <!-- RECEIVED -->
-
-                    <div class="ar-info-line">
-
-                        <span class="ar-info-label">
-
-                            Received
-
-                        </span>
-
-
-                        <span class="ar-info-separator">
-
-                            :
-
-                        </span>
-
-
-                        <span class="ar-info-value">
-
-                            ${dateReceived}
-
-                        </span>
-
-                    </div>
+                    
 
 
                     <!-- DUE DATE -->
@@ -9833,14 +9831,7 @@ async addInvoice() {
         }
 
 
-        if (
-            this.arFormDateReceived
-        ) {
-
-            this.arFormDateReceived.value =
-                "";
-
-        }
+       
 
 
         if (
@@ -11639,228 +11630,317 @@ updateInvoiceSummary() {
 }
 
     /*
-    ======================================================
-    SAVE DRAFT
-    ======================================================
-    */
+======================================================
+SAVE DRAFT
+ACCOUNT RECEIVABLE
+BOOTSTRAP ALERT
+======================================================
+*/
 
-    async saveDraft() {
+async saveDraft() {
 
-        try {
+    try {
 
-            if (
-                !this.arFormCustomer?.value
-            ) {
+        /*
+        ==================================================
+        VALIDATE CUSTOMER
+        ==================================================
+        */
 
-                return this.showError(
-                    "Customer is required."
-                );
+        if (
+            !this.arFormCustomer?.value
+        ) {
 
-            }
+            return this.showError(
+                "Customer is required."
+            );
+
+        }
 
 
-            if (
-                !this.arFormInvoiceNo
+        /*
+        ==================================================
+        VALIDATE INVOICE NO
+        ==================================================
+        */
+
+        if (
+            !this.arFormInvoiceNo
+                ?.value
+                ?.trim()
+        ) {
+
+            return this.showError(
+                "Invoice No is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        VALIDATE INVOICE DATE
+        ==================================================
+        */
+
+        if (
+            !this.arFormInvoiceDate?.value
+        ) {
+
+            return this.showError(
+                "Invoice Date is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        VALIDATE DUE DATE
+        ==================================================
+        */
+
+        if (
+            !this.arFormDueDate?.value
+        ) {
+
+            return this.showError(
+                "Due Date is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        VALIDATE DETAIL
+        ==================================================
+        */
+
+        if (
+            !this.invoiceDetails.length
+        ) {
+
+            return this.showError(
+                "Please add at least one invoice detail."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        HEADER
+        ==================================================
+        */
+
+        const header = {
+
+            customer_id:
+                Number(
+                    this.arFormCustomer.value
+                ),
+
+            po_no:
+                this.arFormPoNo
                     ?.value
                     ?.trim()
-            ) {
+                || null,
 
-                return this.showError(
-                    "Invoice No is required."
-                );
+            invoice_no:
+                this.arFormInvoiceNo
+                    .value
+                    .trim(),
 
-            }
+            invoice_date:
+                this.arFormInvoiceDate.value,
 
+            due_date:
+                this.arFormDueDate.value,
 
-            if (
-                !this.arFormInvoiceDate?.value
-            ) {
+            description:
+                this.arFormDescription
+                    ?.value
+                    ?.trim()
+                || null
 
-                return this.showError(
-                    "Invoice Date is required."
-                );
-
-            }
-
-
-            if (
-                !this.arFormDueDate?.value
-            ) {
-
-                return this.showError(
-                    "Due Date is required."
-                );
-
-            }
+        };
 
 
-            if (
-                !this.invoiceDetails.length
-            ) {
+        /*
+        ==================================================
+        DETAILS
+        ==================================================
+        */
 
-                return this.showError(
-                    "Please add at least one invoice detail."
-                );
+        const details =
+            this.invoiceDetails.map(
 
-            }
+                item => ({
 
+                    revenue_account_id:
+                        Number(
+                            item.revenue_account_id
+                        ),
 
-            const header = {
+                    description:
+                        item.description
+                        || null,
 
-                customer_id:
-                    Number(
-                        this.arFormCustomer.value
-                    ),
+                    quantity:
+                        Number(
+                            item.quantity
+                            || 1
+                        ),
 
-                po_no:
-                    this.arFormPoNo
-                        ?.value
-                        ?.trim()
-                    || null,
+                    unit_price:
+                        Number(
+                            item.unit_price
+                            || 0
+                        ),
 
-                invoice_no:
-                    this.arFormInvoiceNo
-                        .value
-                        .trim(),
+                    line_amount:
+                        Number(
+                            item.line_amount
+                            || 0
+                        ),
 
-                invoice_date:
-                    this.arFormInvoiceDate.value,
+                    tax_plus_id:
+                        item.tax_plus_id
+                        || null,
 
-                date_received:
-                    this.arFormDateReceived?.value
-                    || null,
+                    tax_plus_account_id:
+                        item.tax_plus_account_id
+                        || null,
 
-                due_date:
-                    this.arFormDueDate.value,
+                    tax_output_rate:
+                        Number(
+                            item.tax_output_rate
+                            || 0
+                        ),
 
-                description:
-                    this.arFormDescription
-                        ?.value
-                        ?.trim()
-                    || null
+                    tax_output_amount:
+                        Number(
+                            item.tax_output_amount
+                            || 0
+                        ),
 
-            };
+                    tax_minus_id:
+                        item.tax_minus_id
+                        || null,
 
+                    tax_minus_account_id:
+                        item.tax_minus_account_id
+                        || null,
 
-            const details =
-                this.invoiceDetails.map(
-                    item => ({
+                    withholding_tax_rate:
+                        Number(
+                            item.withholding_tax_rate
+                            || 0
+                        ),
 
-                        revenue_account_id:
-                            Number(
-                                item.revenue_account_id
-                            ),
+                    withholding_tax_amount:
+                        Number(
+                            item.withholding_tax_amount
+                            || 0
+                        ),
 
-                        description:
-                            item.description
-                            || null,
+                    total_amount:
+                        Number(
+                            item.total_amount
+                            || 0
+                        )
 
-                        quantity:
-                            Number(
-                                item.quantity
-                                || 1
-                            ),
+                })
 
-                        unit_price:
-                            Number(
-                                item.unit_price
-                                || 0
-                            ),
-
-                        line_amount:
-                            Number(
-                                item.line_amount
-                                || 0
-                            ),
-
-                        tax_plus_id:
-                            item.tax_plus_id
-                            || null,
-
-                        tax_plus_account_id:
-                            item.tax_plus_account_id
-                            || null,
-
-                        tax_output_rate:
-                            Number(
-                                item.tax_output_rate
-                                || 0
-                            ),
-
-                        tax_output_amount:
-                            Number(
-                                item.tax_output_amount
-                                || 0
-                            ),
-
-                        tax_minus_id:
-                            item.tax_minus_id
-                            || null,
-
-                        tax_minus_account_id:
-                            item.tax_minus_account_id
-                            || null,
-
-                        withholding_tax_rate:
-                            Number(
-                                item.withholding_tax_rate
-                                || 0
-                            ),
-
-                        withholding_tax_amount:
-                            Number(
-                                item.withholding_tax_amount
-                                || 0
-                            ),
-
-                        total_amount:
-                            Number(
-                                item.total_amount
-                                || 0
-                            )
-
-                    })
-                );
-
-
-            await this.service.create(
-                header,
-                details
             );
 
 
-            bootstrap.Modal
-                .getInstance(
-                    this.accountReceivableModal
-                )
-                ?.hide();
+        /*
+        ==================================================
+        CREATE ACCOUNT RECEIVABLE
+        ==================================================
+        */
+
+        await this.service.create(
+            header,
+            details
+        );
 
 
-            this.resetForm();
+        /*
+        ==================================================
+        CLOSE MODAL
+        ==================================================
+        */
+
+        bootstrap.Modal
+            .getInstance(
+                this.accountReceivableModal
+            )
+            ?.hide();
 
 
-            await this.loadData();
+        /*
+        ==================================================
+        RESET FORM
+        ==================================================
+        */
 
-        }
-
-        catch (error) {
-
-            console.error(
-                "AccountReceivable.saveDraft:",
-                error
-            );
+        this.resetForm();
 
 
-            this.showError(
-                error.message
-                ||
-                "Failed to save Account Receivable."
-            );
+        /*
+        ==================================================
+        RELOAD DATA
+        NO LOADING
+        ==================================================
+        */
 
-        }
+        await this.loadData(
+            false
+        );
+
+
+        /*
+        ==================================================
+        SUCCESS
+        BOOTSTRAP ALERT
+        ==================================================
+        */
+
+        this.showSuccess(
+            "Account Receivable saved as Draft."
+        );
 
     }
 
+    catch (
+        error
+    ) {
+
+        console.error(
+            "AccountReceivable.saveDraft:",
+            error
+        );
+
+
+        /*
+        ==================================================
+        ERROR
+        BOOTSTRAP ALERT
+        ==================================================
+        */
+
+        this.showError(
+            error?.message
+            ||
+            "Failed to save Account Receivable."
+        );
+
+    }
+
+}
 
     /*
 ======================================================
@@ -11941,8 +12021,7 @@ async editInvoice(id) {
 
             this.arFormInvoiceDate,
 
-            this.arFormDateReceived,
-
+           
             this.arFormDueDate,
 
             this.arFormDescription,
@@ -12082,21 +12161,7 @@ async editInvoice(id) {
         }
 
 
-        /*
-        ==================================================
-        DATE RECEIVED
-        ==================================================
-        */
-
-        if (
-            this.arFormDateReceived
-        ) {
-
-            this.arFormDateReceived.value =
-                header.date_received
-                || "";
-
-        }
+        
 
 
         /*
@@ -12616,188 +12681,352 @@ async editInvoice(id) {
 
 
     /*
-    ======================================================
-    SAVE EDIT
-    ======================================================
-    */
+======================================================
+SAVE EDIT
+ACCOUNT RECEIVABLE
+BOOTSTRAP ALERT
+======================================================
+*/
 
-    async saveEdit() {
+async saveEdit() {
 
-        try {
+    try {
 
-            if (
-                !this.currentInvoiceId
-            ) {
+        /*
+        ==================================================
+        VALIDATE ID
+        ==================================================
+        */
 
-                throw new Error(
-                    "Account Receivable ID is required."
-                );
+        if (
+            !this.currentInvoiceId
+        ) {
 
-            }
-
-
-            const header = {
-
-                customer_id:
-                    Number(
-                        this.arFormCustomer.value
-                    ),
-
-                po_no:
-                    this.arFormPoNo
-                        ?.value
-                        ?.trim()
-                    || null,
-
-                invoice_no:
-                    this.arFormInvoiceNo
-                        .value
-                        .trim(),
-
-                invoice_date:
-                    this.arFormInvoiceDate.value,
-
-                date_received:
-                    this.arFormDateReceived?.value
-                    || null,
-
-                due_date:
-                    this.arFormDueDate.value,
-
-                description:
-                    this.arFormDescription
-                        ?.value
-                        ?.trim()
-                    || null
-
-            };
-
-
-            const details =
-                this.invoiceDetails.map(
-                    item => ({
-
-                        revenue_account_id:
-                            Number(
-                                item.revenue_account_id
-                            ),
-
-                        description:
-                            item.description
-                            || null,
-
-                        quantity:
-                            Number(
-                                item.quantity
-                                || 1
-                            ),
-
-                        unit_price:
-                            Number(
-                                item.unit_price
-                                || 0
-                            ),
-
-                        line_amount:
-                            Number(
-                                item.line_amount
-                                || 0
-                            ),
-
-                        tax_plus_id:
-                            item.tax_plus_id
-                            || null,
-
-                        tax_plus_account_id:
-                            item.tax_plus_account_id
-                            || null,
-
-                        tax_output_rate:
-                            Number(
-                                item.tax_output_rate
-                                || 0
-                            ),
-
-                        tax_output_amount:
-                            Number(
-                                item.tax_output_amount
-                                || 0
-                            ),
-
-                        tax_minus_id:
-                            item.tax_minus_id
-                            || null,
-
-                        tax_minus_account_id:
-                            item.tax_minus_account_id
-                            || null,
-
-                        withholding_tax_rate:
-                            Number(
-                                item.withholding_tax_rate
-                                || 0
-                            ),
-
-                        withholding_tax_amount:
-                            Number(
-                                item.withholding_tax_amount
-                                || 0
-                            ),
-
-                        total_amount:
-                            Number(
-                                item.total_amount
-                                || 0
-                            )
-
-                    })
-                );
-
-
-            await this.service.update(
-                this.currentInvoiceId,
-                header,
-                details
-            );
-
-
-            bootstrap.Modal
-                .getInstance(
-                    this.accountReceivableModal
-                )
-                ?.hide();
-
-
-            this.currentInvoiceId =
-                null;
-
-
-            this.currentMode =
-                "add";
-
-
-            await this.loadData(
-    false
-);
-
-        }
-
-        catch (error) {
-
-            console.error(
-                "AccountReceivable.saveEdit:",
-                error
-            );
-
-
-            this.showError(
-                error.message
+            throw new Error(
+                "Account Receivable ID is required."
             );
 
         }
+
+
+        /*
+        ==================================================
+        VALIDATE CUSTOMER
+        ==================================================
+        */
+
+        if (
+            !this.arFormCustomer?.value
+        ) {
+
+            return this.showError(
+                "Customer is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        VALIDATE INVOICE NO
+        ==================================================
+        */
+
+        if (
+            !this.arFormInvoiceNo
+                ?.value
+                ?.trim()
+        ) {
+
+            return this.showError(
+                "Invoice No is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        VALIDATE INVOICE DATE
+        ==================================================
+        */
+
+        if (
+            !this.arFormInvoiceDate?.value
+        ) {
+
+            return this.showError(
+                "Invoice Date is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        VALIDATE DUE DATE
+        ==================================================
+        */
+
+        if (
+            !this.arFormDueDate?.value
+        ) {
+
+            return this.showError(
+                "Due Date is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        VALIDATE DETAIL
+        ==================================================
+        */
+
+        if (
+            !Array.isArray(
+                this.invoiceDetails
+            )
+            ||
+            !this.invoiceDetails.length
+        ) {
+
+            return this.showError(
+                "Please add at least one invoice detail."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        HEADER
+        ==================================================
+        */
+
+        const header = {
+
+            customer_id:
+                Number(
+                    this.arFormCustomer.value
+                ),
+
+            po_no:
+                this.arFormPoNo
+                    ?.value
+                    ?.trim()
+                || null,
+
+            invoice_no:
+                this.arFormInvoiceNo
+                    .value
+                    .trim(),
+
+            invoice_date:
+                this.arFormInvoiceDate.value,
+
+            due_date:
+                this.arFormDueDate.value,
+
+            description:
+                this.arFormDescription
+                    ?.value
+                    ?.trim()
+                || null
+
+        };
+
+
+        /*
+        ==================================================
+        DETAILS
+        ==================================================
+        */
+
+        const details =
+            this.invoiceDetails.map(
+
+                item => ({
+
+                    revenue_account_id:
+                        Number(
+                            item.revenue_account_id
+                        ),
+
+                    description:
+                        item.description
+                        || null,
+
+                    quantity:
+                        Number(
+                            item.quantity
+                            || 1
+                        ),
+
+                    unit_price:
+                        Number(
+                            item.unit_price
+                            || 0
+                        ),
+
+                    line_amount:
+                        Number(
+                            item.line_amount
+                            || 0
+                        ),
+
+                    tax_plus_id:
+                        item.tax_plus_id
+                        || null,
+
+                    tax_plus_account_id:
+                        item.tax_plus_account_id
+                        || null,
+
+                    tax_output_rate:
+                        Number(
+                            item.tax_output_rate
+                            || 0
+                        ),
+
+                    tax_output_amount:
+                        Number(
+                            item.tax_output_amount
+                            || 0
+                        ),
+
+                    tax_minus_id:
+                        item.tax_minus_id
+                        || null,
+
+                    tax_minus_account_id:
+                        item.tax_minus_account_id
+                        || null,
+
+                    withholding_tax_rate:
+                        Number(
+                            item.withholding_tax_rate
+                            || 0
+                        ),
+
+                    withholding_tax_amount:
+                        Number(
+                            item.withholding_tax_amount
+                            || 0
+                        ),
+
+                    total_amount:
+                        Number(
+                            item.total_amount
+                            || 0
+                        )
+
+                })
+
+            );
+
+
+        /*
+        ==================================================
+        UPDATE ACCOUNT RECEIVABLE
+        ==================================================
+        */
+
+        await this.service.update(
+
+            this.currentInvoiceId,
+
+            header,
+
+            details
+
+        );
+
+
+        /*
+        ==================================================
+        CLOSE MODAL
+        ==================================================
+        */
+
+        bootstrap.Modal
+            .getInstance(
+                this.accountReceivableModal
+            )
+            ?.hide();
+
+
+        /*
+        ==================================================
+        RESET STATE
+        ==================================================
+        */
+
+        this.currentInvoiceId =
+            null;
+
+
+        this.currentMode =
+            "add";
+
+
+        this.currentDetailId =
+            null;
+
+
+        /*
+        ==================================================
+        RELOAD DATA
+        NO LOADING
+        ==================================================
+        */
+
+        await this.loadData(
+            false
+        );
+
+
+        /*
+        ==================================================
+        SUCCESS
+        BOOTSTRAP ALERT
+        ==================================================
+        */
+
+        this.showSuccess(
+            "Account Receivable updated successfully."
+        );
 
     }
 
+    catch (
+        error
+    ) {
+
+        console.error(
+            "AccountReceivable.saveEdit:",
+            error
+        );
+
+
+        /*
+        ==================================================
+        ERROR
+        BOOTSTRAP ALERT
+        ==================================================
+        */
+
+        this.showError(
+            error?.message
+            ||
+            "Failed to update Account Receivable."
+        );
+
+    }
+
+}
 
     /*
 ======================================================
@@ -12848,7 +13077,7 @@ async viewInvoice(id) {
 
             this.arFormInvoiceDate,
 
-            this.arFormDateReceived,
+            
 
             this.arFormTop,
 
@@ -12998,54 +13227,666 @@ async viewInvoice(id) {
 }
 
 
-    /*
-    ======================================================
-    DELETE
-    ======================================================
-    */
+/*
+======================================================
+DELETE ACCOUNT RECEIVABLE
+BOOTSTRAP CONFIRMATION
+SAME DESIGN AS ACCOUNT PAYABLE
+======================================================
+*/
 
-    async deleteInvoice(id) {
+async deleteInvoice(
+    id
+) {
 
-        try {
+    try {
 
-            if (
-                !confirm(
-                    "Delete this Account Receivable?"
-                )
-            ) {
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
 
-                return;
+        if (
+            !id
+        ) {
 
+            throw new Error(
+                "Account Receivable ID is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        FIND ACCOUNT RECEIVABLE
+        ==================================================
+        */
+
+        const data =
+            Array.isArray(
+                this.data
+            )
+                ? this.data
+                : [];
+
+
+        const invoice =
+            data.find(
+                item =>
+                    String(
+                        item.id
+                    )
+                    ===
+                    String(
+                        id
+                    )
+            );
+
+
+        if (
+            !invoice
+        ) {
+
+            throw new Error(
+                "Account Receivable not found."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        INVOICE INFORMATION
+        ==================================================
+        */
+
+        const invoiceNo =
+            invoice.invoice_no
+            ||
+            "-";
+
+
+        const customerName =
+            invoice
+                ?.mst_business_partner
+                ?.bp_name
+            ||
+            "-";
+
+
+        const poNo =
+            invoice.po_no
+            ||
+            "-";
+
+
+        /*
+        ==================================================
+        REMOVE OLD MODAL
+        ==================================================
+        */
+
+        const existingModal =
+            document.getElementById(
+                "arDeleteInvoiceModal"
+            );
+
+
+        if (
+            existingModal
+        ) {
+
+            const oldInstance =
+                bootstrap.Modal
+                    .getInstance(
+                        existingModal
+                    );
+
+
+            oldInstance?.dispose();
+
+
+            existingModal.remove();
+
+        }
+
+
+        /*
+        ==================================================
+        CREATE MODAL
+        SAME STRUCTURE AS AP
+        ==================================================
+        */
+
+        const modalHTML = `
+
+            <!-- ==========================================================
+                 DELETE ACCOUNT RECEIVABLE CONFIRMATION
+            =========================================================== -->
+
+            <div
+                class="modal fade"
+                id="arDeleteInvoiceModal"
+                tabindex="-1"
+                aria-labelledby="arDeleteInvoiceModalLabel"
+                aria-hidden="true">
+
+                <div
+                    class="modal-dialog modal-dialog-centered">
+
+                    <div class="modal-content shadow-lg">
+
+
+                        <!-- ==================================================
+                             HEADER
+                        =================================================== -->
+
+                        <div class="modal-header">
+
+                            <h5
+                                class="modal-title fw-semibold"
+                                id="arDeleteInvoiceModalLabel">
+
+                                <i
+                                    class="fa-solid fa-trash text-danger me-2">
+                                </i>
+
+                                Confirm Delete Account Receivable
+
+                            </h5>
+
+
+                            <button
+                                type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close">
+                            </button>
+
+                        </div>
+
+
+                        <!-- ==================================================
+                             BODY
+                        =================================================== -->
+
+                        <div class="modal-body">
+
+                            <div class="text-center">
+
+
+                                <!-- ==========================================
+                                     DELETE ICON
+                                =========================================== -->
+
+                                <div class="mb-3">
+
+                                    <i
+                                        class="fa-solid fa-trash-can text-danger"
+                                        style="font-size: 48px;">
+                                    </i>
+
+                                </div>
+
+
+                                <!-- ==========================================
+                                     QUESTION
+                                =========================================== -->
+
+                                <div
+                                    class="mb-3"
+                                    style="font-size: 16px;">
+
+                                    Apakah Anda yakin ingin
+
+                                    <strong>
+                                        menghapus Account Receivable ini?
+                                    </strong>
+
+                                </div>
+
+
+                                <!-- ==========================================
+                                     INVOICE INFORMATION
+                                =========================================== -->
+
+                                <div
+                                    class="table-responsive text-start mb-3">
+
+                                    <table
+                                        class="table table-sm table-bordered mb-0">
+
+                                        <tbody>
+
+
+                                            <!-- INVOICE NO -->
+
+                                            <tr>
+
+                                                <th
+                                                    style="width: 150px;">
+
+                                                    Invoice No
+
+                                                </th>
+
+                                                <td>
+
+                                                    ${
+                                                        this.escapeHtml(
+                                                            invoiceNo
+                                                        )
+                                                    }
+
+                                                </td>
+
+                                            </tr>
+
+
+                                            <!-- CUSTOMER -->
+
+                                            <tr>
+
+                                                <th>
+
+                                                    Customer
+
+                                                </th>
+
+                                                <td>
+
+                                                    ${
+                                                        this.escapeHtml(
+                                                            customerName
+                                                        )
+                                                    }
+
+                                                </td>
+
+                                            </tr>
+
+
+                                            <!-- PO NO -->
+
+                                            <tr>
+
+                                                <th>
+
+                                                    PO No
+
+                                                </th>
+
+                                                <td>
+
+                                                    ${
+                                                        this.escapeHtml(
+                                                            poNo
+                                                        )
+                                                    }
+
+                                                </td>
+
+                                            </tr>
+
+
+                                        </tbody>
+
+                                    </table>
+
+                                </div>
+
+
+                                <!-- ==========================================
+                                     WARNING
+                                =========================================== -->
+
+                                <div
+                                    class="alert alert-danger text-start mb-0">
+
+                                    <i
+                                        class="fa-solid fa-triangle-exclamation me-2">
+                                    </i>
+
+                                    Account Receivable yang dihapus
+                                    tidak dapat dikembalikan.
+
+                                </div>
+
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ==================================================
+                             FOOTER
+                        =================================================== -->
+
+                        <div class="modal-footer">
+
+                            <button
+                                type="button"
+                                class="btn btn-secondary"
+                                data-bs-dismiss="modal">
+
+                                <i
+                                    class="fa-solid fa-xmark me-1">
+                                </i>
+
+                                Batal
+
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="btn btn-danger"
+                                id="btn-confirm-ar-delete-invoice">
+
+                                <i
+                                    class="fa-solid fa-trash me-1">
+                                </i>
+
+                                Ya, Hapus
+
+                            </button>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        `;
+
+
+        /*
+        ==================================================
+        INSERT MODAL
+        ==================================================
+        */
+
+        document.body.insertAdjacentHTML(
+            "beforeend",
+            modalHTML
+        );
+
+
+        /*
+        ==================================================
+        GET MODAL
+        ==================================================
+        */
+
+        const modalElement =
+            document.getElementById(
+                "arDeleteInvoiceModal"
+            );
+
+
+        const btnConfirm =
+            document.getElementById(
+                "btn-confirm-ar-delete-invoice"
+            );
+
+
+        if (
+            !modalElement
+            ||
+            !btnConfirm
+        ) {
+
+            throw new Error(
+                "Delete confirmation modal not found."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        CREATE BOOTSTRAP MODAL
+        ==================================================
+        */
+
+        const modal =
+            bootstrap.Modal
+                .getOrCreateInstance(
+                    modalElement
+                );
+
+
+        /*
+        ==================================================
+        CONFIRM DELETE
+        ==================================================
+        */
+
+        btnConfirm.addEventListener(
+            "click",
+            async () => {
+
+                /*
+                ==============================================
+                PREVENT DOUBLE CLICK
+                ==============================================
+                */
+
+                if (
+                    btnConfirm.dataset.processing
+                    ===
+                    "true"
+                ) {
+
+                    return;
+
+                }
+
+
+                /*
+                ==============================================
+                LOCK BUTTON
+                ==============================================
+                */
+
+                btnConfirm.dataset.processing =
+                    "true";
+
+
+                btnConfirm.disabled =
+                    true;
+
+
+                const originalContent =
+                    btnConfirm.innerHTML;
+
+
+                btnConfirm.innerHTML = `
+
+                    <span
+                        class="
+                            spinner-border
+                            spinner-border-sm
+                            me-1
+                        ">
+                    </span>
+
+                    Menghapus...
+
+                `;
+
+
+                try {
+
+                    /*
+                    ==========================================
+                    DELETE
+                    ==========================================
+                    */
+
+                    await this.service.delete(
+                        id
+                    );
+
+
+                    /*
+                    ==========================================
+                    CLOSE DELETE MODAL
+                    ==========================================
+                    */
+
+                    modal.hide();
+
+
+                    /*
+                    ==========================================
+                    RELOAD DATA
+                    ==========================================
+                    */
+
+                    await this.loadData(
+                        false
+                    );
+
+
+                    /*
+                    ==========================================
+                    SUCCESS BOOTSTRAP ALERT
+                    ==========================================
+                    */
+
+                    this.showSuccess(
+                        "Account Receivable deleted successfully."
+                    );
+
+                }
+
+                catch (
+                    error
+                ) {
+
+                    console.error(
+                        "AccountReceivable.deleteInvoice:",
+                        error
+                    );
+
+
+                    /*
+                    ==========================================
+                    CLOSE DELETE MODAL
+                    ==========================================
+                    */
+
+                    modal.hide();
+
+
+                    /*
+                    ==========================================
+                    ERROR BOOTSTRAP ALERT
+                    ==========================================
+                    */
+
+                    this.showError(
+                        error?.message
+                        ||
+                        "Failed to delete Account Receivable."
+                    );
+
+                }
+
+                finally {
+
+                    /*
+                    ==========================================
+                    RELEASE BUTTON
+                    ==========================================
+                    */
+
+                    btnConfirm.dataset.processing =
+                        "false";
+
+
+                    btnConfirm.disabled =
+                        false;
+
+
+                    btnConfirm.innerHTML =
+                        originalContent;
+
+                }
+
+            },
+            {
+                once:
+                    true
             }
+        );
 
 
-            await this.service.delete(
-                id
-            );
+        /*
+        ==================================================
+        CLEANUP MODAL
+        ==================================================
+        */
+
+        modalElement.addEventListener(
+            "hidden.bs.modal",
+            () => {
+
+                const instance =
+                    bootstrap.Modal
+                        .getInstance(
+                            modalElement
+                        );
 
 
-            await this.loadData(
-    false
-);
-
-        }
-
-        catch (error) {
-
-            console.error(
-                "AccountReceivable.deleteInvoice:",
-                error
-            );
+                instance?.dispose();
 
 
-            this.showError(
-                error.message
-            );
+                modalElement.remove();
 
-        }
+            },
+            {
+                once:
+                    true
+            }
+        );
+
+
+        /*
+        ==================================================
+        SHOW MODAL
+        ==================================================
+        */
+
+        modal.show();
 
     }
 
+    catch (
+        error
+    ) {
+
+        console.error(
+            "AccountReceivable.deleteInvoice:",
+            error
+        );
+
+
+        this.showError(
+            error?.message
+            ||
+            "Failed to delete Account Receivable."
+        );
+
+    }
+
+}
 
     /*
 ======================================================
@@ -13221,19 +14062,23 @@ bindEvents() {
 
 
     /*
-    ==================================================
-    DATE RECEIVED CHANGE
-    ==================================================
-    */
+==================================================
+INVOICE DATE CHANGE
 
-    this.arFormDateReceived?.addEventListener(
-        "change",
-        async () => {
+DUE DATE
+=
+INVOICE DATE + TOP
+==================================================
+*/
 
-            await this.calculateARDueDate();
+this.arFormInvoiceDate?.addEventListener(
+    "change",
+    async () => {
 
-        }
-    );
+        await this.calculateARDueDate();
+
+    }
+);
 
 
     /*
@@ -16735,27 +17580,294 @@ async printInvoice(id) {
 
 
     /*
-    ======================================================
-    SHOW ERROR
-    ======================================================
+======================================================
+SHOW ERROR
+BOOTSTRAP ALERT
+ACCOUNT RECEIVABLE
+======================================================
+*/
+
+showError(
+    message
+) {
+
+    /*
+    ==================================================
+    NORMALIZE MESSAGE
+    ==================================================
     */
 
-    showError(message) {
+    const errorMessage =
+        message
+        ||
+        "An error occurred.";
 
-        console.error(
-            "Account Receivable:",
-            message
+
+    /*
+    ==================================================
+    CONSOLE
+    ==================================================
+    */
+
+    console.error(
+        "Account Receivable:",
+        errorMessage
+    );
+
+
+    /*
+    ==================================================
+    REMOVE EXISTING ERROR ALERT
+    ==================================================
+    */
+
+    const existingAlert =
+        document.getElementById(
+            "ar-bootstrap-alert"
         );
 
 
-        alert(
-            message
+    if (
+        existingAlert
+    ) {
+
+        existingAlert.remove();
+
+    }
+
+
+    /*
+    ==================================================
+    CREATE BOOTSTRAP ALERT
+    ==================================================
+    */
+
+    const alertElement =
+        document.createElement(
+            "div"
+        );
+
+
+    alertElement.id =
+        "ar-bootstrap-alert";
+
+
+    alertElement.className =
+        "alert alert-danger alert-dismissible fade show shadow-sm";
+
+
+    alertElement.setAttribute(
+        "role",
+        "alert"
+    );
+
+
+    alertElement.innerHTML = `
+
+        <div class="d-flex align-items-start">
+
+            <i
+                class="fa-solid fa-circle-exclamation me-2 mt-1">
+            </i>
+
+            <div class="flex-grow-1">
+
+                <strong>
+                    Account Receivable
+                </strong>
+
+                <div>
+                    ${this.escapeHtml(
+                        errorMessage
+                    )}
+                </div>
+
+            </div>
+
+            <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close">
+            </button>
+
+        </div>
+
+    `;
+
+
+    /*
+    ==================================================
+    FIND ACTIVE AR MODAL
+    ==================================================
+    */
+
+    const modal =
+        document.getElementById(
+            "accountReceivableModal"
+        );
+
+
+    const modalIsVisible =
+        modal
+        &&
+        modal.classList.contains(
+            "show"
+        );
+
+
+    const modalBody =
+        modalIsVisible
+            ? modal.querySelector(
+                ".modal-body"
+            )
+            : null;
+
+
+    /*
+    ==================================================
+    INSERT ALERT
+    ==================================================
+    */
+
+    if (
+        modalBody
+    ) {
+
+        modalBody.insertBefore(
+            alertElement,
+            modalBody.firstChild
         );
 
     }
+
+    else {
+
+        alertElement.style.position =
+            "fixed";
+
+        alertElement.style.top =
+            "20px";
+
+        alertElement.style.left =
+            "50%";
+
+        alertElement.style.transform =
+            "translateX(-50%)";
+
+        alertElement.style.zIndex =
+            "99999";
+
+        alertElement.style.minWidth =
+            "420px";
+
+        alertElement.style.maxWidth =
+            "90vw";
+
+
+        document.body.appendChild(
+            alertElement
+        );
+
+    }
+
+
+    /*
+    ==================================================
+    AUTO CLOSE
+    ==================================================
+    */
+
+    setTimeout(
+        () => {
+
+            const currentAlert =
+                document.getElementById(
+                    "ar-bootstrap-alert"
+                );
+
+
+            if (
+                !currentAlert
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                window.bootstrap
+                &&
+                bootstrap.Alert
+            ) {
+
+                bootstrap.Alert
+                    .getOrCreateInstance(
+                        currentAlert
+                    )
+                    .close();
+
+            }
+
+            else {
+
+                currentAlert.remove();
+
+            }
+
+        },
+
+        7000
+    );
+
+}
+/*
+======================================================
+ESCAPE HTML
+======================================================
+*/
+
+escapeHtml(
+    value
+) {
+
+    return String(
+        value
+        ?? ""
+    )
+
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+
+}
     /*
 ======================================================
 SHOW SUCCESS
+BOOTSTRAP ALERT
+ACCOUNT RECEIVABLE
 ======================================================
 */
 
@@ -16763,36 +17875,240 @@ showSuccess(
     message
 ) {
 
+    /*
+    ==================================================
+    NORMALIZE MESSAGE
+    ==================================================
+    */
+
+    const successMessage =
+        message
+        ||
+        "Operation completed successfully.";
+
+
+    /*
+    ==================================================
+    CONSOLE
+    ==================================================
+    */
+
+    console.log(
+        "Account Receivable SUCCESS:",
+        successMessage
+    );
+
+
+    /*
+    ==================================================
+    REMOVE EXISTING SUCCESS ALERT
+    ==================================================
+    */
+
+    const existingAlert =
+        document.getElementById(
+            "ar-bootstrap-success-alert"
+        );
+
+
     if (
-        window.Toast
-        &&
-        typeof Toast.fire
-        ===
-        "function"
+        existingAlert
     ) {
 
-        Toast.fire({
-
-            icon:
-                "success",
-
-            title:
-                message
-                ||
-                "Success"
-
-        });
-
-
-        return;
+        existingAlert.remove();
 
     }
 
 
-    console.log(
-        message
-        ||
-        "Success"
+    /*
+    ==================================================
+    CREATE BOOTSTRAP SUCCESS ALERT
+    ==================================================
+    */
+
+    const alertElement =
+        document.createElement(
+            "div"
+        );
+
+
+    alertElement.id =
+        "ar-bootstrap-success-alert";
+
+
+    alertElement.className =
+        "alert alert-success alert-dismissible fade show shadow-sm";
+
+
+    alertElement.setAttribute(
+        "role",
+        "alert"
+    );
+
+
+    alertElement.innerHTML = `
+
+        <div class="d-flex align-items-start">
+
+            <i
+                class="fa-solid fa-circle-check me-2 mt-1">
+            </i>
+
+            <div class="flex-grow-1">
+
+                <strong>
+                    Account Receivable
+                </strong>
+
+                <div>
+                    ${this.escapeHtml(
+                        successMessage
+                    )}
+                </div>
+
+            </div>
+
+            <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close">
+            </button>
+
+        </div>
+
+    `;
+
+
+    /*
+    ==================================================
+    FIND ACTIVE AR MODAL
+    ==================================================
+    */
+
+    const modal =
+        document.getElementById(
+            "accountReceivableModal"
+        );
+
+
+    const modalIsVisible =
+        modal
+        &&
+        modal.classList.contains(
+            "show"
+        );
+
+
+    const modalBody =
+        modalIsVisible
+            ? modal.querySelector(
+                ".modal-body"
+            )
+            : null;
+
+
+    /*
+    ==================================================
+    INSERT INSIDE MODAL
+    ==================================================
+    */
+
+    if (
+        modalBody
+    ) {
+
+        modalBody.insertBefore(
+            alertElement,
+            modalBody.firstChild
+        );
+
+    }
+
+    else {
+
+        /*
+        ==============================================
+        PAGE LEVEL ALERT
+        ==============================================
+        */
+
+        alertElement.style.position =
+            "fixed";
+
+        alertElement.style.top =
+            "20px";
+
+        alertElement.style.left =
+            "50%";
+
+        alertElement.style.transform =
+            "translateX(-50%)";
+
+        alertElement.style.zIndex =
+            "99999";
+
+        alertElement.style.minWidth =
+            "380px";
+
+        alertElement.style.maxWidth =
+            "90vw";
+
+
+        document.body.appendChild(
+            alertElement
+        );
+
+    }
+
+
+    /*
+    ==================================================
+    AUTO CLOSE
+    ==================================================
+    */
+
+    setTimeout(
+        () => {
+
+            const currentAlert =
+                document.getElementById(
+                    "ar-bootstrap-success-alert"
+                );
+
+
+            if (
+                !currentAlert
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                window.bootstrap
+                &&
+                bootstrap.Alert
+            ) {
+
+                bootstrap.Alert
+                    .getOrCreateInstance(
+                        currentAlert
+                    )
+                    .close();
+
+            }
+
+            else {
+
+                currentAlert.remove();
+
+            }
+
+        },
+
+        5000
     );
 
 }

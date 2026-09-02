@@ -9071,23 +9071,25 @@ async editInvoiceDetail(id) {
 /*
 ======================================================
 SHOW SUCCESS
+BOOTSTRAP ALERT
+ACCOUNT PAYABLE
 ======================================================
 */
 
-showSuccess(message) {
+showSuccess(
+    message
+) {
 
     /*
     ==================================================
-    VALIDATION
+    NORMALIZE MESSAGE
     ==================================================
     */
 
-    if (!message) {
-
-        message =
-            "Operation completed successfully.";
-
-    }
+    const successMessage =
+        message
+        ||
+        "Operation completed successfully.";
 
 
     /*
@@ -9098,37 +9100,225 @@ showSuccess(message) {
 
     console.log(
         "Account Payable SUCCESS:",
-        message
+        successMessage
     );
 
 
     /*
     ==================================================
-    USE EXISTING ALERT SYSTEM
+    REMOVE EXISTING SUCCESS ALERT
     ==================================================
     */
 
-    if (
-        typeof window.showSuccess ===
-        "function"
-    ) {
-
-        window.showSuccess(
-            message
+    const existingAlert =
+        document.getElementById(
+            "ap-bootstrap-success-alert"
         );
 
-        return;
+
+    if (
+        existingAlert
+    ) {
+
+        existingAlert.remove();
 
     }
 
 
     /*
     ==================================================
-    FALLBACK
+    CREATE BOOTSTRAP SUCCESS ALERT
     ==================================================
     */
 
-    alert(message);
+    const alertElement =
+        document.createElement(
+            "div"
+        );
+
+
+    alertElement.id =
+        "ap-bootstrap-success-alert";
+
+
+    alertElement.className =
+        "alert alert-success alert-dismissible fade show shadow-sm";
+
+
+    alertElement.setAttribute(
+        "role",
+        "alert"
+    );
+
+
+    alertElement.innerHTML = `
+
+        <div class="d-flex align-items-start">
+
+            <i
+                class="fa-solid fa-circle-check me-2 mt-1">
+            </i>
+
+            <div class="flex-grow-1">
+
+                <strong>
+                    Account Payable
+                </strong>
+
+                <div>
+                    ${this.escapeHtml(
+                        successMessage
+                    )}
+                </div>
+
+            </div>
+
+            <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close">
+            </button>
+
+        </div>
+
+    `;
+
+
+    /*
+    ==================================================
+    FIND AP MODAL
+    ==================================================
+    */
+
+    const modal =
+        document.getElementById(
+            "accountPayableModal"
+        );
+
+
+    const modalIsVisible =
+        modal
+        &&
+        modal.classList.contains(
+            "show"
+        );
+
+
+    const modalBody =
+        modalIsVisible
+            ? modal.querySelector(
+                ".modal-body"
+            )
+            : null;
+
+
+    /*
+    ==================================================
+    INSERT INSIDE ACTIVE MODAL
+    ==================================================
+    */
+
+    if (
+        modalBody
+    ) {
+
+        modalBody.insertBefore(
+            alertElement,
+            modalBody.firstChild
+        );
+
+    }
+
+    else {
+
+        /*
+        ==============================================
+        PAGE LEVEL ALERT
+        USED AFTER MODAL HAS CLOSED
+        ==============================================
+        */
+
+        alertElement.style.position =
+            "fixed";
+
+        alertElement.style.top =
+            "20px";
+
+        alertElement.style.left =
+            "50%";
+
+        alertElement.style.transform =
+            "translateX(-50%)";
+
+        alertElement.style.zIndex =
+            "99999";
+
+        alertElement.style.width =
+            "auto";
+
+        alertElement.style.minWidth =
+            "380px";
+
+        alertElement.style.maxWidth =
+            "90vw";
+
+
+        document.body.appendChild(
+            alertElement
+        );
+
+    }
+
+
+    /*
+    ==================================================
+    AUTO CLOSE
+    ==================================================
+    */
+
+    setTimeout(
+        () => {
+
+            const currentAlert =
+                document.getElementById(
+                    "ap-bootstrap-success-alert"
+                );
+
+
+            if (
+                !currentAlert
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                window.bootstrap
+                &&
+                bootstrap.Alert
+            ) {
+
+                bootstrap.Alert
+                    .getOrCreateInstance(
+                        currentAlert
+                    )
+                    .close();
+
+            }
+
+            else {
+
+                currentAlert.remove();
+
+            }
+
+        },
+
+        5000
+    );
 
 }
 /*
@@ -11402,96 +11592,326 @@ showConfirmModal({
 /*
 ======================================================
 SHOW ERROR
+BOOTSTRAP ALERT
+ACCOUNT PAYABLE
 ======================================================
 */
 
-showError(message) {
+showError(
+    message
+) {
+
+    /*
+    ==================================================
+    NORMALIZE MESSAGE
+    ==================================================
+    */
+
+    const errorMessage =
+        message
+        ||
+        "An error occurred.";
+
+
+    /*
+    ==================================================
+    CONSOLE
+    ==================================================
+    */
 
     console.error(
         "Account Payable:",
-        message
+        errorMessage
     );
 
 
     /*
     ==================================================
-    BOOTSTRAP ALERT
+    REMOVE EXISTING ALERT
     ==================================================
     */
 
     const existingAlert =
         document.getElementById(
-            "ap-error-alert"
+            "ap-bootstrap-alert"
         );
 
 
-    if (existingAlert) {
+    if (
+        existingAlert
+    ) {
 
         existingAlert.remove();
 
     }
 
 
-    const alert =
+    /*
+    ==================================================
+    CREATE BOOTSTRAP ALERT
+    ==================================================
+    */
+
+    const alertElement =
         document.createElement(
             "div"
         );
 
 
-    alert.id =
-        "ap-error-alert";
+    alertElement.id =
+        "ap-bootstrap-alert";
 
 
-    alert.className =
-        "alert alert-danger alert-dismissible fade show position-fixed";
+    alertElement.className =
+        "alert alert-danger alert-dismissible fade show shadow-sm";
 
 
-    alert.style.top =
-        "80px";
+    alertElement.setAttribute(
+        "role",
+        "alert"
+    );
 
 
-    alert.style.right =
-        "20px";
+    alertElement.innerHTML = `
 
+        <div class="d-flex align-items-start">
 
-    alert.style.zIndex =
-        "9999";
+            <i
+                class="fa-solid fa-circle-exclamation me-2 mt-1">
+            </i>
 
+            <div class="flex-grow-1">
 
-    alert.innerHTML = `
+                <strong>
+                    Account Payable
+                </strong>
 
-        <strong>Error:</strong>
+                <div>
+                    ${this.escapeHtml(
+                        errorMessage
+                    )}
+                </div>
 
-        ${message}
+            </div>
 
-        <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="alert">
-        </button>
+            <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close">
+            </button>
+
+        </div>
 
     `;
 
 
-    document.body.appendChild(
-        alert
-    );
+    /*
+    ==================================================
+    FIND AP MODAL
+    ==================================================
+    */
+
+    const modal =
+        document.getElementById(
+            "accountPayableModal"
+        );
+
+
+    const modalBody =
+        modal
+            ?.querySelector(
+                ".modal-body"
+            );
 
 
     /*
     ==================================================
-    AUTO HIDE
+    INSERT ALERT
+    ==================================================
+    */
+
+    if (
+        modalBody
+    ) {
+
+        modalBody.insertBefore(
+            alertElement,
+            modalBody.firstChild
+        );
+
+    }
+
+    else {
+
+        /*
+        ==============================================
+        FALLBACK
+        ==============================================
+        */
+
+        alertElement.style.position =
+            "fixed";
+
+        alertElement.style.top =
+            "20px";
+
+        alertElement.style.left =
+            "50%";
+
+        alertElement.style.transform =
+            "translateX(-50%)";
+
+        alertElement.style.zIndex =
+            "99999";
+
+        alertElement.style.minWidth =
+            "420px";
+
+        alertElement.style.maxWidth =
+            "90vw";
+
+
+        document.body.appendChild(
+            alertElement
+        );
+
+    }
+
+
+    /*
+    ==================================================
+    SCROLL ALERT INTO VIEW
+    ==================================================
+    */
+
+    alertElement.scrollIntoView({
+
+        behavior:
+            "smooth",
+
+        block:
+            "nearest"
+
+    });
+
+
+    /*
+    ==================================================
+    AUTO CLOSE
+    7 SECONDS
     ==================================================
     */
 
     setTimeout(
         () => {
 
-            alert.remove();
+            const currentAlert =
+                document.getElementById(
+                    "ap-bootstrap-alert"
+                );
+
+
+            if (
+                !currentAlert
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+            ==========================================
+            BOOTSTRAP AVAILABLE
+            ==========================================
+            */
+
+            if (
+                window.bootstrap
+                &&
+                bootstrap.Alert
+            ) {
+
+                const alertInstance =
+                    bootstrap.Alert.getOrCreateInstance(
+                        currentAlert
+                    );
+
+
+                alertInstance.close();
+
+            }
+
+            else {
+
+                currentAlert.remove();
+
+            }
 
         },
-        4000
+
+        7000
     );
+
+}
+/*
+======================================================
+ESCAPE HTML
+ACCOUNT PAYABLE
+======================================================
+*/
+
+escapeHtml(
+    value
+) {
+
+    /*
+    ==================================================
+    NORMALIZE
+    ==================================================
+    */
+
+    const text =
+        String(
+            value
+            ??
+            ""
+        );
+
+
+    /*
+    ==================================================
+    ESCAPE HTML
+    ==================================================
+    */
+
+    return text
+
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
 
 }
 /*
