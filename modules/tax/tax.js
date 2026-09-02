@@ -286,54 +286,84 @@ cacheDOM() {
 
 }
     /*
-    ==================================================
-    INIT
-    ==================================================
-    */
+======================================================
+INIT
+======================================================
+*/
 
-    async init() {
+async init() {
 
-        try {
+    try {
 
-            console.log(
-                "Tax Master initializing..."
-            );
-
-
-            this.bindEvents();
+        console.log(
+            "Tax Master initializing..."
+        );
 
 
-            await this.loadCOA();
+        /*
+        ==================================================
+        CACHE DOM FIRST
+        ==================================================
+        */
+
+        this.cacheDOM();
 
 
-            await this.loadData(
-    true,
-    true
-);
+        /*
+        ==================================================
+        BIND EVENTS
+        ==================================================
+        */
+
+        this.bindEvents();
 
 
-            console.log(
-                "Tax Master initialized."
-            );
+        /*
+        ==================================================
+        LOAD COA
+        ==================================================
+        */
 
-        }
+        await this.loadCOA();
 
-        catch (error) {
 
-            console.error(
-                "Tax.init:",
-                error
-            );
+        /*
+        ==================================================
+        LOAD DATA
+        ==================================================
+        */
 
-            this.showError(
-                error.message
-                ||
-                "Failed to initialize Tax Master."
-            );
+        await this.loadData(
+            true,
+            true
+        );
 
-        }
+
+        console.log(
+            "Tax Master initialized."
+        );
 
     }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "Tax.init:",
+            error
+        );
+
+
+        this.showError(
+            error?.message
+            ||
+            "Failed to initialize Tax Master."
+        );
+
+    }
+
+}
 
 
     /*
@@ -1185,7 +1215,40 @@ render() {
                             </span>
                           `;
 
+                /*
+==========================================
+STATUS ACTION
+==========================================
+*/
 
+const statusAction =
+    tax.status
+
+        ? `
+            <button
+                type="button"
+                class="btn btn-outline-warning"
+                title="Set Inactive"
+                data-tax-action="inactive"
+                data-tax-id="${tax.id}">
+
+                <i class="fa-solid fa-ban"></i>
+
+            </button>
+          `
+
+        : `
+            <button
+                type="button"
+                class="btn btn-outline-success"
+                title="Set Active"
+                data-tax-action="active"
+                data-tax-id="${tax.id}">
+
+                <i class="fa-solid fa-check"></i>
+
+            </button>
+          `;
                 /*
                 ==========================================
                 TAX ACCOUNT
@@ -1288,30 +1351,33 @@ render() {
 
                             <div class="btn-group btn-group-sm">
 
-                                <button
-                                    type="button"
-                                    class="btn btn-outline-primary"
-                                    title="Edit"
-                                    data-tax-action="edit"
-                                    data-tax-id="${tax.id}">
+                        <button
+                            type="button"
+                            class="btn btn-outline-primary"
+                            title="Edit"
+                            data-tax-action="edit"
+                            data-tax-id="${tax.id}">
 
-                                    <i class="fa-solid fa-pen"></i>
+                            <i class="fa-solid fa-pen"></i>
 
-                                </button>
+                        </button>
 
 
-                                <button
-                                    type="button"
-                                    class="btn btn-outline-danger"
-                                    title="Delete"
-                                    data-tax-action="delete"
-                                    data-tax-id="${tax.id}">
+                        ${statusAction}
 
-                                    <i class="fa-solid fa-trash"></i>
 
-                                </button>
+                        <button
+                            type="button"
+                            class="btn btn-outline-danger"
+                            title="Delete"
+                            data-tax-action="delete"
+                            data-tax-id="${tax.id}">
 
-                            </div>
+                            <i class="fa-solid fa-trash"></i>
+
+                        </button>
+
+                    </div>
 
                         </td>
 
@@ -3798,40 +3864,214 @@ async save() {
 
 
     /*
-    ==================================================
-    HANDLE ACTION
-    ==================================================
-    */
+======================================================
+HANDLE ACTION
+======================================================
+*/
 
-    handleAction(
-        action,
-        id
+handleAction(
+    action,
+    id
+) {
+
+    switch (
+        action
     ) {
 
-        switch (
-            action
+        /*
+        ==================================================
+        EDIT
+        ==================================================
+        */
+
+        case "edit":
+
+            this.openEditModal(
+                id
+            );
+
+            break;
+
+
+        /*
+        ==================================================
+        ACTIVE
+        ==================================================
+        */
+
+        case "active":
+
+            this.changeTaxStatus(
+                id,
+                true
+            );
+
+            break;
+
+
+        /*
+        ==================================================
+        INACTIVE
+        ==================================================
+        */
+
+        case "inactive":
+
+            this.changeTaxStatus(
+                id,
+                false
+            );
+
+            break;
+
+
+        /*
+        ==================================================
+        DELETE
+        ==================================================
+        */
+
+        case "delete":
+
+            this.deleteTax(
+                id
+            );
+
+            break;
+
+    }
+
+}
+/*
+======================================================
+CHANGE TAX STATUS
+======================================================
+*/
+
+async changeTaxStatus(
+    id,
+    newStatus
+) {
+
+    try {
+
+        /*
+        ==================================================
+        FIND TAX
+        ==================================================
+        */
+
+        const tax =
+            this.taxes.find(
+                item =>
+                    String(
+                        item.id
+                    )
+                    ===
+                    String(
+                        id
+                    )
+            );
+
+
+        if (
+            !tax
         ) {
 
-            case "edit":
-
-                this.openEditModal(
-                    id
-                );
-
-                break;
-
-
-            case "delete":
-
-                this.deleteTax(
-                    id
-                );
-
-                break;
+            throw new Error(
+                "Tax not found."
+            );
 
         }
 
+
+        /*
+        ==================================================
+        VALIDATE CURRENT STATUS
+        ==================================================
+        */
+
+        if (
+            Boolean(
+                tax.status
+            )
+            ===
+            Boolean(
+                newStatus
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        UPDATE STATUS
+        ==================================================
+        */
+
+        await this.service.update(
+            id,
+            {
+                status:
+                    Boolean(
+                        newStatus
+                    )
+            }
+        );
+
+
+        /*
+        ==================================================
+        RELOAD DATA
+        ==================================================
+        */
+
+        await this.loadData(
+            false,
+            false
+        );
+
+
+        /*
+        ==================================================
+        SUCCESS
+        ==================================================
+        */
+
+        this.showSuccess(
+
+            newStatus
+
+                ? "Tax activated successfully."
+
+                : "Tax deactivated successfully."
+
+        );
+
     }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "Tax.changeTaxStatus:",
+            error
+        );
+
+
+        this.showError(
+            error?.message
+            ||
+            "Failed to change Tax status."
+        );
+
+    }
+
+}
 
 
     /*
@@ -4077,29 +4317,169 @@ async save() {
 
 
     /*
-    ==================================================
-    REFRESH
-    ==================================================
-    */
+======================================================
+REFRESH
+======================================================
+*/
 
-    async refresh() {
+async refresh() {
 
-        try {
+    try {
 
-            await this.loadData();
+        /*
+        ==================================================
+        RESET FILTER STATE
+        ==================================================
+        */
+
+        this.keyword =
+            "";
+
+        this.taxType =
+            "";
+
+        this.status =
+            "";
+
+        this.currentPage =
+            1;
+
+
+        /*
+        ==================================================
+        RESET FILTER DOM
+        ==================================================
+        */
+
+        if (
+            this.keywordInput
+        ) {
+
+            this.keywordInput.value =
+                "";
 
         }
 
-        catch (error) {
 
-            console.error(
-                "Tax.refresh:",
-                error
-            );
+        if (
+            this.typeFilter
+        ) {
+
+            this.typeFilter.value =
+                "";
+
+        }
+
+
+        if (
+            this.statusFilter
+        ) {
+
+            this.statusFilter.value =
+                "";
+
+        }
+
+
+        /*
+        ==================================================
+        REFRESH BUTTON LOADING
+        ==================================================
+        */
+
+        if (
+            this.btnRefresh
+        ) {
+
+            this.btnRefresh.disabled =
+                true;
+
+
+            this.btnRefresh.innerHTML = `
+
+                <span
+                    class="spinner-border spinner-border-sm me-1"
+                    role="status">
+                </span>
+
+                Refreshing...
+
+            `;
+
+        }
+
+
+        /*
+        ==================================================
+        RELOAD DATA
+        ==================================================
+        */
+
+        await this.loadData(
+            true,
+            true
+        );
+
+
+        /*
+        ==================================================
+        SUCCESS
+        ==================================================
+        */
+
+        this.showSuccess(
+            "Tax Master refreshed successfully."
+        );
+
+    }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "Tax.refresh:",
+            error
+        );
+
+
+        this.showError(
+            error?.message
+            ||
+            "Failed to refresh Tax Master."
+        );
+
+    }
+
+    finally {
+
+        /*
+        ==================================================
+        RESTORE REFRESH BUTTON
+        ==================================================
+        */
+
+        if (
+            this.btnRefresh
+        ) {
+
+            this.btnRefresh.disabled =
+                false;
+
+
+            this.btnRefresh.innerHTML = `
+
+                <i class="fas fa-rotate-right"></i>
+
+                Refresh
+
+            `;
 
         }
 
     }
+
+}
 
 
     /*
