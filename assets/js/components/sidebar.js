@@ -261,27 +261,7 @@ export class FinovaSidebar {
             )}
 
 
-            ${this.menuGroup(
-                "Payment",
-                "fa-solid fa-wallet",
-                [
-
-                    this.menuItem(
-                        "AP Payment",
-                        "fa-solid fa-money-check-dollar",
-                        "ap-payment",
-                        true
-                    ),
-
-                    this.menuItem(
-                        "AR Payment",
-                        "fa-solid fa-money-bill-transfer",
-                        "ar-payment",
-                        true
-                    )
-
-                ]
-            )}
+           
 
 
             ${this.menuGroup(

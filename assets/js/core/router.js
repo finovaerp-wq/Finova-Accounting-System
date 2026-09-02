@@ -83,19 +83,7 @@ export class FinovaRouter {
 
             },
 
-            "ap-payment": {
-                title: "AP Payment",
-                html: "modules/ap-payment/ap-payment.html",
-                js: "modules/ap-payment/ap-payment.js",
-                className: "APPayment"
-            },
-
-            "ar-payment": {
-                title: "AR Payment",
-                html: "modules/ar-payment/ar-payment.html",
-                js: "modules/ar-payment/ar-payment.js",
-                className: "ARPayment"
-            },
+            
 
             "general-ledger": {
                 title: "General Ledger",

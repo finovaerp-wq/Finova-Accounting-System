@@ -1,15 +1,16 @@
-# Accounting Flow
+# Alur Akuntansi
 
-## Objective
+## Tujuan
 
-FINOVA is an accounting-focused ERP. The intended flow is:
+FINOVA adalah ERP yang berfokus pada proses keuangan dan akuntansi. Alur
+utama yang digunakan adalah:
 
 ``` text
 Master Data
    ↓
-AP / AR Transactions
+Transaksi AP / AR
    ↓
-Payment / Completion
+Pembayaran / Penyelesaian
    ↓
 GL Journal
    ↓
@@ -17,168 +18,241 @@ General Ledger
    ↓
 Trial Balance
    ↓
-Financial Statements
+Laporan Keuangan
 ```
 
-GL Journal is the central audit bridge between operational transactions
-and accounting reports.
+GL Journal menjadi pusat pencatatan dan jejak audit antara transaksi
+operasional dan laporan akuntansi.
 
-## Master Data Dependencies
+## Ketergantungan Master Data
 
 ### Business Partner
 
--   AP uses Vendor.
--   AR uses Customer.
--   Inactive partners should not be selectable for new transactions.
+-   AP menggunakan Business Partner dengan tipe Vendor.
+-   AR menggunakan Business Partner dengan tipe Customer.
+-   Business Partner berstatus Inactive tidak boleh dipilih untuk
+    transaksi baru.
 
 ### Chart of Accounts
 
-Posting accounts should be active and allow transactions.
+Akun yang digunakan untuk posting transaksi harus berstatus aktif dan
+mengizinkan transaksi.
 
 ### Tax Master
 
-Tax definitions map tax behavior/rates to accounting accounts used by
-AP/AR transaction lines.
+Tax Master menentukan jenis pajak, tarif pajak, dan akun akuntansi yang
+digunakan pada transaksi AP/AR.
 
 ### Term of Payment
 
-TOP supports due-date calculation and aging.
+Term of Payment digunakan untuk perhitungan jatuh tempo dan aging.
 
-## AP Invoice Flow
+## Alur AP Invoice
 
-Conceptually:
+Secara konsep:
 
 ``` text
 Vendor Invoice
-→ AP Header + Details
-→ validate totals/taxes
-→ complete/post process
+→ AP Header + Detail
+→ validasi total/pajak
+→ proses complete/post
 → generate GL Journal
-→ journal source_module = AP
+→ source_module = AP
 → source_document_type = AP_INVOICE
 ```
 
-Current automatic description convention:
+Konvensi deskripsi otomatis:
 
 ``` text
 [AUTO] INV AP
-<AP invoice header description>
+<deskripsi header AP>
 ```
 
-A generated journal must not be duplicated when the AP document already
-has a linked journal.
+GL Journal tidak boleh dibuat dua kali apabila dokumen AP sudah memiliki
+jurnal yang terhubung.
 
-## AP Payment Flow
+### Accounting Date AP Invoice
 
-Conceptually:
+Accounting period AP Invoice ditentukan berdasarkan:
+
+``` text
+Date Received
+```
+
+Hanya Date Received yang berada pada accounting period berstatus `Open`
+yang boleh diproses.
+
+## Alur AP Payment (Di Dalam Account Payable)
+
+AP Payment diproses langsung dari module Account Payable. Tidak ada lagi
+module atau route AP Payment standalone.
+
+Secara konsep:
 
 ``` text
 AP Invoice
-→ Payment
-→ reduce/settle payable
-→ generate payment journal
+→ buka Payment dari Account Payable
+→ input Payment Date
+→ validasi accounting period
+→ simpan pembayaran
+→ kurangi outstanding payable
+→ update status pembayaran AP
+→ generate GL Journal pembayaran
 → source_module = AP
 → source_document_type = AP_PAYMENT
 ```
 
-Automatic description convention:
+Accounting period AP Payment ditentukan berdasarkan:
 
 ``` text
-[AUTO] PAYMENT AP
-<payment description>
+Payment Date
 ```
 
-## AR Invoice Flow
+Data transaksi payment, modal payment, service payment, dan integrasi GL
+Journal tetap menjadi bagian dari proses Account Payable.
 
-Conceptually:
+## Alur AR Invoice
+
+Secara konsep:
 
 ``` text
 Customer Invoice
-→ AR Header + Details
-→ validate totals/taxes
-→ complete/post process
+→ AR Header + Detail
+→ validasi total/pajak
+→ proses complete/post
 → generate GL Journal
 → source_module = AR
 → source_document_type = AR_INVOICE
 ```
 
-Automatic description convention:
+### Accounting Date AR Invoice
+
+Accounting period AR Invoice ditentukan berdasarkan:
 
 ``` text
-[AUTO] INV AR
-<AR invoice header description>
+Invoice Date
 ```
 
-## AR Payment Flow
+Hanya Invoice Date yang berada pada accounting period berstatus `Open`
+yang boleh diproses.
 
-Conceptually:
+## Alur AR Payment (Di Dalam Account Receivable)
+
+AR Payment diproses langsung dari module Account Receivable. Tidak ada
+lagi module atau route AR Payment standalone.
+
+Secara konsep:
 
 ``` text
 AR Invoice
-→ Customer Payment
-→ reduce/settle receivable
-→ generate payment journal
+→ buka Payment dari Account Receivable
+→ input Payment Date
+→ validasi accounting period
+→ simpan pembayaran
+→ kurangi outstanding receivable
+→ update status pembayaran AR
+→ generate GL Journal pembayaran
 → source_module = AR
 → source_document_type = AR_PAYMENT
 ```
 
-Automatic description convention:
+Accounting period AR Payment ditentukan berdasarkan:
 
 ``` text
-[AUTO] PAYMENT AR
-<payment description>
+Payment Date
 ```
 
-The current AR payment journal pattern uses Bank/Cash against Accounts
-Receivable.
+Data transaksi payment, modal payment, service payment, dan integrasi GL
+Journal tetap menjadi bagian dari proses Account Receivable.
+
+## Dasar Accounting Period
+
+FINOVA menggunakan dasar tanggal berikut:
+
+``` text
+Account Payable Invoice     → Date Received
+Account Receivable Invoice  → Invoice Date
+General Journal             → Accounting Date
+AP Payment                  → Payment Date
+AR Payment                  → Payment Date
+```
+
+Hanya transaksi yang tanggal akuntansinya berada pada periode berstatus
+`Open` yang boleh diproses.
+
+``` text
+Tanggal Akuntansi Transaksi
+        ↓
+mst_accounting_period
+        ↓
+Status Periode
+        │
+        ├── Open       → BOLEH
+        ├── Closed     → BLOK
+        └── Belum Open → BLOK
+```
+
+Contoh apabila periode aktif adalah September 2026:
+
+``` text
+Agustus 2026   → Closed     → tidak boleh input/posting
+September 2026 → Open       → boleh input/posting
+Oktober 2026   → belum Open → tidak boleh input/posting
+```
 
 ## Manual GL Journal
 
-Manual GL Journal supports accounting entries not generated by AP/AR.
-Journal lines must remain balanced before posting.
+Manual GL Journal digunakan untuk pencatatan akuntansi yang tidak
+berasal dari transaksi AP/AR.
 
-Statuses:
+Accounting period Manual GL Journal ditentukan berdasarkan:
 
--   Draft --- editable working journal;
--   Posted --- accounting entry recognized for reporting;
--   Void --- cancelled journal retained for audit visibility.
+``` text
+Accounting Date
+```
 
-In the current UI convention, Posted rows are visually greyed; Draft and
-Void remain normal white rows while status badges identify state.
+Journal harus balance sebelum posting.
+
+Status jurnal:
+
+-   Draft --- jurnal masih dapat dikerjakan sesuai aturan sistem.
+-   Posted --- jurnal sudah diakui dalam pencatatan akuntansi.
+-   Void --- jurnal dibatalkan tetapi tetap dipertahankan untuk audit
+    trail.
 
 ## General Ledger
 
-General Ledger should derive movement from posted GL Journal data and
-present account-level debit/credit activity with source traceability.
+General Ledger mengambil pergerakan transaksi dari GL Journal yang telah
+diposting dan menampilkan aktivitas Debit/Credit per akun beserta sumber
+transaksinya.
 
 ## Trial Balance
 
-Trial Balance aggregates GL balances by account and period/year. Total
-debit and credit should reconcile.
+Trial Balance mengagregasikan saldo GL berdasarkan akun dan
+periode/tahun. Total Debit dan Credit harus dapat direkonsiliasi.
 
-## Financial Statements
+## Laporan Keuangan
 
-Balance Sheet, Income Statement, and Profit & Loss should be driven by
-explicit COA classifications/hierarchy and posted accounting balances.
-
-Do not classify accounts only by hard-coded numeric prefixes unless that
-rule is formally encoded in the chart design.
+Balance Sheet, Income Statement, dan Profit & Loss harus menggunakan
+klasifikasi/hierarki Chart of Accounts serta saldo akuntansi yang telah
+diposting.
 
 ## Aging
 
 ### Aging Payable
 
-Uses unpaid AP balances and due dates to classify vendor liabilities
-into aging buckets.
+Menggunakan saldo AP yang belum lunas dan Due Date untuk mengelompokkan
+kewajiban Vendor ke dalam aging bucket.
 
 ### Aging Receivable
 
-Uses unpaid AR balances and due dates to classify customer receivables
-into aging buckets.
+Menggunakan saldo AR yang belum lunas dan Due Date untuk mengelompokkan
+piutang Customer ke dalam aging bucket.
 
-## Audit Requirements
+## Kebutuhan Audit Trail
 
-For every source-generated journal preserve where available:
+Untuk setiap jurnal yang dibuat dari transaksi sumber, pertahankan
+informasi berikut jika tersedia:
 
 ``` text
 source_module
@@ -191,5 +265,5 @@ journal_date
 status
 ```
 
-This allows a GL row to be traced back to the originating AP/AR
-transaction.
+Informasi tersebut memungkinkan transaksi pada GL ditelusuri kembali ke
+dokumen AP/AR asalnya.

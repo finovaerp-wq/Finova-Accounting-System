@@ -1,91 +1,99 @@
-# Changelog
+# Catatan Perubahan
 
-All notable FINOVA changes should be recorded here.
+Semua perubahan penting pada FINOVA Accounting System dicatat dalam file
+ini.
 
-This file is initialized from the state of **BACKUP 26 FINISH**. Earlier
-work was not consistently version-tagged, so historical entries below
-summarize the current baseline rather than claiming exact release dates.
+Dokumentasi ini diperbarui berdasarkan kondisi project **BACKUP 26
+FINISH**.
 
-## \[Unreleased\]
+## \[Belum Dirilis\]
 
-### Documentation
+### Dokumentasi
 
--   Added project README.
--   Added Installation Guide.
--   Added Development Guide.
--   Added Internal API/Service Reference.
--   Added Database Guide.
--   Added Accounting Flow.
--   Added Module Reference.
--   Established changelog format.
+-   Memperbarui Accounting Flow setelah penghapusan module AP Payment
+    dan AR Payment standalone.
+-   Menjelaskan bahwa payment tetap diproses langsung dari Account
+    Payable dan Account Receivable.
+-   Memperjelas dasar Accounting Period untuk AP, AR, GL Journal, dan
+    payment.
 
-### Recommended Next Documentation Work
+### Diubah
 
--   Reconcile live Supabase schema with repository migrations.
--   Document exact RLS policies.
--   Document financial-statement COA classification fields.
--   Add deployment environment checklist.
+-   AP Payment sekarang diproses langsung dari module Account Payable.
+-   AR Payment sekarang diproses langsung dari module Account
+    Receivable.
+-   AP Payment tetap menggunakan Payment Date sebagai dasar Accounting
+    Period.
+-   AR Payment tetap menggunakan Payment Date sebagai dasar Accounting
+    Period.
+-   Logic transaksi payment dan integrasi GL Journal tetap berada di
+    dalam Account Payable dan Account Receivable.
+
+### Dihapus
+
+-   Menu AP Payment standalone.
+-   Menu AR Payment standalone.
+-   Route AP Payment standalone.
+-   Route AR Payment standalone.
+-   Module standalone `modules/ap-payment`.
+-   Module standalone `modules/ar-payment`.
 
 ## \[1.0.0-baseline\] - 2026-08-30
 
 ### Core
 
--   SPA router with dynamically loaded accounting modules.
--   Supabase client/auth integration.
--   Global sidebar/topbar/layout.
--   Global table and pagination design.
+-   SPA Router dengan pemuatan module secara dinamis.
+-   Integrasi Supabase Client dan Authentication.
+-   Global Sidebar, Topbar, dan Layout.
+-   Global Table dan Pagination.
 
 ### Master Data
 
 -   User Management.
--   Business Partner with Customer/Vendor/Employee types.
--   Business Partner bank support.
--   Term of Payment integration.
+-   Business Partner dengan tipe Customer, Vendor, dan Employee.
+-   Business Partner Bank.
+-   Term of Payment.
 -   Chart of Accounts.
 -   Tax Master.
 
 ### Finance
 
--   Account Payable.
--   Account Receivable.
+-   Account Payable beserta proses AP Payment di dalam module.
+-   Account Receivable beserta proses AR Payment di dalam module.
 -   Aging Payable.
 -   Aging Receivable.
 
 ### Accounting
 
--   GL Journal with Draft, Posted, and Void statuses.
--   Source metadata for generated journals.
--   AP/AR invoice and payment journal integration.
+-   GL Journal dengan status Draft, Posted, dan Void.
+-   Source metadata untuk jurnal yang dibuat dari transaksi.
+-   Integrasi jurnal AP/AR Invoice dan Payment.
 
-### Reports
+### Report
 
 -   General Ledger.
 -   Trial Balance Year.
--   Income Statement route.
+-   Income Statement.
 -   Balance Sheet.
 -   Profit & Loss.
 
-### Payment
+## Format Changelog
 
--   AP Payment route.
--   AR Payment route.
-
-## Changelog Format
-
-For future releases use:
+Untuk versi berikutnya gunakan:
 
 ``` text
 ## [x.y.z] - YYYY-MM-DD
 
-### Added
-### Changed
-### Fixed
-### Removed
-### Security
+### Ditambahkan
+### Diubah
+### Diperbaiki
+### Dihapus
+### Keamanan
 ```
 
-Use semantic versioning where practical:
+Gunakan semantic versioning jika memungkinkan:
 
--   MAJOR: incompatible architecture/data changes
--   MINOR: new backward-compatible module/features
--   PATCH: backward-compatible fixes
+-   MAJOR --- perubahan arsitektur/data yang tidak kompatibel dengan
+    versi sebelumnya.
+-   MINOR --- penambahan module atau fitur yang tetap kompatibel.
+-   PATCH --- perbaikan yang tetap kompatibel.

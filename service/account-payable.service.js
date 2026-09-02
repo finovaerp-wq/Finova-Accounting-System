@@ -54,6 +54,200 @@ export class AccountPayableService {
         TABLE.AP_PAYMENT;
 
 }
+/*
+==========================================================
+GET ACCOUNTING PERIOD
+ACCOUNT PAYABLE
+DATE RECEIVED = ACCOUNTING DATE
+==========================================================
+*/
+
+async getAccountingPeriod(dateReceived) {
+
+    /*
+    ======================================================
+    VALIDATE DATE RECEIVED
+    ======================================================
+    */
+
+    if (!dateReceived) {
+
+        throw new Error(
+            "Date Received is required."
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    GET ACCOUNTING PERIOD
+    ======================================================
+    */
+
+    const {
+
+        data,
+        error
+
+    } = await supabase
+
+        .from(
+            "mst_accounting_period"
+        )
+
+        .select(`
+            id,
+            period,
+            month,
+            year,
+            start_date,
+            end_date,
+            status
+        `)
+
+        .lte(
+            "start_date",
+            dateReceived
+        )
+
+        .gte(
+            "end_date",
+            dateReceived
+        )
+
+        .maybeSingle();
+
+
+    /*
+    ======================================================
+    DATABASE ERROR
+    ======================================================
+    */
+
+    if (error) {
+
+        console.error(
+            "AccountPayableService.getAccountingPeriod:",
+            error
+        );
+
+        throw error;
+
+    }
+
+
+    /*
+    ======================================================
+    PERIOD NOT CONFIGURED
+    ======================================================
+    */
+
+    if (!data) {
+
+        throw new Error(
+            `Accounting Period for Date Received ${dateReceived} is not configured.`
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    RETURN
+    ======================================================
+    */
+
+    return data;
+
+}
+
+
+/*
+==========================================================
+VALIDATE ACCOUNTING PERIOD
+ACCOUNT PAYABLE
+
+DATE RECEIVED = ACCOUNTING DATE
+==========================================================
+*/
+
+async validateAccountingPeriod(dateReceived) {
+
+    /*
+    ======================================================
+    GET PERIOD
+    ======================================================
+    */
+
+    const period =
+        await this.getAccountingPeriod(
+            dateReceived
+        );
+
+
+    /*
+    ======================================================
+    NORMALIZE STATUS
+    ======================================================
+    */
+
+    const status =
+        String(
+            period.status || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    /*
+    ======================================================
+    CLOSED PERIOD
+    ======================================================
+    */
+
+    if (
+        status === "closed"
+    ) {
+
+        throw new Error(
+
+            `Accounting Period ${period.period} is Closed. ` +
+
+            `Account Payable with Date Received ${dateReceived} cannot be processed.`
+
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    UNKNOWN STATUS
+    FAIL CLOSED
+    ======================================================
+    */
+
+    if (
+        status !== "open"
+    ) {
+
+        throw new Error(
+            `Accounting Period ${period.period} is not Open.`
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    RETURN
+    ======================================================
+    */
+
+    return period;
+
+}
 
    /*
 ======================================================
@@ -501,12 +695,19 @@ async getById(id) {
 ======================================================
 COMPLETE ACCOUNT PAYABLE
 Draft → Complete
+WITH ACCOUNTING PERIOD LOCK
 ======================================================
 */
 
 async completeInvoice(id) {
 
     try {
+
+        /*
+        ==================================================
+        VALIDATE ID
+        ==================================================
+        */
 
         if (!id) {
 
@@ -517,9 +718,74 @@ async completeInvoice(id) {
         }
 
 
+        /*
+        ==================================================
+        GET EXISTING ACCOUNT PAYABLE
+        ==================================================
+        */
+
+        const result =
+            await this.getById(
+                id
+            );
+
+
+        const invoice =
+            result?.header
+            || null;
+
+
+        if (!invoice) {
+
+            throw new Error(
+                "Account Payable not found."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        VALIDATE STATUS
+        ==================================================
+        */
+
+        if (
+            invoice.status !==
+            this.STATUS.DRAFT
+        ) {
+
+            throw new Error(
+                "Only Draft Account Payable can be completed."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        ACCOUNTING PERIOD LOCK
+        DATE RECEIVED = ACCOUNTING DATE
+        ==================================================
+        */
+
+        await this.validateAccountingPeriod(
+            invoice.date_received
+        );
+
+
+        /*
+        ==================================================
+        UPDATE STATUS
+        Draft → Complete
+        ==================================================
+        */
+
         const {
+
             data,
             error
+
         } = await supabase
 
             .from(
@@ -529,7 +795,7 @@ async completeInvoice(id) {
             .update({
 
                 status:
-                    "Complete"
+                    this.STATUS.COMPLETE
 
             })
 
@@ -540,11 +806,17 @@ async completeInvoice(id) {
 
             .eq(
                 "status",
-                "Draft"
+                this.STATUS.DRAFT
             )
 
             .select();
 
+
+        /*
+        ==================================================
+        DATABASE ERROR
+        ==================================================
+        */
 
         if (error) {
 
@@ -552,6 +824,12 @@ async completeInvoice(id) {
 
         }
 
+
+        /*
+        ==================================================
+        VALIDATE RESULT
+        ==================================================
+        */
 
         if (
             !Array.isArray(data)
@@ -565,6 +843,12 @@ async completeInvoice(id) {
 
         }
 
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
 
         return data[0];
 
@@ -2033,6 +2317,16 @@ async create(
 
         }
 
+        /*
+        ==================================================
+        ACCOUNTING PERIOD LOCK
+        DATE RECEIVED = ACCOUNTING DATE
+        ==================================================
+        */
+
+        await this.validateAccountingPeriod(
+            header.date_received
+        );
 
         /*
         ==================================================
@@ -2582,208 +2876,323 @@ async create(
 
 }
     /*
-    ======================================================
-    UPDATE
-    ======================================================
-    */
-
-    async update(
-        id,
-        header,
-        details = []
-    ) {
-
-        try {
-
-            if (!id) {
-
-                throw new Error(
-                    "Account Payable ID is required."
-                );
-
-            }
-
-
-            /*
-            ==================================================
-            CALCULATE DETAILS
-            ==================================================
-            */
-
-            const calculatedDetails =
-
-                details.map(
-                    detail => {
-
-                        const calculated =
-
-                            this.calculateDetailAmount(
-                                detail
-                            );
-
-
-                        return {
-
-                            ...detail,
-
-                            ...calculated
-
-                        };
-
-                    }
-                );
-
-
-            /*
-            ==================================================
-            CALCULATE TOTALS
-            ==================================================
-            */
-
-            const totals =
-
-                this.calculateTotals(
-                    calculatedDetails
-                );
-
-
-            /*
-            ==================================================
-            UPDATE HEADER
-            ==================================================
-            */
-
-            const {
-
-                data: invoice,
-
-                error: invoiceError
-
-            } = await supabase
-
-                .from(this.table)
-
-                .update({
-
-                    ...header,
-
-                    ...totals
-
-                })
-
-                .eq(
-                    "id",
-                    id
-                )
-
-                .select()
-
-                .single();
-
-
-            if (invoiceError) {
-
-                throw invoiceError;
-
-            }
-
-
-            /*
-            ==================================================
-            DELETE OLD DETAILS
-            ==================================================
-            */
-
-            const {
-
-                error: deleteError
-
-            } = await supabase
-
-                .from(this.detailTable)
-
-                .delete()
-
-                .eq(
-                    "account_payable_id",
-                    id
-                );
-
-
-            if (deleteError) {
-
-                throw deleteError;
-
-            }
-
-
-            /*
-            ==================================================
-            INSERT NEW DETAILS
-            ==================================================
-            */
-
-            if (
-                calculatedDetails.length
-            ) {
-
-                const detailRows =
-
-                    calculatedDetails.map(
-                        detail => ({
-
-                            ...detail,
-
-                            account_payable_id:
-                                id
-
-                        })
-                    );
-
-
-                const {
-
-                    error: insertError
-
-                } = await supabase
-
-                    .from(this.detailTable)
-
-                    .insert(
-                        detailRows
-                    );
-
-
-                if (insertError) {
-
-                    throw insertError;
-
-                }
-
-            }
-
-
-            return this.getById(id);
-
-        }
-
-        catch (error) {
-
-            console.error(
-                "AccountPayableService.update:",
-                error
+======================================================
+UPDATE ACCOUNT PAYABLE
+WITH ACCOUNTING PERIOD LOCK
+======================================================
+*/
+
+async update(
+    id,
+    header,
+    details = []
+) {
+
+    try {
+
+        /*
+        ==================================================
+        VALIDATE ID
+        ==================================================
+        */
+
+        if (!id) {
+
+            throw new Error(
+                "Account Payable ID is required."
             );
 
-            throw error;
+        }
+
+
+        /*
+        ==================================================
+        VALIDATE HEADER
+        ==================================================
+        */
+
+        if (!header) {
+
+            throw new Error(
+                "Account Payable header is required."
+            );
 
         }
+
+
+        if (!header.date_received) {
+
+            throw new Error(
+                "Date Received is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        GET EXISTING ACCOUNT PAYABLE
+        ==================================================
+
+        IMPORTANT:
+
+        We must validate the ORIGINAL Date Received first.
+
+        Example:
+
+        Original Date Received:
+        31-08-2026
+
+        Period:
+        2026-08 CLOSED
+
+        User must NOT be allowed to change it to:
+
+        01-09-2026
+
+        just to bypass Accounting Period Lock.
+        ==================================================
+        */
+
+        const existingResult =
+            await this.getById(
+                id
+            );
+
+
+        const existingInvoice =
+            existingResult?.header
+            || null;
+
+
+        if (!existingInvoice) {
+
+            throw new Error(
+                "Account Payable not found."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        ACCOUNTING PERIOD LOCK
+        ORIGINAL DATE RECEIVED
+        ==================================================
+        */
+
+        await this.validateAccountingPeriod(
+            existingInvoice.date_received
+        );
+
+
+        /*
+        ==================================================
+        ACCOUNTING PERIOD LOCK
+        NEW DATE RECEIVED
+        ==================================================
+        */
+
+        await this.validateAccountingPeriod(
+            header.date_received
+        );
+
+
+        /*
+        ==================================================
+        CALCULATE DETAILS
+        ==================================================
+        */
+
+        const calculatedDetails =
+
+            details.map(
+                detail => {
+
+                    const calculated =
+
+                        this.calculateDetailAmount(
+                            detail
+                        );
+
+
+                    return {
+
+                        ...detail,
+
+                        ...calculated
+
+                    };
+
+                }
+            );
+
+
+        /*
+        ==================================================
+        CALCULATE TOTALS
+        ==================================================
+        */
+
+        const totals =
+
+            this.calculateTotals(
+                calculatedDetails
+            );
+
+
+        /*
+        ==================================================
+        UPDATE HEADER
+        ==================================================
+        */
+
+        const {
+
+            data: invoice,
+
+            error: invoiceError
+
+        } = await supabase
+
+            .from(
+                this.table
+            )
+
+            .update({
+
+                ...header,
+
+                ...totals
+
+            })
+
+            .eq(
+                "id",
+                id
+            )
+
+            .select()
+
+            .single();
+
+
+        if (invoiceError) {
+
+            throw invoiceError;
+
+        }
+
+
+        /*
+        ==================================================
+        DELETE OLD DETAILS
+        ==================================================
+        */
+
+        const {
+
+            error: deleteError
+
+        } = await supabase
+
+            .from(
+                this.detailTable
+            )
+
+            .delete()
+
+            .eq(
+                "account_payable_id",
+                id
+            );
+
+
+        if (deleteError) {
+
+            throw deleteError;
+
+        }
+
+
+        /*
+        ==================================================
+        INSERT NEW DETAILS
+        ==================================================
+        */
+
+        if (
+            calculatedDetails.length
+        ) {
+
+            const detailRows =
+
+                calculatedDetails.map(
+                    detail => ({
+
+                        ...detail,
+
+                        account_payable_id:
+                            id
+
+                    })
+                );
+
+
+            const {
+
+                error: insertError
+
+            } = await supabase
+
+                .from(
+                    this.detailTable
+                )
+
+                .insert(
+                    detailRows
+                );
+
+
+            if (insertError) {
+
+                throw insertError;
+
+            }
+
+        }
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
+
+        return this.getById(
+            id
+        );
 
     }
 
+    catch (error) {
 
-   /*
+        console.error(
+            "AccountPayableService.update:",
+            error
+        );
+
+        throw error;
+
+    }
+
+}
+
+
+ /*
 ======================================================
-DELETE
+DELETE ACCOUNT PAYABLE
+WITH ACCOUNTING PERIOD LOCK
 ======================================================
 */
 
@@ -2805,44 +3214,22 @@ async delete(id) {
 
         }
 
-        
-
 
         /*
         ==================================================
-        CHECK INVOICE
+        GET ACCOUNT PAYABLE
         ==================================================
         */
 
-        const {
-
-            data: invoice,
-
-            error: findError
-
-        } = await supabase
-
-            .from(this.table)
-
-            .select(`
-                id,
-                invoice_no,
-                status
-            `)
-
-            .eq(
-                "id",
+        const result =
+            await this.getById(
                 id
-            )
-
-            .single();
+            );
 
 
-        if (findError) {
-
-            throw findError;
-
-        }
+        const invoice =
+            result?.header
+            || null;
 
 
         if (!invoice) {
@@ -2854,29 +3241,53 @@ async delete(id) {
         }
 
 
-        console.log(
-            "DELETE TARGET:",
-            invoice
+        /*
+        ==================================================
+        ACCOUNTING PERIOD LOCK
+        DATE RECEIVED = ACCOUNTING DATE
+        ==================================================
+        */
+
+        await this.validateAccountingPeriod(
+            invoice.date_received
         );
 
 
         /*
-==================================================
-ONLY DRAFT / VOID CAN BE DELETED
-==================================================
-*/
+        ==================================================
+        ONLY DRAFT / VOID CAN BE DELETED
+        ==================================================
+        */
 
-if (
-    invoice.status !== this.STATUS.DRAFT
-    &&
-    invoice.status !== this.STATUS.VOID
-) {
+        if (
+            invoice.status !== this.STATUS.DRAFT
+            &&
+            invoice.status !== this.STATUS.VOID
+        ) {
 
-    throw new Error(
-        "Only Draft or Void Account Payable can be deleted."
-    );
+            throw new Error(
+                "Only Draft or Void Account Payable can be deleted."
+            );
 
-}
+        }
+
+
+        console.log(
+            "DELETE TARGET:",
+            {
+                id:
+                    invoice.id,
+
+                invoice_no:
+                    invoice.invoice_no,
+
+                status:
+                    invoice.status,
+
+                date_received:
+                    invoice.date_received
+            }
+        );
 
 
         /*
@@ -2893,7 +3304,9 @@ if (
 
         } = await supabase
 
-            .from(this.table)
+            .from(
+                this.table
+            )
 
             .delete()
 
@@ -2928,24 +3341,13 @@ if (
 
         /*
         ==================================================
-        DEBUG RESULT
-        ==================================================
-        */
-
-        console.log(
-            "DELETE RESULT:",
-            deletedInvoice
-        );
-
-
-        /*
-        ==================================================
         VERIFY DELETE
         ==================================================
         */
 
         if (
-            !deletedInvoice ||
+            !deletedInvoice
+            ||
             deletedInvoice.length === 0
         ) {
 
@@ -2987,6 +3389,7 @@ if (
 /*
 ======================================================
 VOID ACCOUNT PAYABLE
+WITH ACCOUNTING PERIOD LOCK
 ======================================================
 */
 
@@ -3030,32 +3433,15 @@ async voidInvoice(
         ==================================================
         */
 
-        const {
-            data: invoice,
-            error: findError
-        } = await supabase
-
-            .from(this.table)
-
-            .select(`
-                id,
-                invoice_no,
-                status
-            `)
-
-            .eq(
-                "id",
+        const result =
+            await this.getById(
                 id
-            )
-
-            .single();
+            );
 
 
-        if (findError) {
-
-            throw findError;
-
-        }
+        const invoice =
+            result?.header
+            || null;
 
 
         if (!invoice) {
@@ -3065,17 +3451,31 @@ async voidInvoice(
             );
 
         }
+
+
         console.log(
-    "AP VOID BEFORE UPDATE:",
-    {
-        id: invoice?.id,
-        invoice_no: invoice?.invoice_no,
-        status: invoice?.status,
-        total_amount: invoice?.total_amount,
-        outstanding_amount:
-            invoice?.outstanding_amount
-    }
-);
+            "AP VOID BEFORE UPDATE:",
+            {
+                id:
+                    invoice?.id,
+
+                invoice_no:
+                    invoice?.invoice_no,
+
+                status:
+                    invoice?.status,
+
+                total_amount:
+                    invoice?.total_amount,
+
+                outstanding_amount:
+                    invoice?.outstanding_amount,
+
+                date_received:
+                    invoice?.date_received
+            }
+        );
+
 
         /*
         ==================================================
@@ -3097,16 +3497,32 @@ async voidInvoice(
 
         /*
         ==================================================
+        ACCOUNTING PERIOD LOCK
+        DATE RECEIVED = ACCOUNTING DATE
+        ==================================================
+        */
+
+        await this.validateAccountingPeriod(
+            invoice.date_received
+        );
+
+
+        /*
+        ==================================================
         UPDATE STATUS
         ==================================================
         */
 
         const {
+
             data,
             error: updateError
+
         } = await supabase
 
-            .from(this.table)
+            .from(
+                this.table
+            )
 
             .update({
 
@@ -3305,6 +3721,16 @@ async createPayment(
             );
 
         }
+        /*
+        ==================================================
+        ACCOUNTING PERIOD LOCK
+        PAYMENT DATE = ACCOUNTING DATE
+        ==================================================
+        */
+
+        await this.validatePaymentAccountingPeriod(
+            paymentDate
+        );
 
 
         /*

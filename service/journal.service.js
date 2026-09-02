@@ -910,13 +910,35 @@ else {
 
 }
 
+/*
+==========================================================
+UPDATE GENERAL JOURNAL
+WITH ACCOUNTING PERIOD LOCK
+==========================================================
+*/
+
 async update(id, header, details = []) {
 
     try {
 
         /*
         ======================================================
-        VALIDATE
+        VALIDATE ID
+        ======================================================
+        */
+
+        if (!id) {
+
+            throw new Error(
+                "General Journal ID is required."
+            );
+
+        }
+
+
+        /*
+        ======================================================
+        VALIDATE HEADER & DETAIL
         ======================================================
         */
 
@@ -926,14 +948,65 @@ async update(id, header, details = []) {
 
 
         /*
-        ==========================================================
+        ======================================================
+        GET EXISTING JOURNAL
+        ======================================================
+
+        IMPORTANT:
+
+        We must validate the ORIGINAL journal date first.
+
+        Example:
+
+        Original Journal Date:
+        31-08-2026
+        Period:
+        2026-08 CLOSED
+
+        User must NOT be allowed to change it to:
+
+        01-09-2026
+
+        just to bypass Accounting Period Lock.
+        ======================================================
+        */
+
+        const existingJournal =
+            await this.getById(id);
+
+
+        if (!existingJournal) {
+
+            throw new Error(
+                "General Journal not found."
+            );
+
+        }
+
+
+        /*
+        ======================================================
         ACCOUNTING PERIOD LOCK
-        ==========================================================
+        ORIGINAL JOURNAL DATE
+        ======================================================
+        */
+
+        await this.validateAccountingPeriod(
+            existingJournal.journal_date
+        );
+
+
+        /*
+        ======================================================
+        ACCOUNTING PERIOD LOCK
+        NEW JOURNAL DATE
+        ======================================================
         */
 
         await this.validateAccountingPeriod(
             header.journal_date
         );
+
 
         /*
         ======================================================
@@ -943,8 +1016,16 @@ async update(id, header, details = []) {
 
         const journalDetails =
             this.buildJournalDetail(details);
-            console.log("===== BUILD JOURNAL DETAIL =====");
-            console.table(journalDetails);
+
+
+        console.log(
+            "===== BUILD JOURNAL DETAIL ====="
+        );
+
+        console.table(
+            journalDetails
+        );
+
 
         /*
         ======================================================
@@ -953,13 +1034,18 @@ async update(id, header, details = []) {
         */
 
         const total =
-            this.calculateTotal(journalDetails);
+            this.calculateTotal(
+                journalDetails
+            );
+
 
         header.total_debit =
             total.totalDebit;
 
+
         header.total_credit =
             total.totalCredit;
+
 
         /*
         ======================================================
@@ -973,17 +1059,26 @@ async update(id, header, details = []) {
 
         } = await supabase
 
-            .from(TABLE.GL_JOURNAL)
+            .from(
+                TABLE.GL_JOURNAL
+            )
 
-            .update(header)
+            .update(
+                header
+            )
 
-            .eq("id", id);
+            .eq(
+                "id",
+                id
+            );
+
 
         if (headerError) {
 
             throw headerError;
 
         }
+
 
         /*
         ======================================================
@@ -997,17 +1092,17 @@ async update(id, header, details = []) {
 
         } = await supabase
 
-            .from(TABLE.GL_JOURNAL_DETAIL)
+            .from(
+                TABLE.GL_JOURNAL_DETAIL
+            )
 
             .delete()
 
             .eq(
-
                 "journal_id",
-
                 id
-
             );
+
 
         if (deleteError) {
 
@@ -1015,41 +1110,54 @@ async update(id, header, details = []) {
 
         }
 
+
         /*
         ======================================================
         PREPARE DETAIL
         ======================================================
         */
-        console.log("JOURNAL DETAIL");
-        console.table(journalDetails);
+
+        console.log(
+            "JOURNAL DETAIL"
+        );
+
+        console.table(
+            journalDetails
+        );
+
+
         const insertDetail =
-    journalDetails.map(item => ({
 
-        journal_id:
-            id,
+            journalDetails.map(
+                item => ({
 
-        line_no:
-            item.line_no,
+                    journal_id:
+                        id,
 
-        account_id:
-            item.account_id,
+                    line_no:
+                        item.line_no,
 
-        business_partner_id:
-            item.business_partner_id,
+                    account_id:
+                        item.account_id,
 
-        description:
-            item.description,
+                    business_partner_id:
+                        item.business_partner_id,
 
-        debit:
-            item.debit,
+                    description:
+                        item.description,
 
-        credit:
-            item.credit,
+                    debit:
+                        item.debit,
 
-        transaction_group:
-            item.transaction_group
+                    credit:
+                        item.credit,
 
-    }));
+                    transaction_group:
+                        item.transaction_group
+
+                })
+            );
+
 
         /*
         ======================================================
@@ -1057,18 +1165,24 @@ async update(id, header, details = []) {
         ======================================================
         */
 
-        if (insertDetail.length > 0) {
+        if (
+            insertDetail.length > 0
+        ) {
 
             const {
 
                 error: detailError
 
             } = await supabase
-            
 
-                .from(TABLE.GL_JOURNAL_DETAIL)
+                .from(
+                    TABLE.GL_JOURNAL_DETAIL
+                )
 
-                .insert(insertDetail);
+                .insert(
+                    insertDetail
+                );
+
 
             if (detailError) {
 
@@ -1078,6 +1192,13 @@ async update(id, header, details = []) {
 
         }
 
+
+        /*
+        ======================================================
+        SUCCESS
+        ======================================================
+        */
+
         return true;
 
     }
@@ -1085,12 +1206,10 @@ async update(id, header, details = []) {
     catch (error) {
 
         console.error(
-
             "GeneralJournalService.update",
-
             error
-
         );
+
 
         throw error;
 
