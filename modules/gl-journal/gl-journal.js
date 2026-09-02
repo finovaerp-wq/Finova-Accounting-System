@@ -1526,29 +1526,30 @@ bindModalEvents() {
 
     this.modalEventsBound = true;
 
+    /*
+======================================================
+ACCOUNTING DATE
+UPDATE POSTING PERIOD + VALIDATE ACCOUNTING PERIOD
+======================================================
+*/
+
+this.txtAccountingDate?.addEventListener(
+
+    "change",
+
+    async () => {
+
         /*
-    ======================================================
-    ACCOUNTING DATE → POSTING PERIOD
-    ======================================================
-    */
+        ==================================================
+        VALIDATE ACCOUNTING PERIOD
+        ==================================================
+        */
 
-    this.txtAccountingDate?.addEventListener(
-        "change",
-        () => {
+        await this.validateAccountingDatePeriod();
 
-            if (!this.txtPostingPeriod) {
+    }
 
-                return;
-
-            }
-
-            this.txtPostingPeriod.value =
-                this.getPostingPeriod(
-                    this.txtAccountingDate.value
-                );
-
-        }
-    );
+);
 
     /*
     ======================================================
@@ -6608,6 +6609,419 @@ getPostingPeriod(dateValue) {
     return `${parts[0]}-${parts[1]}`;
 
 }
+
+/*
+==========================================================
+VALIDATE ACCOUNTING DATE PERIOD
+GL JOURNAL
+BASED ON ACCOUNTING DATE
+FINAL
+==========================================================
+*/
+
+async validateAccountingDatePeriod() {
+
+    try {
+
+        /*
+        ======================================================
+        ACCOUNTING DATE
+        ======================================================
+        */
+
+        const accountingDate =
+            String(
+                this.txtAccountingDate?.value
+                ||
+                ""
+            )
+            .trim();
+
+
+        /*
+        ======================================================
+        EMPTY DATE
+        ======================================================
+        */
+
+        if (
+            !accountingDate
+        ) {
+
+            if (
+                this.txtPostingPeriod
+            ) {
+
+                this.txtPostingPeriod.value =
+                    "";
+
+            }
+
+
+            if (
+                this.btnAddLine
+            ) {
+
+                this.btnAddLine.disabled =
+                    true;
+
+            }
+
+
+            if (
+                this.btnSaveJournal
+            ) {
+
+                this.btnSaveJournal.disabled =
+                    true;
+
+            }
+
+
+            if (
+                this.btnPostJournal
+            ) {
+
+                this.btnPostJournal.disabled =
+                    true;
+
+            }
+
+
+            return false;
+
+        }
+
+
+        /*
+        ======================================================
+        POSTING PERIOD
+        ALWAYS BASED ON ACCOUNTING DATE
+        ======================================================
+        */
+
+        if (
+            this.txtPostingPeriod
+        ) {
+
+            this.txtPostingPeriod.value =
+                this.getPostingPeriod(
+                    accountingDate
+                );
+
+        }
+
+
+        /*
+        ======================================================
+        GET ACCOUNTING PERIOD
+        ======================================================
+        */
+
+        const {
+
+            data:
+                accountingPeriod,
+
+            error:
+                accountingPeriodError
+
+        } =
+            await supabase
+
+                .from(
+                    "mst_accounting_period"
+                )
+
+                .select(`
+                    id,
+                    period,
+                    month,
+                    year,
+                    start_date,
+                    end_date,
+                    status
+                `)
+
+                .lte(
+                    "start_date",
+                    accountingDate
+                )
+
+                .gte(
+                    "end_date",
+                    accountingDate
+                )
+
+                .maybeSingle();
+
+
+        /*
+        ======================================================
+        DATABASE ERROR
+        ======================================================
+        */
+
+        if (
+            accountingPeriodError
+        ) {
+
+            throw accountingPeriodError;
+
+        }
+
+
+        /*
+        ======================================================
+        PERIOD NOT AVAILABLE
+        ======================================================
+        */
+
+        if (
+            !accountingPeriod
+        ) {
+
+            /*
+            ==================================================
+            BLOCK JOURNAL INPUT
+            ==================================================
+            */
+
+            if (
+                this.btnAddLine
+            ) {
+
+                this.btnAddLine.disabled =
+                    true;
+
+            }
+
+
+            if (
+                this.btnSaveJournal
+            ) {
+
+                this.btnSaveJournal.disabled =
+                    true;
+
+            }
+
+
+            if (
+                this.btnPostJournal
+            ) {
+
+                this.btnPostJournal.disabled =
+                    true;
+
+            }
+
+
+            this.showError(
+                `Accounting Period for ${accountingDate} is not available or has not been opened.`
+            );
+
+
+            return false;
+
+        }
+
+
+        /*
+        ======================================================
+        NORMALIZE STATUS
+        ======================================================
+        */
+
+        const periodStatus =
+            String(
+                accountingPeriod.status
+                ||
+                ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        /*
+        ======================================================
+        CLOSED PERIOD
+        ======================================================
+        */
+
+        if (
+            periodStatus !==
+            "open"
+        ) {
+
+            /*
+            ==================================================
+            BLOCK JOURNAL INPUT
+            ==================================================
+            */
+
+            if (
+                this.btnAddLine
+            ) {
+
+                this.btnAddLine.disabled =
+                    true;
+
+            }
+
+
+            if (
+                this.btnSaveJournal
+            ) {
+
+                this.btnSaveJournal.disabled =
+                    true;
+
+            }
+
+
+            if (
+                this.btnPostJournal
+            ) {
+
+                this.btnPostJournal.disabled =
+                    true;
+
+            }
+
+
+            this.showError(
+                `Accounting Period ${accountingPeriod.period} is Closed. Journal cannot be entered.`
+            );
+
+
+            return false;
+
+        }
+
+
+        /*
+        ======================================================
+        PERIOD OPEN
+        ENABLE JOURNAL INPUT
+        ======================================================
+        */
+
+        if (
+            this.btnAddLine
+        ) {
+
+            this.btnAddLine.disabled =
+                false;
+
+        }
+
+
+        if (
+            this.btnSaveJournal
+        ) {
+
+            this.btnSaveJournal.disabled =
+                false;
+
+        }
+
+
+        if (
+            this.btnPostJournal
+        ) {
+
+            this.btnPostJournal.disabled =
+                false;
+
+        }
+
+
+        /*
+        ======================================================
+        DEBUG
+        ======================================================
+        */
+
+        console.log(
+            "GL JOURNAL ACCOUNTING DATE PERIOD:",
+            {
+
+                accounting_date:
+                    accountingDate,
+
+                period:
+                    accountingPeriod.period,
+
+                status:
+                    accountingPeriod.status
+
+            }
+        );
+
+
+        return true;
+
+    }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "GeneralJournal.validateAccountingDatePeriod:",
+            error
+        );
+
+
+        /*
+        ======================================================
+        BLOCK BUTTON WHEN VALIDATION FAILED
+        ======================================================
+        */
+
+        if (
+            this.btnAddLine
+        ) {
+
+            this.btnAddLine.disabled =
+                true;
+
+        }
+
+
+        if (
+            this.btnSaveJournal
+        ) {
+
+            this.btnSaveJournal.disabled =
+                true;
+
+        }
+
+
+        if (
+            this.btnPostJournal
+        ) {
+
+            this.btnPostJournal.disabled =
+                true;
+
+        }
+
+
+        this.showError(
+            error?.message
+            ||
+            "Failed to validate Accounting Period."
+        );
+
+
+        return false;
+
+    }
+
+}
 /*
 ==========================================================
 INITIALIZE JOURNAL HEADER
@@ -8704,110 +9118,540 @@ if (
     }
 
 }
-showSuccess(message) {
-
-    const modalElement =
-        document.getElementById(
-            "finovaSuccessModal"
-        );
-
-    if (!modalElement) {
-
-        console.log(
-            "SUCCESS:",
-            message
-        );
-
-        return;
-
-    }
-
-    const messageElement =
-        modalElement.querySelector(
-            ".finova-success-message"
-        );
-
-    if (messageElement) {
-
-        messageElement.textContent =
-            message;
-
-    }
-
-    bootstrap.Modal
-        .getOrCreateInstance(
-            modalElement
-        )
-        .show();
-
-}
 /*
 ==========================================================
-SHOW ERROR
+SHOW SUCCESS
+BOOTSTRAP ALERT
+GENERAL JOURNAL
 ==========================================================
 */
 
-showError(message) {
+showSuccess(
+    message
+) {
 
-    const modalElement =
+    /*
+    ======================================================
+    NORMALIZE MESSAGE
+    ======================================================
+    */
+
+    const successMessage =
+        message
+        ||
+        "Operation completed successfully.";
+
+
+    /*
+    ======================================================
+    CONSOLE
+    ======================================================
+    */
+
+    console.log(
+        "General Journal SUCCESS:",
+        successMessage
+    );
+
+
+    /*
+    ======================================================
+    REMOVE EXISTING SUCCESS ALERT
+    ======================================================
+    */
+
+    const existingAlert =
         document.getElementById(
-            "finovaErrorModal"
-        );
-
-
-    /*
-    ==================================================
-    FALLBACK
-    ==================================================
-    */
-
-    if (!modalElement) {
-
-        console.error(
-            "ERROR:",
-            message
-        );
-
-        return;
-
-    }
-
-
-    /*
-    ==================================================
-    MESSAGE ELEMENT
-    ==================================================
-    */
-
-    const messageElement =
-        modalElement.querySelector(
-            ".finova-error-message"
+            "gl-bootstrap-success-alert"
         );
 
 
     if (
-        messageElement
+        existingAlert
     ) {
 
-        messageElement.textContent =
-            message
-            ||
-            "An error occurred.";
+        existingAlert.remove();
 
     }
 
 
     /*
-    ==================================================
-    SHOW MODAL
-    ==================================================
+    ======================================================
+    CREATE BOOTSTRAP ALERT
+    ======================================================
     */
 
-    bootstrap.Modal
-        .getOrCreateInstance(
-            modalElement
-        )
-        .show();
+    const alertElement =
+        document.createElement(
+            "div"
+        );
+
+
+    alertElement.id =
+        "gl-bootstrap-success-alert";
+
+
+    alertElement.className =
+        "alert alert-success alert-dismissible fade show shadow-sm";
+
+
+    alertElement.setAttribute(
+        "role",
+        "alert"
+    );
+
+
+    alertElement.innerHTML = `
+
+        <div class="d-flex align-items-start">
+
+            <i
+                class="
+                    fa-solid
+                    fa-circle-check
+                    me-2
+                    mt-1
+                ">
+            </i>
+
+
+            <div class="flex-grow-1">
+
+                <strong>
+                    General Journal
+                </strong>
+
+
+                <div>
+
+                    ${
+                        this.escapeHTML(
+                            successMessage
+                        )
+                    }
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close">
+            </button>
+
+        </div>
+
+    `;
+
+
+    /*
+    ======================================================
+    FIND JOURNAL MODAL
+    ======================================================
+    */
+
+    const modal =
+        document.getElementById(
+            "glJournalModal"
+        );
+
+
+    const modalIsVisible =
+        modal
+        &&
+        modal.classList.contains(
+            "show"
+        );
+
+
+    const modalBody =
+        modalIsVisible
+            ? modal.querySelector(
+                ".modal-body"
+            )
+            : null;
+
+
+    /*
+    ======================================================
+    INSERT ALERT
+    ======================================================
+    */
+
+    if (
+        modalBody
+    ) {
+
+        modalBody.insertBefore(
+            alertElement,
+            modalBody.firstChild
+        );
+
+    }
+
+    else {
+
+        /*
+        ==================================================
+        PAGE LEVEL ALERT
+        ==================================================
+        */
+
+        alertElement.style.position =
+            "fixed";
+
+
+        alertElement.style.top =
+            "20px";
+
+
+        alertElement.style.left =
+            "50%";
+
+
+        alertElement.style.transform =
+            "translateX(-50%)";
+
+
+        alertElement.style.zIndex =
+            "99999";
+
+
+        alertElement.style.minWidth =
+            "380px";
+
+
+        alertElement.style.maxWidth =
+            "90vw";
+
+
+        document.body.appendChild(
+            alertElement
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    AUTO CLOSE
+    ======================================================
+    */
+
+    setTimeout(
+        () => {
+
+            const currentAlert =
+                document.getElementById(
+                    "gl-bootstrap-success-alert"
+                );
+
+
+            if (
+                !currentAlert
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                window.bootstrap
+                &&
+                bootstrap.Alert
+            ) {
+
+                bootstrap.Alert
+                    .getOrCreateInstance(
+                        currentAlert
+                    )
+                    .close();
+
+            }
+
+            else {
+
+                currentAlert.remove();
+
+            }
+
+        },
+
+        5000
+    );
+
+}
+
+
+/*
+==========================================================
+SHOW ERROR
+BOOTSTRAP ALERT
+GENERAL JOURNAL
+==========================================================
+*/
+
+showError(
+    message
+) {
+
+    /*
+    ======================================================
+    NORMALIZE MESSAGE
+    ======================================================
+    */
+
+    const errorMessage =
+        message
+        ||
+        "An error occurred.";
+
+
+    /*
+    ======================================================
+    CONSOLE
+    ======================================================
+    */
+
+    console.error(
+        "General Journal ERROR:",
+        errorMessage
+    );
+
+
+    /*
+    ======================================================
+    REMOVE EXISTING ERROR ALERT
+    ======================================================
+    */
+
+    const existingAlert =
+        document.getElementById(
+            "gl-bootstrap-error-alert"
+        );
+
+
+    if (
+        existingAlert
+    ) {
+
+        existingAlert.remove();
+
+    }
+
+
+    /*
+    ======================================================
+    CREATE BOOTSTRAP ALERT
+    ======================================================
+    */
+
+    const alertElement =
+        document.createElement(
+            "div"
+        );
+
+
+    alertElement.id =
+        "gl-bootstrap-error-alert";
+
+
+    alertElement.className =
+        "alert alert-danger alert-dismissible fade show shadow-sm";
+
+
+    alertElement.setAttribute(
+        "role",
+        "alert"
+    );
+
+
+    alertElement.innerHTML = `
+
+        <div class="d-flex align-items-start">
+
+            <i
+                class="
+                    fa-solid
+                    fa-circle-exclamation
+                    me-2
+                    mt-1
+                ">
+            </i>
+
+
+            <div class="flex-grow-1">
+
+                <strong>
+                    General Journal
+                </strong>
+
+
+                <div>
+
+                    ${
+                        this.escapeHTML(
+                            errorMessage
+                        )
+                    }
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="alert"
+                aria-label="Close">
+            </button>
+
+        </div>
+
+    `;
+
+
+    /*
+    ======================================================
+    FIND JOURNAL MODAL
+    ======================================================
+    */
+
+    const modal =
+        document.getElementById(
+            "glJournalModal"
+        );
+
+
+    const modalIsVisible =
+        modal
+        &&
+        modal.classList.contains(
+            "show"
+        );
+
+
+    const modalBody =
+        modalIsVisible
+            ? modal.querySelector(
+                ".modal-body"
+            )
+            : null;
+
+
+    /*
+    ======================================================
+    INSERT ALERT
+    ======================================================
+    */
+
+    if (
+        modalBody
+    ) {
+
+        modalBody.insertBefore(
+            alertElement,
+            modalBody.firstChild
+        );
+
+    }
+
+    else {
+
+        /*
+        ==================================================
+        PAGE LEVEL ALERT
+        ==================================================
+        */
+
+        alertElement.style.position =
+            "fixed";
+
+
+        alertElement.style.top =
+            "20px";
+
+
+        alertElement.style.left =
+            "50%";
+
+
+        alertElement.style.transform =
+            "translateX(-50%)";
+
+
+        alertElement.style.zIndex =
+            "99999";
+
+
+        alertElement.style.minWidth =
+            "420px";
+
+
+        alertElement.style.maxWidth =
+            "90vw";
+
+
+        document.body.appendChild(
+            alertElement
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    AUTO CLOSE
+    ======================================================
+    */
+
+    setTimeout(
+        () => {
+
+            const currentAlert =
+                document.getElementById(
+                    "gl-bootstrap-error-alert"
+                );
+
+
+            if (
+                !currentAlert
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                window.bootstrap
+                &&
+                bootstrap.Alert
+            ) {
+
+                bootstrap.Alert
+                    .getOrCreateInstance(
+                        currentAlert
+                    )
+                    .close();
+
+            }
+
+            else {
+
+                currentAlert.remove();
+
+            }
+
+        },
+
+        7000
+    );
 
 }
 /*
@@ -13532,85 +14376,306 @@ showPostConfirmation() {
 /*
 ==========================================================
 SAVE JOURNAL
+ACCOUNTING PERIOD BASED ON ACCOUNTING DATE
+FINAL
 ==========================================================
 */
 
-async saveJournal(status = "Draft") {
+async saveJournal(
+    status = "Draft"
+) {
 
     try {
 
-        if (!this.validateJournal(status)) {
+        /*
+        ======================================================
+        VALIDATE JOURNAL FORM
+        ======================================================
+        */
+
+        if (
+            !this.validateJournal(
+                status
+            )
+        ) {
+
             return;
+
         }
-/*
-======================================================
-HEADER
-======================================================
-*/
-
-const header = {
-
-    journal_no:
-        this.txtJournalNo.value.trim(),
-
-    journal_date:
-        this.txtAccountingDate.value,
-
-    posting_period:
-        this.txtPostingPeriod?.value ||
-
-        this.getPostingPeriod(
-            this.txtAccountingDate.value
-        ),
-
-    description:
-        this.txtDescription.value.trim(),
 
 
-    /*
-    ======================================================
-    SOURCE DOCUMENT
-    MANUAL GENERAL JOURNAL
-    ======================================================
-    */
+        /*
+        ======================================================
+        ACCOUNTING DATE
+        THIS IS THE ONLY PERIOD BASIS FOR GL JOURNAL
+        ======================================================
+        */
 
-    source_module:
-    "GLJ",
+        const accountingDate =
+            String(
+                this.txtAccountingDate
+                    ?.value
+                ||
+                ""
+            )
+            .trim();
 
-    source_document_type:
-        "MANUAL_JOURNAL",
 
-    source_document_id:
-        null,
+        /*
+        ======================================================
+        VALIDATE ACCOUNTING DATE
+        ======================================================
+        */
+
+        if (
+            !accountingDate
+        ) {
+
+            this.showError(
+                "Accounting Date is required."
+            );
+
+            return;
+
+        }
 
 
-    /*
-    ======================================================
-    STATUS
-    ======================================================
-    */
+        /*
+        ======================================================
+        GET ACCOUNTING PERIOD
+        BASED ON ACCOUNTING DATE
+        ======================================================
+        */
 
-    status
+        const {
 
-};
+            data:
+                accountingPeriod,
 
-/*
-======================================================
-EDIT MODE
-======================================================
-*/
+            error:
+                accountingPeriodError
 
-if (
+        } =
+            await supabase
 
-    this.currentMode === "edit" &&
+                .from(
+                    "mst_accounting_period"
+                )
 
-    this.currentJournal?.id
+                .select(`
+                    id,
+                    period,
+                    month,
+                    year,
+                    start_date,
+                    end_date,
+                    status
+                `)
 
-) {
+                .lte(
+                    "start_date",
+                    accountingDate
+                )
 
-    header.id = this.currentJournal.id;
+                .gte(
+                    "end_date",
+                    accountingDate
+                )
 
-}
+                .maybeSingle();
+
+
+        /*
+        ======================================================
+        ACCOUNTING PERIOD QUERY ERROR
+        ======================================================
+        */
+
+        if (
+            accountingPeriodError
+        ) {
+
+            console.error(
+                "GL JOURNAL ACCOUNTING PERIOD ERROR:",
+                accountingPeriodError
+            );
+
+
+            throw accountingPeriodError;
+
+        }
+
+
+        /*
+        ======================================================
+        PERIOD NOT CONFIGURED
+        FUTURE PERIOD / UNKNOWN PERIOD
+        ======================================================
+        */
+
+        if (
+            !accountingPeriod
+        ) {
+
+            this.showError(
+                `Accounting Period for ${accountingDate} is not available or has not been opened.`
+            );
+
+            return;
+
+        }
+
+
+        /*
+        ======================================================
+        NORMALIZE PERIOD STATUS
+        ======================================================
+        */
+
+        const periodStatus =
+            String(
+                accountingPeriod.status
+                ||
+                ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        /*
+        ======================================================
+        CLOSED PERIOD
+        ======================================================
+        */
+
+        if (
+            periodStatus !==
+            "open"
+        ) {
+
+            this.showError(
+                `Accounting Period ${accountingPeriod.period} is Closed. Journal cannot be saved.`
+            );
+
+            return;
+
+        }
+
+
+        /*
+        ======================================================
+        DEBUG ACCOUNTING PERIOD
+        ======================================================
+        */
+
+        console.log(
+            "GL JOURNAL ACCOUNTING PERIOD:",
+            {
+
+                accounting_date:
+                    accountingDate,
+
+                period:
+                    accountingPeriod.period,
+
+                status:
+                    accountingPeriod.status
+
+            }
+        );
+
+
+        /*
+        ======================================================
+        HEADER
+        ======================================================
+        */
+
+        const header = {
+
+            journal_no:
+                this.txtJournalNo
+                    .value
+                    .trim(),
+
+            /*
+            ==================================================
+            IMPORTANT
+            GL JOURNAL PERIOD BASIS
+            =
+            ACCOUNTING DATE
+            ==================================================
+            */
+
+            journal_date:
+                accountingDate,
+
+
+            /*
+            ==================================================
+            POSTING PERIOD
+            ALWAYS DERIVED FROM ACCOUNTING DATE
+            ==================================================
+            */
+
+            posting_period:
+                this.getPostingPeriod(
+                    accountingDate
+                ),
+
+
+            description:
+                this.txtDescription
+                    .value
+                    .trim(),
+
+
+            /*
+            ==================================================
+            SOURCE DOCUMENT
+            MANUAL GENERAL JOURNAL
+            ==================================================
+            */
+
+            source_module:
+                "GLJ",
+
+            source_document_type:
+                "MANUAL_JOURNAL",
+
+            source_document_id:
+                null,
+
+
+            /*
+            ==================================================
+            STATUS
+            ==================================================
+            */
+
+            status
+
+        };
+
+
+        /*
+        ======================================================
+        EDIT MODE
+        ======================================================
+        */
+
+        if (
+            this.currentMode ===
+                "edit"
+            &&
+            this.currentJournal?.id
+        ) {
+
+            header.id =
+                this.currentJournal.id;
+
+        }
+
 
         /*
         ======================================================
@@ -13618,29 +14683,40 @@ if (
         ======================================================
         */
 
-        const details = this.detailLines.map(
-    (line, index) => ({
+        const details =
+            this.detailLines.map(
 
-        line_no:
-            index + 1,
+                (
+                    line,
+                    index
+                ) => ({
 
-        description:
-            line.description,
+                    line_no:
+                        index + 1,
 
-        debit_account_id:
-            line.debit_account_id,
+                    description:
+                        line.description,
 
-        credit_account_id:
-            line.credit_account_id,
+                    debit_account_id:
+                        line.debit_account_id,
 
-        business_partner_id:
-            line.business_partner_id || null,
+                    credit_account_id:
+                        line.credit_account_id,
 
-        amount:
-            Number(line.amount)
+                    business_partner_id:
+                        line.business_partner_id
+                        ||
+                        null,
 
-    })
-);
+                    amount:
+                        Number(
+                            line.amount
+                        )
+
+                })
+
+            );
+
 
         /*
         ======================================================
@@ -13648,17 +14724,18 @@ if (
         ======================================================
         */
 
-        if (this.currentMode === "add") {
+        if (
+            this.currentMode ===
+            "add"
+        ) {
 
             await this.service.create(
-
                 header,
-
                 details
-
             );
 
         }
+
         else {
 
             await this.service.update(
@@ -13673,21 +14750,26 @@ if (
 
         }
 
+
         /*
         ======================================================
         RELOAD
         ======================================================
         */
 
-        await this.loadData();
+        await this.loadData(
+            false
+        );
+
 
         /*
         ======================================================
-        CLOSE
+        CLOSE MODAL
         ======================================================
         */
 
         this.modal.hide();
+
 
         /*
         ======================================================
@@ -13695,30 +14777,35 @@ if (
         ======================================================
         */
 
-        window.App?.showSuccess?.(
-
-            `Journal ${status} successfully.`
-
+        this.showSuccess(
+            status ===
+                "Posted"
+                ? "Journal posted successfully."
+                : "Journal saved as Draft successfully."
         );
 
     }
 
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
-
-            "Save Journal",
-
+            "GeneralJournal.saveJournal:",
             error
-
         );
 
-        window.App?.showError?.(
 
-            error.message ||
+        /*
+        ======================================================
+        ERROR
+        ======================================================
+        */
 
+        this.showError(
+            error?.message
+            ||
             "Failed to save journal."
-
         );
 
     }
