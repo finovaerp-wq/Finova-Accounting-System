@@ -16181,8 +16181,32 @@ this.resetAccountingPreview();
         modalTitle
     ) {
 
-        modalTitle.textContent =
-            "Add Account Payable";
+        /*
+==================================================
+MODAL TITLE
+ADD MODE
+==================================================
+*/
+
+const modalTitle =
+    document.querySelector(
+        "#accountPayableModal .modal-title"
+    );
+
+
+if (
+    modalTitle
+) {
+
+    modalTitle.innerHTML = `
+
+        <i class="fa-solid fa-file-invoice-dollar me-2"></i>
+
+        Add Account Payable
+
+    `;
+
+}
 
     }
 

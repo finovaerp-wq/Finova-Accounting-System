@@ -10246,14 +10246,14 @@ async addInvoice() {
 
 
         /*
-==============================================
-RESET FORM
-RESET ACCOUNTING PREVIEW SUDAH DIHANDLE
-OLEH resetForm()
-==============================================
-*/
+        ==============================================
+        RESET FORM
+        RESET ACCOUNTING PREVIEW SUDAH DIHANDLE
+        OLEH resetForm()
+        ==============================================
+        */
 
-this.resetForm();
+        this.resetForm();
 
 
         /*
@@ -10279,6 +10279,90 @@ this.resetForm();
 
             this.arFormStatus.value =
                 "Draft";
+
+        }
+
+
+        /*
+        ==============================================
+        MODAL TITLE
+        ADD MODE
+        ==============================================
+        */
+
+        const modalTitle =
+            document.getElementById(
+                "accountReceivableModalLabel"
+            );
+
+
+        if (
+            modalTitle
+        ) {
+
+            modalTitle.innerHTML = `
+
+                <i class="fa-solid fa-file-invoice-dollar me-2"></i>
+
+                Add Account Receivable
+
+            `;
+
+        }
+
+
+        /*
+        ==============================================
+        MODAL SUBTITLE
+        ADD MODE
+        ==============================================
+        */
+
+        const modalSubtitle =
+            document.querySelector(
+                "#accountReceivableModal .modal-subtitle"
+            );
+
+
+        if (
+            modalSubtitle
+        ) {
+
+            modalSubtitle.textContent =
+                "Create new Account Receivable";
+
+        }
+
+
+        /*
+        ==============================================
+        SAVE BUTTON
+        ADD MODE
+        ==============================================
+        */
+
+        if (
+            this.btnSaveDraft
+        ) {
+
+            this.btnSaveDraft
+                .classList
+                .remove(
+                    "d-none"
+                );
+
+
+            this.btnSaveDraft.disabled =
+                false;
+
+
+            this.btnSaveDraft.innerHTML = `
+
+                <i class="fa-solid fa-floppy-disk me-1"></i>
+
+                Save Draft
+
+            `;
 
         }
 
