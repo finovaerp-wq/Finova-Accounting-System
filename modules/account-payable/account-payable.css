@@ -1747,13 +1747,13 @@ TAB BUTTON
 
     justify-content: center !important;
 
-    width: 100%;
+    width: 100% !important;
 
-    min-height: 42px;
+    min-height: 36px !important;
 
     margin: 0 !important;
 
-    padding: 8px 16px !important;
+    padding: 7px 14px !important;
 
     background: transparent !important;
 
@@ -1784,7 +1784,6 @@ TAB BUTTON
         box-shadow .18s ease;
 
 }
-
 
 /*
 ==========================================================
