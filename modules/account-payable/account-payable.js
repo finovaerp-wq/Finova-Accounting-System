@@ -20680,8 +20680,13 @@ if (
     modalTitle
 ) {
 
-    modalTitle.textContent =
-        "Edit Account Payable";
+    modalTitle.innerHTML = `
+
+        <i class="fa-solid fa-file-invoice-dollar me-2"></i>
+
+        Edit Account Payable
+
+    `;
 
 }
 
