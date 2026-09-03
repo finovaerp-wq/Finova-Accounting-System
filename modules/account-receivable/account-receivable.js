@@ -99,6 +99,23 @@ export class AccountReceivable {
         this.taxPlusData = [];
 
         this.taxMinusData = [];
+        /*
+==================================================
+ACCOUNTING PREVIEW STATE
+==================================================
+*/
+
+this.arAccountingPreviewRequestId = 0;
+
+this.arAccountingPreviewState = {
+    status: "WAITING",
+    isReady: false,
+    isBalanced: false,
+    totalDebit: 0,
+    totalCredit: 0,
+    difference: 0,
+    issues: []
+};
 
 
         /*
@@ -220,15 +237,23 @@ this.btnSaveARPayment = null;
 
 
         /*
-        ==================================================
-        SEARCHABLE SELECT
-        ==================================================
-        */
+==================================================
+SEARCHABLE SELECT
+==================================================
+*/
 
-        this.arDetailCOASelect = null;
+this.arDetailCOASelect = null;
 
-        this.arDetailCOASelect = null;
+this.arCustomerSelect = null;
 
+
+/*
+==================================================
+AR COMPLETE PROCESS STATE
+==================================================
+*/
+
+this.arCompleteProcessing = false;
 
         /*
         ==================================================
@@ -1159,6 +1184,62 @@ cacheDOM() {
         document.getElementById(
             "ar-form-total"
         );
+
+    /*
+==================================================
+ACCOUNTING PREVIEW
+==================================================
+*/
+
+this.arAccountingPreviewBody =
+    document.getElementById(
+        "ar-accounting-preview-body"
+    );
+
+this.arAccountingPreviewEmpty =
+    document.getElementById(
+        "ar-accounting-preview-empty"
+    );
+
+this.arAccountingPreviewTotalDebit =
+    document.getElementById(
+        "ar-accounting-preview-total-debit"
+    );
+
+this.arAccountingPreviewTotalCredit =
+    document.getElementById(
+        "ar-accounting-preview-total-credit"
+    );
+
+this.arAccountingPreviewSummaryDebit =
+    document.getElementById(
+        "ar-accounting-preview-summary-debit"
+    );
+
+this.arAccountingPreviewSummaryCredit =
+    document.getElementById(
+        "ar-accounting-preview-summary-credit"
+    );
+
+this.arAccountingPreviewDifference =
+    document.getElementById(
+        "ar-accounting-preview-difference"
+    );
+
+this.arAccountingPreviewStatus =
+    document.getElementById(
+        "ar-accounting-preview-status"
+    );
+
+this.arAccountingPreviewStatusTitle =
+    document.getElementById(
+        "ar-accounting-preview-status-title"
+    );
+
+this.arAccountingPreviewStatusMessage =
+    document.getElementById(
+        "ar-accounting-preview-status-message"
+    );
 
 
     /*
@@ -9917,11 +9998,225 @@ renderActionButtons(
     `;
 
 }
+
+/*
+==========================================================
+RESET AR MODAL TAB
+DEFAULT : HEADER INFO
+==========================================================
+*/
+
+resetARModalTab() {
+
+    try {
+
+        /*
+        ==================================================
+        HEADER INFO TAB
+        ==================================================
+        */
+
+        const headerInfoTab =
+            document.getElementById(
+                "ar-header-info-tab"
+            );
+
+
+        if (
+            !headerInfoTab
+        ) {
+
+            console.warn(
+                "AR Header Info tab not found."
+            );
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        SHOW HEADER INFO
+
+        BOOTSTRAP WILL AUTOMATICALLY:
+        - REMOVE ACTIVE FROM OTHER TABS
+        - REMOVE SHOW/ACTIVE FROM OTHER PANES
+        - ACTIVATE HEADER INFO
+        ==================================================
+        */
+
+        const tabInstance =
+            bootstrap.Tab
+                .getOrCreateInstance(
+                    headerInfoTab
+                );
+
+
+        tabInstance.show();
+
+
+        /*
+        ==================================================
+        RESET MODAL BODY SCROLL
+        ==================================================
+        */
+
+        const modalBody =
+            this.accountReceivableModal
+                ?.querySelector(
+                    ".modal-body"
+                );
+
+
+        if (
+            modalBody
+        ) {
+
+            modalBody.scrollTop =
+                0;
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountReceivable.resetARModalTab:",
+            error
+        );
+
+    }
+
+}
+
+/*
+==========================================================
+RESET AR ACCOUNTING PREVIEW
+==========================================================
+*/
+
+resetAccountingPreview() {
+
+    try {
+
+        /*
+        ==================================================
+        INVALIDATE PREVIOUS PREVIEW REQUEST
+        ==================================================
+        */
+
+        this.arAccountingPreviewRequestId =
+            Number(
+                this.arAccountingPreviewRequestId
+                || 0
+            )
+            + 1;
+
+
+        /*
+        ==================================================
+        RESET STATE
+        ==================================================
+        */
+
+        this.arAccountingPreviewState = {
+
+            status:
+                "WAITING",
+
+            isReady:
+                false,
+
+            isBalanced:
+                false,
+
+            totalDebit:
+                0,
+
+            totalCredit:
+                0,
+
+            difference:
+                0,
+
+            issues:
+                []
+
+        };
+
+
+        /*
+        ==================================================
+        RESET TABLE
+        ==================================================
+        */
+
+        if (
+    this.arAccountingPreviewBody
+) {
+
+    this.arAccountingPreviewBody.innerHTML = `
+
+        <tr id="ar-accounting-preview-empty">
+
+            <td
+                colspan="5"
+                class="text-center text-muted py-4">
+
+                No accounting preview available.
+
+            </td>
+
+        </tr>
+
+    `;
+
+}
+
+
+        /*
+        ==================================================
+        RESET SUMMARY
+        ==================================================
+        */
+
+        this.updateARAccountingPreviewSummary(
+            0,
+            0
+        );
+
+
+        /*
+        ==================================================
+        RESET STATUS
+        ==================================================
+        */
+
+        this.updateARAccountingPreviewStatus(
+            "WAITING",
+            "Waiting for Transaction",
+            "Add Invoice Detail to generate the accounting preview."
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountReceivable.resetAccountingPreview:",
+            error
+        );
+
+    }
+
+}
     /*
-======================================================
+==========================================================
 ADD AR
 ALWAYS OPEN HEADER INFO TAB
-======================================================
+==========================================================
 */
 
 async addInvoice() {
@@ -9951,12 +10246,14 @@ async addInvoice() {
 
 
         /*
-        ==============================================
-        RESET FORM
-        ==============================================
-        */
+==============================================
+RESET FORM
+RESET ACCOUNTING PREVIEW SUDAH DIHANDLE
+OLEH resetForm()
+==============================================
+*/
 
-        this.resetForm();
+this.resetForm();
 
 
         /*
@@ -10004,55 +10301,10 @@ async addInvoice() {
         /*
         ==============================================
         RESET TAB TO HEADER INFO
-
-        IMPORTANT:
-        PREVENT PREVIOUS TAB HISTORY
         ==============================================
         */
 
-        const headerInfoTab =
-            document.getElementById(
-                "ar-header-info-tab"
-            );
-
-
-        if (
-            headerInfoTab
-        ) {
-
-            const tabInstance =
-                bootstrap.Tab
-                    .getOrCreateInstance(
-                        headerInfoTab
-                    );
-
-
-            tabInstance.show();
-
-        }
-
-
-        /*
-        ==============================================
-        RESET MODAL BODY SCROLL
-        ==============================================
-        */
-
-        const modalBody =
-            this.accountReceivableModal
-                ?.querySelector(
-                    ".modal-body"
-                );
-
-
-        if (
-            modalBody
-        ) {
-
-            modalBody.scrollTop =
-                0;
-
-        }
+        this.resetARModalTab();
 
 
         /*
@@ -10273,26 +10525,35 @@ resetForm() {
 
 
     /*
-    ==================================================
-    RESET DETAIL DATA
-    ==================================================
-    */
+==================================================
+RESET DETAIL DATA
+==================================================
+*/
 
-    this.invoiceDetails =
-        [];
-
-
-    this.currentDetailId =
-        null;
+this.invoiceDetails =
+    [];
 
 
-    /*
-    ==================================================
-    UPDATE SUMMARY
-    ==================================================
-    */
+this.currentDetailId =
+    null;
 
-    this.updateInvoiceSummary();
+
+/*
+==================================================
+RESET ACCOUNTING PREVIEW
+==================================================
+*/
+
+this.resetAccountingPreview();
+
+
+/*
+==================================================
+UPDATE SUMMARY
+==================================================
+*/
+
+this.updateInvoiceSummary();
 
 }
 
@@ -12025,6 +12286,14 @@ updateInvoiceSummary() {
                 );
 
         }
+       /*
+==================================================
+ACCOUNTING PREVIEW
+REALTIME
+==================================================
+*/
+
+void this.renderAccountingPreview();
 
     }
 
@@ -12034,6 +12303,1801 @@ updateInvoiceSummary() {
             "AccountReceivable.updateInvoiceSummary:",
             error
         );
+
+    }
+
+}
+
+/*
+==========================================================
+CHECK AR ACCOUNTING PREVIEW READINESS
+
+STATUS:
+- READY
+- NOT READY
+
+IMPORTANT:
+THIS FUNCTION DOES NOT GENERATE GL.
+ONLY CHECKS WHETHER ACCOUNTING MAPPING
+IS COMPLETE ENOUGH FOR PREVIEW.
+==========================================================
+*/
+
+checkARAccountingPreviewReadiness(
+    details = null
+) {
+
+    const sourceDetails =
+        Array.isArray(details)
+            ? details
+            : (
+                Array.isArray(
+                    this.invoiceDetails
+                )
+                    ? this.invoiceDetails
+                    : []
+            );
+
+
+    const issues =
+        [];
+
+
+    /*
+    ======================================================
+    DETAIL
+    ======================================================
+    */
+
+    if (
+        !sourceDetails.length
+    ) {
+
+        issues.push(
+            "Invoice Detail is empty."
+        );
+
+
+        return {
+
+            ready:
+                false,
+
+            issues:
+                issues
+
+        };
+
+    }
+
+
+    /*
+    ======================================================
+    CHECK EACH DETAIL
+    ======================================================
+    */
+
+    sourceDetails.forEach(
+        (
+            detail,
+            index
+        ) => {
+
+            const lineNumber =
+                index + 1;
+
+
+            /*
+            ==================================================
+            BASE AMOUNT
+            ==================================================
+            */
+
+            const lineAmount =
+                Number(
+                    detail.line_amount
+                    || 0
+                );
+
+
+            /*
+            ==================================================
+            REVENUE ACCOUNT
+            ==================================================
+            */
+
+            const revenueAccountId =
+                Number(
+                    detail.revenue_account_id
+                    || 0
+                );
+
+
+            if (
+                lineAmount > 0
+                &&
+                !revenueAccountId
+            ) {
+
+                issues.push(
+                    `Invoice Detail ${lineNumber}: Revenue Account is not mapped.`
+                );
+
+            }
+
+
+            /*
+            ==================================================
+            TAX (+)
+            ==================================================
+            */
+
+            const taxPlusAmount =
+                Number(
+                    detail.tax_output_amount
+                    || 0
+                );
+
+
+            const taxPlusAccountId =
+                Number(
+                    detail.tax_plus_account_id
+                    || 0
+                );
+
+
+            if (
+                taxPlusAmount > 0
+                &&
+                !taxPlusAccountId
+            ) {
+
+                issues.push(
+                    `Invoice Detail ${lineNumber}: Tax (+) Account is not mapped.`
+                );
+
+            }
+
+
+            /*
+            ==================================================
+            TAX (-)
+            ==================================================
+            */
+
+            const taxMinusAmount =
+                Number(
+                    detail.withholding_tax_amount
+                    || 0
+                );
+
+
+            const taxMinusAccountId =
+                Number(
+                    detail.tax_minus_account_id
+                    || 0
+                );
+
+
+            if (
+                taxMinusAmount > 0
+                &&
+                !taxMinusAccountId
+            ) {
+
+                issues.push(
+                    `Invoice Detail ${lineNumber}: Tax (-) Account is not mapped.`
+                );
+
+            }
+
+
+            /*
+            ==================================================
+            INVALID AMOUNT
+            ==================================================
+            */
+
+            if (
+                !Number.isFinite(
+                    lineAmount
+                )
+                ||
+                lineAmount < 0
+            ) {
+
+                issues.push(
+                    `Invoice Detail ${lineNumber}: Invalid Line Amount.`
+                );
+
+            }
+
+
+            if (
+                !Number.isFinite(
+                    taxPlusAmount
+                )
+                ||
+                taxPlusAmount < 0
+            ) {
+
+                issues.push(
+                    `Invoice Detail ${lineNumber}: Invalid Tax (+) Amount.`
+                );
+
+            }
+
+
+            if (
+                !Number.isFinite(
+                    taxMinusAmount
+                )
+                ||
+                taxMinusAmount < 0
+            ) {
+
+                issues.push(
+                    `Invoice Detail ${lineNumber}: Invalid Tax (-) Amount.`
+                );
+
+            }
+
+        }
+    );
+
+
+    /*
+    ======================================================
+    RESULT
+    ======================================================
+    */
+
+    return {
+
+        ready:
+            issues.length === 0,
+
+        issues:
+            issues
+
+    };
+
+}
+/*
+==========================================================
+RENDER AR ACCOUNTING PREVIEW
+MATCH ACCOUNT PAYABLE
+
+STATUS:
+- WAITING
+- NOT_READY
+- BALANCED
+- NOT_BALANCED
+
+FEATURE:
+- RACE GUARD
+- READINESS CHECK
+- GROUP ACCOUNT
+- NET SAME ACCOUNT
+- REALTIME SUMMARY
+==========================================================
+*/
+
+async renderAccountingPreview() {
+
+    /*
+    ======================================================
+    REQUEST ID
+    PREVENT OLD RENDER FROM OVERRIDING NEWER PREVIEW
+    ======================================================
+    */
+
+    const requestId =
+        Number(
+            this.arAccountingPreviewRequestId
+            || 0
+        )
+        + 1;
+
+
+    this.arAccountingPreviewRequestId =
+        requestId;
+
+
+    try {
+
+        /*
+        ==================================================
+        BODY
+        ==================================================
+        */
+
+        const body =
+            this.arAccountingPreviewBody
+            ||
+            document.getElementById(
+                "ar-accounting-preview-body"
+            );
+
+
+        if (
+            !body
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        DETAILS
+        ==================================================
+        */
+
+        const details =
+            Array.isArray(
+                this.invoiceDetails
+            )
+                ? this.invoiceDetails
+                : [];
+
+
+        /*
+        ==================================================
+        EMPTY
+        ==================================================
+        */
+
+        if (
+            !details.length
+        ) {
+
+            /*
+            ==============================================
+            RACE GUARD
+            ==============================================
+            */
+
+            if (
+                requestId !==
+                this.arAccountingPreviewRequestId
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+            ==============================================
+            EMPTY TABLE
+            ==============================================
+            */
+
+            body.innerHTML = `
+
+    <tr
+        id="ar-accounting-preview-empty"
+    >
+
+        <td
+            colspan="5"
+            class="
+                text-center
+                text-muted
+                py-4
+            "
+        >
+
+            No accounting preview available.
+
+        </td>
+
+    </tr>
+
+`;
+
+
+            /*
+            ==============================================
+            RESET STATE
+            ==============================================
+            */
+
+            this.arAccountingPreviewState = {
+
+                status:
+                    "WAITING",
+
+                isReady:
+                    false,
+
+                isBalanced:
+                    false,
+
+                totalDebit:
+                    0,
+
+                totalCredit:
+                    0,
+
+                difference:
+                    0,
+
+                issues:
+                    []
+
+            };
+
+
+            /*
+            ==============================================
+            RESET SUMMARY
+            ==============================================
+            */
+
+            this.updateARAccountingPreviewSummary(
+                0,
+                0
+            );
+
+
+            /*
+            ==============================================
+            RESET STATUS
+            ==============================================
+            */
+
+            this.updateARAccountingPreviewStatus(
+                "WAITING",
+                "Waiting for Transaction",
+                "Add Invoice Detail to generate the accounting preview."
+            );
+
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        READINESS
+        ==================================================
+        */
+
+        const readiness =
+            this.checkARAccountingPreviewReadiness(
+                details
+            );
+
+
+        /*
+        ==================================================
+        TEMPORARY INVOICE HEADER
+        PREVIEW DOES NOT REQUIRE SAVED AR ID
+        ==================================================
+        */
+
+        const previewInvoice = {
+
+            id:
+                this.currentInvoiceId
+                || null,
+
+            customer_id:
+                this.arCustomerSelect
+                    ?.getValue?.()
+                ||
+                this.arFormCustomer
+                    ?.value
+                ||
+                null,
+
+            invoice_no:
+                this.arFormInvoiceNo
+                    ?.value
+                || "",
+
+            invoice_date:
+                this.arFormInvoiceDate
+                    ?.value
+                || "",
+
+            po_no:
+                this.arFormPoNo
+                    ?.value
+                || "",
+
+            description:
+                this.arFormDescription
+                    ?.value
+                || ""
+
+        };
+
+
+        /*
+        ==================================================
+        BUILD JOURNAL
+
+        SAME BUILDER AS REAL GL JOURNAL
+        NON STRICT FOR PREVIEW
+        ==================================================
+        */
+
+        const journalDetails =
+            await Promise.resolve(
+
+                this.buildARJournalLines(
+                    previewInvoice,
+                    details,
+                    {
+                        strictValidation:
+                            false
+                    }
+                )
+
+            );
+
+
+        /*
+        ==================================================
+        RACE GUARD
+
+        IGNORE OLD RESULT IF NEW PREVIEW
+        HAS ALREADY STARTED
+        ==================================================
+        */
+
+        if (
+            requestId !==
+            this.arAccountingPreviewRequestId
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        CURRENT COA
+        ==================================================
+        */
+
+        const coaData =
+            Array.isArray(
+                this.currentCOA
+            )
+                ? this.currentCOA
+                : [];
+
+
+        /*
+        ==================================================
+        GET ACCOUNT
+        ==================================================
+        */
+
+        const getAccount =
+            accountId => {
+
+                return (
+                    coaData.find(
+                        account =>
+                            Number(
+                                account.id
+                            )
+                            ===
+                            Number(
+                                accountId
+                            )
+                    )
+                    ||
+                    null
+                );
+
+            };
+
+
+        /*
+        ==================================================
+        CONVERT GL JOURNAL PAIRS
+        INTO ACCOUNT-SIDE PREVIEW LINES
+
+        SAME DISPLAY METHOD AS ACCOUNT PAYABLE
+        ==================================================
+        */
+
+        const accountMap =
+            new Map();
+
+
+        /*
+        ==================================================
+        ADD ACCOUNT AMOUNT
+        ==================================================
+        */
+
+        const addAccountAmount = (
+            accountId,
+            debit,
+            credit,
+            description
+        ) => {
+
+            const id =
+                Number(
+                    accountId
+                    || 0
+                );
+
+
+            if (
+                !id
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+            ==============================================
+            FIND COA
+            ==============================================
+            */
+
+            const coa =
+                getAccount(
+                    id
+                );
+
+
+            const key =
+                String(
+                    id
+                );
+
+
+            /*
+            ==============================================
+            CREATE ACCOUNT LINE
+            ==============================================
+            */
+
+            if (
+                !accountMap.has(
+                    key
+                )
+            ) {
+
+                accountMap.set(
+                    key,
+                    {
+
+                        account_id:
+                            id,
+
+                        account_code:
+                            coa?.account_code
+                            || "-",
+
+                        account_name:
+                            coa?.account_name
+                            ||
+                            (
+                                id === 155
+                                    ? "PIUTANG USAHA"
+                                    : "-"
+                            ),
+
+                        debit:
+                            0,
+
+                        credit:
+                            0,
+
+                        descriptions:
+                            []
+
+                    }
+                );
+
+            }
+
+
+            const current =
+                accountMap.get(
+                    key
+                );
+
+
+            /*
+            ==============================================
+            ACCUMULATE DEBIT
+            ==============================================
+            */
+
+            current.debit +=
+                Number(
+                    debit
+                    || 0
+                );
+
+
+            /*
+            ==============================================
+            ACCUMULATE CREDIT
+            ==============================================
+            */
+
+            current.credit +=
+                Number(
+                    credit
+                    || 0
+                );
+
+
+            /*
+            ==============================================
+            DESCRIPTION
+            PREVENT DUPLICATE DESCRIPTION
+            ==============================================
+            */
+
+            const normalizedDescription =
+                String(
+                    description
+                    || ""
+                )
+                .trim();
+
+
+            if (
+                normalizedDescription
+                &&
+                !current.descriptions.includes(
+                    normalizedDescription
+                )
+            ) {
+
+                current.descriptions.push(
+                    normalizedDescription
+                );
+
+            }
+
+        };
+
+
+        /*
+        ==================================================
+        SPLIT JOURNAL PAIRS INTO ACCOUNT SIDE
+
+        JOURNAL DETAIL FORMAT:
+        DR ACCOUNT
+        CR ACCOUNT
+        AMOUNT
+        ==================================================
+        */
+
+        journalDetails.forEach(
+            line => {
+
+                const amount =
+                    Number(
+                        line.amount
+                        || 0
+                    );
+
+
+                /*
+                ==========================================
+                INVALID / ZERO AMOUNT
+                ==========================================
+                */
+
+                if (
+                    !Number.isFinite(
+                        amount
+                    )
+                    ||
+                    amount <= 0
+                ) {
+
+                    return;
+
+                }
+
+
+                /*
+                ==========================================
+                DEBIT ACCOUNT
+                ==========================================
+                */
+
+                addAccountAmount(
+                    line.debit_account_id,
+                    amount,
+                    0,
+                    line.description
+                );
+
+
+                /*
+                ==========================================
+                CREDIT ACCOUNT
+                ==========================================
+                */
+
+                addAccountAmount(
+                    line.credit_account_id,
+                    0,
+                    amount,
+                    line.description
+                );
+
+            }
+        );
+
+
+        /*
+        ==================================================
+        NET SAME ACCOUNT
+
+        EXAMPLE PIUTANG USAHA:
+
+        DEBIT BASE
+        + DEBIT TAX (+)
+        - CREDIT TAX (-)
+        ==================================================
+        */
+
+        const previewLines =
+            Array.from(
+                accountMap.values()
+            )
+            .map(
+                line => {
+
+                    const debit =
+                        Number(
+                            line.debit
+                            || 0
+                        );
+
+
+                    const credit =
+                        Number(
+                            line.credit
+                            || 0
+                        );
+
+
+                    /*
+                    ======================================
+                    NET DEBIT
+                    ======================================
+                    */
+
+                    if (
+                        debit > credit
+                    ) {
+
+                        return {
+
+                            ...line,
+
+                            debit:
+                                debit
+                                -
+                                credit,
+
+                            credit:
+                                0
+
+                        };
+
+                    }
+
+
+                    /*
+                    ======================================
+                    NET CREDIT
+                    ======================================
+                    */
+
+                    if (
+                        credit > debit
+                    ) {
+
+                        return {
+
+                            ...line,
+
+                            debit:
+                                0,
+
+                            credit:
+                                credit
+                                -
+                                debit
+
+                        };
+
+                    }
+
+
+                    /*
+                    ======================================
+                    ZERO BALANCE
+                    ======================================
+                    */
+
+                    return {
+
+                        ...line,
+
+                        debit:
+                            0,
+
+                        credit:
+                            0
+
+                    };
+
+                }
+            )
+            .filter(
+                line =>
+
+                    Number(
+                        line.debit
+                        || 0
+                    ) > 0
+
+                    ||
+
+                    Number(
+                        line.credit
+                        || 0
+                    ) > 0
+            );
+
+
+        /*
+        ==================================================
+        TOTAL DEBIT
+        ==================================================
+        */
+
+        const totalDebit =
+            previewLines.reduce(
+                (
+                    total,
+                    line
+                ) =>
+                    total
+                    +
+                    Number(
+                        line.debit
+                        || 0
+                    ),
+                0
+            );
+
+
+        /*
+        ==================================================
+        TOTAL CREDIT
+        ==================================================
+        */
+
+        const totalCredit =
+            previewLines.reduce(
+                (
+                    total,
+                    line
+                ) =>
+                    total
+                    +
+                    Number(
+                        line.credit
+                        || 0
+                    ),
+                0
+            );
+
+
+        /*
+        ==================================================
+        DIFFERENCE
+        ==================================================
+        */
+
+        const difference =
+            Math.abs(
+                totalDebit
+                -
+                totalCredit
+            );
+
+
+        /*
+        ==================================================
+        FINAL BALANCE
+        ==================================================
+        */
+
+        const isBalanced =
+
+            readiness.ready === true
+
+            &&
+
+            totalDebit > 0
+
+            &&
+
+            totalCredit > 0
+
+            &&
+
+            difference < 0.5;
+
+
+        /*
+        ==================================================
+        ACCOUNTING STATUS
+        ==================================================
+        */
+
+        const accountingStatus =
+
+            readiness.ready !== true
+
+                ? "NOT_READY"
+
+                : (
+                    isBalanced
+                        ? "BALANCED"
+                        : "NOT_BALANCED"
+                );
+
+
+        /*
+        ==================================================
+        RENDER PREVIEW TABLE
+        SAME FORMAT AS ACCOUNT PAYABLE
+        ==================================================
+        */
+
+        if (
+            previewLines.length
+        ) {
+
+            body.innerHTML =
+                previewLines
+                    .map(
+                        (
+                            line,
+                            index
+                        ) => {
+
+                            /*
+                            ==============================
+                            DESCRIPTION
+                            ==============================
+                            */
+
+                            const description =
+                                Array.isArray(
+                                    line.descriptions
+                                )
+                                    ? line.descriptions
+                                        .filter(
+                                            Boolean
+                                        )
+                                        .join(
+                                            " / "
+                                        )
+                                    : "-";
+
+
+                            return `
+
+                                <tr>
+
+                                    <!-- ==================
+                                         NO
+                                    =================== -->
+
+                                    <td
+                                        class="
+                                            text-center
+                                            align-top
+                                        "
+                                    >
+
+                                        ${index + 1}
+
+                                    </td>
+
+
+                                    <!-- ==================
+                                         ACCOUNT
+                                    =================== -->
+
+                                    <td
+                                        class="
+                                            text-start
+                                            align-top
+                                        "
+                                    >
+
+                                        <div
+                                            class="fw-semibold"
+                                        >
+
+                                            ${
+                                                this.escapeHtml(
+                                                    line.account_code
+                                                    || "-"
+                                                )
+                                            }
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <!-- ==================
+                                         ACCOUNT NAME /
+                                         DESCRIPTION
+                                    =================== -->
+
+                                    <td
+                                        class="
+                                            text-start
+                                            align-top
+                                        "
+                                    >
+
+                                        <div
+                                            class="fw-semibold"
+                                        >
+
+                                            ${
+                                                this.escapeHtml(
+                                                    line.account_name
+                                                    || "-"
+                                                )
+                                            }
+
+                                        </div>
+
+
+                                        <div
+                                            class="
+                                                small
+                                                text-muted
+                                                mt-1
+                                            "
+                                        >
+
+                                            ${
+                                                this.escapeHtml(
+                                                    description
+                                                    || "-"
+                                                )
+                                            }
+
+                                        </div>
+
+                                    </td>
+
+
+                                    <!-- ==================
+                                         DEBIT
+                                    =================== -->
+
+                                    <td
+                                        class="
+                                            text-end
+                                            align-top
+
+                                            ${
+                                                Number(
+                                                    line.debit
+                                                    || 0
+                                                ) > 0
+                                                    ? "fw-semibold"
+                                                    : ""
+                                            }
+                                        "
+                                    >
+
+                                        ${
+                                            Number(
+                                                line.debit
+                                                || 0
+                                            ) > 0
+                                                ? this.formatCurrency(
+                                                    line.debit
+                                                )
+                                                : "-"
+                                        }
+
+                                    </td>
+
+
+                                    <!-- ==================
+                                         CREDIT
+                                    =================== -->
+
+                                    <td
+                                        class="
+                                            text-end
+                                            align-top
+
+                                            ${
+                                                Number(
+                                                    line.credit
+                                                    || 0
+                                                ) > 0
+                                                    ? "fw-semibold"
+                                                    : ""
+                                            }
+                                        "
+                                    >
+
+                                        ${
+                                            Number(
+                                                line.credit
+                                                || 0
+                                            ) > 0
+                                                ? this.formatCurrency(
+                                                    line.credit
+                                                )
+                                                : "-"
+                                        }
+
+                                    </td>
+
+                                </tr>
+
+                            `;
+
+                        }
+                    )
+                    .join("");
+
+        }
+
+        else {
+
+    /*
+    ==============================================
+    NO VALID JOURNAL
+    ==============================================
+    */
+
+    body.innerHTML = `
+
+        <tr>
+
+            <td
+                colspan="5"
+                class="
+                    text-center
+                    text-muted
+                    py-4
+                "
+            >
+
+                No valid accounting transaction.
+
+            </td>
+
+        </tr>
+
+    `;
+
+}
+
+
+        /*
+        ==================================================
+        RACE GUARD BEFORE DOM SUMMARY
+        ==================================================
+        */
+
+        if (
+            requestId !==
+            this.arAccountingPreviewRequestId
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        SUMMARY
+        ==================================================
+        */
+
+        this.updateARAccountingPreviewSummary(
+            totalDebit,
+            totalCredit
+        );
+
+
+        /*
+        ==================================================
+        SYNC ACCOUNTING PREVIEW STATE
+        ==================================================
+        */
+
+        this.arAccountingPreviewState = {
+
+            status:
+                accountingStatus,
+
+            isReady:
+                readiness.ready === true,
+
+            isBalanced:
+                isBalanced,
+
+            totalDebit:
+                totalDebit,
+
+            totalCredit:
+                totalCredit,
+
+            difference:
+                difference,
+
+            issues:
+                Array.isArray(
+                    readiness.issues
+                )
+                    ? [
+                        ...readiness.issues
+                    ]
+                    : []
+
+        };
+
+
+        /*
+        ==================================================
+        NOT READY
+        PRIORITY #1
+
+        EVEN IF DEBIT = CREDIT,
+        MISSING ACCOUNT MAPPING MUST NOT
+        SHOW BALANCED
+        ==================================================
+        */
+
+        if (
+            accountingStatus ===
+            "NOT_READY"
+        ) {
+
+            const issues =
+                Array.isArray(
+                    readiness.issues
+                )
+                    ? readiness.issues
+                    : [];
+
+
+            const issueMessage =
+                issues.length
+                    ? issues.join(
+                        " "
+                    )
+                    : "Complete the accounting account mapping.";
+
+
+            this.updateARAccountingPreviewStatus(
+                "NOT_READY",
+                "NOT READY",
+                issueMessage
+            );
+
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        BALANCED
+        ==================================================
+        */
+
+        if (
+            accountingStatus ===
+            "BALANCED"
+        ) {
+
+            this.updateARAccountingPreviewStatus(
+                "BALANCED",
+                "BALANCED",
+                "Accounting Preview is ready for Complete."
+            );
+
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        NOT BALANCED
+        ==================================================
+        */
+
+        this.updateARAccountingPreviewStatus(
+            "NOT_BALANCED",
+            "NOT BALANCED",
+            `Journal difference: ${
+                this.formatCurrency(
+                    difference
+                )
+            }`
+        );
+
+    }
+
+    catch (
+        error
+    ) {
+
+        /*
+        ==================================================
+        IGNORE STALE REQUEST ERROR
+        ==================================================
+        */
+
+        if (
+            requestId !==
+            this.arAccountingPreviewRequestId
+        ) {
+
+            return;
+
+        }
+
+
+        console.error(
+            "AccountReceivable.renderAccountingPreview:",
+            error
+        );
+
+
+        /*
+        ==================================================
+        ERROR STATE
+        ==================================================
+        */
+
+        this.arAccountingPreviewState = {
+
+            status:
+                "NOT_READY",
+
+            isReady:
+                false,
+
+            isBalanced:
+                false,
+
+            totalDebit:
+                0,
+
+            totalCredit:
+                0,
+
+            difference:
+                0,
+
+            issues: [
+
+                error?.message
+                ||
+                "Unable to generate accounting preview."
+
+            ]
+
+        };
+
+
+        /*
+        ==================================================
+        RESET SUMMARY
+        ==================================================
+        */
+
+        this.updateARAccountingPreviewSummary(
+            0,
+            0
+        );
+
+
+        /*
+        ==================================================
+        ERROR STATUS
+        ==================================================
+        */
+
+        this.updateARAccountingPreviewStatus(
+            "NOT_READY",
+            "NOT READY",
+            error?.message
+            ||
+            "Unable to generate accounting preview."
+        );
+
+    }
+
+}
+
+
+/*
+==========================================================
+UPDATE AR ACCOUNTING PREVIEW SUMMARY
+
+IMPORTANT:
+DISPLAY ONLY
+DO NOT MODIFY PREVIEW STATE HERE
+==========================================================
+*/
+
+updateARAccountingPreviewSummary(
+    totalDebit = 0,
+    totalCredit = 0
+) {
+
+    const debit =
+        Number(
+            totalDebit
+            || 0
+        );
+
+
+    const credit =
+        Number(
+            totalCredit
+            || 0
+        );
+
+
+    const difference =
+        Math.abs(
+            debit
+            -
+            credit
+        );
+
+
+    /*
+    ======================================================
+    TABLE FOOTER
+    ======================================================
+    */
+
+    if (
+        this.arAccountingPreviewTotalDebit
+    ) {
+
+        this.arAccountingPreviewTotalDebit.textContent =
+            this.formatCurrency(
+                debit
+            );
+
+    }
+
+
+    if (
+        this.arAccountingPreviewTotalCredit
+    ) {
+
+        this.arAccountingPreviewTotalCredit.textContent =
+            this.formatCurrency(
+                credit
+            );
+
+    }
+
+
+    /*
+    ======================================================
+    SUMMARY DEBIT
+    ======================================================
+    */
+
+    if (
+        this.arAccountingPreviewSummaryDebit
+    ) {
+
+        this.arAccountingPreviewSummaryDebit.textContent =
+            this.formatCurrency(
+                debit
+            );
+
+    }
+
+
+    /*
+    ======================================================
+    SUMMARY CREDIT
+    ======================================================
+    */
+
+    if (
+        this.arAccountingPreviewSummaryCredit
+    ) {
+
+        this.arAccountingPreviewSummaryCredit.textContent =
+            this.formatCurrency(
+                credit
+            );
+
+    }
+
+
+    /*
+    ======================================================
+    DIFFERENCE
+    ======================================================
+    */
+
+    if (
+        this.arAccountingPreviewDifference
+    ) {
+
+        this.arAccountingPreviewDifference.textContent =
+            this.formatCurrency(
+                difference
+            );
+
+    }
+
+}
+
+
+/*
+==========================================================
+UPDATE AR ACCOUNTING PREVIEW STATUS
+BOOTSTRAP ALERT
+==========================================================
+*/
+
+updateARAccountingPreviewStatus(
+    status,
+    title,
+    message
+) {
+
+    const container =
+        this.arAccountingPreviewStatus;
+
+
+    if (
+        !container
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    REMOVE OLD STATUS
+    ======================================================
+    */
+
+    container.classList.remove(
+        "alert-success",
+        "alert-warning",
+        "alert-danger",
+        "alert-secondary",
+        "alert-info"
+    );
+
+
+    /*
+    ======================================================
+    STATUS STYLE
+    ======================================================
+    */
+
+    switch (
+        status
+    ) {
+
+        case "BALANCED":
+
+            container.classList.add(
+                "alert-success"
+            );
+
+            break;
+
+
+        case "NOT_READY":
+
+            container.classList.add(
+                "alert-warning"
+            );
+
+            break;
+
+
+        case "NOT_BALANCED":
+
+            container.classList.add(
+                "alert-danger"
+            );
+
+            break;
+
+
+        case "WAITING":
+
+        default:
+
+            container.classList.add(
+                "alert-secondary"
+            );
+
+            break;
+
+    }
+
+
+    /*
+    ======================================================
+    TITLE
+    ======================================================
+    */
+
+    if (
+        this.arAccountingPreviewStatusTitle
+    ) {
+
+        this.arAccountingPreviewStatusTitle.textContent =
+            title
+            || "";
+
+    }
+
+
+    /*
+    ======================================================
+    MESSAGE
+    ======================================================
+    */
+
+    if (
+        this.arAccountingPreviewStatusMessage
+    ) {
+
+        this.arAccountingPreviewStatusMessage.textContent =
+            message
+            || "";
 
     }
 
@@ -13065,43 +15129,53 @@ async editInvoice(id) {
 
 
         /*
-        ==================================================
-        MODAL TITLE
-        ==================================================
-        */
+==================================================
+MODAL TITLE
+==================================================
+*/
 
-        const modalTitle =
-            document.getElementById(
-                "accountReceivableModalLabel"
-            );
-
-
-        if (
-            modalTitle
-        ) {
-
-            modalTitle.innerHTML = `
-
-                <i class="fa-solid fa-file-invoice-dollar me-2"></i>
-
-                Edit Account Receivable
-
-            `;
-
-        }
+const modalTitle =
+    document.getElementById(
+        "accountReceivableModalLabel"
+    );
 
 
-        /*
-        ==================================================
-        SHOW MODAL
-        ==================================================
-        */
+if (
+    modalTitle
+) {
 
-        bootstrap.Modal
-            .getOrCreateInstance(
-                this.accountReceivableModal
-            )
-            .show();
+    modalTitle.innerHTML = `
+
+        <i class="fa-solid fa-file-invoice-dollar me-2"></i>
+
+        Edit Account Receivable
+
+    `;
+
+}
+
+
+/*
+==================================================
+RESET TAB
+ALWAYS OPEN HEADER INFO
+==================================================
+*/
+
+this.resetARModalTab();
+
+
+/*
+==================================================
+SHOW MODAL
+==================================================
+*/
+
+bootstrap.Modal
+    .getOrCreateInstance(
+        this.accountReceivableModal
+    )
+    .show();
 
     }
 
@@ -15035,22 +17109,151 @@ this.arPaymentAmount?.addEventListener(
 
 
             /*
-            ==============================================
-            COMPLETE
-            ==============================================
-            */
+==============================================
+COMPLETE
+PREVENT DOUBLE SUBMIT
+==============================================
+*/
 
-            if (
-                action === "complete"
-            ) {
+if (
+    action === "complete"
+) {
 
-                await this.completeInvoice(
-                    id
-                );
+    /*
+    ==========================================
+    BLOCK DOUBLE CLICK
+    ==========================================
+    */
 
-                return;
+    if (
+        this.arCompleteProcessing
+    ) {
 
-            }
+        return;
+
+    }
+
+
+    /*
+    ==========================================
+    BUTTON
+    ==========================================
+    */
+
+    const completeButton =
+        event.target.closest(
+            '[data-action="complete"]'
+        );
+
+
+    const originalHTML =
+        completeButton
+            ?.innerHTML
+        || "";
+
+
+    try {
+
+        /*
+        ======================================
+        PROCESSING
+        ======================================
+        */
+
+        this.arCompleteProcessing =
+            true;
+
+
+        /*
+        ======================================
+        DISABLE BUTTON
+        ======================================
+        */
+
+        if (
+            completeButton
+        ) {
+
+            completeButton.disabled =
+                true;
+
+
+            completeButton.innerHTML = `
+
+                <span
+                    class="spinner-border spinner-border-sm"
+                    role="status"
+                    aria-hidden="true">
+                </span>
+
+            `;
+
+        }
+
+
+        /*
+        ======================================
+        COMPLETE
+
+        IMPORTANT:
+        completeInvoice() WILL:
+        - LOAD FRESH DATABASE DATA
+        - VALIDATE ACCOUNTING
+        - GENERATE GL
+        - LINK GL
+        - COMPLETE AR
+        - VERIFY RESULT
+        ======================================
+        */
+
+        await this.completeInvoice(
+            id
+        );
+
+    }
+
+    finally {
+
+        /*
+        ======================================
+        RELEASE PROCESS LOCK
+        ======================================
+        */
+
+        this.arCompleteProcessing =
+            false;
+
+
+        /*
+        ======================================
+        RESTORE BUTTON
+
+        THE TABLE MAY ALREADY HAVE BEEN
+        RE-RENDERED BY loadData().
+        ======================================
+        */
+
+        if (
+            completeButton
+            &&
+            completeButton.isConnected
+        ) {
+
+            completeButton.disabled =
+                false;
+
+
+            completeButton.innerHTML =
+                originalHTML;
+
+        }
+
+    }
+
+
+    return;
+
+}
 
 
             /*
@@ -18557,10 +20760,786 @@ showSuccess(
     );
 
 }
-  /*
-======================================================
+
+/*
+==========================================================
+BUILD AR JOURNAL LINES
+SINGLE SOURCE OF TRUTH
+
+USED BY:
+- ACCOUNTING PREVIEW
+- GL JOURNAL GENERATION
+==========================================================
+*/
+
+buildARJournalLines(
+    invoice,
+    details,
+    {
+        strictValidation = false
+    } = {}
+) {
+
+    /*
+    ======================================================
+    VALIDATION
+    ======================================================
+    */
+
+    if (
+        !invoice
+    ) {
+
+        if (
+            strictValidation
+        ) {
+
+            throw new Error(
+                "Account Receivable header is required."
+            );
+
+        }
+
+
+        return [];
+
+    }
+
+
+    if (
+        !Array.isArray(
+            details
+        )
+        ||
+        !details.length
+    ) {
+
+        if (
+            strictValidation
+        ) {
+
+            throw new Error(
+                "Account Receivable detail cannot be empty."
+            );
+
+        }
+
+
+        return [];
+
+    }
+
+
+    /*
+    ======================================================
+    PIUTANG USAHA ACCOUNT
+
+    SAME ACCOUNT AS CURRENT AR JOURNAL
+    ======================================================
+    */
+
+    const receivableAccountId =
+        155;
+
+
+    /*
+    ======================================================
+    BUSINESS PARTNER
+    ======================================================
+    */
+
+    const businessPartnerId =
+        invoice.customer_id
+            ? Number(
+                invoice.customer_id
+            )
+            : null;
+
+
+    /*
+    ======================================================
+    JOURNAL DETAILS
+    ======================================================
+    */
+
+    const journalDetails =
+        [];
+
+
+    /*
+    ======================================================
+    LOOP AR DETAIL
+    ======================================================
+    */
+
+    for (
+        const detail
+        of details
+    ) {
+
+        /*
+        ==================================================
+        BASE TRANSACTION
+        ==================================================
+        */
+
+        const revenueAccountId =
+            Number(
+                detail.revenue_account_id
+                || 0
+            );
+
+
+        const lineAmount =
+            Number(
+                detail.line_amount
+                || 0
+            );
+
+
+        /*
+        ==================================================
+        VALIDATE REVENUE ACCOUNT
+        ==================================================
+        */
+
+        if (
+            lineAmount > 0
+            &&
+            !revenueAccountId
+        ) {
+
+            if (
+                strictValidation
+            ) {
+
+                throw new Error(
+                    `Revenue Account is missing on AR detail: ${
+                        detail.description
+                        || ""
+                    }`
+                );
+
+            }
+
+
+            console.warn(
+                "AR Accounting Preview: Revenue Account is missing.",
+                detail
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        BASE JOURNAL
+
+        DR PIUTANG USAHA
+        CR REVENUE
+        ==================================================
+        */
+
+        if (
+            lineAmount > 0
+            &&
+            revenueAccountId
+        ) {
+
+            journalDetails.push({
+
+                debit_account_id:
+                    receivableAccountId,
+
+                credit_account_id:
+                    revenueAccountId,
+
+                business_partner_id:
+                    businessPartnerId,
+
+                description:
+                    detail.description
+                    ||
+                    invoice.invoice_no
+                    ||
+                    "AR Invoice",
+
+                amount:
+                    lineAmount,
+
+                preview_source:
+                    "BASE"
+
+            });
+
+        }
+
+
+        /*
+        ==================================================
+        TAX (+)
+
+        DR PIUTANG USAHA
+        CR TAX OUTPUT
+        ==================================================
+        */
+
+        const taxPlusAmount =
+            Number(
+                detail.tax_output_amount
+                || 0
+            );
+
+
+        const taxPlusAccountId =
+            Number(
+                detail.tax_plus_account_id
+                || 0
+            );
+
+
+        if (
+            taxPlusAmount > 0
+            &&
+            !taxPlusAccountId
+        ) {
+
+            if (
+                strictValidation
+            ) {
+
+                throw new Error(
+                    `Tax (+) Account is missing for ${
+                        detail.tax_plus_name
+                        ||
+                        "Tax (+)"
+                    }.`
+                );
+
+            }
+
+
+            console.warn(
+                "AR Accounting Preview: Tax (+) Account is missing.",
+                detail
+            );
+
+        }
+
+
+        if (
+            taxPlusAmount > 0
+            &&
+            taxPlusAccountId
+        ) {
+
+            journalDetails.push({
+
+                debit_account_id:
+                    receivableAccountId,
+
+                credit_account_id:
+                    taxPlusAccountId,
+
+                business_partner_id:
+                    businessPartnerId,
+
+                description:
+                    detail.tax_plus_name
+                    ||
+                    "Tax (+)",
+
+                amount:
+                    taxPlusAmount,
+
+                preview_source:
+                    "TAX_PLUS"
+
+            });
+
+        }
+
+
+        /*
+        ==================================================
+        TAX (-)
+
+        DR TAX RECEIVABLE
+        CR PIUTANG USAHA
+        ==================================================
+        */
+
+        const taxMinusAmount =
+            Number(
+                detail.withholding_tax_amount
+                || 0
+            );
+
+
+        const taxMinusAccountId =
+            Number(
+                detail.tax_minus_account_id
+                || 0
+            );
+
+
+        if (
+            taxMinusAmount > 0
+            &&
+            !taxMinusAccountId
+        ) {
+
+            if (
+                strictValidation
+            ) {
+
+                throw new Error(
+                    `Tax (-) Account is missing for ${
+                        detail.tax_minus_name
+                        ||
+                        "Tax (-)"
+                    }.`
+                );
+
+            }
+
+
+            console.warn(
+                "AR Accounting Preview: Tax (-) Account is missing.",
+                detail
+            );
+
+        }
+
+
+        if (
+            taxMinusAmount > 0
+            &&
+            taxMinusAccountId
+        ) {
+
+            journalDetails.push({
+
+                debit_account_id:
+                    taxMinusAccountId,
+
+                credit_account_id:
+                    receivableAccountId,
+
+                business_partner_id:
+                    businessPartnerId,
+
+                description:
+                    detail.tax_minus_name
+                    ||
+                    "Tax (-)",
+
+                amount:
+                    taxMinusAmount,
+
+                preview_source:
+                    "TAX_MINUS"
+
+            });
+
+        }
+
+    }
+
+
+    /*
+    ======================================================
+    STRICT VALIDATION
+    ======================================================
+    */
+
+    if (
+        strictValidation
+        &&
+        !journalDetails.length
+    ) {
+
+        throw new Error(
+            "No valid AR detail available for GL Journal."
+        );
+
+    }
+
+
+    return journalDetails;
+
+}
+/*
+==========================================================
+VALIDATE AR ACCOUNTING
+BEFORE COMPLETE
+
+IMPORTANT:
+- USE FRESH DATABASE DATA
+- USE SAME JOURNAL BUILDER
+- DO NOT USE DOM PREVIEW AS AUTHORITY
+==========================================================
+*/
+
+validateARAccounting(
+    invoice,
+    details
+) {
+
+    /*
+    ======================================================
+    VALIDATE HEADER
+    ======================================================
+    */
+
+    if (
+        !invoice
+    ) {
+
+        throw new Error(
+            "Account Receivable header is required."
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    VALIDATE INVOICE DATE
+    AR ACCOUNTING BASIS = INVOICE DATE
+    ======================================================
+    */
+
+    if (
+        !invoice.invoice_date
+    ) {
+
+        throw new Error(
+            "Account Receivable Invoice Date is required."
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    VALIDATE CUSTOMER
+    ======================================================
+    */
+
+    if (
+        !invoice.customer_id
+    ) {
+
+        throw new Error(
+            "Account Receivable Customer is required."
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    VALIDATE DETAIL
+    ======================================================
+    */
+
+    if (
+        !Array.isArray(
+            details
+        )
+        ||
+        !details.length
+    ) {
+
+        throw new Error(
+            "Account Receivable detail cannot be empty."
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    BUILD JOURNAL
+
+    STRICT VALIDATION = TRUE
+
+    THIS IS THE SAME BUILDER USED BY:
+    - ACCOUNTING PREVIEW
+    - GL JOURNAL
+    ======================================================
+    */
+
+    const journalDetails =
+        this.buildARJournalLines(
+            invoice,
+            details,
+            {
+                strictValidation:
+                    true
+            }
+        );
+
+
+    /*
+    ======================================================
+    VALIDATE JOURNAL RESULT
+    ======================================================
+    */
+
+    if (
+        !Array.isArray(
+            journalDetails
+        )
+        ||
+        !journalDetails.length
+    ) {
+
+        throw new Error(
+            "No valid AR accounting journal can be generated."
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    TOTAL DEBIT / CREDIT
+    ======================================================
+
+    EACH BUILDER LINE REPRESENTS:
+
+    debit_account_id
+        DR amount
+
+    credit_account_id
+        CR amount
+
+    ======================================================
+    */
+
+    let totalDebit =
+        0;
+
+
+    let totalCredit =
+        0;
+
+
+    /*
+    ======================================================
+    VALIDATE EACH JOURNAL LINE
+    ======================================================
+    */
+
+    journalDetails.forEach(
+        (
+            line,
+            index
+        ) => {
+
+            const lineNumber =
+                index + 1;
+
+
+            const debitAccountId =
+                Number(
+                    line.debit_account_id
+                    || 0
+                );
+
+
+            const creditAccountId =
+                Number(
+                    line.credit_account_id
+                    || 0
+                );
+
+
+            const amount =
+                Number(
+                    line.amount
+                    || 0
+                );
+
+
+            /*
+            ==============================================
+            DEBIT ACCOUNT
+            ==============================================
+            */
+
+            if (
+                !debitAccountId
+            ) {
+
+                throw new Error(
+                    `Debit Account is missing on accounting line ${lineNumber}.`
+                );
+
+            }
+
+
+            /*
+            ==============================================
+            CREDIT ACCOUNT
+            ==============================================
+            */
+
+            if (
+                !creditAccountId
+            ) {
+
+                throw new Error(
+                    `Credit Account is missing on accounting line ${lineNumber}.`
+                );
+
+            }
+
+
+            /*
+            ==============================================
+            SAME ACCOUNT
+            ==============================================
+            */
+
+            if (
+                debitAccountId ===
+                creditAccountId
+            ) {
+
+                throw new Error(
+                    `Debit Account and Credit Account cannot be the same on accounting line ${lineNumber}.`
+                );
+
+            }
+
+
+            /*
+            ==============================================
+            AMOUNT
+            ==============================================
+            */
+
+            if (
+                !Number.isFinite(
+                    amount
+                )
+                ||
+                amount <= 0
+            ) {
+
+                throw new Error(
+                    `Invalid accounting amount on line ${lineNumber}.`
+                );
+
+            }
+
+
+            /*
+            ==============================================
+            TOTAL
+            ==============================================
+            */
+
+            totalDebit +=
+                amount;
+
+
+            totalCredit +=
+                amount;
+
+        }
+    );
+
+
+    /*
+    ======================================================
+    DIFFERENCE
+    ======================================================
+    */
+
+    const difference =
+        Math.abs(
+            totalDebit
+            -
+            totalCredit
+        );
+
+
+    /*
+    ======================================================
+    VALIDATE TOTAL
+    ======================================================
+    */
+
+    if (
+        totalDebit <= 0
+        ||
+        totalCredit <= 0
+    ) {
+
+        throw new Error(
+            "Account Receivable accounting total must be greater than zero."
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    VALIDATE BALANCE
+    ======================================================
+    */
+
+    if (
+        difference >= 0.5
+    ) {
+
+        throw new Error(
+            `Account Receivable accounting is not balanced. Difference: ${this.formatCurrency(
+                difference
+            )}.`
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    VALID
+    ======================================================
+    */
+
+    return {
+
+        valid:
+            true,
+
+        isBalanced:
+            true,
+
+        journalDetails:
+            journalDetails,
+
+        totalDebit:
+            totalDebit,
+
+        totalCredit:
+            totalCredit,
+
+        difference:
+            difference
+
+    };
+
+}
+ /*
+==========================================================
 GENERATE GL JOURNAL FROM ACCOUNT RECEIVABLE
-======================================================
+SINGLE SOURCE OF TRUTH
+==========================================================
 */
 
 async generateARJournal(
@@ -18576,7 +21555,9 @@ async generateARJournal(
         ==================================================
         */
 
-        if (!invoice) {
+        if (
+            !invoice
+        ) {
 
             throw new Error(
                 "Account Receivable header is required."
@@ -18586,7 +21567,9 @@ async generateARJournal(
 
 
         if (
-            !Array.isArray(details)
+            !Array.isArray(
+                details
+            )
             ||
             !details.length
         ) {
@@ -18600,250 +21583,58 @@ async generateARJournal(
 
         /*
         ==================================================
-        PIUTANG USAHA ACCOUNT
+        BUILD JOURNAL DETAILS
+
+        IMPORTANT:
+        SAME BUILDER AS ACCOUNTING PREVIEW
         ==================================================
         */
 
-        const receivableAccountId =
-            155;
+        const builtJournalDetails =
+            this.buildARJournalLines(
+                invoice,
+                details,
+                {
+                    strictValidation:
+                        true
+                }
+            );
 
 
         /*
         ==================================================
-        BUSINESS PARTNER
-        ==================================================
-        */
+        REMOVE PREVIEW ONLY FIELD
 
-        const businessPartnerId =
-            invoice.customer_id
-                ? Number(
-                    invoice.customer_id
-                )
-                : null;
-
-
-        /*
-        ==================================================
-        JOURNAL DETAILS
+        preview_source MUST NOT BE SENT TO DATABASE
         ==================================================
         */
 
         const journalDetails =
-            [];
-
-
-        /*
-        ==================================================
-        LOOP AR DETAIL
-        ==================================================
-        */
-
-        for (
-            const detail
-            of details
-        ) {
-
-            /*
-            ==============================================
-            BASE TRANSACTION
-            ==============================================
-            */
-
-            const revenueAccountId =
-                Number(
-                    detail.revenue_account_id
-                    || 0
-                );
-
-
-            const lineAmount =
-                Number(
-                    detail.line_amount
-                    || 0
-                );
-
-
-            if (
-                !revenueAccountId
-            ) {
-
-                throw new Error(
-                    `Revenue Account is missing on AR detail: ${
-                        detail.description
-                        || ""
-                    }`
-                );
-
-            }
-
-
-            /*
-            ==============================================
-            BASE JOURNAL
-
-            DR PIUTANG USAHA
-            CR REVENUE
-            ==============================================
-            */
-
-            if (
-                lineAmount > 0
-            ) {
-
-                journalDetails.push({
+            builtJournalDetails.map(
+                detail => ({
 
                     debit_account_id:
-                        receivableAccountId,
+                        detail.debit_account_id,
 
                     credit_account_id:
-                        revenueAccountId,
+                        detail.credit_account_id,
 
                     business_partner_id:
-                        businessPartnerId,
+                        detail.business_partner_id
+                        || null,
 
                     description:
                         detail.description
-                        ||
-                        invoice.invoice_no,
+                        || "",
 
                     amount:
-                        lineAmount
+                        Number(
+                            detail.amount
+                            || 0
+                        )
 
-                });
-
-            }
-
-
-            /*
-            ==============================================
-            TAX (+)
-
-            DR PIUTANG USAHA
-            CR TAX OUTPUT
-            ==============================================
-            */
-
-            const taxPlusAmount =
-                Number(
-                    detail.tax_output_amount
-                    || 0
-                );
-
-
-            const taxPlusAccountId =
-                Number(
-                    detail.tax_plus_account_id
-                    || 0
-                );
-
-
-            if (
-                taxPlusAmount > 0
-            ) {
-
-                if (
-                    !taxPlusAccountId
-                ) {
-
-                    throw new Error(
-                        `Tax (+) Account is missing for ${
-                            detail.tax_plus_name
-                            || "Tax (+)"
-                        }.`
-                    );
-
-                }
-
-
-                journalDetails.push({
-
-                    debit_account_id:
-                        receivableAccountId,
-
-                    credit_account_id:
-                        taxPlusAccountId,
-
-                    business_partner_id:
-                        businessPartnerId,
-
-                    description:
-                        detail.tax_plus_name
-                        ||
-                        "Tax (+)",
-
-                    amount:
-                        taxPlusAmount
-
-                });
-
-            }
-
-
-            /*
-            ==============================================
-            TAX (-)
-
-            DR TAX RECEIVABLE
-            CR PIUTANG USAHA
-            ==============================================
-            */
-
-            const taxMinusAmount =
-                Number(
-                    detail.withholding_tax_amount
-                    || 0
-                );
-
-
-            const taxMinusAccountId =
-                Number(
-                    detail.tax_minus_account_id
-                    || 0
-                );
-
-
-            if (
-                taxMinusAmount > 0
-            ) {
-
-                if (
-                    !taxMinusAccountId
-                ) {
-
-                    throw new Error(
-                        `Tax (-) Account is missing for ${
-                            detail.tax_minus_name
-                            || "Tax (-)"
-                        }.`
-                    );
-
-                }
-
-
-                journalDetails.push({
-
-                    debit_account_id:
-                        taxMinusAccountId,
-
-                    credit_account_id:
-                        receivableAccountId,
-
-                    business_partner_id:
-                        businessPartnerId,
-
-                    description:
-                        detail.tax_minus_name
-                        ||
-                        "Tax (-)",
-
-                    amount:
-                        taxMinusAmount
-
-                });
-
-            }
-
-        }
+                })
+            );
 
 
         /*
@@ -18896,6 +21687,30 @@ async generateARJournal(
 
         /*
         ==================================================
+        JOURNAL DATE
+
+        AR BASIS = INVOICE DATE
+        ==================================================
+        */
+
+        const journalDate =
+            invoice.invoice_date
+            || null;
+
+
+        if (
+            !journalDate
+        ) {
+
+            throw new Error(
+                "Account Receivable Invoice Date is required for GL Journal."
+            );
+
+        }
+
+
+        /*
+        ==================================================
         JOURNAL HEADER
         ==================================================
         */
@@ -18906,15 +21721,13 @@ async generateARJournal(
                 "",
 
             journal_date:
-                invoice.invoice_date,
+                journalDate,
 
             posting_period:
-                invoice.invoice_date
-                    ? invoice.invoice_date.substring(
-                        0,
-                        7
-                    )
-                    : "",
+                journalDate.substring(
+                    0,
+                    7
+                ),
 
             description:
                 journalDescription,
@@ -19001,7 +21814,9 @@ async generateARJournal(
 
     }
 
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
             "AccountReceivable.generateARJournal:",
@@ -19209,31 +22024,87 @@ async completeInvoice(
 
 
         /*
-        ==================================================
-        VALIDATE DETAILS
-        ==================================================
-        */
+==================================================
+VALIDATE DETAILS
+==================================================
+*/
 
-        if (
-            !details.length
-        ) {
+if (
+    !details.length
+) {
 
-            throw new Error(
-                "Account Receivable detail cannot be empty."
-            );
+    throw new Error(
+        "Account Receivable detail cannot be empty."
+    );
 
-        }
+}
 
 
-        /*
-        ==================================================
-        GENERATE GL JOURNAL
-        ONLY IF JOURNAL DOES NOT EXIST
-        ==================================================
-        */
+/*
+==================================================
+VALIDATE AR ACCOUNTING
+BEFORE COMPLETE / GL GENERATION
 
-        let journal =
-            null;
+IMPORTANT:
+USE FRESH DATABASE HEADER + DETAIL
+==================================================
+*/
+
+const accountingValidation =
+    this.validateARAccounting(
+        invoice,
+        details
+    );
+
+
+if (
+    !accountingValidation
+    ||
+    accountingValidation.valid !== true
+    ||
+    accountingValidation.isBalanced !== true
+) {
+
+    throw new Error(
+        "Account Receivable accounting validation failed."
+    );
+
+}
+
+
+/*
+==================================================
+DEBUG ACCOUNTING VALIDATION
+==================================================
+*/
+
+console.log(
+    "AR ACCOUNTING VALIDATION:",
+    {
+        totalDebit:
+            accountingValidation.totalDebit,
+
+        totalCredit:
+            accountingValidation.totalCredit,
+
+        difference:
+            accountingValidation.difference,
+
+        balanced:
+            accountingValidation.isBalanced
+    }
+);
+
+
+/*
+==================================================
+GENERATE GL JOURNAL
+ONLY IF JOURNAL DOES NOT EXIST
+==================================================
+*/
+
+let journal =
+    null;
 
 
         if (

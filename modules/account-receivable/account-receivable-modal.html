@@ -171,6 +171,29 @@
 
                         </li>
 
+
+                        <!-- ACCOUNTING PREVIEW -->
+
+                        <li
+                            class="nav-item"
+                            role="presentation">
+
+                            <button
+                                class="nav-link"
+                                id="ar-accounting-preview-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#ar-accounting-preview-pane"
+                                type="button"
+                                role="tab"
+                                aria-controls="ar-accounting-preview-pane"
+                                aria-selected="false">
+
+                                Accounting Preview
+
+                            </button>
+
+                        </li>
+
                     </ul>
 
                 </div>
@@ -854,8 +877,352 @@
 
                     </div>
 
+
+                    <!-- ==============================================
+     TAB 5 : ACCOUNTING PREVIEW
+=============================================== -->
+
+<div
+    class="tab-pane fade"
+    id="ar-accounting-preview-pane"
+    role="tabpanel"
+    aria-labelledby="ar-accounting-preview-tab"
+    tabindex="0"
+>
+
+    <div class="p-4">
+
+        <div class="finova-card">
+
+            <div class="finova-card-body">
+
+
+                <!-- ==========================================
+                     HEADER
+                =========================================== -->
+
+                <div class="mb-3">
+
+                    <div class="fw-semibold">
+
+                        Accounting Preview
+
+                    </div>
+
+
+                    <div class="text-muted small">
+
+                        Preview journal entries based on
+                        Invoice Details, Tax (+), and Tax (-)
+
+                    </div>
+
                 </div>
 
+
+                <!-- ==========================================
+                     JOURNAL TABLE
+                =========================================== -->
+
+                <div class="table-responsive">
+
+                    <table
+                        class="
+                            table
+                            table-sm
+                            table-hover
+                            align-middle
+                            mb-0
+                        "
+                    >
+
+                        <colgroup>
+
+                            <col style="width: 6%;">
+                            <col style="width: 24%;">
+                            <col style="width: 38%;">
+                            <col style="width: 16%;">
+                            <col style="width: 16%;">
+
+                        </colgroup>
+
+
+                        <thead>
+
+                            <tr>
+
+                                <th class="text-center">
+
+                                    No
+
+                                </th>
+
+
+                                <th class="text-start">
+
+                                    Account
+
+                                </th>
+
+
+                                <th class="text-start">
+
+                                    Account Name / Description
+
+                                </th>
+
+
+                                <th class="text-end">
+
+                                    Debit
+
+                                </th>
+
+
+                                <th class="text-end">
+
+                                    Credit
+
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody
+                            id="ar-accounting-preview-body"
+                        >
+
+                            <tr
+                                id="ar-accounting-preview-empty"
+                            >
+
+                                <td
+                                    colspan="5"
+                                    class="
+                                        text-center
+                                        text-muted
+                                        py-4
+                                    "
+                                >
+
+                                    No accounting preview available.
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+
+                        <tfoot>
+
+                            <tr class="fw-semibold">
+
+                                <td
+                                    colspan="3"
+                                    class="text-end"
+                                >
+
+                                    TOTAL
+
+                                </td>
+
+
+                                <td
+                                    class="text-end"
+                                    id="ar-accounting-preview-total-debit"
+                                >
+
+                                    0
+
+                                </td>
+
+
+                                <td
+                                    class="text-end"
+                                    id="ar-accounting-preview-total-credit"
+                                >
+
+                                    0
+
+                                </td>
+
+                            </tr>
+
+                        </tfoot>
+
+                    </table>
+
+                </div>
+
+
+                <!-- ==========================================
+                     ACCOUNTING SUMMARY
+                =========================================== -->
+
+                <div class="row g-3 mt-3">
+
+
+                    <!-- TOTAL -->
+
+                    <div class="col-lg-6">
+
+                        <div
+                            class="
+                                border
+                                rounded
+                                p-3
+                                h-100
+                            "
+                        >
+
+
+                            <div
+                                class="
+                                    d-flex
+                                    justify-content-between
+                                    align-items-center
+                                    mb-2
+                                "
+                            >
+
+                                <span>
+
+                                    Total Debit
+
+                                </span>
+
+
+                                <strong
+                                    id="ar-accounting-preview-summary-debit"
+                                >
+
+                                    0
+
+                                </strong>
+
+                            </div>
+
+
+                            <div
+                                class="
+                                    d-flex
+                                    justify-content-between
+                                    align-items-center
+                                    mb-2
+                                "
+                            >
+
+                                <span>
+
+                                    Total Credit
+
+                                </span>
+
+
+                                <strong
+                                    id="ar-accounting-preview-summary-credit"
+                                >
+
+                                    0
+
+                                </strong>
+
+                            </div>
+
+
+                            <hr>
+
+
+                            <div
+                                class="
+                                    d-flex
+                                    justify-content-between
+                                    align-items-center
+                                "
+                            >
+
+                                <span class="fw-semibold">
+
+                                    Difference
+
+                                </span>
+
+
+                                <strong
+                                    id="ar-accounting-preview-difference"
+                                >
+
+                                    0
+
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- STATUS -->
+
+                    <div class="col-lg-6">
+
+                        <div
+                            id="ar-accounting-preview-status"
+                            class="
+                                alert
+                                alert-secondary
+                                border
+                                h-100
+                                mb-0
+                                d-flex
+                                align-items-center
+                            "
+                        >
+
+                            <div>
+
+                                <div
+                                    class="
+                                        fw-semibold
+                                        mb-1
+                                    "
+                                    id="ar-accounting-preview-status-title"
+                                >
+
+                                    Waiting for Transaction
+
+                                </div>
+
+
+                                <div
+                                    class="small"
+                                    id="ar-accounting-preview-status-message"
+                                >
+
+                                    Add Invoice Detail to generate
+                                    the accounting preview.
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 
                 <!-- ==================================================
                      TOTAL SUMMARY

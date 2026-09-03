@@ -2449,7 +2449,7 @@ th:nth-child(2) {
 
     grid-template-columns:
         repeat(
-            4,
+            5,
             minmax(0, 1fr)
         );
 
@@ -3759,7 +3759,7 @@ td:nth-child(7) {
 
     grid-template-columns:
         repeat(
-            4,
+            5,
             minmax(0, 1fr)
         ) !important;
 
