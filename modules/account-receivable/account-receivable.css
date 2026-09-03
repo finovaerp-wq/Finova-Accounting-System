@@ -4460,3 +4460,22 @@ table {
     margin-bottom: 0 !important;
 
 }
+/*
+==========================================================
+ACCOUNT RECEIVABLE
+MODAL SUBTITLE ALIGNMENT
+MATCH ACCOUNT PAYABLE
+==========================================================
+*/
+
+#accountReceivableModal
+.modal-header
+.modal-subtitle {
+
+    margin-left: 0 !important;
+
+    padding-left: 0 !important;
+
+    text-indent: 0 !important;
+
+}

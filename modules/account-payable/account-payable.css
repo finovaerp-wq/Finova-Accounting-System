@@ -2575,3 +2575,65 @@ tr.ap-data-row.ap-row-completed:hover
     text-align: center;
 
 }
+/*
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+ACCOUNT PAYABLE
+HEADER INFO
+MATCH ACCOUNT RECEIVABLE
+==========================================================
+*/
+
+
+/* ==========================================================
+   HEADER INFO PANE
+========================================================== */
+
+#accountPayableModal
+#ap-header-info-pane
+> .p-4 {
+
+    padding: 20px !important;
+
+}
+
+
+/* ==========================================================
+   HEADER CARD
+========================================================== */
+
+#accountPayableModal
+#ap-header-info-pane
+.finova-card {
+
+    width: 100% !important;
+
+    background: #FFFFFF !important;
+
+    border: 1px solid #EEF0F3 !important;
+
+    border-radius: 14px !important;
+
+    box-shadow:
+        0 3px 10px
+        rgba(
+            15,
+            23,
+            42,
+            .05
+        ) !important;
+
+}
+
+
+/* ==========================================================
+   HEADER CARD BODY
+========================================================== */
+
+#accountPayableModal
+#ap-header-info-pane
+.finova-card-body {
+
+    padding: 20px !important;
+
+}
