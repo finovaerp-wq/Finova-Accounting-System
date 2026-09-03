@@ -494,22 +494,13 @@
 
 
                                             <colgroup>
-
-                                                <col style="width: 5%;">
-
-                                                <col style="width: 25%;">
-
-                                                <col style="width: 31%;">
-
-                                                <col style="width: 8%;">
-
-                                                <col style="width: 11%;">
-
-                                                <col style="width: 13%;">
-
-                                                <col style="width: 7%;">
-
-                                            </colgroup>
+                                            <col style="width: 8%;">
+                                            <col style="width: 34%;">
+                                            <col style="width: 26%;">
+                                            <col style="width: 14%;">
+                                            <col style="width: 8%;">
+                                            <col style="width: 10%;">
+                                        </colgroup>
 
 
                                             <thead>
@@ -582,300 +573,517 @@
                     </div>
 
 
-                    <!-- ==================================================
-                         TAB 3 : TAX PLUS
-                    =================================================== -->
+                   <!-- ==================================================
+     TAB 3 : TAX PLUS
+=================================================== -->
 
-                    <div
-                        class="tab-pane fade"
-                        id="ar-tax-plus-pane"
-                        role="tabpanel"
-                        aria-labelledby="ar-tax-plus-tab"
-                        tabindex="0">
+<div
+    class="tab-pane fade"
+    id="ar-tax-plus-pane"
+    role="tabpanel"
+    aria-labelledby="ar-tax-plus-tab"
+    tabindex="0">
 
-                        <div class="p-4">
+    <div class="p-4">
 
-                            <div class="finova-card">
+        <div class="finova-card">
 
-                                <div class="finova-card-body">
-
-                                    <div class="mb-3">
-
-                                        <div class="fw-semibold">
-                                            Tax (+)
-                                        </div>
-
-                                        <div class="text-muted small">
-                                            Automatically generated from Invoice Details
-                                        </div>
-
-                                    </div>
+            <div class="finova-card-body">
 
 
-                                    <div class="table-responsive">
+                <!-- ==================================================
+                     TAX PLUS HEADER
+                =================================================== -->
 
-                                        <table
-                                            class="
-                                                table
-                                                table-sm
-                                                table-hover
-                                                align-middle
-                                                mb-0
-                                            ">
+                <div class="mb-3">
 
-                                            <thead>
+                    <div class="fw-semibold">
+                        Tax (+)
+                    </div>
 
-                                                <tr>
+                    <div class="text-muted small">
+                        Automatically generated from Invoice Details
+                    </div>
 
-                                                    <th>No</th>
-
-                                                    <th>Tax Code</th>
-
-                                                    <th>Tax Name</th>
-
-                                                    <th>Tax Account</th>
-
-                                                    <th class="text-end">
-                                                        Tax Base
-                                                    </th>
-
-                                                    <th class="text-end">
-                                                        Rate
-                                                    </th>
-
-                                                    <th class="text-end">
-                                                        Tax Amount
-                                                    </th>
-
-                                                </tr>
-
-                                            </thead>
+                </div>
 
 
-                                            <tbody id="ar-tax-plus-body">
+                <!-- ==================================================
+                     TAX PLUS TABLE
+                =================================================== -->
 
-                                                <tr id="ar-tax-plus-empty">
+                <div class="table-responsive">
 
-                                                    <td
-                                                        colspan="7"
-                                                        class="
-                                                            text-center
-                                                            text-muted
-                                                            py-4
-                                                        ">
-
-                                                        No Tax (+) found from Invoice Details.
-
-                                                    </td>
-
-                                                </tr>
-
-                                            </tbody>
-
-                                        </table>
-
-                                    </div>
+                    <table
+                        class="
+                            table
+                            table-sm
+                            table-hover
+                            align-middle
+                            mb-0
+                        ">
 
 
-                                    <!-- JOURNAL PREVIEW -->
+                        <!-- ==========================================
+                             COLUMN WIDTH
+                        =========================================== -->
 
-                                    <div
-                                        class="
-                                            alert
-                                            alert-light
-                                            border
-                                            mt-3
-                                            mb-0
-                                        ">
+                        <colgroup>
 
-                                        <div class="ar-tax-journal-preview"></div>
+                            <!-- NO -->
+                            <col style="width: 6%;">
 
-                                        <div class="fw-semibold mb-1">
-                                            Journal Preview
-                                        </div>
+                            <!-- TAX NAME -->
+                            <col style="width: 34%;">
 
-                                        <div class="small text-muted">
+                            <!-- TAX ACCOUNT -->
+                            <col style="width: 26%;">
 
-                                            Debit:
+                            <!-- TAX BASE -->
+                            <col style="width: 14%;">
 
-                                            <strong
-                                                id="ar-tax-plus-preview-debit">
+                            <!-- RATE -->
+                            <col style="width: 8%;">
 
-                                                PIUTANG USAHA
+                            <!-- TAX AMOUNT -->
+                            <col style="width: 12%;">
 
-                                            </strong>
+                        </colgroup>
 
-                                            <span class="mx-2">
-                                                |
-                                            </span>
 
-                                            Credit:
+                        <!-- ==========================================
+                             HEADER
+                        =========================================== -->
 
-                                            <strong
-                                                id="ar-tax-plus-preview-credit">
+                        <thead>
 
-                                                -
+                            <tr>
 
-                                            </strong>
+                                <th
+                                    class="
+                                        text-start
+                                        text-nowrap
+                                    ">
 
-                                        </div>
+                                    No
 
-                                    </div>
+                                </th>
 
-                                </div>
 
-                            </div>
+                                <th
+                                    class="
+                                        text-start
+                                        text-nowrap
+                                    ">
 
-                        </div>
+                                    Tax Name
+
+                                </th>
+
+
+                                <th
+                                    class="
+                                        text-start
+                                        text-nowrap
+                                    ">
+
+                                    Tax Account
+
+                                </th>
+
+
+                                <th
+                                    class="
+                                        text-end
+                                        text-nowrap
+                                    ">
+
+                                    Tax Base
+
+                                </th>
+
+
+                                <th
+                                    class="
+                                        text-end
+                                        text-nowrap
+                                    ">
+
+                                    Rate
+
+                                </th>
+
+
+                                <th
+                                    class="
+                                        text-end
+                                        text-nowrap
+                                    ">
+
+                                    Tax Amount
+
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <!-- ==========================================
+                             BODY
+                        =========================================== -->
+
+                        <tbody id="ar-tax-plus-body">
+
+                            <tr id="ar-tax-plus-empty">
+
+                                <td
+                                    colspan="6"
+                                    class="
+                                        text-center
+                                        text-muted
+                                        py-4
+                                    ">
+
+                                    No Tax (+) found from Invoice Details.
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <!-- ==================================================
+                     JOURNAL PREVIEW
+                =================================================== -->
+
+                <div
+                    class="
+                        alert
+                        alert-light
+                        border
+                        mt-3
+                        mb-0
+                    ">
+
+
+                    <div class="ar-tax-journal-preview"></div>
+
+
+                    <div class="fw-semibold mb-1">
+
+                        Journal Preview
 
                     </div>
 
 
-                    <!-- ==================================================
-                         TAB 4 : TAX MINUS
-                    =================================================== -->
-
-                    <div
-                        class="tab-pane fade"
-                        id="ar-tax-minus-pane"
-                        role="tabpanel"
-                        aria-labelledby="ar-tax-minus-tab"
-                        tabindex="0">
-
-                        <div class="p-4">
-
-                            <div class="finova-card">
-
-                                <div class="finova-card-body">
-
-                                    <div class="mb-3">
-
-                                        <div class="fw-semibold">
-                                            Tax (-)
-                                        </div>
-
-                                        <div class="text-muted small">
-                                            Automatically generated from Invoice Details
-                                        </div>
-
-                                    </div>
+                    <div class="small text-muted">
 
 
-                                    <div class="table-responsive">
-
-                                        <table
-                                            class="
-                                                table
-                                                table-sm
-                                                table-hover
-                                                align-middle
-                                                mb-0
-                                            ">
-
-                                            <thead>
-
-                                                <tr>
-
-                                                    <th>No</th>
-
-                                                    <th>Tax Code</th>
-
-                                                    <th>Tax Name</th>
-
-                                                    <th>Tax Account</th>
-
-                                                    <th class="text-end">
-                                                        Tax Base
-                                                    </th>
-
-                                                    <th class="text-end">
-                                                        Rate
-                                                    </th>
-
-                                                    <th class="text-end">
-                                                        Tax Amount
-                                                    </th>
-
-                                                </tr>
-
-                                            </thead>
+                        Debit:
 
 
-                                            <tbody id="ar-tax-minus-body">
+                        <strong
+                            id="ar-tax-plus-preview-debit">
 
-                                                <tr id="ar-tax-minus-empty">
+                            PIUTANG USAHA
 
-                                                    <td
-                                                        colspan="7"
-                                                        class="
-                                                            text-center
-                                                            text-muted
-                                                            py-4
-                                                        ">
-
-                                                        No Tax (-) found from Invoice Details.
-
-                                                    </td>
-
-                                                </tr>
-
-                                            </tbody>
-
-                                        </table>
-
-                                    </div>
+                        </strong>
 
 
-                                    <!-- JOURNAL PREVIEW -->
+                        <span class="mx-2">
 
-                                    <div
-                                        class="
-                                            alert
-                                            alert-light
-                                            border
-                                            mt-3
-                                            mb-0
-                                        ">
+                            |
 
-                                        <div class="fw-semibold mb-1">
-                                            Journal Preview
-                                        </div>
+                        </span>
 
-                                        <div class="small text-muted">
 
-                                            Debit:
+                        Credit:
 
-                                            <strong
-                                                id="ar-tax-minus-preview-debit">
 
-                                                -
+                        <strong
+                            id="ar-tax-plus-preview-credit">
 
-                                            </strong>
+                            -
 
-                                            <span class="mx-2">
-                                                |
-                                            </span>
+                        </strong>
 
-                                            Credit:
-
-                                            <strong
-                                                id="ar-tax-minus-preview-credit">
-
-                                                PIUTANG USAHA
-
-                                            </strong>
-
-                                        </div>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </div>
 
                     </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- ==================================================
+     TAB 4 : TAX MINUS
+=================================================== -->
+
+<div
+    class="tab-pane fade"
+    id="ar-tax-minus-pane"
+    role="tabpanel"
+    aria-labelledby="ar-tax-minus-tab"
+    tabindex="0">
+
+    <div class="p-4">
+
+        <div class="finova-card">
+
+            <div class="finova-card-body">
+
+
+                <!-- ==================================================
+                     TAX MINUS HEADER
+                =================================================== -->
+
+                <div class="mb-3">
+
+                    <div class="fw-semibold">
+
+                        Tax (-)
+
+                    </div>
+
+
+                    <div class="text-muted small">
+
+                        Automatically generated from Invoice Details
+
+                    </div>
+
+                </div>
+
+
+                <!-- ==================================================
+                     TAX MINUS TABLE
+                =================================================== -->
+
+                <div class="table-responsive">
+
+                    <table
+                        class="
+                            table
+                            table-sm
+                            table-hover
+                            align-middle
+                            mb-0
+                        ">
+
+
+                        <!-- ==========================================
+                             COLUMN WIDTH
+                        =========================================== -->
+
+                        <colgroup>
+
+                            <!-- NO -->
+                            <col style="width: 6%;">
+
+                            <!-- TAX NAME -->
+                            <col style="width: 34%;">
+
+                            <!-- TAX ACCOUNT -->
+                            <col style="width: 26%;">
+
+                            <!-- TAX BASE -->
+                            <col style="width: 14%;">
+
+                            <!-- RATE -->
+                            <col style="width: 8%;">
+
+                            <!-- TAX AMOUNT -->
+                            <col style="width: 12%;">
+
+                        </colgroup>
+
+
+                        <!-- ==========================================
+                             HEADER
+                        =========================================== -->
+
+                        <thead>
+
+                            <tr>
+
+                                <th
+                                    class="
+                                        text-start
+                                        text-nowrap
+                                    ">
+
+                                    No
+
+                                </th>
+
+
+                                <th
+                                    class="
+                                        text-start
+                                        text-nowrap
+                                    ">
+
+                                    Tax Name
+
+                                </th>
+
+
+                                <th
+                                    class="
+                                        text-start
+                                        text-nowrap
+                                    ">
+
+                                    Tax Account
+
+                                </th>
+
+
+                                <th
+                                    class="
+                                        text-end
+                                        text-nowrap
+                                    ">
+
+                                    Tax Base
+
+                                </th>
+
+
+                                <th
+                                    class="
+                                        text-end
+                                        text-nowrap
+                                    ">
+
+                                    Rate
+
+                                </th>
+
+
+                                <th
+                                    class="
+                                        text-end
+                                        text-nowrap
+                                    ">
+
+                                    Tax Amount
+
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <!-- ==========================================
+                             BODY
+                        =========================================== -->
+
+                        <tbody id="ar-tax-minus-body">
+
+                            <tr id="ar-tax-minus-empty">
+
+                                <td
+                                    colspan="6"
+                                    class="
+                                        text-center
+                                        text-muted
+                                        py-4
+                                    ">
+
+                                    No Tax (-) found from Invoice Details.
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <!-- ==================================================
+                     JOURNAL PREVIEW
+                =================================================== -->
+
+                <div
+                    class="
+                        alert
+                        alert-light
+                        border
+                        mt-3
+                        mb-0
+                    ">
+
+
+                    <div class="fw-semibold mb-1">
+
+                        Journal Preview
+
+                    </div>
+
+
+                    <div class="small text-muted">
+
+
+                        Debit:
+
+
+                        <strong
+                            id="ar-tax-minus-preview-debit">
+
+                            -
+
+                        </strong>
+
+
+                        <span class="mx-2">
+
+                            |
+
+                        </span>
+
+
+                        Credit:
+
+
+                        <strong
+                            id="ar-tax-minus-preview-credit">
+
+                            PIUTANG USAHA
+
+                        </strong>
+
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 
 
                     <!-- ==============================================
@@ -937,14 +1145,13 @@
                     >
 
                         <colgroup>
-
-                            <col style="width: 6%;">
-                            <col style="width: 24%;">
-                            <col style="width: 38%;">
-                            <col style="width: 16%;">
-                            <col style="width: 16%;">
-
-                        </colgroup>
+                        <col style="width: 8%;">
+                        <col style="width: 34%;">
+                        <col style="width: 26%;">
+                        <col style="width: 14%;">
+                        <col style="width: 8%;">
+                        <col style="width: 10%;">
+                    </colgroup>
 
 
                         <thead>

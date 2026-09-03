@@ -2637,3 +2637,144 @@ MATCH ACCOUNT RECEIVABLE
     padding: 20px !important;
 
 }
+/*
+==========================================================
+ACCOUNT PAYABLE
+TAX (+) / TAX (-)
+FINAL COLUMN ALIGNMENT
+==========================================================
+*/
+
+#accountPayableModal
+#ap-tax-plus-pane
+th:nth-child(1),
+
+#accountPayableModal
+#ap-tax-plus-pane
+td:nth-child(1),
+
+#accountPayableModal
+#ap-tax-minus-pane
+th:nth-child(1),
+
+#accountPayableModal
+#ap-tax-minus-pane
+td:nth-child(1) {
+
+    width: 6% !important;
+    white-space: nowrap !important;
+
+}
+
+
+#accountPayableModal
+#ap-tax-plus-pane
+th:nth-child(2),
+
+#accountPayableModal
+#ap-tax-plus-pane
+td:nth-child(2),
+
+#accountPayableModal
+#ap-tax-minus-pane
+th:nth-child(2),
+
+#accountPayableModal
+#ap-tax-minus-pane
+td:nth-child(2) {
+
+    width: 34% !important;
+    white-space: nowrap !important;
+
+}
+
+
+#accountPayableModal
+#ap-tax-plus-pane
+th:nth-child(3),
+
+#accountPayableModal
+#ap-tax-plus-pane
+td:nth-child(3),
+
+#accountPayableModal
+#ap-tax-minus-pane
+th:nth-child(3),
+
+#accountPayableModal
+#ap-tax-minus-pane
+td:nth-child(3) {
+
+    width: 26% !important;
+    white-space: nowrap !important;
+
+}
+
+
+#accountPayableModal
+#ap-tax-plus-pane
+th:nth-child(4),
+
+#accountPayableModal
+#ap-tax-plus-pane
+td:nth-child(4),
+
+#accountPayableModal
+#ap-tax-minus-pane
+th:nth-child(4),
+
+#accountPayableModal
+#ap-tax-minus-pane
+td:nth-child(4) {
+
+    width: 14% !important;
+    text-align: right !important;
+    white-space: nowrap !important;
+
+}
+
+
+#accountPayableModal
+#ap-tax-plus-pane
+th:nth-child(5),
+
+#accountPayableModal
+#ap-tax-plus-pane
+td:nth-child(5),
+
+#accountPayableModal
+#ap-tax-minus-pane
+th:nth-child(5),
+
+#accountPayableModal
+#ap-tax-minus-pane
+td:nth-child(5) {
+
+    width: 8% !important;
+    text-align: right !important;
+    white-space: nowrap !important;
+
+}
+
+
+#accountPayableModal
+#ap-tax-plus-pane
+th:nth-child(6),
+
+#accountPayableModal
+#ap-tax-plus-pane
+td:nth-child(6),
+
+#accountPayableModal
+#ap-tax-minus-pane
+th:nth-child(6),
+
+#accountPayableModal
+#ap-tax-minus-pane
+td:nth-child(6) {
+
+    width: 12% !important;
+    text-align: right !important;
+    white-space: nowrap !important;
+
+}

@@ -12034,428 +12034,1084 @@ renderInvoiceDetails() {
     /*
 ======================================================
 RENDER TAX (+)
+SAME DISPLAY STANDARD AS ACCOUNT PAYABLE
 ======================================================
 */
 
 renderTaxPlus() {
 
-    const body =
-        document.getElementById(
-            "ar-tax-plus-body"
-        );
+    try {
+
+        /*
+        ==================================================
+        GET BODY
+        ==================================================
+        */
+
+        const body =
+            document.getElementById(
+                "ar-tax-plus-body"
+            );
 
 
-    if (!body) {
+        if (!body) {
 
-        return;
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        TAX DETAILS
+        ==================================================
+        */
+
+        const taxDetails =
+            (this.invoiceDetails || [])
+                .filter(
+                    detail =>
+                        Number(
+                            detail.tax_output_amount
+                            || 0
+                        ) > 0
+                );
+
+
+        /*
+        ==================================================
+        JOURNAL PREVIEW
+        ==================================================
+        */
+
+        const previewDebit =
+            document.getElementById(
+                "ar-tax-plus-preview-debit"
+            );
+
+
+        const previewCredit =
+            document.getElementById(
+                "ar-tax-plus-preview-credit"
+            );
+
+
+        /*
+        ==================================================
+        EMPTY
+        ==================================================
+        */
+
+        if (
+            taxDetails.length === 0
+        ) {
+
+            body.innerHTML = `
+
+                <tr
+                    id="ar-tax-plus-empty">
+
+                    <td
+                        colspan="6"
+                        class="text-center text-muted py-4">
+
+                        No Tax (+) found from Invoice Details.
+
+                    </td>
+
+                </tr>
+
+            `;
+
+
+            if (
+                previewDebit
+            ) {
+
+                previewDebit.textContent =
+                    "-";
+
+            }
+
+
+            if (
+                previewCredit
+            ) {
+
+                previewCredit.textContent =
+                    "-";
+
+            }
+
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        RENDER ROWS
+        ==================================================
+        */
+
+        body.innerHTML =
+            taxDetails
+                .map(
+                    (
+                        detail,
+                        index
+                    ) => {
+
+                        /*
+                        ==========================================
+                        TAX BASE
+                        ==========================================
+                        */
+
+                        const taxBase =
+                            Number(
+                                detail.line_amount
+                                || 0
+                            );
+
+
+                        /*
+                        ==========================================
+                        TAX RATE
+                        ==========================================
+                        */
+
+                        const taxRate =
+                            Number(
+                                detail.tax_output_rate
+                                || 0
+                            );
+
+
+                        /*
+                        ==========================================
+                        TAX AMOUNT
+                        ==========================================
+                        */
+
+                        const taxAmount =
+                            Number(
+                                detail.tax_output_amount
+                                || 0
+                            );
+
+
+                        /*
+                        ==========================================
+                        FIND TAX MASTER BY ID
+                        ==========================================
+                        */
+
+                        let taxMaster =
+                            null;
+
+
+                        if (
+                            detail.tax_plus_id
+                            &&
+                            Array.isArray(
+                                this.taxPlusData
+                            )
+                        ) {
+
+                            taxMaster =
+                                this.taxPlusData.find(
+                                    tax =>
+                                        String(
+                                            tax.id
+                                        )
+                                        ===
+                                        String(
+                                            detail.tax_plus_id
+                                        )
+                                )
+                                || null;
+
+                        }
+
+
+                        /*
+                        ==========================================
+                        FALLBACK TAX MASTER BY RATE
+                        ==========================================
+                        */
+
+                        if (
+                            !taxMaster
+                            &&
+                            Array.isArray(
+                                this.taxPlusData
+                            )
+                        ) {
+
+                            taxMaster =
+                                this.taxPlusData.find(
+                                    tax =>
+                                        Number(
+                                            tax.tax_rate
+                                            || 0
+                                        )
+                                        ===
+                                        taxRate
+                                )
+                                || null;
+
+                        }
+
+
+                        /*
+                        ==========================================
+                        TAX NAME
+                        ==========================================
+                        */
+
+                        const taxName =
+                            detail.tax_plus_name
+                            ||
+                            taxMaster?.tax_name
+                            ||
+                            "Tax (+)";
+
+
+                        /*
+                        ==========================================
+                        TAX ACCOUNT ID
+                        ==========================================
+                        */
+
+                        const taxAccountId =
+                            Number(
+                                detail.tax_plus_account_id
+                                ||
+                                taxMaster?.tax_account_id
+                                ||
+                                0
+                            );
+
+
+                        /*
+                        ==========================================
+                        FIND TAX COA
+                        ==========================================
+                        */
+
+                        const taxCOA =
+                            Array.isArray(
+                                this.currentCOA
+                            )
+                                ? this.currentCOA.find(
+                                    account =>
+                                        Number(
+                                            account.id
+                                        )
+                                        ===
+                                        taxAccountId
+                                )
+                                : null;
+
+
+                        /*
+                        ==========================================
+                        TAX ACCOUNT NAME
+                        ==========================================
+                        */
+
+                        const taxAccountName =
+                            taxCOA?.account_name
+                            ||
+                            "-";
+
+
+                        /*
+                        ==========================================
+                        RENDER ROW
+                        6 COLUMNS
+                        ==========================================
+                        */
+
+                        return `
+
+                            <tr>
+
+                                <td>
+                                    ${index + 1}
+                                </td>
+
+
+                                <td>
+                                    ${
+                                        this.escapeHtml(
+                                            taxName
+                                        )
+                                    }
+                                </td>
+
+
+                                <td>
+                                    ${
+                                        this.escapeHtml(
+                                            taxAccountName
+                                        )
+                                    }
+                                </td>
+
+
+                                <td class="text-end">
+
+                                    ${
+                                        this.formatCurrency(
+                                            taxBase
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <td class="text-end">
+
+                                    ${taxRate}%
+
+                                </td>
+
+
+                                <td
+                                    class="text-end fw-semibold">
+
+                                    ${
+                                        this.formatCurrency(
+                                            taxAmount
+                                        )
+                                    }
+
+                                </td>
+
+                            </tr>
+
+                        `;
+
+                    }
+                )
+                .join("");
+
+
+        /*
+        ==================================================
+        JOURNAL PREVIEW
+
+        AR TAX (+)
+        DEBIT  : PIUTANG USAHA
+        CREDIT : TAX OUTPUT ACCOUNT
+        ==================================================
+        */
+
+        const firstDetail =
+            taxDetails[0];
+
+
+        const firstTaxRate =
+            Number(
+                firstDetail.tax_output_rate
+                || 0
+            );
+
+
+        let previewTaxMaster =
+            null;
+
+
+        /*
+        ==================================================
+        FIND TAX MASTER BY ID
+        ==================================================
+        */
+
+        if (
+            firstDetail.tax_plus_id
+            &&
+            Array.isArray(
+                this.taxPlusData
+            )
+        ) {
+
+            previewTaxMaster =
+                this.taxPlusData.find(
+                    tax =>
+                        String(
+                            tax.id
+                        )
+                        ===
+                        String(
+                            firstDetail.tax_plus_id
+                        )
+                )
+                || null;
+
+        }
+
+
+        /*
+        ==================================================
+        FALLBACK TAX MASTER BY RATE
+        ==================================================
+        */
+
+        if (
+            !previewTaxMaster
+            &&
+            Array.isArray(
+                this.taxPlusData
+            )
+        ) {
+
+            previewTaxMaster =
+                this.taxPlusData.find(
+                    tax =>
+                        Number(
+                            tax.tax_rate
+                            || 0
+                        )
+                        ===
+                        firstTaxRate
+                )
+                || null;
+
+        }
+
+
+        /*
+        ==================================================
+        TAX ACCOUNT ID
+        ==================================================
+        */
+
+        const previewTaxAccountId =
+            Number(
+                firstDetail.tax_plus_account_id
+                ||
+                previewTaxMaster?.tax_account_id
+                ||
+                0
+            );
+
+
+        /*
+        ==================================================
+        FIND TAX ACCOUNT
+        ==================================================
+        */
+
+        const previewTaxCOA =
+            Array.isArray(
+                this.currentCOA
+            )
+                ? this.currentCOA.find(
+                    account =>
+                        Number(
+                            account.id
+                        )
+                        ===
+                        previewTaxAccountId
+                )
+                : null;
+
+
+        /*
+        ==================================================
+        TAX ACCOUNT NAME
+        ==================================================
+        */
+
+        const previewTaxAccountName =
+            previewTaxCOA?.account_name
+            ||
+            "-";
+
+
+        /*
+        ==================================================
+        UPDATE JOURNAL PREVIEW
+        ==================================================
+        */
+
+        if (
+            previewDebit
+        ) {
+
+            previewDebit.textContent =
+                "PIUTANG USAHA";
+
+        }
+
+
+        if (
+            previewCredit
+        ) {
+
+            previewCredit.textContent =
+                previewTaxAccountName;
+
+        }
 
     }
 
-
-    /*
-    ==================================================
-    FILTER DETAIL WITH TAX (+)
-    ==================================================
-    */
-
-    const details =
-        this.invoiceDetails.filter(
-            item =>
-                Number(
-                    item.tax_output_amount
-                    || 0
-                )
-                >
-                0
-        );
-
-
-    /*
-    ==================================================
-    EMPTY
-    ==================================================
-    */
-
-    if (
-        !details.length
+    catch (
+        error
     ) {
 
-        body.innerHTML = `
-
-            <tr>
-
-                <td
-                    colspan="7"
-                    class="text-center text-muted py-4">
-
-                    No Tax (+) found from Invoice Details.
-
-                </td>
-
-            </tr>
-
-        `;
-
-        return;
+        console.error(
+            "AccountReceivable.renderTaxPlus:",
+            error
+        );
 
     }
-
-
-    /*
-    ==================================================
-    RENDER
-    ==================================================
-    */
-
-    body.innerHTML =
-        details
-            .map(
-                (
-                    detail,
-                    index
-                ) => {
-
-                    /*
-                    ==========================================
-                    TAX MASTER
-                    FALLBACK BY TAX ID
-                    ==========================================
-                    */
-
-                    const taxMaster =
-                        Array.isArray(
-                            this.taxPlusData
-                        )
-                            ? this.taxPlusData.find(
-                                tax =>
-                                    String(
-                                        tax.id
-                                    )
-                                    ===
-                                    String(
-                                        detail.tax_plus_id
-                                        || ""
-                                    )
-                            )
-                            : null;
-
-
-                    /*
-                    ==========================================
-                    TAX NAME
-                    ==========================================
-                    */
-
-                    const taxName =
-                        detail.tax_plus_name
-                        ||
-                        taxMaster?.tax_name
-                        ||
-                        "-";
-
-
-                    /*
-                    ==========================================
-                    TAX ACCOUNT
-                    ==========================================
-                    */
-
-                    const taxAccountId =
-                        Number(
-                            detail.tax_plus_account_id
-                            ||
-                            taxMaster?.tax_account_id
-                            ||
-                            0
-                        );
-
-
-                    return `
-
-                        <tr>
-
-                            <td>
-                                ${index + 1}
-                            </td>
-
-
-                            <td>
-                                Tax (+)
-                            </td>
-
-
-                            <td>
-
-                                ${
-                                    this.escapeHtml(
-                                        taxName
-                                    )
-                                }
-
-                            </td>
-
-
-                            <td>
-
-                                ${
-                                    taxAccountId
-                                    || "-"
-                                }
-
-                            </td>
-
-
-                            <td class="text-end">
-
-                                ${this.formatCurrency(
-                                    detail.line_amount
-                                )}
-
-                            </td>
-
-
-                            <td class="text-end">
-
-                                ${
-                                    Number(
-                                        detail.tax_output_rate
-                                        || taxMaster?.tax_rate
-                                        || 0
-                                    )
-                                }%
-
-                            </td>
-
-
-                            <td class="text-end">
-
-                                ${this.formatCurrency(
-                                    detail.tax_output_amount
-                                )}
-
-                            </td>
-
-                        </tr>
-
-                    `;
-
-                }
-            )
-            .join("");
 
 }
 
     /*
 ======================================================
 RENDER TAX (-)
+SAME DISPLAY STANDARD AS ACCOUNT PAYABLE
 ======================================================
 */
 
 renderTaxMinus() {
 
-    const body =
-        document.getElementById(
-            "ar-tax-minus-body"
-        );
+    try {
+
+        /*
+        ==================================================
+        GET BODY
+        ==================================================
+        */
+
+        const body =
+            document.getElementById(
+                "ar-tax-minus-body"
+            );
 
 
-    if (!body) {
+        if (!body) {
 
-        return;
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        TAX DETAILS
+        ==================================================
+        */
+
+        const taxDetails =
+            (this.invoiceDetails || [])
+                .filter(
+                    detail =>
+                        Number(
+                            detail.withholding_tax_amount
+                            || 0
+                        ) > 0
+                );
+
+
+        /*
+        ==================================================
+        JOURNAL PREVIEW
+        ==================================================
+        */
+
+        const previewDebit =
+            document.getElementById(
+                "ar-tax-minus-preview-debit"
+            );
+
+
+        const previewCredit =
+            document.getElementById(
+                "ar-tax-minus-preview-credit"
+            );
+
+
+        /*
+        ==================================================
+        EMPTY
+        ==================================================
+        */
+
+        if (
+            taxDetails.length === 0
+        ) {
+
+            body.innerHTML = `
+
+                <tr
+                    id="ar-tax-minus-empty">
+
+                    <td
+                        colspan="6"
+                        class="text-center text-muted py-4">
+
+                        No Tax (-) found from Invoice Details.
+
+                    </td>
+
+                </tr>
+
+            `;
+
+
+            if (
+                previewDebit
+            ) {
+
+                previewDebit.textContent =
+                    "-";
+
+            }
+
+
+            if (
+                previewCredit
+            ) {
+
+                previewCredit.textContent =
+                    "-";
+
+            }
+
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        RENDER ROWS
+        ==================================================
+        */
+
+        body.innerHTML =
+            taxDetails
+                .map(
+                    (
+                        detail,
+                        index
+                    ) => {
+
+                        /*
+                        ==========================================
+                        TAX BASE
+                        ==========================================
+                        */
+
+                        const taxBase =
+                            Number(
+                                detail.line_amount
+                                || 0
+                            );
+
+
+                        /*
+                        ==========================================
+                        TAX RATE
+                        ==========================================
+                        */
+
+                        const taxRate =
+                            Number(
+                                detail.withholding_tax_rate
+                                || 0
+                            );
+
+
+                        /*
+                        ==========================================
+                        TAX AMOUNT
+                        ==========================================
+                        */
+
+                        const taxAmount =
+                            Number(
+                                detail.withholding_tax_amount
+                                || 0
+                            );
+
+
+                        /*
+                        ==========================================
+                        FIND TAX MASTER BY ID
+                        ==========================================
+                        */
+
+                        let taxMaster =
+                            null;
+
+
+                        if (
+                            detail.tax_minus_id
+                            &&
+                            Array.isArray(
+                                this.taxMinusData
+                            )
+                        ) {
+
+                            taxMaster =
+                                this.taxMinusData.find(
+                                    tax =>
+                                        String(
+                                            tax.id
+                                        )
+                                        ===
+                                        String(
+                                            detail.tax_minus_id
+                                        )
+                                )
+                                || null;
+
+                        }
+
+
+                        /*
+                        ==========================================
+                        FALLBACK TAX MASTER BY RATE
+                        ==========================================
+                        */
+
+                        if (
+                            !taxMaster
+                            &&
+                            Array.isArray(
+                                this.taxMinusData
+                            )
+                        ) {
+
+                            taxMaster =
+                                this.taxMinusData.find(
+                                    tax =>
+                                        Number(
+                                            tax.tax_rate
+                                            || 0
+                                        )
+                                        ===
+                                        taxRate
+                                )
+                                || null;
+
+                        }
+
+
+                        /*
+                        ==========================================
+                        TAX NAME
+                        ==========================================
+                        */
+
+                        const taxName =
+                            detail.tax_minus_name
+                            ||
+                            taxMaster?.tax_name
+                            ||
+                            "Tax (-)";
+
+
+                        /*
+                        ==========================================
+                        TAX ACCOUNT ID
+                        ==========================================
+                        */
+
+                        const taxAccountId =
+                            Number(
+                                detail.tax_minus_account_id
+                                ||
+                                taxMaster?.tax_account_id
+                                ||
+                                0
+                            );
+
+
+                        /*
+                        ==========================================
+                        FIND TAX ACCOUNT
+                        ==========================================
+                        */
+
+                        const taxCOA =
+                            Array.isArray(
+                                this.currentCOA
+                            )
+                                ? this.currentCOA.find(
+                                    account =>
+                                        Number(
+                                            account.id
+                                        )
+                                        ===
+                                        taxAccountId
+                                )
+                                : null;
+
+
+                        /*
+                        ==========================================
+                        TAX ACCOUNT NAME
+                        ==========================================
+                        */
+
+                        const taxAccountName =
+                            taxCOA?.account_name
+                            ||
+                            "-";
+
+
+                        /*
+                        ==========================================
+                        RENDER ROW
+                        6 COLUMNS
+                        ==========================================
+                        */
+
+                        return `
+
+                            <tr>
+
+                                <td>
+                                    ${index + 1}
+                                </td>
+
+
+                                <td>
+                                    ${
+                                        this.escapeHtml(
+                                            taxName
+                                        )
+                                    }
+                                </td>
+
+
+                                <td>
+                                    ${
+                                        this.escapeHtml(
+                                            taxAccountName
+                                        )
+                                    }
+                                </td>
+
+
+                                <td class="text-end">
+
+                                    ${
+                                        this.formatCurrency(
+                                            taxBase
+                                        )
+                                    }
+
+                                </td>
+
+
+                                <td class="text-end">
+
+                                    ${taxRate}%
+
+                                </td>
+
+
+                                <td
+                                    class="text-end fw-semibold">
+
+                                    ${
+                                        this.formatCurrency(
+                                            taxAmount
+                                        )
+                                    }
+
+                                </td>
+
+                            </tr>
+
+                        `;
+
+                    }
+                )
+                .join("");
+
+
+        /*
+        ==================================================
+        JOURNAL PREVIEW
+
+        AR TAX (-)
+        DEBIT  : TAX WITHHOLDING ACCOUNT
+        CREDIT : PIUTANG USAHA
+        ==================================================
+        */
+
+        const firstDetail =
+            taxDetails[0];
+
+
+        const firstTaxRate =
+            Number(
+                firstDetail.withholding_tax_rate
+                || 0
+            );
+
+
+        let previewTaxMaster =
+            null;
+
+
+        /*
+        ==================================================
+        FIND TAX MASTER BY ID
+        ==================================================
+        */
+
+        if (
+            firstDetail.tax_minus_id
+            &&
+            Array.isArray(
+                this.taxMinusData
+            )
+        ) {
+
+            previewTaxMaster =
+                this.taxMinusData.find(
+                    tax =>
+                        String(
+                            tax.id
+                        )
+                        ===
+                        String(
+                            firstDetail.tax_minus_id
+                        )
+                )
+                || null;
+
+        }
+
+
+        /*
+        ==================================================
+        FALLBACK TAX MASTER BY RATE
+        ==================================================
+        */
+
+        if (
+            !previewTaxMaster
+            &&
+            Array.isArray(
+                this.taxMinusData
+            )
+        ) {
+
+            previewTaxMaster =
+                this.taxMinusData.find(
+                    tax =>
+                        Number(
+                            tax.tax_rate
+                            || 0
+                        )
+                        ===
+                        firstTaxRate
+                )
+                || null;
+
+        }
+
+
+        /*
+        ==================================================
+        TAX ACCOUNT ID
+        ==================================================
+        */
+
+        const previewTaxAccountId =
+            Number(
+                firstDetail.tax_minus_account_id
+                ||
+                previewTaxMaster?.tax_account_id
+                ||
+                0
+            );
+
+
+        /*
+        ==================================================
+        FIND TAX ACCOUNT
+        ==================================================
+        */
+
+        const previewTaxCOA =
+            Array.isArray(
+                this.currentCOA
+            )
+                ? this.currentCOA.find(
+                    account =>
+                        Number(
+                            account.id
+                        )
+                        ===
+                        previewTaxAccountId
+                )
+                : null;
+
+
+        /*
+        ==================================================
+        TAX ACCOUNT NAME
+        ==================================================
+        */
+
+        const previewTaxAccountName =
+            previewTaxCOA?.account_name
+            ||
+            "-";
+
+
+        /*
+        ==================================================
+        UPDATE JOURNAL PREVIEW
+        ==================================================
+        */
+
+        if (
+            previewDebit
+        ) {
+
+            previewDebit.textContent =
+                previewTaxAccountName;
+
+        }
+
+
+        if (
+            previewCredit
+        ) {
+
+            previewCredit.textContent =
+                "PIUTANG USAHA";
+
+        }
 
     }
 
-
-    /*
-    ==================================================
-    FILTER DETAIL WITH TAX (-)
-    ==================================================
-    */
-
-    const details =
-        this.invoiceDetails.filter(
-            item =>
-                Number(
-                    item.withholding_tax_amount
-                    || 0
-                )
-                >
-                0
-        );
-
-
-    /*
-    ==================================================
-    EMPTY
-    ==================================================
-    */
-
-    if (
-        !details.length
+    catch (
+        error
     ) {
 
-        body.innerHTML = `
-
-            <tr>
-
-                <td
-                    colspan="7"
-                    class="text-center text-muted py-4">
-
-                    No Tax (-) found from Invoice Details.
-
-                </td>
-
-            </tr>
-
-        `;
-
-        return;
+        console.error(
+            "AccountReceivable.renderTaxMinus:",
+            error
+        );
 
     }
-
-
-    /*
-    ==================================================
-    RENDER
-    ==================================================
-    */
-
-    body.innerHTML =
-        details
-            .map(
-                (
-                    detail,
-                    index
-                ) => {
-
-                    /*
-                    ==========================================
-                    TAX MASTER
-                    FALLBACK BY TAX ID
-                    ==========================================
-                    */
-
-                    const taxMaster =
-                        Array.isArray(
-                            this.taxMinusData
-                        )
-                            ? this.taxMinusData.find(
-                                tax =>
-                                    String(
-                                        tax.id
-                                    )
-                                    ===
-                                    String(
-                                        detail.tax_minus_id
-                                        || ""
-                                    )
-                            )
-                            : null;
-
-
-                    /*
-                    ==========================================
-                    TAX NAME
-                    ==========================================
-                    */
-
-                    const taxName =
-                        detail.tax_minus_name
-                        ||
-                        taxMaster?.tax_name
-                        ||
-                        "-";
-
-
-                    /*
-                    ==========================================
-                    TAX ACCOUNT
-                    ==========================================
-                    */
-
-                    const taxAccountId =
-                        Number(
-                            detail.tax_minus_account_id
-                            ||
-                            taxMaster?.tax_account_id
-                            ||
-                            0
-                        );
-
-
-                    return `
-
-                        <tr>
-
-                            <td>
-                                ${index + 1}
-                            </td>
-
-
-                            <td>
-                                Tax (-)
-                            </td>
-
-
-                            <td>
-
-                                ${
-                                    this.escapeHtml(
-                                        taxName
-                                    )
-                                }
-
-                            </td>
-
-
-                            <td>
-
-                                ${
-                                    taxAccountId
-                                    || "-"
-                                }
-
-                            </td>
-
-
-                            <td class="text-end">
-
-                                ${this.formatCurrency(
-                                    detail.line_amount
-                                )}
-
-                            </td>
-
-
-                            <td class="text-end">
-
-                                ${
-                                    Number(
-                                        detail.withholding_tax_rate
-                                        || taxMaster?.tax_rate
-                                        || 0
-                                    )
-                                }%
-
-                            </td>
-
-
-                            <td class="text-end">
-
-                                ${this.formatCurrency(
-                                    detail.withholding_tax_amount
-                                )}
-
-                            </td>
-
-                        </tr>
-
-                    `;
-
-                }
-            )
-            .join("");
 
 }
 
