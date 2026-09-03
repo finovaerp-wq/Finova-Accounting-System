@@ -12979,16 +12979,17 @@ async renderAccountingPreview() {
                 ? this.invoiceDetails
                 : [];
 
-        /*
-==================================================
-CHECK ACCOUNTING CONFIGURATION
-==================================================
-*/
 
-const readiness =
-    this.checkAPAccountingPreviewReadiness(
-        details
-    );
+        /*
+        ==================================================
+        CHECK ACCOUNTING CONFIGURATION
+        ==================================================
+        */
+
+        const readiness =
+            this.checkAPAccountingPreviewReadiness(
+                details
+            );
 
 
         /*
@@ -13024,22 +13025,34 @@ const readiness =
 
 
             if (totalDebitElement) {
-                totalDebitElement.textContent = "0";
+
+                totalDebitElement.textContent =
+                    "0";
+
             }
 
 
             if (totalCreditElement) {
-                totalCreditElement.textContent = "0";
+
+                totalCreditElement.textContent =
+                    "0";
+
             }
 
 
             if (summaryDebitElement) {
-                summaryDebitElement.textContent = "0";
+
+                summaryDebitElement.textContent =
+                    "0";
+
             }
 
 
             if (summaryCreditElement) {
-                summaryCreditElement.textContent = "0";
+
+                summaryCreditElement.textContent =
+                    "0";
+
             }
 
 
@@ -13047,6 +13060,7 @@ const readiness =
 
                 differenceElement.textContent =
                     "0";
+
 
                 differenceElement.classList.remove(
                     "text-success",
@@ -13078,37 +13092,39 @@ const readiness =
                     "Add Invoice Detail to generate the accounting preview.";
 
             }
+
+
             /*
-==================================================
-SYNC PREVIEW STATE
-==================================================
-*/
+            ==================================================
+            SYNC PREVIEW STATE
+            ==================================================
+            */
 
-this.setAPAccountingPreviewState({
+            this.setAPAccountingPreviewState({
 
-    status:
-        "WAITING",
+                status:
+                    "WAITING",
 
-    isReady:
-        false,
+                isReady:
+                    false,
 
-    isBalanced:
-        false,
+                isBalanced:
+                    false,
 
-    totalDebit:
-        0,
+                totalDebit:
+                    0,
 
-    totalCredit:
-        0,
+                totalCredit:
+                    0,
 
-    difference:
-        0,
+                difference:
+                    0,
 
-    issues: [
-        "Invoice Detail is empty."
-    ]
+                issues: [
+                    "Invoice Detail is empty."
+                ]
 
-});
+            });
 
 
             return;
@@ -13183,21 +13199,24 @@ this.setAPAccountingPreviewState({
                         false
                 }
             );
+
+
         /*
-==================================================
-IGNORE STALE PREVIEW RESULT
-==================================================
-*/
+        ==================================================
+        IGNORE STALE PREVIEW RESULT
+        ==================================================
+        */
 
-if (
-    requestId
-    !==
-    this.apAccountingPreviewRequestId
-) {
+        if (
+            requestId
+            !==
+            this.apAccountingPreviewRequestId
+        ) {
 
-    return;
+            return;
 
-}
+        }
+
 
         /*
         ==================================================
@@ -13298,6 +13317,7 @@ if (
                 accountMap.set(
                     key,
                     {
+
                         account_id:
                             id,
 
@@ -13323,6 +13343,7 @@ if (
 
                         descriptions:
                             []
+
                     }
                 );
 
@@ -13453,6 +13474,7 @@ if (
                     ) {
 
                         return {
+
                             ...line,
 
                             debit:
@@ -13460,6 +13482,7 @@ if (
 
                             credit:
                                 0
+
                         };
 
                     }
@@ -13470,6 +13493,7 @@ if (
                     ) {
 
                         return {
+
                             ...line,
 
                             debit:
@@ -13477,12 +13501,14 @@ if (
 
                             credit:
                                 credit - debit
+
                         };
 
                     }
 
 
                     return {
+
                         ...line,
 
                         debit:
@@ -13490,6 +13516,7 @@ if (
 
                         credit:
                             0
+
                     };
 
                 }
@@ -13555,61 +13582,69 @@ if (
 
 
         /*
-==================================================
-ACCOUNTING STATUS
-==================================================
-*/
+        ==================================================
+        ACCOUNTING STATUS
+        ==================================================
+        */
 
-const isReady =
-    readiness.ready === true;
-
-
-const isBalanced =
-    isReady
-    &&
-    difference < 0.5
-    &&
-    totalDebit > 0
-    &&
-    totalCredit > 0;
+        const isReady =
+            readiness.ready === true;
 
 
-const accountingStatus =
-    !isReady
-        ? "NOT_READY"
-        : isBalanced
-            ? "BALANCED"
-            : "NOT_BALANCED";
+        const isBalanced =
+            isReady
+            &&
+            difference < 0.5
+            &&
+            totalDebit > 0
+            &&
+            totalCredit > 0;
+
+
+        const accountingStatus =
+            !isReady
+                ? "NOT_READY"
+                : isBalanced
+                    ? "BALANCED"
+                    : "NOT_BALANCED";
+
+
         /*
-==================================================
-SYNC ACCOUNTING PREVIEW STATE
-==================================================
-*/
+        ==================================================
+        SYNC ACCOUNTING PREVIEW STATE
+        ==================================================
+        */
 
-this.setAPAccountingPreviewState({
+        this.setAPAccountingPreviewState({
 
-    status:
-        accountingStatus,
+            status:
+                accountingStatus,
 
-    isReady,
+            isReady,
 
-    isBalanced,
+            isBalanced,
 
-    totalDebit,
+            totalDebit,
 
-    totalCredit,
+            totalCredit,
 
-    difference,
+            difference,
 
-    issues:
-        readiness.issues
+            issues:
+                readiness.issues
 
-});
+        });
 
 
         /*
         ==================================================
         RENDER PREVIEW TABLE
+        5 COLUMNS:
+        NO
+        ACCOUNT
+        ACCOUNT NAME
+        DEBIT
+        CREDIT
         ==================================================
         */
 
@@ -13621,23 +13656,13 @@ this.setAPAccountingPreviewState({
                         index
                     ) => {
 
-                        const description =
-                            Array.isArray(
-                                line.descriptions
-                            )
-                                ? line.descriptions
-                                    .filter(
-                                        Boolean
-                                    )
-                                    .join(
-                                        " / "
-                                    )
-                                : "-";
-
-
                         return `
 
                             <tr>
+
+                                <!-- ==============================
+                                     NO
+                                =============================== -->
 
                                 <td
                                     class="
@@ -13651,6 +13676,10 @@ this.setAPAccountingPreviewState({
                                 </td>
 
 
+                                <!-- ==============================
+                                     ACCOUNT CODE
+                                =============================== -->
+
                                 <td
                                     class="
                                         text-start
@@ -13659,9 +13688,7 @@ this.setAPAccountingPreviewState({
                                 >
 
                                     <div
-                                        class="
-                                            fw-semibold
-                                        "
+                                        class="fw-semibold"
                                     >
 
                                         ${
@@ -13676,6 +13703,10 @@ this.setAPAccountingPreviewState({
                                 </td>
 
 
+                                <!-- ==============================
+                                     ACCOUNT NAME
+                                =============================== -->
+
                                 <td
                                     class="
                                         text-start
@@ -13684,9 +13715,7 @@ this.setAPAccountingPreviewState({
                                 >
 
                                     <div
-                                        class="
-                                            fw-semibold
-                                        "
+                                        class="fw-semibold"
                                     >
 
                                         ${
@@ -13698,26 +13727,12 @@ this.setAPAccountingPreviewState({
 
                                     </div>
 
-
-                                    <div
-                                        class="
-                                            small
-                                            text-muted
-                                            mt-1
-                                        "
-                                    >
-
-                                        ${
-                                            this.escapeHtml(
-                                                description
-                                                || "-"
-                                            )
-                                        }
-
-                                    </div>
-
                                 </td>
 
+
+                                <!-- ==============================
+                                     DEBIT
+                                =============================== -->
 
                                 <td
                                     class="
@@ -13747,6 +13762,10 @@ this.setAPAccountingPreviewState({
 
                                 </td>
 
+
+                                <!-- ==============================
+                                     CREDIT
+                                =============================== -->
 
                                 <td
                                     class="
@@ -13871,158 +13890,158 @@ this.setAPAccountingPreviewState({
 
 
         /*
-==================================================
-STATUS
-==================================================
-*/
-
-if (
-    statusElement
-) {
-
-    switch (
-        accountingStatus
-    ) {
-
-        /*
-        ==============================================
-        BALANCED
-        ==============================================
+        ==================================================
+        STATUS
+        ==================================================
         */
 
-        case "BALANCED":
+        if (
+            statusElement
+        ) {
 
-            statusElement.className =
-                "alert alert-success border h-100 mb-0 d-flex align-items-center";
+            switch (
+                accountingStatus
+            ) {
 
-            break;
+                /*
+                ==============================================
+                BALANCED
+                ==============================================
+                */
+
+                case "BALANCED":
+
+                    statusElement.className =
+                        "alert alert-success border h-100 mb-0 d-flex align-items-center";
+
+                    break;
+
+
+                /*
+                ==============================================
+                NOT READY
+                ==============================================
+                */
+
+                case "NOT_READY":
+
+                    statusElement.className =
+                        "alert alert-warning border h-100 mb-0 d-flex align-items-center";
+
+                    break;
+
+
+                /*
+                ==============================================
+                NOT BALANCED
+                ==============================================
+                */
+
+                default:
+
+                    statusElement.className =
+                        "alert alert-danger border h-100 mb-0 d-flex align-items-center";
+
+                    break;
+
+            }
+
+        }
 
 
         /*
-        ==============================================
-        NOT READY
-        ==============================================
+        ==================================================
+        STATUS TITLE
+        ==================================================
         */
 
-        case "NOT_READY":
+        if (
+            statusTitleElement
+        ) {
 
-            statusElement.className =
-                "alert alert-warning border h-100 mb-0 d-flex align-items-center";
+            switch (
+                accountingStatus
+            ) {
 
-            break;
+                case "BALANCED":
+
+                    statusTitleElement.textContent =
+                        "BALANCED";
+
+                    break;
+
+
+                case "NOT_READY":
+
+                    statusTitleElement.textContent =
+                        "NOT READY";
+
+                    break;
+
+
+                default:
+
+                    statusTitleElement.textContent =
+                        "NOT BALANCED";
+
+                    break;
+
+            }
+
+        }
 
 
         /*
-        ==============================================
-        NOT BALANCED
-        ==============================================
+        ==================================================
+        STATUS MESSAGE
+        ==================================================
         */
 
-        default:
+        if (
+            statusMessageElement
+        ) {
 
-            statusElement.className =
-                "alert alert-danger border h-100 mb-0 d-flex align-items-center";
+            if (
+                accountingStatus ===
+                "BALANCED"
+            ) {
 
-            break;
+                statusMessageElement.textContent =
+                    "Accounting Preview is ready for Complete.";
 
-    }
+            }
 
-}
+            else if (
+                accountingStatus ===
+                "NOT_READY"
+            ) {
 
+                statusMessageElement.innerHTML =
+                    readiness.issues
+                        .map(
+                            issue =>
+                                `<div>• ${
+                                    this.escapeHtml(
+                                        issue
+                                    )
+                                }</div>`
+                        )
+                        .join("");
 
-/*
-==================================================
-STATUS TITLE
-==================================================
-*/
+            }
 
-if (
-    statusTitleElement
-) {
+            else {
 
-    switch (
-        accountingStatus
-    ) {
+                statusMessageElement.textContent =
+                    `Journal difference: ${
+                        this.formatCurrency(
+                            difference
+                        )
+                    }`;
 
-        case "BALANCED":
+            }
 
-            statusTitleElement.textContent =
-                "BALANCED";
-
-            break;
-
-
-        case "NOT_READY":
-
-            statusTitleElement.textContent =
-                "NOT READY";
-
-            break;
-
-
-        default:
-
-            statusTitleElement.textContent =
-                "NOT BALANCED";
-
-            break;
-
-    }
-
-}
-
-
-/*
-==================================================
-STATUS MESSAGE
-==================================================
-*/
-
-if (
-    statusMessageElement
-) {
-
-    if (
-        accountingStatus ===
-        "BALANCED"
-    ) {
-
-        statusMessageElement.textContent =
-            "Accounting Preview is ready for Complete.";
-
-    }
-
-    else if (
-        accountingStatus ===
-        "NOT_READY"
-    ) {
-
-        statusMessageElement.innerHTML =
-            readiness.issues
-                .map(
-                    issue =>
-                        `<div>• ${
-                            this.escapeHtml(
-                                issue
-                            )
-                        }</div>`
-                )
-                .join("");
-
-    }
-
-    else {
-
-        statusMessageElement.textContent =
-            `Journal difference: ${
-                this.formatCurrency(
-                    difference
-                )
-            }`;
-
-    }
-
-}
+        }
 
 
         /*
@@ -14034,16 +14053,24 @@ if (
         console.log(
             "AP ACCOUNTING PREVIEW:",
             {
+
                 journalDetails,
+
                 previewLines,
+
                 totalDebit,
+
                 totalCredit,
+
                 difference,
+
                 isBalanced
+
             }
         );
 
     }
+
     catch (
         error
     ) {
@@ -20636,7 +20663,50 @@ async editInvoice(id) {
 
         this.resetAPModalTab();
 
+        /*
+==================================================
+MODAL TITLE
+EDIT MODE
+==================================================
+*/
 
+const modalTitle =
+    document.querySelector(
+        "#accountPayableModal .modal-title"
+    );
+
+
+if (
+    modalTitle
+) {
+
+    modalTitle.textContent =
+        "Edit Account Payable";
+
+}
+
+
+/*
+==================================================
+MODAL SUBTITLE
+EDIT MODE
+==================================================
+*/
+
+const modalSubtitle =
+    document.querySelector(
+        "#accountPayableModal .modal-subtitle"
+    );
+
+
+if (
+    modalSubtitle
+) {
+
+    modalSubtitle.textContent =
+        "Edit existing Account Payable";
+
+}
         /*
         ==================================================
         BUTTON MODE

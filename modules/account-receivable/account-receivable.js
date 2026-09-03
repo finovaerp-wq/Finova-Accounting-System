@@ -13617,44 +13617,26 @@ async renderAccountingPreview() {
                                     =================== -->
 
                                     <td
-                                        class="
-                                            text-start
-                                            align-top
-                                        "
-                                    >
+    class="
+        text-start
+        align-top
+    "
+>
 
-                                        <div
-                                            class="fw-semibold"
-                                        >
+    <div
+        class="fw-semibold"
+    >
 
-                                            ${
-                                                this.escapeHtml(
-                                                    line.account_name
-                                                    || "-"
-                                                )
-                                            }
+        ${
+            this.escapeHtml(
+                line.account_name
+                || "-"
+            )
+        }
 
-                                        </div>
+    </div>
 
-
-                                        <div
-                                            class="
-                                                small
-                                                text-muted
-                                                mt-1
-                                            "
-                                        >
-
-                                            ${
-                                                this.escapeHtml(
-                                                    description
-                                                    || "-"
-                                                )
-                                            }
-
-                                        </div>
-
-                                    </td>
+</td>
 
 
                                     <!-- ==================
