@@ -4811,3 +4811,523 @@ td {
     background: #FFFFFF;
 
 }
+/*
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+ACCOUNT RECEIVABLE
+ACCOUNTING PREVIEW
+FIXED MODAL + INNER JOURNAL SCROLL
+MATCH ACCOUNT PAYABLE
+==========================================================
+*/
+
+
+/*
+==========================================================
+ACCOUNT RECEIVABLE
+MAIN MODAL HEIGHT
+MATCH ACCOUNT PAYABLE
+==========================================================
+*/
+
+/*
+==========================================================
+ACCOUNT RECEIVABLE
+MAIN MODAL POSITION
+MATCH ACCOUNT PAYABLE
+==========================================================
+*/
+
+#accountReceivableModal
+.modal-dialog {
+
+    width: calc(100% - 48px) !important;
+
+    max-width: 1140px !important;
+
+    height: auto !important;
+
+    max-height: none !important;
+
+    margin:
+
+        48px
+
+        auto !important;
+
+}
+
+
+#accountReceivableModal
+.modal-content {
+
+    display: flex !important;
+
+    flex-direction: column !important;
+
+    width: 100% !important;
+
+    height: auto !important;
+
+    max-height: calc(100vh - 96px) !important;
+
+    min-height: 0 !important;
+
+    overflow: hidden !important;
+
+}
+
+
+/* ==========================================================
+   HEADER
+   NEVER SCROLL
+========================================================== */
+
+#accountReceivableModal
+.modal-header {
+
+    flex: 0 0 auto !important;
+
+}
+
+
+/* ==========================================================
+   MODAL BODY
+   IMPORTANT:
+   DISABLE MAIN MODAL SCROLL
+========================================================== */
+
+#accountReceivableModal
+.modal-body {
+
+    display: flex !important;
+
+    flex-direction: column !important;
+
+    flex: 1 1 auto !important;
+
+    min-height: 0 !important;
+
+    height: auto !important;
+
+    max-height: none !important;
+
+    padding: 0 !important;
+
+    overflow: hidden !important;
+
+}
+
+
+/* ==========================================================
+   TAB HEADER
+   NEVER SCROLL
+========================================================== */
+
+#accountReceivableModal
+.ap-modern-tabs-wrapper {
+
+    flex: 0 0 auto !important;
+
+    width: 100% !important;
+
+}
+
+
+/* ==========================================================
+   TAB CONTENT
+========================================================== */
+
+#accountReceivableModal
+#ar-modal-tab-content {
+
+    display: block !important;
+
+    flex: 0 1 auto !important;
+
+    width: 100% !important;
+
+    min-height: 0 !important;
+
+}
+
+
+/* ==========================================================
+   ACCOUNTING PREVIEW PANE
+========================================================== */
+
+#accountReceivableModal
+#ar-accounting-preview-pane {
+
+    width: 100% !important;
+
+    height: auto !important;
+
+    min-height: 0 !important;
+
+    padding: 0 !important;
+
+    overflow: visible !important;
+
+}
+
+
+/* ==========================================================
+   ACCOUNTING PREVIEW OUTER PADDING
+========================================================== */
+
+#accountReceivableModal
+#ar-accounting-preview-pane
+> .p-4 {
+
+    padding: 20px !important;
+
+}
+
+
+/* ==========================================================
+   ACCOUNTING PREVIEW CARD
+========================================================== */
+
+#accountReceivableModal
+#ar-accounting-preview-pane
+.finova-card {
+
+    height: auto !important;
+
+    min-height: 0 !important;
+
+    margin: 0 !important;
+
+}
+
+
+/* ==========================================================
+   CARD BODY
+========================================================== */
+
+#accountReceivableModal
+#ar-accounting-preview-pane
+.finova-card-body {
+
+    height: auto !important;
+
+    min-height: 0 !important;
+
+}
+
+
+/* ==========================================================
+   JOURNAL TABLE SCROLL
+   ONLY THIS AREA SCROLLS
+========================================================== */
+
+#accountReceivableModal
+#ar-accounting-preview-pane
+.ar-accounting-preview-scroll {
+
+    display: block !important;
+
+    width: 100% !important;
+
+    height: auto !important;
+
+    max-height: 225px !important;
+
+    overflow-x: auto !important;
+
+    overflow-y: auto !important;
+
+    scrollbar-gutter: stable;
+
+}
+
+
+/* ==========================================================
+   TABLE
+========================================================== */
+
+#accountReceivableModal
+#ar-accounting-preview-pane
+.ar-accounting-preview-scroll
+table {
+
+    width: 100% !important;
+
+    margin-bottom: 0 !important;
+
+}
+
+
+/* ==========================================================
+   STICKY TABLE HEADER
+========================================================== */
+
+#accountReceivableModal
+#ar-accounting-preview-pane
+.ar-accounting-preview-scroll
+thead
+th {
+
+    position: sticky !important;
+
+    top: 0 !important;
+
+    z-index: 5 !important;
+
+    background: #FFFFFF !important;
+
+}
+
+
+/* ==========================================================
+   STICKY TOTAL
+========================================================== */
+
+#accountReceivableModal
+#ar-accounting-preview-pane
+.ar-accounting-preview-scroll
+tfoot
+td {
+
+    position: sticky !important;
+
+    bottom: 0 !important;
+
+    z-index: 4 !important;
+
+    background: #FFFFFF !important;
+
+}
+
+
+/* ==========================================================
+   PREVENT AMOUNT WRAP
+========================================================== */
+
+#accountReceivableModal
+#ar-accounting-preview-pane
+.ar-accounting-preview-scroll
+th,
+
+#accountReceivableModal
+#ar-accounting-preview-pane
+.ar-accounting-preview-scroll
+td {
+
+    white-space: nowrap !important;
+
+}
+
+
+/* ==========================================================
+   ACCOUNTING SUMMARY
+   TOTAL DEBIT / CREDIT / DIFFERENCE / STATUS
+   NEVER SCROLL
+========================================================== */
+
+#accountReceivableModal
+#ar-accounting-preview-pane
+.ar-accounting-preview-scroll
++ .row {
+
+    flex: 0 0 auto !important;
+
+    margin-top: 16px !important;
+
+}
+
+
+/* ==========================================================
+   TOTAL RECEIVABLE SECTION
+   NEVER SCROLL
+========================================================== */
+
+#accountReceivableModal
+#ar-modal-tab-content
++ .border-top {
+
+    flex: 0 0 auto !important;
+
+    margin-top: auto !important;
+
+    padding-top: 16px !important;
+
+    padding-bottom: 16px !important;
+
+    background: #FFFFFF !important;
+
+}
+
+
+/* ==========================================================
+   TOTAL RECEIVABLE CARD
+========================================================== */
+
+#accountReceivableModal
+#ar-modal-tab-content
++ .border-top
+.finova-card {
+
+    flex: 0 0 auto !important;
+
+    height: auto !important;
+
+    min-height: 0 !important;
+
+    margin-bottom: 0 !important;
+
+}
+
+
+/* ==========================================================
+   FOOTER
+   CANCEL / SAVE CHANGES
+   ALWAYS VISIBLE
+========================================================== */
+
+#accountReceivableModal
+.modal-footer {
+
+    display: flex !important;
+
+    align-items: center !important;
+
+    justify-content: flex-end !important;
+
+    flex: 0 0 auto !important;
+
+    min-height: 54px !important;
+
+    padding: 10px 14px !important;
+
+    background: #FFFFFF !important;
+
+    border-top: 1px solid #DEE2E6 !important;
+
+    position: relative !important;
+
+    z-index: 20 !important;
+
+}
+/*
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+ACCOUNT RECEIVABLE
+MAIN MODAL FOOTER
+FINAL - MATCH ACCOUNT PAYABLE
+==========================================================
+*/
+
+
+/* ==========================================================
+   MAIN FOOTER
+========================================================== */
+
+#accountReceivableModal
+> .modal-dialog
+> .modal-content
+> .modal-footer {
+
+    display: flex !important;
+
+    flex-direction: row !important;
+
+    align-items: center !important;
+
+    justify-content: flex-end !important;
+
+    flex-wrap: nowrap !important;
+
+    flex: 0 0 58px !important;
+
+    width: 100% !important;
+
+    min-height: 58px !important;
+
+    height: 58px !important;
+
+    margin: 0 !important;
+
+    padding: 10px 14px !important;
+
+    gap: 8px !important;
+
+    box-sizing: border-box !important;
+
+    background: #FFFFFF !important;
+
+    border-top: 1px solid #DEE2E6 !important;
+
+    overflow: hidden !important;
+
+    position: relative !important;
+
+    z-index: 30 !important;
+
+}
+
+
+/* ==========================================================
+   FOOTER BUTTON
+========================================================== */
+
+#accountReceivableModal
+> .modal-dialog
+> .modal-content
+> .modal-footer
+> .btn {
+
+    display: inline-flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    flex: 0 0 auto !important;
+
+    width: auto !important;
+
+    min-height: 34px !important;
+
+    height: 34px !important;
+
+    margin: 0 !important;
+
+    padding-top: 0 !important;
+
+    padding-bottom: 0 !important;
+
+    white-space: nowrap !important;
+
+}
+
+
+/* ==========================================================
+   CANCEL
+========================================================== */
+
+#accountReceivableModal
+> .modal-dialog
+> .modal-content
+> .modal-footer
+> .btn-light {
+
+    flex: 0 0 auto !important;
+
+}
+
+
+/* ==========================================================
+   SAVE DRAFT / SAVE CHANGES
+========================================================== */
+
+#accountReceivableModal
+> .modal-dialog
+> .modal-content
+> .modal-footer
+> #btn-save-ar-draft {
+
+    flex: 0 0 auto !important;
+
+}

@@ -2897,3 +2897,55 @@ td {
     background: #FFFFFF;
 
 }
+/*
+==========================================================
+ACCOUNT PAYABLE
+MAIN MODAL POSITION
+MATCH ACCOUNT RECEIVABLE
+==========================================================
+*/
+
+#accountPayableModal
+.modal-dialog {
+
+    width: calc(100% - 48px) !important;
+
+    max-width: 1140px !important;
+
+    height: auto !important;
+
+    max-height: none !important;
+
+    margin:
+
+        48px
+
+        auto !important;
+
+}
+
+
+/*
+==========================================================
+MODAL CONTENT
+==========================================================
+*/
+
+#accountPayableModal
+.modal-content {
+
+    display: flex !important;
+
+    flex-direction: column !important;
+
+    width: 100% !important;
+
+    height: auto !important;
+
+    max-height: calc(100vh - 96px) !important;
+
+    min-height: 0 !important;
+
+    overflow: hidden !important;
+
+}
