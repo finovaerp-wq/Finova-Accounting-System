@@ -2778,3 +2778,122 @@ td:nth-child(6) {
     white-space: nowrap !important;
 
 }
+/*
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+ACCOUNT PAYABLE
+ACCOUNTING PREVIEW
+FIXED 5 ROWS + SCROLL
+==========================================================
+*/
+
+
+/* ==========================================================
+   JOURNAL SCROLL AREA
+   SHOW APPROXIMATELY 5 ROWS
+========================================================== */
+
+#accountPayableModal
+#ap-accounting-preview-pane
+.ap-accounting-preview-scroll {
+
+    width: 100%;
+
+    max-height: 225px;
+
+    overflow-x: auto;
+
+    overflow-y: auto;
+
+}
+
+
+/* ==========================================================
+   KEEP TABLE HEADER VISIBLE
+========================================================== */
+
+#accountPayableModal
+#ap-accounting-preview-pane
+.ap-accounting-preview-scroll
+thead
+th {
+
+    position: sticky;
+
+    top: 0;
+
+    z-index: 5;
+
+    background: #FFFFFF;
+
+}
+
+
+/* ==========================================================
+   KEEP TOTAL ROW VISIBLE
+========================================================== */
+
+#accountPayableModal
+#ap-accounting-preview-pane
+.ap-accounting-preview-scroll
+tfoot
+td {
+
+    position: sticky;
+
+    bottom: 0;
+
+    z-index: 4;
+
+    background: #FFFFFF;
+
+}
+
+
+/* ==========================================================
+   PREVENT AMOUNT WRAPPING
+========================================================== */
+
+#accountPayableModal
+#ap-accounting-preview-pane
+.ap-accounting-preview-scroll
+th,
+
+#accountPayableModal
+#ap-accounting-preview-pane
+.ap-accounting-preview-scroll
+td {
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   ACCOUNTING SUMMARY
+   NEVER SCROLL WITH JOURNAL
+========================================================== */
+
+#accountPayableModal
+#ap-accounting-preview-pane
+.ap-accounting-preview-scroll
++ .row {
+
+    flex: 0 0 auto;
+
+}
+
+
+/* ==========================================================
+   MODAL FOOTER
+   KEEP PERMANENT
+========================================================== */
+
+#accountPayableModal
+.modal-footer {
+
+    flex: 0 0 auto;
+
+    background: #FFFFFF;
+
+}
