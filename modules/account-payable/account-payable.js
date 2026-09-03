@@ -15696,9 +15696,23 @@ ADD ACCOUNT PAYABLE
 
 addInvoice() {
 
-    this.currentInvoiceId = null;
+    /*
+    ==================================================
+    STATE
+    ==================================================
+    */
 
-    this.currentMode = "add";
+    this.currentInvoiceId =
+        null;
+
+    this.currentMode =
+        "add";
+
+    this.currentDetailId =
+        null;
+
+    this.pendingDeleteDetailId =
+        null;
 
 
     /*
@@ -15707,7 +15721,9 @@ addInvoice() {
     ==================================================
     */
 
-    if (!this.accountPayableModal) {
+    if (
+        !this.accountPayableModal
+    ) {
 
         console.error(
             "Account Payable modal not found."
@@ -15725,6 +15741,232 @@ addInvoice() {
     */
 
     this.resetAddForm();
+
+
+    /*
+    ==================================================
+    ENABLE HEADER FIELDS
+    RESTORE AFTER VIEW MODE
+    ==================================================
+    */
+
+    const editableFields = [
+
+        this.apFormVendor,
+        this.apFormPoNo,
+        this.apFormInvoiceNo,
+        this.apFormInvoiceDate,
+        this.apFormDateReceived,
+        this.apFormDescription
+
+    ];
+
+
+    editableFields.forEach(
+        field => {
+
+            if (
+                !field
+            ) {
+
+                return;
+
+            }
+
+
+            field.disabled =
+                false;
+
+            field.readOnly =
+                false;
+
+        }
+    );
+
+
+    /*
+    ==================================================
+    TOP
+    READ ONLY
+    ==================================================
+    */
+
+    if (
+        this.apFormTop
+    ) {
+
+        this.apFormTop.disabled =
+            false;
+
+        this.apFormTop.readOnly =
+            true;
+
+    }
+
+
+    /*
+    ==================================================
+    DUE DATE
+    READ ONLY / AUTO CALCULATED
+    ==================================================
+    */
+
+    if (
+        this.apFormDueDate
+    ) {
+
+        this.apFormDueDate.disabled =
+            false;
+
+        this.apFormDueDate.readOnly =
+            true;
+
+    }
+
+
+    /*
+    ==================================================
+    JOURNAL NO
+    ALWAYS READ ONLY
+    ==================================================
+    */
+
+    if (
+        this.apFormJournalNo
+    ) {
+
+        this.apFormJournalNo.disabled =
+            false;
+
+        this.apFormJournalNo.readOnly =
+            true;
+
+        this.apFormJournalNo.value =
+            "AUTO";
+
+    }
+
+
+    /*
+    ==================================================
+    ENABLE VENDOR TOM SELECT
+    RESTORE AFTER VIEW MODE
+    ==================================================
+    */
+
+    if (
+        this.apVendorSelect
+    ) {
+
+        this.apVendorSelect.enable();
+
+        this.apVendorSelect.clear(
+            true
+        );
+
+        this.apVendorSelect.setTextboxValue(
+            ""
+        );
+
+    }
+
+
+    /*
+    ==================================================
+    ENABLE ADD DETAIL
+    ==================================================
+    */
+
+    if (
+        this.btnAddDetail
+    ) {
+
+        this.btnAddDetail.disabled =
+            false;
+
+        this.btnAddDetail.style.display =
+            "";
+
+    }
+
+
+    /*
+    ==================================================
+    RESTORE SAVE DRAFT BUTTON
+    VIEW MODE MAY HAVE HIDDEN IT
+    ==================================================
+    */
+
+    if (
+        this.btnSaveDraft
+    ) {
+
+        this.btnSaveDraft.style.display =
+            "";
+
+        this.btnSaveDraft.disabled =
+            false;
+
+        this.btnSaveDraft.innerHTML = `
+
+            <i class="fa-solid fa-floppy-disk me-1"></i>
+
+            Save Draft
+
+        `;
+
+    }
+
+
+    /*
+    ==================================================
+    MODAL TITLE
+    ==================================================
+    */
+
+    const modalTitle =
+        this.accountPayableModal
+            ?.querySelector(
+                ".modal-title"
+            );
+
+
+    if (
+        modalTitle
+    ) {
+
+        modalTitle.innerHTML = `
+
+            <i class="fa-solid fa-file-invoice-dollar me-2"></i>
+
+            Add Account Payable
+
+        `;
+
+    }
+
+
+    /*
+    ==================================================
+    MODAL SUBTITLE
+    ==================================================
+    */
+
+    const modalSubtitle =
+        this.accountPayableModal
+            ?.querySelector(
+                ".modal-subtitle"
+            );
+
+
+    if (
+        modalSubtitle
+    ) {
+
+        modalSubtitle.textContent =
+            "Create new Account Payable";
+
+    }
 
 
     /*
@@ -18906,70 +19148,799 @@ async postInvoice(id) {
 
 }
 
+       /*
+======================================================
+VIEW ACCOUNT PAYABLE
+READ ONLY
+======================================================
+*/
+
+async viewInvoice(id) {
+
+    try {
+
         /*
-    ======================================================
-    VIEW ACCOUNT PAYABLE
-    READ ONLY
-    ======================================================
-    */
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
 
-    async viewInvoice(id) {
+        if (!id) {
 
-        try {
+            throw new Error(
+                "Account Payable ID is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        LOAD MODALS
+        ==================================================
+        */
+
+        await this.loadModalHTML();
+
+        await this.loadDetailModalHTML();
+
+
+        /*
+        ==================================================
+        CACHE DOM
+        ==================================================
+        */
+
+        this.cacheDOM();
+
+
+        /*
+        ==================================================
+        RESET PREVIOUS VIEW STATE
+        IMPORTANT
+        ==================================================
+        */
+
+        this.currentInvoiceId =
+            null;
+
+        this.currentDetailId =
+            null;
+
+        this.currentMode =
+            "view";
+
+        this.invoiceDetails =
+            [];
+
+        this.selectedVendor =
+            null;
+
+        this.selectedTopId =
+            null;
+
+
+        /*
+        ==================================================
+        CLEAR HEADER FORM
+        ==================================================
+        */
+
+        if (this.apFormVendor) {
+
+            this.apFormVendor.value =
+                "";
+
+        }
+
+
+        if (this.apFormPoNo) {
+
+            this.apFormPoNo.value =
+                "";
+
+        }
+
+
+        if (this.apFormInvoiceNo) {
+
+            this.apFormInvoiceNo.value =
+                "";
+
+        }
+
+
+        if (this.apFormJournalNo) {
+
+            this.apFormJournalNo.value =
+                "";
+
+        }
+
+
+        if (this.apFormInvoiceDate) {
+
+            this.apFormInvoiceDate.value =
+                "";
+
+        }
+
+
+        if (this.apFormDateReceived) {
+
+            this.apFormDateReceived.value =
+                "";
+
+        }
+
+
+        if (this.apFormTop) {
+
+            this.apFormTop.value =
+                "";
+
+        }
+
+
+        if (this.apFormDueDate) {
+
+            this.apFormDueDate.value =
+                "";
+
+        }
+
+
+        if (this.apFormDescription) {
+
+            this.apFormDescription.value =
+                "";
+
+        }
+
+
+        /*
+        ==================================================
+        CLEAR DETAIL TABLE
+        ==================================================
+        */
+
+        if (this.apDetailBody) {
+
+            this.apDetailBody.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="9"
+                        class="text-center text-muted py-4">
+
+                        Loading...
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        }
+
+
+        /*
+        ==================================================
+        RESET TAX TABLE
+        ==================================================
+        */
+
+        this.resetAPTaxTables?.();
+
+
+        /*
+        ==================================================
+        RESET TOTAL
+        ==================================================
+        */
+
+        if (this.apFormSubtotal) {
+
+            this.apFormSubtotal.textContent =
+                "0";
+
+        }
+
+
+        if (this.apFormTax) {
+
+            this.apFormTax.textContent =
+                "0";
+
+        }
+
+
+        if (this.apFormWht) {
+
+            this.apFormWht.textContent =
+                "0";
+
+        }
+
+
+        if (this.apFormTotal) {
+
+            this.apFormTotal.textContent =
+                "0";
+
+        }
+
+
+        /*
+        ==================================================
+        LOAD VENDORS
+        ==================================================
+        */
+
+        if (
+            !Array.isArray(
+                this.vendorData
+            )
+            ||
+            !this.vendorData.length
+        ) {
+
+            await this.loadVendors();
+
+        }
+
+
+        /*
+        ==================================================
+        LOAD CHART OF ACCOUNTS
+        ==================================================
+        */
+
+        await this.loadDetailCOA();
+
+
+        /*
+        ==================================================
+        LOAD TAX MASTER
+        ==================================================
+        */
+
+        await this.loadTaxMaster();
+
+
+        /*
+        ==================================================
+        LOAD ACCOUNT PAYABLE
+        ALWAYS USE CURRENT CLICKED ID
+        ==================================================
+        */
+
+        const result =
+            await this.service.getById(
+                id
+            );
+
+
+        if (!result) {
+
+            throw new Error(
+                "Account Payable not found."
+            );
+
+        }
+
+
+        const header =
+            result.header;
+
+
+        const details =
+            Array.isArray(
+                result.details
+            )
+                ? result.details
+                : [];
+
+
+        if (!header) {
+
+            throw new Error(
+                "Account Payable header not found."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        SET CURRENT VIEW ID
+        ONLY AFTER DATA SUCCESSFULLY LOADED
+        ==================================================
+        */
+
+        this.currentInvoiceId =
+            id;
+
+
+        /*
+        ==================================================
+        GL JOURNAL REFERENCE
+        ==================================================
+        */
+
+        const journalId =
+            header.gl_journal_id
+            || null;
+
+
+        let journalNo =
+            "";
+
+
+        if (
+            journalId
+        ) {
+
+            journalNo =
+                await this.getAPJournalNo(
+                    journalId
+                );
+
+        }
+
+
+        if (
+            this.apFormJournalNo
+        ) {
+
+            this.apFormJournalNo.value =
+                journalNo;
+
+        }
+
+
+        /*
+        ==================================================
+        MAP INVOICE DETAILS
+        ==================================================
+        */
+
+        this.invoiceDetails =
+            details.map(
+                detail => {
+
+                    /*
+                    ==========================================
+                    COA RELATION
+                    ==========================================
+                    */
+
+                    const relationCOA =
+                        detail.charge_account
+                        || {};
+
+
+                    /*
+                    ==========================================
+                    FALLBACK COA MASTER
+                    ==========================================
+                    */
+
+                    const masterCOA =
+                        Array.isArray(
+                            this.currentCOA
+                        )
+                            ? this.currentCOA.find(
+                                account =>
+                                    String(account.id)
+                                    ===
+                                    String(
+                                        detail.charge_account_id
+                                    )
+                            )
+                            : null;
+
+
+                    return {
+
+                        id:
+                            detail.id
+                            ||
+                            crypto.randomUUID(),
+
+                        charge_account_id:
+                            Number(
+                                detail.charge_account_id
+                                ||
+                                relationCOA.id
+                                ||
+                                masterCOA?.id
+                                ||
+                                0
+                            ),
+
+                        account_code:
+                            detail.account_code
+                            ||
+                            relationCOA.account_code
+                            ||
+                            masterCOA?.account_code
+                            ||
+                            "",
+
+                        account_name:
+                            detail.account_name
+                            ||
+                            relationCOA.account_name
+                            ||
+                            masterCOA?.account_name
+                            ||
+                            "",
+
+                        description:
+                            detail.description
+                            || "",
+
+                        quantity:
+                            Number(
+                                detail.quantity
+                                || 0
+                            ),
+
+                        unit_price:
+                            Number(
+                                detail.unit_price
+                                || 0
+                            ),
+
+
+                        /*
+                        ======================================
+                        TAX (+)
+                        ======================================
+                        */
+
+                        tax_plus_id:
+                            detail.tax_plus_id
+                                ? Number(
+                                    detail.tax_plus_id
+                                )
+                                : null,
+
+                        tax_plus_account_id:
+                            detail.tax_plus_account_id
+                                ? Number(
+                                    detail.tax_plus_account_id
+                                )
+                                : null,
+
+                        tax_input_rate:
+                            Number(
+                                detail.tax_input_rate
+                                || 0
+                            ),
+
+                        tax_input_amount:
+                            Number(
+                                detail.tax_input_amount
+                                || 0
+                            ),
+
+
+                        /*
+                        ======================================
+                        TAX (-)
+                        ======================================
+                        */
+
+                        tax_minus_id:
+                            detail.tax_minus_id
+                                ? Number(
+                                    detail.tax_minus_id
+                                )
+                                : null,
+
+                        tax_minus_account_id:
+                            detail.tax_minus_account_id
+                                ? Number(
+                                    detail.tax_minus_account_id
+                                )
+                                : null,
+
+                        withholding_tax_rate:
+                            Number(
+                                detail.withholding_tax_rate
+                                || 0
+                            ),
+
+                        withholding_tax_amount:
+                            Number(
+                                detail.withholding_tax_amount
+                                || 0
+                            ),
+
+
+                        /*
+                        ======================================
+                        AMOUNT
+                        ======================================
+                        */
+
+                        line_amount:
+                            Number(
+                                detail.line_amount
+                                || 0
+                            ),
+
+                        total_amount:
+                            Number(
+                                detail.total_amount
+                                || 0
+                            )
+
+                    };
+
+                }
+            );
+
+
+        /*
+        ==================================================
+        VENDOR
+        VIEW MODE
+        SUPPORT ACTIVE / INACTIVE / HISTORICAL VENDOR
+        ==================================================
+        */
+
+        const vendorValue =
+            String(
+                header.vendor_id
+                || ""
+            );
+
+
+        /*
+        ==================================================
+        FIND FROM CURRENT VENDOR DATA
+        ==================================================
+        */
+
+        let vendor =
+            Array.isArray(
+                this.vendorData
+            )
+                ? this.vendorData.find(
+                    item =>
+                        String(
+                            item.id
+                        )
+                        ===
+                        vendorValue
+                )
+                : null;
+
+
+        /*
+        ==================================================
+        FALLBACK FROM AP HEADER RELATION
+
+        IMPORTANT:
+        HISTORICAL VENDOR MUST STILL BE VISIBLE
+        EVEN IF CURRENTLY INACTIVE
+        ==================================================
+        */
+
+        if (
+            !vendor
+            &&
+            header.mst_business_partner
+        ) {
+
+            vendor = {
+
+                id:
+                    header.mst_business_partner.id
+                    ||
+                    header.vendor_id,
+
+                bp_code:
+                    header.mst_business_partner.bp_code
+                    ||
+                    "",
+
+                bp_name:
+                    header.mst_business_partner.bp_name
+                    ||
+                    "",
+
+                bp_type:
+                    header.mst_business_partner.bp_type
+                    ||
+                    "Vendor",
+
+                top_id:
+                    header.mst_business_partner.top_id
+                    ||
+                    header.top_id
+                    ||
+                    null,
+
+                is_active:
+                    header.mst_business_partner.is_active,
+
+                mst_term_of_payment:
+                    header.mst_business_partner
+                        .mst_term_of_payment
+                    ||
+                    null
+
+            };
+
+        }
+
+
+        /*
+        ==================================================
+        NATIVE SELECT
+        ENSURE HISTORICAL VENDOR OPTION EXISTS
+        ==================================================
+        */
+
+        if (
+            this.apFormVendor
+            &&
+            vendorValue
+        ) {
+
+            const existingOption =
+                Array.from(
+                    this.apFormVendor.options
+                    || []
+                )
+                .find(
+                    option =>
+                        String(
+                            option.value
+                        )
+                        ===
+                        vendorValue
+                );
+
+
+            if (
+                !existingOption
+                &&
+                vendor
+            ) {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    vendorValue;
+
+
+                option.textContent =
+                    `${
+                        vendor.bp_code
+                        || ""
+                    } :: ${
+                        vendor.bp_name
+                        || ""
+                    }`;
+
+
+                this.apFormVendor.appendChild(
+                    option
+                );
+
+            }
+
+
+            this.apFormVendor.value =
+                vendorValue;
+
+        }
+
+
+        /*
+        ==================================================
+        TOM SELECT
+        ENSURE HISTORICAL VENDOR OPTION EXISTS
+        ==================================================
+        */
+
+        if (
+            this.apVendorSelect
+            &&
+            vendorValue
+            &&
+            vendor
+        ) {
+
+            const optionText =
+                `${
+                    vendor.bp_code
+                    || ""
+                } :: ${
+                    vendor.bp_name
+                    || ""
+                }`;
+
 
             /*
-            ==================================================
-            VALIDATION
-            ==================================================
+            ==============================================
+            ADD OPTION IF NOT AVAILABLE
+            ==============================================
             */
 
-            if (!id) {
+            if (
+                !this.apVendorSelect.options[
+                    vendorValue
+                ]
+            ) {
 
-                throw new Error(
-                    "Account Payable ID is required."
+                this.apVendorSelect.addOption(
+                    {
+                        value:
+                            vendorValue,
+
+                        text:
+                            optionText
+                    }
                 );
 
             }
 
 
             /*
-            ==================================================
-            LOAD MODALS
-            ==================================================
+            ==============================================
+            SET VENDOR
+            TRUE = SILENT
+            ==============================================
             */
 
-            await this.loadModalHTML();
-
-            await this.loadDetailModalHTML();
+            this.apVendorSelect.setValue(
+                vendorValue,
+                true
+            );
 
 
             /*
-            ==================================================
-            CACHE DOM
-            ==================================================
+            ==============================================
+            VIEW MODE = READ ONLY
+            ==============================================
             */
 
-            this.cacheDOM();
+            this.apVendorSelect.disable();
+
+        }
 
 
-            /*
-            ==================================================
-            RESET PREVIOUS VIEW STATE
-            IMPORTANT
-            ==================================================
-            */
+        /*
+        ==================================================
+        TERM OF PAYMENT
+        ==================================================
+        */
 
-            this.currentInvoiceId =
-                null;
+        if (
+            vendor
+        ) {
 
-            this.currentDetailId =
-                null;
+            this.selectedVendor =
+                vendor;
 
-            this.currentMode =
-                "view";
 
-            this.invoiceDetails =
-                [];
+            this.renderVendorTOP(
+                vendor
+            );
+
+        }
+        else {
 
             this.selectedVendor =
                 null;
@@ -18978,932 +19949,400 @@ async postInvoice(id) {
                 null;
 
 
-            /*
-            ==================================================
-            CLEAR HEADER FORM
-            ==================================================
-            */
-
-            if (this.apFormVendor) {
-
-                this.apFormVendor.value =
-                    "";
-
-            }
-
-
-            if (this.apFormPoNo) {
-
-                this.apFormPoNo.value =
-                    "";
-
-            }
-
-
-            if (this.apFormInvoiceNo) {
-
-                this.apFormInvoiceNo.value =
-                    "";
-
-            }
-
-
-            if (this.apFormJournalNo) {
-
-                this.apFormJournalNo.value =
-                    "";
-
-            }
-
-
-            if (this.apFormInvoiceDate) {
-
-                this.apFormInvoiceDate.value =
-                    "";
-
-            }
-
-
-            if (this.apFormDateReceived) {
-
-                this.apFormDateReceived.value =
-                    "";
-
-            }
-
-
-            if (this.apFormTop) {
+            if (
+                this.apFormTop
+            ) {
 
                 this.apFormTop.value =
-                    "";
+                    "No Term of Payment";
 
             }
 
+        }
 
-            if (this.apFormDueDate) {
 
-                this.apFormDueDate.value =
-                    "";
+        /*
+        ==================================================
+        PO NO
+        ==================================================
+        */
+
+        if (
+            this.apFormPoNo
+        ) {
+
+            this.apFormPoNo.value =
+                header.po_no
+                || "";
+
+        }
+
+
+        /*
+        ==================================================
+        INVOICE NO
+        ==================================================
+        */
+
+        if (
+            this.apFormInvoiceNo
+        ) {
+
+            this.apFormInvoiceNo.value =
+                header.invoice_no
+                || "";
+
+        }
+
+
+        /*
+        ==================================================
+        INVOICE DATE
+        ==================================================
+        */
+
+        if (
+            this.apFormInvoiceDate
+        ) {
+
+            this.apFormInvoiceDate.value =
+                header.invoice_date
+                || "";
+
+        }
+
+
+        /*
+        ==================================================
+        DATE RECEIVED
+        ==================================================
+        */
+
+        if (
+            this.apFormDateReceived
+        ) {
+
+            this.apFormDateReceived.value =
+                header.date_received
+                || "";
+
+        }
+
+
+        /*
+        ==================================================
+        DUE DATE
+        ==================================================
+        */
+
+        if (
+            this.apFormDueDate
+        ) {
+
+            this.apFormDueDate.value =
+                header.due_date
+                || "";
+
+        }
+
+
+        /*
+        ==================================================
+        DESCRIPTION
+        ==================================================
+        */
+
+        if (
+            this.apFormDescription
+        ) {
+
+            this.apFormDescription.value =
+                header.description
+                || "";
+
+        }
+
+
+        /*
+        ==================================================
+        RENDER DETAILS
+        ==================================================
+        */
+
+        this.renderInvoiceDetails();
+
+
+        /*
+        ==================================================
+        RENDER TAX (+)
+        ==================================================
+        */
+
+        this.renderTaxPlus();
+
+
+        /*
+        ==================================================
+        RENDER TAX (-)
+        ==================================================
+        */
+
+        this.renderTaxMinus();
+
+
+        /*
+        ==================================================
+        UPDATE SUMMARY
+        ==================================================
+        */
+
+        this.updateInvoiceSummary();
+
+
+        /*
+        ==================================================
+        READ ONLY
+        ==================================================
+        */
+
+        const viewFields = [
+
+            this.apFormVendor,
+            this.apFormPoNo,
+            this.apFormInvoiceNo,
+            this.apFormInvoiceDate,
+            this.apFormDateReceived,
+            this.apFormTop,
+            this.apFormDueDate,
+            this.apFormDescription
+
+        ];
+
+
+        viewFields.forEach(
+            field => {
+
+                if (!field) {
+
+                    return;
+
+                }
+
+
+                field.disabled =
+                    true;
+
+
+                field.readOnly =
+                    true;
 
             }
+        );
 
 
-            if (this.apFormDescription) {
+        /*
+        ==================================================
+        DISABLE VENDOR TOM SELECT
+        ==================================================
+        */
 
-                this.apFormDescription.value =
-                    "";
+        if (
+            this.apVendorSelect
+        ) {
 
-            }
+            this.apVendorSelect.disable();
 
+        }
 
-            /*
-            ==================================================
-            CLEAR DETAIL TABLE
-            ==================================================
-            */
 
-            if (this.apDetailBody) {
+        /*
+        ==================================================
+        DISABLE DETAIL ACTION
+        ==================================================
+        */
 
-                this.apDetailBody.innerHTML = `
-
-                    <tr>
-
-                        <td
-                            colspan="9"
-                            class="text-center text-muted py-4">
-
-                            Loading...
-
-                        </td>
-
-                    </tr>
-
-                `;
-
-            }
-
-
-            /*
-            ==================================================
-            RESET TAX TABLE
-            ==================================================
-            */
-
-            this.resetAPTaxTables?.();
-
-
-            /*
-            ==================================================
-            RESET TOTAL
-            ==================================================
-            */
-
-            if (this.apFormSubtotal) {
-
-                this.apFormSubtotal.textContent =
-                    "0";
-
-            }
-
-
-            if (this.apFormTax) {
-
-                this.apFormTax.textContent =
-                    "0";
-
-            }
-
-
-            if (this.apFormWht) {
-
-                this.apFormWht.textContent =
-                    "0";
-
-            }
-
-
-            if (this.apFormTotal) {
-
-                this.apFormTotal.textContent =
-                    "0";
-
-            }
-
-
-            /*
-            ==================================================
-            LOAD VENDORS
-            ==================================================
-            */
-
-            if (
-                !Array.isArray(
-                    this.vendorData
-                )
-                ||
-                !this.vendorData.length
-            ) {
-
-                await this.loadVendors();
-
-            }
-
-
-            /*
-            ==================================================
-            LOAD CHART OF ACCOUNTS
-            ==================================================
-            */
-
-            await this.loadDetailCOA();
-
-
-            /*
-            ==================================================
-            LOAD TAX MASTER
-            ==================================================
-            */
-
-            await this.loadTaxMaster();
-
-
-            /*
-            ==================================================
-            LOAD ACCOUNT PAYABLE
-            ALWAYS USE CURRENT CLICKED ID
-            ==================================================
-            */
-
-            const result =
-                await this.service.getById(
-                    id
-                );
-
-
-            if (!result) {
-
-                throw new Error(
-                    "Account Payable not found."
-                );
-
-            }
-
-
-            const header =
-                result.header;
-
-
-            const details =
-                Array.isArray(
-                    result.details
-                )
-                    ? result.details
-                    : [];
-
-
-            if (!header) {
-
-                throw new Error(
-                    "Account Payable header not found."
-                );
-
-            }
-
-
-            /*
-            ==================================================
-            SET CURRENT VIEW ID
-            ONLY AFTER DATA SUCCESSFULLY LOADED
-            ==================================================
-            */
-
-            this.currentInvoiceId =
-                id;
-
-
-            /*
-            ==================================================
-            GL JOURNAL REFERENCE
-            ==================================================
-            */
-
-            const journalId =
-                header.gl_journal_id
-                || null;
-
-
-            let journalNo =
-                "";
-
-
-            if (
-                journalId
-            ) {
-
-                journalNo =
-                    await this.getAPJournalNo(
-                        journalId
-                    );
-
-            }
-
-
-            if (
-                this.apFormJournalNo
-            ) {
-
-                this.apFormJournalNo.value =
-                    journalNo;
-
-            }
-
-
-            /*
-            ==================================================
-            MAP INVOICE DETAILS
-            ==================================================
-            */
-
-            this.invoiceDetails =
-                details.map(
-                    detail => {
-
-                        /*
-                        ==========================================
-                        COA RELATION
-                        ==========================================
-                        */
-
-                        const relationCOA =
-                            detail.charge_account
-                            || {};
-
-
-                        /*
-                        ==========================================
-                        FALLBACK COA MASTER
-                        ==========================================
-                        */
-
-                        const masterCOA =
-                            Array.isArray(
-                                this.currentCOA
-                            )
-                                ? this.currentCOA.find(
-                                    account =>
-                                        String(account.id)
-                                        ===
-                                        String(
-                                            detail.charge_account_id
-                                        )
-                                )
-                                : null;
-
-
-                        return {
-
-                            id:
-                                detail.id
-                                ||
-                                crypto.randomUUID(),
-
-                            charge_account_id:
-                                Number(
-                                    detail.charge_account_id
-                                    ||
-                                    relationCOA.id
-                                    ||
-                                    masterCOA?.id
-                                    ||
-                                    0
-                                ),
-
-                            account_code:
-                                detail.account_code
-                                ||
-                                relationCOA.account_code
-                                ||
-                                masterCOA?.account_code
-                                ||
-                                "",
-
-                            account_name:
-                                detail.account_name
-                                ||
-                                relationCOA.account_name
-                                ||
-                                masterCOA?.account_name
-                                ||
-                                "",
-
-                            description:
-                                detail.description
-                                || "",
-
-                            quantity:
-                                Number(
-                                    detail.quantity
-                                    || 0
-                                ),
-
-                            unit_price:
-                                Number(
-                                    detail.unit_price
-                                    || 0
-                                ),
-
-
-                            /*
-                            ======================================
-                            TAX (+)
-                            ======================================
-                            */
-
-                            tax_plus_id:
-                                detail.tax_plus_id
-                                    ? Number(
-                                        detail.tax_plus_id
-                                    )
-                                    : null,
-
-                            tax_plus_account_id:
-                                detail.tax_plus_account_id
-                                    ? Number(
-                                        detail.tax_plus_account_id
-                                    )
-                                    : null,
-
-                            tax_input_rate:
-                                Number(
-                                    detail.tax_input_rate
-                                    || 0
-                                ),
-
-                            tax_input_amount:
-                                Number(
-                                    detail.tax_input_amount
-                                    || 0
-                                ),
-
-
-                            /*
-                            ======================================
-                            TAX (-)
-                            ======================================
-                            */
-
-                            tax_minus_id:
-                                detail.tax_minus_id
-                                    ? Number(
-                                        detail.tax_minus_id
-                                    )
-                                    : null,
-
-                            tax_minus_account_id:
-                                detail.tax_minus_account_id
-                                    ? Number(
-                                        detail.tax_minus_account_id
-                                    )
-                                    : null,
-
-                            withholding_tax_rate:
-                                Number(
-                                    detail.withholding_tax_rate
-                                    || 0
-                                ),
-
-                            withholding_tax_amount:
-                                Number(
-                                    detail.withholding_tax_amount
-                                    || 0
-                                ),
-
-
-                            /*
-                            ======================================
-                            AMOUNT
-                            ======================================
-                            */
-
-                            line_amount:
-                                Number(
-                                    detail.line_amount
-                                    || 0
-                                ),
-
-                            total_amount:
-                                Number(
-                                    detail.total_amount
-                                    || 0
-                                )
-
-                        };
-
-                    }
-                );
-
-
-            /*
-==================================================
-VENDOR
-NATIVE SELECT + TOM SELECT
-==================================================
-*/
-
-const vendorValue =
-    String(
-        header.vendor_id
-        || ""
-    );
-
-
-/*
-==================================================
-SET ORIGINAL SELECT
-==================================================
-*/
-
-if (
-    this.apFormVendor
-) {
-
-    this.apFormVendor.value =
-        vendorValue;
-
-}
-
-
-/*
-==================================================
-SET TOM SELECT DISPLAY
-
-TRUE = SILENT
-DO NOT TRIGGER VENDOR CHANGE
-==================================================
-*/
-
-if (
-    this.apVendorSelect
-) {
-
-    this.apVendorSelect.setValue(
-        vendorValue,
-        true
-    );
-
-}
-
-
-/*
-==================================================
-FIND VENDOR
-==================================================
-*/
-
-const vendor =
-    this.vendorData.find(
-        item =>
-            String(
-                item.id
+        document
+            .querySelectorAll(
+                "#ap-detail-body [data-detail-action]"
             )
-            ===
-            String(
-                header.vendor_id
-            )
-    )
-    || null;
+            .forEach(
+                button => {
 
-
-/*
-==================================================
-TERM OF PAYMENT
-==================================================
-*/
-
-if (
-    vendor
-) {
-
-    this.selectedVendor =
-        vendor;
-
-
-    this.renderVendorTOP(
-        vendor
-    );
-
-}
-
-else {
-
-    this.selectedVendor =
-        null;
-
-    this.selectedTopId =
-        null;
-
-
-    if (
-        this.apFormTop
-    ) {
-
-        this.apFormTop.value =
-            "No Term of Payment";
-
-    }
-
-}
-
-
-            /*
-            ==================================================
-            PO NO
-            ==================================================
-            */
-
-            if (
-                this.apFormPoNo
-            ) {
-
-                this.apFormPoNo.value =
-                    header.po_no
-                    || "";
-
-            }
-
-
-            /*
-            ==================================================
-            INVOICE NO
-            ==================================================
-            */
-
-            if (
-                this.apFormInvoiceNo
-            ) {
-
-                this.apFormInvoiceNo.value =
-                    header.invoice_no
-                    || "";
-
-            }
-
-
-            /*
-            ==================================================
-            INVOICE DATE
-            ==================================================
-            */
-
-            if (
-                this.apFormInvoiceDate
-            ) {
-
-                this.apFormInvoiceDate.value =
-                    header.invoice_date
-                    || "";
-
-            }
-
-
-            /*
-            ==================================================
-            DATE RECEIVED
-            ==================================================
-            */
-
-            if (
-                this.apFormDateReceived
-            ) {
-
-                this.apFormDateReceived.value =
-                    header.date_received
-                    || "";
-
-            }
-
-
-            /*
-            ==================================================
-            DUE DATE
-            ==================================================
-            */
-
-            if (
-                this.apFormDueDate
-            ) {
-
-                this.apFormDueDate.value =
-                    header.due_date
-                    || "";
-
-            }
-
-
-            /*
-            ==================================================
-            DESCRIPTION
-            ==================================================
-            */
-
-            if (
-                this.apFormDescription
-            ) {
-
-                this.apFormDescription.value =
-                    header.description
-                    || "";
-
-            }
-
-
-            /*
-            ==================================================
-            RENDER DETAILS
-            ==================================================
-            */
-
-            this.renderInvoiceDetails();
-
-
-            /*
-            ==================================================
-            RENDER TAX (+)
-            ==================================================
-            */
-
-            this.renderTaxPlus();
-
-
-            /*
-            ==================================================
-            RENDER TAX (-)
-            ==================================================
-            */
-
-            this.renderTaxMinus();
-
-
-            /*
-            ==================================================
-            UPDATE SUMMARY
-            ==================================================
-            */
-
-            this.updateInvoiceSummary();
-
-
-            /*
-            ==================================================
-            READ ONLY
-            ==================================================
-            */
-
-            const viewFields = [
-
-                this.apFormVendor,
-                this.apFormPoNo,
-                this.apFormInvoiceNo,
-                this.apFormInvoiceDate,
-                this.apFormDateReceived,
-                this.apFormTop,
-                this.apFormDueDate,
-                this.apFormDescription
-
-            ];
-
-
-            viewFields.forEach(
-                field => {
-
-                    if (!field) {
-
-                        return;
-
-                    }
-
-
-                    field.disabled =
-                        true;
-
-
-                    field.readOnly =
+                    button.disabled =
                         true;
 
                 }
             );
 
 
-            /*
-            ==================================================
-            DISABLE DETAIL ACTION
-            ==================================================
-            */
+        /*
+        ==================================================
+        DISABLE ADD DETAIL
+        ==================================================
+        */
 
-            document
-                .querySelectorAll(
-                    "#ap-detail-body [data-detail-action]"
-                )
-                .forEach(
-                    button => {
+        if (
+            this.btnAddDetail
+        ) {
 
-                        button.disabled =
-                            true;
-
-                    }
-                );
-
-
-            /*
-            ==================================================
-            DISABLE ADD DETAIL
-            ==================================================
-            */
-
-            if (
-                this.btnAddDetail
-            ) {
-
-                this.btnAddDetail.disabled =
-                    true;
-
-            }
-
-
-            /*
-            ==================================================
-            DISABLE SAVE
-            ==================================================
-            */
-
-            if (
-                this.btnSaveDraft
-            ) {
-
-                this.btnSaveDraft.disabled =
-                    true;
-
-            }
-
-
-            /*
-            ==================================================
-            RESET TAB TO HEADER
-            ==================================================
-            */
-
-            this.resetAPModalTab();
-
-
-            /*
-            ==================================================
-            MODAL TITLE
-            ==================================================
-            */
-
-            const modalElement =
-                document.getElementById(
-                    "accountPayableModal"
-                );
-
-
-            const titleElement =
-                modalElement?.querySelector(
-                    ".modal-title"
-                );
-
-
-            if (
-                titleElement
-            ) {
-
-                titleElement.innerHTML = `
-                    <i class="fa-solid fa-eye me-2"></i>
-                    View Account Payable
-                `;
-
-            }
-
-
-            const subtitleElement =
-                modalElement?.querySelector(
-                    ".modal-subtitle"
-                );
-
-
-            if (
-                subtitleElement
-            ) {
-
-                subtitleElement.textContent =
-                    "View Account Payable";
-
-            }
-
-
-            /*
-            ==================================================
-            SHOW MODAL
-            ==================================================
-            */
-
-            if (
-                modalElement
-            ) {
-
-                const modal =
-                    bootstrap.Modal.getOrCreateInstance(
-                        modalElement
-                    );
-
-
-                modal.show();
-
-            }
-
-
-            /*
-            ==================================================
-            DEBUG
-            ==================================================
-            */
-
-            console.log(
-                "AP VIEW LOADED:",
-                {
-                    requested_id:
-                        id,
-
-                    loaded_id:
-                        header.id,
-
-                    invoice_no:
-                        header.invoice_no,
-
-                    detail_count:
-                        this.invoiceDetails.length
-                }
-            );
+            this.btnAddDetail.disabled =
+                true;
 
         }
 
-        catch (error) {
 
-            console.error(
-                "AccountPayable.viewInvoice:",
-                error
-            );
+        /*
+        ==================================================
+        HIDE SAVE DRAFT
+        VIEW MODE
+        ==================================================
+        */
 
+        if (
+            this.btnSaveDraft
+        ) {
 
-            this.showError(
-                error.message
-                ||
-                "Failed to view Account Payable."
-            );
+            this.btnSaveDraft.disabled =
+                true;
+
+            this.btnSaveDraft.style.display =
+                "none";
 
         }
+
+
+        /*
+        ==================================================
+        RESET TAB TO HEADER
+        ==================================================
+        */
+
+        this.resetAPModalTab();
+
+
+        /*
+        ==================================================
+        MODAL TITLE
+        ==================================================
+        */
+
+        const modalElement =
+            document.getElementById(
+                "accountPayableModal"
+            );
+
+
+        const titleElement =
+            modalElement?.querySelector(
+                ".modal-title"
+            );
+
+
+        if (
+            titleElement
+        ) {
+
+            titleElement.innerHTML = `
+                <i class="fa-solid fa-eye me-2"></i>
+                View Account Payable
+            `;
+
+        }
+
+
+        const subtitleElement =
+            modalElement?.querySelector(
+                ".modal-subtitle"
+            );
+
+
+        if (
+            subtitleElement
+        ) {
+
+            subtitleElement.textContent =
+                "View Account Payable";
+
+        }
+
+
+        /*
+        ==================================================
+        SHOW MODAL
+        ==================================================
+        */
+
+        if (
+            modalElement
+        ) {
+
+            const modal =
+                bootstrap.Modal.getOrCreateInstance(
+                    modalElement
+                );
+
+
+            modal.show();
+
+        }
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "AP VIEW LOADED:",
+            {
+                requested_id:
+                    id,
+
+                loaded_id:
+                    header.id,
+
+                invoice_no:
+                    header.invoice_no,
+
+                vendor_id:
+                    header.vendor_id,
+
+                vendor:
+                    vendor
+                        ? `${
+                            vendor.bp_code
+                            || ""
+                        } :: ${
+                            vendor.bp_name
+                            || ""
+                        }`
+                        : null,
+
+                detail_count:
+                    this.invoiceDetails.length
+            }
+        );
 
     }
+
+    catch (error) {
+
+        console.error(
+            "AccountPayable.viewInvoice:",
+            error
+        );
+
+
+        this.showError(
+            error.message
+            ||
+            "Failed to view Account Payable."
+        );
+
+    }
+
+}
 /*
 ======================================================
 GET GL JOURNAL NUMBER
@@ -20011,6 +20450,46 @@ async editInvoice(id) {
         */
 
         this.cacheDOM();
+        /*
+==================================================
+RESTORE EDIT MODE
+AFTER VIEW MODE
+==================================================
+*/
+
+if (
+    this.apVendorSelect
+) {
+
+    this.apVendorSelect.enable();
+
+}
+
+
+if (
+    this.btnSaveDraft
+) {
+
+    this.btnSaveDraft.style.display =
+        "";
+
+    this.btnSaveDraft.disabled =
+        false;
+
+}
+
+
+if (
+    this.btnAddDetail
+) {
+
+    this.btnAddDetail.style.display =
+        "";
+
+    this.btnAddDetail.disabled =
+        false;
+
+}
 
 
         /*
