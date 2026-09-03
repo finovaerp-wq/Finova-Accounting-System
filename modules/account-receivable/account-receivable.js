@@ -11948,71 +11948,145 @@ renderInvoiceDetails() {
 
 
     /*
-    ======================================================
-    RENDER TAX (+)
-    ======================================================
+======================================================
+RENDER TAX (+)
+======================================================
+*/
+
+renderTaxPlus() {
+
+    const body =
+        document.getElementById(
+            "ar-tax-plus-body"
+        );
+
+
+    if (!body) {
+
+        return;
+
+    }
+
+
+    /*
+    ==================================================
+    FILTER DETAIL WITH TAX (+)
+    ==================================================
     */
 
-    renderTaxPlus() {
-
-        const body =
-            document.getElementById(
-                "ar-tax-plus-body"
-            );
-
-
-        if (!body) {
-
-            return;
-
-        }
+    const details =
+        this.invoiceDetails.filter(
+            item =>
+                Number(
+                    item.tax_output_amount
+                    || 0
+                )
+                >
+                0
+        );
 
 
-        const details =
-            this.invoiceDetails.filter(
-                item =>
-                    Number(
-                        item.tax_output_amount
-                        || 0
-                    )
-                    >
-                    0
-            );
+    /*
+    ==================================================
+    EMPTY
+    ==================================================
+    */
+
+    if (
+        !details.length
+    ) {
+
+        body.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="7"
+                    class="text-center text-muted py-4">
+
+                    No Tax (+) found from Invoice Details.
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
 
 
-        if (
-            !details.length
-        ) {
+    /*
+    ==================================================
+    RENDER
+    ==================================================
+    */
 
-            body.innerHTML = `
+    body.innerHTML =
+        details
+            .map(
+                (
+                    detail,
+                    index
+                ) => {
 
-                <tr>
+                    /*
+                    ==========================================
+                    TAX MASTER
+                    FALLBACK BY TAX ID
+                    ==========================================
+                    */
 
-                    <td
-                        colspan="7"
-                        class="text-center text-muted py-4">
+                    const taxMaster =
+                        Array.isArray(
+                            this.taxPlusData
+                        )
+                            ? this.taxPlusData.find(
+                                tax =>
+                                    String(
+                                        tax.id
+                                    )
+                                    ===
+                                    String(
+                                        detail.tax_plus_id
+                                        || ""
+                                    )
+                            )
+                            : null;
 
-                        No Tax (+) found from Invoice Details.
 
-                    </td>
+                    /*
+                    ==========================================
+                    TAX NAME
+                    ==========================================
+                    */
 
-                </tr>
-
-            `;
-
-
-            return;
-
-        }
+                    const taxName =
+                        detail.tax_plus_name
+                        ||
+                        taxMaster?.tax_name
+                        ||
+                        "-";
 
 
-        body.innerHTML =
-            details
-                .map(
-                    (
-                        detail,
-                        index
-                    ) => `
+                    /*
+                    ==========================================
+                    TAX ACCOUNT
+                    ==========================================
+                    */
+
+                    const taxAccountId =
+                        Number(
+                            detail.tax_plus_account_id
+                            ||
+                            taxMaster?.tax_account_id
+                            ||
+                            0
+                        );
+
+
+                    return `
 
                         <tr>
 
@@ -12027,17 +12101,20 @@ renderInvoiceDetails() {
 
 
                             <td>
+
                                 ${
-                                    detail.tax_plus_name
-                                    || "-"
+                                    this.escapeHtml(
+                                        taxName
+                                    )
                                 }
+
                             </td>
 
 
                             <td>
 
                                 ${
-                                    detail.tax_plus_account_id
+                                    taxAccountId
                                     || "-"
                                 }
 
@@ -12058,6 +12135,7 @@ renderInvoiceDetails() {
                                 ${
                                     Number(
                                         detail.tax_output_rate
+                                        || taxMaster?.tax_rate
                                         || 0
                                     )
                                 }%
@@ -12075,79 +12153,154 @@ renderInvoiceDetails() {
 
                         </tr>
 
-                    `
-                )
-                .join("");
+                    `;
+
+                }
+            )
+            .join("");
+
+}
+
+    /*
+======================================================
+RENDER TAX (-)
+======================================================
+*/
+
+renderTaxMinus() {
+
+    const body =
+        document.getElementById(
+            "ar-tax-minus-body"
+        );
+
+
+    if (!body) {
+
+        return;
 
     }
 
 
     /*
-    ======================================================
-    RENDER TAX (-)
-    ======================================================
+    ==================================================
+    FILTER DETAIL WITH TAX (-)
+    ==================================================
     */
 
-    renderTaxMinus() {
-
-        const body =
-            document.getElementById(
-                "ar-tax-minus-body"
-            );
-
-
-        if (!body) {
-
-            return;
-
-        }
+    const details =
+        this.invoiceDetails.filter(
+            item =>
+                Number(
+                    item.withholding_tax_amount
+                    || 0
+                )
+                >
+                0
+        );
 
 
-        const details =
-            this.invoiceDetails.filter(
-                item =>
-                    Number(
-                        item.withholding_tax_amount
-                        || 0
-                    )
-                    >
-                    0
-            );
+    /*
+    ==================================================
+    EMPTY
+    ==================================================
+    */
+
+    if (
+        !details.length
+    ) {
+
+        body.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="7"
+                    class="text-center text-muted py-4">
+
+                    No Tax (-) found from Invoice Details.
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
 
 
-        if (
-            !details.length
-        ) {
+    /*
+    ==================================================
+    RENDER
+    ==================================================
+    */
 
-            body.innerHTML = `
+    body.innerHTML =
+        details
+            .map(
+                (
+                    detail,
+                    index
+                ) => {
 
-                <tr>
+                    /*
+                    ==========================================
+                    TAX MASTER
+                    FALLBACK BY TAX ID
+                    ==========================================
+                    */
 
-                    <td
-                        colspan="7"
-                        class="text-center text-muted py-4">
+                    const taxMaster =
+                        Array.isArray(
+                            this.taxMinusData
+                        )
+                            ? this.taxMinusData.find(
+                                tax =>
+                                    String(
+                                        tax.id
+                                    )
+                                    ===
+                                    String(
+                                        detail.tax_minus_id
+                                        || ""
+                                    )
+                            )
+                            : null;
 
-                        No Tax (-) found from Invoice Details.
 
-                    </td>
+                    /*
+                    ==========================================
+                    TAX NAME
+                    ==========================================
+                    */
 
-                </tr>
-
-            `;
-
-
-            return;
-
-        }
+                    const taxName =
+                        detail.tax_minus_name
+                        ||
+                        taxMaster?.tax_name
+                        ||
+                        "-";
 
 
-        body.innerHTML =
-            details
-                .map(
-                    (
-                        detail,
-                        index
-                    ) => `
+                    /*
+                    ==========================================
+                    TAX ACCOUNT
+                    ==========================================
+                    */
+
+                    const taxAccountId =
+                        Number(
+                            detail.tax_minus_account_id
+                            ||
+                            taxMaster?.tax_account_id
+                            ||
+                            0
+                        );
+
+
+                    return `
 
                         <tr>
 
@@ -12164,8 +12317,9 @@ renderInvoiceDetails() {
                             <td>
 
                                 ${
-                                    detail.tax_minus_name
-                                    || "-"
+                                    this.escapeHtml(
+                                        taxName
+                                    )
                                 }
 
                             </td>
@@ -12174,7 +12328,7 @@ renderInvoiceDetails() {
                             <td>
 
                                 ${
-                                    detail.tax_minus_account_id
+                                    taxAccountId
                                     || "-"
                                 }
 
@@ -12195,6 +12349,7 @@ renderInvoiceDetails() {
                                 ${
                                     Number(
                                         detail.withholding_tax_rate
+                                        || taxMaster?.tax_rate
                                         || 0
                                     )
                                 }%
@@ -12212,11 +12367,13 @@ renderInvoiceDetails() {
 
                         </tr>
 
-                    `
-                )
-                .join("");
+                    `;
 
-    }
+                }
+            )
+            .join("");
+
+}
 
 
     /*
@@ -14564,7 +14721,8 @@ async editInvoice(id) {
 
         /*
         ==================================================
-        SHOW SAVE BUTTON
+        SAVE BUTTON
+        EDIT MODE
         ==================================================
         */
 
@@ -14581,6 +14739,15 @@ async editInvoice(id) {
 
             this.btnSaveDraft.disabled =
                 false;
+
+
+            this.btnSaveDraft.innerHTML = `
+
+                <i class="fa-solid fa-floppy-disk me-1"></i>
+
+                Save Changes
+
+            `;
 
         }
 
@@ -15129,53 +15296,75 @@ async editInvoice(id) {
 
 
         /*
-==================================================
-MODAL TITLE
-==================================================
-*/
+        ==================================================
+        MODAL TITLE
+        ==================================================
+        */
 
-const modalTitle =
-    document.getElementById(
-        "accountReceivableModalLabel"
-    );
-
-
-if (
-    modalTitle
-) {
-
-    modalTitle.innerHTML = `
-
-        <i class="fa-solid fa-file-invoice-dollar me-2"></i>
-
-        Edit Account Receivable
-
-    `;
-
-}
+        const modalTitle =
+            document.getElementById(
+                "accountReceivableModalLabel"
+            );
 
 
-/*
-==================================================
-RESET TAB
-ALWAYS OPEN HEADER INFO
-==================================================
-*/
+        if (
+            modalTitle
+        ) {
 
-this.resetARModalTab();
+            modalTitle.innerHTML = `
+
+                <i class="fa-solid fa-file-invoice-dollar me-2"></i>
+
+                Edit Account Receivable
+
+            `;
+
+        }
 
 
-/*
-==================================================
-SHOW MODAL
-==================================================
-*/
+        /*
+        ==================================================
+        MODAL SUBTITLE
+        ==================================================
+        */
 
-bootstrap.Modal
-    .getOrCreateInstance(
-        this.accountReceivableModal
-    )
-    .show();
+        const modalSubtitle =
+            document.getElementById(
+                "accountReceivableModalSubtitle"
+            );
+
+
+        if (
+            modalSubtitle
+        ) {
+
+            modalSubtitle.textContent =
+                "Edit existing Account Receivable";
+
+        }
+
+
+        /*
+        ==================================================
+        RESET TAB
+        ALWAYS OPEN HEADER INFO
+        ==================================================
+        */
+
+        this.resetARModalTab();
+
+
+        /*
+        ==================================================
+        SHOW MODAL
+        ==================================================
+        */
+
+        bootstrap.Modal
+            .getOrCreateInstance(
+                this.accountReceivableModal
+            )
+            .show();
 
     }
 

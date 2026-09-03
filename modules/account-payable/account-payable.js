@@ -10575,19 +10575,57 @@ saveInvoiceDetail() {
     try {
 
         /*
-        ==================================================
-        GET FORM VALUES
-        ==================================================
-        */
+==================================================
+GET FORM VALUES
+==================================================
+*/
 
-        const coaId =
-            this.apDetailCOA?.value
-            || "";
+/*
+==================================================
+CHART OF ACCOUNT
+TOM SELECT + NATIVE SELECT FALLBACK
+==================================================
+*/
 
-        const descriptionElement =
-            document.getElementById(
-                "ap-detail-description"
-            );
+const coaId =
+    String(
+        this.apDetailCOASelect?.getValue?.()
+        ||
+        this.apDetailCOA?.value
+        ||
+        ""
+    )
+    .trim();
+
+
+/*
+==================================================
+SYNC NATIVE SELECT
+==================================================
+*/
+
+if (
+    this.apDetailCOA
+    &&
+    coaId
+) {
+
+    this.apDetailCOA.value =
+        coaId;
+
+}
+
+
+/*
+==================================================
+DESCRIPTION
+==================================================
+*/
+
+const descriptionElement =
+    document.getElementById(
+        "ap-detail-description"
+    );
 
         const description =
             descriptionElement?.value
