@@ -4504,46 +4504,567 @@ async refresh() {
 
 
     /*
+==========================================================
+SHOW SUCCESS
+BOOTSTRAP ALERT
+TAX MASTER
+SAME STYLE AS ACCOUNT PAYABLE
+==========================================================
+*/
+
+showSuccess(
+    message
+) {
+
+    /*
     ==================================================
-    FORMAT MESSAGE
+    NORMALIZE MESSAGE
     ==================================================
     */
 
-    showSuccess(
+    const successMessage =
         message
-    ) {
+        ||
+        "Action completed successfully.";
 
-        console.log(
-            "SUCCESS:",
-            message
+
+    /*
+    ==================================================
+    REMOVE EXISTING SUCCESS ALERT
+    ==================================================
+    */
+
+    const existingAlert =
+        document.getElementById(
+            "tax-bootstrap-success-alert"
         );
 
-        /*
-        ==============================================
-        Gunakan mekanisme notification FINOVA
-        Anda di sini jika sudah tersedia.
-        ==============================================
-        */
+
+    if (
+        existingAlert
+    ) {
+
+        existingAlert.remove();
 
     }
 
 
-    showError(
-        message
-    ) {
+    /*
+    ==================================================
+    CREATE BOOTSTRAP ALERT
+    ==================================================
+    */
 
-        console.error(
-            "ERROR:",
-            message
+    const alertElement =
+        document.createElement(
+            "div"
         );
 
-        /*
-        ==============================================
-        Gunakan mekanisme notification FINOVA
-        Anda di sini jika sudah tersedia.
-        ==============================================
-        */
+
+    alertElement.id =
+        "tax-bootstrap-success-alert";
+
+
+    alertElement.className = `
+        alert
+        alert-success
+        alert-dismissible
+        fade
+        show
+        d-flex
+        align-items-center
+        shadow-sm
+        mb-0
+    `;
+
+
+    alertElement.setAttribute(
+        "role",
+        "alert"
+    );
+
+
+    /*
+    ==================================================
+    ESCAPE MESSAGE
+    ==================================================
+    */
+
+    const safeMessage =
+        String(
+            successMessage
+        )
+            .replaceAll(
+                "&",
+                "&amp;"
+            )
+            .replaceAll(
+                "<",
+                "&lt;"
+            )
+            .replaceAll(
+                ">",
+                "&gt;"
+            )
+            .replaceAll(
+                '"',
+                "&quot;"
+            )
+            .replaceAll(
+                "'",
+                "&#039;"
+            );
+
+
+    /*
+    ==================================================
+    CONTENT
+    ==================================================
+    */
+
+    alertElement.innerHTML = `
+
+        <i
+            class="
+                fa-solid
+                fa-circle-check
+                me-2
+            ">
+        </i>
+
+        <div class="flex-grow-1">
+
+            ${safeMessage}
+
+        </div>
+
+        <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close">
+        </button>
+
+    `;
+
+
+    /*
+    ==================================================
+    CHECK ACTIVE TAX MODAL
+    ==================================================
+    */
+
+    const modal =
+        document.getElementById(
+            "taxModal"
+        );
+
+
+    const modalIsVisible =
+        modal
+        &&
+        modal.classList.contains(
+            "show"
+        );
+
+
+    const modalBody =
+        modalIsVisible
+            ? modal.querySelector(
+                ".modal-body"
+            )
+            : null;
+
+
+    /*
+    ==================================================
+    SHOW INSIDE MODAL
+    ==================================================
+    */
+
+    if (
+        modalBody
+    ) {
+
+        modalBody.insertBefore(
+            alertElement,
+            modalBody.firstChild
+        );
 
     }
 
+    else {
+
+        /*
+        ==============================================
+        PAGE LEVEL ALERT
+        ==============================================
+        */
+
+        alertElement.style.position =
+            "fixed";
+
+        alertElement.style.top =
+            "20px";
+
+        alertElement.style.left =
+            "50%";
+
+        alertElement.style.transform =
+            "translateX(-50%)";
+
+        alertElement.style.zIndex =
+            "99999";
+
+        alertElement.style.width =
+            "auto";
+
+        alertElement.style.minWidth =
+            "380px";
+
+        alertElement.style.maxWidth =
+            "90vw";
+
+
+        document.body.appendChild(
+            alertElement
+        );
+
+    }
+
+
+    /*
+    ==================================================
+    AUTO CLOSE
+    ==================================================
+    */
+
+    setTimeout(
+        () => {
+
+            const currentAlert =
+                document.getElementById(
+                    "tax-bootstrap-success-alert"
+                );
+
+
+            if (
+                !currentAlert
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                window.bootstrap
+                &&
+                bootstrap.Alert
+            ) {
+
+                bootstrap.Alert
+                    .getOrCreateInstance(
+                        currentAlert
+                    )
+                    .close();
+
+            }
+
+            else {
+
+                currentAlert.remove();
+
+            }
+
+        },
+
+        5000
+
+    );
+
+}
+
+
+    /*
+==========================================================
+SHOW ERROR
+BOOTSTRAP ALERT
+TAX MASTER
+SAME STYLE AS ACCOUNT PAYABLE
+==========================================================
+*/
+
+showError(
+    message
+) {
+
+    /*
+    ==================================================
+    NORMALIZE MESSAGE
+    ==================================================
+    */
+
+    const errorMessage =
+        message
+        ||
+        "An unexpected error occurred.";
+
+
+    /*
+    ==================================================
+    REMOVE EXISTING ERROR ALERT
+    ==================================================
+    */
+
+    const existingAlert =
+        document.getElementById(
+            "tax-bootstrap-error-alert"
+        );
+
+
+    if (
+        existingAlert
+    ) {
+
+        existingAlert.remove();
+
+    }
+
+
+    /*
+    ==================================================
+    CREATE BOOTSTRAP ALERT
+    ==================================================
+    */
+
+    const alertElement =
+        document.createElement(
+            "div"
+        );
+
+
+    alertElement.id =
+        "tax-bootstrap-error-alert";
+
+
+    alertElement.className = `
+        alert
+        alert-danger
+        alert-dismissible
+        fade
+        show
+        d-flex
+        align-items-center
+        shadow-sm
+        mb-0
+    `;
+
+
+    alertElement.setAttribute(
+        "role",
+        "alert"
+    );
+
+
+    /*
+    ==================================================
+    ESCAPE MESSAGE
+    ==================================================
+    */
+
+    const safeMessage =
+        String(
+            errorMessage
+        )
+            .replaceAll(
+                "&",
+                "&amp;"
+            )
+            .replaceAll(
+                "<",
+                "&lt;"
+            )
+            .replaceAll(
+                ">",
+                "&gt;"
+            )
+            .replaceAll(
+                '"',
+                "&quot;"
+            )
+            .replaceAll(
+                "'",
+                "&#039;"
+            );
+
+
+    /*
+    ==================================================
+    CONTENT
+    ==================================================
+    */
+
+    alertElement.innerHTML = `
+
+        <i
+            class="
+                fa-solid
+                fa-circle-exclamation
+                me-2
+            ">
+        </i>
+
+        <div class="flex-grow-1">
+
+            ${safeMessage}
+
+        </div>
+
+        <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close">
+        </button>
+
+    `;
+
+
+    /*
+    ==================================================
+    CHECK ACTIVE TAX MODAL
+    ==================================================
+    */
+
+    const modal =
+        document.getElementById(
+            "taxModal"
+        );
+
+
+    const modalIsVisible =
+        modal
+        &&
+        modal.classList.contains(
+            "show"
+        );
+
+
+    const modalBody =
+        modalIsVisible
+            ? modal.querySelector(
+                ".modal-body"
+            )
+            : null;
+
+
+    /*
+    ==================================================
+    SHOW INSIDE ACTIVE MODAL
+    ==================================================
+    */
+
+    if (
+        modalBody
+    ) {
+
+        modalBody.insertBefore(
+            alertElement,
+            modalBody.firstChild
+        );
+
+    }
+
+    else {
+
+        /*
+        ==============================================
+        PAGE LEVEL ALERT
+        ==============================================
+        */
+
+        alertElement.style.position =
+            "fixed";
+
+        alertElement.style.top =
+            "20px";
+
+        alertElement.style.left =
+            "50%";
+
+        alertElement.style.transform =
+            "translateX(-50%)";
+
+        alertElement.style.zIndex =
+            "99999";
+
+        alertElement.style.width =
+            "auto";
+
+        alertElement.style.minWidth =
+            "380px";
+
+        alertElement.style.maxWidth =
+            "90vw";
+
+
+        document.body.appendChild(
+            alertElement
+        );
+
+    }
+
+
+    /*
+    ==================================================
+    AUTO CLOSE
+    ==================================================
+    */
+
+    setTimeout(
+        () => {
+
+            const currentAlert =
+                document.getElementById(
+                    "tax-bootstrap-error-alert"
+                );
+
+
+            if (
+                !currentAlert
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                window.bootstrap
+                &&
+                bootstrap.Alert
+            ) {
+
+                bootstrap.Alert
+                    .getOrCreateInstance(
+                        currentAlert
+                    )
+                    .close();
+
+            }
+
+            else {
+
+                currentAlert.remove();
+
+            }
+
+        },
+
+        5000
+
+    );
+
+}
 }

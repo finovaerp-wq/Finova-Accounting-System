@@ -3865,38 +3865,589 @@ async confirmDeleteBusinessPartner() {
 }
 
     /*
-    ==========================================================
-    SUCCESS MESSAGE
-    ==========================================================
-    */
+==========================================================
+SHOW SUCCESS
+BOOTSTRAP ALERT
+BUSINESS PARTNER
+SAME STYLE AS ACCOUNT PAYABLE
+==========================================================
+*/
 
-    showSuccess(message) {
-
-        /*
-            Sprint berikutnya kita ganti
-            menggunakan Notification Component.
-        */
-
-        alert(message);
-
-    }
+showSuccess(
+    message
+) {
 
     /*
-    ==========================================================
-    ERROR MESSAGE
-    ==========================================================
+    ==================================================
+    NORMALIZE MESSAGE
+    ==================================================
     */
 
-    showError(message) {
+    const successMessage =
+        message
+        ||
+        "Action completed successfully.";
 
-        /*
-            Sprint berikutnya kita ganti
-            menggunakan Notification Component.
-        */
 
-        alert(message);
+    /*
+    ==================================================
+    REMOVE EXISTING SUCCESS ALERT
+    ==================================================
+    */
+
+    const existingAlert =
+        document.getElementById(
+            "bp-bootstrap-success-alert"
+        );
+
+
+    if (
+        existingAlert
+    ) {
+
+        existingAlert.remove();
 
     }
+
+
+    /*
+    ==================================================
+    CREATE ALERT
+    ==================================================
+    */
+
+    const alertElement =
+        document.createElement(
+            "div"
+        );
+
+
+    alertElement.id =
+        "bp-bootstrap-success-alert";
+
+
+    alertElement.className = `
+        alert
+        alert-success
+        alert-dismissible
+        fade
+        show
+        d-flex
+        align-items-center
+        shadow-sm
+        mb-0
+    `;
+
+
+    alertElement.setAttribute(
+        "role",
+        "alert"
+    );
+
+
+    /*
+    ==================================================
+    ESCAPE MESSAGE
+    ==================================================
+    */
+
+    const safeMessage =
+        String(
+            successMessage
+        )
+            .replaceAll(
+                "&",
+                "&amp;"
+            )
+            .replaceAll(
+                "<",
+                "&lt;"
+            )
+            .replaceAll(
+                ">",
+                "&gt;"
+            )
+            .replaceAll(
+                '"',
+                "&quot;"
+            )
+            .replaceAll(
+                "'",
+                "&#039;"
+            );
+
+
+    /*
+    ==================================================
+    ALERT CONTENT
+    ==================================================
+    */
+
+    alertElement.innerHTML = `
+
+        <i
+            class="
+                fa-solid
+                fa-circle-check
+                me-2
+            ">
+        </i>
+
+
+        <div class="flex-grow-1">
+
+            ${safeMessage}
+
+        </div>
+
+
+        <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close">
+        </button>
+
+    `;
+
+
+    /*
+    ==================================================
+    CHECK BUSINESS PARTNER MODAL
+    ==================================================
+    */
+
+    const modal =
+        document.getElementById(
+            "businessPartnerModal"
+        );
+
+
+    const modalIsVisible =
+        modal
+        &&
+        modal.classList.contains(
+            "show"
+        );
+
+
+    const modalBody =
+        modalIsVisible
+            ? modal.querySelector(
+                ".modal-body"
+            )
+            : null;
+
+
+    /*
+    ==================================================
+    IF MODAL STILL OPEN
+    SHOW INSIDE MODAL
+    ==================================================
+    */
+
+    if (
+        modalBody
+    ) {
+
+        modalBody.insertBefore(
+            alertElement,
+            modalBody.firstChild
+        );
+
+    }
+
+    else {
+
+        /*
+        ==============================================
+        PAGE LEVEL ALERT
+        SAME CONCEPT AS ACCOUNT PAYABLE
+        ==============================================
+        */
+
+        alertElement.style.position =
+            "fixed";
+
+
+        alertElement.style.top =
+            "20px";
+
+
+        alertElement.style.left =
+            "50%";
+
+
+        alertElement.style.transform =
+            "translateX(-50%)";
+
+
+        alertElement.style.zIndex =
+            "99999";
+
+
+        alertElement.style.width =
+            "auto";
+
+
+        alertElement.style.minWidth =
+            "380px";
+
+
+        alertElement.style.maxWidth =
+            "90vw";
+
+
+        document.body.appendChild(
+            alertElement
+        );
+
+    }
+
+
+    /*
+    ==================================================
+    AUTO CLOSE
+    ==================================================
+    */
+
+    setTimeout(
+        () => {
+
+            const currentAlert =
+                document.getElementById(
+                    "bp-bootstrap-success-alert"
+                );
+
+
+            if (
+                !currentAlert
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                window.bootstrap
+                &&
+                bootstrap.Alert
+            ) {
+
+                bootstrap.Alert
+                    .getOrCreateInstance(
+                        currentAlert
+                    )
+                    .close();
+
+            }
+
+            else {
+
+                currentAlert.remove();
+
+            }
+
+        },
+
+        5000
+
+    );
+
+}
+
+    /*
+==========================================================
+SHOW ERROR
+BOOTSTRAP ALERT
+BUSINESS PARTNER
+SAME STYLE AS ACCOUNT PAYABLE
+==========================================================
+*/
+
+showError(
+    message
+) {
+
+    /*
+    ==================================================
+    NORMALIZE MESSAGE
+    ==================================================
+    */
+
+    const errorMessage =
+        message
+        ||
+        "An unexpected error occurred.";
+
+
+    /*
+    ==================================================
+    REMOVE EXISTING ERROR ALERT
+    ==================================================
+    */
+
+    const existingAlert =
+        document.getElementById(
+            "bp-bootstrap-error-alert"
+        );
+
+
+    if (
+        existingAlert
+    ) {
+
+        existingAlert.remove();
+
+    }
+
+
+    /*
+    ==================================================
+    CREATE BOOTSTRAP ALERT
+    ==================================================
+    */
+
+    const alertElement =
+        document.createElement(
+            "div"
+        );
+
+
+    alertElement.id =
+        "bp-bootstrap-error-alert";
+
+
+    alertElement.className = `
+        alert
+        alert-danger
+        alert-dismissible
+        fade
+        show
+        d-flex
+        align-items-center
+        shadow-sm
+        mb-0
+    `;
+
+
+    alertElement.setAttribute(
+        "role",
+        "alert"
+    );
+
+
+    /*
+    ==================================================
+    ESCAPE MESSAGE
+    ==================================================
+    */
+
+    const safeMessage =
+        String(
+            errorMessage
+        )
+            .replaceAll(
+                "&",
+                "&amp;"
+            )
+            .replaceAll(
+                "<",
+                "&lt;"
+            )
+            .replaceAll(
+                ">",
+                "&gt;"
+            )
+            .replaceAll(
+                '"',
+                "&quot;"
+            )
+            .replaceAll(
+                "'",
+                "&#039;"
+            );
+
+
+    /*
+    ==================================================
+    ALERT CONTENT
+    ==================================================
+    */
+
+    alertElement.innerHTML = `
+
+        <i
+            class="
+                fa-solid
+                fa-circle-exclamation
+                me-2
+            ">
+        </i>
+
+
+        <div class="flex-grow-1">
+
+            ${safeMessage}
+
+        </div>
+
+
+        <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close">
+        </button>
+
+    `;
+
+
+    /*
+    ==================================================
+    CHECK BUSINESS PARTNER MODAL
+    ==================================================
+    */
+
+    const modal =
+        document.getElementById(
+            "businessPartnerModal"
+        );
+
+
+    const modalIsVisible =
+        modal
+        &&
+        modal.classList.contains(
+            "show"
+        );
+
+
+    const modalBody =
+        modalIsVisible
+            ? modal.querySelector(
+                ".modal-body"
+            )
+            : null;
+
+
+    /*
+    ==================================================
+    SHOW INSIDE ACTIVE MODAL
+    ==================================================
+    */
+
+    if (
+        modalBody
+    ) {
+
+        modalBody.insertBefore(
+            alertElement,
+            modalBody.firstChild
+        );
+
+    }
+
+    else {
+
+        /*
+        ==============================================
+        PAGE LEVEL ALERT
+        SAME CONCEPT AS ACCOUNT PAYABLE
+        ==============================================
+        */
+
+        alertElement.style.position =
+            "fixed";
+
+
+        alertElement.style.top =
+            "20px";
+
+
+        alertElement.style.left =
+            "50%";
+
+
+        alertElement.style.transform =
+            "translateX(-50%)";
+
+
+        alertElement.style.zIndex =
+            "99999";
+
+
+        alertElement.style.width =
+            "auto";
+
+
+        alertElement.style.minWidth =
+            "380px";
+
+
+        alertElement.style.maxWidth =
+            "90vw";
+
+
+        document.body.appendChild(
+            alertElement
+        );
+
+    }
+
+
+    /*
+    ==================================================
+    AUTO CLOSE
+    ==================================================
+    */
+
+    setTimeout(
+        () => {
+
+            const currentAlert =
+                document.getElementById(
+                    "bp-bootstrap-error-alert"
+                );
+
+
+            if (
+                !currentAlert
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                window.bootstrap
+                &&
+                bootstrap.Alert
+            ) {
+
+                bootstrap.Alert
+                    .getOrCreateInstance(
+                        currentAlert
+                    )
+                    .close();
+
+            }
+
+            else {
+
+                currentAlert.remove();
+
+            }
+
+        },
+
+        5000
+
+    );
+
+}
 
     /*
     ==========================================================

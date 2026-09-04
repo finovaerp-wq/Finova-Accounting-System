@@ -3143,255 +3143,371 @@ else {
 
 
     /*
-    ======================================================
-    BOOTSTRAP ERROR
-    ======================================================
-    */
+==========================================================
+SHOW ERROR
+BOOTSTRAP ALERT
+ACCOUNTING PERIOD
+SAME STYLE AS ACCOUNT PAYABLE
+==========================================================
+*/
 
-    showError(
+showError(
+    message
+) {
+
+    const errorMessage =
         message
-    ) {
-
-        document
-            .getElementById(
-                "accounting-period-alert"
-            )
-            ?.remove();
-
-
-        const alert =
-            document.createElement(
-                "div"
-            );
-
-
-        alert.id =
-            "accounting-period-alert";
-
-
-        alert.className =
-            `
-                alert
-                alert-danger
-                alert-dismissible
-                fade
-                show
-                shadow-sm
-            `;
-
-
-        alert.setAttribute(
-            "role",
-            "alert"
-        );
-
-
-        alert.innerHTML = `
-
-            <div class="d-flex align-items-start">
-
-                <i
-                    class="
-                        fa-solid
-                        fa-circle-exclamation
-                        me-2
-                        mt-1
-                    ">
-                </i>
-
-
-                <div class="flex-grow-1">
-
-                    <strong>
-                        Accounting Period
-                    </strong>
-
-
-                    <div class="small mt-1">
-
-                        ${this.escapeHTML(
-                            message
-                        )}
-
-                    </div>
-
-                </div>
-
-
-                <button
-                    type="button"
-                    class="btn-close"
-                    data-bs-dismiss="alert"
-                    aria-label="Close">
-                </button>
-
-            </div>
-
-        `;
-
-
-        const page =
-            document.querySelector(
-                ".accounting-period-page"
-            );
-
-
-        page?.prepend(
-            alert
-        );
-
-
-        window.setTimeout(
-
-            () => {
-
-                if (
-                    alert.isConnected
-                    &&
-                    window.bootstrap
-                ) {
-
-                    bootstrap.Alert
-                        .getOrCreateInstance(
-                            alert
-                        )
-                        .close();
-
-                }
-
-            },
-
-            7000
-
-        );
-
-    }
+        ||
+        "An unexpected error occurred.";
 
 
     /*
-    ======================================================
-    BOOTSTRAP SUCCESS
-    ======================================================
+    ==================================================
+    REMOVE EXISTING ERROR ALERT
+    ==================================================
     */
 
-    showSuccess(
+    document
+        .getElementById(
+            "accounting-period-bootstrap-error-alert"
+        )
+        ?.remove();
+
+
+    /*
+    ==================================================
+    CREATE ALERT
+    ==================================================
+    */
+
+    const alertElement =
+        document.createElement(
+            "div"
+        );
+
+
+    alertElement.id =
+        "accounting-period-bootstrap-error-alert";
+
+
+    alertElement.className = `
+        alert
+        alert-danger
+        alert-dismissible
+        fade
+        show
+        d-flex
+        align-items-center
+        shadow-sm
+        mb-0
+    `;
+
+
+    alertElement.setAttribute(
+        "role",
+        "alert"
+    );
+
+
+    alertElement.innerHTML = `
+
+        <i
+            class="
+                fa-solid
+                fa-circle-exclamation
+                me-2
+            ">
+        </i>
+
+        <div class="flex-grow-1">
+
+            ${this.escapeHTML(
+                errorMessage
+            )}
+
+        </div>
+
+        <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close">
+        </button>
+
+    `;
+
+
+    /*
+    ==================================================
+    PAGE LEVEL ALERT
+    ==================================================
+    */
+
+    alertElement.style.position =
+        "fixed";
+
+    alertElement.style.top =
+        "20px";
+
+    alertElement.style.left =
+        "50%";
+
+    alertElement.style.transform =
+        "translateX(-50%)";
+
+    alertElement.style.zIndex =
+        "99999";
+
+    alertElement.style.width =
+        "auto";
+
+    alertElement.style.minWidth =
+        "380px";
+
+    alertElement.style.maxWidth =
+        "90vw";
+
+
+    document.body.appendChild(
+        alertElement
+    );
+
+
+    /*
+    ==================================================
+    AUTO CLOSE
+    ==================================================
+    */
+
+    setTimeout(
+        () => {
+
+            const currentAlert =
+                document.getElementById(
+                    "accounting-period-bootstrap-error-alert"
+                );
+
+
+            if (
+                !currentAlert
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                window.bootstrap
+                &&
+                bootstrap.Alert
+            ) {
+
+                bootstrap.Alert
+                    .getOrCreateInstance(
+                        currentAlert
+                    )
+                    .close();
+
+            }
+
+            else {
+
+                currentAlert.remove();
+
+            }
+
+        },
+
+        5000
+
+    );
+
+}
+
+
+    /*
+==========================================================
+SHOW SUCCESS
+BOOTSTRAP ALERT
+ACCOUNTING PERIOD
+SAME STYLE AS ACCOUNT PAYABLE
+==========================================================
+*/
+
+showSuccess(
+    message
+) {
+
+    const successMessage =
         message
-    ) {
-
-        document
-            .getElementById(
-                "accounting-period-success-alert"
-            )
-            ?.remove();
+        ||
+        "Action completed successfully.";
 
 
-        const alert =
-            document.createElement(
-                "div"
-            );
+    /*
+    ==================================================
+    REMOVE EXISTING SUCCESS ALERT
+    ==================================================
+    */
+
+    document
+        .getElementById(
+            "accounting-period-bootstrap-success-alert"
+        )
+        ?.remove();
 
 
-        alert.id =
-            "accounting-period-success-alert";
+    /*
+    ==================================================
+    CREATE ALERT
+    ==================================================
+    */
 
-
-        alert.className =
-            `
-                alert
-                alert-success
-                alert-dismissible
-                fade
-                show
-                shadow-sm
-            `;
-
-
-        alert.setAttribute(
-            "role",
-            "alert"
+    const alertElement =
+        document.createElement(
+            "div"
         );
 
 
-        alert.innerHTML = `
-
-            <div class="d-flex align-items-start">
-
-                <i
-                    class="
-                        fa-solid
-                        fa-circle-check
-                        me-2
-                        mt-1
-                    ">
-                </i>
+    alertElement.id =
+        "accounting-period-bootstrap-success-alert";
 
 
-                <div class="flex-grow-1">
-
-                    <strong>
-                        Accounting Period
-                    </strong>
-
-
-                    <div class="small mt-1">
-
-                        ${this.escapeHTML(
-                            message
-                        )}
-
-                    </div>
-
-                </div>
+    alertElement.className = `
+        alert
+        alert-success
+        alert-dismissible
+        fade
+        show
+        d-flex
+        align-items-center
+        shadow-sm
+        mb-0
+    `;
 
 
-                <button
-                    type="button"
-                    class="btn-close"
-                    data-bs-dismiss="alert"
-                    aria-label="Close">
-                </button>
-
-            </div>
-
-        `;
+    alertElement.setAttribute(
+        "role",
+        "alert"
+    );
 
 
-        const page =
-            document.querySelector(
-                ".accounting-period-page"
-            );
+    alertElement.innerHTML = `
+
+        <i
+            class="
+                fa-solid
+                fa-circle-check
+                me-2
+            ">
+        </i>
+
+        <div class="flex-grow-1">
+
+            ${this.escapeHTML(
+                successMessage
+            )}
+
+        </div>
+
+        <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close">
+        </button>
+
+    `;
 
 
-        page?.prepend(
-            alert
-        );
+    /*
+    ==================================================
+    PAGE LEVEL ALERT
+    ==================================================
+    */
+
+    alertElement.style.position =
+        "fixed";
+
+    alertElement.style.top =
+        "20px";
+
+    alertElement.style.left =
+        "50%";
+
+    alertElement.style.transform =
+        "translateX(-50%)";
+
+    alertElement.style.zIndex =
+        "99999";
+
+    alertElement.style.width =
+        "auto";
+
+    alertElement.style.minWidth =
+        "380px";
+
+    alertElement.style.maxWidth =
+        "90vw";
 
 
-        window.setTimeout(
+    document.body.appendChild(
+        alertElement
+    );
 
-            () => {
 
-                if (
-                    alert.isConnected
-                    &&
-                    window.bootstrap
-                ) {
+    /*
+    ==================================================
+    AUTO CLOSE
+    ==================================================
+    */
 
-                    bootstrap.Alert
-                        .getOrCreateInstance(
-                            alert
-                        )
-                        .close();
+    setTimeout(
+        () => {
 
-                }
+            const currentAlert =
+                document.getElementById(
+                    "accounting-period-bootstrap-success-alert"
+                );
 
-            },
 
-            5000
+            if (
+                !currentAlert
+            ) {
 
-        );
+                return;
 
-    }
+            }
+
+
+            if (
+                window.bootstrap
+                &&
+                bootstrap.Alert
+            ) {
+
+                bootstrap.Alert
+                    .getOrCreateInstance(
+                        currentAlert
+                    )
+                    .close();
+
+            }
+
+            else {
+
+                currentAlert.remove();
+
+            }
+
+        },
+
+        5000
+
+    );
+
+}
 
 
     /*

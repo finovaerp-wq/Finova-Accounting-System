@@ -1466,11 +1466,11 @@ showDeleteJournalModal(id) {
             error
         );
 
-        alert(
-            error?.message
-            ||
-            "Failed to open delete confirmation."
-        );
+        this.showError(
+    error?.message
+    ||
+    "Failed to open delete confirmation."
+);
 
     }
 
@@ -9188,6 +9188,7 @@ if (
 SHOW SUCCESS
 BOOTSTRAP ALERT
 GENERAL JOURNAL
+SAME STYLE AS ACCOUNT PAYABLE
 ==========================================================
 */
 
@@ -9196,9 +9197,9 @@ showSuccess(
 ) {
 
     /*
-    ======================================================
+    ==================================================
     NORMALIZE MESSAGE
-    ======================================================
+    ==================================================
     */
 
     const successMessage =
@@ -9208,21 +9209,9 @@ showSuccess(
 
 
     /*
-    ======================================================
-    CONSOLE
-    ======================================================
-    */
-
-    console.log(
-        "General Journal SUCCESS:",
-        successMessage
-    );
-
-
-    /*
-    ======================================================
+    ==================================================
     REMOVE EXISTING SUCCESS ALERT
-    ======================================================
+    ==================================================
     */
 
     const existingAlert =
@@ -9241,9 +9230,9 @@ showSuccess(
 
 
     /*
-    ======================================================
-    CREATE BOOTSTRAP ALERT
-    ======================================================
+    ==================================================
+    CREATE ALERT
+    ==================================================
     */
 
     const alertElement =
@@ -9256,8 +9245,17 @@ showSuccess(
         "gl-bootstrap-success-alert";
 
 
-    alertElement.className =
-        "alert alert-success alert-dismissible fade show shadow-sm";
+    alertElement.className = `
+        alert
+        alert-success
+        alert-dismissible
+        fade
+        show
+        d-flex
+        align-items-center
+        shadow-sm
+        mb-0
+    `;
 
 
     alertElement.setAttribute(
@@ -9266,56 +9264,46 @@ showSuccess(
     );
 
 
+    /*
+    ==================================================
+    CONTENT
+    ==================================================
+    */
+
     alertElement.innerHTML = `
 
-        <div class="d-flex align-items-start">
-
-            <i
-                class="
-                    fa-solid
-                    fa-circle-check
-                    me-2
-                    mt-1
-                ">
-            </i>
+        <i
+            class="
+                fa-solid
+                fa-circle-check
+                me-2
+            ">
+        </i>
 
 
-            <div class="flex-grow-1">
+        <div class="flex-grow-1">
 
-                <strong>
-                    General Journal
-                </strong>
-
-
-                <div>
-
-                    ${
-                        this.escapeHTML(
-                            successMessage
-                        )
-                    }
-
-                </div>
-
-            </div>
-
-
-            <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="alert"
-                aria-label="Close">
-            </button>
+            ${this.escapeHTML(
+                successMessage
+            )}
 
         </div>
+
+
+        <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close">
+        </button>
 
     `;
 
 
     /*
-    ======================================================
-    FIND JOURNAL MODAL
-    ======================================================
+    ==================================================
+    CHECK ACTIVE JOURNAL MODAL
+    ==================================================
     */
 
     const modal =
@@ -9341,9 +9329,9 @@ showSuccess(
 
 
     /*
-    ======================================================
-    INSERT ALERT
-    ======================================================
+    ==================================================
+    SHOW INSIDE MODAL
+    ==================================================
     */
 
     if (
@@ -9360,34 +9348,31 @@ showSuccess(
     else {
 
         /*
-        ==================================================
+        ==============================================
         PAGE LEVEL ALERT
-        ==================================================
+        ==============================================
         */
 
         alertElement.style.position =
             "fixed";
 
-
         alertElement.style.top =
             "20px";
-
 
         alertElement.style.left =
             "50%";
 
-
         alertElement.style.transform =
             "translateX(-50%)";
-
 
         alertElement.style.zIndex =
             "99999";
 
+        alertElement.style.width =
+            "auto";
 
         alertElement.style.minWidth =
             "380px";
-
 
         alertElement.style.maxWidth =
             "90vw";
@@ -9401,9 +9386,9 @@ showSuccess(
 
 
     /*
-    ======================================================
+    ==================================================
     AUTO CLOSE
-    ======================================================
+    ==================================================
     */
 
     setTimeout(
@@ -9447,6 +9432,7 @@ showSuccess(
         },
 
         5000
+
     );
 
 }
@@ -9457,6 +9443,7 @@ showSuccess(
 SHOW ERROR
 BOOTSTRAP ALERT
 GENERAL JOURNAL
+SAME STYLE AS ACCOUNT PAYABLE
 ==========================================================
 */
 
@@ -9465,9 +9452,9 @@ showError(
 ) {
 
     /*
-    ======================================================
+    ==================================================
     NORMALIZE MESSAGE
-    ======================================================
+    ==================================================
     */
 
     const errorMessage =
@@ -9477,21 +9464,9 @@ showError(
 
 
     /*
-    ======================================================
-    CONSOLE
-    ======================================================
-    */
-
-    console.error(
-        "General Journal ERROR:",
-        errorMessage
-    );
-
-
-    /*
-    ======================================================
+    ==================================================
     REMOVE EXISTING ERROR ALERT
-    ======================================================
+    ==================================================
     */
 
     const existingAlert =
@@ -9510,9 +9485,9 @@ showError(
 
 
     /*
-    ======================================================
-    CREATE BOOTSTRAP ALERT
-    ======================================================
+    ==================================================
+    CREATE ALERT
+    ==================================================
     */
 
     const alertElement =
@@ -9525,8 +9500,17 @@ showError(
         "gl-bootstrap-error-alert";
 
 
-    alertElement.className =
-        "alert alert-danger alert-dismissible fade show shadow-sm";
+    alertElement.className = `
+        alert
+        alert-danger
+        alert-dismissible
+        fade
+        show
+        d-flex
+        align-items-center
+        shadow-sm
+        mb-0
+    `;
 
 
     alertElement.setAttribute(
@@ -9535,56 +9519,46 @@ showError(
     );
 
 
+    /*
+    ==================================================
+    CONTENT
+    ==================================================
+    */
+
     alertElement.innerHTML = `
 
-        <div class="d-flex align-items-start">
-
-            <i
-                class="
-                    fa-solid
-                    fa-circle-exclamation
-                    me-2
-                    mt-1
-                ">
-            </i>
+        <i
+            class="
+                fa-solid
+                fa-circle-exclamation
+                me-2
+            ">
+        </i>
 
 
-            <div class="flex-grow-1">
+        <div class="flex-grow-1">
 
-                <strong>
-                    General Journal
-                </strong>
-
-
-                <div>
-
-                    ${
-                        this.escapeHTML(
-                            errorMessage
-                        )
-                    }
-
-                </div>
-
-            </div>
-
-
-            <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="alert"
-                aria-label="Close">
-            </button>
+            ${this.escapeHTML(
+                errorMessage
+            )}
 
         </div>
+
+
+        <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close">
+        </button>
 
     `;
 
 
     /*
-    ======================================================
-    FIND JOURNAL MODAL
-    ======================================================
+    ==================================================
+    CHECK ACTIVE JOURNAL MODAL
+    ==================================================
     */
 
     const modal =
@@ -9610,9 +9584,9 @@ showError(
 
 
     /*
-    ======================================================
-    INSERT ALERT
-    ======================================================
+    ==================================================
+    SHOW INSIDE MODAL
+    ==================================================
     */
 
     if (
@@ -9629,34 +9603,31 @@ showError(
     else {
 
         /*
-        ==================================================
+        ==============================================
         PAGE LEVEL ALERT
-        ==================================================
+        ==============================================
         */
 
         alertElement.style.position =
             "fixed";
 
-
         alertElement.style.top =
             "20px";
-
 
         alertElement.style.left =
             "50%";
 
-
         alertElement.style.transform =
             "translateX(-50%)";
-
 
         alertElement.style.zIndex =
             "99999";
 
+        alertElement.style.width =
+            "auto";
 
         alertElement.style.minWidth =
-            "420px";
-
+            "380px";
 
         alertElement.style.maxWidth =
             "90vw";
@@ -9670,9 +9641,9 @@ showError(
 
 
     /*
-    ======================================================
+    ==================================================
     AUTO CLOSE
-    ======================================================
+    ==================================================
     */
 
     setTimeout(
@@ -9715,7 +9686,8 @@ showError(
 
         },
 
-        7000
+        5000
+
     );
 
 }
@@ -10309,9 +10281,9 @@ saveDetailLine() {
         !detail.debit_account_id
     ) {
 
-        alert(
-            "Debit Account is required."
-        );
+        this.showError(
+    "Debit Account is required."
+);
 
         return;
 
@@ -10328,9 +10300,9 @@ saveDetailLine() {
         !detail.credit_account_id
     ) {
 
-        alert(
-            "Credit Account is required."
-        );
+        this.showError(
+    "Credit Account is required."
+);
 
         return;
 
@@ -10353,9 +10325,9 @@ saveDetailLine() {
         )
     ) {
 
-        alert(
-            "Debit Account and Credit Account cannot be the same."
-        );
+        this.showError(
+    "Debit Account and Credit Account cannot be the same."
+);
 
         return;
 
@@ -10376,9 +10348,9 @@ saveDetailLine() {
         detail.amount <= 0
     ) {
 
-        alert(
-            "Amount must be greater than zero."
-        );
+        this.showError(
+    "Amount must be greater than zero."
+);
 
         return;
 
@@ -13221,9 +13193,9 @@ saveDetail(detail) {
 
     ) {
 
-        alert(
-            "Debit / Credit cannot be negative."
-        );
+        this.showError(
+    "Debit / Credit cannot be negative."
+);
 
         return false;
 
@@ -13237,9 +13209,9 @@ saveDetail(detail) {
 
     ) {
 
-        alert(
-            "Only Debit or Credit may contain a value."
-        );
+        this.showError(
+    "Only Debit or Credit may contain a value."
+);
 
         return false;
 
@@ -13253,9 +13225,9 @@ saveDetail(detail) {
 
     ) {
 
-        alert(
-            "Debit or Credit must be greater than zero."
-        );
+        this.showError(
+    "Debit or Credit must be greater than zero."
+);
 
         return false;
 

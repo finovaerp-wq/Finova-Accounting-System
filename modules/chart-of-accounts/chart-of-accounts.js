@@ -4561,54 +4561,585 @@ bindTableEvents() {
 /*
 ==========================================================
 SHOW SUCCESS
+BOOTSTRAP ALERT
+CHART OF ACCOUNTS
+SAME STYLE AS ACCOUNT PAYABLE
 ==========================================================
 */
 
-showSuccess(message) {
+showSuccess(
+    message
+) {
 
-    if (window.Toast) {
+    /*
+    ==================================================
+    NORMALIZE MESSAGE
+    ==================================================
+    */
 
-        Toast.fire({
+    const successMessage =
+        message
+        ||
+        "Action completed successfully.";
 
-            icon: "success",
 
-            title: message
+    /*
+    ==================================================
+    REMOVE EXISTING SUCCESS ALERT
+    ==================================================
+    */
 
-        });
+    const existingAlert =
+        document.getElementById(
+            "coa-bootstrap-success-alert"
+        );
 
-        return;
+
+    if (
+        existingAlert
+    ) {
+
+        existingAlert.remove();
 
     }
 
-    alert(message);
+
+    /*
+    ==================================================
+    CREATE BOOTSTRAP ALERT
+    ==================================================
+    */
+
+    const alertElement =
+        document.createElement(
+            "div"
+        );
+
+
+    alertElement.id =
+        "coa-bootstrap-success-alert";
+
+
+    alertElement.className = `
+        alert
+        alert-success
+        alert-dismissible
+        fade
+        show
+        d-flex
+        align-items-center
+        shadow-sm
+        mb-0
+    `;
+
+
+    alertElement.setAttribute(
+        "role",
+        "alert"
+    );
+
+
+    /*
+    ==================================================
+    ESCAPE MESSAGE
+    ==================================================
+    */
+
+    const safeMessage =
+        String(
+            successMessage
+        )
+            .replaceAll(
+                "&",
+                "&amp;"
+            )
+            .replaceAll(
+                "<",
+                "&lt;"
+            )
+            .replaceAll(
+                ">",
+                "&gt;"
+            )
+            .replaceAll(
+                '"',
+                "&quot;"
+            )
+            .replaceAll(
+                "'",
+                "&#039;"
+            );
+
+
+    /*
+    ==================================================
+    ALERT CONTENT
+    ==================================================
+    */
+
+    alertElement.innerHTML = `
+
+        <i
+            class="
+                fa-solid
+                fa-circle-check
+                me-2
+            ">
+        </i>
+
+
+        <div class="flex-grow-1">
+
+            ${safeMessage}
+
+        </div>
+
+
+        <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close">
+        </button>
+
+    `;
+
+
+    /*
+    ==================================================
+    CHECK COA MODAL
+    ==================================================
+    */
+
+    const modal =
+        document.getElementById(
+            "coa-modal"
+        );
+
+
+    const modalIsVisible =
+        modal
+        &&
+        modal.classList.contains(
+            "show"
+        );
+
+
+    const modalBody =
+        modalIsVisible
+            ? modal.querySelector(
+                ".modal-body"
+            )
+            : null;
+
+
+    /*
+    ==================================================
+    SHOW INSIDE MODAL
+    ==================================================
+    */
+
+    if (
+        modalBody
+    ) {
+
+        modalBody.insertBefore(
+            alertElement,
+            modalBody.firstChild
+        );
+
+    }
+
+    else {
+
+        /*
+        ==============================================
+        PAGE LEVEL ALERT
+        SAME AS ACCOUNT PAYABLE
+        ==============================================
+        */
+
+        alertElement.style.position =
+            "fixed";
+
+
+        alertElement.style.top =
+            "20px";
+
+
+        alertElement.style.left =
+            "50%";
+
+
+        alertElement.style.transform =
+            "translateX(-50%)";
+
+
+        alertElement.style.zIndex =
+            "99999";
+
+
+        alertElement.style.width =
+            "auto";
+
+
+        alertElement.style.minWidth =
+            "380px";
+
+
+        alertElement.style.maxWidth =
+            "90vw";
+
+
+        document.body.appendChild(
+            alertElement
+        );
+
+    }
+
+
+    /*
+    ==================================================
+    AUTO CLOSE
+    ==================================================
+    */
+
+    setTimeout(
+        () => {
+
+            const currentAlert =
+                document.getElementById(
+                    "coa-bootstrap-success-alert"
+                );
+
+
+            if (
+                !currentAlert
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                window.bootstrap
+                &&
+                bootstrap.Alert
+            ) {
+
+                bootstrap.Alert
+                    .getOrCreateInstance(
+                        currentAlert
+                    )
+                    .close();
+
+            }
+
+            else {
+
+                currentAlert.remove();
+
+            }
+
+        },
+
+        5000
+
+    );
 
 }
 /*
 ==========================================================
 SHOW ERROR
+BOOTSTRAP ALERT
+CHART OF ACCOUNTS
+SAME STYLE AS ACCOUNT PAYABLE
 ==========================================================
 */
 
-showError(message) {
+showError(
+    message
+) {
 
-    if (window.Toast) {
+    /*
+    ==================================================
+    NORMALIZE MESSAGE
+    ==================================================
+    */
 
-        Toast.fire({
+    const errorMessage =
+        message
+        ||
+        "An unexpected error occurred.";
 
-            icon: "error",
 
-            title: message
+    /*
+    ==================================================
+    REMOVE EXISTING ERROR ALERT
+    ==================================================
+    */
 
-        });
+    const existingAlert =
+        document.getElementById(
+            "coa-bootstrap-error-alert"
+        );
 
-        return;
+
+    if (
+        existingAlert
+    ) {
+
+        existingAlert.remove();
 
     }
 
-    alert(message);
+
+    /*
+    ==================================================
+    CREATE BOOTSTRAP ALERT
+    ==================================================
+    */
+
+    const alertElement =
+        document.createElement(
+            "div"
+        );
+
+
+    alertElement.id =
+        "coa-bootstrap-error-alert";
+
+
+    alertElement.className = `
+        alert
+        alert-danger
+        alert-dismissible
+        fade
+        show
+        d-flex
+        align-items-center
+        shadow-sm
+        mb-0
+    `;
+
+
+    alertElement.setAttribute(
+        "role",
+        "alert"
+    );
+
+
+    /*
+    ==================================================
+    ESCAPE MESSAGE
+    ==================================================
+    */
+
+    const safeMessage =
+        String(
+            errorMessage
+        )
+            .replaceAll(
+                "&",
+                "&amp;"
+            )
+            .replaceAll(
+                "<",
+                "&lt;"
+            )
+            .replaceAll(
+                ">",
+                "&gt;"
+            )
+            .replaceAll(
+                '"',
+                "&quot;"
+            )
+            .replaceAll(
+                "'",
+                "&#039;"
+            );
+
+
+    /*
+    ==================================================
+    ALERT CONTENT
+    ==================================================
+    */
+
+    alertElement.innerHTML = `
+
+        <i
+            class="
+                fa-solid
+                fa-circle-exclamation
+                me-2
+            ">
+        </i>
+
+
+        <div class="flex-grow-1">
+
+            ${safeMessage}
+
+        </div>
+
+
+        <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close">
+        </button>
+
+    `;
+
+
+    /*
+    ==================================================
+    CHECK COA MODAL
+    ==================================================
+    */
+
+    const modal =
+        document.getElementById(
+            "coa-modal"
+        );
+
+
+    const modalIsVisible =
+        modal
+        &&
+        modal.classList.contains(
+            "show"
+        );
+
+
+    const modalBody =
+        modalIsVisible
+            ? modal.querySelector(
+                ".modal-body"
+            )
+            : null;
+
+
+    /*
+    ==================================================
+    SHOW INSIDE ACTIVE MODAL
+    ==================================================
+    */
+
+    if (
+        modalBody
+    ) {
+
+        modalBody.insertBefore(
+            alertElement,
+            modalBody.firstChild
+        );
+
+    }
+
+    else {
+
+        /*
+        ==============================================
+        PAGE LEVEL ALERT
+        SAME CONCEPT AS ACCOUNT PAYABLE
+        ==============================================
+        */
+
+        alertElement.style.position =
+            "fixed";
+
+
+        alertElement.style.top =
+            "20px";
+
+
+        alertElement.style.left =
+            "50%";
+
+
+        alertElement.style.transform =
+            "translateX(-50%)";
+
+
+        alertElement.style.zIndex =
+            "99999";
+
+
+        alertElement.style.width =
+            "auto";
+
+
+        alertElement.style.minWidth =
+            "380px";
+
+
+        alertElement.style.maxWidth =
+            "90vw";
+
+
+        document.body.appendChild(
+            alertElement
+        );
+
+    }
+
+
+    /*
+    ==================================================
+    AUTO CLOSE
+    ==================================================
+    */
+
+    setTimeout(
+        () => {
+
+            const currentAlert =
+                document.getElementById(
+                    "coa-bootstrap-error-alert"
+                );
+
+
+            if (
+                !currentAlert
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                window.bootstrap
+                &&
+                bootstrap.Alert
+            ) {
+
+                bootstrap.Alert
+                    .getOrCreateInstance(
+                        currentAlert
+                    )
+                    .close();
+
+            }
+
+            else {
+
+                currentAlert.remove();
+
+            }
+
+        },
+
+        5000
+
+    );
 
 }
-
 
 
 }
