@@ -15527,11 +15527,11 @@ async postJournal(id) {
 
         );
 
-        alert(
-
-            error.message
-
-        );
+        this.showError(
+    error?.message
+    ||
+    "Failed to post Journal."
+);
 
     }
 
@@ -15558,6 +15558,7 @@ async voidJournal(id) {
 
         }
 
+
         /*
         ======================================================
         BOOTSTRAP CONFIRMATION
@@ -15567,11 +15568,13 @@ async voidJournal(id) {
         const confirmed =
             await this.showVoidConfirmation();
 
+
         if (!confirmed) {
 
             return;
 
         }
+
 
         /*
         ======================================================
@@ -15584,18 +15587,23 @@ async voidJournal(id) {
                 "void-journal-reason"
             );
 
+
         const reason =
-            reasonInput?.value?.trim() || "";
+            reasonInput?.value?.trim()
+            ||
+            "";
+
 
         if (!reason) {
 
             this.showError(
-    "Alasan Void wajib diisi."
-);
+                "Alasan Void wajib diisi."
+            );
 
-return;
+            return;
 
         }
+
 
         /*
         ======================================================
@@ -15608,7 +15616,6 @@ return;
             reason
         );
 
-       
 
         /*
         ======================================================
@@ -15617,6 +15624,18 @@ return;
         */
 
         await this.loadData();
+
+
+        /*
+        ======================================================
+        SUCCESS
+        BOOTSTRAP ALERT
+        ======================================================
+        */
+
+        this.showSuccess(
+            "Journal voided successfully."
+        );
 
     }
 
@@ -15627,15 +15646,16 @@ return;
             error
         );
 
+
         this.showError(
-    error?.message ||
-    "Gagal melakukan Void Journal."
-);
+            error?.message
+            ||
+            "Gagal melakukan Void Journal."
+        );
 
     }
 
 }
-
 /*
 ==========================================================
 VOID CONFIRMATION MODAL
