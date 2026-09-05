@@ -4882,41 +4882,53 @@ getJournalDetailCategory(
 
 
     /*
-    ======================================================
-    TAX MINUS FALLBACK
-    ======================================================
-    */
+======================================================
+TAX MINUS FALLBACK
+======================================================
+*/
 
-    if (
-        description.includes("PPH")
-        ||
-        description.includes("WITHHOLDING")
-        ||
-        description.includes("WHT")
-    ) {
+if (
+    description.includes("TAX (-)")
+    ||
+    description.includes("TAX_MINUS")
+    ||
+    description.includes("PPH")
+    ||
+    description.includes("WITHHOLDING")
+    ||
+    description.includes("WHT")
+) {
 
-        return "TAX (-)";
+    return "TAX (-)";
 
-    }
+}
 
 
     /*
-    ======================================================
-    TAX PLUS FALLBACK
-    ======================================================
-    */
+======================================================
+TAX PLUS FALLBACK
+======================================================
+*/
 
-    if (
-        description.includes("PPN")
-        ||
-        description.includes("PAJAK MASUKAN")
-        ||
-        description.includes("VAT INPUT")
-    ) {
+if (
+    description.includes("TAX (+)")
+    ||
+    description.includes("TAX_PLUS")
+    ||
+    description.includes("PPN")
+    ||
+    description.includes("PAJAK MASUKAN")
+    ||
+    description.includes("PAJAK KELUARAN")
+    ||
+    description.includes("VAT INPUT")
+    ||
+    description.includes("VAT OUTPUT")
+) {
 
-        return "TAX (+)";
+    return "TAX (+)";
 
-    }
+}
 
 
     /*
