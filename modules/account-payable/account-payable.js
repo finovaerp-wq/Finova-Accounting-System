@@ -7609,34 +7609,46 @@ if (btnConfirmCompleteAP) {
                 */
 
                 await this.completeInvoice(
-                    id
-                );
+    id
+);
 
 
-                /*
-                ======================================
-                CLOSE CONFIRMATION
-                ONLY AFTER SUCCESS
-                ======================================
-                */
+/*
+======================================
+CLOSE CONFIRMATION
+ONLY AFTER SUCCESS
+======================================
+*/
 
-                if (
-                    this.accountPayableCompleteModal
-                ) {
+if (
+    this.accountPayableCompleteModal
+) {
 
-                    this.accountPayableCompleteModal.hide();
+    this.accountPayableCompleteModal.hide();
 
-                }
+}
 
 
-                /*
-                ======================================
-                CLEAR PENDING
-                ======================================
-                */
+/*
+======================================
+CLEAR PENDING
+======================================
+*/
 
-                this.pendingCompleteAPId =
-                    null;
+this.pendingCompleteAPId =
+    null;
+
+
+/*
+======================================
+SUCCESS
+BOOTSTRAP ALERT
+======================================
+*/
+
+this.showSuccess(
+    "Account Payable completed successfully."
+);
 
             }
 
@@ -8676,25 +8688,44 @@ async saveAPPayment() {
         }
 
 
-        /*
-        ==================================================
-        PREVENT OVERPAYMENT
-        ==================================================
-        */
+      /*
+==================================================
+NORMALIZE PAYMENT / OUTSTANDING
+FINOVA USES WHOLE NUMBER DISPLAY
+==================================================
+*/
 
-        if (
-            paymentAmount
-            >
-            actualOutstandingAmount
-        ) {
+const normalizedPaymentAmount =
+    Math.round(
+        paymentAmount
+    );
 
-            throw new Error(
-                `Payment Amount cannot exceed Outstanding Amount (${this.formatCurrency(
-                    actualOutstandingAmount
-                )}).`
-            );
 
-        }
+const normalizedOutstandingAmount =
+    Math.round(
+        actualOutstandingAmount
+    );
+
+
+/*
+==================================================
+PREVENT OVERPAYMENT
+==================================================
+*/
+
+if (
+    normalizedPaymentAmount
+    >
+    normalizedOutstandingAmount
+) {
+
+    throw new Error(
+        `Payment Amount cannot exceed Outstanding Amount (${this.formatCurrency(
+            normalizedOutstandingAmount
+        )}).`
+    );
+
+}
 
 
         /*
@@ -8900,19 +8931,37 @@ async saveAPPayment() {
         }
 
 
-        if (
-            paymentAmount
-            >
-            finalOutstandingBeforeInsert
-        ) {
+       /*
+==================================================
+NORMALIZE FINAL OUTSTANDING
+==================================================
+*/
 
-            throw new Error(
-                `Payment Amount cannot exceed current Outstanding Amount (${this.formatCurrency(
-                    finalOutstandingBeforeInsert
-                )}).`
-            );
+const normalizedFinalOutstanding =
+    Math.round(
+        finalOutstandingBeforeInsert
+    );
 
-        }
+
+/*
+==================================================
+FINAL OVERPAYMENT CHECK
+==================================================
+*/
+
+if (
+    normalizedPaymentAmount
+    >
+    normalizedFinalOutstanding
+) {
+
+    throw new Error(
+        `Payment Amount cannot exceed current Outstanding Amount (${this.formatCurrency(
+            normalizedFinalOutstanding
+        )}).`
+    );
+
+}
 
 
         /*
@@ -8934,7 +8983,7 @@ async saveAPPayment() {
                         bankAccountId,
 
                     amount:
-                        paymentAmount,
+                         normalizedPaymentAmount,
 
                     dpp_amount:
                         paymentDPP,
@@ -8995,7 +9044,7 @@ async saveAPPayment() {
                 paymentTaxMinus,
 
             payment_amount:
-                paymentAmount,
+               normalizedPaymentAmount,
 
             reference_no:
                 referenceNo,
@@ -9259,29 +9308,48 @@ async saveAPPayment() {
         ==================================================
         */
 
-        await this.loadData(
-            false
-        );
-
-
         /*
-        ==================================================
-        RETURN
-        ==================================================
-        */
+==================================================
+REFRESH ACCOUNT PAYABLE
+NO LOADING
+==================================================
+*/
 
-        return {
+await this.loadData(
+    false
+);
 
-            payment:
-                createdPayment,
 
-            journal:
-                createdJournal,
+/*
+==================================================
+SUCCESS
+BOOTSTRAP ALERT
+==================================================
+*/
 
-            accountPayable:
-                updatedInvoice
+this.showSuccess(
+    "Account Payable payment saved successfully."
+);
 
-        };
+
+/*
+==================================================
+RETURN
+==================================================
+*/
+
+return {
+
+    payment:
+        createdPayment,
+
+    journal:
+        createdJournal,
+
+    accountPayable:
+        updatedInvoice
+
+};
 
     }
 
@@ -9339,48 +9407,118 @@ async saveAPPayment() {
 
 
         /*
-        ==================================================
-        ROLLBACK JOURNAL
-        ==================================================
+==================================================
+ROLLBACK JOURNAL
+DELETE DETAIL FIRST
+THEN HEADER
+==================================================
+*/
+
+if (
+    createdJournal?.id
+) {
+
+    try {
+
+        const journalId =
+            createdJournal.id;
+
+
+        /*
+        ==============================================
+        DELETE JOURNAL DETAIL
+        ==============================================
         */
 
+        const {
+            error: rollbackDetailError
+        } = await supabase
+
+            .from(
+                "trx_gl_journal_detail"
+            )
+
+            .delete()
+
+            .eq(
+                "journal_id",
+                journalId
+            );
+
+
         if (
-            createdJournal?.id
+            rollbackDetailError
         ) {
 
-            try {
+            console.error(
+                "AP PAYMENT JOURNAL DETAIL ROLLBACK ERROR:",
+                rollbackDetailError
+            );
 
-                await supabase
-
-                    .from(
-                        "trx_gl_journal"
-                    )
-
-                    .delete()
-
-                    .eq(
-                        "id",
-                        createdJournal.id
-                    );
-
-
-                createdJournal =
-                    null;
-
-            }
-
-            catch (
-                rollbackJournalException
-            ) {
-
-                console.error(
-                    "AP PAYMENT JOURNAL ROLLBACK EXCEPTION:",
-                    rollbackJournalException
-                );
-
-            }
+            throw rollbackDetailError;
 
         }
+
+
+        /*
+        ==============================================
+        DELETE JOURNAL HEADER
+        ==============================================
+        */
+
+        const {
+            error: rollbackJournalError
+        } = await supabase
+
+            .from(
+                "trx_gl_journal"
+            )
+
+            .delete()
+
+            .eq(
+                "id",
+                journalId
+            );
+
+
+        if (
+            rollbackJournalError
+        ) {
+
+            console.error(
+                "AP PAYMENT JOURNAL ROLLBACK ERROR:",
+                rollbackJournalError
+            );
+
+            throw rollbackJournalError;
+
+        }
+
+
+        console.log(
+            "AP PAYMENT JOURNAL ROLLBACK SUCCESS:",
+            journalId
+        );
+
+
+        createdJournal =
+            null;
+
+    }
+
+    catch (
+        rollbackJournalException
+    ) {
+
+        console.error(
+            "AP PAYMENT JOURNAL ROLLBACK EXCEPTION:",
+            rollbackJournalException
+        );
+
+    }
+
+}
 
 
         /*
@@ -21890,28 +22028,136 @@ async createPayment(
 
 
         /*
-        ==================================================
-        OUTSTANDING
-        ==================================================
-        */
+==================================================
+OUTSTANDING
+FRESH FROM ACTIVE PAYMENT
+SAME SOURCE AS SAVE AP PAYMENT
+==================================================
+*/
 
-        const outstandingAmount =
-            Number(
-                invoice.outstanding_amount
-                ??
-                totalAmount
+const {
+    data: existingPayments,
+    error: existingPaymentsError
+} = await supabase
+
+    .from(
+        "trx_ap_payment"
+    )
+
+    .select(`
+        id,
+        payment_amount,
+        gl_journal_id
+    `)
+
+    .eq(
+        "account_payable_id",
+        id
+    )
+
+    .not(
+        "gl_journal_id",
+        "is",
+        null
+    );
+
+
+if (
+    existingPaymentsError
+) {
+
+    throw existingPaymentsError;
+
+}
+
+
+/*
+==================================================
+ACTUAL PAID
+==================================================
+*/
+
+const actualPaidAmount =
+    (
+        existingPayments
+        ||
+        []
+    )
+    .reduce(
+        (
+            total,
+            payment
+        ) => {
+
+            return (
+                total
+                +
+                Number(
+                    payment.payment_amount
+                    ||
+                    0
+                )
             );
 
+        },
+        0
+    );
 
-        if (
-            outstandingAmount <= 0
-        ) {
 
-            throw new Error(
-                "Account Payable is already fully paid."
-            );
+/*
+==================================================
+ACTUAL OUTSTANDING
+==================================================
+*/
 
-        }
+const outstandingAmount =
+    Math.max(
+        totalAmount
+        -
+        actualPaidAmount,
+        0
+    );
+
+
+/*
+==================================================
+VALIDATE OUTSTANDING
+==================================================
+*/
+
+if (
+    outstandingAmount <= 0
+) {
+
+    throw new Error(
+        "Account Payable is already fully paid."
+    );
+
+}
+
+
+/*
+==================================================
+DEBUG
+==================================================
+*/
+
+console.log(
+    "AP PAYMENT FRESH OUTSTANDING:",
+    {
+        ap_id:
+            id,
+
+        total_amount:
+            totalAmount,
+
+        paid_amount:
+            actualPaidAmount,
+
+        outstanding_amount:
+            outstandingAmount
+    }
+);
 
 
         /*

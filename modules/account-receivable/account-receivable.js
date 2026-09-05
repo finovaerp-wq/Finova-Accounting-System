@@ -10255,6 +10255,21 @@ async addInvoice() {
 
         this.resetForm();
 
+        /*
+==================================================
+CUSTOMER TOMSELECT
+ENABLE IN ADD MODE
+==================================================
+*/
+
+if (
+    this.arCustomerSelect
+) {
+
+    this.arCustomerSelect.enable();
+
+}
+
 
         /*
         ==============================================
@@ -16536,6 +16551,21 @@ async viewInvoice(id) {
             }
         );
 
+        /*
+==================================================
+CUSTOMER TOMSELECT
+LOCK IN VIEW MODE
+==================================================
+*/
+
+if (
+    this.arCustomerSelect
+) {
+
+    this.arCustomerSelect.disable();
+
+}
+
 
         /*
         ==================================================
@@ -17768,51 +17798,125 @@ this.arPaymentAmount?.addEventListener(
 
 
     /*
-    ==================================================
-    DETAIL CALCULATION
-    ==================================================
-    */
+==================================================
+DETAIL CALCULATION
+ACCOUNT RECEIVABLE
+==================================================
+*/
 
-    this.arDetailQuantity?.addEventListener(
-        "input",
-        () => {
+/*
+==================================================
+QUANTITY
+==================================================
+*/
 
-            this.calculateDetail();
+this.arDetailQuantity?.addEventListener(
+    "input",
+    () => {
 
-        }
-    );
+        this.calculateDetail();
+
+    }
+);
 
 
-    this.arDetailUnitPrice?.addEventListener(
-        "input",
-        () => {
+/*
+==================================================
+UNIT PRICE
+IMPORTANT:
+DO NOT FORMAT WHILE USER IS TYPING
+==================================================
+*/
+
+this.arDetailUnitPrice?.addEventListener(
+    "input",
+    () => {
+
+        /*
+        ==============================================
+        CALCULATE USING CURRENT RAW VALUE
+        ==============================================
+        */
+
+        this.calculateDetail();
+
+    }
+);
+
+
+/*
+==================================================
+UNIT PRICE
+FORMAT AFTER USER FINISHES INPUT
+==================================================
+*/
+
+this.arDetailUnitPrice?.addEventListener(
+    "blur",
+    () => {
+
+        /*
+        ==============================================
+        FORMAT ONLY FOR TEXT INPUT
+
+        INPUT TYPE NUMBER CANNOT CONTAIN
+        INDONESIAN THOUSANDS SEPARATOR "."
+        ==============================================
+        */
+
+        if (
+            this.arDetailUnitPrice
+            &&
+            this.arDetailUnitPrice.type !== "number"
+        ) {
 
             this.formatUnitPrice();
 
-            this.calculateDetail();
-
         }
-    );
 
 
-    this.arDetailTaxOutputRate?.addEventListener(
-        "change",
-        () => {
+        /*
+        ==============================================
+        RECALCULATE FINAL VALUE
+        ==============================================
+        */
 
-            this.calculateDetail();
+        this.calculateDetail();
 
-        }
-    );
+    }
+);
 
 
-    this.arDetailWithholdingTaxRate?.addEventListener(
-        "change",
-        () => {
+/*
+==================================================
+TAX (+)
+==================================================
+*/
 
-            this.calculateDetail();
+this.arDetailTaxOutputRate?.addEventListener(
+    "change",
+    () => {
 
-        }
-    );
+        this.calculateDetail();
+
+    }
+);
+
+
+/*
+==================================================
+TAX (-)
+==================================================
+*/
+
+this.arDetailWithholdingTaxRate?.addEventListener(
+    "change",
+    () => {
+
+        this.calculateDetail();
+
+    }
+);
 
 
     /*

@@ -4946,104 +4946,141 @@ async updatePaymentStatus(
 
 
         /*
-        ==================================================
-        TOTAL INVOICE
-        ==================================================
-        */
+==================================================
+TOTAL INVOICE
+==================================================
+*/
 
-        const totalAmount =
-            Number(
-                invoice.total_amount
-                ||
-                0
-            );
-
-
-        if (
-            !Number.isFinite(
-                totalAmount
-            )
-            ||
-            totalAmount <= 0
-        ) {
-
-            throw new Error(
-                "Account Payable Total Amount is invalid."
-            );
-
-        }
+const rawTotalAmount =
+    Number(
+        invoice.total_amount
+        ||
+        0
+    );
 
 
-        /*
-        ==================================================
-        TOTAL ACTIVE PAYMENT
-        ==================================================
-        */
+if (
+    !Number.isFinite(
+        rawTotalAmount
+    )
+    ||
+    rawTotalAmount <= 0
+) {
 
-        const paidAmount =
-            Number(
-                await this.getPaymentTotal(
-                    accountPayableId
-                )
-                ||
-                0
-            );
+    throw new Error(
+        "Account Payable Total Amount is invalid."
+    );
 
-
-        if (
-            !Number.isFinite(
-                paidAmount
-            )
-            ||
-            paidAmount < 0
-        ) {
-
-            throw new Error(
-                "Account Payable Paid Amount is invalid."
-            );
-
-        }
+}
 
 
-        /*
-        ==================================================
-        PREVENT OVERPAYMENT
-        ==================================================
-        */
+/*
+==================================================
+TOTAL ACTIVE PAYMENT
+==================================================
+*/
 
-        if (
+const rawPaidAmount =
+    Number(
+        await this.getPaymentTotal(
+            accountPayableId
+        )
+        ||
+        0
+    );
+
+
+if (
+    !Number.isFinite(
+        rawPaidAmount
+    )
+    ||
+    rawPaidAmount < 0
+) {
+
+    throw new Error(
+        "Account Payable Paid Amount is invalid."
+    );
+
+}
+
+
+/*
+==================================================
+NORMALIZE TO WHOLE RUPIAH
+FINOVA DISPLAY = NO DECIMAL
+==================================================
+*/
+
+const totalAmount =
+    Math.round(
+        rawTotalAmount
+    );
+
+
+const paidAmount =
+    Math.round(
+        rawPaidAmount
+    );
+
+
+/*
+==================================================
+DEBUG
+==================================================
+*/
+
+console.log(
+    "AP PAYMENT STATUS NORMALIZED:",
+    {
+        raw_total_amount:
+            rawTotalAmount,
+
+        raw_paid_amount:
+            rawPaidAmount,
+
+        total_amount:
+            totalAmount,
+
+        paid_amount:
             paidAmount
-            >
-            totalAmount
-        ) {
+    }
+);
 
-            throw new Error(
-                "Total payment cannot exceed Account Payable Total Amount."
-            );
 
-        }
+/*
+==================================================
+PREVENT OVERPAYMENT
+==================================================
+*/
+
+if (
+    paidAmount
+    >
+    totalAmount
+) {
+
+    throw new Error(
+        "Total payment cannot exceed Account Payable Total Amount."
+    );
+
+}
 
 
         /*
-        ==================================================
-        OUTSTANDING
-        ==================================================
-        */
+==================================================
+OUTSTANDING
+WHOLE RUPIAH
+==================================================
+*/
 
-        const outstandingAmount =
-            Math.max(
-                Number(
-                    (
-                        totalAmount
-                        -
-                        paidAmount
-                    )
-                    .toFixed(
-                        2
-                    )
-                ),
-                0
-            );
+const outstandingAmount =
+    Math.max(
+        totalAmount
+        -
+        paidAmount,
+        0
+    );
 
 
         /*
@@ -5113,14 +5150,10 @@ async updatePaymentStatus(
             .update({
 
                 paid_amount:
-                    Number(
-                        paidAmount.toFixed(
-                            2
-                        )
-                    ),
+    paidAmount,
 
-                outstanding_amount:
-                    outstandingAmount,
+outstanding_amount:
+    outstandingAmount,
 
                 status:
                     status
