@@ -133,55 +133,1532 @@ export class FinovaRouter {
 
         };
 
-        this.currentModule = null;
+        /*
+==========================================================
+WORKSPACE STATE
+==========================================================
+*/
 
-        this.initialize();
+this.currentModule =
+    null;
+
+
+/*
+==========================================================
+OPEN WORKSPACE TABS
+
+Map structure:
+
+moduleName => {
+    route,
+    panel,
+    instance
+}
+==========================================================
+*/
+
+this.openTabs =
+    new Map();
+
+
+/*
+==========================================================
+TAB HISTORY
+
+Digunakan ketika tab aktif ditutup
+==========================================================
+*/
+
+this.tabHistory =
+    [];
+
+
+/*
+==========================================================
+INITIALIZE
+==========================================================
+*/
+
+this.initialize();
+
+    }
+    /*
+==========================================================
+CREATE HOME TAB
+==========================================================
+*/
+
+createHomeTab() {
+
+    /*
+    ======================================================
+    GET TAB CONTAINER
+    ======================================================
+    */
+
+    const tabContainer =
+        document.getElementById(
+            "finova-workspace-tabs"
+        );
+
+
+    if (!tabContainer) {
+
+        console.warn(
+            "FINOVA ROUTER: #finova-workspace-tabs not found."
+        );
+
+        return;
 
     }
 
+
+    /*
+    ======================================================
+    PREVENT DUPLICATE
+    ======================================================
+    */
+
+    const existingTab =
+        document.getElementById(
+            "finova-tab-dashboard"
+        );
+
+
+    if (existingTab) {
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    CREATE TAB
+    ======================================================
+    */
+
+    const tab =
+        document.createElement(
+            "div"
+        );
+
+
+    tab.id =
+        "finova-tab-dashboard";
+
+
+    tab.className =
+        "finova-workspace-tab home active";
+
+
+    tab.dataset.module =
+        "dashboard";
+
+    tab.setAttribute(
+    "role",
+    "tab"
+);
+
+
+tab.setAttribute(
+    "aria-selected",
+    "true"
+);
+
+
+    /*
+    ======================================================
+    TAB CONTENT
+    ======================================================
+    */
+
+    tab.innerHTML = `
+
+        <span
+            class="finova-workspace-tab-icon">
+
+            <i class="fa-solid fa-house"></i>
+
+        </span>
+
+
+        <span
+            class="finova-workspace-tab-title">
+
+            Home
+
+        </span>
+
+    `;
+
+
+    /*
+    ======================================================
+    CLICK EVENT
+    ======================================================
+    */
+
+    tab.addEventListener(
+        "click",
+        () => {
+
+            this.navigate(
+                "dashboard"
+            );
+
+        }
+    );
+
+
+    /*
+    ======================================================
+    APPEND
+    ======================================================
+    */
+
+    tabContainer.appendChild(
+        tab
+    );
+
+
+    console.log(
+        "FINOVA HOME TAB CREATED"
+    );
+
+}
+/*
+==========================================================
+CREATE WORKSPACE TAB
+==========================================================
+*/
+
+createWorkspaceTab(
+    moduleName,
+    route
+) {
+
+    /*
+    ======================================================
+    DASHBOARD USES HOME TAB
+    ======================================================
+    */
+
+    if (
+        moduleName ===
+        "dashboard"
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    GET TAB CONTAINER
+    ======================================================
+    */
+
+    const tabContainer =
+        document.getElementById(
+            "finova-workspace-tabs"
+        );
+
+
+    if (
+        !tabContainer
+    ) {
+
+        console.warn(
+            "FINOVA ROUTER: #finova-workspace-tabs not found."
+        );
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    PREVENT DUPLICATE TAB
+    ======================================================
+    */
+
+    const existingTab =
+        document.getElementById(
+            `finova-tab-${moduleName}`
+        );
+
+
+    if (
+        existingTab
+    ) {
+
+        return existingTab;
+
+    }
+
+
+    /*
+    ======================================================
+    CREATE TAB
+    ======================================================
+    */
+
+    const tab =
+        document.createElement(
+            "div"
+        );
+
+
+    tab.id =
+        `finova-tab-${moduleName}`;
+
+
+    tab.className =
+        "finova-workspace-tab";
+
+
+    tab.dataset.module =
+        moduleName;
+    tab.setAttribute(
+    "role",
+    "tab"
+);
+
+
+tab.setAttribute(
+    "aria-selected",
+    "false"
+);
+
+
+    /*
+    ======================================================
+    TAB CONTENT
+    ======================================================
+    */
+
+    tab.innerHTML = `
+
+        <span
+            class="finova-workspace-tab-title">
+
+            ${route.title}
+
+        </span>
+
+
+        <button
+            type="button"
+            class="finova-workspace-tab-close"
+            aria-label="Close">
+
+            <i class="fa-solid fa-xmark"></i>
+
+        </button>
+
+    `;
+
+
+    /*
+    ======================================================
+    TAB CLICK
+    ======================================================
+    */
+
+    tab.addEventListener(
+        "click",
+        event => {
+
+            /*
+            Ignore close button
+            */
+
+            if (
+                event.target.closest(
+                    ".finova-workspace-tab-close"
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            this.navigate(
+                moduleName
+            );
+
+        }
+    );
+
+
+    /*
+    ======================================================
+    CLOSE BUTTON
+    ======================================================
+    */
+
+    const closeButton =
+        tab.querySelector(
+            ".finova-workspace-tab-close"
+        );
+
+
+    if (
+        closeButton
+    ) {
+
+        closeButton.addEventListener(
+    "click",
+    event => {
+
+        /*
+        ==============================================
+        PREVENT TAB CLICK
+        ==============================================
+        */
+
+        event.preventDefault();
+
+        event.stopPropagation();
+
+
+        /*
+        ==============================================
+        CLOSE WORKSPACE
+        ==============================================
+        */
+
+        this.closeWorkspaceTab(
+            moduleName
+        );
+
+    }
+);
+    }
+
+
+    /*
+    ======================================================
+    APPEND TAB
+    ======================================================
+    */
+
+    tabContainer.appendChild(
+        tab
+    );
+
+
+    /*
+    ======================================================
+    RETURN
+    ======================================================
+    */
+
+    return tab;
+
+}
+/*
+==========================================================
+CLOSE WORKSPACE TAB
+==========================================================
+*/
+
+closeWorkspaceTab(
+    moduleName
+) {
+
+    /*
+    ======================================================
+    HOME CANNOT BE CLOSED
+    ======================================================
+    */
+
+    if (
+        moduleName ===
+        "dashboard"
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    CHECK WORKSPACE
+    ======================================================
+    */
+
+    const workspace =
+        this.openTabs.get(
+            moduleName
+        );
+
+
+    if (
+        !workspace
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    ACTIVE STATE
+    ======================================================
+    */
+
+    const wasActive =
+        this.currentModule ===
+        moduleName;
+
+
+    /*
+    ======================================================
+    CLEAN BOOTSTRAP OVERLAY
+    ======================================================
+    */
+
+    this.cleanupWorkspaceOverlay(
+        moduleName
+    );
+
+
+    /*
+    ======================================================
+    DESTROY MODULE INSTANCE
+    ======================================================
+    */
+
+    if (
+        workspace.instance
+        &&
+        typeof workspace.instance.destroy ===
+            "function"
+    ) {
+
+        try {
+
+            workspace.instance.destroy();
+
+        }
+
+        catch (
+            error
+        ) {
+
+            console.warn(
+                "FINOVA MODULE DESTROY ERROR :",
+                moduleName,
+                error
+            );
+
+        }
+
+    }
+
+
+    /*
+    ======================================================
+    REMOVE PANEL
+    ======================================================
+    */
+
+    if (
+        workspace.panel
+    ) {
+
+        workspace.panel.remove();
+
+    }
+
+    else {
+
+        const panel =
+            document.getElementById(
+                `finova-panel-${moduleName}`
+            );
+
+
+        if (
+            panel
+        ) {
+
+            panel.remove();
+
+        }
+
+    }
+
+
+    /*
+    ======================================================
+    REMOVE TAB
+    ======================================================
+    */
+
+    const tab =
+        document.getElementById(
+            `finova-tab-${moduleName}`
+        );
+
+
+    if (
+        tab
+    ) {
+
+        tab.remove();
+
+    }
+
+
+    /*
+    ======================================================
+    REMOVE OPEN TAB STATE
+    ======================================================
+    */
+
+    this.openTabs.delete(
+        moduleName
+    );
+
+
+    /*
+    ======================================================
+    REMOVE HISTORY
+    ======================================================
+    */
+
+    this.tabHistory =
+        this.tabHistory.filter(
+            item =>
+                item !== moduleName
+        );
+
+
+    /*
+    ======================================================
+    IF CLOSED TAB WAS NOT ACTIVE
+    ======================================================
+    */
+
+    if (
+        !wasActive
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    FIND PREVIOUS MODULE
+    ======================================================
+    */
+
+    let previousModule =
+        this.tabHistory[
+            this.tabHistory.length - 1
+        ];
+
+
+    /*
+    ======================================================
+    FALLBACK HOME
+    ======================================================
+    */
+
+    if (
+        !previousModule
+        ||
+        !this.openTabs.has(
+            previousModule
+        )
+    ) {
+
+        previousModule =
+            "dashboard";
+
+    }
+
+
+    /*
+    ======================================================
+    ACTIVATE PREVIOUS MODULE
+    ======================================================
+    */
+
+    this.navigate(
+        previousModule
+    );
+
+}
+
+/*
+==========================================================
+CREATE WORKSPACE PANEL
+==========================================================
+*/
+
+createWorkspacePanel(
+    moduleName
+) {
+
+    /*
+    ======================================================
+    GET WORKSPACE CONTENT
+    ======================================================
+    */
+
+    const workspace =
+        document.getElementById(
+            "finova-content"
+        );
+
+
+    if (
+        !workspace
+    ) {
+
+        throw new Error(
+            "FINOVA ROUTER: #finova-content not found."
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    RETURN EXISTING PANEL
+    ======================================================
+    */
+
+    const existingPanel =
+        document.getElementById(
+            `finova-panel-${moduleName}`
+        );
+
+
+    if (
+        existingPanel
+    ) {
+
+        return existingPanel;
+
+    }
+
+
+    /*
+    ======================================================
+    CREATE PANEL
+    ======================================================
+    */
+
+    const panel =
+        document.createElement(
+            "section"
+        );
+
+
+    /*
+    ======================================================
+    ATTRIBUTES
+    ======================================================
+    */
+
+    panel.id =
+        `finova-panel-${moduleName}`;
+
+
+    panel.className =
+        "finova-workspace-panel";
+
+
+    panel.dataset.module =
+        moduleName;
+
+
+    panel.setAttribute(
+        "role",
+        "tabpanel"
+    );
+
+
+    panel.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+
+
+    /*
+    ======================================================
+    APPEND
+    ======================================================
+    */
+
+    workspace.appendChild(
+        panel
+    );
+
+
+    /*
+    ======================================================
+    RETURN
+    ======================================================
+    */
+
+    return panel;
+
+}
+/*
+==========================================================
+CLEANUP WORKSPACE OVERLAY
+==========================================================
+*/
+
+cleanupWorkspaceOverlay(
+    moduleName = null
+) {
+
+    /*
+    ======================================================
+    GET TARGET PANEL
+    ======================================================
+    */
+
+    let panel =
+        null;
+
+
+    if (
+        moduleName
+    ) {
+
+        panel =
+            document.getElementById(
+                `finova-panel-${moduleName}`
+            );
+
+    }
+
+
+    /*
+    ======================================================
+    GET OPEN MODALS
+    ======================================================
+    */
+
+    const modalElements =
+        panel
+            ? panel.querySelectorAll(
+                ".modal.show"
+            )
+            : document.querySelectorAll(
+                ".modal.show"
+            );
+
+
+    /*
+    ======================================================
+    HIDE ACTIVE BOOTSTRAP MODALS
+    ======================================================
+    */
+
+    modalElements.forEach(
+        modalElement => {
+
+            try {
+
+                if (
+                    window.bootstrap
+                    &&
+                    bootstrap.Modal
+                ) {
+
+                    const modalInstance =
+                        bootstrap.Modal.getInstance(
+                            modalElement
+                        );
+
+
+                    if (
+                        modalInstance
+                    ) {
+
+                        modalInstance.hide();
+
+                    }
+
+                }
+
+            }
+
+            catch (
+                error
+            ) {
+
+                console.warn(
+                    "FINOVA MODAL CLEANUP :",
+                    error
+                );
+
+            }
+
+        }
+    );
+
+
+    /*
+    ======================================================
+    REMOVE LEFTOVER BACKDROP
+    ======================================================
+    */
+
+    document
+        .querySelectorAll(
+            ".modal-backdrop"
+        )
+        .forEach(
+            backdrop => {
+
+                backdrop.remove();
+
+            }
+        );
+
+
+    /*
+    ======================================================
+    RESTORE BODY
+    ======================================================
+    */
+
+    document.body.classList.remove(
+        "modal-open"
+    );
+
+
+    document.body.style.removeProperty(
+        "overflow"
+    );
+
+
+    document.body.style.removeProperty(
+        "padding-right"
+    );
+
+}
+/*
+==========================================================
+ACTIVATE WORKSPACE
+==========================================================
+*/
+
+activateWorkspace(
+    moduleName
+) {
+
+    /*
+    ======================================================
+    VALIDATE WORKSPACE
+    ======================================================
+    */
+
+    const workspace =
+        this.openTabs.get(
+            moduleName
+        );
+
+
+    /*
+    Dashboard may be activated
+    before it is registered in openTabs
+    during first initialization.
+    */
+
+    const panel =
+        document.getElementById(
+            `finova-panel-${moduleName}`
+        );
+
+
+    if (
+        !panel
+    ) {
+
+        console.warn(
+            "FINOVA WORKSPACE PANEL NOT FOUND :",
+            moduleName
+        );
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    CLEAN CURRENT MODULE OVERLAY
+    ======================================================
+    */
+
+    if (
+        this.currentModule
+        &&
+        this.currentModule !==
+            moduleName
+    ) {
+
+        this.cleanupWorkspaceOverlay(
+            this.currentModule
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    DEACTIVATE ALL TABS
+    ======================================================
+    */
+
+    document
+        .querySelectorAll(
+            "#finova-workspace-tabs .finova-workspace-tab"
+        )
+        .forEach(
+            tab => {
+
+                tab.classList.remove(
+                    "active"
+                );
+
+                tab.setAttribute(
+                    "aria-selected",
+                    "false"
+                );
+
+            }
+        );
+
+
+    /*
+    ======================================================
+    DEACTIVATE ALL PANELS
+    ======================================================
+    */
+
+    document
+        .querySelectorAll(
+            "#finova-content .finova-workspace-panel"
+        )
+        .forEach(
+            workspacePanel => {
+
+                workspacePanel.classList.remove(
+                    "active"
+                );
+
+                workspacePanel.setAttribute(
+                    "aria-hidden",
+                    "true"
+                );
+
+            }
+        );
+
+
+    /*
+    ======================================================
+    ACTIVATE CURRENT TAB
+    ======================================================
+    */
+
+    const tab =
+        document.getElementById(
+            `finova-tab-${moduleName}`
+        );
+
+
+    if (
+        tab
+    ) {
+
+        tab.classList.add(
+            "active"
+        );
+
+
+        tab.setAttribute(
+            "aria-selected",
+            "true"
+        );
+
+
+        /*
+        Keep active tab visible
+        when many tabs are opened.
+        */
+
+        tab.scrollIntoView(
+            {
+                behavior:
+                    "smooth",
+
+                block:
+                    "nearest",
+
+                inline:
+                    "nearest"
+            }
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    ACTIVATE PANEL
+    ======================================================
+    */
+
+    panel.classList.add(
+        "active"
+    );
+
+
+    panel.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+
+
+    /*
+    ======================================================
+    CURRENT MODULE
+    ======================================================
+    */
+
+    this.currentModule =
+        moduleName;
+
+
+    /*
+    ======================================================
+    TAB HISTORY
+    ======================================================
+    */
+
+    this.tabHistory =
+        this.tabHistory.filter(
+            item =>
+                item !== moduleName
+        );
+
+
+    this.tabHistory.push(
+        moduleName
+    );
+
+
+    /*
+    ======================================================
+    DEBUG
+    ======================================================
+    */
+
+    console.log(
+        "FINOVA WORKSPACE ACTIVE :",
+        moduleName
+    );
+
+}
     initialize() {
 
-        this.navigate("dashboard");
+    /*
+    ======================================================
+    CREATE HOME TAB
+    ======================================================
+    */
+
+    this.createHomeTab();
+
+
+    /*
+    ======================================================
+    LOAD DASHBOARD
+    ======================================================
+    */
+
+    this.navigate(
+        "dashboard"
+    );
+
+}
+
+  /*
+==========================================================
+NAVIGATE
+TRUE MULTI TAB
+==========================================================
+*/
+
+async navigate(
+    moduleName
+) {
+
+    /*
+    ======================================================
+    GET ROUTE
+    ======================================================
+    */
+
+    const route =
+        this.routes[
+            moduleName
+        ];
+
+
+    /*
+    ======================================================
+    VALIDATE ROUTE
+    ======================================================
+    */
+
+    if (
+        !route
+    ) {
+
+        this.show404();
+
+        return;
 
     }
 
-    async navigate(moduleName) {
 
-        const route = this.routes[moduleName];
+    try {
 
-        if (!route) {
+        /*
+        ==================================================
+        CHECK IF MODULE ALREADY OPEN
+        ==================================================
+        */
 
-            this.show404();
+        const existingWorkspace =
+            this.openTabs.get(
+                moduleName
+            );
+
+
+        /*
+        ==================================================
+        EXISTING MODULE
+        ==================================================
+        */
+
+        if (
+            existingWorkspace
+        ) {
+
+            /*
+            ==============================================
+            ACTIVATE EXISTING WORKSPACE
+            ==============================================
+            */
+
+            this.activateWorkspace(
+                moduleName
+            );
+
+
+            /*
+            ==============================================
+            UPDATE TOPBAR
+            ==============================================
+            */
+
+            this.updateTopbar(
+                route.title
+            );
+
+
+            /*
+            ==============================================
+            UPDATE SIDEBAR
+            ==============================================
+            */
+
+            this.setActiveMenu(
+                moduleName
+            );
+
+
+            console.log(
+                "FINOVA WORKSPACE REUSED :",
+                moduleName
+            );
+
 
             return;
 
         }
 
-        try {
 
-            await this.loadHTML(route);
+        /*
+        ==================================================
+        CREATE TAB
+        ==================================================
+        */
 
-            await this.loadModule(route);
+        if (
+            moduleName !==
+            "dashboard"
+        ) {
 
-            this.updateTopbar(route.title);
-
-            this.setActiveMenu(moduleName);
-
-            this.currentModule = moduleName;
-
-        }
-
-        catch (error) {
-
-            console.error(error);
-
-            this.showError();
+            this.createWorkspaceTab(
+                moduleName,
+                route
+            );
 
         }
+
+
+        /*
+==========================================================
+CREATE PANEL
+==========================================================
+*/
+
+const panel =
+    this.createWorkspacePanel(
+        moduleName
+    );
+
+
+/*
+==========================================================
+REGISTER WORKSPACE FIRST
+==========================================================
+*/
+
+this.openTabs.set(
+    moduleName,
+    {
+
+        route:
+            route,
+
+        panel:
+            panel,
+
+        instance:
+            null
+
+    }
+);
+
+
+/*
+==========================================================
+LOAD HTML
+==========================================================
+*/
+
+await this.loadHTML(
+    route,
+    panel
+);
+
+
+/*
+==========================================================
+ACTIVATE WORKSPACE
+==========================================================
+*/
+
+this.activateWorkspace(
+    moduleName
+);
+
+
+/*
+==========================================================
+LOAD MODULE
+==========================================================
+*/
+
+const instance =
+    await this.loadModule(
+        route
+    );
+
+
+/*
+==========================================================
+STORE MODULE INSTANCE
+==========================================================
+*/
+
+const workspace =
+    this.openTabs.get(
+        moduleName
+    );
+
+
+if (
+    workspace
+) {
+
+    workspace.instance =
+        instance;
+
+}
+
+
+        /*
+        ==================================================
+        UPDATE TOPBAR
+        ==================================================
+        */
+
+        this.updateTopbar(
+            route.title
+        );
+
+
+        /*
+        ==================================================
+        UPDATE SIDEBAR
+        ==================================================
+        */
+
+        this.setActiveMenu(
+            moduleName
+        );
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "FINOVA WORKSPACE OPENED :",
+            moduleName
+        );
 
     }
 
-    async loadHTML(route) {
+    catch (
+        error
+    ) {
+
+        console.error(
+            "FINOVA ROUTER ERROR :",
+            error
+        );
+
+
+        /*
+        ==================================================
+        CLEAN FAILED WORKSPACE
+        ==================================================
+        */
+
+        const failedPanel =
+            document.getElementById(
+                `finova-panel-${moduleName}`
+            );
+
+
+        if (
+            failedPanel
+        ) {
+
+            failedPanel.remove();
+
+        }
+
+
+        if (
+            moduleName !==
+            "dashboard"
+        ) {
+
+            const failedTab =
+                document.getElementById(
+                    `finova-tab-${moduleName}`
+                );
+
+
+            if (
+                failedTab
+            ) {
+
+                failedTab.remove();
+
+            }
+
+        }
+
+
+        this.openTabs.delete(
+            moduleName
+        );
+
+
+        /*
+        ==================================================
+        ERROR DISPLAY
+        ==================================================
+        */
+
+        this.showError();
+
+    }
+
+}
+/*
+==========================================================
+LOAD HTML
+==========================================================
+*/
+
+async loadHTML(
+    route,
+    panel
+) {
+
+    /*
+    ======================================================
+    VALIDATE PANEL
+    ======================================================
+    */
+
+    if (
+        !panel
+    ) {
+
+        throw new Error(
+            "FINOVA ROUTER: Workspace panel not provided."
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    CREATE URL
+    ======================================================
+    */
 
     const url =
         new URL(
@@ -190,11 +1667,23 @@ export class FinovaRouter {
         );
 
 
+    /*
+    ======================================================
+    CACHE BUSTER
+    ======================================================
+    */
+
     url.searchParams.set(
         "v",
         Date.now().toString()
     );
 
+
+    /*
+    ======================================================
+    FETCH HTML
+    ======================================================
+    */
 
     const response =
         await fetch(
@@ -205,6 +1694,12 @@ export class FinovaRouter {
             }
         );
 
+
+    /*
+    ======================================================
+    VALIDATION
+    ======================================================
+    */
 
     if (
         !response.ok
@@ -217,16 +1712,24 @@ export class FinovaRouter {
     }
 
 
+    /*
+    ======================================================
+    GET HTML
+    ======================================================
+    */
+
     const html =
         await response.text();
 
 
-    document
-        .getElementById(
-            "finova-content"
-        )
-        .innerHTML =
-            html;
+    /*
+    ======================================================
+    RENDER INTO WORKSPACE PANEL
+    ======================================================
+    */
+
+    panel.innerHTML =
+        html;
 
 }
 
@@ -371,6 +1874,8 @@ console.log(
         console.log(
             "=========================================="
         );
+
+        return page;
 
     }
 

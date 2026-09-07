@@ -246,75 +246,106 @@ class FinovaApp {
 
 
     /*
-    ======================================================
-    RENDER LAYOUT
-    ======================================================
+==========================================================
+RENDER LAYOUT
+==========================================================
+*/
+
+renderLayout() {
+
+    /*
+    ==========================================
+    APPLICATION CONTAINER
+    ==========================================
     */
 
-    renderLayout() {
-
-        /*
-        ==========================================
-        APPLICATION CONTAINER
-        ==========================================
-        */
-
-        const app =
-            document.getElementById(
-                "finova-app"
-            );
+    const app =
+        document.getElementById(
+            "finova-app"
+        );
 
 
-        /*
-        ==========================================
-        VALIDATION
-        ==========================================
-        */
+    /*
+    ==========================================
+    VALIDATION
+    ==========================================
+    */
 
-        if (
-            !app
-        ) {
+    if (
+        !app
+    ) {
 
-            throw new Error(
-                "Container #finova-app not found."
-            );
-
-        }
-
-
-        /*
-        ==========================================
-        LAYOUT
-        ==========================================
-        */
-
-        app.innerHTML = `
-
-            <div class="finova-layout">
-
-                <aside
-                    id="finova-sidebar">
-                </aside>
-
-                <div class="finova-main">
-
-                    <header
-                        id="finova-topbar">
-                    </header>
-
-                    <main
-                        id="finova-content">
-                    </main>
-
-                </div>
-
-            </div>
-
-        `;
+        throw new Error(
+            "Container #finova-app not found."
+        );
 
     }
 
 
+    /*
+    ==========================================
+    LAYOUT
+    ==========================================
+    */
+
+    app.innerHTML = `
+
+        <div class="finova-layout">
+
+
+            <!-- ==========================================
+                 SIDEBAR
+            =========================================== -->
+
+            <aside
+                id="finova-sidebar">
+            </aside>
+
+
+            <!-- ==========================================
+                 MAIN
+            =========================================== -->
+
+            <div class="finova-main">
+
+
+                <!-- ======================================
+                     TOPBAR
+                ======================================= -->
+
+                <header
+                    id="finova-topbar">
+                </header>
+
+
+                <!-- ======================================
+                     WORKSPACE TAB BAR
+                ======================================= -->
+
+                <div
+                    id="finova-workspace-tabs"
+                    class="finova-workspace-tabs">
+                </div>
+
+
+                <!-- ======================================
+                     WORKSPACE CONTENT
+                ======================================= -->
+
+                <main
+    id="finova-content"
+    class="finova-workspace-content">
+</main>
+
+
+            </div>
+
+
+        </div>
+
+    `;
+
+}
     /*
     ======================================================
     INITIALIZE COMPONENTS

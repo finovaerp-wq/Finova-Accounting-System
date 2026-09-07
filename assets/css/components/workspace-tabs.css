@@ -1,0 +1,683 @@
+/*
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+WORKSPACE TABS
+Version : 2.0.0
+==========================================================
+*/
+
+
+/* ==========================================================
+   WORKSPACE TAB BAR
+========================================================== */
+
+.finova-workspace-tabs {
+
+    display: flex;
+
+    align-items: flex-end;
+
+    width: 100%;
+
+    min-width: 0;
+
+    min-height: 42px;
+
+    height: 42px;
+
+    padding: 6px 10px 0 10px;
+
+    margin: 0;
+
+    background: #f3f5f8;
+
+    border-top: 1px solid #e1e5ea;
+
+    border-bottom: 1px solid #d9dee5;
+
+    overflow-x: auto;
+
+    overflow-y: hidden;
+
+    flex-shrink: 0;
+
+    box-sizing: border-box;
+
+    scrollbar-width: thin;
+
+}
+
+
+/* ==========================================================
+   WORKSPACE TAB BAR SCROLLBAR
+========================================================== */
+
+.finova-workspace-tabs::-webkit-scrollbar {
+
+    height: 5px;
+
+}
+
+
+.finova-workspace-tabs::-webkit-scrollbar-track {
+
+    background: transparent;
+
+}
+
+
+.finova-workspace-tabs::-webkit-scrollbar-thumb {
+
+    background: #c9d0d9;
+
+    border-radius: 10px;
+
+}
+
+
+.finova-workspace-tabs::-webkit-scrollbar-thumb:hover {
+
+    background: #aeb8c5;
+
+}
+
+
+/* ==========================================================
+   WORKSPACE TAB
+========================================================== */
+
+.finova-workspace-tab {
+
+    position: relative;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: flex-start;
+
+    gap: 7px;
+
+    flex: 0 0 auto;
+
+    min-width: 145px;
+
+    max-width: 220px;
+
+    height: 35px;
+
+    margin: 0 4px 0 0;
+
+    padding: 0 10px 0 12px;
+
+    background: #e9edf2;
+
+    border: 1px solid #d5dae1;
+
+    border-bottom: 0;
+
+    border-radius: 7px 7px 0 0;
+
+    color: #4b5563;
+
+    font-size: 12.5px;
+
+    font-weight: 500;
+
+    line-height: 1;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+
+    user-select: none;
+
+    box-sizing: border-box;
+
+    transition:
+        background-color 0.18s ease,
+        color 0.18s ease,
+        border-color 0.18s ease,
+        box-shadow 0.18s ease;
+
+}
+
+
+/* ==========================================================
+   TAB HOVER
+========================================================== */
+
+.finova-workspace-tab:hover {
+
+    background: #f7f9fb;
+
+    color: #14284a;
+
+    border-color: #c8d0da;
+
+}
+
+
+/* ==========================================================
+   ACTIVE TAB
+========================================================== */
+
+.finova-workspace-tab.active {
+
+    background: #ffffff;
+
+    color: #14284a;
+
+    font-weight: 600;
+
+    border-color: #cfd6df;
+
+    box-shadow:
+        0 -2px 8px rgba(15, 23, 42, 0.06);
+
+    z-index: 3;
+
+}
+
+
+/* ==========================================================
+   ACTIVE TAB TOP ACCENT
+========================================================== */
+
+.finova-workspace-tab.active::before {
+
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+
+    left: 8px;
+
+    right: 8px;
+
+    height: 3px;
+
+    background: #14284a;
+
+    border-radius: 0 0 4px 4px;
+
+}
+
+
+/* ==========================================================
+   TAB ICON
+========================================================== */
+
+.finova-workspace-tab-icon {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    width: 18px;
+
+    height: 18px;
+
+    color: #667085;
+
+    font-size: 11px;
+
+    line-height: 1;
+
+}
+
+
+/* ==========================================================
+   ACTIVE TAB ICON
+========================================================== */
+
+.finova-workspace-tab.active
+.finova-workspace-tab-icon {
+
+    color: #14284a;
+
+}
+
+
+/* ==========================================================
+   TAB TITLE
+========================================================== */
+
+.finova-workspace-tab-title {
+
+    display: block;
+
+    flex: 1 1 auto;
+
+    min-width: 0;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   CLOSE BUTTON
+========================================================== */
+
+.finova-workspace-tab-close {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex: 0 0 auto;
+
+    width: 18px;
+
+    height: 18px;
+
+    padding: 0;
+
+    margin: 0 0 0 4px;
+
+    border: 0;
+
+    border-radius: 50%;
+
+    background: transparent;
+
+    color: #98a2b3;
+
+    font-size: 9px;
+
+    line-height: 1;
+
+    cursor: pointer;
+
+    outline: none;
+
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease;
+
+}
+
+
+/* ==========================================================
+   CLOSE BUTTON HOVER
+========================================================== */
+
+.finova-workspace-tab-close:hover {
+
+    background: #e4e7ec;
+
+    color: #344054;
+
+}
+
+
+/* ==========================================================
+   CLOSE BUTTON FOCUS
+========================================================== */
+
+.finova-workspace-tab-close:focus {
+
+    outline: none;
+
+    box-shadow: none;
+
+}
+
+
+/* ==========================================================
+   ACTIVE TAB CLOSE BUTTON
+========================================================== */
+
+.finova-workspace-tab.active
+.finova-workspace-tab-close {
+
+    color: #667085;
+
+}
+
+
+/* ==========================================================
+   HOME TAB
+========================================================== */
+
+.finova-workspace-tab.home {
+
+    min-width: 115px;
+
+    max-width: 135px;
+
+}
+
+
+/* ==========================================================
+   HOME ICON
+========================================================== */
+
+.finova-workspace-tab.home
+.finova-workspace-tab-icon {
+
+    color: #14284a;
+
+}
+
+
+/* ==========================================================
+   ACTIVE HOME
+========================================================== */
+
+.finova-workspace-tab.home.active {
+
+    color: #14284a;
+
+}
+
+
+/* ==========================================================
+   WORKSPACE TAB ACCESSIBILITY
+========================================================== */
+
+.finova-workspace-tab[aria-selected="true"] {
+
+    z-index: 3;
+
+}
+
+
+/* ==========================================================
+   WORKSPACE CONTENT
+========================================================== */
+
+.finova-workspace-content {
+
+    position: relative;
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    width: 100%;
+
+    min-width: 0;
+
+    min-height: 0;
+
+    height: 100%;
+
+    padding: 0;
+
+    margin: 0;
+
+    overflow: hidden;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   WORKSPACE PANEL
+========================================================== */
+
+.finova-workspace-panel {
+
+    position: relative;
+
+    display: none;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    width: 100%;
+
+    height: 100%;
+
+    min-width: 0;
+
+    min-height: 0;
+
+    padding: 0;
+
+    margin: 0;
+
+    overflow: hidden;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   INACTIVE PANEL
+========================================================== */
+
+.finova-workspace-panel:not(.active) {
+
+    display: none !important;
+
+}
+
+
+/* ==========================================================
+   ACTIVE PANEL
+========================================================== */
+
+.finova-workspace-panel.active {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    width: 100%;
+
+    height: 100%;
+
+    min-width: 0;
+
+    min-height: 0;
+
+}
+
+
+/* ==========================================================
+   DIRECT FINOVA MODULE PAGE
+========================================================== */
+
+.finova-workspace-panel.active > .finova-page {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    width: 100%;
+
+    min-width: 0;
+
+    min-height: 0;
+
+}
+
+
+/* ==========================================================
+   DASHBOARD WORKSPACE
+   DASHBOARD NEEDS VERTICAL SCROLL
+========================================================== */
+
+#finova-panel-dashboard {
+
+    overflow-x: hidden;
+
+    overflow-y: auto;
+
+}
+
+
+/* ==========================================================
+   DASHBOARD FINOVA PAGE
+========================================================== */
+
+#finova-panel-dashboard > .finova-page {
+
+    display: block;
+
+    flex: 0 0 auto;
+
+    width: 100%;
+
+    height: auto;
+
+    min-height: 100%;
+
+    overflow: visible;
+
+}
+
+
+/* ==========================================================
+   DASHBOARD PAGE FALLBACK
+========================================================== */
+
+#finova-panel-dashboard .dashboard-page {
+
+    width: 100%;
+
+    height: auto;
+
+    min-height: 100%;
+
+    overflow: visible;
+
+}
+
+
+/* ==========================================================
+   MODULE PANEL
+   PREVENT DOUBLE SCROLL
+========================================================== */
+
+.finova-workspace-panel:not(
+    #finova-panel-dashboard
+) {
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   PREVENT MODULE WIDTH OVERFLOW
+========================================================== */
+
+.finova-workspace-panel > * {
+
+    min-width: 0;
+
+}
+
+
+/* ==========================================================
+   ACTIVE PANEL VISIBILITY
+========================================================== */
+
+.finova-workspace-panel[aria-hidden="false"] {
+
+    visibility: visible;
+
+}
+
+
+/* ==========================================================
+   INACTIVE PANEL VISIBILITY
+========================================================== */
+
+.finova-workspace-panel[aria-hidden="true"] {
+
+    visibility: hidden;
+
+}
+
+
+/* ==========================================================
+   ACTIVE PANEL OVERRIDE
+========================================================== */
+
+.finova-workspace-panel.active[aria-hidden="false"] {
+
+    display: flex;
+
+    visibility: visible;
+
+}
+
+
+/* ==========================================================
+   RESPONSIVE TAB BAR
+========================================================== */
+
+@media (
+    max-width: 768px
+) {
+
+    .finova-workspace-tabs {
+
+        min-height: 40px;
+
+        height: 40px;
+
+        padding:
+
+            5px
+            6px
+            0
+            6px;
+
+    }
+
+
+    .finova-workspace-tab {
+
+        min-width: 125px;
+
+        max-width: 180px;
+
+        height: 34px;
+
+        padding:
+
+            0
+            8px
+            0
+            10px;
+
+        font-size: 12px;
+
+    }
+
+
+    .finova-workspace-tab.home {
+
+        min-width: 100px;
+
+        max-width: 115px;
+
+    }
+
+}
