@@ -2259,10 +2259,26 @@ checkBalance(details = []) {
 ==========================================================
 POST JOURNAL
 WITH ACCOUNTING PERIOD LOCK
+DRAFT / VOID -> POSTED
 ==========================================================
 */
 
 async post(id) {
+
+    /*
+    ======================================================
+    VALIDATION
+    ======================================================
+    */
+
+    if (!id) {
+
+        throw new Error(
+            "Journal ID is required."
+        );
+
+    }
+
 
     /*
     ======================================================
@@ -2285,17 +2301,52 @@ async post(id) {
 
     /*
     ======================================================
-    VALIDATE STATUS
+    NORMALIZE STATUS
+    ======================================================
+    */
+
+    const currentStatus =
+        String(
+            journal.status
+            || ""
+        )
+        .trim()
+        .toUpperCase();
+
+
+    /*
+    ======================================================
+    ALREADY POSTED
     ======================================================
     */
 
     if (
-        journal.status !==
-        this.STATUS.DRAFT
+        currentStatus ===
+        "POSTED"
+    ) {
+
+        return true;
+
+    }
+
+
+    /*
+    ======================================================
+    FINOVA RULE
+
+    DRAFT -> POSTED
+    VOID  -> POSTED
+    ======================================================
+    */
+
+    if (
+        currentStatus !== "DRAFT"
+        &&
+        currentStatus !== "VOID"
     ) {
 
         throw new Error(
-            "Only Draft Journal can be posted."
+            `Journal status "${journal.status || ""}" cannot be posted.`
         );
 
     }
@@ -2315,6 +2366,9 @@ async post(id) {
     /*
     ======================================================
     POST JOURNAL
+
+    IMPORTANT:
+    ONLY UPDATE VERIFIED FIELD.
     ======================================================
     */
 
@@ -2329,10 +2383,7 @@ async post(id) {
         .update({
 
             status:
-                this.STATUS.POSTED,
-
-            Posted_at:
-                new Date().toISOString()
+                this.STATUS.POSTED
 
         })
 

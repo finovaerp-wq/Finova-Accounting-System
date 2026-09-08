@@ -1079,6 +1079,223 @@ async init() {
 
 
         /*
+        ======================================================
+        REMOVE OLD EXTERNAL LISTENER
+        PREVENT DUPLICATE LISTENER
+        ======================================================
+        */
+
+        if (
+            this.handleExternalSourceTransactionChange
+        ) {
+
+            window.removeEventListener(
+                "finova:source-transaction-changed",
+                this.handleExternalSourceTransactionChange
+            );
+
+
+            this.handleExternalSourceTransactionChange =
+                null;
+
+        }
+
+
+        /*
+        ======================================================
+        EXTERNAL SOURCE TRANSACTION CHANGE
+        GL JOURNAL -> ACCOUNT PAYABLE
+
+        USED WHEN:
+
+        AP_INVOICE JOURNAL:
+        - DELETED
+        - VOIDED
+        - CHANGED
+
+        AP_PAYMENT JOURNAL:
+        - DELETED
+        - VOIDED
+        - CHANGED
+
+        AP WORKSPACE MAY BE INACTIVE
+        BUT STILL OPEN IN MULTI TAB.
+
+        THEREFORE DATA MUST BE RELOADED.
+        ======================================================
+        */
+
+        this.handleExternalSourceTransactionChange =
+            async event => {
+
+                try {
+
+                    /*
+                    ==========================================
+                    EVENT DETAIL
+                    ==========================================
+                    */
+
+                    const detail =
+                        event?.detail
+                        ||
+                        {};
+
+
+                    /*
+                    ==========================================
+                    SOURCE MODULE
+                    ==========================================
+                    */
+
+                    const sourceModule =
+                        String(
+                            detail.sourceModule
+                            ||
+                            ""
+                        )
+                        .trim()
+                        .toUpperCase();
+
+
+                    /*
+                    ==========================================
+                    SOURCE DOCUMENT TYPE
+                    ==========================================
+                    */
+
+                    const sourceDocumentType =
+                        String(
+                            detail.sourceDocumentType
+                            ||
+                            ""
+                        )
+                        .trim()
+                        .toUpperCase();
+
+
+                    /*
+                    ==========================================
+                    IGNORE NON AP EVENT
+                    ==========================================
+                    */
+
+                    if (
+                        sourceModule !==
+                        "AP"
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    ONLY AP INVOICE / AP PAYMENT
+                    ==========================================
+                    */
+
+                    if (
+                        sourceDocumentType !==
+                            "AP_INVOICE"
+                        &&
+                        sourceDocumentType !==
+                            "AP_PAYMENT"
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    DEBUG
+                    ==========================================
+                    */
+
+                    console.log(
+                        "ACCOUNT PAYABLE EXTERNAL CHANGE:",
+                        {
+                            source_module:
+                                sourceModule,
+
+                            source_document_type:
+                                sourceDocumentType,
+
+                            source_document_id:
+                                detail.sourceDocumentId
+                                ||
+                                null,
+
+                            account_payable_id:
+                                detail.accountPayableId
+                                ||
+                                null,
+
+                            journal_id:
+                                detail.journalId
+                                ||
+                                null,
+
+                            action:
+                                detail.action
+                                ||
+                                null
+                        }
+                    );
+
+
+                    /*
+                    ==========================================
+                    RELOAD LATEST AP DATA
+                    NO FULL LOADING
+                    ==========================================
+                    */
+
+                    await this.loadData(
+                        false
+                    );
+
+
+                    /*
+                    ==========================================
+                    DEBUG SUCCESS
+                    ==========================================
+                    */
+
+                    console.log(
+                        "ACCOUNT PAYABLE REALTIME REFRESH COMPLETE."
+                    );
+
+                }
+
+                catch (error) {
+
+                    console.error(
+                        "AccountPayable external refresh:",
+                        error
+                    );
+
+                }
+
+            };
+
+
+        /*
+        ======================================================
+        REGISTER EXTERNAL LISTENER
+        ======================================================
+        */
+
+        window.addEventListener(
+            "finova:source-transaction-changed",
+            this.handleExternalSourceTransactionChange
+        );
+
+
+        /*
         ==============================================
         LOAD ACCOUNT PAYABLE
         INITIAL LOADING
@@ -1208,9 +1425,6 @@ async init() {
                         )
                             ? result.details
                             : [];
-
-
-                    
 
 
                     /*
@@ -6180,31 +6394,79 @@ console.log(
 
 
         /*
-        ==================================================
-        RELOAD AP DATA
-        ==================================================
-        */
+==================================================
+RELOAD AP DATA
+==================================================
+*/
 
-        await this.loadData(
+await this.loadData(
     false
 );
 
 
-        /*
-        ==================================================
-        RETURN
-        ==================================================
-        */
+/*
+==================================================
+NOTIFY GL JOURNAL
 
-        return {
+IMPORTANT:
+Journal has already been:
+1. Generated
+2. Linked to AP
+3. AP successfully completed
 
-            ap:
-                completed,
+Notify any open GL Journal workspace
+to reload latest journal data.
+==================================================
+*/
 
-            journal:
-                journal
+window.dispatchEvent(
+    new CustomEvent(
+        "finova:gl-journal-changed",
+        {
+            detail: {
 
-        };
+                source:
+                    "AP",
+
+                action:
+                    "AP_COMPLETE",
+
+                documentId:
+                    id,
+
+                documentNo:
+                    invoice?.invoice_no
+                    || null,
+
+                journalId:
+                    journalId
+                    || null,
+
+                journalNo:
+                    journal?.journal_no
+                    || null
+
+            }
+        }
+    )
+);
+
+
+/*
+==================================================
+RETURN
+==================================================
+*/
+
+return {
+
+    ap:
+        completed,
+
+    journal:
+        journal
+
+};
 
     }
     catch (error) {
@@ -6349,6 +6611,214 @@ async loadDetailModalHTML() {
         );
 
         throw error;
+
+    }
+
+}
+/*
+==========================================================
+DESTROY
+ACCOUNT PAYABLE
+CLEAN WORKSPACE RESOURCES
+==========================================================
+*/
+
+destroy() {
+
+    try {
+
+        /*
+        ==================================================
+        REMOVE SOURCE TRANSACTION LISTENER
+        ==================================================
+        */
+
+        if (
+            this.handleExternalSourceTransactionChange
+        ) {
+
+            window.removeEventListener(
+                "finova:source-transaction-changed",
+                this.handleExternalSourceTransactionChange
+            );
+
+            this.handleExternalSourceTransactionChange =
+                null;
+
+        }
+
+
+        /*
+        ==================================================
+        DESTROY VENDOR TOM SELECT
+        ==================================================
+        */
+
+        if (
+            this.apVendorSelect
+        ) {
+
+            try {
+
+                this.apVendorSelect.destroy();
+
+            }
+
+            catch (
+                error
+            ) {
+
+                console.warn(
+                    "Failed to destroy AP Vendor TomSelect:",
+                    error
+                );
+
+            }
+
+            this.apVendorSelect =
+                null;
+
+        }
+
+
+        /*
+        ==================================================
+        DESTROY DETAIL COA TOM SELECT
+        ==================================================
+        */
+
+        if (
+            this.apDetailCOASelect
+        ) {
+
+            try {
+
+                this.apDetailCOASelect.destroy();
+
+            }
+
+            catch (
+                error
+            ) {
+
+                console.warn(
+                    "Failed to destroy AP Detail COA TomSelect:",
+                    error
+                );
+
+            }
+
+            this.apDetailCOASelect =
+                null;
+
+        }
+
+
+        /*
+        ==================================================
+        CLEAR ACTIVE BOOTSTRAP MODAL INSTANCES
+        ==================================================
+        */
+
+        const modalElements = [
+            this.accountPayableModal,
+            this.apDetailModal,
+            this.apPaymentModal,
+            this.apDeleteInvoiceModal
+        ];
+
+
+        modalElements.forEach(
+            modalElement => {
+
+                if (
+                    !modalElement
+                ) {
+
+                    return;
+
+                }
+
+
+                try {
+
+                    const modal =
+                        bootstrap.Modal.getInstance(
+                            modalElement
+                        );
+
+                    modal?.hide();
+                    modal?.dispose();
+
+                }
+
+                catch (
+                    error
+                ) {
+
+                    console.warn(
+                        "Failed to dispose AP modal:",
+                        error
+                    );
+
+                }
+
+            }
+        );
+
+
+        /*
+        ==================================================
+        REMOVE LEFTOVER MODAL BACKDROP
+        ==================================================
+        */
+
+        document
+            .querySelectorAll(
+                ".modal-backdrop"
+            )
+            .forEach(
+                backdrop => {
+
+                    backdrop.remove();
+
+                }
+            );
+
+
+        /*
+        ==================================================
+        RESTORE BODY
+        ==================================================
+        */
+
+        document.body.classList.remove(
+            "modal-open"
+        );
+
+        document.body.style.removeProperty(
+            "overflow"
+        );
+
+        document.body.style.removeProperty(
+            "padding-right"
+        );
+
+
+        console.log(
+            "FINOVA Account Payable destroyed."
+        );
+
+    }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "AccountPayable.destroy:",
+            error
+        );
 
     }
 
@@ -9322,6 +9792,108 @@ await this.loadData(
 
 /*
 ==================================================
+NOTIFY GL JOURNAL
+AP PAYMENT JOURNAL CREATED
+==================================================
+
+IMPORTANT:
+
+At this point:
+
+1. AP Payment GL Journal already created
+2. Payment row already created
+3. Payment linked to GL Journal
+4. AP payment status already updated
+5. AP data already refreshed
+
+Therefore GL Journal workspace
+can safely reload its latest data.
+==================================================
+*/
+
+window.dispatchEvent(
+
+    new CustomEvent(
+
+        "finova:gl-journal-changed",
+
+        {
+
+            detail: {
+
+                source:
+                    "AP",
+
+                sourceModule:
+                    "AP",
+
+                sourceDocumentType:
+                    "AP_PAYMENT",
+
+                action:
+                    "AP_PAYMENT_CREATED",
+
+                documentId:
+                    id,
+
+                documentNo:
+                    invoice?.invoice_no
+                    ||
+                    null,
+
+                paymentId:
+                    createdPayment?.id
+                    ||
+                    null,
+
+                journalId:
+                    createdJournal?.id
+                    ||
+                    null,
+
+                journalNo:
+                    createdJournal?.journal_no
+                    ||
+                    null
+
+            }
+
+        }
+
+    )
+
+);
+
+
+/*
+==================================================
+DEBUG
+==================================================
+*/
+
+console.log(
+    "AP PAYMENT -> GL JOURNAL REALTIME:",
+    {
+        account_payable_id:
+            id,
+
+        invoice_no:
+            invoice?.invoice_no,
+
+        payment_id:
+            createdPayment?.id,
+
+        journal_id:
+            createdJournal?.id,
+
+        journal_no:
+            createdJournal?.journal_no
+    }
+);
+
+
+/*
+==================================================
 SUCCESS
 BOOTSTRAP ALERT
 ==================================================
@@ -10431,12 +11003,6 @@ showSuccess(
     );
 
 }
-/*
-======================================================
-CONFIRM DELETE ACCOUNT PAYABLE
-======================================================
-*/
-
 async confirmDelete() {
 
     try {
@@ -10486,7 +11052,7 @@ async confirmDelete() {
 
         /*
         ==================================================
-        DELETE
+        EXECUTE DELETE
         ==================================================
         */
 
@@ -10497,7 +11063,7 @@ async confirmDelete() {
 
         /*
         ==================================================
-        CLEAR DELETE ID
+        CLEAR DELETE STATE
         ==================================================
         */
 
@@ -10528,7 +11094,7 @@ async confirmDelete() {
 
         /*
         ==================================================
-        REFRESH DATA
+        REFRESH ACCOUNT PAYABLE DATA
         ==================================================
         */
 
@@ -10537,7 +11103,7 @@ async confirmDelete() {
 
         /*
         ==================================================
-        SUCCESS ALERT
+        SUCCESS FEEDBACK
         ==================================================
         */
 
@@ -10551,7 +11117,46 @@ async confirmDelete() {
 
         /*
         ==================================================
-        ERROR
+        GET ERROR MESSAGE
+        ==================================================
+        */
+
+        const message =
+            error?.message
+            ||
+            "Failed to delete Account Payable.";
+
+
+        /*
+        ==================================================
+        BUSINESS VALIDATION
+        ==================================================
+
+        EXAMPLE:
+        - Only Draft or Void can be deleted
+        - Accounting Period Closed
+        - Referenced by another transaction
+        ==================================================
+        */
+
+        if (
+            error?.name ===
+            "BusinessValidationError"
+        ) {
+
+            this.showError(
+                message
+            );
+
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        REAL / UNEXPECTED ERROR
         ==================================================
         */
 
@@ -10561,10 +11166,14 @@ async confirmDelete() {
         );
 
 
+        /*
+        ==================================================
+        USER FEEDBACK
+        ==================================================
+        */
+
         this.showError(
-            error?.message
-            ||
-            "Failed to delete Account Payable."
+            message
         );
 
     }
@@ -14500,14 +15109,6 @@ showConfirmModal({
     modal.show();
 
 }
-/*
-======================================================
-SHOW ERROR
-BOOTSTRAP ALERT
-ACCOUNT PAYABLE
-======================================================
-*/
-
 showError(
     message
 ) {
@@ -14522,18 +15123,6 @@ showError(
         message
         ||
         "An error occurred.";
-
-
-    /*
-    ==================================================
-    CONSOLE
-    ==================================================
-    */
-
-    console.error(
-        "Account Payable:",
-        errorMessage
-    );
 
 
     /*
@@ -14619,18 +15208,18 @@ showError(
 
     /*
     ==================================================
-    FIND AP MODAL
+    FIND CURRENT VISIBLE MODAL
     ==================================================
     */
 
-    const modal =
-        document.getElementById(
-            "accountPayableModal"
+    const visibleModal =
+        document.querySelector(
+            ".modal.show"
         );
 
 
-    const modalBody =
-        modal
+    const visibleModalBody =
+        visibleModal
             ?.querySelector(
                 ".modal-body"
             );
@@ -14638,17 +15227,17 @@ showError(
 
     /*
     ==================================================
-    INSERT ALERT
+    INSERT INTO VISIBLE MODAL
     ==================================================
     */
 
     if (
-        modalBody
+        visibleModalBody
     ) {
 
-        modalBody.insertBefore(
+        visibleModalBody.insertBefore(
             alertElement,
-            modalBody.firstChild
+            visibleModalBody.firstChild
         );
 
     }
@@ -14656,9 +15245,9 @@ showError(
     else {
 
         /*
-        ==============================================
-        FALLBACK
-        ==============================================
+        ==================================================
+        GLOBAL FIXED FEEDBACK
+        ==================================================
         */
 
         alertElement.style.position =
@@ -14676,6 +15265,9 @@ showError(
         alertElement.style.zIndex =
             "99999";
 
+        alertElement.style.width =
+            "auto";
+
         alertElement.style.minWidth =
             "420px";
 
@@ -14692,19 +15284,26 @@ showError(
 
     /*
     ==================================================
-    SCROLL ALERT INTO VIEW
+    SCROLL INTO VIEW
+    ONLY IF INSIDE MODAL
     ==================================================
     */
 
-    alertElement.scrollIntoView({
+    if (
+        visibleModalBody
+    ) {
 
-        behavior:
-            "smooth",
+        alertElement.scrollIntoView({
 
-        block:
-            "nearest"
+            behavior:
+                "smooth",
 
-    });
+            block:
+                "nearest"
+
+        });
+
+    }
 
 
     /*
@@ -14731,12 +15330,6 @@ showError(
 
             }
 
-
-            /*
-            ==========================================
-            BOOTSTRAP AVAILABLE
-            ==========================================
-            */
 
             if (
                 window.bootstrap
@@ -15832,303 +16425,350 @@ ADD ACCOUNT PAYABLE
 ======================================================
 */
 
-addInvoice() {
+async addInvoice() {
 
-    /*
-    ==================================================
-    STATE
-    ==================================================
-    */
+    try {
 
-    this.currentInvoiceId =
-        null;
+        /*
+        ==================================================
+        STATE
+        ==================================================
+        */
 
-    this.currentMode =
-        "add";
+        this.currentInvoiceId =
+            null;
 
-    this.currentDetailId =
-        null;
+        this.currentMode =
+            "add";
 
-    this.pendingDeleteDetailId =
-        null;
+        this.currentDetailId =
+            null;
 
-
-    /*
-    ==================================================
-    CHECK MODAL
-    ==================================================
-    */
-
-    if (
-        !this.accountPayableModal
-    ) {
-
-        console.error(
-            "Account Payable modal not found."
-        );
-
-        return;
-
-    }
+        this.pendingDeleteDetailId =
+            null;
 
 
-    /*
-    ==================================================
-    RESET FORM
-    ==================================================
-    */
+        /*
+        ==================================================
+        CHECK MODAL
+        ==================================================
+        */
 
-    this.resetAddForm();
+        if (
+            !this.accountPayableModal
+        ) {
 
+            console.error(
+                "Account Payable modal not found."
+            );
 
-    /*
-    ==================================================
-    ENABLE HEADER FIELDS
-    RESTORE AFTER VIEW MODE
-    ==================================================
-    */
-
-    const editableFields = [
-
-        this.apFormVendor,
-        this.apFormPoNo,
-        this.apFormInvoiceNo,
-        this.apFormInvoiceDate,
-        this.apFormDateReceived,
-        this.apFormDescription
-
-    ];
-
-
-    editableFields.forEach(
-        field => {
-
-            if (
-                !field
-            ) {
-
-                return;
-
-            }
-
-
-            field.disabled =
-                false;
-
-            field.readOnly =
-                false;
+            return;
 
         }
-    );
 
 
-    /*
-    ==================================================
-    TOP
-    READ ONLY
-    ==================================================
-    */
+        /*
+        ==================================================
+        RELOAD ACTIVE VENDORS
+        ALWAYS GET LATEST BUSINESS PARTNER DATA
 
-    if (
-        this.apFormTop
-    ) {
+        IMPORTANT:
+        Vendor may have been added / updated
+        from Business Partner workspace tab.
 
-        this.apFormTop.disabled =
-            false;
+        Therefore Vendor data must always be refreshed
+        before opening Add Account Payable.
+        ==================================================
+        */
 
-        this.apFormTop.readOnly =
-            true;
-
-    }
+        await this.loadVendors();
 
 
-    /*
-    ==================================================
-    DUE DATE
-    READ ONLY / AUTO CALCULATED
-    ==================================================
-    */
+        /*
+        ==================================================
+        RESET FORM
+        ==================================================
+        */
 
-    if (
-        this.apFormDueDate
-    ) {
-
-        this.apFormDueDate.disabled =
-            false;
-
-        this.apFormDueDate.readOnly =
-            true;
-
-    }
+        this.resetAddForm();
 
 
-    /*
-    ==================================================
-    JOURNAL NO
-    ALWAYS READ ONLY
-    ==================================================
-    */
+        /*
+        ==================================================
+        ENABLE HEADER FIELDS
+        RESTORE AFTER VIEW MODE
+        ==================================================
+        */
 
-    if (
-        this.apFormJournalNo
-    ) {
+        const editableFields = [
 
-        this.apFormJournalNo.disabled =
-            false;
+            this.apFormVendor,
+            this.apFormPoNo,
+            this.apFormInvoiceNo,
+            this.apFormInvoiceDate,
+            this.apFormDateReceived,
+            this.apFormDescription
 
-        this.apFormJournalNo.readOnly =
-            true;
-
-        this.apFormJournalNo.value =
-            "AUTO";
-
-    }
+        ];
 
 
-    /*
-    ==================================================
-    ENABLE VENDOR TOM SELECT
-    RESTORE AFTER VIEW MODE
-    ==================================================
-    */
+        editableFields.forEach(
+            field => {
 
-    if (
-        this.apVendorSelect
-    ) {
+                if (
+                    !field
+                ) {
 
-        this.apVendorSelect.enable();
+                    return;
 
-        this.apVendorSelect.clear(
-            true
+                }
+
+
+                field.disabled =
+                    false;
+
+                field.readOnly =
+                    false;
+
+            }
         );
 
-        this.apVendorSelect.setTextboxValue(
-            ""
-        );
 
-    }
+        /*
+        ==================================================
+        TOP
+        READ ONLY
+        ==================================================
+        */
 
+        if (
+            this.apFormTop
+        ) {
 
-    /*
-    ==================================================
-    ENABLE ADD DETAIL
-    ==================================================
-    */
+            this.apFormTop.disabled =
+                false;
 
-    if (
-        this.btnAddDetail
-    ) {
+            this.apFormTop.readOnly =
+                true;
 
-        this.btnAddDetail.disabled =
-            false;
-
-        this.btnAddDetail.style.display =
-            "";
-
-    }
+        }
 
 
-    /*
-    ==================================================
-    RESTORE SAVE DRAFT BUTTON
-    VIEW MODE MAY HAVE HIDDEN IT
-    ==================================================
-    */
+        /*
+        ==================================================
+        DUE DATE
+        READ ONLY / AUTO CALCULATED
+        ==================================================
+        */
 
-    if (
-        this.btnSaveDraft
-    ) {
+        if (
+            this.apFormDueDate
+        ) {
 
-        this.btnSaveDraft.style.display =
-            "";
+            this.apFormDueDate.disabled =
+                false;
 
-        this.btnSaveDraft.disabled =
-            false;
+            this.apFormDueDate.readOnly =
+                true;
 
-        this.btnSaveDraft.innerHTML = `
-
-            <i class="fa-solid fa-floppy-disk me-1"></i>
-
-            Save Draft
-
-        `;
-
-    }
+        }
 
 
-    /*
-    ==================================================
-    MODAL TITLE
-    ==================================================
-    */
+        /*
+        ==================================================
+        JOURNAL NO
+        ALWAYS READ ONLY
+        ==================================================
+        */
 
-    const modalTitle =
-        this.accountPayableModal
-            ?.querySelector(
-                ".modal-title"
+        if (
+            this.apFormJournalNo
+        ) {
+
+            this.apFormJournalNo.disabled =
+                false;
+
+            this.apFormJournalNo.readOnly =
+                true;
+
+            this.apFormJournalNo.value =
+                "AUTO";
+
+        }
+
+
+        /*
+        ==================================================
+        ENABLE VENDOR TOM SELECT
+        RESTORE AFTER VIEW MODE
+
+        IMPORTANT:
+        loadVendors() rebuilds Vendor options
+        and recreates Tom Select.
+        ==================================================
+        */
+
+        if (
+            this.apVendorSelect
+        ) {
+
+            this.apVendorSelect.enable();
+
+            this.apVendorSelect.clear(
+                true
             );
 
-
-    if (
-        modalTitle
-    ) {
-
-        modalTitle.innerHTML = `
-
-            <i class="fa-solid fa-file-invoice-dollar me-2"></i>
-
-            Add Account Payable
-
-        `;
-
-    }
-
-
-    /*
-    ==================================================
-    MODAL SUBTITLE
-    ==================================================
-    */
-
-    const modalSubtitle =
-        this.accountPayableModal
-            ?.querySelector(
-                ".modal-subtitle"
+            this.apVendorSelect.setTextboxValue(
+                ""
             );
 
-
-    if (
-        modalSubtitle
-    ) {
-
-        modalSubtitle.textContent =
-            "Create new Account Payable";
-
-    }
+        }
 
 
-    /*
-    ==================================================
-    RESET TAB
-    ==================================================
-    */
+        /*
+        ==================================================
+        ENABLE ADD DETAIL
+        ==================================================
+        */
 
-    this.resetAPModalTab();
+        if (
+            this.btnAddDetail
+        ) {
+
+            this.btnAddDetail.disabled =
+                false;
+
+            this.btnAddDetail.style.display =
+                "";
+
+        }
 
 
-    /*
-    ==================================================
-    SHOW MODAL
-    ==================================================
-    */
+        /*
+        ==================================================
+        RESTORE SAVE DRAFT BUTTON
+        VIEW MODE MAY HAVE HIDDEN IT
+        ==================================================
+        */
 
-    const modal =
-        bootstrap.Modal.getOrCreateInstance(
+        if (
+            this.btnSaveDraft
+        ) {
+
+            this.btnSaveDraft.style.display =
+                "";
+
+            this.btnSaveDraft.disabled =
+                false;
+
+            this.btnSaveDraft.innerHTML = `
+
+                <i class="fa-solid fa-floppy-disk me-1"></i>
+
+                Save Draft
+
+            `;
+
+        }
+
+
+        /*
+        ==================================================
+        MODAL TITLE
+        ==================================================
+        */
+
+        const modalTitle =
             this.accountPayableModal
+                ?.querySelector(
+                    ".modal-title"
+                );
+
+
+        if (
+            modalTitle
+        ) {
+
+            modalTitle.innerHTML = `
+
+                <i class="fa-solid fa-file-invoice-dollar me-2"></i>
+
+                Add Account Payable
+
+            `;
+
+        }
+
+
+        /*
+        ==================================================
+        MODAL SUBTITLE
+        ==================================================
+        */
+
+        const modalSubtitle =
+            this.accountPayableModal
+                ?.querySelector(
+                    ".modal-subtitle"
+                );
+
+
+        if (
+            modalSubtitle
+        ) {
+
+            modalSubtitle.textContent =
+                "Create new Account Payable";
+
+        }
+
+
+        /*
+        ==================================================
+        RESET TAB
+        ==================================================
+        */
+
+        this.resetAPModalTab();
+
+
+        /*
+        ==================================================
+        SHOW MODAL
+        ==================================================
+        */
+
+        const modal =
+            bootstrap.Modal.getOrCreateInstance(
+                this.accountPayableModal
+            );
+
+
+        modal.show();
+
+    }
+
+    catch (error) {
+
+        /*
+        ==================================================
+        ERROR
+        ==================================================
+        */
+
+        console.error(
+            "AccountPayable.addInvoice:",
+            error
         );
 
 
-    modal.show();
+        this.showError(
+            error?.message
+            ||
+            "Failed to open Add Account Payable."
+        );
+
+    }
 
 }
 /*
@@ -21443,13 +22083,7 @@ if (
 }
 
 
-  /*
-==================================================
-DELETE INVOICE
-==================================================
-*/
-
-async deleteInvoice(id) {
+ async deleteInvoice(id) {
 
     try {
 
@@ -21470,22 +22104,14 @@ async deleteInvoice(id) {
 
         /*
         ==================================================
-        STORE DELETE ID
-        ==================================================
-        */
-
-        this.deleteInvoiceId =
-            id;
-
-
-        /*
-        ==================================================
         FIND INVOICE
         ==================================================
         */
 
         const data =
-            Array.isArray(this.data)
+            Array.isArray(
+                this.data
+            )
                 ? this.data
                 : [];
 
@@ -21493,13 +22119,19 @@ async deleteInvoice(id) {
         const invoice =
             data.find(
                 item =>
-                    String(item.id)
+                    String(
+                        item.id
+                    )
                     ===
-                    String(id)
+                    String(
+                        id
+                    )
             );
 
 
-        if (!invoice) {
+        if (
+            !invoice
+        ) {
 
             throw new Error(
                 "Account Payable not found."
@@ -21508,10 +22140,62 @@ async deleteInvoice(id) {
         }
 
 
-        console.log(
-            "DELETE INVOICE:",
-            invoice
-        );
+        /*
+        ==================================================
+        NORMALIZE STATUS
+        ==================================================
+        */
+
+        const status =
+            String(
+                invoice.status
+                ||
+                ""
+            )
+            .trim();
+
+
+        /*
+        ==================================================
+        VALIDATE STATUS
+
+        ONLY:
+        - DRAFT
+        - VOID
+
+        CAN BE DELETED
+
+        PAYMENT HISTORY DOES NOT BLOCK DELETE
+        ==================================================
+        */
+
+        if (
+            status !== "Draft"
+            &&
+            status !== "Void"
+        ) {
+
+            this.showError(
+                "Only Draft or Void Account Payable can be deleted."
+            );
+
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        STORE DELETE ID
+
+        IMPORTANT:
+        PAYMENT HISTORY IS HANDLED BY SERVICE.DELETE()
+        ==================================================
+        */
+
+        this.deleteInvoiceId =
+            id;
 
 
         /*
@@ -21528,19 +22212,14 @@ async deleteInvoice(id) {
             invoice.business_partner_id;
 
 
-        console.log(
-            "VENDOR ID:",
-            vendorId
-        );
-
-
         /*
         ==================================================
         FIND VENDOR FROM VENDOR DATA
         ==================================================
         */
 
-        let vendorObject = null;
+        let vendorObject =
+            null;
 
 
         if (
@@ -21555,42 +22234,20 @@ async deleteInvoice(id) {
                 this.vendorData.find(
                     vendor => {
 
-                        return String(
-                            vendor.id
-                        )
-                        ===
-                        String(
-                            vendorId
+                        return (
+                            String(
+                                vendor.id
+                            )
+                            ===
+                            String(
+                                vendorId
+                            )
                         );
 
                     }
-                );
-
-        }
-
-
-        console.log(
-            "VENDOR OBJECT:",
-            vendorObject
-        );
-
-
-        /*
-        ==================================================
-        DEBUG VENDOR OBJECT
-        ==================================================
-        */
-
-        if (vendorObject) {
-
-            console.log(
-                "VENDOR OBJECT JSON:",
-                JSON.stringify(
-                    vendorObject,
-                    null,
-                    2
                 )
-            );
+                ||
+                null;
 
         }
 
@@ -21604,20 +22261,19 @@ async deleteInvoice(id) {
         const vendorName =
             vendorObject?.bp_name
             ||
+            invoice
+                ?.mst_business_partner
+                ?.bp_name
+            ||
             invoice.vendor_name
             ||
             "-";
 
 
-        console.log(
-            "VENDOR NAME:",
-            vendorName
-        );
-
-
         /*
         ==================================================
-        SET DELETE MODAL INFORMATION
+        SET DELETE MODAL
+        INVOICE NUMBER
         ==================================================
         */
 
@@ -21635,6 +22291,7 @@ async deleteInvoice(id) {
 
         /*
         ==================================================
+        SET DELETE MODAL
         VENDOR
         ==================================================
         */
@@ -21651,6 +22308,7 @@ async deleteInvoice(id) {
 
         /*
         ==================================================
+        SET DELETE MODAL
         PO NUMBER
         ==================================================
         */
@@ -21699,8 +22357,34 @@ async deleteInvoice(id) {
         modal.show();
 
 
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
         console.log(
-            "DELETE CONFIRMATION MODAL OPENED"
+            "DELETE ACCOUNT PAYABLE CONFIRMATION:",
+            {
+
+                id:
+                    invoice.id,
+
+                invoice_no:
+                    invoice.invoice_no,
+
+                status:
+                    status,
+
+                vendor:
+                    vendorName,
+
+                po_no:
+                    invoice.po_no
+                    ||
+                    null
+
+            }
         );
 
     }
@@ -21708,14 +22392,36 @@ async deleteInvoice(id) {
 
     catch (error) {
 
+        /*
+        ==================================================
+        CLEAR DELETE STATE
+        ==================================================
+        */
+
+        this.deleteInvoiceId =
+            null;
+
+
+        /*
+        ==================================================
+        REAL ERROR
+        ==================================================
+        */
+
         console.error(
             "AccountPayable.deleteInvoice:",
             error
         );
 
 
+        /*
+        ==================================================
+        USER FEEDBACK
+        ==================================================
+        */
+
         this.showError(
-            error.message
+            error?.message
             ||
             "Failed to delete Account Payable."
         );
@@ -25164,6 +25870,7 @@ createTableRow(
 ======================================================
 GET AP PAYMENT STATUS
 FINAL
+WHOLE RUPIAH CONSISTENT
 ======================================================
 */
 
@@ -25203,18 +25910,13 @@ getPaymentStatus(
 
     /*
     ==================================================
-    DRAFT / NOT COMPLETE
-
-    PAYMENT STATUS MUST ALWAYS BE UNPAID
-
-    IMPORTANT:
-    Jika journal invoice dihapus dan AP kembali Draft,
-    badge tidak boleh masih menampilkan Paid.
+    DRAFT
     ==================================================
     */
 
     if (
-        technicalStatus === "Draft"
+        technicalStatus ===
+        "Draft"
     ) {
 
         return "Unpaid";
@@ -25229,7 +25931,8 @@ getPaymentStatus(
     */
 
     if (
-        technicalStatus === "Void"
+        technicalStatus ===
+        "Void"
     ) {
 
         return "Void";
@@ -25240,59 +25943,83 @@ getPaymentStatus(
     /*
     ==================================================
     TOTAL
+    FINOVA = WHOLE RUPIAH
     ==================================================
     */
 
     const totalAmount =
-        Number(
-            invoice.total_amount
-            ??
-            invoice.total
-            ??
-            0
+        Math.round(
+            Number(
+                invoice.total_amount
+                ??
+                invoice.total
+                ??
+                0
+            )
         );
 
 
     /*
     ==================================================
     PAID
+    FINOVA = WHOLE RUPIAH
     ==================================================
     */
 
     const paidAmount =
-        Number(
-            invoice.paid_amount
-            ??
-            0
+        Math.round(
+            Number(
+                invoice.paid_amount
+                ??
+                0
+            )
         );
 
 
     /*
     ==================================================
     OUTSTANDING
+    FINOVA = WHOLE RUPIAH
     ==================================================
     */
 
     const outstandingAmount =
-        Number(
-            invoice.outstanding_amount
-            ??
-            totalAmount
+        Math.round(
+            Number(
+                invoice.outstanding_amount
+                ??
+                (
+                    totalAmount
+                    -
+                    paidAmount
+                )
+            )
         );
 
 
     /*
     ==================================================
-    PAID
+    FULLY PAID
+
+    DATABASE STATUS PAID
+    OR
+    PAID >= TOTAL AND OUTSTANDING <= 0
     ==================================================
     */
 
     if (
-        totalAmount > 0
-        &&
-        paidAmount >= totalAmount
-        &&
-        outstandingAmount <= 0
+        technicalStatus ===
+            "Paid"
+        ||
+        (
+            totalAmount > 0
+            &&
+            paidAmount >=
+                totalAmount
+            &&
+            outstandingAmount <=
+                0
+        )
     ) {
 
         return "Paid";
@@ -25309,7 +26036,8 @@ getPaymentStatus(
     if (
         paidAmount > 0
         &&
-        paidAmount < totalAmount
+        paidAmount <
+            totalAmount
     ) {
 
         return "Partial Paid";
@@ -27581,56 +28309,70 @@ renderActionButtons(invoice) {
 
 
     /*
-    ==================================================
-    VOID
-    VIEW | PRINT
-    ==================================================
-    */
+==================================================
+VOID
+VIEW | PRINT | DELETE
+==================================================
+*/
 
-    if (
-        status === "Void"
-    ) {
+if (
+    status === "Void"
+) {
 
-        return `
+    return `
 
-            <div
-                class="btn-group btn-group-sm"
-                role="group">
-
-
-                <!-- VIEW -->
-
-                <button
-                    type="button"
-                    class="btn btn-outline-secondary"
-                    title="View"
-                    data-action="view"
-                    data-id="${id}">
-
-                    <i class="fa-regular fa-eye"></i>
-
-                </button>
+        <div
+            class="btn-group btn-group-sm"
+            role="group">
 
 
-                <!-- PRINT -->
+            <!-- VIEW -->
 
-                <button
-                    type="button"
-                    class="btn btn-outline-dark"
-                    title="Print"
-                    data-action="print"
-                    data-id="${id}">
+            <button
+                type="button"
+                class="btn btn-outline-secondary"
+                title="View"
+                data-action="view"
+                data-id="${id}">
 
-                    <i class="fa-solid fa-print"></i>
+                <i class="fa-regular fa-eye"></i>
 
-                </button>
+            </button>
 
 
-            </div>
+            <!-- PRINT -->
 
-        `;
+            <button
+                type="button"
+                class="btn btn-outline-dark"
+                title="Print"
+                data-action="print"
+                data-id="${id}">
 
-    }
+                <i class="fa-solid fa-print"></i>
+
+            </button>
+
+
+            <!-- DELETE -->
+
+            <button
+                type="button"
+                class="btn btn-outline-danger"
+                title="Delete"
+                data-action="delete"
+                data-id="${id}">
+
+                <i class="fa-solid fa-trash"></i>
+
+            </button>
+
+
+        </div>
+
+    `;
+
+}
 
 
     /*

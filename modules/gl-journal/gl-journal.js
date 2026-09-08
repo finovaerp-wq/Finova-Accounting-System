@@ -178,7 +178,9 @@ async init() {
 
         /*
         ======================================================
-        CREATE DELETE MODAL
+        CREATE DELETE JOURNAL MODAL
+        IMPORTANT:
+        REQUIRED BY showDeleteJournalModal()
         ======================================================
         */
 
@@ -192,6 +194,76 @@ async init() {
         */
 
         this.bindEvents();
+
+
+        /*
+        ======================================================
+        EXTERNAL GL JOURNAL CHANGE EVENT
+        ======================================================
+
+        Used by:
+        - AP Invoice
+        - AP Payment
+        - AR Invoice
+        - AR Payment
+
+        When another module creates or changes
+        a GL Journal while this workspace is open,
+        reload GL Journal automatically.
+
+        ======================================================
+        */
+
+        if (
+            !this.handleExternalGLJournalChange
+        ) {
+
+            this.handleExternalGLJournalChange =
+                async event => {
+
+                    try {
+
+                        const detail =
+                            event?.detail
+                            || {};
+
+
+                        console.log(
+                            "GL JOURNAL EXTERNAL CHANGE:",
+                            detail
+                        );
+
+
+                        /*
+                        ==========================================
+                        LOAD LATEST GL JOURNAL DATA
+                        ==========================================
+                        */
+
+                        await this.loadData(
+                            false
+                        );
+
+                    }
+
+                    catch (error) {
+
+                        console.error(
+                            "GeneralJournal external refresh:",
+                            error
+                        );
+
+                    }
+
+                };
+
+
+            window.addEventListener(
+                "finova:gl-journal-changed",
+                this.handleExternalGLJournalChange
+            );
+
+        }
 
 
         /*
@@ -223,7 +295,60 @@ async init() {
             error
         );
 
+
+        console.groupEnd();
+
+
         throw error;
+
+    }
+
+}
+/*
+==========================================================
+DESTROY
+CLEAN WORKSPACE LISTENERS
+==========================================================
+*/
+
+destroy() {
+
+    try {
+
+        /*
+        ==================================================
+        REMOVE EXTERNAL GL CHANGE LISTENER
+        ==================================================
+        */
+
+        if (
+            this.handleExternalGLJournalChange
+        ) {
+
+            window.removeEventListener(
+                "finova:gl-journal-changed",
+                this.handleExternalGLJournalChange
+            );
+
+
+            this.handleExternalGLJournalChange =
+                null;
+
+        }
+
+
+        console.log(
+            "FINOVA General Journal destroyed."
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "GeneralJournal.destroy:",
+            error
+        );
 
     }
 
@@ -4304,7 +4429,6 @@ renderStatusBadge(status) {
 ==========================================================
 RENDER ACTION BUTTONS
 FINAL
-VOID SAME AS DRAFT
 ==========================================================
 */
 
@@ -4320,7 +4444,7 @@ renderActionButtons(
 
     const status =
         String(
-            journal.status
+            journal?.status
             || "Draft"
         )
         .trim()
@@ -4330,6 +4454,12 @@ renderActionButtons(
     /*
     ======================================================
     DRAFT
+
+    EDIT
+    POST
+    VIEW
+    DUPLICATE
+    DELETE
     ======================================================
     */
 
@@ -4429,6 +4559,11 @@ renderActionButtons(
     /*
     ======================================================
     POSTED
+
+    VIEW
+    VOUCHER
+    DUPLICATE
+    VOID
     ======================================================
     */
 
@@ -4510,104 +4645,103 @@ renderActionButtons(
 
 
     /*
-    ======================================================
-    VOID
-    SAME ACTION AS DRAFT
-    ======================================================
-    */
+======================================================
+VOID
+SAME ACTION AS DRAFT
+======================================================
+*/
 
-    if (
-        status === "void"
-    ) {
+if (
+    status === "void"
+) {
 
-        return `
+    return `
 
-            <button
-                type="button"
-                class="
-                    dropdown-item
-                    btn-edit-journal
-                "
-                data-id="${journal.id}"
-            >
+        <button
+            type="button"
+            class="
+                dropdown-item
+                btn-edit-journal
+            "
+            data-id="${journal.id}"
+        >
 
-                <i class="fa-solid fa-pen"></i>
+            <i class="fa-solid fa-pen"></i>
 
-                Edit
+            Edit
 
-            </button>
-
-
-            <button
-                type="button"
-                class="
-                    dropdown-item
-                    btn-post-journal
-                "
-                data-id="${journal.id}"
-            >
-
-                <i class="fa-solid fa-check"></i>
-
-                Post
-
-            </button>
+        </button>
 
 
-            <button
-                type="button"
-                class="
-                    dropdown-item
-                    btn-view-journal
-                "
-                data-id="${journal.id}"
-            >
+        <button
+            type="button"
+            class="
+                dropdown-item
+                btn-post-journal
+            "
+            data-id="${journal.id}"
+        >
 
-                <i class="fa-solid fa-eye"></i>
+            <i class="fa-solid fa-check"></i>
 
-                View
+            Post
 
-            </button>
-
-
-            <div class="dropdown-divider"></div>
+        </button>
 
 
-            <button
-                type="button"
-                class="
-                    dropdown-item
-                    btn-duplicate-journal
-                "
-                data-id="${journal.id}"
-            >
+        <button
+            type="button"
+            class="
+                dropdown-item
+                btn-view-journal
+            "
+            data-id="${journal.id}"
+        >
 
-                <i class="fa-solid fa-copy"></i>
+            <i class="fa-solid fa-eye"></i>
 
-                Duplicate
+            View
 
-            </button>
+        </button>
 
 
-            <button
-                type="button"
-                class="
-                    dropdown-item
-                    btn-delete-journal
-                "
-                data-id="${journal.id}"
-            >
+        <div class="dropdown-divider"></div>
 
-                <i class="fa-solid fa-trash"></i>
 
-                Delete
+        <button
+            type="button"
+            class="
+                dropdown-item
+                btn-duplicate-journal
+            "
+            data-id="${journal.id}"
+        >
 
-            </button>
+            <i class="fa-solid fa-copy"></i>
 
-        `;
+            Duplicate
 
-    }
+        </button>
 
+
+        <button
+            type="button"
+            class="
+                dropdown-item
+                btn-delete-journal
+            "
+            data-id="${journal.id}"
+        >
+
+            <i class="fa-solid fa-trash"></i>
+
+            Delete
+
+        </button>
+
+    `;
+
+}
 
     /*
     ======================================================
@@ -9169,12 +9303,72 @@ if (
 
 
         /*
-        ==================================================
-        RELOAD GL JOURNAL
-        ==================================================
-        */
+==================================================
+NOTIFY SOURCE MODULE
+GL JOURNAL HAS BEEN DELETED
+==================================================
+*/
 
-        await this.loadData();
+window.dispatchEvent(
+    new CustomEvent(
+        "finova:source-transaction-changed",
+        {
+            detail: {
+
+                sourceModule:
+                    sourceModule,
+
+                sourceDocumentType:
+                    sourceDocumentType,
+
+                sourceDocumentId:
+                    sourceDocumentId,
+
+                journalId:
+                    id,
+
+                action:
+                    "JOURNAL_DELETED",
+
+                /*
+                ==========================================
+                AP PAYMENT SOURCE DOCUMENT ID CURRENTLY
+                POINTS TO AP INVOICE ID
+                ==========================================
+                */
+
+                accountPayableId:
+                    apPayment?.account_payable_id
+                    ||
+                    (
+                        sourceModule === "AP"
+                        ? sourceDocumentId
+                        : null
+                    ),
+
+                accountReceivableId:
+                    arPayment?.account_receivable_id
+                    ||
+                    (
+                        sourceModule === "AR"
+                        ? sourceDocumentId
+                        : null
+                    )
+
+            }
+
+        }
+    )
+);
+
+
+/*
+==================================================
+RELOAD GL JOURNAL
+==================================================
+*/
+
+await this.loadData();
 
     }
 
@@ -14427,6 +14621,7 @@ showPostConfirmation() {
 SAVE JOURNAL
 ACCOUNTING PERIOD BASED ON ACCOUNTING DATE
 FINAL
+REALTIME GL -> AP / AR
 ==========================================================
 */
 
@@ -14558,7 +14753,6 @@ async saveJournal(
         /*
         ======================================================
         PERIOD NOT CONFIGURED
-        FUTURE PERIOD / UNKNOWN PERIOD
         ======================================================
         */
 
@@ -14569,6 +14763,7 @@ async saveJournal(
             this.showError(
                 `Accounting Period for ${accountingDate} is not available or has not been opened.`
             );
+
 
             return;
 
@@ -14593,7 +14788,7 @@ async saveJournal(
 
         /*
         ======================================================
-        CLOSED PERIOD
+        PERIOD MUST BE OPEN
         ======================================================
         */
 
@@ -14605,6 +14800,7 @@ async saveJournal(
             this.showError(
                 `Accounting Period ${accountingPeriod.period} is Closed. Journal cannot be saved.`
             );
+
 
             return;
 
@@ -14620,7 +14816,6 @@ async saveJournal(
         console.log(
             "GL JOURNAL ACCOUNTING PERIOD:",
             {
-
                 accounting_date:
                     accountingDate,
 
@@ -14629,9 +14824,100 @@ async saveJournal(
 
                 status:
                     accountingPeriod.status
-
             }
         );
+
+
+        /*
+        ======================================================
+        EXISTING SOURCE DOCUMENT
+
+        IMPORTANT:
+        GENERATED JOURNAL FROM AP / AR MUST KEEP ITS SOURCE.
+
+        DO NOT CHANGE:
+        AP_INVOICE  -> GLJ
+        AP_PAYMENT  -> GLJ
+        AR_INVOICE  -> GLJ
+        AR_PAYMENT  -> GLJ
+        ======================================================
+        */
+
+        const existingSourceModule =
+            String(
+                this.currentJournal
+                    ?.source_module
+                ||
+                ""
+            )
+            .trim();
+
+
+        const existingSourceDocumentType =
+            String(
+                this.currentJournal
+                    ?.source_document_type
+                ||
+                ""
+            )
+            .trim();
+
+
+        const existingSourceDocumentId =
+            this.currentJournal
+                ?.source_document_id
+            ??
+            null;
+
+
+        const isExistingGeneratedJournal =
+            this.currentMode ===
+                "edit"
+            &&
+            Boolean(
+                existingSourceModule
+            )
+            &&
+            existingSourceModule
+                .toUpperCase()
+            !==
+            "GLJ";
+
+
+        /*
+        ======================================================
+        SOURCE MODULE
+        ======================================================
+        */
+
+        const sourceModule =
+            isExistingGeneratedJournal
+                ? existingSourceModule
+                : "GLJ";
+
+
+        /*
+        ======================================================
+        SOURCE DOCUMENT TYPE
+        ======================================================
+        */
+
+        const sourceDocumentType =
+            isExistingGeneratedJournal
+                ? existingSourceDocumentType
+                : "MANUAL_JOURNAL";
+
+
+        /*
+        ======================================================
+        SOURCE DOCUMENT ID
+        ======================================================
+        */
+
+        const sourceDocumentId =
+            isExistingGeneratedJournal
+                ? existingSourceDocumentId
+                : null;
 
 
         /*
@@ -14647,11 +14933,9 @@ async saveJournal(
                     .value
                     .trim(),
 
+
             /*
             ==================================================
-            IMPORTANT
-            GL JOURNAL PERIOD BASIS
-            =
             ACCOUNTING DATE
             ==================================================
             */
@@ -14663,7 +14947,6 @@ async saveJournal(
             /*
             ==================================================
             POSTING PERIOD
-            ALWAYS DERIVED FROM ACCOUNTING DATE
             ==================================================
             */
 
@@ -14672,6 +14955,12 @@ async saveJournal(
                     accountingDate
                 ),
 
+
+            /*
+            ==================================================
+            DESCRIPTION
+            ==================================================
+            */
 
             description:
                 this.txtDescription
@@ -14682,18 +14971,18 @@ async saveJournal(
             /*
             ==================================================
             SOURCE DOCUMENT
-            MANUAL GENERAL JOURNAL
+            PRESERVE ORIGINAL SOURCE
             ==================================================
             */
 
             source_module:
-                "GLJ",
+                sourceModule,
 
             source_document_type:
-                "MANUAL_JOURNAL",
+                sourceDocumentType,
 
             source_document_id:
-                null,
+                sourceDocumentId,
 
 
             /*
@@ -14702,9 +14991,60 @@ async saveJournal(
             ==================================================
             */
 
-            status
+            status:
+                status
 
         };
+
+
+        /*
+        ======================================================
+        PRESERVE SOURCE INVOICE NO
+        ======================================================
+        */
+
+        if (
+            this.currentMode ===
+                "edit"
+            &&
+            this.currentJournal
+                ?.source_invoice_no
+            !==
+            undefined
+        ) {
+
+            header.source_invoice_no =
+                this.currentJournal
+                    .source_invoice_no
+                ||
+                null;
+
+        }
+
+
+        /*
+        ======================================================
+        PRESERVE SOURCE PO NO
+        ======================================================
+        */
+
+        if (
+            this.currentMode ===
+                "edit"
+            &&
+            this.currentJournal
+                ?.source_po_no
+            !==
+            undefined
+        ) {
+
+            header.source_po_no =
+                this.currentJournal
+                    .source_po_no
+                ||
+                null;
+
+        }
 
 
         /*
@@ -14717,7 +15057,8 @@ async saveJournal(
             this.currentMode ===
                 "edit"
             &&
-            this.currentJournal?.id
+            this.currentJournal
+                ?.id
         ) {
 
             header.id =
@@ -14769,6 +15110,19 @@ async saveJournal(
 
         /*
         ======================================================
+        JOURNAL ID
+        ======================================================
+        */
+
+        let savedJournalId =
+            this.currentJournal
+                ?.id
+            ||
+            null;
+
+
+        /*
+        ======================================================
         SAVE
         ======================================================
         */
@@ -14778,10 +15132,18 @@ async saveJournal(
             "add"
         ) {
 
-            await this.service.create(
-                header,
-                details
-            );
+            const createdJournal =
+                await this.service.create(
+                    header,
+                    details
+                );
+
+
+            savedJournalId =
+                createdJournal
+                    ?.id
+                ||
+                null;
 
         }
 
@@ -14797,12 +15159,139 @@ async saveJournal(
 
             );
 
+
+            savedJournalId =
+                header.id;
+
         }
 
 
         /*
         ======================================================
-        RELOAD
+        REALTIME SOURCE NOTIFICATION
+        ONLY AFTER DATABASE SAVE SUCCESS
+        ======================================================
+        */
+
+        const normalizedSavedStatus =
+            String(
+                status
+                ||
+                ""
+            )
+            .trim()
+            .toUpperCase();
+
+
+        const normalizedSourceModule =
+            String(
+                sourceModule
+                ||
+                ""
+            )
+            .trim()
+            .toUpperCase();
+
+
+        const normalizedSourceDocumentType =
+            String(
+                sourceDocumentType
+                ||
+                ""
+            )
+            .trim()
+            .toUpperCase();
+
+
+        /*
+        ======================================================
+        GENERATED JOURNAL POSTED
+        GL -> AP / AR
+        ======================================================
+        */
+
+        if (
+            normalizedSavedStatus ===
+                "POSTED"
+            &&
+            (
+                normalizedSourceModule ===
+                    "AP"
+                ||
+                normalizedSourceModule ===
+                    "AR"
+            )
+        ) {
+
+            console.log(
+                "GL JOURNAL POSTED - NOTIFY SOURCE:",
+                {
+                    source_module:
+                        normalizedSourceModule,
+
+                    source_document_type:
+                        normalizedSourceDocumentType,
+
+                    source_document_id:
+                        sourceDocumentId,
+
+                    journal_id:
+                        savedJournalId
+                }
+            );
+
+
+            window.dispatchEvent(
+
+                new CustomEvent(
+
+                    "finova:source-transaction-changed",
+
+                    {
+
+                        detail: {
+
+                            sourceModule:
+                                normalizedSourceModule,
+
+                            sourceDocumentType:
+                                normalizedSourceDocumentType,
+
+                            sourceDocumentId:
+                                sourceDocumentId,
+
+                            journalId:
+                                savedJournalId,
+
+                            action:
+                                "JOURNAL_POSTED",
+
+                            accountPayableId:
+                                normalizedSourceModule ===
+                                    "AP"
+                                    ? sourceDocumentId
+                                    : null,
+
+                            accountReceivableId:
+                                normalizedSourceModule ===
+                                    "AR"
+                                    ? sourceDocumentId
+                                    : null
+
+                        }
+
+                    }
+
+                )
+
+            );
+
+        }
+
+
+        /*
+        ======================================================
+        RELOAD GL JOURNAL
         ======================================================
         */
 
@@ -14827,10 +15316,14 @@ async saveJournal(
         */
 
         this.showSuccess(
+
             status ===
                 "Posted"
+
                 ? "Journal posted successfully."
+
                 : "Journal saved as Draft successfully."
+
         );
 
     }
@@ -15316,6 +15809,9 @@ convertDatabaseDetail(databaseDetails = []) {
 /*
 ==========================================================
 POST JOURNAL
+FINAL
+DRAFT / VOID -> POSTED
+REALTIME GL -> AP / AR
 ==========================================================
 */
 
@@ -15334,14 +15830,186 @@ async postJournal(id) {
             return;
 
         }
+
+
         /*
         ======================================================
-        BOOTSTRAP CONFIRMATION
+        GET JOURNAL
+        ======================================================
+        */
+
+        const result =
+            await this.service.getById(
+                id
+            );
+
+
+        const journal =
+            result?.header
+            ||
+            result;
+
+
+        if (!journal) {
+
+            throw new Error(
+                "GL Journal not found."
+            );
+
+        }
+
+
+        /*
+        ======================================================
+        SOURCE INFORMATION
+        MUST BE SAVED BEFORE POST
+        ======================================================
+        */
+
+        const sourceModule =
+            String(
+                journal.source_module
+                || ""
+            )
+            .trim()
+            .toUpperCase();
+
+
+        const sourceDocumentType =
+            String(
+                journal.source_document_type
+                || ""
+            )
+            .trim()
+            .toUpperCase();
+
+
+        const sourceDocumentId =
+            journal.source_document_id
+            || null;
+
+
+        /*
+        ======================================================
+        CURRENT STATUS
+        ======================================================
+        */
+
+        const currentStatus =
+            String(
+                journal.status
+                || ""
+            )
+            .trim()
+            .toUpperCase();
+
+
+        /*
+        ======================================================
+        ALREADY POSTED
+
+        DO NOT POST AGAIN.
+        ONLY NOTIFY SOURCE MODULE.
+        ======================================================
+        */
+
+        if (
+            currentStatus ===
+            "POSTED"
+        ) {
+
+            if (
+                (
+                    sourceModule === "AP"
+                    ||
+                    sourceModule === "AR"
+                )
+                &&
+                sourceDocumentId
+            ) {
+
+                window.dispatchEvent(
+
+                    new CustomEvent(
+                        "finova:source-transaction-changed",
+                        {
+                            detail: {
+
+                                sourceModule:
+                                    sourceModule,
+
+                                sourceDocumentType:
+                                    sourceDocumentType,
+
+                                sourceDocumentId:
+                                    sourceDocumentId,
+
+                                journalId:
+                                    id,
+
+                                action:
+                                    "JOURNAL_POSTED",
+
+                                accountPayableId:
+                                    sourceModule === "AP"
+                                        ? sourceDocumentId
+                                        : null,
+
+                                accountReceivableId:
+                                    sourceModule === "AR"
+                                        ? sourceDocumentId
+                                        : null
+
+                            }
+                        }
+                    )
+
+                );
+
+            }
+
+
+            await this.loadData(
+                false
+            );
+
+
+            return;
+
+        }
+
+
+        /*
+        ======================================================
+        FINOVA STATUS RULE
+
+        DRAFT -> CAN POST
+        VOID  -> CAN POST
+        ======================================================
+        */
+
+        if (
+            currentStatus !== "DRAFT"
+            &&
+            currentStatus !== "VOID"
+        ) {
+
+            throw new Error(
+                `Journal status "${journal.status || ""}" cannot be posted.`
+            );
+
+        }
+
+
+        /*
+        ======================================================
+        CONFIRM
         ======================================================
         */
 
         const confirmed =
             await this.showPostConfirmation();
+
 
         if (!confirmed) {
 
@@ -15349,189 +16017,168 @@ async postJournal(id) {
 
         }
 
-        
 
         /*
         ======================================================
-        LOAD DETAIL
+        POST THROUGH SERVICE
+
+        IMPORTANT:
+        STATUS / ACCOUNTING PERIOD VALIDATION
+        IS CENTRALIZED IN JOURNAL SERVICE.
         ======================================================
         */
 
-        const {
-
-            data: details,
-
-            error
-
-        } = await supabase
-
-            .from(
-
-                TABLE.GL_JOURNAL_DETAIL
-
-            )
-
-            .select("*")
-
-            .eq(
-
-                "journal_id",
-
-                id
-
-            );
-
-        if (error) {
-
-            throw error;
-
-        }
-
-        /*
-        ======================================================
-        NO DETAIL
-        ======================================================
-        */
-
-        if (
-
-            !details ||
-
-            details.length === 0
-
-        ) {
-
-            alert(
-
-                "Journal detail is empty."
-
-            );
-
-            return;
-
-        }
-
-        /*
-        ======================================================
-        CALCULATE
-        ======================================================
-        */
-
-        let totalDebit = 0;
-
-        let totalCredit = 0;
-
-        details.forEach(
-
-            row => {
-
-                totalDebit += Number(
-
-                    row.debit || 0
-
-                );
-
-                totalCredit += Number(
-
-                    row.credit || 0
-
-                );
-
-            }
-
+        await this.service.post(
+            id
         );
 
+
         /*
         ======================================================
-        BALANCED
+        DEBUG
+        ======================================================
+        */
+
+        console.log(
+            "GL JOURNAL POSTED:",
+            {
+                journal_id:
+                    id,
+
+                journal_no:
+                    journal.journal_no,
+
+                previous_status:
+                    currentStatus,
+
+                source_module:
+                    sourceModule,
+
+                source_document_type:
+                    sourceDocumentType,
+
+                source_document_id:
+                    sourceDocumentId
+            }
+        );
+
+
+        /*
+        ======================================================
+        REALTIME GL -> AP / AR
         ======================================================
         */
 
         if (
-
-            Math.abs(
-
-                totalDebit - totalCredit
-
-            ) > 0.01
-
+            (
+                sourceModule === "AP"
+                ||
+                sourceModule === "AR"
+            )
+            &&
+            sourceDocumentId
         ) {
 
-            alert(
+            window.dispatchEvent(
 
-                "Journal is not balanced."
+                new CustomEvent(
+                    "finova:source-transaction-changed",
+                    {
+                        detail: {
 
-            );
+                            sourceModule:
+                                sourceModule,
 
-            return;
+                            sourceDocumentType:
+                                sourceDocumentType,
 
-        }
+                            sourceDocumentId:
+                                sourceDocumentId,
 
-        /*
-        ======================================================
-        UPDATE STATUS
-        ======================================================
-        */
+                            journalId:
+                                id,
 
-        const {
+                            action:
+                                "JOURNAL_POSTED",
 
-            error: updateError
+                            accountPayableId:
+                                sourceModule === "AP"
+                                    ? sourceDocumentId
+                                    : null,
 
-        } = await supabase
+                            accountReceivableId:
+                                sourceModule === "AR"
+                                    ? sourceDocumentId
+                                    : null
 
-            .from(
-
-                TABLE.GL_JOURNAL
-
-            )
-
-            .update({
-
-                status: "Posted"
-
-            })
-
-            .eq(
-
-                "id",
-
-                id
+                        }
+                    }
+                )
 
             );
 
-        if (updateError) {
 
-            throw updateError;
+            console.log(
+                "GL -> SOURCE REALTIME EVENT:",
+                {
+                    source_module:
+                        sourceModule,
+
+                    source_document_type:
+                        sourceDocumentType,
+
+                    source_document_id:
+                        sourceDocumentId,
+
+                    journal_id:
+                        id,
+
+                    action:
+                        "JOURNAL_POSTED"
+                }
+            );
 
         }
 
-        
 
         /*
         ======================================================
-        RELOAD
+        REFRESH GL
         ======================================================
         */
 
-        await this.loadData();
+        await this.loadData(
+            false
+        );
+
+
+        /*
+        ======================================================
+        SUCCESS
+        ======================================================
+        */
+
+        this.showSuccess(
+            "Journal posted successfully."
+        );
 
     }
 
     catch (error) {
 
         console.error(
-
-            "Post Journal Error",
-
+            "GeneralJournal.postJournal:",
             error
-
         );
 
+
         this.showError(
-    error?.message
-    ||
-    "Failed to post Journal."
-);
+            error?.message
+            ||
+            error?.details
+            ||
+            "Failed to post Journal."
+        );
 
     }
 

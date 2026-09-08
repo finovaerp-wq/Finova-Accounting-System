@@ -576,30 +576,129 @@ class Login {
        
 
     /*
+==========================================================
+SHOW ERROR
+BOOTSTRAP MODAL
+==========================================================
+*/
+
+showError(
+    message
+) {
+
+    /*
     ======================================================
-    ERROR
+    GET MODAL ELEMENT
     ======================================================
     */
 
-    showError(message) {
+    const modalElement =
+        document.getElementById(
+            "login-alert-modal"
+        );
 
-        if (window.Toast) {
 
-            Toast.fire({
+    /*
+    ======================================================
+    GET MESSAGE ELEMENT
+    ======================================================
+    */
 
-                icon: "error",
+    const messageElement =
+        document.getElementById(
+            "login-alert-message"
+        );
 
-                title: message
 
-            });
+    /*
+    ======================================================
+    VALIDATION
+    ======================================================
+    */
 
-            return;
+    if (
+        !modalElement
+        ||
+        !messageElement
+    ) {
 
-        }
+        console.error(
+            "FINOVA LOGIN ERROR :",
+            message
+        );
 
-        alert(message);
+        return;
 
     }
+
+
+    /*
+    ======================================================
+    SET ERROR MESSAGE
+    ======================================================
+    */
+
+    messageElement.textContent =
+        message
+        ??
+        "Unable to sign in.";
+
+
+    /*
+    ======================================================
+    CHECK BOOTSTRAP
+    ======================================================
+    */
+
+    if (
+        typeof bootstrap ===
+            "undefined"
+        ||
+        !bootstrap.Modal
+    ) {
+
+        console.error(
+            "FINOVA LOGIN: Bootstrap Modal is not available."
+        );
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    GET / CREATE MODAL INSTANCE
+    ======================================================
+    */
+
+    const modal =
+        bootstrap.Modal.getOrCreateInstance(
+            modalElement,
+            {
+
+                backdrop:
+                    true,
+
+                keyboard:
+                    true,
+
+                focus:
+                    true
+
+            }
+        );
+
+
+    /*
+    ======================================================
+    SHOW MODAL
+    ======================================================
+    */
+
+    modal.show();
+
+}
 
 }
 

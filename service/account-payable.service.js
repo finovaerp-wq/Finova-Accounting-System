@@ -2476,7 +2476,7 @@ async search(
     }
 
 
-    /*
+   /*
 ======================================================
 CREATE ACCOUNT PAYABLE
 ======================================================
@@ -2513,7 +2513,23 @@ async create(
         }
 
 
-        if (!header.invoice_no) {
+        /*
+        ==================================================
+        NORMALIZE DOCUMENT NUMBER
+        ==================================================
+        */
+
+        const invoiceNo =
+            String(
+                header.invoice_no
+                || ""
+            )
+            .trim();
+
+
+        if (
+            !invoiceNo
+        ) {
 
             throw new Error(
                 "Document No. is required."
@@ -2521,6 +2537,102 @@ async create(
 
         }
 
+
+        /*
+        ==================================================
+        CHECK DUPLICATE DOCUMENT NUMBER
+        ==================================================
+        */
+
+        const {
+
+            data:
+                existingInvoice,
+
+            error:
+                duplicateCheckError
+
+        } = await supabase
+
+            .from(
+                this.table
+            )
+
+            .select(`
+                id,
+                invoice_no,
+                vendor_id,
+                status
+            `)
+
+            .eq(
+                "invoice_no",
+                invoiceNo
+            )
+
+            .maybeSingle();
+
+
+        /*
+        ==================================================
+        DUPLICATE CHECK ERROR
+        ==================================================
+        */
+
+        if (
+            duplicateCheckError
+        ) {
+
+            console.error(
+                "CHECK AP DUPLICATE DOCUMENT NO ERROR:",
+                duplicateCheckError
+            );
+
+            throw duplicateCheckError;
+
+        }
+
+
+        /*
+        ==================================================
+        DUPLICATE DOCUMENT FOUND
+        ==================================================
+        */
+
+        if (
+            existingInvoice
+        ) {
+
+            const validationError =
+                new Error(
+                    `Document No. "${invoiceNo}" already exists. Please use a different Document No.`
+                );
+
+
+            validationError.name =
+                "BusinessValidationError";
+
+
+            throw validationError;
+
+        }
+
+
+        /*
+        ==================================================
+        USE NORMALIZED DOCUMENT NUMBER
+        ==================================================
+        */
+
+        header.invoice_no =
+            invoiceNo;
+
+
+        /*
+        ==================================================
+        INVOICE DATE
+        ==================================================
+        */
 
         if (!header.invoice_date) {
 
@@ -2531,6 +2643,12 @@ async create(
         }
 
 
+        /*
+        ==================================================
+        DATE RECEIVED
+        ==================================================
+        */
+
         if (!header.date_received) {
 
             throw new Error(
@@ -2539,6 +2657,12 @@ async create(
 
         }
 
+
+        /*
+        ==================================================
+        DETAIL VALIDATION
+        ==================================================
+        */
 
         if (
             !Array.isArray(details)
@@ -2779,10 +2903,43 @@ async create(
             );
 
 
+            /*
+            ==================================================
+            DUPLICATE DATABASE FALLBACK
+            POSTGRES UNIQUE VIOLATION
+            ==================================================
+            */
+
+            if (
+                invoiceError.code ===
+                    "23505"
+            ) {
+
+                const validationError =
+                    new Error(
+                        `Document No. "${invoiceNo}" already exists. Please use a different Document No.`
+                    );
+
+
+                validationError.name =
+                    "BusinessValidationError";
+
+
+                throw validationError;
+
+            }
+
+
             throw invoiceError;
 
         }
 
+
+        /*
+        ==================================================
+        VALIDATE CREATED HEADER
+        ==================================================
+        */
 
         if (
             !invoice?.id
@@ -3099,6 +3256,29 @@ async create(
     }
 
     catch (error) {
+
+        /*
+        ==================================================
+        BUSINESS VALIDATION
+        DO NOT LOG AS SYSTEM ERROR
+        ==================================================
+        */
+
+        if (
+            error?.name ===
+            "BusinessValidationError"
+        ) {
+
+            throw error;
+
+        }
+
+
+        /*
+        ==================================================
+        REAL SYSTEM ERROR
+        ==================================================
+        */
 
         console.error(
             "AccountPayableService.create:",
@@ -3423,15 +3603,1384 @@ async update(
     }
 
 }
+async deletePaymentHistoryForAP(
+    accountPayableId
+) {
+
+    try {
+
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
+
+        if (
+            !accountPayableId
+        ) {
+
+            throw new Error(
+                "Account Payable ID is required."
+            );
+
+        }
 
 
- /*
-======================================================
-DELETE ACCOUNT PAYABLE
-WITH ACCOUNTING PERIOD LOCK
-======================================================
-*/
+        /*
+        ==================================================
+        GET AP PAYMENT HISTORY
+        ==================================================
+        */
 
+        const {
+
+            data:
+                paymentData,
+
+            error:
+                paymentFindError
+
+        } = await supabase
+
+            .from(
+                this.paymentTable
+            )
+
+            .select(`
+                id,
+                account_payable_id,
+                gl_journal_id
+            `)
+
+            .eq(
+                "account_payable_id",
+                accountPayableId
+            );
+
+
+        /*
+        ==================================================
+        DATABASE ERROR
+        ==================================================
+        */
+
+        if (
+            paymentFindError
+        ) {
+
+            console.error(
+                "GET AP PAYMENT HISTORY ERROR:",
+                paymentFindError
+            );
+
+
+            throw paymentFindError;
+
+        }
+
+
+        /*
+        ==================================================
+        NORMALIZE PAYMENT DATA
+        ==================================================
+        */
+
+        const payments =
+            Array.isArray(
+                paymentData
+            )
+                ? paymentData
+                : [];
+
+
+        /*
+        ==================================================
+        NO PAYMENT HISTORY
+        ==================================================
+        */
+
+        if (
+            payments.length ===
+                0
+        ) {
+
+            return true;
+
+        }
+
+
+        /*
+        ==================================================
+        PROCESS EACH PAYMENT
+        ==================================================
+        */
+
+        for (
+            const payment
+            of payments
+        ) {
+
+            const paymentId =
+                payment?.id
+                || null;
+
+
+            const journalId =
+                payment?.gl_journal_id
+                || null;
+
+
+            /*
+            ==================================================
+            PAYMENT WITHOUT GL JOURNAL
+
+            DELETE PAYMENT ROW ONLY
+            ==================================================
+            */
+
+            if (
+                !journalId
+            ) {
+
+                const {
+
+                    error:
+                        paymentDeleteError
+
+                } = await supabase
+
+                    .from(
+                        this.paymentTable
+                    )
+
+                    .delete()
+
+                    .eq(
+                        "id",
+                        paymentId
+                    )
+
+                    .eq(
+                        "account_payable_id",
+                        accountPayableId
+                    );
+
+
+                if (
+                    paymentDeleteError
+                ) {
+
+                    throw paymentDeleteError;
+
+                }
+
+
+                continue;
+
+            }
+
+
+            /*
+            ==================================================
+            GET PAYMENT GL JOURNAL
+            ==================================================
+            */
+
+            const {
+
+                data:
+                    journal,
+
+                error:
+                    journalFindError
+
+            } = await supabase
+
+                .from(
+                    "trx_gl_journal"
+                )
+
+                .select(`
+                    id,
+                    journal_no,
+                    status,
+                    source_module,
+                    source_document_type,
+                    source_document_id
+                `)
+
+                .eq(
+                    "id",
+                    journalId
+                )
+
+                .maybeSingle();
+
+
+            if (
+                journalFindError
+            ) {
+
+                console.error(
+                    "GET AP PAYMENT GL JOURNAL ERROR:",
+                    journalFindError
+                );
+
+
+                throw journalFindError;
+
+            }
+
+
+            /*
+            ==================================================
+            JOURNAL NOT FOUND
+
+            PAYMENT ROW CAN BE REMOVED
+            ==================================================
+            */
+
+            if (
+                !journal
+            ) {
+
+                const {
+
+                    error:
+                        paymentDeleteError
+
+                } = await supabase
+
+                    .from(
+                        this.paymentTable
+                    )
+
+                    .delete()
+
+                    .eq(
+                        "id",
+                        paymentId
+                    );
+
+
+                if (
+                    paymentDeleteError
+                ) {
+
+                    throw paymentDeleteError;
+
+                }
+
+
+                continue;
+
+            }
+
+
+            /*
+            ==================================================
+            SAFETY CHECK
+
+            JOURNAL MUST BELONG TO
+            THIS AP PAYMENT
+            ==================================================
+            */
+
+            const isAPPaymentJournal =
+                journal.source_module ===
+                    "AP"
+                &&
+                journal.source_document_type ===
+                    "AP_PAYMENT"
+                &&
+                String(
+                    journal.source_document_id
+                )
+                ===
+                String(
+                    accountPayableId
+                );
+
+
+            if (
+                !isAPPaymentJournal
+            ) {
+
+                const validationError =
+                    new Error(
+                        "AP Payment GL Journal does not match the Account Payable transaction."
+                    );
+
+
+                validationError.name =
+                    "BusinessValidationError";
+
+
+                throw validationError;
+
+            }
+
+
+            /*
+            ==================================================
+            NORMALIZE JOURNAL STATUS
+            ==================================================
+            */
+
+            const journalStatus =
+                String(
+                    journal.status
+                    ||
+                    ""
+                )
+                .trim();
+
+
+            /*
+            ==================================================
+            DEBUG
+            ==================================================
+            */
+
+            console.log(
+                "AP PAYMENT DELETE PROCESS:",
+                {
+
+                    account_payable_id:
+                        accountPayableId,
+
+                    payment_id:
+                        paymentId,
+
+                    gl_journal_id:
+                        journalId,
+
+                    journal_no:
+                        journal.journal_no,
+
+                    journal_status:
+                        journalStatus
+
+                }
+            );
+
+
+            /*
+            ==================================================
+            DRAFT JOURNAL
+
+            FLOW:
+            1. DETACH PAYMENT FROM JOURNAL
+            2. DELETE JOURNAL DETAIL
+            3. DELETE JOURNAL HEADER
+            4. DELETE PAYMENT ROW
+            ==================================================
+            */
+
+            if (
+                journalStatus ===
+                    "Draft"
+            ) {
+
+                /*
+                ==============================================
+                DETACH GL JOURNAL FROM PAYMENT
+                ==============================================
+                */
+
+                const {
+
+                    error:
+                        detachError
+
+                } = await supabase
+
+                    .from(
+                        this.paymentTable
+                    )
+
+                    .update({
+
+                        gl_journal_id:
+                            null
+
+                    })
+
+                    .eq(
+                        "id",
+                        paymentId
+                    )
+
+                    .eq(
+                        "account_payable_id",
+                        accountPayableId
+                    );
+
+
+                if (
+                    detachError
+                ) {
+
+                    console.error(
+                        "DETACH AP PAYMENT GL JOURNAL ERROR:",
+                        detachError
+                    );
+
+
+                    throw detachError;
+
+                }
+
+
+                /*
+                ==============================================
+                DELETE JOURNAL DETAIL
+                ==============================================
+                */
+
+                const {
+
+                    error:
+                        detailDeleteError
+
+                } = await supabase
+
+                    .from(
+                        "trx_gl_journal_detail"
+                    )
+
+                    .delete()
+
+                    .eq(
+                        "journal_id",
+                        journalId
+                    );
+
+
+                if (
+                    detailDeleteError
+                ) {
+
+                    console.error(
+                        "DELETE AP PAYMENT GL DETAIL ERROR:",
+                        detailDeleteError
+                    );
+
+
+                    throw detailDeleteError;
+
+                }
+
+
+                /*
+                ==============================================
+                DELETE JOURNAL HEADER
+                ==============================================
+                */
+
+                const {
+
+                    error:
+                        journalDeleteError
+
+                } = await supabase
+
+                    .from(
+                        "trx_gl_journal"
+                    )
+
+                    .delete()
+
+                    .eq(
+                        "id",
+                        journalId
+                    )
+
+                    .eq(
+                        "source_module",
+                        "AP"
+                    )
+
+                    .eq(
+                        "source_document_type",
+                        "AP_PAYMENT"
+                    )
+
+                    .eq(
+                        "source_document_id",
+                        accountPayableId
+                    );
+
+
+                if (
+                    journalDeleteError
+                ) {
+
+                    console.error(
+                        "DELETE AP PAYMENT GL JOURNAL ERROR:",
+                        journalDeleteError
+                    );
+
+
+                    throw journalDeleteError;
+
+                }
+
+
+                /*
+                ==============================================
+                DELETE PAYMENT ROW
+                ==============================================
+                */
+
+                const {
+
+                    error:
+                        paymentDeleteError
+
+                } = await supabase
+
+                    .from(
+                        this.paymentTable
+                    )
+
+                    .delete()
+
+                    .eq(
+                        "id",
+                        paymentId
+                    );
+
+
+                if (
+                    paymentDeleteError
+                ) {
+
+                    throw paymentDeleteError;
+
+                }
+
+
+                continue;
+
+            }
+
+
+            /*
+            ==================================================
+            POSTED JOURNAL
+
+            DO NOT DELETE ACCOUNTING HISTORY
+
+            CHANGE JOURNAL TO VOID
+            THEN DELETE PAYMENT REFERENCE
+            ==================================================
+            */
+
+            if (
+                journalStatus ===
+                    "Posted"
+            ) {
+
+                const {
+
+                    error:
+                        journalVoidError
+
+                } = await supabase
+
+                    .from(
+                        "trx_gl_journal"
+                    )
+
+                    .update({
+
+                        status:
+                            "Void"
+
+                    })
+
+                    .eq(
+                        "id",
+                        journalId
+                    )
+
+                    .eq(
+                        "source_module",
+                        "AP"
+                    )
+
+                    .eq(
+                        "source_document_type",
+                        "AP_PAYMENT"
+                    )
+
+                    .eq(
+                        "source_document_id",
+                        accountPayableId
+                    );
+
+
+                if (
+                    journalVoidError
+                ) {
+
+                    console.error(
+                        "VOID AP PAYMENT GL JOURNAL ERROR:",
+                        journalVoidError
+                    );
+
+
+                    throw journalVoidError;
+
+                }
+
+
+                /*
+                ==============================================
+                DELETE PAYMENT ROW
+                ==============================================
+                */
+
+                const {
+
+                    error:
+                        paymentDeleteError
+
+                } = await supabase
+
+                    .from(
+                        this.paymentTable
+                    )
+
+                    .delete()
+
+                    .eq(
+                        "id",
+                        paymentId
+                    );
+
+
+                if (
+                    paymentDeleteError
+                ) {
+
+                    throw paymentDeleteError;
+
+                }
+
+
+                continue;
+
+            }
+
+
+            /*
+            ==================================================
+            VOID JOURNAL
+
+            KEEP JOURNAL AS AUDIT HISTORY
+            DELETE PAYMENT REFERENCE
+            ==================================================
+            */
+
+            if (
+                journalStatus ===
+                    "Void"
+            ) {
+
+                const {
+
+                    error:
+                        paymentDeleteError
+
+                } = await supabase
+
+                    .from(
+                        this.paymentTable
+                    )
+
+                    .delete()
+
+                    .eq(
+                        "id",
+                        paymentId
+                    );
+
+
+                if (
+                    paymentDeleteError
+                ) {
+
+                    throw paymentDeleteError;
+
+                }
+
+
+                continue;
+
+            }
+
+
+            /*
+            ==================================================
+            UNKNOWN JOURNAL STATUS
+
+            SAFETY BLOCK
+            ==================================================
+            */
+
+            const validationError =
+                new Error(
+                    `AP Payment GL Journal status "${journalStatus}" cannot be processed.`
+                );
+
+
+            validationError.name =
+                "BusinessValidationError";
+
+
+            throw validationError;
+
+        }
+
+
+        /*
+        ==================================================
+        SUCCESS
+        ==================================================
+        */
+
+        console.log(
+            "AP PAYMENT HISTORY CLEANUP SUCCESS:",
+            {
+
+                account_payable_id:
+                    accountPayableId,
+
+                payment_count:
+                    payments.length
+
+            }
+        );
+
+
+        return true;
+
+    }
+
+    catch (error) {
+
+        /*
+        ==================================================
+        BUSINESS VALIDATION
+        ==================================================
+        */
+
+        if (
+            error?.name ===
+            "BusinessValidationError"
+        ) {
+
+            throw error;
+
+        }
+
+
+        /*
+        ==================================================
+        REAL SYSTEM ERROR
+        ==================================================
+        */
+
+        console.error(
+            "AccountPayableService.deletePaymentHistoryForAP:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
+async cleanupInvoiceJournalForAP(
+    accountPayableId,
+    glJournalId
+) {
+
+    try {
+
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
+
+        if (
+            !accountPayableId
+        ) {
+
+            throw new Error(
+                "Account Payable ID is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        FIND AP INVOICE GL JOURNAL
+        ==================================================
+        */
+
+        let query =
+            supabase
+
+                .from(
+                    "trx_gl_journal"
+                )
+
+                .select(`
+                    id,
+                    journal_no,
+                    journal_date,
+                    status,
+                    source_module,
+                    source_document_type,
+                    source_document_id
+                `)
+
+                .eq(
+                    "source_module",
+                    "AP"
+                )
+
+                .eq(
+                    "source_document_type",
+                    "AP_INVOICE"
+                )
+
+                .eq(
+                    "source_document_id",
+                    accountPayableId
+                );
+
+
+        /*
+        ==================================================
+        USE LINKED JOURNAL ID
+        IF AVAILABLE
+        ==================================================
+        */
+
+        if (
+            glJournalId
+        ) {
+
+            query =
+                query.eq(
+                    "id",
+                    glJournalId
+                );
+
+        }
+
+
+        const {
+
+            data:
+                journal,
+
+            error:
+                journalFindError
+
+        } = await query
+
+            .maybeSingle();
+
+
+        /*
+        ==================================================
+        DATABASE ERROR
+        ==================================================
+        */
+
+        if (
+            journalFindError
+        ) {
+
+            console.error(
+                "GET AP INVOICE GL JOURNAL ERROR:",
+                journalFindError
+            );
+
+
+            throw journalFindError;
+
+        }
+
+
+        /*
+        ==================================================
+        JOURNAL NOT FOUND
+        ==================================================
+        */
+
+        if (
+            !journal
+        ) {
+
+            console.log(
+                "AP INVOICE GL JOURNAL NOT FOUND:",
+                {
+
+                    account_payable_id:
+                        accountPayableId,
+
+                    gl_journal_id:
+                        glJournalId
+                        ||
+                        null
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /*
+        ==================================================
+        NORMALIZE JOURNAL STATUS
+        ==================================================
+        */
+
+        const journalStatus =
+            String(
+                journal.status
+                ||
+                ""
+            )
+            .trim();
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "AP INVOICE GL JOURNAL CLEANUP:",
+            {
+
+                account_payable_id:
+                    accountPayableId,
+
+                gl_journal_id:
+                    journal.id,
+
+                journal_no:
+                    journal.journal_no,
+
+                journal_status:
+                    journalStatus
+
+            }
+        );
+
+
+        /*
+        ==================================================
+        DRAFT JOURNAL
+
+        DRAFT HAS NOT BECOME
+        FINAL ACCOUNTING HISTORY
+
+        FLOW:
+        1. DELETE JOURNAL DETAIL
+        2. DETACH AP FROM JOURNAL
+        3. DELETE JOURNAL HEADER
+        ==================================================
+        */
+
+        if (
+            journalStatus ===
+                "Draft"
+        ) {
+
+            /*
+            ==================================================
+            DELETE JOURNAL DETAIL
+            ==================================================
+            */
+
+            const {
+
+                error:
+                    detailDeleteError
+
+            } = await supabase
+
+                .from(
+                    "trx_gl_journal_detail"
+                )
+
+                .delete()
+
+                .eq(
+                    "journal_id",
+                    journal.id
+                );
+
+
+            if (
+                detailDeleteError
+            ) {
+
+                console.error(
+                    "DELETE AP INVOICE GL DETAIL ERROR:",
+                    detailDeleteError
+                );
+
+
+                throw detailDeleteError;
+
+            }
+
+
+            /*
+            ==================================================
+            DETACH AP FROM GL JOURNAL
+
+            IMPORTANT:
+            trx_account_payable.gl_journal_id
+            MUST NO LONGER REFERENCE JOURNAL
+            ==================================================
+            */
+
+            const {
+
+                error:
+                    detachError
+
+            } = await supabase
+
+                .from(
+                    this.table
+                )
+
+                .update({
+
+                    gl_journal_id:
+                        null
+
+                })
+
+                .eq(
+                    "id",
+                    accountPayableId
+                )
+
+                .eq(
+                    "gl_journal_id",
+                    journal.id
+                );
+
+
+            if (
+                detachError
+            ) {
+
+                console.error(
+                    "DETACH AP INVOICE GL JOURNAL ERROR:",
+                    detachError
+                );
+
+
+                throw detachError;
+
+            }
+
+
+            /*
+            ==================================================
+            DELETE JOURNAL HEADER
+
+            SAFETY FILTER:
+            AP / AP_INVOICE / THIS AP
+            ==================================================
+            */
+
+            const {
+
+                error:
+                    journalDeleteError
+
+            } = await supabase
+
+                .from(
+                    "trx_gl_journal"
+                )
+
+                .delete()
+
+                .eq(
+                    "id",
+                    journal.id
+                )
+
+                .eq(
+                    "source_module",
+                    "AP"
+                )
+
+                .eq(
+                    "source_document_type",
+                    "AP_INVOICE"
+                )
+
+                .eq(
+                    "source_document_id",
+                    accountPayableId
+                );
+
+
+            if (
+                journalDeleteError
+            ) {
+
+                console.error(
+                    "DELETE AP INVOICE GL JOURNAL ERROR:",
+                    journalDeleteError
+                );
+
+
+                throw journalDeleteError;
+
+            }
+
+
+            /*
+            ==================================================
+            SUCCESS
+            ==================================================
+            */
+
+            console.log(
+                "AP INVOICE DRAFT JOURNAL DELETED:",
+                {
+
+                    account_payable_id:
+                        accountPayableId,
+
+                    journal_id:
+                        journal.id,
+
+                    journal_no:
+                        journal.journal_no
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /*
+        ==================================================
+        POSTED JOURNAL
+
+        DO NOT PHYSICALLY DELETE
+        ACCOUNTING HISTORY
+
+        CHANGE STATUS TO VOID
+        ==================================================
+        */
+
+        if (
+            journalStatus ===
+                "Posted"
+        ) {
+
+            const {
+
+                error:
+                    journalVoidError
+
+            } = await supabase
+
+                .from(
+                    "trx_gl_journal"
+                )
+
+                .update({
+
+                    status:
+                        "Void"
+
+                })
+
+                .eq(
+                    "id",
+                    journal.id
+                )
+
+                .eq(
+                    "source_module",
+                    "AP"
+                )
+
+                .eq(
+                    "source_document_type",
+                    "AP_INVOICE"
+                )
+
+                .eq(
+                    "source_document_id",
+                    accountPayableId
+                );
+
+
+            if (
+                journalVoidError
+            ) {
+
+                console.error(
+                    "VOID AP INVOICE GL JOURNAL ERROR:",
+                    journalVoidError
+                );
+
+
+                throw journalVoidError;
+
+            }
+
+
+            /*
+            ==================================================
+            SUCCESS
+            ==================================================
+            */
+
+            console.log(
+                "AP INVOICE POSTED JOURNAL VOIDED:",
+                {
+
+                    account_payable_id:
+                        accountPayableId,
+
+                    journal_id:
+                        journal.id,
+
+                    journal_no:
+                        journal.journal_no
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /*
+        ==================================================
+        VOID JOURNAL
+
+        ALREADY VOID
+        KEEP FOR AUDIT HISTORY
+        ==================================================
+        */
+
+        if (
+            journalStatus ===
+                "Void"
+        ) {
+
+            console.log(
+                "AP INVOICE GL JOURNAL ALREADY VOID:",
+                {
+
+                    account_payable_id:
+                        accountPayableId,
+
+                    journal_id:
+                        journal.id,
+
+                    journal_no:
+                        journal.journal_no
+
+                }
+            );
+
+
+            return true;
+
+        }
+
+
+        /*
+        ==================================================
+        UNKNOWN STATUS
+        ==================================================
+        */
+
+        const validationError =
+            new Error(
+                `AP Invoice GL Journal status "${journalStatus}" cannot be processed for deletion.`
+            );
+
+
+        validationError.name =
+            "BusinessValidationError";
+
+
+        throw validationError;
+
+    }
+
+    catch (error) {
+
+        /*
+        ==================================================
+        BUSINESS VALIDATION
+        ==================================================
+        */
+
+        if (
+            error?.name ===
+            "BusinessValidationError"
+        ) {
+
+            throw error;
+
+        }
+
+
+        /*
+        ==================================================
+        REAL SYSTEM ERROR
+        ==================================================
+        */
+
+        console.error(
+            "AccountPayableService.cleanupInvoiceJournalForAP:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
 async delete(id) {
 
     try {
@@ -3468,7 +5017,9 @@ async delete(id) {
             || null;
 
 
-        if (!invoice) {
+        if (
+            !invoice
+        ) {
 
             throw new Error(
                 "Account Payable not found."
@@ -3479,8 +5030,22 @@ async delete(id) {
 
         /*
         ==================================================
+        NORMALIZE STATUS
+        ==================================================
+        */
+
+        const status =
+            String(
+                invoice.status
+                ||
+                ""
+            )
+            .trim();
+
+
+        /*
+        ==================================================
         ACCOUNTING PERIOD LOCK
-        DATE RECEIVED = ACCOUNTING DATE
         ==================================================
         */
 
@@ -3492,25 +5057,45 @@ async delete(id) {
         /*
         ==================================================
         ONLY DRAFT / VOID CAN BE DELETED
+
+        DRAFT + PAYMENT = ALLOWED
+        VOID  + PAYMENT = ALLOWED
         ==================================================
         */
 
         if (
-            invoice.status !== this.STATUS.DRAFT
+            status !==
+                this.STATUS.DRAFT
             &&
-            invoice.status !== this.STATUS.VOID
+            status !==
+                this.STATUS.VOID
         ) {
 
-            throw new Error(
-                "Only Draft or Void Account Payable can be deleted."
-            );
+            const validationError =
+                new Error(
+                    "Only Draft or Void Account Payable can be deleted."
+                );
+
+
+            validationError.name =
+                "BusinessValidationError";
+
+
+            throw validationError;
 
         }
 
 
+        /*
+        ==================================================
+        DEBUG TARGET
+        ==================================================
+        */
+
         console.log(
-            "DELETE TARGET:",
+            "DELETE ACCOUNT PAYABLE TARGET:",
             {
+
                 id:
                     invoice.id,
 
@@ -3518,25 +5103,126 @@ async delete(id) {
                     invoice.invoice_no,
 
                 status:
-                    invoice.status,
+                    status,
 
                 date_received:
-                    invoice.date_received
+                    invoice.date_received,
+
+                gl_journal_id:
+                    invoice.gl_journal_id
+                    ||
+                    null
+
             }
         );
 
 
         /*
         ==================================================
-        DELETE HEADER
+        STEP 1
+        CLEAN AP PAYMENT HISTORY
+        ==================================================
+        */
 
-        DETAIL AUTO DELETE BY CASCADE
+        await this.deletePaymentHistoryForAP(
+            id
+        );
+
+
+        /*
+        ==================================================
+        STEP 2
+        CLEAN AP INVOICE GL JOURNAL
+        ==================================================
+        */
+
+        await this.cleanupInvoiceJournalForAP(
+            id,
+            invoice.gl_journal_id
+        );
+
+
+        /*
+        ==================================================
+        STEP 3
+        DELETE ACCOUNT PAYABLE DETAIL
+
+        EXPLICIT DELETE
+        DO NOT RELY ON DATABASE CASCADE
         ==================================================
         */
 
         const {
 
-            error: deleteError
+            error:
+                detailDeleteError
+
+        } = await supabase
+
+            .from(
+                this.detailTable
+            )
+
+            .delete()
+
+            .eq(
+                "account_payable_id",
+                id
+            );
+
+
+        /*
+        ==================================================
+        DETAIL DELETE ERROR
+        ==================================================
+        */
+
+        if (
+            detailDeleteError
+        ) {
+
+            console.error(
+                "DELETE ACCOUNT PAYABLE DETAIL ERROR:",
+                detailDeleteError
+            );
+
+
+            if (
+                detailDeleteError.code ===
+                    "23503"
+            ) {
+
+                const validationError =
+                    new Error(
+                        "Account Payable detail cannot be deleted because it is still referenced by another transaction."
+                    );
+
+
+                validationError.name =
+                    "BusinessValidationError";
+
+
+                throw validationError;
+
+            }
+
+
+            throw detailDeleteError;
+
+        }
+
+
+        /*
+        ==================================================
+        STEP 4
+        DELETE ACCOUNT PAYABLE HEADER
+        ==================================================
+        */
+
+        const {
+
+            error:
+                deleteError
 
         } = await supabase
 
@@ -3554,7 +5240,7 @@ async delete(id) {
 
         /*
         ==================================================
-        DATABASE ERROR
+        HEADER DELETE ERROR
         ==================================================
         */
 
@@ -3563,9 +5249,29 @@ async delete(id) {
         ) {
 
             console.error(
-                "DELETE DATABASE ERROR:",
+                "DELETE ACCOUNT PAYABLE DATABASE ERROR:",
                 deleteError
             );
+
+
+            if (
+                deleteError.code ===
+                    "23503"
+            ) {
+
+                const validationError =
+                    new Error(
+                        "Account Payable cannot be deleted because it is still referenced by another transaction."
+                    );
+
+
+                validationError.name =
+                    "BusinessValidationError";
+
+
+                throw validationError;
+
+            }
 
 
             throw deleteError;
@@ -3582,11 +5288,16 @@ async delete(id) {
         console.log(
             "ACCOUNT PAYABLE DELETED SUCCESSFULLY:",
             {
+
                 id:
                     invoice.id,
 
                 invoice_no:
-                    invoice.invoice_no
+                    invoice.invoice_no,
+
+                status:
+                    status
+
             }
         );
 
@@ -3596,6 +5307,28 @@ async delete(id) {
     }
 
     catch (error) {
+
+        /*
+        ==================================================
+        BUSINESS VALIDATION
+        ==================================================
+        */
+
+        if (
+            error?.name ===
+            "BusinessValidationError"
+        ) {
+
+            throw error;
+
+        }
+
+
+        /*
+        ==================================================
+        REAL SYSTEM / DATABASE ERROR
+        ==================================================
+        */
 
         console.error(
             "AccountPayableService.delete:",
