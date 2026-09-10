@@ -3328,13 +3328,825 @@ async update(
 
 }
 
+/*
+======================================================
+DELETE PAYMENT HISTORY FOR AR
+SAME RULE AS ACCOUNT PAYABLE
+======================================================
+*/
+
+async deletePaymentHistoryForAR(
+    accountReceivableId
+) {
+
+    if (
+        !accountReceivableId
+    ) {
+
+        throw new Error(
+            "Account Receivable ID is required."
+        );
+
+    }
+
+
+    /*
+    ==================================================
+    GET AR PAYMENT HISTORY
+    ==================================================
+    */
+
+    const {
+        data: payments,
+        error: paymentError
+    } =
+        await supabase
+
+            .from(
+                this.paymentTable
+            )
+
+            .select(`
+                id,
+                account_receivable_id,
+                gl_journal_id
+            `)
+
+            .eq(
+                "account_receivable_id",
+                accountReceivableId
+            );
+
+
+    if (
+        paymentError
+    ) {
+
+        throw paymentError;
+
+    }
+
+
+    const paymentRows =
+        Array.isArray(
+            payments
+        )
+            ? payments
+            : [];
+
+
+    /*
+    ==================================================
+    PROCESS EACH PAYMENT
+    ==================================================
+    */
+
+    for (
+        const payment
+        of paymentRows
+    ) {
+
+        const paymentId =
+            payment?.id
+            ||
+            null;
+
+
+        const journalId =
+            payment?.gl_journal_id
+            ||
+            null;
+
+
+        /*
+        ==================================================
+        PAYMENT WITHOUT GL JOURNAL
+        ==================================================
+        */
+
+        if (
+            !journalId
+        ) {
+
+            const {
+                error
+            } =
+                await supabase
+
+                    .from(
+                        this.paymentTable
+                    )
+
+                    .delete()
+
+                    .eq(
+                        "id",
+                        paymentId
+                    );
+
+
+            if (
+                error
+            ) {
+
+                throw error;
+
+            }
+
+
+            continue;
+
+        }
+
+
+        /*
+        ==================================================
+        GET PAYMENT GL JOURNAL
+        ==================================================
+        */
+
+        const {
+            data: journal,
+            error: journalError
+        } =
+            await supabase
+
+                .from(
+                    TABLE.GL_JOURNAL
+                )
+
+                .select(`
+                    id,
+                    status,
+                    source_module,
+                    source_document_type,
+                    source_document_id
+                `)
+
+                .eq(
+                    "id",
+                    journalId
+                )
+
+                .maybeSingle();
+
+
+        if (
+            journalError
+        ) {
+
+            throw journalError;
+
+        }
+
+
+        /*
+        ==================================================
+        JOURNAL ALREADY MISSING
+        DELETE PAYMENT ROW
+        ==================================================
+        */
+
+        if (
+            !journal
+        ) {
+
+            const {
+                error
+            } =
+                await supabase
+
+                    .from(
+                        this.paymentTable
+                    )
+
+                    .delete()
+
+                    .eq(
+                        "id",
+                        paymentId
+                    );
+
+
+            if (
+                error
+            ) {
+
+                throw error;
+
+            }
+
+
+            continue;
+
+        }
+
+
+        /*
+        ==================================================
+        SAFETY VALIDATION
+        ==================================================
+        */
+
+        const sourceModule =
+            String(
+                journal.source_module
+                ||
+                ""
+            )
+            .trim()
+            .toUpperCase();
+
+
+        const sourceDocumentType =
+            String(
+                journal.source_document_type
+                ||
+                ""
+            )
+            .trim()
+            .toUpperCase();
+
+
+        if (
+            sourceModule !== "AR"
+            ||
+            sourceDocumentType !== "AR_PAYMENT"
+            ||
+            String(
+                journal.source_document_id
+            )
+            !==
+            String(
+                accountReceivableId
+            )
+        ) {
+
+            const validationError =
+                new Error(
+                    "AR Payment GL Journal source does not match this Account Receivable."
+                );
+
+
+            validationError.name =
+                "BusinessValidationError";
+
+
+            throw validationError;
+
+        }
+
+
+        /*
+        ==================================================
+        JOURNAL STATUS
+        ==================================================
+        */
+
+        const journalStatus =
+            String(
+                journal.status
+                ||
+                ""
+            )
+            .trim()
+            .toUpperCase();
+
+
+        /*
+        ==================================================
+        DRAFT JOURNAL
+        DELETE DETAIL + HEADER
+        ==================================================
+        */
+
+        if (
+            journalStatus ===
+            "DRAFT"
+        ) {
+
+            /*
+            ==============================================
+            DETACH PAYMENT FIRST
+            ==============================================
+            */
+
+            const {
+                error: detachError
+            } =
+                await supabase
+
+                    .from(
+                        this.paymentTable
+                    )
+
+                    .update({
+                        gl_journal_id:
+                            null
+                    })
+
+                    .eq(
+                        "id",
+                        paymentId
+                    );
+
+
+            if (
+                detachError
+            ) {
+
+                throw detachError;
+
+            }
+
+
+            /*
+            ==============================================
+            DELETE GL DETAIL
+            ==============================================
+            */
+
+            const {
+                error: detailError
+            } =
+                await supabase
+
+                    .from(
+                        TABLE.GL_JOURNAL_DETAIL
+                    )
+
+                    .delete()
+
+                    .eq(
+                        "journal_id",
+                        journalId
+                    );
+
+
+            if (
+                detailError
+            ) {
+
+                throw detailError;
+
+            }
+
+
+            /*
+            ==============================================
+            DELETE GL HEADER
+            ==============================================
+            */
+
+            const {
+                error: journalDeleteError
+            } =
+                await supabase
+
+                    .from(
+                        TABLE.GL_JOURNAL
+                    )
+
+                    .delete()
+
+                    .eq(
+                        "id",
+                        journalId
+                    );
+
+
+            if (
+                journalDeleteError
+            ) {
+
+                throw journalDeleteError;
+
+            }
+
+        }
+
+
+        /*
+        ==================================================
+        POSTED JOURNAL
+
+        KEEP AUDIT TRAIL
+        CHANGE TO VOID
+        ==================================================
+        */
+
+        else if (
+            journalStatus ===
+            "POSTED"
+        ) {
+
+            const {
+                error: voidError
+            } =
+                await supabase
+
+                    .from(
+                        TABLE.GL_JOURNAL
+                    )
+
+                    .update({
+                        status:
+                            "Void"
+                    })
+
+                    .eq(
+                        "id",
+                        journalId
+                    );
+
+
+            if (
+                voidError
+            ) {
+
+                throw voidError;
+
+            }
+
+        }
+
+
+        /*
+        ==================================================
+        VOID JOURNAL
+        KEEP JOURNAL
+        ==================================================
+        */
+
+        else if (
+            journalStatus ===
+            "VOID"
+        ) {
+
+            /*
+            NO ACTION TO JOURNAL
+            */
+
+        }
+
+
+        else {
+
+            const validationError =
+                new Error(
+                    `AR Payment GL Journal status "${journal.status || ""}" cannot be processed for deletion.`
+                );
+
+
+            validationError.name =
+                "BusinessValidationError";
+
+
+            throw validationError;
+
+        }
+
+
+        /*
+        ==================================================
+        DELETE AR PAYMENT ROW
+        ==================================================
+        */
+
+        const {
+            error: deletePaymentError
+        } =
+            await supabase
+
+                .from(
+                    this.paymentTable
+                )
+
+                .delete()
+
+                .eq(
+                    "id",
+                    paymentId
+                );
+
+
+        if (
+            deletePaymentError
+        ) {
+
+            throw deletePaymentError;
+
+        }
+
+    }
+
+}
+/*
+======================================================
+CLEANUP AR INVOICE GL JOURNAL
+SAME PATTERN AS AP
+======================================================
+*/
+
+async cleanupInvoiceJournalForAR(
+    accountReceivableId,
+    linkedJournalId = null
+) {
+
+    if (
+        !accountReceivableId
+    ) {
+
+        throw new Error(
+            "Account Receivable ID is required."
+        );
+
+    }
+
+
+    /*
+    ==================================================
+    FIND AR INVOICE JOURNAL
+    ==================================================
+    */
+
+    let query =
+        supabase
+
+            .from(
+                TABLE.GL_JOURNAL
+            )
+
+            .select(`
+                id,
+                status,
+                source_module,
+                source_document_type,
+                source_document_id
+            `)
+
+            .eq(
+                "source_module",
+                "AR"
+            )
+
+            .eq(
+                "source_document_type",
+                "AR_INVOICE"
+            )
+
+            .eq(
+                "source_document_id",
+                accountReceivableId
+            );
+
+
+    if (
+        linkedJournalId
+    ) {
+
+        query =
+            query.eq(
+                "id",
+                linkedJournalId
+            );
+
+    }
+
+
+    const {
+        data: journal,
+        error
+    } =
+        await query
+            .maybeSingle();
+
+
+    if (
+        error
+    ) {
+
+        throw error;
+
+    }
+
+
+    if (
+        !journal
+    ) {
+
+        return;
+
+    }
+
+
+    const journalStatus =
+        String(
+            journal.status
+            ||
+            ""
+        )
+        .trim()
+        .toUpperCase();
+
+
+    /*
+    ==================================================
+    DRAFT
+    DELETE JOURNAL
+    ==================================================
+    */
+
+    if (
+        journalStatus ===
+        "DRAFT"
+    ) {
+
+        /*
+        ==============================================
+        DETACH AR HEADER
+        ==============================================
+        */
+
+        const {
+            error: detachError
+        } =
+            await supabase
+
+                .from(
+                    this.table
+                )
+
+                .update({
+                    gl_journal_id:
+                        null
+                })
+
+                .eq(
+                    "id",
+                    accountReceivableId
+                );
+
+
+        if (
+            detachError
+        ) {
+
+            throw detachError;
+
+        }
+
+
+        /*
+        ==============================================
+        DELETE DETAIL
+        ==============================================
+        */
+
+        const {
+            error: detailError
+        } =
+            await supabase
+
+                .from(
+                    TABLE.GL_JOURNAL_DETAIL
+                )
+
+                .delete()
+
+                .eq(
+                    "journal_id",
+                    journal.id
+                );
+
+
+        if (
+            detailError
+        ) {
+
+            throw detailError;
+
+        }
+
+
+        /*
+        ==============================================
+        DELETE HEADER
+        ==============================================
+        */
+
+        const {
+            error: journalDeleteError
+        } =
+            await supabase
+
+                .from(
+                    TABLE.GL_JOURNAL
+                )
+
+                .delete()
+
+                .eq(
+                    "id",
+                    journal.id
+                );
+
+
+        if (
+            journalDeleteError
+        ) {
+
+            throw journalDeleteError;
+
+        }
+
+    }
+
+
+    /*
+    ==================================================
+    POSTED
+    KEEP AUDIT TRAIL
+    ==================================================
+    */
+
+    else if (
+        journalStatus ===
+        "POSTED"
+    ) {
+
+        const {
+            error: voidError
+        } =
+            await supabase
+
+                .from(
+                    TABLE.GL_JOURNAL
+                )
+
+                .update({
+                    status:
+                        "Void"
+                })
+
+                .eq(
+                    "id",
+                    journal.id
+                );
+
+
+        if (
+            voidError
+        ) {
+
+            throw voidError;
+
+        }
+
+    }
+
+
+    /*
+    ==================================================
+    VOID
+    KEEP JOURNAL
+    ==================================================
+    */
+
+    else if (
+        journalStatus ===
+        "VOID"
+    ) {
+
+        return;
+
+    }
+
+
+    else {
+
+        const validationError =
+            new Error(
+                `AR Invoice GL Journal status "${journal.status || ""}" cannot be processed for deletion.`
+            );
+
+
+        validationError.name =
+            "BusinessValidationError";
+
+
+        throw validationError;
+
+    }
+
+}
+
 
     /*
 ======================================================
-DELETE
-ACCOUNT RECEIVABLE
-WITH ACCOUNTING PERIOD VALIDATION
-BASIS : INVOICE DATE
+DELETE ACCOUNT RECEIVABLE
+FINAL
+SAME BEHAVIOR AS ACCOUNT PAYABLE
 ======================================================
 */
 
@@ -3359,42 +4171,35 @@ async delete(id) {
 
         /*
         ==================================================
-        CHECK INVOICE
+        GET ACCOUNT RECEIVABLE
         ==================================================
         */
 
         const {
-
             data: invoice,
-
             error: findError
+        } =
+            await supabase
 
-        } = await supabase
+                .from(
+                    this.table
+                )
 
-            .from(
-                this.table
-            )
+                .select(`
+                    id,
+                    invoice_no,
+                    invoice_date,
+                    status,
+                    gl_journal_id
+                `)
 
-            .select(`
-                id,
-                invoice_no,
-                invoice_date,
-                status
-            `)
+                .eq(
+                    "id",
+                    id
+                )
 
-            .eq(
-                "id",
-                id
-            )
+                .maybeSingle();
 
-            .single();
-
-
-        /*
-        ==================================================
-        FIND ERROR
-        ==================================================
-        */
 
         if (
             findError
@@ -3418,7 +4223,7 @@ async delete(id) {
 
         /*
         ==================================================
-        ACCOUNTING PERIOD VALIDATION
+        ACCOUNTING PERIOD
         ==================================================
         */
 
@@ -3440,91 +4245,152 @@ async delete(id) {
 
         /*
         ==================================================
-        DEBUG
+        STATUS
+        DRAFT / VOID ONLY
         ==================================================
         */
 
-        console.log(
-            "AR DELETE TARGET:",
-            invoice
-        );
+        const status =
+            String(
+                invoice.status
+                ||
+                ""
+            )
+            .trim()
+            .toUpperCase();
 
-
-        /*
-        ==================================================
-        ONLY DRAFT / VOID CAN BE DELETED
-        ==================================================
-        */
 
         if (
-            invoice.status
-                !==
-                this.STATUS.DRAFT
+            status !== "DRAFT"
             &&
-            invoice.status
-                !==
-                this.STATUS.VOID
+            status !== "VOID"
         ) {
 
-            throw new Error(
-                "Only Draft or Void Account Receivable can be deleted."
-            );
+            const validationError =
+                new Error(
+                    "Only Draft or Void Account Receivable can be deleted."
+                );
+
+
+            validationError.name =
+                "BusinessValidationError";
+
+
+            throw validationError;
 
         }
 
 
         /*
         ==================================================
-        DELETE HEADER
-
-        DETAIL AUTO DELETE BY CASCADE
+        STEP 1
+        DELETE AR PAYMENT HISTORY
         ==================================================
         */
 
-        const {
-
-            error: deleteError
-
-        } = await supabase
-
-            .from(
-                this.table
-            )
-
-            .delete()
-
-            .eq(
-                "id",
-                id
-            );
+        await this.deletePaymentHistoryForAR(
+            id
+        );
 
 
         /*
         ==================================================
-        DATABASE ERROR
+        STEP 2
+        CLEANUP AR INVOICE GL JOURNAL
         ==================================================
         */
+
+        await this.cleanupInvoiceJournalForAR(
+            id,
+            invoice.gl_journal_id
+        );
+
+
+        /*
+        ==================================================
+        STEP 3
+        DELETE AR DETAILS
+        ==================================================
+        */
+
+        const {
+            error: detailDeleteError
+        } =
+            await supabase
+
+                .from(
+                    this.detailTable
+                )
+
+                .delete()
+
+                .eq(
+                    "account_receivable_id",
+                    id
+                );
+
+
+        if (
+            detailDeleteError
+        ) {
+
+            throw detailDeleteError;
+
+        }
+
+
+        /*
+        ==================================================
+        STEP 4
+        DELETE AR HEADER
+        ==================================================
+        */
+
+        const {
+            error: deleteError
+        } =
+            await supabase
+
+                .from(
+                    this.table
+                )
+
+                .delete()
+
+                .eq(
+                    "id",
+                    id
+                );
+
 
         if (
             deleteError
         ) {
 
-            console.error(
-                "AR DELETE DATABASE ERROR:",
-                deleteError
-            );
+            if (
+                deleteError.code ===
+                "23503"
+            ) {
+
+                const validationError =
+                    new Error(
+                        "Account Receivable cannot be deleted because it is still used by another transaction."
+                    );
+
+
+                validationError.name =
+                    "BusinessValidationError";
+
+
+                throw validationError;
+
+            }
 
 
             throw deleteError;
 
         }
 
-
-        /*
-        ==================================================
-        SUCCESS
-        ==================================================
-        */
 
         console.log(
             "ACCOUNT RECEIVABLE DELETED SUCCESSFULLY:",
@@ -3544,6 +4410,22 @@ async delete(id) {
 
     catch (error) {
 
+        /*
+        ==================================================
+        EXPECTED BUSINESS VALIDATION
+        ==================================================
+        */
+
+        if (
+            error?.name ===
+            "BusinessValidationError"
+        ) {
+
+            throw error;
+
+        }
+
+
         console.error(
             "AccountReceivableService.delete:",
             error
@@ -3556,25 +4438,25 @@ async delete(id) {
 
 }
 
-
-    /*
+/*
 ======================================================
 VOID ACCOUNT RECEIVABLE
-WITH ACCOUNTING PERIOD VALIDATION
-BASIS : INVOICE DATE
+FINAL
+SAME BEHAVIOR AS ACCOUNT PAYABLE
+WITH ACCOUNTING PERIOD LOCK
 ======================================================
 */
 
 async voidInvoice(
     id,
-    reason = ""
+    reason
 ) {
 
     try {
 
         /*
         ==================================================
-        VALIDATE ID
+        VALIDATION
         ==================================================
         */
 
@@ -3587,49 +4469,40 @@ async voidInvoice(
         }
 
 
+        if (
+            !reason
+            ||
+            !String(reason).trim()
+        ) {
+
+            throw new Error(
+                "Void reason is required."
+            );
+
+        }
+
+
         /*
         ==================================================
         GET INVOICE
         ==================================================
         */
 
-        const {
-
-            data: invoice,
-
-            error: findError
-
-        } = await supabase
-
-            .from(
-                this.table
-            )
-
-            .select(`
-                id,
-                invoice_no,
-                invoice_date,
-                status,
-                paid_amount,
-                outstanding_amount
-            `)
-
-            .eq(
-                "id",
+        const result =
+            await this.getById(
                 id
-            )
-
-            .single();
+            );
 
 
-        if (findError) {
+        const invoice =
+            result?.header
+            ||
+            null;
 
-            throw findError;
 
-        }
-
-
-        if (!invoice) {
+        if (
+            !invoice
+        ) {
 
             throw new Error(
                 "Account Receivable not found."
@@ -3640,20 +4513,47 @@ async voidInvoice(
 
         /*
         ==================================================
-        ACCOUNTING PERIOD VALIDATION
+        CURRENT STATUS
+        ==================================================
+        */
+
+        const currentStatus =
+            String(
+                invoice.status
+                ||
+                ""
+            )
+            .trim();
+
+
+        /*
+        ==================================================
+        SAME STATUS RULE AS AP
+
+        POSTED
+        PARTIAL PAID
         ==================================================
         */
 
         if (
-            !invoice.invoice_date
+            currentStatus !== "Posted"
+            &&
+            currentStatus !== "Partial Paid"
         ) {
 
             throw new Error(
-                "Account Receivable Invoice Date is required."
+                "Only Posted or Partial Paid Account Receivable can be voided."
             );
 
         }
 
+
+        /*
+        ==================================================
+        ACCOUNTING PERIOD LOCK
+        INVOICE DATE = ACCOUNTING DATE
+        ==================================================
+        */
 
         await this.validateAccountingPeriod(
             invoice.invoice_date
@@ -3662,48 +4562,8 @@ async voidInvoice(
 
         /*
         ==================================================
-        ONLY COMPLETE CAN BE VOIDED
-        ==================================================
-        */
-
-        if (
-            invoice.status
-            !==
-            this.STATUS.COMPLETE
-        ) {
-
-            throw new Error(
-                "Only Complete Account Receivable can be voided."
-            );
-
-        }
-
-
-        /*
-        ==================================================
-        PAYMENT VALIDATION
-        ==================================================
-        */
-
-        if (
-            Number(
-                invoice.paid_amount
-                || 0
-            )
-            >
-            0
-        ) {
-
-            throw new Error(
-                "Account Receivable with payment cannot be voided."
-            );
-
-        }
-
-
-        /*
-        ==================================================
-        UPDATE STATUS
+        UPDATE AR STATUS
+        SAME AS AP
         ==================================================
         */
 
@@ -3711,7 +4571,8 @@ async voidInvoice(
 
             data,
 
-            error: updateError
+            error:
+                updateError
 
         } = await supabase
 
@@ -3736,29 +4597,191 @@ async voidInvoice(
             .single();
 
 
-        if (updateError) {
+        if (
+            updateError
+        ) {
 
             throw updateError;
 
         }
 
 
-        console.log(
-            "AR VOID:",
-            {
-                id,
-                reason,
-                result:
-                    data
-            }
-        );
+        /*
+        ==================================================
+        LINKED GL JOURNAL
+        ==================================================
+        */
 
+        const glJournalId =
+            invoice.gl_journal_id
+            ||
+            null;
+
+
+        /*
+        ==================================================
+        VOID LINKED AR INVOICE JOURNAL
+
+        AR STILL NEEDS GL REALTIME CONSISTENCY.
+        ==================================================
+        */
+
+        if (
+            glJournalId
+        ) {
+
+            const {
+
+                data:
+                    glJournal,
+
+                error:
+                    glFindError
+
+            } = await supabase
+
+                .from(
+                    TABLE.GL_JOURNAL
+                )
+
+                .select(`
+                    id,
+                    status,
+                    source_module,
+                    source_document_type,
+                    source_document_id
+                `)
+
+                .eq(
+                    "id",
+                    glJournalId
+                )
+
+                .maybeSingle();
+
+
+            if (
+                glFindError
+            ) {
+
+                throw glFindError;
+
+            }
+
+
+            if (
+                glJournal
+            ) {
+
+                /*
+                ==============================================
+                SOURCE VALIDATION
+                ==============================================
+                */
+
+                const sourceModule =
+                    String(
+                        glJournal.source_module
+                        ||
+                        ""
+                    )
+                    .trim()
+                    .toUpperCase();
+
+
+                const sourceDocumentType =
+                    String(
+                        glJournal.source_document_type
+                        ||
+                        ""
+                    )
+                    .trim()
+                    .toUpperCase();
+
+
+                if (
+                    sourceModule !== "AR"
+                    ||
+                    sourceDocumentType !== "AR_INVOICE"
+                    ||
+                    String(
+                        glJournal.source_document_id
+                    )
+                    !==
+                    String(
+                        id
+                    )
+                ) {
+
+                    throw new Error(
+                        "Linked GL Journal does not belong to this Account Receivable."
+                    );
+
+                }
+
+
+                /*
+                ==============================================
+                VOID GL JOURNAL
+                ==============================================
+                */
+
+                const {
+
+                    error:
+                        journalVoidError
+
+                } = await supabase
+
+                    .from(
+                        TABLE.GL_JOURNAL
+                    )
+
+                    .update({
+
+                        status:
+                            "Void",
+
+                        void_reason:
+                            String(
+                                reason
+                            )
+                            .trim()
+
+                    })
+
+                    .eq(
+                        "id",
+                        glJournalId
+                    );
+
+
+                if (
+                    journalVoidError
+                ) {
+
+                    throw journalVoidError;
+
+                }
+
+            }
+
+        }
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
 
         return data;
 
     }
 
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
             "AccountReceivableService.voidInvoice:",
@@ -3771,9 +4794,29 @@ async voidInvoice(
     }
 
 }
-    /*
+/*
 ======================================================
 GET PAYMENT TOTAL
+FINAL
+
+ACCOUNT RECEIVABLE PAYMENT LIFECYCLE
+
+ACTIVE PAYMENT:
+- DRAFT GL JOURNAL
+- POSTED GL JOURNAL
+
+INACTIVE PAYMENT:
+- VOID GL JOURNAL
+- NULL gl_journal_id
+- MISSING GL JOURNAL
+- UNKNOWN JOURNAL STATUS
+
+IMPORTANT:
+PAYMENT <-> GL JOURNAL RELATION IS PRESERVED
+WHEN JOURNAL BECOMES VOID.
+
+VOID -> POSTED
+WILL AUTOMATICALLY REACTIVATE PAYMENT.
 ======================================================
 */
 
@@ -3802,15 +4845,25 @@ async getPaymentTotal(
 
         /*
         ==================================================
-        GET PAYMENTS
+        GET AR PAYMENT ROWS
+
+        IMPORTANT:
+        ONLY PAYMENT WITH JOURNAL RELATION
+        CAN POSSIBLY BE ACTIVE.
+
+        NULL gl_journal_id
+        =
+        INACTIVE / ORPHAN PAYMENT
         ==================================================
         */
 
         const {
 
-            data,
+            data:
+                payments,
 
-            error
+            error:
+                paymentError
 
         } = await supabase
 
@@ -3819,41 +4872,554 @@ async getPaymentTotal(
             )
 
             .select(`
-                amount
+                id,
+                account_receivable_id,
+                amount,
+                gl_journal_id
             `)
 
             .eq(
                 "account_receivable_id",
                 accountReceivableId
+            )
+
+            .not(
+                "gl_journal_id",
+                "is",
+                null
             );
 
 
         /*
         ==================================================
-        ERROR
+        PAYMENT QUERY ERROR
         ==================================================
         */
 
-        if (error) {
+        if (
+            paymentError
+        ) {
 
-            throw error;
+            console.error(
+                "AR GET PAYMENT TOTAL - PAYMENT ERROR:",
+                {
+                    account_receivable_id:
+                        accountReceivableId,
+
+                    message:
+                        paymentError.message,
+
+                    details:
+                        paymentError.details,
+
+                    hint:
+                        paymentError.hint,
+
+                    code:
+                        paymentError.code
+                }
+            );
+
+
+            throw paymentError;
 
         }
 
 
         /*
         ==================================================
-        SUM PAYMENT
+        NORMALIZE PAYMENT ROWS
+        ==================================================
+        */
+
+        const paymentRows =
+            Array.isArray(
+                payments
+            )
+                ? payments
+                : [];
+
+
+        /*
+        ==================================================
+        NO PAYMENT
+        ==================================================
+        */
+
+        if (
+            paymentRows.length ===
+            0
+        ) {
+
+            console.log(
+                "AR ACTIVE PAYMENT TOTAL:",
+                {
+                    account_receivable_id:
+                        accountReceivableId,
+
+                    payment_count:
+                        0,
+
+                    active_payment_count:
+                        0,
+
+                    inactive_payment_count:
+                        0,
+
+                    total_payment:
+                        0
+                }
+            );
+
+
+            return 0;
+
+        }
+
+
+        /*
+        ==================================================
+        GET UNIQUE GL JOURNAL IDS
+        ==================================================
+        */
+
+        const journalIds =
+            [
+                ...new Set(
+
+                    paymentRows
+
+                        .map(
+                            payment =>
+                                payment?.gl_journal_id
+                        )
+
+                        .filter(
+                            Boolean
+                        )
+
+                )
+            ];
+
+
+        /*
+        ==================================================
+        NO VALID JOURNAL IDS
+
+        SAFETY:
+        NO JOURNAL
+        =
+        NO ACTIVE PAYMENT
+        ==================================================
+        */
+
+        if (
+            journalIds.length ===
+            0
+        ) {
+
+            return 0;
+
+        }
+
+
+        /*
+        ==================================================
+        GET GL JOURNAL STATUS
+
+        DO NOT USE ONLY gl_journal_id != NULL.
+
+        JOURNAL STATUS DETERMINES
+        WHETHER PAYMENT IS ACTIVE.
+        ==================================================
+        */
+
+        const {
+
+            data:
+                journals,
+
+            error:
+                journalError
+
+        } = await supabase
+
+            .from(
+                TABLE.GL_JOURNAL
+            )
+
+            .select(`
+                id,
+                status,
+                source_module,
+                source_document_type,
+                source_document_id
+            `)
+
+            .in(
+                "id",
+                journalIds
+            );
+
+
+        /*
+        ==================================================
+        JOURNAL QUERY ERROR
+        ==================================================
+        */
+
+        if (
+            journalError
+        ) {
+
+            console.error(
+                "AR GET PAYMENT TOTAL - JOURNAL ERROR:",
+                {
+                    account_receivable_id:
+                        accountReceivableId,
+
+                    journal_ids:
+                        journalIds,
+
+                    message:
+                        journalError.message,
+
+                    details:
+                        journalError.details,
+
+                    hint:
+                        journalError.hint,
+
+                    code:
+                        journalError.code
+                }
+            );
+
+
+            throw journalError;
+
+        }
+
+
+        /*
+        ==================================================
+        NORMALIZE JOURNAL ROWS
+        ==================================================
+        */
+
+        const journalRows =
+            Array.isArray(
+                journals
+            )
+                ? journals
+                : [];
+
+
+        /*
+        ==================================================
+        BUILD JOURNAL MAP
+
+        KEY:
+        JOURNAL ID
+
+        VALUE:
+        COMPLETE JOURNAL INFORMATION
+        ==================================================
+        */
+
+        const journalMap =
+            new Map();
+
+
+        journalRows.forEach(
+            journal => {
+
+                if (
+                    !journal?.id
+                ) {
+
+                    return;
+
+                }
+
+
+                journalMap.set(
+                    String(
+                        journal.id
+                    ),
+                    journal
+                );
+
+            }
+        );
+
+
+        /*
+        ==================================================
+        ACTIVE PAYMENT FILTER
+
+        RULE:
+
+        PAYMENT MUST:
+        1. HAVE GL JOURNAL
+        2. JOURNAL MUST EXIST
+        3. SOURCE MODULE MUST BE AR
+        4. DOCUMENT TYPE MUST BE AR_PAYMENT
+        5. SOURCE DOCUMENT ID MUST MATCH AR
+        6. STATUS MUST BE DRAFT OR POSTED
+
+        VOID
+        =
+        INACTIVE
+        ==================================================
+        */
+
+        const activePayments =
+            paymentRows.filter(
+                payment => {
+
+                    /*
+                    ==========================================
+                    PAYMENT VALIDATION
+                    ==========================================
+                    */
+
+                    if (
+                        !payment
+                        ||
+                        !payment.gl_journal_id
+                    ) {
+
+                        return false;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    GET LINKED JOURNAL
+                    ==========================================
+                    */
+
+                    const journal =
+                        journalMap.get(
+                            String(
+                                payment.gl_journal_id
+                            )
+                        );
+
+
+                    /*
+                    ==========================================
+                    JOURNAL MUST EXIST
+                    ==========================================
+                    */
+
+                    if (
+                        !journal
+                    ) {
+
+                        console.warn(
+                            "AR PAYMENT JOURNAL NOT FOUND:",
+                            {
+                                payment_id:
+                                    payment.id,
+
+                                gl_journal_id:
+                                    payment.gl_journal_id,
+
+                                account_receivable_id:
+                                    accountReceivableId
+                            }
+                        );
+
+
+                        return false;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    NORMALIZE SOURCE
+                    ==========================================
+                    */
+
+                    const sourceModule =
+                        String(
+                            journal.source_module
+                            ||
+                            ""
+                        )
+                        .trim()
+                        .toUpperCase();
+
+
+                    const sourceDocumentType =
+                        String(
+                            journal.source_document_type
+                            ||
+                            ""
+                        )
+                        .trim()
+                        .toUpperCase();
+
+
+                    const journalStatus =
+                        String(
+                            journal.status
+                            ||
+                            ""
+                        )
+                        .trim()
+                        .toUpperCase();
+
+
+                    /*
+                    ==========================================
+                    SAFETY:
+                    MUST BELONG TO AR
+                    ==========================================
+                    */
+
+                    if (
+                        sourceModule !==
+                        "AR"
+                    ) {
+
+                        console.warn(
+                            "AR PAYMENT INVALID SOURCE MODULE:",
+                            {
+                                payment_id:
+                                    payment.id,
+
+                                journal_id:
+                                    journal.id,
+
+                                source_module:
+                                    sourceModule
+                            }
+                        );
+
+
+                        return false;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    SAFETY:
+                    MUST BE AR PAYMENT JOURNAL
+                    ==========================================
+                    */
+
+                    if (
+                        sourceDocumentType !==
+                        "AR_PAYMENT"
+                    ) {
+
+                        console.warn(
+                            "AR PAYMENT INVALID SOURCE DOCUMENT TYPE:",
+                            {
+                                payment_id:
+                                    payment.id,
+
+                                journal_id:
+                                    journal.id,
+
+                                source_document_type:
+                                    sourceDocumentType
+                            }
+                        );
+
+
+                        return false;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    SAFETY:
+                    JOURNAL MUST BELONG TO SAME AR
+                    ==========================================
+                    */
+
+                    if (
+                        String(
+                            journal.source_document_id
+                            ||
+                            ""
+                        )
+                        !==
+                        String(
+                            accountReceivableId
+                        )
+                    ) {
+
+                        console.warn(
+                            "AR PAYMENT SOURCE DOCUMENT MISMATCH:",
+                            {
+                                payment_id:
+                                    payment.id,
+
+                                journal_id:
+                                    journal.id,
+
+                                journal_source_document_id:
+                                    journal.source_document_id,
+
+                                account_receivable_id:
+                                    accountReceivableId
+                            }
+                        );
+
+
+                        return false;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    ACTIVE STATUS
+
+                    DRAFT
+                    =
+                    ACTIVE
+
+                    POSTED
+                    =
+                    ACTIVE
+
+                    VOID
+                    =
+                    INACTIVE
+                    ==========================================
+                    */
+
+                    return (
+                        journalStatus ===
+                            "DRAFT"
+                        ||
+                        journalStatus ===
+                            "POSTED"
+                    );
+
+                }
+            );
+
+
+        /*
+        ==================================================
+        CALCULATE ACTIVE PAYMENT TOTAL
         ==================================================
         */
 
         const total =
-            (
-                data
-                ||
-                []
-            )
-            .reduce(
+            activePayments.reduce(
+
                 (
                     sum,
                     payment
@@ -3870,8 +5436,92 @@ async getPaymentTotal(
                     );
 
                 },
+
                 0
+
             );
+
+
+        /*
+        ==================================================
+        ROUND
+        ==================================================
+        */
+
+        const finalTotal =
+            Number(
+                total.toFixed(
+                    2
+                )
+            );
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "AR ACTIVE PAYMENT TOTAL:",
+            {
+                account_receivable_id:
+                    accountReceivableId,
+
+                payment_count:
+                    paymentRows.length,
+
+                active_payment_count:
+                    activePayments.length,
+
+                inactive_payment_count:
+                    (
+                        paymentRows.length
+                        -
+                        activePayments.length
+                    ),
+
+                total_payment:
+                    finalTotal,
+
+                active_payments:
+                    activePayments.map(
+                        payment => {
+
+                            const journal =
+                                journalMap.get(
+                                    String(
+                                        payment.gl_journal_id
+                                    )
+                                );
+
+
+                            return {
+
+                                payment_id:
+                                    payment.id,
+
+                                amount:
+                                    Number(
+                                        payment.amount
+                                        ||
+                                        0
+                                    ),
+
+                                gl_journal_id:
+                                    payment.gl_journal_id,
+
+                                journal_status:
+                                    journal?.status
+                                    ||
+                                    null
+
+                            };
+
+                        }
+                    )
+            }
+        );
 
 
         /*
@@ -3880,15 +5530,13 @@ async getPaymentTotal(
         ==================================================
         */
 
-        return Number(
-            total.toFixed(
-                2
-            )
-        );
+        return finalTotal;
 
     }
 
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
             "AccountReceivableService.getPaymentTotal:",
@@ -4191,78 +5839,125 @@ async markPaid(
 
 
     /*
-    ======================================================
-    GET PAYMENT HISTORY
-    ======================================================
-    */
+======================================================
+GET PAYMENT HISTORY
+ACCOUNT RECEIVABLE
+FINAL
 
-    async getPaymentHistory(id) {
+SHOW COMPLETE PAYMENT HISTORY
 
-        try {
+INCLUDING:
+- DRAFT JOURNAL
+- POSTED JOURNAL
+- VOID JOURNAL
 
-            if (!id) {
+PAYMENT -> GL JOURNAL RELATION
+MUST BE PRESERVED FOR AUDIT
+======================================================
+*/
 
-                throw new Error(
-                    "Account Receivable ID is required."
-                );
+async getPaymentHistory(id) {
 
-            }
+    try {
 
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
 
-            const {
+        if (!id) {
 
-                data,
-
-                error
-
-            } = await supabase
-
-                .from(
-                    this.paymentTable
-                )
-
-                .select(`
-                    *
-                `)
-
-                .eq(
-                    "account_receivable_id",
-                    id
-                )
-
-                .order(
-                    "payment_date",
-                    {
-                        ascending:
-                            true
-                    }
-                )
-
-                .order(
-                    "created_at",
-                    {
-                        ascending:
-                            true
-                    }
-                );
-
-
-            if (error) {
-
-                throw error;
-
-            }
-
-
-            return data || [];
+            throw new Error(
+                "Account Receivable ID is required."
+            );
 
         }
 
-        catch (error) {
+
+        /*
+        ==================================================
+        GET PAYMENT HISTORY
+        WITH PAYMENT ACCOUNT + GL JOURNAL
+        ==================================================
+        */
+
+        const {
+
+            data,
+
+            error
+
+        } = await supabase
+
+            .from(
+                this.paymentTable
+            )
+
+            .select(`
+                *,
+                payment_account:mst_chart_of_accounts!trx_account_receivable_payment_payment_account_id_fkey (
+                    id,
+                    account_code,
+                    account_name
+                ),
+                trx_gl_journal (
+                    id,
+                    journal_no,
+                    journal_date,
+                    status,
+                    source_module,
+                    source_document_type,
+                    source_document_id
+                )
+            `)
+
+            .eq(
+                "account_receivable_id",
+                id
+            )
+
+            .order(
+                "payment_date",
+                {
+                    ascending: true
+                }
+            )
+
+            .order(
+                "created_at",
+                {
+                    ascending: true
+                }
+            );
+
+
+        /*
+        ==================================================
+        ERROR
+        ==================================================
+        */
+
+        if (error) {
 
             console.error(
-                "AccountReceivableService.getPaymentHistory:",
-                error
+                "AR GET PAYMENT HISTORY ERROR:",
+                {
+                    account_receivable_id:
+                        id,
+
+                    message:
+                        error.message,
+
+                    details:
+                        error.details,
+
+                    hint:
+                        error.hint,
+
+                    code:
+                        error.code
+                }
             );
 
 
@@ -4270,9 +5965,88 @@ async markPaid(
 
         }
 
+
+        /*
+        ==================================================
+        NORMALIZE
+        ==================================================
+        */
+
+        const payments =
+            Array.isArray(data)
+                ? data
+                : [];
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "AR PAYMENT HISTORY:",
+            {
+                account_receivable_id:
+                    id,
+
+                payment_count:
+                    payments.length,
+
+                payments:
+                    payments.map(
+                        payment => ({
+                            payment_id:
+                                payment.id,
+
+                            amount:
+                                Number(
+                                    payment.amount
+                                    ||
+                                    0
+                                ),
+
+                            gl_journal_id:
+                                payment.gl_journal_id
+                                ||
+                                null,
+
+                            journal_no:
+                                payment
+                                    ?.trx_gl_journal
+                                    ?.journal_no
+                                ||
+                                null,
+
+                            journal_status:
+                                payment
+                                    ?.trx_gl_journal
+                                    ?.status
+                                ||
+                                null
+                        })
+                    )
+            }
+        );
+
+
+        return payments;
+
     }
 
+    catch (error) {
 
+        console.error(
+            "AccountReceivableService.getPaymentHistory:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
     /*
 ======================================================
 CREATE PAYMENT

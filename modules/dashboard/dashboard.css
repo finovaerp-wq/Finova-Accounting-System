@@ -1,390 +1,6723 @@
 /*
 ==========================================================
 FINOVA ACCOUNTING SYSTEM
-Module  : Dashboard
-Version : 2.0.0 Executive Summary
+DASHBOARD
+MODERN EXECUTIVE DESIGN
+VISUAL ONLY
 ==========================================================
 */
 
+
+/* ========================================================
+   DASHBOARD PAGE
+======================================================== */
+
 .dashboard-page {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-    min-height: 0;
+
+    --dashboard-bg:
+        #F6F8FC;
+
+    --dashboard-text:
+        #111827;
+
+    --dashboard-muted:
+        #7C889B;
+
+    --dashboard-border:
+        #E7EBF2;
+
+    --dashboard-blue:
+        #2F6BFF;
+
+    --dashboard-navy:
+        #183B7A;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        16px;
+
+    min-height:
+        0;
+
+    padding-bottom:
+        24px;
+
 }
+
+
+/* ========================================================
+   REMOVE OLD HEADER
+======================================================== */
 
 .dashboard-page-header {
-    margin-bottom: 0;
-    align-items: center;
+
+    display:
+        none;
+
 }
 
-.dashboard-header-meta {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-}
-
-.dashboard-period-chip {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-height: 38px;
-    padding: 0 13px;
-    background: #FFFFFF;
-    border: 1px solid #E5E7EB;
-    border-radius: 8px;
-    color: #6B7280;
-    font-size: 12px;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, .03);
-}
-
-.dashboard-period-chip i { color: var(--primary); }
-.dashboard-period-chip strong { color: #111827; font-weight: 600; }
 
 /* ========================================================
-   WELCOME
+   HERO
 ======================================================== */
-.dashboard-welcome-card {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-    min-height: 128px;
-    padding: 24px 28px;
-    overflow: hidden;
-    background: linear-gradient(135deg, #173A77 0%, #244494 55%, #315BB8 100%);
-    border-radius: 10px;
-    box-shadow: 0 6px 18px rgba(36, 68, 148, .16);
-    color: #FFFFFF;
+
+.dashboard-hero {
+
+    position:
+        relative;
+
+    min-height:
+        145px;
+
+    overflow:
+        hidden;
+
+    padding:
+        27px 30px;
+
+    border:
+        1px solid rgba(
+            255,
+            255,
+            255,
+            .45
+        );
+
+    border-radius:
+        18px;
+
+    background:
+
+        radial-gradient(
+            circle at 82% 40%,
+            rgba(
+                101,
+                154,
+                255,
+                .35
+            ),
+            transparent 28%
+        ),
+
+        linear-gradient(
+            120deg,
+            #F5F9FF 0%,
+            #EDF5FF 48%,
+            #DCEAFF 100%
+        );
+
+    box-shadow:
+        0 10px 30px rgba(
+            33,
+            78,
+            140,
+            .08
+        );
+
 }
 
-.dashboard-welcome-card::after {
-    content: "";
-    position: absolute;
-    width: 220px;
-    height: 220px;
-    right: -60px;
-    top: -110px;
-    border: 42px solid rgba(255,255,255,.06);
-    border-radius: 50%;
-}
-
-.dashboard-welcome-copy,
-.dashboard-welcome-date { position: relative; z-index: 1; }
-
-.dashboard-welcome-eyebrow {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    margin-bottom: 7px;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: .8px;
-    opacity: .85;
-}
-
-.dashboard-welcome-copy h3 {
-    margin: 0 0 5px;
-    color: #FFFFFF;
-    font-size: 22px;
-    font-weight: 700;
-}
-
-.dashboard-welcome-copy p {
-    max-width: 720px;
-    margin: 0;
-    color: rgba(255,255,255,.84);
-    font-size: 12px;
-    line-height: 1.65;
-}
-
-.dashboard-welcome-date {
-    min-width: 190px;
-    padding: 13px 16px;
-    border: 1px solid rgba(255,255,255,.16);
-    border-radius: 8px;
-    background: rgba(255,255,255,.09);
-    backdrop-filter: blur(5px);
-}
-
-.dashboard-welcome-date span,
-.dashboard-welcome-date strong { display: block; }
-.dashboard-welcome-date span { margin-bottom: 3px; font-size: 10px; opacity: .75; text-transform: uppercase; letter-spacing: .6px; }
-.dashboard-welcome-date strong { font-size: 12px; font-weight: 600; }
 
 /* ========================================================
-   KPI
+   HERO CONTENT
 ======================================================== */
+
+.dashboard-hero-content {
+
+    position:
+        relative;
+
+    z-index:
+        3;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        30px;
+
+    min-height:
+        88px;
+
+}
+
+
+/* ========================================================
+   HERO COPY
+======================================================== */
+
+.dashboard-hero-copy {
+
+    min-width:
+        0;
+
+}
+
+
+.dashboard-hero-eyebrow {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    gap:
+        8px;
+
+    margin-bottom:
+        7px;
+
+    color:
+        #2F6BFF;
+
+    font-size:
+        10px;
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        .7px;
+
+    text-transform:
+        uppercase;
+
+}
+
+
+.dashboard-hero-copy h1 {
+
+    margin:
+        0;
+
+    color:
+        #102449;
+
+    font-size:
+        26px;
+
+    line-height:
+        1.2;
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        -.45px;
+
+}
+
+
+.dashboard-hero-copy p {
+
+    max-width:
+        760px;
+
+    margin:
+        7px 0 0;
+
+    color:
+        #66758B;
+
+    font-size:
+        11px;
+
+    line-height:
+        1.6;
+
+}
+
+
+/* ========================================================
+   HERO PERIOD CARD
+======================================================== */
+
+.dashboard-hero-period {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        12px;
+
+    flex:
+        0 0 auto;
+
+    min-width:
+        230px;
+
+    padding:
+        14px 16px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            .82
+        );
+
+    border:
+        1px solid rgba(
+            255,
+            255,
+            255,
+            .92
+        );
+
+    border-radius:
+        13px;
+
+    backdrop-filter:
+        blur(
+            12px
+        );
+
+    box-shadow:
+        0 10px 25px rgba(
+            31,
+            74,
+            135,
+            .09
+        );
+
+}
+
+
+.dashboard-period-icon {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    width:
+        38px;
+
+    height:
+        38px;
+
+    flex:
+        0 0 38px;
+
+    border-radius:
+        10px;
+
+    color:
+        #2F6BFF;
+
+    background:
+        #EAF2FF;
+
+    font-size:
+        15px;
+
+}
+
+
+.dashboard-period-content {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    min-width:
+        0;
+
+}
+
+
+.dashboard-period-content span {
+
+    color:
+        #8793A6;
+
+    font-size:
+        9px;
+
+}
+
+
+.dashboard-period-content strong {
+
+    margin-top:
+        1px;
+
+    color:
+        #15233E;
+
+    font-size:
+        11px;
+
+    font-weight:
+        650;
+
+}
+
+
+.dashboard-period-content small {
+
+    margin-top:
+        4px;
+
+    color:
+        #5272A5;
+
+    font-size:
+        8px;
+
+}
+
+
+/* ========================================================
+   HERO DECORATION
+======================================================== */
+
+.dashboard-hero-decoration {
+
+    position:
+        absolute;
+
+    pointer-events:
+        none;
+
+    border-radius:
+        999px;
+
+}
+
+
+.dashboard-hero-decoration-one {
+
+    right:
+        130px;
+
+    bottom:
+        -90px;
+
+    width:
+        360px;
+
+    height:
+        170px;
+
+    transform:
+        rotate(
+            -11deg
+        );
+
+    background:
+        rgba(
+            55,
+            113,
+            221,
+            .08
+        );
+
+}
+
+
+.dashboard-hero-decoration-two {
+
+    right:
+        -70px;
+
+    top:
+        -110px;
+
+    width:
+        300px;
+
+    height:
+        300px;
+
+    border:
+        48px solid rgba(
+            255,
+            255,
+            255,
+            .20
+        );
+
+}
+
+
+/* ========================================================
+   KPI GRID
+======================================================== */
+
 .dashboard-kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 14px;
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            5,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    gap:
+        14px;
+
 }
+
+
+/* ========================================================
+   KPI CARD
+======================================================== */
 
 .dashboard-kpi-card {
-    min-width: 0;
-    padding: 17px 17px 15px;
-    background: #FFFFFF;
-    border: 1px solid #E5E7EB;
-    border-radius: 9px;
-    box-shadow: 0 2px 7px rgba(15,23,42,.04);
-    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+
+    position:
+        relative;
+
+    min-width:
+        0;
+
+    min-height:
+        156px;
+
+    overflow:
+        hidden;
+
+    padding:
+        17px 17px 15px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #FFFFFF 0%,
+            #FBFCFF 100%
+        );
+
+    border:
+        1px solid var(
+            --dashboard-border
+        );
+
+    border-radius:
+        15px;
+
+    box-shadow:
+        0 6px 20px rgba(
+            24,
+            45,
+            84,
+            .055
+        );
+
+    transition:
+        transform .22s ease,
+        box-shadow .22s ease,
+        border-color .22s ease;
+
 }
+
+
+.dashboard-kpi-card::before {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    left:
+        0;
+
+    top:
+        18px;
+
+    bottom:
+        18px;
+
+    width:
+        3px;
+
+    border-radius:
+        0 4px 4px 0;
+
+    background:
+        var(
+            --kpi-accent
+        );
+
+    opacity:
+        .85;
+
+}
+
 
 .dashboard-kpi-card:hover {
-    transform: translateY(-2px);
-    border-color: #D7DDE8;
-    box-shadow: 0 7px 18px rgba(15,23,42,.07);
+
+    transform:
+        translateY(
+            -3px
+        );
+
+    border-color:
+        #D9E1EC;
+
+    box-shadow:
+        0 13px 32px rgba(
+            24,
+            45,
+            84,
+            .10
+        );
+
 }
 
-.dashboard-kpi-head {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
+
+/* ========================================================
+   KPI COLOR VARIABLES
+======================================================== */
+
+.dashboard-kpi-blue {
+
+    --kpi-accent:
+        #2F6BFF;
+
+    --kpi-soft:
+        #EAF2FF;
+
 }
 
-.dashboard-kpi-label { display: block; color: #374151; font-size: 11px; font-weight: 600; }
-.dashboard-kpi-head small { display: block; margin-top: 2px; color: #9CA3AF; font-size: 9px; }
 
-.dashboard-kpi-icon,
-.dashboard-mini-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 auto;
-    border-radius: 8px;
+.dashboard-kpi-red {
+
+    --kpi-accent:
+        #FF5C67;
+
+    --kpi-soft:
+        #FFF0F2;
+
 }
 
-.dashboard-kpi-icon { width: 34px; height: 34px; font-size: 13px; }
-.dashboard-kpi-icon.is-blue, .dashboard-mini-icon.is-blue { color: #2563EB; background: #EFF6FF; }
-.dashboard-kpi-icon.is-red, .dashboard-mini-icon.is-red { color: #DC2626; background: #FEF2F2; }
-.dashboard-kpi-icon.is-purple, .dashboard-mini-icon.is-purple { color: #7C3AED; background: #F5F3FF; }
-.dashboard-kpi-icon.is-green, .dashboard-mini-icon.is-green { color: #059669; background: #ECFDF5; }
-.dashboard-kpi-icon.is-cyan { color: #0891B2; background: #ECFEFF; }
+
+.dashboard-kpi-purple {
+
+    --kpi-accent:
+        #8B5CF6;
+
+    --kpi-soft:
+        #F3EEFF;
+
+}
+
+
+.dashboard-kpi-green {
+
+    --kpi-accent:
+        #20B26B;
+
+    --kpi-soft:
+        #E9FAF2;
+
+}
+
+
+.dashboard-kpi-orange {
+
+    --kpi-accent:
+        #F59E42;
+
+    --kpi-soft:
+        #FFF4E7;
+
+}
+
+
+/* ========================================================
+   KPI TOP
+======================================================== */
+
+.dashboard-kpi-top {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        11px;
+
+}
+
+
+.dashboard-kpi-icon {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    width:
+        38px;
+
+    height:
+        38px;
+
+    flex:
+        0 0 38px;
+
+    border-radius:
+        11px;
+
+    background:
+        var(
+            --kpi-soft
+        );
+
+    color:
+        var(
+            --kpi-accent
+        );
+
+    font-size:
+        15px;
+
+}
+
+
+.dashboard-kpi-meta {
+
+    min-width:
+        0;
+
+}
+
+
+.dashboard-kpi-label {
+
+    display:
+        block;
+
+    color:
+        #2C3850;
+
+    font-size:
+        10.5px;
+
+    font-weight:
+        650;
+
+}
+
+
+.dashboard-kpi-meta small {
+
+    display:
+        block;
+
+    margin-top:
+        2px;
+
+    color:
+        #9AA5B5;
+
+    font-size:
+        8px;
+
+}
+
+
+/* ========================================================
+   KPI VALUE
+======================================================== */
 
 .dashboard-kpi-value {
-    margin-top: 18px;
-    color: #111827;
-    font-size: 20px;
-    line-height: 1.2;
-    font-weight: 700;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+
+    margin-top:
+        20px;
+
+    color:
+        #111827;
+
+    font-size:
+        19px;
+
+    line-height:
+        1.2;
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        -.3px;
+
+    white-space:
+        nowrap;
+
+    overflow:
+        hidden;
+
+    text-overflow:
+        ellipsis;
+
 }
 
-.dashboard-kpi-foot {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    margin-top: 10px;
-    color: #059669;
-    font-size: 9.5px;
-    font-weight: 500;
+
+/* ========================================================
+   KPI BOTTOM
+======================================================== */
+
+.dashboard-kpi-bottom {
+
+    display:
+        flex;
+
+    align-items:
+        flex-end;
+
+    justify-content:
+        space-between;
+
+    gap:
+        10px;
+
+    margin-top:
+        14px;
+
 }
-.dashboard-kpi-foot.is-negative { color: #DC2626; }
-.dashboard-kpi-foot.is-neutral { color: #9CA3AF; }
+
+
+.dashboard-kpi-status {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        5px;
+
+    min-width:
+        0;
+
+    color:
+        #20A467;
+
+    font-size:
+        8.5px;
+
+    font-weight:
+        550;
+
+}
+
+
+.dashboard-kpi-status.is-neutral {
+
+    color:
+        #96A0AF;
+
+}
+
+
+.dashboard-kpi-status.is-negative {
+
+    color:
+        #E5484D;
+
+}
+
+
+/* ========================================================
+   DECORATIVE MINI CHART
+   VISUAL ONLY — NO BUSINESS DATA
+======================================================== */
+
+.dashboard-kpi-mini-chart {
+
+    display:
+        flex;
+
+    align-items:
+        flex-end;
+
+    justify-content:
+        flex-end;
+
+    gap:
+        3px;
+
+    width:
+        52px;
+
+    height:
+        21px;
+
+    opacity:
+        .65;
+
+}
+
+
+.dashboard-kpi-mini-chart span {
+
+    width:
+        5px;
+
+    border-radius:
+        4px 4px 1px 1px;
+
+    background:
+        var(
+            --kpi-accent
+        );
+
+}
+
+
+.dashboard-kpi-mini-chart span:nth-child(1) {
+
+    height:
+        7px;
+
+}
+
+
+.dashboard-kpi-mini-chart span:nth-child(2) {
+
+    height:
+        12px;
+
+}
+
+
+.dashboard-kpi-mini-chart span:nth-child(3) {
+
+    height:
+        9px;
+
+}
+
+
+.dashboard-kpi-mini-chart span:nth-child(4) {
+
+    height:
+        17px;
+
+}
+
+
+.dashboard-kpi-mini-chart span:nth-child(5) {
+
+    height:
+        20px;
+
+}
+
+
+/* ========================================================
+   RESPONSIVE HEADER / KPI
+======================================================== */
+
+@media (
+    max-width:
+    1399.98px
+) {
+
+    .dashboard-kpi-grid {
+
+        grid-template-columns:
+            repeat(
+                3,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+
+    }
+
+}
+
+
+@media (
+    max-width:
+    991.98px
+) {
+
+    .dashboard-hero-content {
+
+        align-items:
+            flex-start;
+
+    }
+
+
+    .dashboard-kpi-grid {
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+
+    }
+
+}
+
+
+@media (
+    max-width:
+    767.98px
+) {
+
+    .dashboard-hero {
+
+        padding:
+            22px;
+
+    }
+
+
+    .dashboard-hero-content {
+
+        flex-direction:
+            column;
+
+    }
+
+
+    .dashboard-hero-period {
+
+        width:
+            100%;
+
+        min-width:
+            0;
+
+    }
+
+
+    .dashboard-hero-copy h1 {
+
+        font-size:
+            22px;
+
+    }
+
+}
+
+
+@media (
+    max-width:
+    575.98px
+) {
+
+    .dashboard-kpi-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+}
 
 /* ========================================================
    PANEL BASE
 ======================================================== */
+
 .dashboard-section-grid {
-    display: grid;
-    gap: 14px;
+
+    display:
+        grid;
+
+    gap:
+        14px;
+
 }
 
-.dashboard-trend-section { grid-template-columns: minmax(0, 2.1fr) minmax(280px, .9fr); }
-.dashboard-summary-section { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+.dashboard-trend-section {
+
+    grid-template-columns:
+        minmax(
+            0,
+            2.15fr
+        )
+        minmax(
+            310px,
+            .85fr
+        );
+
+}
+
+
+.dashboard-summary-section {
+
+    grid-template-columns:
+        repeat(
+            3,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+}
+
+
+/* ========================================================
+   DASHBOARD PANEL
+======================================================== */
 
 .dashboard-panel {
-    min-width: 0;
-    background: #FFFFFF;
-    border: 1px solid #E5E7EB;
-    border-radius: 9px;
-    box-shadow: 0 2px 7px rgba(15,23,42,.035);
-    overflow: hidden;
+
+    min-width:
+        0;
+
+    overflow:
+        hidden;
+
+    background:
+        linear-gradient(
+            145deg,
+            #FFFFFF 0%,
+            #FCFDFF 100%
+        );
+
+    border:
+        1px solid #E6EBF2;
+
+    border-radius:
+        16px;
+
+    box-shadow:
+        0 7px 24px rgba(
+            25,
+            46,
+            82,
+            .055
+        );
+
+    transition:
+        box-shadow .2s ease,
+        border-color .2s ease;
+
 }
+
+
+.dashboard-panel:hover {
+
+    border-color:
+        #DCE4EE;
+
+    box-shadow:
+        0 11px 30px rgba(
+            25,
+            46,
+            82,
+            .08
+        );
+
+}
+
+
+/* ========================================================
+   PANEL HEADER
+======================================================== */
 
 .dashboard-panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 14px;
-    min-height: 66px;
-    padding: 14px 17px;
-    border-bottom: 1px solid #EEF0F3;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        14px;
+
+    min-height:
+        70px;
+
+    padding:
+        15px 18px;
+
+    border-bottom:
+        1px solid #EEF2F6;
+
 }
 
-.dashboard-panel-header h5 { margin: 0; color: #111827; font-size: 13px; font-weight: 650; }
-.dashboard-panel-header p { margin: 3px 0 0; color: #9CA3AF; font-size: 9.5px; }
+
+.dashboard-modern-panel-header {
+
+    background:
+        linear-gradient(
+            180deg,
+            #FFFFFF 0%,
+            #FCFDFF 100%
+        );
+
+}
+
+
+.dashboard-panel-title-wrap {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        11px;
+
+    min-width:
+        0;
+
+}
+
+
+.dashboard-panel-header h5 {
+
+    margin:
+        0;
+
+    color:
+        #17233B;
+
+    font-size:
+        12.5px;
+
+    font-weight:
+        650;
+
+    letter-spacing:
+        -.1px;
+
+}
+
+
+.dashboard-panel-header p {
+
+    margin:
+        3px 0 0;
+
+    color:
+        #96A0B0;
+
+    font-size:
+        8.5px;
+
+}
+
+
+/* ========================================================
+   PANEL ICON
+======================================================== */
 
 .dashboard-panel-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 31px;
-    height: 31px;
-    flex: 0 0 31px;
-    border-radius: 8px;
-    background: #F4F7FB;
-    color: #52627A;
-    font-size: 12px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    width:
+        36px;
+
+    height:
+        36px;
+
+    flex:
+        0 0 36px;
+
+    border-radius:
+        10px;
+
+    background:
+        #F3F6FA;
+
+    color:
+        #5C6B82;
+
+    font-size:
+        13px;
+
 }
 
-.dashboard-panel-body { padding: 17px; }
+
+.dashboard-panel-icon.is-blue {
+
+    color:
+        #2F6BFF;
+
+    background:
+        #EAF2FF;
+
+}
+
+
+.dashboard-panel-icon.is-purple {
+
+    color:
+        #7C3AED;
+
+    background:
+        #F3EEFF;
+
+}
+
 
 /* ========================================================
-   CHART
+   PANEL MENU
 ======================================================== */
-.dashboard-chart-legend { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.dashboard-chart-legend span { display: flex; align-items: center; gap: 5px; color: #6B7280; font-size: 9px; }
-.legend-dot { width: 7px; height: 7px; border-radius: 50%; }
-.legend-dot.revenue { background: #315BB8; }
-.legend-dot.expense { background: #EF6B6B; }
-.legend-dot.profit { background: #3BA272; }
 
-.dashboard-chart-body { height: 260px; padding: 16px 18px 13px; }
-.dashboard-chart-area { position: relative; width: 100%; height: 100%; }
-.dashboard-chart-svg { display: block; width: 100%; height: 100%; overflow: visible; }
-.dashboard-chart-grid { stroke: #EEF1F5; stroke-width: 1; }
-.dashboard-chart-line-revenue { fill: none; stroke: #315BB8; stroke-width: 2.1; }
-.dashboard-chart-line-expense { fill: none; stroke: #EF6B6B; stroke-width: 2.1; }
-.dashboard-chart-line-profit { fill: none; stroke: #3BA272; stroke-width: 2.1; }
-.dashboard-chart-point-revenue { fill: #315BB8; }
-.dashboard-chart-point-expense { fill: #EF6B6B; }
-.dashboard-chart-point-profit { fill: #3BA272; }
-.dashboard-chart-label { fill: #9CA3AF; font-family: Poppins, sans-serif; font-size: 8px; }
-.dashboard-chart-empty { display:flex; height:100%; align-items:center; justify-content:center; color:#9CA3AF; font-size:11px; }
+.dashboard-panel-menu {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    width:
+        32px;
+
+    height:
+        32px;
+
+    flex:
+        0 0 32px;
+
+    border:
+        0;
+
+    border-radius:
+        9px;
+
+    color:
+        #8591A3;
+
+    background:
+        #F5F7FA;
+
+    cursor:
+        default;
+
+}
+
 
 /* ========================================================
-   POSITION / DONUT
+   PANEL BODY
 ======================================================== */
-.dashboard-position-panel .dashboard-panel-body { display: flex; flex-direction: column; align-items: center; }
-.dashboard-donut-wrap { display: flex; align-items: center; justify-content: center; min-height: 148px; }
+
+.dashboard-panel-body {
+
+    padding:
+        18px;
+
+}
+
+
+/* ========================================================
+   TREND ACTIONS
+======================================================== */
+
+.dashboard-trend-actions {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        flex-end;
+
+    gap:
+        14px;
+
+}
+
+
+.dashboard-chart-legend {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        12px;
+
+    flex-wrap:
+        wrap;
+
+}
+
+
+.dashboard-chart-legend span {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        5px;
+
+    color:
+        #768397;
+
+    font-size:
+        8.5px;
+
+}
+
+
+.legend-dot {
+
+    display:
+        inline-block;
+
+    width:
+        7px;
+
+    height:
+        7px;
+
+    border-radius:
+        3px;
+
+}
+
+
+.legend-dot.revenue {
+
+    background:
+        #2F6BFF;
+
+}
+
+
+.legend-dot.expense {
+
+    background:
+        #FF646A;
+
+}
+
+
+.legend-dot.profit {
+
+    background:
+        #20B26B;
+
+}
+
+
+/* ========================================================
+   YEAR CHIP
+   VISUAL ONLY
+======================================================== */
+
+.dashboard-year-chip {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        7px;
+
+    min-height:
+        32px;
+
+    padding:
+        0 11px;
+
+    border:
+        1px solid #E3E8EF;
+
+    border-radius:
+        9px;
+
+    background:
+        #FFFFFF;
+
+    color:
+        #42526A;
+
+    font-size:
+        8.5px;
+
+    white-space:
+        nowrap;
+
+}
+
+
+.dashboard-year-chip i {
+
+    color:
+        #2F6BFF;
+
+}
+
+
+/* ========================================================
+   PERFORMANCE CHART
+======================================================== */
+
+.dashboard-chart-body {
+
+    height:
+        292px;
+
+    padding:
+        19px 20px 17px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #FFFFFF 0%,
+            #FCFDFF 100%
+        );
+
+}
+
+
+.dashboard-chart-area {
+
+    position:
+        relative;
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+}
+
+
+.dashboard-chart-svg {
+
+    display:
+        block;
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    overflow:
+        visible;
+
+}
+
+
+.dashboard-chart-grid {
+
+    stroke:
+        #EDF1F6;
+
+    stroke-width:
+        1;
+
+}
+
+
+.dashboard-chart-line-revenue {
+
+    fill:
+        none;
+
+    stroke:
+        #2F6BFF;
+
+    stroke-width:
+        2.2;
+
+}
+
+
+.dashboard-chart-line-expense {
+
+    fill:
+        none;
+
+    stroke:
+        #FF646A;
+
+    stroke-width:
+        2.2;
+
+}
+
+
+.dashboard-chart-line-profit {
+
+    fill:
+        none;
+
+    stroke:
+        #20B26B;
+
+    stroke-width:
+        2.2;
+
+}
+
+
+.dashboard-chart-point-revenue {
+
+    fill:
+        #2F6BFF;
+
+}
+
+
+.dashboard-chart-point-expense {
+
+    fill:
+        #FF646A;
+
+}
+
+
+.dashboard-chart-point-profit {
+
+    fill:
+        #20B26B;
+
+}
+
+
+.dashboard-chart-label {
+
+    fill:
+        #98A3B3;
+
+    font-family:
+        Poppins,
+        sans-serif;
+
+    font-size:
+        8px;
+
+}
+
+
+.dashboard-chart-empty {
+
+    display:
+        flex;
+
+    height:
+        100%;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    color:
+        #9CA3AF;
+
+    font-size:
+        10px;
+
+}
+
+
+/* ========================================================
+   FINANCIAL POSITION BODY
+======================================================== */
+
+.dashboard-position-body {
+
+    padding:
+        20px 18px 16px;
+
+}
+
+
+.dashboard-position-top {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        19px;
+
+}
+
+
+/* ========================================================
+   DONUT
+======================================================== */
+
+.dashboard-donut-wrap {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    flex:
+        0 0 142px;
+
+    min-height:
+        160px;
+
+}
+
+
 .dashboard-donut {
-    position: relative;
-    width: 126px;
-    height: 126px;
-    border-radius: 50%;
-    background: conic-gradient(#315BB8 0deg 120deg, #EF6B6B 120deg 235deg, #7C3AED 235deg 360deg);
+
+    position:
+        relative;
+
+    width:
+        134px;
+
+    height:
+        134px;
+
+    border-radius:
+        50%;
+
+    background:
+        conic-gradient(
+            #2F6BFF 0deg 120deg,
+            #FF646A 120deg 235deg,
+            #7C3AED 235deg 360deg
+        );
+
+    box-shadow:
+        0 8px 20px rgba(
+            30,
+            64,
+            175,
+            .10
+        );
+
 }
+
+
 .dashboard-donut::after {
-    content:"";
-    position:absolute;
-    inset:17px;
-    border-radius:50%;
-    background:#FFFFFF;
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    inset:
+        18px;
+
+    border-radius:
+        50%;
+
+    background:
+        #FFFFFF;
+
+    box-shadow:
+        inset 0 0 0 1px #EFF2F6;
+
 }
+
+
 .dashboard-donut-center {
-    position:absolute;
-    z-index:2;
-    inset:0;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
+
+    position:
+        absolute;
+
+    z-index:
+        2;
+
+    inset:
+        0;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    text-align:
+        center;
+
 }
-.dashboard-donut-center span { color:#9CA3AF; font-size:8px; }
-.dashboard-donut-center strong { max-width:82px; margin-top:2px; color:#111827; font-size:11px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
-.dashboard-position-list { width: 100%; margin-top: 5px; }
-.dashboard-position-item { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:7px 0; border-top:1px solid #F0F2F5; font-size:10px; }
-.dashboard-position-item span { display:flex; align-items:center; gap:7px; color:#6B7280; }
-.dashboard-position-item strong { color:#374151; font-size:10px; font-weight:600; }
-.position-dot { width:7px; height:7px; border-radius:2px; }
-.position-dot.asset { background:#315BB8; }
-.position-dot.liability { background:#EF6B6B; }
-.position-dot.equity { background:#7C3AED; }
 
-/* ========================================================
-   SUMMARY / INSIGHTS
-======================================================== */
-.dashboard-summary-list { padding-top: 10px; padding-bottom: 10px; }
-.dashboard-summary-row { display:flex; align-items:center; justify-content:space-between; gap:16px; min-height:38px; border-bottom:1px solid #F1F3F5; }
-.dashboard-summary-row:last-child { border-bottom:0; }
-.dashboard-summary-row span { color:#6B7280; font-size:10px; }
-.dashboard-summary-row strong { color:#111827; font-size:10.5px; font-weight:600; text-align:right; }
-.dashboard-summary-row.dashboard-summary-total span,
-.dashboard-summary-row.dashboard-summary-total strong { color:#244494; font-weight:700; }
+.dashboard-donut-center span {
 
-.dashboard-insight-list { display:flex; flex-direction:column; gap:9px; }
-.dashboard-insight-item { display:flex; gap:10px; padding:10px; border-radius:7px; background:#F8FAFC; }
-.dashboard-insight-icon { display:flex; align-items:center; justify-content:center; width:25px; height:25px; flex:0 0 25px; border-radius:6px; }
-.dashboard-insight-item.is-info .dashboard-insight-icon { background:#EFF6FF; color:#2563EB; }
-.dashboard-insight-item.is-warning .dashboard-insight-icon { background:#FFF7ED; color:#EA580C; }
-.dashboard-insight-item.is-danger .dashboard-insight-icon { background:#FEF2F2; color:#DC2626; }
-.dashboard-insight-item.is-success .dashboard-insight-icon { background:#ECFDF5; color:#059669; }
-.dashboard-insight-item strong { display:block; margin-bottom:2px; color:#374151; font-size:9.5px; font-weight:600; }
-.dashboard-insight-item span { display:block; color:#8B95A5; font-size:8.5px; line-height:1.5; }
+    color:
+        #A0A9B7;
 
-/* ========================================================
-   OPERATIONAL SNAPSHOT
-======================================================== */
-.dashboard-operational-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; }
-.dashboard-mini-card { display:flex; align-items:center; gap:12px; min-width:0; padding:14px 15px; background:#FFFFFF; border:1px solid #E5E7EB; border-radius:9px; box-shadow:0 2px 6px rgba(15,23,42,.03); }
-.dashboard-mini-icon { width:38px; height:38px; font-size:14px; }
-.dashboard-mini-card > div:last-child { min-width:0; }
-.dashboard-mini-card span { display:block; color:#6B7280; font-size:9.5px; }
-.dashboard-mini-card strong { display:block; margin-top:2px; color:#111827; font-size:13px; font-weight:650; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.dashboard-mini-card small { display:block; margin-top:2px; color:#9CA3AF; font-size:8px; }
+    font-size:
+        7.5px;
+
+}
+
+
+.dashboard-donut-center strong {
+
+    max-width:
+        90px;
+
+    margin-top:
+        3px;
+
+    overflow:
+        hidden;
+
+    color:
+        #16233B;
+
+    font-size:
+        10.5px;
+
+    font-weight:
+        700;
+
+    white-space:
+        nowrap;
+
+    text-overflow:
+        ellipsis;
+
+}
+
 
 /* ========================================================
-   BOTTOM
+   POSITION SUMMARY
 ======================================================== */
-.dashboard-bottom-grid { display:grid; grid-template-columns:minmax(0,2.2fr) minmax(270px,.8fr); gap:14px; }
-.dashboard-table-body { padding:0; }
-.dashboard-activity-table { width:100%; font-size:9.5px; }
-.dashboard-activity-table thead th { padding:10px 12px; background:#FAFBFC; border-bottom:1px solid #E8EBEF; color:#64748B; font-size:8.5px; font-weight:600; white-space:nowrap; }
-.dashboard-activity-table tbody td { padding:10px 12px; color:#475569; border-color:#F0F2F5; vertical-align:middle; }
-.dashboard-empty-state { height:116px; text-align:center !important; color:#9CA3AF !important; }
-.dashboard-empty-state i { display:block; margin-bottom:7px; font-size:19px; color:#CBD5E1; }
-.dashboard-status-badge { display:inline-flex; align-items:center; justify-content:center; min-width:54px; min-height:20px; padding:2px 7px; border-radius:999px; font-size:8px; font-weight:600; }
-.dashboard-status-badge.posted, .dashboard-status-badge.paid { color:#047857; background:#ECFDF5; }
-.dashboard-status-badge.draft { color:#B45309; background:#FFFBEB; }
-.dashboard-status-badge.void { color:#B91C1C; background:#FEF2F2; }
 
-.dashboard-system-list { display:flex; flex-direction:column; padding-top:8px; padding-bottom:8px; }
-.dashboard-system-item { display:flex; align-items:center; gap:11px; min-height:52px; border-bottom:1px solid #F0F2F5; }
-.dashboard-system-item:last-child { border-bottom:0; }
-.dashboard-system-icon { display:flex; align-items:center; justify-content:center; width:30px; height:30px; flex:0 0 30px; border-radius:7px; background:#F5F7FA; color:#52627A; font-size:11px; }
-.dashboard-system-item span { display:block; color:#9CA3AF; font-size:8.5px; }
-.dashboard-system-item strong { display:block; margin-top:2px; color:#374151; font-size:10px; font-weight:600; }
+.dashboard-position-summary {
+
+    flex:
+        1;
+
+    min-width:
+        0;
+
+}
+
+
+.dashboard-position-item {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        10px;
+
+    min-height:
+        40px;
+
+    padding:
+        8px 0;
+
+    border-bottom:
+        1px solid #EEF2F6;
+
+}
+
+
+.dashboard-position-item:last-child {
+
+    border-bottom:
+        0;
+
+}
+
+
+.dashboard-position-name {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        7px;
+
+    min-width:
+        0;
+
+}
+
+
+.dashboard-position-name span {
+
+    color:
+        #6E7B8E;
+
+    font-size:
+        9px;
+
+}
+
+
+.dashboard-position-item strong {
+
+    max-width:
+        120px;
+
+    overflow:
+        hidden;
+
+    color:
+        #26334B;
+
+    font-size:
+        9px;
+
+    font-weight:
+        650;
+
+    text-align:
+        right;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+
+}
+
+
+.position-dot {
+
+    width:
+        8px;
+
+    height:
+        8px;
+
+    flex:
+        0 0 8px;
+
+    border-radius:
+        3px;
+
+}
+
+
+.position-dot.asset {
+
+    background:
+        #2F6BFF;
+
+}
+
+
+.position-dot.liability {
+
+    background:
+        #FF646A;
+
+}
+
+
+.position-dot.equity {
+
+    background:
+        #7C3AED;
+
+}
+
+
+/* ========================================================
+   POSITION INSIGHT
+======================================================== */
+
+.dashboard-position-insight {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        30px
+        minmax(
+            0,
+            1fr
+        )
+        18px;
+
+    align-items:
+        center;
+
+    gap:
+        9px;
+
+    margin-top:
+        14px;
+
+    padding:
+        10px 11px;
+
+    border:
+        1px solid #DCE9FF;
+
+    border-radius:
+        10px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #EFF6FF 0%,
+            #F6FAFF 100%
+        );
+
+}
+
+
+.dashboard-position-insight-icon {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    width:
+        28px;
+
+    height:
+        28px;
+
+    border-radius:
+        8px;
+
+    color:
+        #2F6BFF;
+
+    background:
+        #DFEBFF;
+
+    font-size:
+        11px;
+
+}
+
+
+.dashboard-position-insight strong {
+
+    display:
+        block;
+
+    color:
+        #2D4774;
+
+    font-size:
+        8.5px;
+
+    font-weight:
+        650;
+
+}
+
+
+.dashboard-position-insight span {
+
+    display:
+        block;
+
+    margin-top:
+        2px;
+
+    color:
+        #7890B5;
+
+    font-size:
+        7.5px;
+
+    line-height:
+        1.45;
+
+}
+
+
+.dashboard-position-insight >
+.fa-chevron-right {
+
+    color:
+        #2F6BFF;
+
+    font-size:
+        9px;
+
+}
+
+
+/* ========================================================
+   RESPONSIVE TREND / POSITION
+======================================================== */
+
+@media (
+    max-width:
+    1199.98px
+) {
+
+    .dashboard-trend-section {
+
+        grid-template-columns:
+            minmax(
+                0,
+                1.8fr
+            )
+            minmax(
+                280px,
+                1fr
+            );
+
+    }
+
+
+    .dashboard-chart-legend {
+
+        display:
+            none;
+
+    }
+
+}
+
+
+@media (
+    max-width:
+    991.98px
+) {
+
+    .dashboard-trend-section {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .dashboard-chart-legend {
+
+        display:
+            flex;
+
+    }
+
+
+    .dashboard-position-top {
+
+        justify-content:
+            center;
+
+    }
+
+}
+
+
+@media (
+    max-width:
+    575.98px
+) {
+
+    .dashboard-modern-panel-header {
+
+        align-items:
+            flex-start;
+
+    }
+
+
+    .dashboard-trend-actions {
+
+        flex-direction:
+            column;
+
+        align-items:
+            flex-end;
+
+        gap:
+            7px;
+
+    }
+
+
+    .dashboard-chart-legend {
+
+        display:
+            none;
+
+    }
+
+
+    .dashboard-chart-body {
+
+        height:
+            235px;
+
+        padding:
+            14px;
+
+    }
+
+
+    .dashboard-position-top {
+
+        flex-direction:
+            column;
+
+        align-items:
+            stretch;
+
+    }
+
+
+    .dashboard-donut-wrap {
+
+        flex-basis:
+            auto;
+
+    }
+
+}
+
+/* ========================================================
+   SUMMARY SECTION
+======================================================== */
+
+.dashboard-summary-section {
+
+    grid-template-columns:
+        repeat(
+            3,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+}
+
+
+/* ========================================================
+   SUMMARY CARD
+======================================================== */
+
+.dashboard-summary-card {
+
+    min-height:
+        295px;
+
+}
+
+
+/* ========================================================
+   SUMMARY BADGE
+======================================================== */
+
+.dashboard-summary-badge {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    gap:
+        6px;
+
+    min-height:
+        26px;
+
+    padding:
+        0 9px;
+
+    border:
+        1px solid #DDE8FB;
+
+    border-radius:
+        999px;
+
+    background:
+        #F3F7FE;
+
+    color:
+        #486CA6;
+
+    font-size:
+        7.5px;
+
+    font-weight:
+        600;
+
+    white-space:
+        nowrap;
+
+}
+
+
+.dashboard-summary-badge i {
+
+    color:
+        #2F6BFF;
+
+    font-size:
+        5px;
+
+}
+
+
+.dashboard-summary-badge-green {
+
+    border-color:
+        #D9F2E5;
+
+    background:
+        #F0FBF5;
+
+    color:
+        #34835C;
+
+}
+
+
+.dashboard-summary-badge-green i {
+
+    color:
+        #20B26B;
+
+}
+
+
+/* ========================================================
+   SUMMARY MODERN LIST
+======================================================== */
+
+.dashboard-summary-modern-list {
+
+    padding:
+        12px 17px 14px;
+
+}
+
+
+/* ========================================================
+   SUMMARY ROW
+======================================================== */
+
+.dashboard-summary-modern-row {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        12px;
+
+    min-height:
+        57px;
+
+    padding:
+        9px 0;
+
+    border-bottom:
+        1px solid #EEF2F6;
+
+}
+
+
+.dashboard-summary-modern-row:last-child {
+
+    border-bottom:
+        0;
+
+}
+
+
+.dashboard-summary-modern-label {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+
+    min-width:
+        0;
+
+}
+
+
+.dashboard-summary-modern-label > div:last-child {
+
+    min-width:
+        0;
+
+}
+
+
+.dashboard-summary-modern-label span {
+
+    display:
+        block;
+
+    color:
+        #3B485E;
+
+    font-size:
+        9.5px;
+
+    font-weight:
+        550;
+
+}
+
+
+.dashboard-summary-modern-label small {
+
+    display:
+        block;
+
+    margin-top:
+        2px;
+
+    color:
+        #A0A9B7;
+
+    font-size:
+        7.5px;
+
+}
+
+
+.dashboard-summary-modern-row > strong {
+
+    flex:
+        0 0 auto;
+
+    max-width:
+        145px;
+
+    overflow:
+        hidden;
+
+    color:
+        #17233B;
+
+    font-size:
+        9.5px;
+
+    font-weight:
+        650;
+
+    text-align:
+        right;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+
+}
+
+
+/* ========================================================
+   SUMMARY ROW ICON
+======================================================== */
+
+.dashboard-summary-row-icon {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    width:
+        31px;
+
+    height:
+        31px;
+
+    flex:
+        0 0 31px;
+
+    border-radius:
+        9px;
+
+    font-size:
+        10px;
+
+}
+
+
+.dashboard-summary-row-icon.is-blue {
+
+    color:
+        #2F6BFF;
+
+    background:
+        #EAF2FF;
+
+}
+
+
+.dashboard-summary-row-icon.is-red {
+
+    color:
+        #E94F5C;
+
+    background:
+        #FFF0F2;
+
+}
+
+
+.dashboard-summary-row-icon.is-purple {
+
+    color:
+        #7C3AED;
+
+    background:
+        #F3EEFF;
+
+}
+
+
+.dashboard-summary-row-icon.is-green {
+
+    color:
+        #20A867;
+
+    background:
+        #EAF9F1;
+
+}
+
+
+.dashboard-summary-row-icon.is-orange {
+
+    color:
+        #E8942E;
+
+    background:
+        #FFF5E8;
+
+}
+
+
+/* ========================================================
+   BALANCE DIFFERENCE
+======================================================== */
+
+.dashboard-summary-modern-total {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        12px;
+
+    margin-top:
+        11px;
+
+    padding:
+        12px 13px;
+
+    border:
+        1px solid #DCE9FF;
+
+    border-radius:
+        11px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #EFF6FF 0%,
+            #F7FAFF 100%
+        );
+
+}
+
+
+.dashboard-summary-modern-total span {
+
+    display:
+        block;
+
+    color:
+        #33588D;
+
+    font-size:
+        9px;
+
+    font-weight:
+        650;
+
+}
+
+
+.dashboard-summary-modern-total small {
+
+    display:
+        block;
+
+    margin-top:
+        2px;
+
+    color:
+        #8199BD;
+
+    font-size:
+        7px;
+
+}
+
+
+.dashboard-summary-modern-total strong {
+
+    max-width:
+        145px;
+
+    overflow:
+        hidden;
+
+    color:
+        #244E93;
+
+    font-size:
+        10px;
+
+    font-weight:
+        700;
+
+    text-align:
+        right;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+
+}
+
+
+/* ========================================================
+   PROFIT HIGHLIGHT
+======================================================== */
+
+.dashboard-profit-highlight {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        12px;
+
+    margin:
+        10px 0;
+
+    padding:
+        11px 12px;
+
+    border:
+        1px solid #DDE9FD;
+
+    border-radius:
+        11px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #EDF5FF 0%,
+            #F8FBFF 100%
+        );
+
+}
+
+
+.dashboard-profit-highlight-left {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        9px;
+
+    min-width:
+        0;
+
+}
+
+
+.dashboard-profit-highlight-icon {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    width:
+        31px;
+
+    height:
+        31px;
+
+    flex:
+        0 0 31px;
+
+    border-radius:
+        9px;
+
+    color:
+        #2F6BFF;
+
+    background:
+        #DDEBFF;
+
+    font-size:
+        10px;
+
+}
+
+
+.dashboard-profit-highlight span {
+
+    display:
+        block;
+
+    color:
+        #2C4F83;
+
+    font-size:
+        9px;
+
+    font-weight:
+        650;
+
+}
+
+
+.dashboard-profit-highlight small {
+
+    display:
+        block;
+
+    margin-top:
+        2px;
+
+    color:
+        #7F96B9;
+
+    font-size:
+        7px;
+
+}
+
+
+.dashboard-profit-highlight strong {
+
+    flex:
+        0 0 auto;
+
+    max-width:
+        145px;
+
+    overflow:
+        hidden;
+
+    color:
+        #2F6BFF;
+
+    font-size:
+        10px;
+
+    font-weight:
+        700;
+
+    text-align:
+        right;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+
+}
+
+
+/* ========================================================
+   MARGIN ROW
+======================================================== */
+
+.dashboard-margin-row {
+
+    border-bottom:
+        0;
+
+}
+
+
+/* ========================================================
+   QUICK INSIGHT PANEL
+======================================================== */
+
+.dashboard-insight-panel {
+
+    min-height:
+        295px;
+
+}
+
+
+/* ========================================================
+   INSIGHT INDICATOR
+======================================================== */
+
+.dashboard-insight-indicator {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    width:
+        29px;
+
+    height:
+        29px;
+
+    border-radius:
+        9px;
+
+    color:
+        #E99936;
+
+    background:
+        #FFF5E8;
+
+    font-size:
+        10px;
+
+}
+
+
+/* ========================================================
+   INSIGHT LIST
+======================================================== */
+
+.dashboard-insight-modern-list {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        9px;
+
+    padding:
+        14px;
+
+}
+
+
+/* ========================================================
+   INSIGHT ITEM
+======================================================== */
+
+.dashboard-insight-modern-item {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        32px
+        minmax(
+            0,
+            1fr
+        )
+        18px;
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+
+    min-height:
+        57px;
+
+    padding:
+        10px 11px;
+
+    border:
+        1px solid transparent;
+
+    border-radius:
+        11px;
+
+    transition:
+        transform .18s ease,
+        box-shadow .18s ease;
+
+}
+
+
+.dashboard-insight-modern-item:hover {
+
+    transform:
+        translateX(
+            2px
+        );
+
+    box-shadow:
+        0 5px 15px rgba(
+            22,
+            40,
+            70,
+            .05
+        );
+
+}
+
+
+/* ========================================================
+   INSIGHT COLORS
+======================================================== */
+
+.dashboard-insight-modern-item.is-info {
+
+    border-color:
+        #DCEAFF;
+
+    background:
+        linear-gradient(
+            90deg,
+            #EFF6FF 0%,
+            #F8FBFF 100%
+        );
+
+}
+
+
+.dashboard-insight-modern-item.is-warning {
+
+    border-color:
+        #FFE5C8;
+
+    background:
+        linear-gradient(
+            90deg,
+            #FFF6EA 0%,
+            #FFFBF7 100%
+        );
+
+}
+
+
+.dashboard-insight-modern-item.is-danger {
+
+    border-color:
+        #FFD9DD;
+
+    background:
+        linear-gradient(
+            90deg,
+            #FFF0F2 0%,
+            #FFF9FA 100%
+        );
+
+}
+
+
+.dashboard-insight-modern-item.is-success {
+
+    border-color:
+        #D8F2E4;
+
+    background:
+        linear-gradient(
+            90deg,
+            #ECFAF2 0%,
+            #F8FDFB 100%
+        );
+
+}
+
+
+/* ========================================================
+   INSIGHT ICON
+======================================================== */
+
+.dashboard-insight-modern-icon {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    width:
+        30px;
+
+    height:
+        30px;
+
+    border-radius:
+        9px;
+
+    font-size:
+        11px;
+
+}
+
+
+.dashboard-insight-modern-item.is-info
+.dashboard-insight-modern-icon {
+
+    color:
+        #2F6BFF;
+
+    background:
+        #DFEBFF;
+
+}
+
+
+.dashboard-insight-modern-item.is-warning
+.dashboard-insight-modern-icon {
+
+    color:
+        #E88B22;
+
+    background:
+        #FFE8CC;
+
+}
+
+
+.dashboard-insight-modern-item.is-danger
+.dashboard-insight-modern-icon {
+
+    color:
+        #E5484D;
+
+    background:
+        #FFE0E3;
+
+}
+
+
+.dashboard-insight-modern-item.is-success
+.dashboard-insight-modern-icon {
+
+    color:
+        #1FA267;
+
+    background:
+        #DDF5E8;
+
+}
+
+
+/* ========================================================
+   INSIGHT CONTENT
+======================================================== */
+
+.dashboard-insight-modern-content {
+
+    min-width:
+        0;
+
+}
+
+
+.dashboard-insight-modern-content strong {
+
+    display:
+        block;
+
+    color:
+        #344155;
+
+    font-size:
+        9px;
+
+    font-weight:
+        650;
+
+}
+
+
+.dashboard-insight-modern-content span {
+
+    display:
+        block;
+
+    margin-top:
+        2px;
+
+    color:
+        #8D99AA;
+
+    font-size:
+        7.5px;
+
+    line-height:
+        1.45;
+
+}
+
+
+.dashboard-insight-modern-item >
+.fa-chevron-right {
+
+    color:
+        #A5AFBD;
+
+    font-size:
+        8px;
+
+}
+
+
+/* ========================================================
+   KEEP COMPATIBILITY WITH JS-GENERATED INSIGHTS
+======================================================== */
+
+.dashboard-insight-list {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        9px;
+
+}
+
+
+.dashboard-insight-item {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+
+    min-height:
+        57px;
+
+    padding:
+        10px 11px;
+
+    border:
+        1px solid #E7ECF3;
+
+    border-radius:
+        11px;
+
+    background:
+        #F8FAFC;
+
+}
+
+
+.dashboard-insight-icon {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    width:
+        30px;
+
+    height:
+        30px;
+
+    flex:
+        0 0 30px;
+
+    border-radius:
+        9px;
+
+}
+
+
+.dashboard-insight-item.is-info {
+
+    border-color:
+        #DCEAFF;
+
+    background:
+        #F2F7FF;
+
+}
+
+
+.dashboard-insight-item.is-info
+.dashboard-insight-icon {
+
+    color:
+        #2F6BFF;
+
+    background:
+        #DFEBFF;
+
+}
+
+
+.dashboard-insight-item.is-warning {
+
+    border-color:
+        #FFE5C8;
+
+    background:
+        #FFF7EE;
+
+}
+
+
+.dashboard-insight-item.is-warning
+.dashboard-insight-icon {
+
+    color:
+        #E88B22;
+
+    background:
+        #FFE9CF;
+
+}
+
+
+.dashboard-insight-item.is-danger {
+
+    border-color:
+        #FFD9DD;
+
+    background:
+        #FFF3F4;
+
+}
+
+
+.dashboard-insight-item.is-danger
+.dashboard-insight-icon {
+
+    color:
+        #E5484D;
+
+    background:
+        #FFE0E3;
+
+}
+
+
+.dashboard-insight-item.is-success {
+
+    border-color:
+        #D8F2E4;
+
+    background:
+        #EFFAF4;
+
+}
+
+
+.dashboard-insight-item.is-success
+.dashboard-insight-icon {
+
+    color:
+        #1FA267;
+
+    background:
+        #DDF5E8;
+
+}
+
+
+.dashboard-insight-item strong {
+
+    display:
+        block;
+
+    margin-bottom:
+        2px;
+
+    color:
+        #344155;
+
+    font-size:
+        9px;
+
+    font-weight:
+        650;
+
+}
+
+
+.dashboard-insight-item span {
+
+    display:
+        block;
+
+    color:
+        #8D99AA;
+
+    font-size:
+        7.5px;
+
+    line-height:
+        1.45;
+
+}
+
+
+/* ========================================================
+   RESPONSIVE SUMMARY
+======================================================== */
+
+@media (
+    max-width:
+    1199.98px
+) {
+
+    .dashboard-summary-section {
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+
+    }
+
+
+    .dashboard-summary-section
+    .dashboard-panel:last-child {
+
+        grid-column:
+            1 / -1;
+
+    }
+
+}
+
+
+@media (
+    max-width:
+    767.98px
+) {
+
+    .dashboard-summary-section {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .dashboard-summary-section
+    .dashboard-panel:last-child {
+
+        grid-column:
+            auto;
+
+    }
+
+
+    .dashboard-summary-modern-row,
+    .dashboard-summary-modern-total,
+    .dashboard-profit-highlight {
+
+        gap:
+            8px;
+
+    }
+
+}
+/* ========================================================
+   OPERATIONAL SECTION
+======================================================== */
+
+.dashboard-operational-section {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        12px;
+
+}
+
+
+/* ========================================================
+   SECTION HEADING
+======================================================== */
+
+.dashboard-section-heading {
+
+    display:
+        flex;
+
+    align-items:
+        flex-end;
+
+    justify-content:
+        space-between;
+
+    gap:
+        20px;
+
+    padding:
+        2px 2px 0;
+
+}
+
+
+.dashboard-section-eyebrow {
+
+    display:
+        block;
+
+    margin-bottom:
+        4px;
+
+    color:
+        #2F6BFF;
+
+    font-size:
+        7.5px;
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        .8px;
+
+}
+
+
+.dashboard-section-heading h4 {
+
+    margin:
+        0;
+
+    color:
+        #17233B;
+
+    font-size:
+        14px;
+
+    font-weight:
+        700;
+
+}
+
+
+.dashboard-section-heading p {
+
+    margin:
+        3px 0 0;
+
+    color:
+        #96A0B0;
+
+    font-size:
+        8px;
+
+}
+
+
+/* ========================================================
+   OPERATIONAL GRID
+======================================================== */
+
+.dashboard-operational-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        repeat(
+            4,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    gap:
+        14px;
+
+}
+
+
+/* ========================================================
+   OPERATIONAL MINI CARD
+======================================================== */
+
+.dashboard-mini-card {
+
+    --mini-accent:
+        #2F6BFF;
+
+    --mini-soft:
+        #EAF2FF;
+
+    position:
+        relative;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        12px;
+
+    min-width:
+        0;
+
+    min-height:
+        104px;
+
+    overflow:
+        hidden;
+
+    padding:
+        15px 16px;
+
+    border:
+        1px solid #E6EBF2;
+
+    border-radius:
+        15px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #FFFFFF 0%,
+            #FCFDFF 100%
+        );
+
+    box-shadow:
+        0 6px 20px rgba(
+            24,
+            45,
+            84,
+            .05
+        );
+
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease,
+        border-color .2s ease;
+
+}
+
+
+.dashboard-mini-card::before {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    left:
+        0;
+
+    top:
+        16px;
+
+    bottom:
+        16px;
+
+    width:
+        3px;
+
+    border-radius:
+        0 5px 5px 0;
+
+    background:
+        var(
+            --mini-accent
+        );
+
+}
+
+
+.dashboard-mini-card:hover {
+
+    transform:
+        translateY(
+            -2px
+        );
+
+    border-color:
+        #DAE2ED;
+
+    box-shadow:
+        0 10px 25px rgba(
+            24,
+            45,
+            84,
+            .085
+        );
+
+}
+
+
+/* ========================================================
+   MINI COLOR
+======================================================== */
+
+.dashboard-mini-blue {
+
+    --mini-accent:
+        #2F6BFF;
+
+    --mini-soft:
+        #EAF2FF;
+
+}
+
+
+.dashboard-mini-red {
+
+    --mini-accent:
+        #EF5A67;
+
+    --mini-soft:
+        #FFF0F2;
+
+}
+
+
+.dashboard-mini-purple {
+
+    --mini-accent:
+        #7C3AED;
+
+    --mini-soft:
+        #F3EEFF;
+
+}
+
+
+.dashboard-mini-green {
+
+    --mini-accent:
+        #20A867;
+
+    --mini-soft:
+        #EAF9F1;
+
+}
+
+
+/* ========================================================
+   MINI ICON
+======================================================== */
+
+.dashboard-mini-icon {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    width:
+        42px;
+
+    height:
+        42px;
+
+    flex:
+        0 0 42px;
+
+    border-radius:
+        12px;
+
+    color:
+        var(
+            --mini-accent
+        );
+
+    background:
+        var(
+            --mini-soft
+        );
+
+    font-size:
+        15px;
+
+}
+
+
+/* ========================================================
+   MINI CONTENT
+======================================================== */
+
+.dashboard-mini-content {
+
+    position:
+        relative;
+
+    z-index:
+        2;
+
+    min-width:
+        0;
+
+    flex:
+        1;
+
+}
+
+
+.dashboard-mini-label {
+
+    overflow:
+        hidden;
+
+    color:
+        #667287;
+
+    font-size:
+        8.5px;
+
+    font-weight:
+        550;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+
+}
+
+
+.dashboard-mini-content strong {
+
+    display:
+        block;
+
+    margin-top:
+        4px;
+
+    overflow:
+        hidden;
+
+    color:
+        #17233B;
+
+    font-size:
+        12.5px;
+
+    line-height:
+        1.3;
+
+    font-weight:
+        700;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+
+}
+
+
+/* ========================================================
+   MINI META
+======================================================== */
+
+.dashboard-mini-meta {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        5px;
+
+    margin-top:
+        5px;
+
+}
+
+
+.dashboard-mini-meta small {
+
+    overflow:
+        hidden;
+
+    color:
+        #99A3B2;
+
+    font-size:
+        7.5px;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+
+}
+
+
+.dashboard-mini-dot {
+
+    width:
+        5px;
+
+    height:
+        5px;
+
+    flex:
+        0 0 5px;
+
+    border-radius:
+        50%;
+
+    background:
+        var(
+            --mini-accent
+        );
+
+}
+
+
+/* ========================================================
+   MINI DECORATION
+======================================================== */
+
+.dashboard-mini-decoration {
+
+    position:
+        absolute;
+
+    right:
+        -7px;
+
+    bottom:
+        -12px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    width:
+        64px;
+
+    height:
+        64px;
+
+    border-radius:
+        50%;
+
+    color:
+        var(
+            --mini-accent
+        );
+
+    background:
+        var(
+            --mini-soft
+        );
+
+    font-size:
+        19px;
+
+    opacity:
+        .28;
+
+}
+
+
+/* ========================================================
+   BOTTOM GRID
+======================================================== */
+
+.dashboard-bottom-grid {
+
+    display:
+        grid;
+
+    grid-template-columns:
+        minmax(
+            0,
+            2.25fr
+        )
+        minmax(
+            285px,
+            .75fr
+        );
+
+    gap:
+        14px;
+
+}
+
+
+/* ========================================================
+   ACTIVITY PANEL
+======================================================== */
+
+.dashboard-activity-panel {
+
+    min-width:
+        0;
+
+}
+
+
+/* ========================================================
+   LIVE BADGE
+======================================================== */
+
+.dashboard-activity-header-badge,
+.dashboard-system-status {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    gap:
+        6px;
+
+    min-height:
+        26px;
+
+    padding:
+        0 9px;
+
+    border:
+        1px solid #D6F0E2;
+
+    border-radius:
+        999px;
+
+    background:
+        #F0FBF5;
+
+    color:
+        #34835C;
+
+    font-size:
+        7.5px;
+
+    font-weight:
+        650;
+
+}
+
+
+.dashboard-activity-header-badge span,
+.dashboard-system-status span {
+
+    width:
+        6px;
+
+    height:
+        6px;
+
+    border-radius:
+        50%;
+
+    background:
+        #20B26B;
+
+    box-shadow:
+        0 0 0 3px rgba(
+            32,
+            178,
+            107,
+            .10
+        );
+
+}
+
+
+/* ========================================================
+   ACTIVITY TABLE BODY
+======================================================== */
+
+.dashboard-table-body {
+
+    padding:
+        0;
+
+}
+
+
+/* ========================================================
+   ACTIVITY TABLE
+======================================================== */
+
+.dashboard-activity-table {
+
+    width:
+        100%;
+
+    margin:
+        0;
+
+    border-collapse:
+        separate;
+
+    border-spacing:
+        0;
+
+    font-size:
+        8.5px;
+
+}
+
+
+.dashboard-activity-table thead th {
+
+    height:
+        39px;
+
+    padding:
+        10px 13px;
+
+    border:
+        0;
+
+    border-bottom:
+        1px solid #E9EDF3;
+
+    background:
+        #F8FAFD;
+
+    color:
+        #78869A;
+
+    font-size:
+        7.5px;
+
+    font-weight:
+        650;
+
+    letter-spacing:
+        .15px;
+
+    text-transform:
+        uppercase;
+
+    white-space:
+        nowrap;
+
+}
+
+
+.dashboard-activity-table tbody td {
+
+    height:
+        44px;
+
+    padding:
+        9px 13px;
+
+    border:
+        0;
+
+    border-bottom:
+        1px solid #F0F3F7;
+
+    color:
+        #455267;
+
+    font-size:
+        8px;
+
+    vertical-align:
+        middle;
+
+}
+
+
+.dashboard-activity-table tbody tr:last-child td {
+
+    border-bottom:
+        0;
+
+}
+
+
+.dashboard-activity-table tbody tr {
+
+    transition:
+        background .16s ease;
+
+}
+
+
+.dashboard-activity-table tbody tr:hover {
+
+    background:
+        #FAFCFF;
+
+}
+
+
+/* ========================================================
+   STATUS BADGE
+======================================================== */
+
+.dashboard-status-badge {
+
+    display:
+        inline-flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    min-width:
+        55px;
+
+    min-height:
+        21px;
+
+    padding:
+        2px 8px;
+
+    border-radius:
+        999px;
+
+    font-size:
+        7px;
+
+    font-weight:
+        650;
+
+}
+
+
+.dashboard-status-badge.posted,
+.dashboard-status-badge.paid {
+
+    color:
+        #148553;
+
+    background:
+        #EAF9F1;
+
+}
+
+
+.dashboard-status-badge.draft {
+
+    color:
+        #B9771D;
+
+    background:
+        #FFF6E9;
+
+}
+
+
+.dashboard-status-badge.void {
+
+    color:
+        #C84350;
+
+    background:
+        #FFF0F2;
+
+}
+
+
+/* ========================================================
+   EMPTY STATE
+======================================================== */
+
+.dashboard-empty-state {
+
+    height:
+        150px !important;
+
+    padding:
+        20px !important;
+
+    text-align:
+        center !important;
+
+}
+
+
+.dashboard-empty-visual {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    gap:
+        4px;
+
+}
+
+
+.dashboard-empty-icon {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    width:
+        42px;
+
+    height:
+        42px;
+
+    margin-bottom:
+        4px;
+
+    border-radius:
+        12px;
+
+    background:
+        #F1F5FA;
+
+    color:
+        #94A3B8;
+
+    font-size:
+        16px;
+
+}
+
+
+.dashboard-empty-visual strong {
+
+    color:
+        #536176;
+
+    font-size:
+        9px;
+
+    font-weight:
+        600;
+
+}
+
+
+.dashboard-empty-visual span {
+
+    color:
+        #A0A9B7;
+
+    font-size:
+        7.5px;
+
+}
+
+
+/* ========================================================
+   SYSTEM PANEL
+======================================================== */
+
+.dashboard-system-panel {
+
+    min-width:
+        0;
+
+}
+
+
+/* ========================================================
+   SYSTEM MODERN LIST
+======================================================== */
+
+.dashboard-system-modern-list {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    padding:
+        8px 16px;
+
+}
+
+
+/* ========================================================
+   SYSTEM ITEM
+======================================================== */
+
+.dashboard-system-modern-item {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        11px;
+
+    min-height:
+        58px;
+
+    border-bottom:
+        1px solid #EFF2F6;
+
+}
+
+
+.dashboard-system-modern-item:last-child {
+
+    border-bottom:
+        0;
+
+}
+
+
+/* ========================================================
+   SYSTEM ICON
+======================================================== */
+
+.dashboard-system-icon {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    width:
+        34px;
+
+    height:
+        34px;
+
+    flex:
+        0 0 34px;
+
+    border-radius:
+        10px;
+
+    background:
+        #F2F5F9;
+
+    color:
+        #5C6A80;
+
+    font-size:
+        11px;
+
+}
+
+
+.dashboard-system-icon.is-blue {
+
+    color:
+        #2F6BFF;
+
+    background:
+        #EAF2FF;
+
+}
+
+
+.dashboard-system-icon.is-purple {
+
+    color:
+        #7C3AED;
+
+    background:
+        #F3EEFF;
+
+}
+
+
+.dashboard-system-icon.is-orange {
+
+    color:
+        #E8942E;
+
+    background:
+        #FFF4E7;
+
+}
+
+
+.dashboard-system-icon.is-green {
+
+    color:
+        #20A867;
+
+    background:
+        #EAF9F1;
+
+}
+
+
+/* ========================================================
+   SYSTEM COPY
+======================================================== */
+
+.dashboard-system-copy {
+
+    min-width:
+        0;
+
+}
+
+
+.dashboard-system-copy span {
+
+    display:
+        block;
+
+    color:
+        #9AA4B3;
+
+    font-size:
+        7.5px;
+
+}
+
+
+.dashboard-system-copy strong {
+
+    display:
+        block;
+
+    margin-top:
+        2px;
+
+    overflow:
+        hidden;
+
+    color:
+        #354258;
+
+    font-size:
+        9px;
+
+    font-weight:
+        650;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+
+}
+
 
 /* ========================================================
    RESPONSIVE
 ======================================================== */
-@media (max-width: 1399.98px) {
-    .dashboard-kpi-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+
+@media (
+    max-width:
+    1199.98px
+) {
+
+    .dashboard-operational-grid {
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+
+    }
+
+
+    .dashboard-bottom-grid {
+
+        grid-template-columns:
+            minmax(
+                0,
+                1.7fr
+            )
+            minmax(
+                260px,
+                .8fr
+            );
+
+    }
+
 }
 
-@media (max-width: 1199.98px) {
-    .dashboard-summary-section { grid-template-columns:repeat(2,minmax(0,1fr)); }
-    .dashboard-summary-section .dashboard-panel:last-child { grid-column:1 / -1; }
-    .dashboard-operational-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+
+@media (
+    max-width:
+    991.98px
+) {
+
+    .dashboard-bottom-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
 }
 
-@media (max-width: 991.98px) {
-    .dashboard-page-header { align-items:flex-start; }
-    .dashboard-trend-section,
-    .dashboard-bottom-grid { grid-template-columns:1fr; }
-    .dashboard-kpi-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+
+@media (
+    max-width:
+    767.98px
+) {
+
+    .dashboard-operational-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .dashboard-section-heading {
+
+        align-items:
+            flex-start;
+
+        flex-direction:
+            column;
+
+    }
+
 }
+
+
+@media (
+    max-width:
+    575.98px
+) {
+
+    .dashboard-mini-card {
+
+        min-height:
+            96px;
+
+    }
+
+
+    .dashboard-activity-table {
+
+        min-width:
+            700px;
+
+    }
+
+}
+/*
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+DASHBOARD
+TAHAP 5
+FINAL VISUAL POLISHING
+
+IMPORTANT:
+VISUAL ONLY
+NO BUSINESS LOGIC CHANGE
+==========================================================
+*/
+
+
+/* ========================================================
+   PAGE FOUNDATION
+======================================================== */
+
+.dashboard-page {
+
+    width:
+        100%;
+
+    max-width:
+        100%;
+
+    min-width:
+        0;
+
+    padding:
+        2px 2px 28px;
+
+    gap:
+        16px;
+
+    color:
+        #17233B;
+
+}
+
+
+/* ========================================================
+   CONSISTENT BOX SIZING
+======================================================== */
+
+.dashboard-page,
+.dashboard-page *,
+.dashboard-page *::before,
+.dashboard-page *::after {
+
+    box-sizing:
+        border-box;
+
+}
+
+
+/* ========================================================
+   REMOVE UNWANTED MARGIN
+======================================================== */
+
+.dashboard-page section,
+.dashboard-page article {
+
+    margin:
+        0;
+
+}
+
+
+/* ========================================================
+   HERO FINAL POLISH
+======================================================== */
+
+.dashboard-hero {
+
+    isolation:
+        isolate;
+
+    min-height:
+        142px;
+
+    border:
+        1px solid #E2EBFA;
+
+    border-radius:
+        18px;
+
+    box-shadow:
+        0 8px 28px rgba(
+            38,
+            71,
+            126,
+            .07
+        );
+
+}
+
+
+.dashboard-hero::before {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    z-index:
+        -1;
+
+    width:
+        360px;
+
+    height:
+        360px;
+
+    right:
+        12%;
+
+    top:
+        -250px;
+
+    border-radius:
+        50%;
+
+    background:
+        rgba(
+            47,
+            107,
+            255,
+            .055
+        );
+
+}
+
+
+.dashboard-hero-copy {
+
+    max-width:
+        760px;
+
+}
+
+
+.dashboard-hero-copy h1 {
+
+    text-rendering:
+        optimizeLegibility;
+
+}
+
+
+.dashboard-hero-period {
+
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease;
+
+}
+
+
+.dashboard-hero-period:hover {
+
+    transform:
+        translateY(
+            -1px
+        );
+
+    box-shadow:
+        0 12px 28px rgba(
+            31,
+            74,
+            135,
+            .12
+        );
+
+}
+
+
+/* ========================================================
+   GENERAL CARD CONSISTENCY
+======================================================== */
+
+.dashboard-kpi-card,
+.dashboard-panel,
+.dashboard-mini-card {
+
+    border-color:
+        #E5EAF1;
+
+}
+
+
+.dashboard-kpi-card,
+.dashboard-mini-card {
+
+    transform:
+        translateZ(
+            0
+        );
+
+}
+
+
+/* ========================================================
+   KPI FINAL ALIGNMENT
+======================================================== */
+
+.dashboard-kpi-grid {
+
+    align-items:
+        stretch;
+
+}
+
+
+.dashboard-kpi-card {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    justify-content:
+        space-between;
+
+    height:
+        100%;
+
+}
+
+
+.dashboard-kpi-top {
+
+    min-height:
+        40px;
+
+}
+
+
+.dashboard-kpi-value {
+
+    width:
+        100%;
+
+    min-height:
+        25px;
+
+}
+
+
+.dashboard-kpi-bottom {
+
+    min-height:
+        23px;
+
+}
+
+
+/* ========================================================
+   KPI LARGE NUMBER SAFETY
+======================================================== */
+
+.dashboard-kpi-value {
+
+    font-variant-numeric:
+        tabular-nums;
+
+}
+
+
+.dashboard-kpi-card:hover
+.dashboard-kpi-icon {
+
+    transform:
+        scale(
+            1.04
+        );
+
+}
+
+
+.dashboard-kpi-icon {
+
+    transition:
+        transform .18s ease;
+
+}
+
+
+/* ========================================================
+   SECTION SPACING
+======================================================== */
+
+.dashboard-trend-section,
+.dashboard-summary-section,
+.dashboard-bottom-grid {
+
+    align-items:
+        stretch;
+
+}
+
+
+/* ========================================================
+   PANEL HEIGHT CONSISTENCY
+======================================================== */
+
+.dashboard-panel {
+
+    height:
+        100%;
+
+}
+
+
+.dashboard-panel-header {
+
+    flex:
+        0 0 auto;
+
+}
+
+
+.dashboard-panel-body {
+
+    min-width:
+        0;
+
+}
+
+
+/* ========================================================
+   PANEL HEADER TYPOGRAPHY
+======================================================== */
+
+.dashboard-panel-header h5 {
+
+    line-height:
+        1.35;
+
+}
+
+
+.dashboard-panel-header p {
+
+    line-height:
+        1.45;
+
+}
+
+
+/* ========================================================
+   PANEL ICON MICRO INTERACTION
+======================================================== */
+
+.dashboard-panel-icon {
+
+    transition:
+        transform .18s ease,
+        box-shadow .18s ease;
+
+}
+
+
+.dashboard-panel:hover
+.dashboard-panel-icon {
+
+    transform:
+        translateY(
+            -1px
+        );
+
+}
+
+
+/* ========================================================
+   PERFORMANCE CHART FINAL
+======================================================== */
+
+.dashboard-trend-panel {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+}
+
+
+.dashboard-trend-panel
+.dashboard-chart-body {
+
+    flex:
+        1 1 auto;
+
+}
+
+
+.dashboard-chart-area {
+
+    min-width:
+        0;
+
+}
+
+
+.dashboard-chart-svg {
+
+    shape-rendering:
+        geometricPrecision;
+
+}
+
+
+/* ========================================================
+   CHART LEGEND
+======================================================== */
+
+.dashboard-chart-legend span {
+
+    white-space:
+        nowrap;
+
+}
+
+
+.legend-dot {
+
+    box-shadow:
+        0 0 0 2px rgba(
+            255,
+            255,
+            255,
+            .9
+        );
+
+}
+
+
+/* ========================================================
+   POSITION PANEL FINAL
+======================================================== */
+
+.dashboard-position-panel {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+}
+
+
+.dashboard-position-panel
+.dashboard-position-body {
+
+    flex:
+        1 1 auto;
+
+}
+
+
+.dashboard-position-item strong {
+
+    font-variant-numeric:
+        tabular-nums;
+
+}
+
+
+/* ========================================================
+   DONUT FINAL
+======================================================== */
+
+.dashboard-donut {
+
+    transition:
+        transform .22s ease;
+
+}
+
+
+.dashboard-donut:hover {
+
+    transform:
+        scale(
+            1.025
+        );
+
+}
+
+
+.dashboard-donut-center strong {
+
+    font-variant-numeric:
+        tabular-nums;
+
+}
+
+
+/* ========================================================
+   SUMMARY CARD CONSISTENCY
+======================================================== */
+
+.dashboard-summary-card,
+.dashboard-insight-panel {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+}
+
+
+.dashboard-summary-card
+.dashboard-panel-body,
+.dashboard-insight-panel
+.dashboard-panel-body {
+
+    flex:
+        1 1 auto;
+
+}
+
+
+/* ========================================================
+   SUMMARY VALUE ALIGNMENT
+======================================================== */
+
+.dashboard-summary-modern-row > strong,
+.dashboard-summary-modern-total strong,
+.dashboard-profit-highlight strong {
+
+    font-variant-numeric:
+        tabular-nums;
+
+}
+
+
+/* ========================================================
+   SUMMARY ROW HOVER
+======================================================== */
+
+.dashboard-summary-modern-row {
+
+    border-radius:
+        8px;
+
+    transition:
+        background .16s ease,
+        padding .16s ease;
+
+}
+
+
+.dashboard-summary-modern-row:hover {
+
+    padding-left:
+        6px;
+
+    padding-right:
+        6px;
+
+    background:
+        #FAFCFF;
+
+}
+
+
+/* ========================================================
+   BALANCE DIFFERENCE FINAL
+======================================================== */
+
+.dashboard-summary-modern-total {
+
+    position:
+        relative;
+
+    overflow:
+        hidden;
+
+}
+
+
+.dashboard-summary-modern-total::before {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    left:
+        0;
+
+    top:
+        10px;
+
+    bottom:
+        10px;
+
+    width:
+        3px;
+
+    border-radius:
+        0 4px 4px 0;
+
+    background:
+        #2F6BFF;
+
+}
+
+
+/* ========================================================
+   PROFIT HIGHLIGHT FINAL
+======================================================== */
+
+.dashboard-profit-highlight {
+
+    position:
+        relative;
+
+    overflow:
+        hidden;
+
+}
+
+
+.dashboard-profit-highlight::before {
+
+    content:
+        "";
+
+    position:
+        absolute;
+
+    top:
+        0;
+
+    left:
+        0;
+
+    width:
+        100%;
+
+    height:
+        2px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #2F6BFF,
+            rgba(
+                47,
+                107,
+                255,
+                0
+            )
+        );
+
+}
+
+
+/* ========================================================
+   QUICK INSIGHTS FINAL
+======================================================== */
+
+.dashboard-insight-modern-list,
+.dashboard-insight-list {
+
+    overflow:
+        auto;
+
+    scrollbar-width:
+        thin;
+
+    scrollbar-color:
+        #D7DFE9
+        transparent;
+
+}
+
+
+.dashboard-insight-modern-list::-webkit-scrollbar,
+.dashboard-insight-list::-webkit-scrollbar {
+
+    width:
+        5px;
+
+}
+
+
+.dashboard-insight-modern-list::-webkit-scrollbar-track,
+.dashboard-insight-list::-webkit-scrollbar-track {
+
+    background:
+        transparent;
+
+}
+
+
+.dashboard-insight-modern-list::-webkit-scrollbar-thumb,
+.dashboard-insight-list::-webkit-scrollbar-thumb {
+
+    background:
+        #D7DFE9;
+
+    border-radius:
+        10px;
+
+}
+
+
+/* ========================================================
+   OPERATIONAL SECTION FINAL
+======================================================== */
+
+.dashboard-operational-grid {
+
+    align-items:
+        stretch;
+
+}
+
+
+.dashboard-mini-card {
+
+    height:
+        100%;
+
+}
+
+
+.dashboard-mini-card:hover
+.dashboard-mini-decoration {
+
+    transform:
+        scale(
+            1.08
+        )
+        rotate(
+            -4deg
+        );
+
+}
+
+
+.dashboard-mini-decoration {
+
+    transition:
+        transform .22s ease;
+
+}
+
+
+/* ========================================================
+   OPERATIONAL NUMBERS
+======================================================== */
+
+.dashboard-mini-content strong {
+
+    font-variant-numeric:
+        tabular-nums;
+
+}
+
+
+/* ========================================================
+   ACTIVITY PANEL FINAL
+======================================================== */
+
+.dashboard-activity-panel {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+}
+
+
+.dashboard-activity-panel
+.dashboard-table-body {
+
+    flex:
+        1 1 auto;
+
+    min-height:
+        0;
+
+}
+
+
+/* ========================================================
+   TABLE RESPONSIVE
+======================================================== */
+
+.dashboard-activity-panel
+.table-responsive {
+
+    width:
+        100%;
+
+    max-width:
+        100%;
+
+    overflow-x:
+        auto;
+
+    overflow-y:
+        visible;
+
+    scrollbar-width:
+        thin;
+
+    scrollbar-color:
+        #D9E0E9
+        transparent;
+
+}
+
+
+.dashboard-activity-panel
+.table-responsive::-webkit-scrollbar {
+
+    height:
+        6px;
+
+}
+
+
+.dashboard-activity-panel
+.table-responsive::-webkit-scrollbar-track {
+
+    background:
+        transparent;
+
+}
+
+
+.dashboard-activity-panel
+.table-responsive::-webkit-scrollbar-thumb {
+
+    border-radius:
+        10px;
+
+    background:
+        #D9E0E9;
+
+}
+
+
+/* ========================================================
+   ACTIVITY TABLE COLUMN SAFETY
+======================================================== */
+
+.dashboard-activity-table {
+
+    table-layout:
+        auto;
+
+}
+
+
+.dashboard-activity-table th,
+.dashboard-activity-table td {
+
+    vertical-align:
+        middle;
+
+}
+
+
+.dashboard-activity-table th:nth-child(1),
+.dashboard-activity-table td:nth-child(1) {
+
+    width:
+        92px;
+
+    white-space:
+        nowrap;
+
+}
+
+
+.dashboard-activity-table th:nth-child(2),
+.dashboard-activity-table td:nth-child(2) {
+
+    width:
+        82px;
+
+    white-space:
+        nowrap;
+
+}
+
+
+.dashboard-activity-table th:nth-child(3),
+.dashboard-activity-table td:nth-child(3) {
+
+    min-width:
+        130px;
+
+}
+
+
+.dashboard-activity-table th:nth-child(4),
+.dashboard-activity-table td:nth-child(4) {
+
+    min-width:
+        180px;
+
+}
+
+
+.dashboard-activity-table th:nth-child(5),
+.dashboard-activity-table td:nth-child(5) {
+
+    min-width:
+        115px;
+
+    font-variant-numeric:
+        tabular-nums;
+
+    white-space:
+        nowrap;
+
+}
+
+
+.dashboard-activity-table th:nth-child(6),
+.dashboard-activity-table td:nth-child(6) {
+
+    width:
+        80px;
+
+    white-space:
+        nowrap;
+
+}
+
+
+/* ========================================================
+   ACTIVITY TABLE ROW
+======================================================== */
+
+.dashboard-activity-table tbody tr {
+
+    position:
+        relative;
+
+}
+
+
+.dashboard-activity-table tbody td {
+
+    transition:
+        color .16s ease;
+
+}
+
+
+.dashboard-activity-table tbody tr:hover td {
+
+    color:
+        #263650;
+
+}
+
+
+/* ========================================================
+   SYSTEM PANEL FINAL
+======================================================== */
+
+.dashboard-system-panel {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+}
+
+
+.dashboard-system-modern-list {
+
+    flex:
+        1 1 auto;
+
+}
+
+
+.dashboard-system-modern-item {
+
+    transition:
+        padding .16s ease,
+        background .16s ease;
+
+    border-radius:
+        8px;
+
+}
+
+
+.dashboard-system-modern-item:hover {
+
+    padding-left:
+        5px;
+
+    padding-right:
+        5px;
+
+    background:
+        #FAFCFF;
+
+}
+
+
+/* ========================================================
+   SYSTEM STATUS ANIMATION
+======================================================== */
+
+.dashboard-system-status span,
+.dashboard-activity-header-badge span {
+
+    animation:
+        dashboard-live-pulse
+        2.1s
+        ease-in-out
+        infinite;
+
+}
+
+
+@keyframes dashboard-live-pulse {
+
+    0%,
+    100% {
+
+        box-shadow:
+            0 0 0 2px rgba(
+                32,
+                178,
+                107,
+                .08
+            );
+
+    }
+
+
+    50% {
+
+        box-shadow:
+            0 0 0 5px rgba(
+                32,
+                178,
+                107,
+                .02
+            );
+
+    }
+
+}
+
+
+/* ========================================================
+   ACCESSIBILITY
+   REDUCE MOTION
+======================================================== */
+
+@media (
+    prefers-reduced-motion:
+    reduce
+) {
+
+    .dashboard-page *,
+    .dashboard-page *::before,
+    .dashboard-page *::after {
+
+        animation-duration:
+            .01ms !important;
+
+        animation-iteration-count:
+            1 !important;
+
+        transition-duration:
+            .01ms !important;
+
+        scroll-behavior:
+            auto !important;
+
+    }
+
+}
+
+
+/* ========================================================
+   DESKTOP
+   1400 AND BELOW
+======================================================== */
+
+@media (
+    max-width:
+    1399.98px
+) {
+
+    .dashboard-page {
+
+        gap:
+            14px;
+
+    }
+
+
+    .dashboard-hero {
+
+        padding:
+            24px 26px;
+
+    }
+
+
+    .dashboard-kpi-grid {
+
+        gap:
+            12px;
+
+    }
+
+
+    .dashboard-kpi-card {
+
+        min-height:
+            150px;
+
+    }
+
+
+    .dashboard-kpi-value {
+
+        font-size:
+            17px;
+
+    }
+
+
+    .dashboard-section-grid,
+    .dashboard-operational-grid,
+    .dashboard-bottom-grid {
+
+        gap:
+            12px;
+
+    }
+
+}
+
+
+/* ========================================================
+   LAPTOP
+======================================================== */
+
+@media (
+    max-width:
+    1199.98px
+) {
+
+    .dashboard-hero-copy h1 {
+
+        font-size:
+            24px;
+
+    }
+
+
+    .dashboard-kpi-grid {
+
+        grid-template-columns:
+            repeat(
+                3,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+
+    }
+
+
+    .dashboard-summary-section {
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+
+    }
+
+
+    .dashboard-summary-section
+    .dashboard-panel:last-child {
+
+        grid-column:
+            1 / -1;
+
+    }
+
+
+    .dashboard-operational-grid {
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+
+    }
+
+}
+
+
+/* ========================================================
+   TABLET
+======================================================== */
+
+@media (
+    max-width:
+    991.98px
+) {
+
+    .dashboard-page {
+
+        padding-bottom:
+            20px;
+
+    }
+
+
+    .dashboard-hero {
+
+        min-height:
+            auto;
+
+    }
+
+
+    .dashboard-hero-content {
+
+        flex-direction:
+            column;
+
+        align-items:
+            stretch;
+
+    }
+
+
+    .dashboard-hero-period {
+
+        width:
+            100%;
+
+        max-width:
+            none;
+
+    }
+
+
+    .dashboard-trend-section {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .dashboard-position-top {
+
+        max-width:
+            620px;
+
+        margin:
+            0 auto;
+
+    }
+
+
+    .dashboard-bottom-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .dashboard-system-modern-list {
+
+        display:
+            grid;
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+
+        gap:
+            0 18px;
+
+    }
+
+}
+
+
+/* ========================================================
+   MOBILE LARGE
+======================================================== */
+
+@media (
+    max-width:
+    767.98px
+) {
+
+    .dashboard-page {
+
+        gap:
+            12px;
+
+        padding-left:
+            0;
+
+        padding-right:
+            0;
+
+    }
+
+
+    .dashboard-hero {
+
+        padding:
+            20px;
+
+        border-radius:
+            14px;
+
+    }
+
+
+    .dashboard-hero-copy h1 {
+
+        font-size:
+            21px;
+
+    }
+
+
+    .dashboard-hero-copy p {
+
+        font-size:
+            10px;
+
+    }
+
+
+    .dashboard-kpi-grid {
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+
+        gap:
+            10px;
+
+    }
+
+
+    .dashboard-kpi-card {
+
+        min-height:
+            145px;
+
+        padding:
+            15px;
+
+        border-radius:
+            13px;
+
+    }
+
+
+    .dashboard-kpi-value {
+
+        font-size:
+            15px;
+
+    }
+
+
+    .dashboard-summary-section {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .dashboard-summary-section
+    .dashboard-panel:last-child {
+
+        grid-column:
+            auto;
+
+    }
+
+
+    .dashboard-operational-grid {
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(
+                    0,
+                    1fr
+                )
+            );
+
+        gap:
+            10px;
+
+    }
+
+
+    .dashboard-mini-card {
+
+        min-height:
+            96px;
+
+        padding:
+            13px;
+
+    }
+
+
+    .dashboard-position-top {
+
+        flex-direction:
+            column;
+
+    }
+
+
+    .dashboard-position-summary {
+
+        width:
+            100%;
+
+    }
+
+
+    .dashboard-panel {
+
+        border-radius:
+            14px;
+
+    }
+
+
+    .dashboard-system-modern-list {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+}
+
+
+/* ========================================================
+   MOBILE SMALL
+======================================================== */
+
+@media (
+    max-width:
+    575.98px
+) {
+
+    .dashboard-page {
+
+        gap:
+            11px;
+
+    }
+
+
+    .dashboard-hero {
+
+        padding:
+            18px;
+
+    }
+
+
+    .dashboard-hero-copy h1 {
+
+        font-size:
+            19px;
+
+    }
+
+
+    .dashboard-hero-eyebrow {
+
+        font-size:
+            8px;
+
+    }
+
+
+    .dashboard-kpi-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .dashboard-kpi-card {
+
+        min-height:
+            135px;
+
+    }
+
+
+    .dashboard-kpi-value {
+
+        font-size:
+            17px;
+
+    }
+
+
+    .dashboard-kpi-mini-chart {
+
+        width:
+            46px;
+
+    }
+
+
+    .dashboard-panel-header {
+
+        min-height:
+            64px;
+
+        padding:
+            13px 14px;
+
+    }
+
+
+    .dashboard-panel-body {
+
+        padding:
+            14px;
+
+    }
+
+
+    .dashboard-chart-body {
+
+        height:
+            230px;
+
+        padding:
+            13px;
+
+    }
+
+
+    .dashboard-operational-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .dashboard-mini-card {
+
+        min-height:
+            90px;
+
+    }
+
+
+    .dashboard-section-heading h4 {
+
+        font-size:
+            13px;
+
+    }
+
+
+    .dashboard-activity-table {
+
+        min-width:
+            720px;
+
+    }
+
+
+    .dashboard-summary-modern-row > strong,
+    .dashboard-summary-modern-total strong,
+    .dashboard-profit-highlight strong {
+
+        max-width:
+            125px;
+
+        font-size:
+            8.5px;
+
+    }
+
+}
+
+
+/* ========================================================
+   VERY SMALL MOBILE
+======================================================== */
+
+@media (
+    max-width:
+    380px
+) {
+
+    .dashboard-hero {
+
+        padding:
+            16px;
+
+    }
+
+
+    .dashboard-hero-copy h1 {
+
+        font-size:
+            18px;
+
+    }
+
+
+    .dashboard-kpi-value {
+
+        font-size:
+            16px;
+
+    }
+
+
+    .dashboard-position-item {
+
+        gap:
+            6px;
+
+    }
+
+
+    .dashboard-position-item strong {
+
+        max-width:
+            105px;
+
+    }
+
+}
+
+
+/* ========================================================
+   FINAL FOCUS STATE
+======================================================== */
+
+.dashboard-page button:focus-visible {
+
+    outline:
+        2px solid rgba(
+            47,
+            107,
+            255,
+            .35
+        );
+
+    outline-offset:
+        2px;
+
+}
+
+
+/* ========================================================
+   FINAL SELECTION
+======================================================== */
+
+.dashboard-page ::selection {
+
+    color:
+        #173A77;
+
+    background:
+        #DCE9FF;
+
+}
+/*
+==========================================================
+FINOVA DASHBOARD
+FONT SIZE ENLARGEMENT
+VISUAL ONLY
+==========================================================
+*/
+
+
+/* ========================================================
+   HERO
+======================================================== */
+
+.dashboard-hero-eyebrow {
+    font-size: 11px;
+}
+
+.dashboard-hero-copy h1 {
+    font-size: 30px;
+}
+
+.dashboard-hero-copy p {
+    font-size: 13px;
+}
+
+.dashboard-period-content span {
+    font-size: 10px;
+}
+
+.dashboard-period-content strong {
+    font-size: 13px;
+}
+
+.dashboard-period-content small {
+    font-size: 9.5px;
+}
+
+
+/* ========================================================
+   KPI
+======================================================== */
+
+.dashboard-kpi-label {
+    font-size: 12px;
+}
+
+.dashboard-kpi-meta small {
+    font-size: 9.5px;
+}
+
+.dashboard-kpi-value {
+    font-size: 22px;
+}
+
+.dashboard-kpi-status {
+    font-size: 10px;
+}
+
+
+/* ========================================================
+   PANEL HEADER
+======================================================== */
+
+.dashboard-panel-header h5 {
+    font-size: 15px;
+}
+
+.dashboard-panel-header p {
+    font-size: 10.5px;
+}
+
+
+/* ========================================================
+   CHART LEGEND
+======================================================== */
+
+.dashboard-chart-legend span {
+    font-size: 10px;
+}
+
+.dashboard-year-chip {
+    font-size: 10px;
+}
+
+
+/* ========================================================
+   CHART LABEL
+======================================================== */
+
+.dashboard-chart-label {
+    font-size: 9.5px;
+}
+
+
+/* ========================================================
+   FINANCIAL POSITION
+======================================================== */
+
+.dashboard-donut-center span {
+    font-size: 9px;
+}
+
+.dashboard-donut-center strong {
+    font-size: 12px;
+}
+
+.dashboard-position-name span {
+    font-size: 10.5px;
+}
+
+.dashboard-position-item strong {
+    font-size: 10.5px;
+}
+
+.dashboard-position-insight strong {
+    font-size: 10px;
+}
+
+.dashboard-position-insight span {
+    font-size: 8.5px;
+}
+
+
+/* ========================================================
+   SUMMARY
+======================================================== */
+
+.dashboard-summary-modern-label span {
+    font-size: 11px;
+}
+
+.dashboard-summary-modern-label small {
+    font-size: 9px;
+}
+
+.dashboard-summary-modern-row > strong {
+    font-size: 11px;
+}
+
+.dashboard-summary-modern-total span {
+    font-size: 10.5px;
+}
+
+.dashboard-summary-modern-total small {
+    font-size: 8.5px;
+}
+
+.dashboard-summary-modern-total strong {
+    font-size: 11.5px;
+}
+
+.dashboard-profit-highlight span {
+    font-size: 10.5px;
+}
+
+.dashboard-profit-highlight small {
+    font-size: 8.5px;
+}
+
+.dashboard-profit-highlight strong {
+    font-size: 11.5px;
+}
+
+
+/* ========================================================
+   QUICK INSIGHTS
+======================================================== */
+
+.dashboard-insight-modern-content strong,
+.dashboard-insight-item strong {
+    font-size: 10.5px;
+}
+
+.dashboard-insight-modern-content span,
+.dashboard-insight-item span {
+    font-size: 9px;
+}
+
+
+/* ========================================================
+   OPERATIONAL SNAPSHOT
+======================================================== */
+
+.dashboard-section-eyebrow {
+    font-size: 9px;
+}
+
+.dashboard-section-heading h4 {
+    font-size: 17px;
+}
+
+.dashboard-section-heading p {
+    font-size: 9.5px;
+}
+
+.dashboard-mini-label {
+    font-size: 10px;
+}
+
+.dashboard-mini-content strong {
+    font-size: 15px;
+}
+
+.dashboard-mini-meta small {
+    font-size: 9px;
+}
+
+
+/* ========================================================
+   RECENT ACTIVITY
+======================================================== */
+
+.dashboard-activity-table {
+    font-size: 10px;
+}
+
+.dashboard-activity-table thead th {
+    font-size: 9px;
+}
+
+.dashboard-activity-table tbody td {
+    font-size: 9.5px;
+}
+
+.dashboard-status-badge {
+    font-size: 8.5px;
+}
+
+
+/* ========================================================
+   EMPTY STATE
+======================================================== */
+
+.dashboard-empty-visual strong {
+    font-size: 10.5px;
+}
+
+.dashboard-empty-visual span {
+    font-size: 9px;
+}
+
+
+/* ========================================================
+   SYSTEM INFORMATION
+======================================================== */
+
+.dashboard-system-copy span {
+    font-size: 9px;
+}
+
+.dashboard-system-copy strong {
+    font-size: 10.5px;
+}
+
+.dashboard-activity-header-badge,
+.dashboard-system-status,
+.dashboard-summary-badge {
+    font-size: 9px;
+}
+
+
+/* ========================================================
+   MOBILE ADJUSTMENT
+======================================================== */
 
 @media (max-width: 767.98px) {
-    .dashboard-welcome-card { align-items:flex-start; flex-direction:column; padding:20px; }
-    .dashboard-welcome-date { min-width:0; width:100%; }
-    .dashboard-summary-section,
-    .dashboard-operational-grid { grid-template-columns:1fr; }
-    .dashboard-summary-section .dashboard-panel:last-child { grid-column:auto; }
+
+    .dashboard-hero-copy h1 {
+        font-size: 25px;
+    }
+
+    .dashboard-hero-copy p {
+        font-size: 11.5px;
+    }
+
+    .dashboard-kpi-value {
+        font-size: 19px;
+    }
+
+    .dashboard-panel-header h5 {
+        font-size: 14px;
+    }
+
+    .dashboard-mini-content strong {
+        font-size: 14px;
+    }
+
 }
 
+
 @media (max-width: 575.98px) {
-    .dashboard-kpi-grid { grid-template-columns:1fr; }
-    .dashboard-header-meta { width:100%; justify-content:flex-start; margin-top:8px; }
-    .dashboard-period-chip { width:100%; }
-    .dashboard-chart-legend { display:none; }
-    .dashboard-chart-body { height:220px; }
+
+    .dashboard-hero-copy h1 {
+        font-size: 22px;
+    }
+
+    .dashboard-kpi-value {
+        font-size: 18px;
+    }
+
+    .dashboard-panel-header h5 {
+        font-size: 13.5px;
+    }
+
 }

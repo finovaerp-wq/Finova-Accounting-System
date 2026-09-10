@@ -404,54 +404,580 @@ this.arCompleteProcessing = false;
 
 
     /*
-    ======================================================
-    INIT
-    ======================================================
-    */
+======================================================
+INIT
+ACCOUNT RECEIVABLE
+REALTIME GL JOURNAL SUPPORT
+======================================================
+*/
 
-    async init() {
+async init() {
 
-        try {
+    try {
 
-            await this.loadModalHTML();
+        /*
+        ==================================================
+        LOAD MODALS
+        ==================================================
+        */
 
-            await this.loadDetailModalHTML();
-            await this.loadPaymentModalHTML();
+        await this.loadModalHTML();
 
-            this.cacheDOM();
+        await this.loadDetailModalHTML();
 
-            await this.loadCustomers();
+        await this.loadPaymentModalHTML();
 
-            await this.loadDetailCOA();
 
-            await this.loadTaxMaster();
+        /*
+        ==================================================
+        CACHE DOM
+        ==================================================
+        */
 
-            this.bindEvents();
+        this.cacheDOM();
 
-            await this.loadData();
+
+        /*
+        ==================================================
+        LOAD MASTER DATA
+        ==================================================
+        */
+
+        await this.loadCustomers();
+
+        await this.loadDetailCOA();
+
+        await this.loadTaxMaster();
+
+
+        /*
+        ==================================================
+        BIND EVENTS
+        ==================================================
+        */
+
+        this.bindEvents();
+
+
+        /*
+        ==================================================
+        REMOVE OLD EXTERNAL LISTENER
+        PREVENT DUPLICATE
+        ==================================================
+        */
+
+        if (
+            this.handleExternalSourceTransactionChange
+        ) {
+
+            window.removeEventListener(
+                "finova:source-transaction-changed",
+                this.handleExternalSourceTransactionChange
+            );
+
+
+            this.handleExternalSourceTransactionChange =
+                null;
+
+        }
+
+
+        /*
+        ==================================================
+        GL JOURNAL -> ACCOUNT RECEIVABLE
+
+        USED FOR:
+        AR_INVOICE
+        AR_PAYMENT
+        ==================================================
+        */
+
+        this.handleExternalSourceTransactionChange =
+            async event => {
+
+                try {
+
+                    const detail =
+                        event?.detail
+                        ||
+                        {};
+
+
+                    const sourceModule =
+                        String(
+                            detail.sourceModule
+                            ||
+                            ""
+                        )
+                        .trim()
+                        .toUpperCase();
+
+
+                    const sourceDocumentType =
+                        String(
+                            detail.sourceDocumentType
+                            ||
+                            ""
+                        )
+                        .trim()
+                        .toUpperCase();
+
+
+                    /*
+                    ======================================
+                    IGNORE NON AR
+                    ======================================
+                    */
+
+                    if (
+                        sourceModule !==
+                        "AR"
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    /*
+                    ======================================
+                    ONLY AR INVOICE / AR PAYMENT
+                    ======================================
+                    */
+
+                    if (
+                        sourceDocumentType !==
+                            "AR_INVOICE"
+                        &&
+                        sourceDocumentType !==
+                            "AR_PAYMENT"
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    console.log(
+                        "ACCOUNT RECEIVABLE EXTERNAL CHANGE:",
+                        {
+                            source_module:
+                                sourceModule,
+
+                            source_document_type:
+                                sourceDocumentType,
+
+                            source_document_id:
+                                detail.sourceDocumentId
+                                || null,
+
+                            account_receivable_id:
+                                detail.accountReceivableId
+                                || null,
+
+                            journal_id:
+                                detail.journalId
+                                || null,
+
+                            action:
+                                detail.action
+                                || null
+                        }
+                    );
+
+
+                    /*
+                    ======================================
+                    GET LATEST AR
+                    NO FULL LOADING
+                    ======================================
+                    */
+
+                    await this.loadData(
+                        false
+                    );
+
+
+                    console.log(
+                        "ACCOUNT RECEIVABLE REALTIME REFRESH COMPLETE."
+                    );
+
+                }
+
+                catch (error) {
+
+                    console.error(
+                        "AccountReceivable external refresh:",
+                        error
+                    );
+
+                }
+
+            };
+
+
+        /*
+        ==================================================
+        REGISTER LISTENER
+        ==================================================
+        */
+
+        window.addEventListener(
+            "finova:source-transaction-changed",
+            this.handleExternalSourceTransactionChange
+        );
+
+
+        /*
+        ==================================================
+        INITIAL LOAD
+        ==================================================
+        */
+
+        await this.loadData(
+            true
+        );
+
+
+        console.log(
+            "Account Receivable initialized."
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountReceivable.init:",
+            error
+        );
+
+
+        this.showError(
+            "Failed to initialize Account Receivable."
+        );
+
+    }
+
+}
+
+/*
+======================================================
+DESTROY
+ACCOUNT RECEIVABLE
+
+FINAL
+
+CLEAN:
+- REALTIME GL -> AR LISTENER
+- CUSTOMER TOMSELECT
+- DETAIL COA TOMSELECT
+- BOOTSTRAP MODALS
+
+IMPORTANT:
+PREVENT DUPLICATE REALTIME EVENT
+WHEN WORKSPACE IS CLOSED / REOPENED
+======================================================
+*/
+
+destroy() {
+
+    try {
+
+        /*
+        ==================================================
+        REMOVE GL -> AR REALTIME LISTENER
+        ==================================================
+        */
+
+        if (
+            this.handleExternalSourceTransactionChange
+        ) {
+
+            window.removeEventListener(
+                "finova:source-transaction-changed",
+                this.handleExternalSourceTransactionChange
+            );
+
+
+            this.handleExternalSourceTransactionChange =
+                null;
 
 
             console.log(
-                "Account Receivable initialized."
+                "AR REALTIME LISTENER REMOVED."
             );
 
         }
 
-        catch (error) {
 
-            console.error(
-                "AccountReceivable.init:",
+        /*
+        ==================================================
+        DESTROY CUSTOMER TOMSELECT
+        ==================================================
+        */
+
+        if (
+            this.arCustomerSelect
+            &&
+            typeof this.arCustomerSelect.destroy
+            ===
+            "function"
+        ) {
+
+            try {
+
+                this.arCustomerSelect.destroy();
+
+            }
+
+            catch (
                 error
-            );
+            ) {
+
+                console.warn(
+                    "Failed to destroy AR Customer TomSelect:",
+                    error
+                );
+
+            }
 
 
-            this.showError(
-                "Failed to initialize Account Receivable."
-            );
+            this.arCustomerSelect =
+                null;
 
         }
+
+
+        /*
+        ==================================================
+        DESTROY CUSTOMER TOMSELECT
+        FROM DOM INSTANCE
+
+        SAFETY:
+        ONLY IF DIFFERENT INSTANCE STILL EXISTS
+        ==================================================
+        */
+
+        if (
+            this.arFormCustomer?.tomselect
+            &&
+            typeof this.arFormCustomer.tomselect.destroy
+            ===
+            "function"
+        ) {
+
+            try {
+
+                this.arFormCustomer
+                    .tomselect
+                    .destroy();
+
+            }
+
+            catch (
+                error
+            ) {
+
+                console.warn(
+                    "Failed to destroy AR Customer DOM TomSelect:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        /*
+        ==================================================
+        DESTROY DETAIL COA TOMSELECT
+        ==================================================
+        */
+
+        if (
+            this.arDetailCOASelect
+            &&
+            typeof this.arDetailCOASelect.destroy
+            ===
+            "function"
+        ) {
+
+            try {
+
+                this.arDetailCOASelect.destroy();
+
+            }
+
+            catch (
+                error
+            ) {
+
+                console.warn(
+                    "Failed to destroy AR Detail COA TomSelect:",
+                    error
+                );
+
+            }
+
+
+            this.arDetailCOASelect =
+                null;
+
+        }
+
+
+        /*
+        ==================================================
+        DESTROY DETAIL COA TOMSELECT
+        FROM DOM INSTANCE
+        ==================================================
+        */
+
+        if (
+            this.arDetailCOA?.tomselect
+            &&
+            typeof this.arDetailCOA.tomselect.destroy
+            ===
+            "function"
+        ) {
+
+            try {
+
+                this.arDetailCOA
+                    .tomselect
+                    .destroy();
+
+            }
+
+            catch (
+                error
+            ) {
+
+                console.warn(
+                    "Failed to destroy AR Detail COA DOM TomSelect:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        /*
+        ==================================================
+        DISPOSE MAIN AR MODAL
+        ==================================================
+        */
+
+        if (
+            this.accountReceivableModal
+        ) {
+
+            try {
+
+                const modal =
+                    bootstrap.Modal.getInstance(
+                        this.accountReceivableModal
+                    );
+
+
+                modal?.dispose();
+
+            }
+
+            catch (
+                error
+            ) {
+
+                console.warn(
+                    "Failed to dispose Account Receivable Modal:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        /*
+        ==================================================
+        DISPOSE AR PAYMENT MODAL
+        ==================================================
+        */
+
+        if (
+            this.accountReceivablePaymentModal
+        ) {
+
+            try {
+
+                const paymentModal =
+                    bootstrap.Modal.getInstance(
+                        this.accountReceivablePaymentModal
+                    );
+
+
+                paymentModal?.dispose();
+
+            }
+
+            catch (
+                error
+            ) {
+
+                console.warn(
+                    "Failed to dispose AR Payment Modal:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        /*
+        ==================================================
+        CLEAR REFERENCES
+        ==================================================
+        */
+
+        this.accountReceivableModal =
+            null;
+
+
+        this.accountReceivablePaymentModal =
+            null;
+
+
+        this.currentPaymentARId =
+            null;
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "FINOVA Account Receivable destroyed."
+        );
 
     }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "AccountReceivable.destroy:",
+            error
+        );
+
+    }
+
+}
 
     /*
 ======================================================
@@ -3729,33 +4255,184 @@ if (!paymentAccountId) {
 
 
         /*
-        ==================================================
-        REFRESH ACCOUNT RECEIVABLE
+==================================================
+REFRESH ACCOUNT RECEIVABLE
 
-        NO LOADING AFTER ACTION
-        ==================================================
-        */
+NO LOADING AFTER ACTION
+==================================================
+*/
 
-        await this.loadData(
-            false
-        );
+await this.loadData(
+    false
+);
 
 
-        /*
-        ==================================================
-        SUCCESS
-        ==================================================
-        */
+/*
+==================================================
+NOTIFY GL JOURNAL
+AR PAYMENT -> GL JOURNAL REALTIME
 
-        const updatedStatus =
-            String(
-                updatedInvoice.status
-                ||
-                ""
-            )
-            .trim()
-            .toLowerCase();
+SAME BEHAVIOR AS ACCOUNT PAYABLE
+==================================================
+*/
 
+window.dispatchEvent(
+
+    new CustomEvent(
+        "finova:gl-journal-changed",
+        {
+            detail: {
+
+                /*
+                ==========================================
+                SOURCE
+                ==========================================
+                */
+
+                source:
+                    "AR",
+
+                sourceModule:
+                    "AR",
+
+
+                /*
+                ==========================================
+                SOURCE DOCUMENT TYPE
+                ==========================================
+                */
+
+                sourceDocumentType:
+                    "AR_PAYMENT",
+
+
+                /*
+                ==========================================
+                ACTION
+                ==========================================
+                */
+
+                action:
+                    "AR_PAYMENT_CREATED",
+
+
+                /*
+                ==========================================
+                ACCOUNT RECEIVABLE
+                ==========================================
+                */
+
+                documentId:
+                    id,
+
+                accountReceivableId:
+                    id,
+
+                documentNo:
+                    updatedInvoice.invoice_no
+                    ||
+                    invoice.invoice_no
+                    ||
+                    null,
+
+
+                /*
+                ==========================================
+                PAYMENT
+                ==========================================
+                */
+
+                paymentId:
+                    payment.id
+                    ||
+                    null,
+
+
+                /*
+                ==========================================
+                GL JOURNAL
+                ==========================================
+                */
+
+                journalId:
+                    journal.id
+                    ||
+                    null,
+
+                journalNo:
+                    journal.journal_no
+                    ||
+                    null
+
+            }
+        }
+    )
+
+);
+
+
+/*
+==================================================
+DEBUG REALTIME
+==================================================
+*/
+
+console.log(
+    "AR PAYMENT -> GL JOURNAL REALTIME EVENT:",
+    {
+
+        source_module:
+            "AR",
+
+        source_document_type:
+            "AR_PAYMENT",
+
+        account_receivable_id:
+            id,
+
+        invoice_no:
+            updatedInvoice.invoice_no
+            ||
+            invoice.invoice_no
+            ||
+            null,
+
+        payment_id:
+            payment.id
+            ||
+            null,
+
+        journal_id:
+            journal.id
+            ||
+            null,
+
+        journal_no:
+            journal.journal_no
+            ||
+            null,
+
+        action:
+            "AR_PAYMENT_CREATED"
+
+    }
+);
+
+
+/*
+==================================================
+SUCCESS
+==================================================
+*/
+
+const updatedStatus =
+    String(
+        updatedInvoice.status
+        ||
+        ""
+    )
+    .trim()
+    .toLowerCase();
 
         if (
             updatedStatus ===
@@ -7832,14 +8509,27 @@ async viewPayment(
 /*
 ======================================================
 OPEN AR PAYMENT HISTORY MODAL
-SAME VISUAL STANDARD AS ACCOUNT PAYABLE
+FINAL
 
-RULE:
-- SHOW ACTIVE PAYMENT ONLY
-- SHOW BANK / PAYMENT ACCOUNT
-- SHOW PAYMENT JOURNAL
-- DESCRIPTION FULL WIDTH
-- TOTAL PAID
+SHOW:
+- DRAFT PAYMENT
+- POSTED PAYMENT
+- VOID PAYMENT
+
+ACCOUNTING RULE:
+DRAFT  = ACTIVE
+POSTED = ACTIVE
+VOID   = INACTIVE / HISTORY
+
+TOTAL PAID:
+ONLY ACTIVE PAYMENT
+
+IMPORTANT:
+VOID PAYMENT MUST REMAIN VISIBLE
+FOR AUDIT TRAIL.
+
+VOID -> POSTED
+WILL AUTOMATICALLY BECOME ACTIVE AGAIN.
 ======================================================
 */
 
@@ -7867,17 +8557,29 @@ openPaymentHistoryModal(
 
     /*
     ==================================================
-    ACTIVE PAYMENTS ONLY
+    NORMALIZE ALL PAYMENT HISTORY
     ==================================================
     */
 
-    const activePayments =
-        (
-            Array.isArray(payments)
-                ? payments
-                : []
-        )
-        .filter(
+    const paymentHistory =
+        Array.isArray(payments)
+            ? payments
+            : [];
+
+
+    /*
+    ==================================================
+    PAYMENT HISTORY
+
+    IMPORTANT:
+    KEEP PAYMENT WITH JOURNAL RELATION.
+
+    DO NOT REMOVE VOID PAYMENT.
+    ==================================================
+    */
+
+    const historyPayments =
+        paymentHistory.filter(
             payment => {
 
                 return Boolean(
@@ -7892,21 +8594,60 @@ openPaymentHistoryModal(
 
     /*
     ==================================================
-    NO ACTIVE PAYMENT
+    NO PAYMENT HISTORY
     ==================================================
     */
 
     if (
-        activePayments.length === 0
+        historyPayments.length ===
+        0
     ) {
 
         this.showError(
-            "Active payment history not found."
+            "Payment history not found."
         );
 
         return;
 
     }
+
+
+    /*
+    ==================================================
+    ACTIVE PAYMENTS
+
+    DRAFT  = ACTIVE
+    POSTED = ACTIVE
+    VOID   = INACTIVE
+    ==================================================
+    */
+
+    const activePayments =
+        historyPayments.filter(
+            payment => {
+
+                const journalStatus =
+                    String(
+                        payment
+                            ?.trx_gl_journal
+                            ?.status
+                        ||
+                        ""
+                    )
+                    .trim()
+                    .toUpperCase();
+
+
+                return (
+                    journalStatus ===
+                        "DRAFT"
+                    ||
+                    journalStatus ===
+                        "POSTED"
+                );
+
+            }
+        );
 
 
     /*
@@ -7921,7 +8662,9 @@ openPaymentHistoryModal(
         );
 
 
-    if (oldModal) {
+    if (
+        oldModal
+    ) {
 
         const oldInstance =
             bootstrap.Modal.getInstance(
@@ -7929,7 +8672,9 @@ openPaymentHistoryModal(
             );
 
 
-        if (oldInstance) {
+        if (
+            oldInstance
+        ) {
 
             oldInstance.dispose();
 
@@ -7976,47 +8721,138 @@ openPaymentHistoryModal(
     /*
     ==================================================
     TOTAL PAID
+
+    ONLY:
+    DRAFT + POSTED PAYMENT
+
+    VOID PAYMENT IS EXCLUDED.
     ==================================================
     */
 
     const totalPaid =
-        activePayments.reduce(
-            (
-                total,
-                payment
-            ) => {
+        Number(
 
-                const amount =
-                    Number(
-                        payment?.amount
-                        ||
-                        0
+            activePayments.reduce(
+
+                (
+                    total,
+                    payment
+                ) => {
+
+                    const amount =
+                        Number(
+                            payment?.amount
+                            ||
+                            0
+                        );
+
+
+                    return (
+                        total
+                        +
+                        (
+                            Number.isFinite(
+                                amount
+                            )
+                                ? amount
+                                : 0
+                        )
                     );
 
+                },
 
-                return (
-                    total
-                    +
-                    (
-                        Number.isFinite(amount)
-                            ? amount
-                            : 0
-                    )
-                );
+                0
 
-            },
-            0
+            )
+            .toFixed(
+                2
+            )
+
         );
 
 
     /*
     ==================================================
+    TOTAL HISTORY
+    ==================================================
+    */
+
+    const totalHistoryAmount =
+        Number(
+
+            historyPayments.reduce(
+
+                (
+                    total,
+                    payment
+                ) => {
+
+                    const amount =
+                        Number(
+                            payment?.amount
+                            ||
+                            0
+                        );
+
+
+                    return (
+                        total
+                        +
+                        (
+                            Number.isFinite(
+                                amount
+                            )
+                                ? amount
+                                : 0
+                        )
+                    );
+
+                },
+
+                0
+
+            )
+            .toFixed(
+                2
+            )
+
+        );
+
+
+    /*
+    ==================================================
+    ACTIVE PAYMENT COUNT
+    ==================================================
+    */
+
+    const activePaymentCount =
+        activePayments.length;
+
+
+    /*
+    ==================================================
+    HISTORY PAYMENT COUNT
+    ==================================================
+    */
+
+    const historyPaymentCount =
+        historyPayments.length;
+
+
+    /*
+    ==================================================
     BUILD PAYMENT ROWS
+
+    IMPORTANT:
+    USE historyPayments.
+
+    VOID PAYMENT MUST REMAIN VISIBLE.
     ==================================================
     */
 
     const rows =
-        activePayments
+        historyPayments
+
             .map(
                 (
                     payment,
@@ -8043,10 +8879,24 @@ openPaymentHistoryModal(
                     ======================================
                     */
 
-                    const paymentDate =
+                    const paymentDateRaw =
                         payment?.payment_date
                         ||
-                        "-";
+                        "";
+
+
+                    const paymentDate =
+                        paymentDateRaw
+                            ? (
+                                typeof this.formatDisplayDate
+                                ===
+                                "function"
+                                    ? this.formatDisplayDate(
+                                        paymentDateRaw
+                                    )
+                                    : paymentDateRaw
+                            )
+                            : "-";
 
 
                     /*
@@ -8097,14 +8947,18 @@ openPaymentHistoryModal(
 
                     }
 
-                    else if (accountName) {
+                    else if (
+                        accountName
+                    ) {
 
                         accountDisplay =
                             accountName;
 
                     }
 
-                    else if (accountCode) {
+                    else if (
+                        accountCode
+                    ) {
 
                         accountDisplay =
                             accountCode;
@@ -8121,6 +8975,21 @@ openPaymentHistoryModal(
                     const paymentDescription =
                         String(
                             payment?.description
+                            ||
+                            "-"
+                        )
+                        .trim();
+
+
+                    /*
+                    ======================================
+                    REFERENCE NO
+                    ======================================
+                    */
+
+                    const referenceNo =
+                        String(
+                            payment?.reference_no
                             ||
                             "-"
                         )
@@ -8158,6 +9027,31 @@ openPaymentHistoryModal(
                         .trim();
 
 
+                    const normalizedJournalStatus =
+                        journalStatus
+                            .toUpperCase();
+
+
+                    /*
+                    ======================================
+                    PAYMENT ACTIVITY STATUS
+
+                    DRAFT  = ACTIVE
+                    POSTED = ACTIVE
+                    VOID   = INACTIVE
+                    ======================================
+                    */
+
+                    const isActive =
+                        (
+                            normalizedJournalStatus ===
+                                "DRAFT"
+                            ||
+                            normalizedJournalStatus ===
+                                "POSTED"
+                        );
+
+
                     /*
                     ======================================
                     JOURNAL STATUS BADGE
@@ -8165,66 +9059,141 @@ openPaymentHistoryModal(
                     */
 
                     let journalStatusBadge =
-                        "";
+                        `
+                            <span
+                                class="
+                                    badge
+                                    bg-secondary
+                                    ar-payment-journal-status
+                                "
+                            >
+                                Unknown
+                            </span>
+                        `;
 
 
-                    if (journalStatus) {
-
-                        let badgeClass =
-                            "bg-secondary";
-
-
-                        if (
-                            journalStatus.toLowerCase()
-                            ===
-                            "posted"
-                        ) {
-
-                            badgeClass =
-                                "bg-success";
-
-                        }
-
-                        else if (
-                            journalStatus.toLowerCase()
-                            ===
-                            "draft"
-                        ) {
-
-                            badgeClass =
-                                "bg-warning text-dark";
-
-                        }
-
-                        else if (
-                            journalStatus.toLowerCase()
-                            ===
-                            "void"
-                        ) {
-
-                            badgeClass =
-                                "bg-danger";
-
-                        }
-
+                    if (
+                        normalizedJournalStatus ===
+                        "POSTED"
+                    ) {
 
                         journalStatusBadge = `
 
                             <span
                                 class="
                                     badge
-                                    ${badgeClass}
+                                    bg-success
                                     ar-payment-journal-status
                                 "
                             >
-
-                                ${journalStatus}
-
+                                Posted
                             </span>
 
                         `;
 
                     }
+
+                    else if (
+                        normalizedJournalStatus ===
+                        "DRAFT"
+                    ) {
+
+                        journalStatusBadge = `
+
+                            <span
+                                class="
+                                    badge
+                                    bg-warning
+                                    text-dark
+                                    ar-payment-journal-status
+                                "
+                            >
+                                Draft
+                            </span>
+
+                        `;
+
+                    }
+
+                    else if (
+                        normalizedJournalStatus ===
+                        "VOID"
+                    ) {
+
+                        journalStatusBadge = `
+
+                            <span
+                                class="
+                                    badge
+                                    bg-danger
+                                    ar-payment-journal-status
+                                "
+                            >
+                                Void
+                            </span>
+
+                        `;
+
+                    }
+
+
+                    /*
+                    ======================================
+                    PAYMENT ACTIVITY BADGE
+                    ======================================
+                    */
+
+                    const activityBadge =
+                        isActive
+
+                            ? `
+
+                                <span
+                                    class="
+                                        badge
+                                        bg-success
+                                        ms-1
+                                    "
+                                >
+                                    Active
+                                </span>
+
+                            `
+
+                            : `
+
+                                <span
+                                    class="
+                                        badge
+                                        bg-secondary
+                                        ms-1
+                                    "
+                                >
+                                    Inactive
+                                </span>
+
+                            `;
+
+
+                    /*
+                    ======================================
+                    ROW CLASS
+
+                    VOID PAYMENT:
+                    VISUALLY MUTED
+                    ======================================
+                    */
+
+                    const rowClass =
+                        isActive
+                            ? "ar-payment-main-row"
+                            : "ar-payment-main-row opacity-50";
+
+
+                    const descriptionRowClass =
+                        isActive
+                            ? "ar-payment-description-row"
+                            : "ar-payment-description-row opacity-50";
 
 
                     /*
@@ -8240,9 +9209,22 @@ openPaymentHistoryModal(
                         =============================== -->
 
                         <tr
-                            class="
-                                ar-payment-main-row
-                            "
+                            class="${rowClass}"
+                            data-payment-id="${
+                                payment?.id
+                                ||
+                                ""
+                            }"
+                            data-journal-id="${
+                                payment?.gl_journal_id
+                                ||
+                                ""
+                            }"
+                            data-active="${
+                                isActive
+                                    ? "true"
+                                    : "false"
+                            }"
                         >
 
                             <!-- NO -->
@@ -8253,9 +9235,7 @@ openPaymentHistoryModal(
                                     align-middle
                                 "
                             >
-
                                 ${index + 1}
-
                             </td>
 
 
@@ -8267,9 +9247,7 @@ openPaymentHistoryModal(
                                     align-middle
                                 "
                             >
-
                                 ${paymentDate}
-
                             </td>
 
 
@@ -8287,10 +9265,28 @@ openPaymentHistoryModal(
                                         ar-payment-account
                                     "
                                 >
-
                                     ${accountDisplay}
-
                                 </div>
+
+
+                                ${
+                                    referenceNo !== "-"
+                                        ? `
+
+                                            <div
+                                                class="
+                                                    small
+                                                    text-muted
+                                                    mt-1
+                                                "
+                                            >
+                                                Ref:
+                                                ${referenceNo}
+                                            </div>
+
+                                        `
+                                        : ""
+                                }
 
                             </td>
 
@@ -8335,13 +9331,21 @@ openPaymentHistoryModal(
                                             ar-payment-journal-no
                                         "
                                     >
-
                                         ${journalNo}
-
                                     </div>
 
 
-                                    ${journalStatusBadge}
+                                    <div
+                                        class="
+                                            mt-1
+                                        "
+                                    >
+
+                                        ${journalStatusBadge}
+
+                                        ${activityBadge}
+
+                                    </div>
 
                                 </div>
 
@@ -8351,13 +9355,11 @@ openPaymentHistoryModal(
 
 
                         <!-- ==============================
-                             DESCRIPTION
+                             DESCRIPTION ROW
                         =============================== -->
 
                         <tr
-                            class="
-                                ar-payment-description-row
-                            "
+                            class="${descriptionRowClass}"
                         >
 
                             <!-- EMPTY NO COLUMN -->
@@ -8390,9 +9392,7 @@ openPaymentHistoryModal(
                                             ar-payment-description-label
                                         "
                                     >
-
                                         Description
-
                                     </span>
 
 
@@ -8401,9 +9401,7 @@ openPaymentHistoryModal(
                                             ar-payment-description-separator
                                         "
                                     >
-
                                         :
-
                                     </span>
 
 
@@ -8412,9 +9410,7 @@ openPaymentHistoryModal(
                                             ar-payment-description-value
                                         "
                                     >
-
                                         ${paymentDescription}
-
                                     </span>
 
                                 </div>
@@ -8426,7 +9422,9 @@ openPaymentHistoryModal(
                     `;
 
                 }
+
             )
+
             .join("");
 
 
@@ -8655,6 +9653,176 @@ openPaymentHistoryModal(
 
 
                         <!-- ==========================
+                             PAYMENT SUMMARY
+                        =========================== -->
+
+                        <div
+                            class="
+                                row
+                                g-2
+                                mb-3
+                            "
+                        >
+
+                            <div
+                                class="
+                                    col-md-4
+                                "
+                            >
+
+                                <div
+                                    class="
+                                        border
+                                        rounded
+                                        p-2
+                                        h-100
+                                    "
+                                >
+
+                                    <div
+                                        class="
+                                            small
+                                            text-muted
+                                        "
+                                    >
+                                        Payment History
+                                    </div>
+
+                                    <div
+                                        class="
+                                            fw-semibold
+                                        "
+                                    >
+                                        ${historyPaymentCount}
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <div
+                                class="
+                                    col-md-4
+                                "
+                            >
+
+                                <div
+                                    class="
+                                        border
+                                        rounded
+                                        p-2
+                                        h-100
+                                    "
+                                >
+
+                                    <div
+                                        class="
+                                            small
+                                            text-muted
+                                        "
+                                    >
+                                        Active Payment
+                                    </div>
+
+                                    <div
+                                        class="
+                                            fw-semibold
+                                        "
+                                    >
+                                        ${activePaymentCount}
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <div
+                                class="
+                                    col-md-4
+                                "
+                            >
+
+                                <div
+                                    class="
+                                        border
+                                        rounded
+                                        p-2
+                                        h-100
+                                    "
+                                >
+
+                                    <div
+                                        class="
+                                            small
+                                            text-muted
+                                        "
+                                    >
+                                        Historical Amount
+                                    </div>
+
+                                    <div
+                                        class="
+                                            fw-semibold
+                                            text-end
+                                        "
+                                    >
+
+                                        ${
+                                            this.formatCurrency(
+                                                totalHistoryAmount
+                                            )
+                                        }
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- ==========================
+                             INFO
+                        =========================== -->
+
+                        <div
+                            class="
+                                alert
+                                alert-light
+                                border
+                                py-2
+                                small
+                                mb-3
+                            "
+                        >
+
+                            <i
+                                class="
+                                    fa-solid
+                                    fa-circle-info
+                                    me-1
+                                "
+                            >
+                            </i>
+
+                            Total Paid hanya menghitung payment
+                            dengan GL Journal berstatus
+                            <strong>Draft</strong>
+                            atau
+                            <strong>Posted</strong>.
+
+                            Payment dengan status
+                            <strong>Void</strong>
+                            tetap ditampilkan sebagai audit history
+                            tetapi tidak dihitung sebagai pembayaran aktif.
+
+                        </div>
+
+
+                        <!-- ==========================
                              PAYMENT TABLE
                         =========================== -->
 
@@ -8729,9 +9897,7 @@ openPaymentHistoryModal(
                                                 text-center
                                             "
                                         >
-
                                             No
-
                                         </th>
 
 
@@ -8740,16 +9906,12 @@ openPaymentHistoryModal(
                                                 text-center
                                             "
                                         >
-
                                             Payment Date
-
                                         </th>
 
 
                                         <th>
-
                                             Bank / Payment Account
-
                                         </th>
 
 
@@ -8758,9 +9920,7 @@ openPaymentHistoryModal(
                                                 text-end
                                             "
                                         >
-
                                             Amount
-
                                         </th>
 
 
@@ -8769,9 +9929,7 @@ openPaymentHistoryModal(
                                                 text-center
                                             "
                                         >
-
                                             Journal
-
                                         </th>
 
                                     </tr>
@@ -8858,15 +10016,18 @@ openPaymentHistoryModal(
                             "
                         >
 
-                            ${
-                                activePayments.length
-                            }
+                            ${historyPaymentCount}
 
                             payment transaction${
-                                activePayments.length > 1
+                                historyPaymentCount > 1
                                     ? "s"
                                     : ""
                             }
+
+                            ·
+
+                            ${activePaymentCount}
+                            active
 
                         </div>
 
@@ -8919,7 +10080,9 @@ openPaymentHistoryModal(
         );
 
 
-    if (!modalElement) {
+    if (
+        !modalElement
+    ) {
 
         this.showError(
             "AR Payment History Modal could not be created."
@@ -8959,7 +10122,9 @@ openPaymentHistoryModal(
     */
 
     modalElement.addEventListener(
+
         "hidden.bs.modal",
+
         () => {
 
             modal.dispose();
@@ -8967,9 +10132,11 @@ openPaymentHistoryModal(
             modalElement.remove();
 
         },
+
         {
             once: true
         }
+
     );
 
 }
@@ -9730,76 +10897,99 @@ renderActionButtons(
 
 
     /*
-    ==================================================
-    VOID
+==================================================
+VOID
 
-    VIEW
-    PRINT
-    ==================================================
-    */
+SAME AS ACCOUNT PAYABLE
 
-    if (
-        status ===
-        "void"
-    ) {
+VIEW
+PRINT
+DELETE
+==================================================
+*/
 
-        return `
+if (
+    status ===
+    "void"
+) {
 
-            <div
-                class="
-                    btn-group
-                    btn-group-sm
-                "
-                role="group"
+    return `
+
+        <div
+            class="
+                btn-group
+                btn-group-sm
+            "
+            role="group"
+        >
+
+            <!-- VIEW -->
+
+            <button
+                type="button"
+                class="btn btn-outline-secondary"
+                title="View"
+                data-action="view"
+                data-id="${id}"
             >
 
-                <!-- VIEW -->
-
-                <button
-                    type="button"
-                    class="btn btn-outline-secondary"
-                    title="View"
-                    data-action="view"
-                    data-id="${id}"
+                <i
+                    class="
+                        fa-regular
+                        fa-eye
+                    "
                 >
+                </i>
 
-                    <i
-                        class="
-                            fa-regular
-                            fa-eye
-                        "
-                    >
-                    </i>
-
-                </button>
+            </button>
 
 
-                <!-- PRINT -->
+            <!-- PRINT -->
 
-                <button
-                    type="button"
-                    class="btn btn-outline-dark"
-                    title="Print"
-                    data-action="print"
-                    data-id="${id}"
+            <button
+                type="button"
+                class="btn btn-outline-dark"
+                title="Print"
+                data-action="print"
+                data-id="${id}"
+            >
+
+                <i
+                    class="
+                        fa-solid
+                        fa-print
+                    "
                 >
+                </i>
 
-                    <i
-                        class="
-                            fa-solid
-                            fa-print
-                        "
-                    >
-                    </i>
-
-                </button>
+            </button>
 
 
-            </div>
+            <!-- DELETE -->
 
-        `;
+            <button
+                type="button"
+                class="btn btn-outline-danger"
+                title="Delete"
+                data-action="delete"
+                data-id="${id}"
+            >
 
-    }
+                <i
+                    class="
+                        fa-solid
+                        fa-trash
+                    "
+                >
+                </i>
+
+            </button>
+
+
+        </div>
+    `;
+
+}
 
 
     /*
@@ -16746,21 +17936,79 @@ async deleteInvoice(
 
 
         if (
-            !invoice
-        ) {
+    !invoice
+) {
 
-            throw new Error(
-                "Account Receivable not found."
-            );
+    throw new Error(
+        "Account Receivable not found."
+    );
 
-        }
+}
 
 
-        /*
-        ==================================================
-        INVOICE INFORMATION
-        ==================================================
-        */
+/*
+==================================================
+NORMALIZE STATUS
+
+SAME AS ACCOUNT PAYABLE
+==================================================
+*/
+
+const status =
+    String(
+        invoice.status
+        ||
+        ""
+    )
+    .trim();
+
+
+/*
+==================================================
+VALIDATE DELETE STATUS
+
+FINAL RULE:
+
+DRAFT
+-> CAN DELETE
+
+VOID
+-> CAN DELETE
+
+COMPLETE
+-> CANNOT DELETE
+
+PARTIAL PAID
+-> CANNOT DELETE
+
+PAID
+-> CANNOT DELETE
+
+PAYMENT HISTORY DOES NOT BLOCK DELETE.
+SERVICE WILL HANDLE PAYMENT HISTORY CLEANUP.
+==================================================
+*/
+
+if (
+    status !== "Draft"
+    &&
+    status !== "Void"
+) {
+
+    this.showError(
+        "Only Draft or Void Account Receivable can be deleted."
+    );
+
+    return;
+
+}
+
+
+/*
+==================================================
+INVOICE INFORMATION
+==================================================
+*/
 
         const invoiceNo =
             invoice.invoice_no
@@ -17195,35 +18443,124 @@ async deleteInvoice(
 
 
                     /*
-                    ==========================================
-                    CLOSE DELETE MODAL
-                    ==========================================
-                    */
+==========================================
+CLOSE MODAL
+==========================================
+*/
 
-                    modal.hide();
-
-
-                    /*
-                    ==========================================
-                    RELOAD DATA
-                    ==========================================
-                    */
-
-                    await this.loadData(
-                        false
-                    );
+modal.hide();
 
 
-                    /*
-                    ==========================================
-                    SUCCESS BOOTSTRAP ALERT
-                    ==========================================
-                    */
+/*
+==========================================
+REMOVE FROM LOCAL DATA
+NO DATABASE RELOAD
+==========================================
+*/
 
-                    this.showSuccess(
-                        "Account Receivable deleted successfully."
-                    );
+this.data =
+    Array.isArray(
+        this.data
+    )
+        ? this.data.filter(
+            item =>
+                String(
+                    item?.id
+                )
+                !==
+                String(
+                    id
+                )
+        )
+        : [];
 
+
+this.filteredData =
+    Array.isArray(
+        this.filteredData
+    )
+        ? this.filteredData.filter(
+            item =>
+                String(
+                    item?.id
+                )
+                !==
+                String(
+                    id
+                )
+        )
+        : [];
+
+
+/*
+==========================================
+RENDER DIRECTLY
+==========================================
+*/
+
+if (
+    typeof this.renderTable
+    ===
+    "function"
+) {
+
+    this.renderTable();
+
+}
+
+
+/*
+==========================================
+NOTIFY GL JOURNAL
+
+AR JOURNAL MAY HAVE BEEN
+DELETED / VOIDED DURING CLEANUP
+==========================================
+*/
+
+window.dispatchEvent(
+
+    new CustomEvent(
+        "finova:gl-journal-changed",
+        {
+            detail: {
+
+                source:
+                    "AR",
+
+                sourceModule:
+                    "AR",
+
+                sourceDocumentType:
+                    "AR_INVOICE",
+
+                action:
+                    "AR_DELETED",
+
+                documentId:
+                    id,
+
+                documentNo:
+                    invoice.invoice_no
+                    ||
+                    null
+
+            }
+        }
+    )
+
+);
+
+
+/*
+==========================================
+SUCCESS
+==========================================
+*/
+
+this.showSuccess(
+    "Account Receivable deleted successfully."
+);
                 }
 
                 catch (
@@ -20260,9 +21597,11 @@ previewHTML() {
     }
 
 }
-    /*
+   /*
 ======================================================
 VOID ACCOUNT RECEIVABLE
+FINAL
+SAME BEHAVIOR AS ACCOUNT PAYABLE
 ======================================================
 */
 
@@ -20287,21 +21626,21 @@ async voidInvoice(id) {
 
         /*
         ==================================================
-        LOAD CURRENT AR
+        FIND INVOICE
+        SAME PATTERN AS AP
         ==================================================
         */
 
-        const result =
-            await this.service.getById(
-                id
+        const invoice =
+            this.data.find(
+                item =>
+                    String(item.id)
+                    ===
+                    String(id)
             );
 
 
-        if (
-            !result
-            ||
-            !result.header
-        ) {
+        if (!invoice) {
 
             throw new Error(
                 "Account Receivable not found."
@@ -20310,42 +21649,36 @@ async voidInvoice(id) {
         }
 
 
-        const header =
-            result.header;
-
-
         /*
         ==================================================
-        STATUS VALIDATION
+        CHECK STATUS
+
+        SAME AS AP:
+
+        POSTED
+        PARTIAL PAID
+
+        CAN BE VOIDED
         ==================================================
         */
 
-        const status =
+        const currentStatus =
             String(
-                header.status
-                || ""
+                invoice.status
+                ||
+                ""
             )
-            .trim()
-            .toLowerCase();
+            .trim();
 
 
         if (
-            status === "draft"
+            currentStatus !== "Posted"
+            &&
+            currentStatus !== "Partial Paid"
         ) {
 
             throw new Error(
-                "Draft Account Receivable does not need to be voided. Delete it instead."
-            );
-
-        }
-
-
-        if (
-            status === "void"
-        ) {
-
-            throw new Error(
-                "Account Receivable is already Void."
+                "Only Posted or Partial Paid Account Receivable can be voided."
             );
 
         }
@@ -20353,44 +21686,62 @@ async voidInvoice(id) {
 
         /*
         ==================================================
-        PAID VALIDATION
+        STORE PENDING ID
         ==================================================
         */
 
-        const paidAmount =
-            Number(
-                header.paid_amount
-                || 0
+        this.pendingVoidId =
+            id;
+
+
+        /*
+        ==================================================
+        RESET VOID REASON
+        ==================================================
+        */
+
+        const reasonElement =
+            document.getElementById(
+                "void-ar-reason"
             );
 
 
         if (
-            paidAmount > 0
+            reasonElement
         ) {
 
-            throw new Error(
-                "Account Receivable with payment cannot be voided."
-            );
+            reasonElement.value =
+                "";
 
         }
 
 
         /*
         ==================================================
-        CONFIRMATION
+        SHOW VOID CONFIRMATION
         ==================================================
         */
 
-        const confirmed =
-            window.confirm(
-                `Void Account Receivable ${
-                    header.invoice_no
-                    || ""
-                }?`
+        const result =
+            await this.showARVoidConfirmation(
+                invoice
             );
 
 
-        if (!confirmed) {
+        /*
+        ==================================================
+        CANCEL
+        ==================================================
+        */
+
+        if (
+            !result
+            ||
+            !result.confirmed
+        ) {
+
+            this.pendingVoidId =
+                null;
 
             return;
 
@@ -20399,75 +21750,167 @@ async voidInvoice(id) {
 
         /*
         ==================================================
-        VOID GL JOURNAL
+        GET VOID REASON
         ==================================================
         */
 
+        const reason =
+            String(
+                result.reason
+                ||
+                ""
+            )
+            .trim();
+
+
         if (
-            header.gl_journal_id
+            !reason
         ) {
 
-            const {
-                error: glError
-            } =
-                await supabase
-
-                    .from(
-                        "trx_gl_journal"
-                    )
-
-                    .update({
-
-                        status:
-                            "Void"
-
-                    })
-
-                    .eq(
-                        "id",
-                        header.gl_journal_id
-                    );
-
-
-            if (glError) {
-
-                throw glError;
-
-            }
+            throw new Error(
+                "Void reason is required."
+            );
 
         }
 
 
         /*
         ==================================================
-        VOID ACCOUNT RECEIVABLE
+        EXECUTE VOID
+
+        SAME PATTERN AS AP
         ==================================================
         */
 
-        await this.service.void(
-            id
+        await this.service.voidInvoice(
+            id,
+            reason
         );
 
 
         /*
         ==================================================
-        RELOAD
+        CLEAR PENDING ID
+        ==================================================
+        */
+
+        this.pendingVoidId =
+            null;
+
+
+        /*
+        ==================================================
+        RELOAD DATA
+
+        SAME AS AP
+        NO FULL LOADING
         ==================================================
         */
 
         await this.loadData(
-    false
-);
+            false
+        );
 
 
-        console.log(
-            "Account Receivable voided:",
-            id
+        /*
+        ==================================================
+        NOTIFY GL JOURNAL
+        AR -> GL REALTIME
+        ==================================================
+        */
+
+        const refreshedInvoice =
+            this.data.find(
+                item =>
+                    String(item.id)
+                    ===
+                    String(id)
+            )
+            ||
+            invoice;
+
+
+        const glJournalId =
+            refreshedInvoice?.gl_journal_id
+            ||
+            invoice?.gl_journal_id
+            ||
+            null;
+
+
+        const journalNo =
+            refreshedInvoice
+                ?.trx_gl_journal
+                ?.journal_no
+            ||
+            invoice
+                ?.trx_gl_journal
+                ?.journal_no
+            ||
+            null;
+
+
+        window.dispatchEvent(
+
+            new CustomEvent(
+                "finova:gl-journal-changed",
+                {
+                    detail: {
+
+                        source:
+                            "AR",
+
+                        sourceModule:
+                            "AR",
+
+                        sourceDocumentType:
+                            "AR_INVOICE",
+
+                        sourceDocumentId:
+                            id,
+
+                        documentId:
+                            id,
+
+                        accountReceivableId:
+                            id,
+
+                        documentNo:
+                            invoice.invoice_no
+                            ||
+                            null,
+
+                        journalId:
+                            glJournalId,
+
+                        journalNo:
+                            journalNo,
+
+                        action:
+                            "AR_VOIDED"
+
+                    }
+                }
+            )
+
+        );
+
+
+        /*
+        ==================================================
+        SUCCESS
+        ==================================================
+        */
+
+        this.showSuccess(
+            "Account Receivable voided successfully."
         );
 
     }
 
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
             "AccountReceivable.voidInvoice:",
@@ -20475,13 +21918,409 @@ async voidInvoice(id) {
         );
 
 
+        this.pendingVoidId =
+            null;
+
+
         this.showError(
-            error.message
+            error?.message
             ||
             "Failed to void Account Receivable."
         );
 
     }
+
+}
+/*
+======================================================
+SHOW AR VOID CONFIRMATION
+BOOTSTRAP MODAL
+SAME PATTERN AS ACCOUNT PAYABLE
+======================================================
+*/
+
+showARVoidConfirmation(
+    invoice
+) {
+
+    return new Promise(
+        resolve => {
+
+            /*
+            ==============================================
+            REMOVE OLD MODAL
+            ==============================================
+            */
+
+            const oldModal =
+                document.getElementById(
+                    "ar-void-modal"
+                );
+
+
+            if (
+                oldModal
+            ) {
+
+                const oldInstance =
+                    bootstrap.Modal
+                        .getInstance(
+                            oldModal
+                        );
+
+
+                if (
+                    oldInstance
+                ) {
+
+                    oldInstance.dispose();
+
+                }
+
+
+                oldModal.remove();
+
+            }
+
+
+            /*
+            ==============================================
+            INVOICE NO
+            ==============================================
+            */
+
+            const invoiceNo =
+                invoice?.invoice_no
+                || "-";
+
+
+            /*
+            ==============================================
+            MODAL HTML
+            ==============================================
+            */
+
+            const modalHTML = `
+
+                <div
+                    class="modal fade"
+                    id="ar-void-modal"
+                    tabindex="-1"
+                    aria-hidden="true">
+
+                    <div
+                        class="modal-dialog modal-dialog-centered">
+
+                        <div
+                            class="modal-content">
+
+
+                            <div
+                                class="modal-header">
+
+                                <h5
+                                    class="modal-title fw-semibold">
+
+                                    <i
+                                        class="fa-solid fa-ban text-danger me-2">
+                                    </i>
+
+                                    Confirm Void
+
+                                </h5>
+
+
+                                <button
+                                    type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="modal">
+                                </button>
+
+                            </div>
+
+
+                            <div
+                                class="modal-body">
+
+                                <p
+                                    class="mb-3">
+
+                                    Are you sure you want to void
+                                    Account Receivable
+
+                                    <strong>
+                                        ${invoiceNo}
+                                    </strong>?
+
+                                </p>
+
+
+                                <label
+                                    for="void-ar-reason"
+                                    class="form-label">
+
+                                    Void Reason
+
+                                </label>
+
+
+                                <textarea
+                                    id="void-ar-reason"
+                                    class="form-control"
+                                    rows="3"
+                                    placeholder="Enter void reason..."
+                                    required>
+                                </textarea>
+
+
+                                <div
+                                    id="void-ar-reason-error"
+                                    class="text-danger small mt-2 d-none">
+
+                                    Void reason is required.
+
+                                </div>
+
+                            </div>
+
+
+                            <div
+                                class="modal-footer">
+
+                                <button
+                                    type="button"
+                                    class="btn btn-light"
+                                    data-bs-dismiss="modal">
+
+                                    Cancel
+
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    class="btn btn-danger"
+                                    id="btn-confirm-ar-void">
+
+                                    <i
+                                        class="fa-solid fa-ban me-1">
+                                    </i>
+
+                                    Void
+
+                                </button>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            `;
+
+
+            /*
+            ==============================================
+            APPEND MODAL
+            ==============================================
+            */
+
+            document.body.insertAdjacentHTML(
+                "beforeend",
+                modalHTML
+            );
+
+
+            const modalElement =
+                document.getElementById(
+                    "ar-void-modal"
+                );
+
+
+            const reasonElement =
+                document.getElementById(
+                    "void-ar-reason"
+                );
+
+
+            const errorElement =
+                document.getElementById(
+                    "void-ar-reason-error"
+                );
+
+
+            const confirmButton =
+                document.getElementById(
+                    "btn-confirm-ar-void"
+                );
+
+
+            /*
+            ==============================================
+            CREATE MODAL INSTANCE
+            ==============================================
+            */
+
+            const modal =
+                bootstrap.Modal
+                    .getOrCreateInstance(
+                        modalElement
+                    );
+
+
+            let resolved =
+                false;
+
+
+            /*
+            ==============================================
+            CONFIRM
+            ==============================================
+            */
+
+            confirmButton
+                ?.addEventListener(
+                    "click",
+                    () => {
+
+                        const reason =
+                            String(
+                                reasonElement?.value
+                                || ""
+                            )
+                            .trim();
+
+
+                        if (
+                            !reason
+                        ) {
+
+                            errorElement
+                                ?.classList
+                                .remove(
+                                    "d-none"
+                                );
+
+
+                            reasonElement
+                                ?.focus();
+
+
+                            return;
+
+                        }
+
+
+                        resolved =
+                            true;
+
+
+                        modal.hide();
+
+
+                        resolve({
+
+                            confirmed:
+                                true,
+
+                            reason:
+                                reason
+
+                        });
+
+                    }
+                );
+
+
+            /*
+            ==============================================
+            RESET ERROR WHEN TYPING
+            ==============================================
+            */
+
+            reasonElement
+                ?.addEventListener(
+                    "input",
+                    () => {
+
+                        errorElement
+                            ?.classList
+                            .add(
+                                "d-none"
+                            );
+
+                    }
+                );
+
+
+            /*
+            ==============================================
+            CANCEL / CLOSE
+            ==============================================
+            */
+
+            modalElement
+                ?.addEventListener(
+                    "hidden.bs.modal",
+                    () => {
+
+                        if (
+                            !resolved
+                        ) {
+
+                            resolved =
+                                true;
+
+
+                            resolve({
+
+                                confirmed:
+                                    false,
+
+                                reason:
+                                    ""
+
+                            });
+
+                        }
+
+
+                        modal.dispose();
+
+                        modalElement.remove();
+
+                    },
+                    {
+                        once:
+                            true
+                    }
+                );
+
+
+            /*
+            ==============================================
+            SHOW
+            ==============================================
+            */
+
+            modal.show();
+
+
+            setTimeout(
+                () => {
+
+                    reasonElement
+                        ?.focus();
+
+                },
+                250
+            );
+
+        }
+    );
 
 }
 
@@ -23276,6 +25115,7 @@ let journal =
         await this.loadData(
             false
         );
+        
 
 
         /*

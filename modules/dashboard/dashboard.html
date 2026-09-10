@@ -9,457 +9,1557 @@ Version : 2.0.0 Executive Summary
 <div class="finova-page dashboard-page">
 
     <!-- ======================================================
-         PAGE HEADER
+         MODERN DASHBOARD HEADER
     ======================================================= -->
-    <div class="finova-page-header dashboard-page-header">
 
-        <div>
-            <h2 class="finova-page-title">Dashboard</h2>
-            <p class="finova-page-subtitle mb-0">
-                Executive financial summary and accounting overview
-            </p>
-        </div>
+    <section class="dashboard-hero">
 
-        <div class="dashboard-header-meta">
-            <div class="dashboard-period-chip">
-                <i class="fa-regular fa-calendar"></i>
-                <span>Period</span>
-                <strong id="dashboard-period-label">Current Period</strong>
-            </div>
-        </div>
+        <div class="dashboard-hero-content">
 
-    </div>
+            <div class="dashboard-hero-copy">
 
-    <!-- ======================================================
-         WELCOME / EXECUTIVE HEADER
-    ======================================================= -->
-    <section class="dashboard-welcome-card">
+                <div class="dashboard-hero-eyebrow">
+                    <i class="fa-solid fa-chart-line"></i>
+                    FINANCIAL OVERVIEW
+                </div>
 
-        <div class="dashboard-welcome-copy">
-            <div class="dashboard-welcome-eyebrow">
-                <i class="fa-solid fa-chart-line"></i>
-                FINANCIAL OVERVIEW
+                <h1>
+                    Executive Financial Dashboard
+                </h1>
+
+                <p>
+                    Monitor financial position, performance,
+                    outstanding balances, and recent accounting
+                    activity from one dashboard.
+                </p>
+
             </div>
 
-            <h3>Executive Summary</h3>
 
-            <p>
-                Monitor financial position, performance, outstanding balances,
-                and recent accounting activity from one dashboard.
-            </p>
+            <div class="dashboard-hero-period">
+
+                <div class="dashboard-period-icon">
+                    <i class="fa-regular fa-calendar"></i>
+                </div>
+
+                <div class="dashboard-period-content">
+
+                    <span>
+                        Period
+                    </span>
+
+                    <strong id="dashboard-period-label">
+                        Current Period
+                    </strong>
+
+                    <small id="dashboard-header-date">
+                        -
+                    </small>
+
+                </div>
+
+            </div>
+
         </div>
 
-        <div class="dashboard-welcome-date">
-            <span>Today</span>
-            <strong id="dashboard-header-date">-</strong>
-        </div>
+
+        <div class="dashboard-hero-decoration dashboard-hero-decoration-one"></div>
+        <div class="dashboard-hero-decoration dashboard-hero-decoration-two"></div>
 
     </section>
+
 
     <!-- ======================================================
          KPI SUMMARY
     ======================================================= -->
+
     <section class="dashboard-kpi-grid">
 
-        <article class="dashboard-kpi-card">
-            <div class="dashboard-kpi-head">
-                <div>
-                    <span class="dashboard-kpi-label">Total Asset</span>
-                    <small>Financial Position</small>
-                </div>
-                <div class="dashboard-kpi-icon is-blue">
+
+        <!-- ==================================================
+             TOTAL ASSET
+        =================================================== -->
+
+        <article class="dashboard-kpi-card dashboard-kpi-blue">
+
+            <div class="dashboard-kpi-top">
+
+                <div class="dashboard-kpi-icon">
                     <i class="fa-solid fa-building-columns"></i>
                 </div>
+
+                <div class="dashboard-kpi-meta">
+                    <span class="dashboard-kpi-label">
+                        Total Asset
+                    </span>
+
+                    <small>
+                        Financial Position
+                    </small>
+                </div>
+
             </div>
-            <div class="dashboard-kpi-value" id="dashboard-total-asset">Rp 0</div>
-            <div class="dashboard-kpi-foot is-neutral">
-                <i class="fa-solid fa-circle-info"></i>
-                Balance Sheet
+
+
+            <div
+                class="dashboard-kpi-value"
+                id="dashboard-total-asset">
+                Rp 0
             </div>
+
+
+            <div class="dashboard-kpi-bottom">
+
+                <div class="dashboard-kpi-status is-neutral">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>Balance Sheet</span>
+                </div>
+
+                <div class="dashboard-kpi-mini-chart">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+
+            </div>
+
         </article>
 
-        <article class="dashboard-kpi-card">
-            <div class="dashboard-kpi-head">
-                <div>
-                    <span class="dashboard-kpi-label">Total Liability</span>
-                    <small>Financial Position</small>
-                </div>
-                <div class="dashboard-kpi-icon is-red">
+
+        <!-- ==================================================
+             TOTAL LIABILITY
+        =================================================== -->
+
+        <article class="dashboard-kpi-card dashboard-kpi-red">
+
+            <div class="dashboard-kpi-top">
+
+                <div class="dashboard-kpi-icon">
                     <i class="fa-solid fa-file-invoice-dollar"></i>
                 </div>
+
+                <div class="dashboard-kpi-meta">
+                    <span class="dashboard-kpi-label">
+                        Total Liability
+                    </span>
+
+                    <small>
+                        Financial Position
+                    </small>
+                </div>
+
             </div>
-            <div class="dashboard-kpi-value" id="dashboard-total-liability">Rp 0</div>
-            <div class="dashboard-kpi-foot is-neutral">
-                <i class="fa-solid fa-circle-info"></i>
-                Balance Sheet
+
+
+            <div
+                class="dashboard-kpi-value"
+                id="dashboard-total-liability">
+                Rp 0
             </div>
+
+
+            <div class="dashboard-kpi-bottom">
+
+                <div class="dashboard-kpi-status is-neutral">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>Balance Sheet</span>
+                </div>
+
+                <div class="dashboard-kpi-mini-chart">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+
+            </div>
+
         </article>
 
-        <article class="dashboard-kpi-card">
-            <div class="dashboard-kpi-head">
-                <div>
-                    <span class="dashboard-kpi-label">Equity</span>
-                    <small>Financial Position</small>
-                </div>
-                <div class="dashboard-kpi-icon is-purple">
+
+        <!-- ==================================================
+             EQUITY
+        =================================================== -->
+
+        <article class="dashboard-kpi-card dashboard-kpi-purple">
+
+            <div class="dashboard-kpi-top">
+
+                <div class="dashboard-kpi-icon">
                     <i class="fa-solid fa-scale-balanced"></i>
                 </div>
+
+                <div class="dashboard-kpi-meta">
+                    <span class="dashboard-kpi-label">
+                        Equity
+                    </span>
+
+                    <small>
+                        Financial Position
+                    </small>
+                </div>
+
             </div>
-            <div class="dashboard-kpi-value" id="dashboard-equity">Rp 0</div>
-            <div class="dashboard-kpi-foot is-neutral">
-                <i class="fa-solid fa-circle-info"></i>
-                Balance Sheet
+
+
+            <div
+                class="dashboard-kpi-value"
+                id="dashboard-equity">
+                Rp 0
             </div>
+
+
+            <div class="dashboard-kpi-bottom">
+
+                <div class="dashboard-kpi-status is-neutral">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span>Balance Sheet</span>
+                </div>
+
+                <div class="dashboard-kpi-mini-chart">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+
+            </div>
+
         </article>
 
-        <article class="dashboard-kpi-card">
-            <div class="dashboard-kpi-head">
-                <div>
-                    <span class="dashboard-kpi-label">Net Profit (YTD)</span>
-                    <small>Performance</small>
-                </div>
-                <div class="dashboard-kpi-icon is-green">
+
+        <!-- ==================================================
+             NET PROFIT
+        =================================================== -->
+
+        <article class="dashboard-kpi-card dashboard-kpi-green">
+
+            <div class="dashboard-kpi-top">
+
+                <div class="dashboard-kpi-icon">
                     <i class="fa-solid fa-arrow-trend-up"></i>
                 </div>
+
+                <div class="dashboard-kpi-meta">
+                    <span class="dashboard-kpi-label">
+                        Net Profit (YTD)
+                    </span>
+
+                    <small>
+                        Performance
+                    </small>
+                </div>
+
             </div>
-            <div class="dashboard-kpi-value" id="dashboard-net-profit">Rp 0</div>
-            <div class="dashboard-kpi-foot" id="dashboard-net-profit-status">
-                <i class="fa-solid fa-minus"></i>
-                No movement
+
+
+            <div
+                class="dashboard-kpi-value"
+                id="dashboard-net-profit">
+                Rp 0
             </div>
+
+
+            <div class="dashboard-kpi-bottom">
+
+                <div
+                    class="dashboard-kpi-status"
+                    id="dashboard-net-profit-status">
+
+                    <i class="fa-solid fa-minus"></i>
+
+                    <span>
+                        No movement
+                    </span>
+
+                </div>
+
+                <div class="dashboard-kpi-mini-chart">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+
+            </div>
+
         </article>
 
-        <article class="dashboard-kpi-card">
-            <div class="dashboard-kpi-head">
-                <div>
-                    <span class="dashboard-kpi-label">Net Margin</span>
-                    <small>Profitability</small>
-                </div>
-                <div class="dashboard-kpi-icon is-cyan">
+
+        <!-- ==================================================
+             NET MARGIN
+        =================================================== -->
+
+        <article class="dashboard-kpi-card dashboard-kpi-orange">
+
+            <div class="dashboard-kpi-top">
+
+                <div class="dashboard-kpi-icon">
                     <i class="fa-solid fa-percent"></i>
                 </div>
+
+                <div class="dashboard-kpi-meta">
+                    <span class="dashboard-kpi-label">
+                        Net Margin
+                    </span>
+
+                    <small>
+                        Profitability
+                    </small>
+                </div>
+
             </div>
-            <div class="dashboard-kpi-value" id="dashboard-net-margin">0,00%</div>
-            <div class="dashboard-kpi-foot is-neutral">
-                <i class="fa-solid fa-chart-pie"></i>
-                Revenue based
+
+
+            <div
+                class="dashboard-kpi-value"
+                id="dashboard-net-margin">
+                0,00%
             </div>
+
+
+            <div class="dashboard-kpi-bottom">
+
+                <div class="dashboard-kpi-status is-neutral">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Revenue based</span>
+                </div>
+
+                <div class="dashboard-kpi-mini-chart">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+
+            </div>
+
         </article>
 
     </section>
 
     <!-- ======================================================
-         PERFORMANCE TREND
-    ======================================================= -->
-    <section class="dashboard-section-grid dashboard-trend-section">
+     PERFORMANCE TREND
+======================================================= -->
 
-        <article class="dashboard-panel dashboard-trend-panel">
+<section class="dashboard-section-grid dashboard-trend-section">
 
-            <div class="dashboard-panel-header">
-                <div>
-                    <h5>Financial Performance Trend</h5>
-                    <p>Revenue, expense, and profit movement by month</p>
+
+    <!-- ==================================================
+         FINANCIAL PERFORMANCE TREND
+    =================================================== -->
+
+    <article class="dashboard-panel dashboard-trend-panel">
+
+        <div class="dashboard-panel-header dashboard-modern-panel-header">
+
+            <div class="dashboard-panel-title-wrap">
+
+                <div class="dashboard-panel-icon is-blue">
+
+                    <i class="fa-solid fa-chart-column"></i>
+
                 </div>
+
+
+                <div>
+
+                    <h5>
+                        Financial Performance Trend
+                    </h5>
+
+                    <p>
+                        Revenue, expense, and profit movement by month
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="dashboard-trend-actions">
 
                 <div class="dashboard-chart-legend">
-                    <span><i class="legend-dot revenue"></i>Revenue</span>
-                    <span><i class="legend-dot expense"></i>Expense</span>
-                    <span><i class="legend-dot profit"></i>Profit</span>
+
+                    <span>
+                        <i class="legend-dot revenue"></i>
+                        Revenue
+                    </span>
+
+                    <span>
+                        <i class="legend-dot expense"></i>
+                        Expense
+                    </span>
+
+                    <span>
+                        <i class="legend-dot profit"></i>
+                        Profit
+                    </span>
+
                 </div>
+
+
+                <div class="dashboard-year-chip">
+
+                    <i class="fa-regular fa-calendar"></i>
+
+                    <span>
+                        Year 2026
+                    </span>
+
+                </div>
+
             </div>
 
-            <div class="dashboard-panel-body dashboard-chart-body">
-                <div class="dashboard-chart-area" id="dashboard-performance-chart"></div>
+        </div>
+
+
+        <div class="dashboard-panel-body dashboard-chart-body">
+
+            <div
+                class="dashboard-chart-area"
+                id="dashboard-performance-chart">
             </div>
 
-        </article>
+        </div>
 
-        <article class="dashboard-panel dashboard-position-panel">
+    </article>
 
-            <div class="dashboard-panel-header">
-                <div>
-                    <h5>Financial Position</h5>
-                    <p>Balance Sheet composition</p>
-                </div>
-                <div class="dashboard-panel-icon">
+
+    <!-- ==================================================
+         FINANCIAL POSITION
+    =================================================== -->
+
+    <article class="dashboard-panel dashboard-position-panel">
+
+        <div class="dashboard-panel-header dashboard-modern-panel-header">
+
+            <div class="dashboard-panel-title-wrap">
+
+                <div class="dashboard-panel-icon is-purple">
+
                     <i class="fa-solid fa-chart-pie"></i>
+
                 </div>
+
+
+                <div>
+
+                    <h5>
+                        Financial Position
+                    </h5>
+
+                    <p>
+                        Balance Sheet composition
+                    </p>
+
+                </div>
+
             </div>
 
-            <div class="dashboard-panel-body">
+
+            <button
+                type="button"
+                class="dashboard-panel-menu"
+                aria-label="More">
+
+                <i class="fa-solid fa-ellipsis"></i>
+
+            </button>
+
+        </div>
+
+
+        <div class="dashboard-panel-body dashboard-position-body">
+
+
+            <!-- ==========================================
+                 DONUT
+            =========================================== -->
+
+            <div class="dashboard-position-top">
 
                 <div class="dashboard-donut-wrap">
-                    <div class="dashboard-donut" id="dashboard-position-donut">
+
+                    <div
+                        class="dashboard-donut"
+                        id="dashboard-position-donut">
+
                         <div class="dashboard-donut-center">
-                            <span>Total Asset</span>
-                            <strong id="dashboard-donut-total">Rp 0</strong>
+
+                            <span>
+                                Total Asset
+                            </span>
+
+                            <strong id="dashboard-donut-total">
+                                Rp 0
+                            </strong>
+
                         </div>
+
                     </div>
+
                 </div>
 
-                <div class="dashboard-position-list">
+
+                <!-- ======================================
+                     POSITION SUMMARY
+                ======================================= -->
+
+                <div class="dashboard-position-summary">
+
+
                     <div class="dashboard-position-item">
-                        <span><i class="position-dot asset"></i>Asset</span>
-                        <strong id="dashboard-position-asset">Rp 0</strong>
+
+                        <div class="dashboard-position-name">
+
+                            <i class="position-dot asset"></i>
+
+                            <span>
+                                Asset
+                            </span>
+
+                        </div>
+
+
+                        <strong id="dashboard-position-asset">
+                            Rp 0
+                        </strong>
+
                     </div>
+
+
                     <div class="dashboard-position-item">
-                        <span><i class="position-dot liability"></i>Liability</span>
-                        <strong id="dashboard-position-liability">Rp 0</strong>
+
+                        <div class="dashboard-position-name">
+
+                            <i class="position-dot liability"></i>
+
+                            <span>
+                                Liability
+                            </span>
+
+                        </div>
+
+
+                        <strong id="dashboard-position-liability">
+                            Rp 0
+                        </strong>
+
                     </div>
+
+
                     <div class="dashboard-position-item">
-                        <span><i class="position-dot equity"></i>Equity</span>
-                        <strong id="dashboard-position-equity">Rp 0</strong>
+
+                        <div class="dashboard-position-name">
+
+                            <i class="position-dot equity"></i>
+
+                            <span>
+                                Equity
+                            </span>
+
+                        </div>
+
+
+                        <strong id="dashboard-position-equity">
+                            Rp 0
+                        </strong>
+
                     </div>
+
                 </div>
 
             </div>
 
-        </article>
 
-    </section>
+            <!-- ==========================================
+                 POSITION INSIGHT
+            =========================================== -->
+
+            <div class="dashboard-position-insight">
+
+                <div class="dashboard-position-insight-icon">
+
+                    <i class="fa-solid fa-circle-info"></i>
+
+                </div>
+
+
+                <div>
+
+                    <strong>
+                        Financial position overview
+                    </strong>
+
+                    <span>
+                        Review the composition of assets,
+                        liabilities, and equity.
+                    </span>
+
+                </div>
+
+
+                <i class="fa-solid fa-chevron-right"></i>
+
+            </div>
+
+        </div>
+
+    </article>
+
+</section>
 
     <!-- ======================================================
-         ACCOUNTING SUMMARY
-    ======================================================= -->
-    <section class="dashboard-section-grid dashboard-summary-section">
+     ACCOUNTING SUMMARY
+======================================================= -->
 
-        <article class="dashboard-panel">
-            <div class="dashboard-panel-header">
-                <div>
-                    <h5>Balance Sheet Summary</h5>
-                    <p>Current financial position</p>
-                </div>
-                <div class="dashboard-panel-icon">
+<section class="dashboard-section-grid dashboard-summary-section">
+
+
+    <!-- ==================================================
+         BALANCE SHEET SUMMARY
+    =================================================== -->
+
+    <article class="dashboard-panel dashboard-summary-card">
+
+        <div class="dashboard-panel-header dashboard-modern-panel-header">
+
+            <div class="dashboard-panel-title-wrap">
+
+                <div class="dashboard-panel-icon is-blue">
+
                     <i class="fa-solid fa-scale-balanced"></i>
-                </div>
-            </div>
 
-            <div class="dashboard-panel-body dashboard-summary-list">
-                <div class="dashboard-summary-row">
-                    <span>Total Asset</span>
-                    <strong id="dashboard-bs-asset">Rp 0</strong>
                 </div>
-                <div class="dashboard-summary-row">
-                    <span>Total Liability</span>
-                    <strong id="dashboard-bs-liability">Rp 0</strong>
-                </div>
-                <div class="dashboard-summary-row">
-                    <span>Equity</span>
-                    <strong id="dashboard-bs-equity">Rp 0</strong>
-                </div>
-                <div class="dashboard-summary-row dashboard-summary-total">
-                    <span>Balance Difference</span>
-                    <strong id="dashboard-bs-difference">Rp 0</strong>
-                </div>
-            </div>
-        </article>
 
-        <article class="dashboard-panel">
-            <div class="dashboard-panel-header">
+
                 <div>
-                    <h5>Profit &amp; Loss Summary</h5>
-                    <p>Year-to-date performance</p>
+
+                    <h5>
+                        Balance Sheet Summary
+                    </h5>
+
+                    <p>
+                        Current financial position
+                    </p>
+
                 </div>
-                <div class="dashboard-panel-icon">
+
+            </div>
+
+
+            <div class="dashboard-summary-badge">
+
+                <i class="fa-solid fa-circle"></i>
+
+                Current
+
+            </div>
+
+        </div>
+
+
+        <div class="dashboard-panel-body dashboard-summary-modern-list">
+
+
+            <div class="dashboard-summary-modern-row">
+
+                <div class="dashboard-summary-modern-label">
+
+                    <div class="dashboard-summary-row-icon is-blue">
+
+                        <i class="fa-solid fa-building-columns"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Total Asset
+                        </span>
+
+                        <small>
+                            Resources owned
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <strong id="dashboard-bs-asset">
+                    Rp 0
+                </strong>
+
+            </div>
+
+
+            <div class="dashboard-summary-modern-row">
+
+                <div class="dashboard-summary-modern-label">
+
+                    <div class="dashboard-summary-row-icon is-red">
+
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Total Liability
+                        </span>
+
+                        <small>
+                            Current obligations
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <strong id="dashboard-bs-liability">
+                    Rp 0
+                </strong>
+
+            </div>
+
+
+            <div class="dashboard-summary-modern-row">
+
+                <div class="dashboard-summary-modern-label">
+
+                    <div class="dashboard-summary-row-icon is-purple">
+
+                        <i class="fa-solid fa-scale-balanced"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Equity
+                        </span>
+
+                        <small>
+                            Owner's interest
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <strong id="dashboard-bs-equity">
+                    Rp 0
+                </strong>
+
+            </div>
+
+
+            <div class="dashboard-summary-modern-total">
+
+                <div>
+
+                    <span>
+                        Balance Difference
+                    </span>
+
+                    <small>
+                        Asset vs liability and equity
+                    </small>
+
+                </div>
+
+
+                <strong id="dashboard-bs-difference">
+                    Rp 0
+                </strong>
+
+            </div>
+
+        </div>
+
+    </article>
+
+
+    <!-- ==================================================
+         PROFIT & LOSS SUMMARY
+    =================================================== -->
+
+    <article class="dashboard-panel dashboard-summary-card">
+
+        <div class="dashboard-panel-header dashboard-modern-panel-header">
+
+            <div class="dashboard-panel-title-wrap">
+
+                <div class="dashboard-panel-icon is-green">
+
                     <i class="fa-solid fa-chart-line"></i>
-                </div>
-            </div>
 
-            <div class="dashboard-panel-body dashboard-summary-list">
-                <div class="dashboard-summary-row">
-                    <span>Revenue</span>
-                    <strong id="dashboard-pl-revenue">Rp 0</strong>
                 </div>
-                <div class="dashboard-summary-row">
-                    <span>Expense</span>
-                    <strong id="dashboard-pl-expense">Rp 0</strong>
-                </div>
-                <div class="dashboard-summary-row dashboard-summary-total">
-                    <span>Net Profit</span>
-                    <strong id="dashboard-pl-profit">Rp 0</strong>
-                </div>
-                <div class="dashboard-summary-row">
-                    <span>Net Margin</span>
-                    <strong id="dashboard-pl-margin">0,00%</strong>
-                </div>
-            </div>
-        </article>
 
-        <article class="dashboard-panel">
-            <div class="dashboard-panel-header">
+
                 <div>
-                    <h5>Quick Insights</h5>
-                    <p>Items requiring attention</p>
+
+                    <h5>
+                        Profit &amp; Loss Summary
+                    </h5>
+
+                    <p>
+                        Year-to-date performance
+                    </p>
+
                 </div>
-                <div class="dashboard-panel-icon">
+
+            </div>
+
+
+            <div class="dashboard-summary-badge dashboard-summary-badge-green">
+
+                <i class="fa-solid fa-circle"></i>
+
+                YTD
+
+            </div>
+
+        </div>
+
+
+        <div class="dashboard-panel-body dashboard-summary-modern-list">
+
+
+            <div class="dashboard-summary-modern-row">
+
+                <div class="dashboard-summary-modern-label">
+
+                    <div class="dashboard-summary-row-icon is-green">
+
+                        <i class="fa-solid fa-arrow-trend-up"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Revenue
+                        </span>
+
+                        <small>
+                            Income generated
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <strong id="dashboard-pl-revenue">
+                    Rp 0
+                </strong>
+
+            </div>
+
+
+            <div class="dashboard-summary-modern-row">
+
+                <div class="dashboard-summary-modern-label">
+
+                    <div class="dashboard-summary-row-icon is-red">
+
+                        <i class="fa-solid fa-arrow-trend-down"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Expense
+                        </span>
+
+                        <small>
+                            Operating cost
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <strong id="dashboard-pl-expense">
+                    Rp 0
+                </strong>
+
+            </div>
+
+
+            <div class="dashboard-profit-highlight">
+
+                <div class="dashboard-profit-highlight-left">
+
+                    <div class="dashboard-profit-highlight-icon">
+
+                        <i class="fa-solid fa-chart-column"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Net Profit (YTD)
+                        </span>
+
+                        <small>
+                            Revenue minus expense
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <strong id="dashboard-pl-profit">
+                    Rp 0
+                </strong>
+
+            </div>
+
+
+            <div class="dashboard-summary-modern-row dashboard-margin-row">
+
+                <div class="dashboard-summary-modern-label">
+
+                    <div class="dashboard-summary-row-icon is-orange">
+
+                        <i class="fa-solid fa-percent"></i>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            Net Margin
+                        </span>
+
+                        <small>
+                            Profitability ratio
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <strong id="dashboard-pl-margin">
+                    0,00%
+                </strong>
+
+            </div>
+
+        </div>
+
+    </article>
+
+
+    <!-- ==================================================
+         QUICK INSIGHTS
+    =================================================== -->
+
+    <article class="dashboard-panel dashboard-insight-panel">
+
+        <div class="dashboard-panel-header dashboard-modern-panel-header">
+
+            <div class="dashboard-panel-title-wrap">
+
+                <div class="dashboard-panel-icon is-orange">
+
                     <i class="fa-regular fa-lightbulb"></i>
+
                 </div>
+
+
+                <div>
+
+                    <h5>
+                        Quick Insights
+                    </h5>
+
+                    <p>
+                        Items requiring attention
+                    </p>
+
+                </div>
+
             </div>
 
-            <div class="dashboard-panel-body dashboard-insight-list" id="dashboard-insight-list">
-                <div class="dashboard-insight-item is-info">
-                    <div class="dashboard-insight-icon">
-                        <i class="fa-solid fa-circle-info"></i>
-                    </div>
-                    <div>
-                        <strong>Dashboard ready</strong>
-                        <span>Financial insights will appear when accounting data is loaded.</span>
-                    </div>
-                </div>
-            </div>
-        </article>
 
-    </section>
+            <div class="dashboard-insight-indicator">
+
+                <i class="fa-solid fa-bolt"></i>
+
+            </div>
+
+        </div>
+
+
+        <div
+            class="dashboard-panel-body dashboard-insight-modern-list"
+            id="dashboard-insight-list">
+
+            <div class="dashboard-insight-modern-item is-info">
+
+                <div class="dashboard-insight-modern-icon">
+
+                    <i class="fa-solid fa-circle-info"></i>
+
+                </div>
+
+
+                <div class="dashboard-insight-modern-content">
+
+                    <strong>
+                        Dashboard ready
+                    </strong>
+
+                    <span>
+                        Financial insights will appear when accounting data is loaded.
+                    </span>
+
+                </div>
+
+
+                <i class="fa-solid fa-chevron-right"></i>
+
+            </div>
+
+        </div>
+
+    </article>
+
+</section>
 
     <!-- ======================================================
-         OPERATIONAL SNAPSHOT
-    ======================================================= -->
-    <section class="dashboard-operational-grid">
+     OPERATIONAL SNAPSHOT
+======================================================= -->
 
-        <article class="dashboard-mini-card">
-            <div class="dashboard-mini-icon is-blue">
+<section class="dashboard-operational-section">
+
+    <div class="dashboard-section-heading">
+
+        <div>
+
+            <span class="dashboard-section-eyebrow">
+                OPERATIONAL OVERVIEW
+            </span>
+
+            <h4>
+                Operational Snapshot
+            </h4>
+
+            <p>
+                Current receivable, payable, journal,
+                and business partner activity.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <div class="dashboard-operational-grid">
+
+
+        <!-- ==================================================
+             ACCOUNT RECEIVABLE
+        =================================================== -->
+
+        <article class="dashboard-mini-card dashboard-mini-blue">
+
+            <div class="dashboard-mini-icon">
+
                 <i class="fa-solid fa-money-check-dollar"></i>
+
             </div>
-            <div>
-                <span>Account Receivable</span>
-                <strong id="dashboard-ar-outstanding">Rp 0</strong>
-                <small id="dashboard-ar-overdue">0 overdue</small>
+
+
+            <div class="dashboard-mini-content">
+
+                <div class="dashboard-mini-label">
+                    Account Receivable
+                </div>
+
+                <strong id="dashboard-ar-outstanding">
+                    Rp 0
+                </strong>
+
+                <div class="dashboard-mini-meta">
+
+                    <span class="dashboard-mini-dot"></span>
+
+                    <small id="dashboard-ar-overdue">
+                        0 overdue
+                    </small>
+
+                </div>
+
             </div>
+
+
+            <div class="dashboard-mini-decoration">
+
+                <i class="fa-solid fa-arrow-trend-up"></i>
+
+            </div>
+
         </article>
 
-        <article class="dashboard-mini-card">
-            <div class="dashboard-mini-icon is-red">
+
+        <!-- ==================================================
+             ACCOUNT PAYABLE
+        =================================================== -->
+
+        <article class="dashboard-mini-card dashboard-mini-red">
+
+            <div class="dashboard-mini-icon">
+
                 <i class="fa-solid fa-file-invoice-dollar"></i>
+
             </div>
-            <div>
-                <span>Account Payable</span>
-                <strong id="dashboard-ap-outstanding">Rp 0</strong>
-                <small id="dashboard-ap-overdue">0 overdue</small>
+
+
+            <div class="dashboard-mini-content">
+
+                <div class="dashboard-mini-label">
+                    Account Payable
+                </div>
+
+                <strong id="dashboard-ap-outstanding">
+                    Rp 0
+                </strong>
+
+                <div class="dashboard-mini-meta">
+
+                    <span class="dashboard-mini-dot"></span>
+
+                    <small id="dashboard-ap-overdue">
+                        0 overdue
+                    </small>
+
+                </div>
+
             </div>
+
+
+            <div class="dashboard-mini-decoration">
+
+                <i class="fa-solid fa-arrow-trend-down"></i>
+
+            </div>
+
         </article>
 
-        <article class="dashboard-mini-card">
-            <div class="dashboard-mini-icon is-purple">
+
+        <!-- ==================================================
+             DRAFT JOURNAL
+        =================================================== -->
+
+        <article class="dashboard-mini-card dashboard-mini-purple">
+
+            <div class="dashboard-mini-icon">
+
                 <i class="fa-solid fa-book-open"></i>
+
             </div>
-            <div>
-                <span>Draft Journal</span>
-                <strong id="dashboard-draft-journal">0</strong>
-                <small>Waiting for posting</small>
+
+
+            <div class="dashboard-mini-content">
+
+                <div class="dashboard-mini-label">
+                    Draft Journal
+                </div>
+
+                <strong id="dashboard-draft-journal">
+                    0
+                </strong>
+
+                <div class="dashboard-mini-meta">
+
+                    <span class="dashboard-mini-dot"></span>
+
+                    <small>
+                        Waiting for posting
+                    </small>
+
+                </div>
+
             </div>
+
+
+            <div class="dashboard-mini-decoration">
+
+                <i class="fa-solid fa-file-circle-plus"></i>
+
+            </div>
+
         </article>
 
-        <article class="dashboard-mini-card">
-            <div class="dashboard-mini-icon is-green">
+
+        <!-- ==================================================
+             ACTIVE BUSINESS PARTNER
+        =================================================== -->
+
+        <article class="dashboard-mini-card dashboard-mini-green">
+
+            <div class="dashboard-mini-icon">
+
                 <i class="fa-solid fa-users"></i>
+
             </div>
-            <div>
-                <span>Active Business Partner</span>
-                <strong id="dashboard-active-bp">0</strong>
-                <small>Customer, Vendor, Employee</small>
+
+
+            <div class="dashboard-mini-content">
+
+                <div class="dashboard-mini-label">
+                    Active Business Partner
+                </div>
+
+                <strong id="dashboard-active-bp">
+                    0
+                </strong>
+
+                <div class="dashboard-mini-meta">
+
+                    <span class="dashboard-mini-dot"></span>
+
+                    <small>
+                        Customer, Vendor, Employee
+                    </small>
+
+                </div>
+
             </div>
+
+
+            <div class="dashboard-mini-decoration">
+
+                <i class="fa-solid fa-user-check"></i>
+
+            </div>
+
         </article>
 
-    </section>
+    </div>
 
-    <!-- ======================================================
-         RECENT ACTIVITY + SYSTEM INFO
-    ======================================================= -->
-    <section class="dashboard-bottom-grid">
+</section>
 
-        <article class="dashboard-panel dashboard-activity-panel">
-            <div class="dashboard-panel-header">
-                <div>
-                    <h5>Recent Financial Activity</h5>
-                    <p>Latest transactions across accounting modules</p>
-                </div>
-                <div class="dashboard-panel-icon">
+
+<!-- ======================================================
+     RECENT ACTIVITY + SYSTEM INFO
+======================================================= -->
+
+<section class="dashboard-bottom-grid">
+
+
+    <!-- ==================================================
+         RECENT FINANCIAL ACTIVITY
+    =================================================== -->
+
+    <article class="dashboard-panel dashboard-activity-panel">
+
+        <div class="dashboard-panel-header dashboard-modern-panel-header">
+
+            <div class="dashboard-panel-title-wrap">
+
+                <div class="dashboard-panel-icon is-blue">
+
                     <i class="fa-solid fa-clock-rotate-left"></i>
-                </div>
-            </div>
 
-            <div class="dashboard-panel-body dashboard-table-body">
-                <div class="table-responsive">
-                    <table class="table dashboard-activity-table mb-0">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Module</th>
-                                <th>Document</th>
-                                <th>Description</th>
-                                <th class="text-end">Amount</th>
-                                <th class="text-center">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="dashboard-activity-tbody">
-                            <tr>
-                                <td colspan="6" class="dashboard-empty-state">
-                                    <i class="fa-regular fa-folder-open"></i>
-                                    <span>No recent financial activity.</span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
                 </div>
-            </div>
-        </article>
 
-        <article class="dashboard-panel dashboard-system-panel">
-            <div class="dashboard-panel-header">
+
                 <div>
-                    <h5>System Information</h5>
-                    <p>Current accounting environment</p>
+
+                    <h5>
+                        Recent Financial Activity
+                    </h5>
+
+                    <p>
+                        Latest transactions across accounting modules
+                    </p>
+
                 </div>
-                <div class="dashboard-panel-icon">
+
+            </div>
+
+
+            <div class="dashboard-activity-header-badge">
+
+                <span></span>
+
+                Live
+
+            </div>
+
+        </div>
+
+
+        <div class="dashboard-panel-body dashboard-table-body">
+
+            <div class="table-responsive">
+
+                <table class="table dashboard-activity-table mb-0">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Date
+                            </th>
+
+                            <th>
+                                Module
+                            </th>
+
+                            <th>
+                                Document
+                            </th>
+
+                            <th>
+                                Description
+                            </th>
+
+                            <th class="text-end">
+                                Amount
+                            </th>
+
+                            <th class="text-center">
+                                Status
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="dashboard-activity-tbody">
+
+                        <tr>
+
+                            <td
+                                colspan="6"
+                                class="dashboard-empty-state">
+
+                                <div class="dashboard-empty-visual">
+
+                                    <div class="dashboard-empty-icon">
+
+                                        <i class="fa-regular fa-folder-open"></i>
+
+                                    </div>
+
+
+                                    <strong>
+                                        No financial activity
+                                    </strong>
+
+                                    <span>
+                                        Recent transactions will appear here automatically.
+                                    </span>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </article>
+
+
+    <!-- ==================================================
+         SYSTEM INFORMATION
+    =================================================== -->
+
+    <article class="dashboard-panel dashboard-system-panel">
+
+        <div class="dashboard-panel-header dashboard-modern-panel-header">
+
+            <div class="dashboard-panel-title-wrap">
+
+                <div class="dashboard-panel-icon is-purple">
+
                     <i class="fa-solid fa-gear"></i>
-                </div>
-            </div>
 
-            <div class="dashboard-panel-body dashboard-system-list">
-
-                <div class="dashboard-system-item">
-                    <div class="dashboard-system-icon">
-                        <i class="fa-regular fa-clock"></i>
-                    </div>
-                    <div>
-                        <span>Current Time</span>
-                        <strong id="dashboard-current-time">-</strong>
-                    </div>
                 </div>
 
-                <div class="dashboard-system-item">
-                    <div class="dashboard-system-icon">
-                        <i class="fa-regular fa-calendar-check"></i>
-                    </div>
-                    <div>
-                        <span>Financial Period</span>
-                        <strong id="dashboard-period">Current Period</strong>
-                    </div>
-                </div>
 
-                <div class="dashboard-system-item">
-                    <div class="dashboard-system-icon">
-                        <i class="fa-solid fa-building"></i>
-                    </div>
-                    <div>
-                        <span>Branch</span>
-                        <strong id="dashboard-branch">-</strong>
-                    </div>
-                </div>
+                <div>
 
-                <div class="dashboard-system-item">
-                    <div class="dashboard-system-icon">
-                        <i class="fa-solid fa-coins"></i>
-                    </div>
-                    <div>
-                        <span>Default Currency</span>
-                        <strong id="dashboard-currency">IDR</strong>
-                    </div>
+                    <h5>
+                        System Information
+                    </h5>
+
+                    <p>
+                        Current accounting environment
+                    </p>
+
                 </div>
 
             </div>
-        </article>
 
-    </section>
+
+            <div class="dashboard-system-status">
+
+                <span></span>
+
+                Active
+
+            </div>
+
+        </div>
+
+
+        <div class="dashboard-panel-body dashboard-system-modern-list">
+
+
+            <!-- ==========================================
+                 CURRENT TIME
+            =========================================== -->
+
+            <div class="dashboard-system-modern-item">
+
+                <div class="dashboard-system-icon is-blue">
+
+                    <i class="fa-regular fa-clock"></i>
+
+                </div>
+
+
+                <div class="dashboard-system-copy">
+
+                    <span>
+                        Current Time
+                    </span>
+
+                    <strong id="dashboard-current-time">
+                        -
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- ==========================================
+                 FINANCIAL PERIOD
+            =========================================== -->
+
+            <div class="dashboard-system-modern-item">
+
+                <div class="dashboard-system-icon is-purple">
+
+                    <i class="fa-regular fa-calendar-check"></i>
+
+                </div>
+
+
+                <div class="dashboard-system-copy">
+
+                    <span>
+                        Financial Period
+                    </span>
+
+                    <strong id="dashboard-period">
+                        Current Period
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- ==========================================
+                 BRANCH
+            =========================================== -->
+
+            <div class="dashboard-system-modern-item">
+
+                <div class="dashboard-system-icon is-orange">
+
+                    <i class="fa-solid fa-building"></i>
+
+                </div>
+
+
+                <div class="dashboard-system-copy">
+
+                    <span>
+                        Branch
+                    </span>
+
+                    <strong id="dashboard-branch">
+                        -
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <!-- ==========================================
+                 CURRENCY
+            =========================================== -->
+
+            <div class="dashboard-system-modern-item">
+
+                <div class="dashboard-system-icon is-green">
+
+                    <i class="fa-solid fa-coins"></i>
+
+                </div>
+
+
+                <div class="dashboard-system-copy">
+
+                    <span>
+                        Default Currency
+                    </span>
+
+                    <strong id="dashboard-currency">
+                        IDR
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </article>
+
+</section>
 
 </div>
