@@ -332,19 +332,45 @@ cacheElements() {
         document.getElementById("coa-table-body");
 
     /*
-    ======================================================
-    PAGINATION
-    ======================================================
-    */
+======================================================
+PAGINATION
+======================================================
+*/
 
-    this.pagination =
-        document.getElementById("pagination");
+this.btnFirst =
+    document.getElementById(
+        "coa-pagination-first"
+    );
 
-    this.paginationInfo =
-        document.getElementById("pagination-info");
+this.btnPrev =
+    document.getElementById(
+        "coa-pagination-prev"
+    );
 
-    this.totalRecord =
-        document.getElementById("total-record");
+this.btnNext =
+    document.getElementById(
+        "coa-pagination-next"
+    );
+
+this.btnLast =
+    document.getElementById(
+        "coa-pagination-last"
+    );
+
+this.txtPage =
+    document.getElementById(
+        "coa-pagination-page-input"
+    );
+
+this.lblTotalPages =
+    document.getElementById(
+        "coa-pagination-total-pages"
+    );
+
+this.lblPaginationInfo =
+    document.getElementById(
+        "coa-pagination-info"
+    );
 
     /*
     ======================================================
@@ -568,43 +594,115 @@ HANDLE REAL-TIME SEARCH
 
 handleSearch() {
 
+    /*
+    ======================================================
+    FILTER VALUE
+    ======================================================
+    */
+
     const keyword =
         this.searchInput
             ?.value
             .trim()
-            .toLowerCase() || "";
+            .toLowerCase()
+        || "";
 
-    if (!keyword) {
 
-        this.filteredData =
-            [...this.data];
+    const status =
+        this.statusFilter
+            ?.value
+        || "";
 
-    } else {
 
-        this.filteredData =
-            this.data.filter(account => {
+    /*
+    ======================================================
+    FILTER DATA
+    ======================================================
+    */
+
+    this.filteredData =
+        this.data.filter(
+            account => {
+
+                /*
+                ==========================================
+                KEYWORD
+                ==========================================
+                */
 
                 const code =
                     String(
-                        account.account_code || ""
-                    ).toLowerCase();
+                        account.account_code
+                        || ""
+                    )
+                    .toLowerCase();
+
 
                 const name =
                     String(
-                        account.account_name || ""
-                    ).toLowerCase();
+                        account.account_name
+                        || ""
+                    )
+                    .toLowerCase();
+
+
+                const keywordMatch =
+                    !keyword
+                    ||
+                    code.includes(
+                        keyword
+                    )
+                    ||
+                    name.includes(
+                        keyword
+                    );
+
+
+                /*
+                ==========================================
+                STATUS
+                ==========================================
+                */
+
+                let statusMatch =
+                    true;
+
+
+                if (
+                    status === "true"
+                ) {
+
+                    statusMatch =
+                        account.status === true;
+
+                }
+
+
+                else if (
+                    status === "false"
+                ) {
+
+                    statusMatch =
+                        account.status === false;
+
+                }
+
+
+                /*
+                ==========================================
+                RESULT
+                ==========================================
+                */
 
                 return (
-
-                    code.includes(keyword) ||
-
-                    name.includes(keyword)
-
+                    keywordMatch
+                    &&
+                    statusMatch
                 );
 
-            });
+            }
+        );
 
-    }
 
     /*
     ======================================================
@@ -612,7 +710,9 @@ handleSearch() {
     ======================================================
     */
 
-    this.currentPage = 1;
+    this.currentPage =
+        1;
+
 
     /*
     ======================================================
@@ -621,8 +721,6 @@ handleSearch() {
     */
 
     this.renderTable();
-
-    this.renderPagination();
 
 }
 
@@ -2537,13 +2635,7 @@ async loadData() {
 
         this.renderTable();
 
-        /*
-        ======================================================
-        RENDER
-        ======================================================
-        */
-
-        this.renderTable();
+        
 
     }
 
@@ -2679,7 +2771,9 @@ renderTable(data = null) {
     */
 
     if (!this.tableBody) {
+
         return;
+
     }
 
 
@@ -2689,8 +2783,25 @@ renderTable(data = null) {
     ======================================================
     */
 
-    if (Array.isArray(data)) {
-        this.filteredData = data;
+    if (
+        Array.isArray(data)
+    ) {
+
+        this.filteredData =
+            data;
+
+    }
+
+
+    if (
+        !Array.isArray(
+            this.filteredData
+        )
+    ) {
+
+        this.filteredData =
+            [];
+
     }
 
 
@@ -2702,6 +2813,7 @@ renderTable(data = null) {
 
     const totalRecords =
         this.filteredData.length;
+
 
     const totalPages =
         Math.max(
@@ -2735,7 +2847,12 @@ renderTable(data = null) {
     ======================================================
     */
 
-    if (!totalRecords) {
+    if (
+        totalRecords === 0
+    ) {
+
+        this.currentPage =
+            1;
 
         this.renderEmptyState();
 
@@ -2753,12 +2870,16 @@ renderTable(data = null) {
     */
 
     const start =
-        (this.currentPage - 1) *
+        (
+            this.currentPage - 1
+        ) *
         this.pageSize;
+
 
     const end =
         start +
         this.pageSize;
+
 
     const pageData =
         this.filteredData.slice(
@@ -2775,8 +2896,11 @@ renderTable(data = null) {
 
     this.tableBody.innerHTML =
         pageData
-            .map(item =>
-                this.renderRow(item)
+            .map(
+                item =>
+                    this.renderRow(
+                        item
+                    )
             )
             .join("");
 
@@ -2791,7 +2915,6 @@ renderTable(data = null) {
 
 }
 
-
 /*
 ==========================================================
 RENDER PAGINATION
@@ -2800,70 +2923,51 @@ RENDER PAGINATION
 
 renderPagination() {
 
-    const totalRecords = this.filteredData.length;
+    /*
+    ======================================================
+    TOTAL RECORD
+    ======================================================
+    */
 
-    const totalPages = Math.max(
-        1,
-        Math.ceil(totalRecords / this.pageSize)
-    );
-
-    this.currentPage = Math.max(
-        1,
-        Math.min(
-            this.currentPage,
-            totalPages
+    const totalRecords =
+        Array.isArray(
+            this.filteredData
         )
-    );
+            ? this.filteredData.length
+            : 0;
 
 
     /*
     ======================================================
-    FIND ELEMENTS
+    TOTAL PAGE
     ======================================================
     */
 
-    const paginationInfo =
-        document.getElementById(
-            "pagination-info"
-        );
-
-    const firstButton =
-        document.getElementById(
-            "pagination-first"
-        );
-
-    const previousButton =
-        document.getElementById(
-            "pagination-prev"
-        );
-
-    const nextButton =
-        document.getElementById(
-            "pagination-next"
-        );
-
-    const lastButton =
-        document.getElementById(
-            "pagination-last"
-        );
-
-    const refreshButton =
-        document.getElementById(
-            "pagination-refresh"
-        );
-
-    const pageInput =
-        document.getElementById(
-            "pagination-page-input"
-        );
-
-    const totalPagesElement =
-        document.getElementById(
-            "pagination-total-pages"
+    const totalPages =
+        Math.max(
+            1,
+            Math.ceil(
+                totalRecords /
+                this.pageSize
+            )
         );
 
 
-    
+    /*
+    ======================================================
+    VALIDATE CURRENT PAGE
+    ======================================================
+    */
+
+    this.currentPage =
+        Math.max(
+            1,
+            Math.min(
+                this.currentPage,
+                totalPages
+            )
+        );
+
 
     /*
     ======================================================
@@ -2871,31 +2975,37 @@ renderPagination() {
     ======================================================
     */
 
-    if (pageInput) {
+    if (
+        this.txtPage
+    ) {
 
-        pageInput.value =
+        this.txtPage.value =
             this.currentPage;
 
-        pageInput.min = 1;
+        this.txtPage.min =
+            1;
 
-        pageInput.max =
+        this.txtPage.max =
             totalPages;
 
     }
 
 
- /*
-======================================================
-TOTAL PAGES
-======================================================
-*/
+    /*
+    ======================================================
+    TOTAL PAGE LABEL
+    ======================================================
+    */
 
-if (totalPagesElement) {
+    if (
+        this.lblTotalPages
+    ) {
 
-    totalPagesElement.textContent =
-        totalPages;
+        this.lblTotalPages.textContent =
+            totalPages;
 
-}
+    }
+
 
     /*
     ======================================================
@@ -2903,30 +3013,45 @@ if (totalPagesElement) {
     ======================================================
     */
 
-    if (firstButton) {
+    if (
+        this.btnFirst
+    ) {
 
-        firstButton.disabled =
+        this.btnFirst.disabled =
             this.currentPage <= 1;
 
     }
 
-    if (previousButton) {
 
-        previousButton.disabled =
+    if (
+        this.btnPrev
+    ) {
+
+        this.btnPrev.disabled =
             this.currentPage <= 1;
 
     }
 
-    if (nextButton) {
 
-        nextButton.disabled =
+    if (
+        this.btnNext
+    ) {
+
+        this.btnNext.disabled =
+            totalRecords === 0
+            ||
             this.currentPage >= totalPages;
 
     }
 
-    if (lastButton) {
 
-        lastButton.disabled =
+    if (
+        this.btnLast
+    ) {
+
+        this.btnLast.disabled =
+            totalRecords === 0
+            ||
             this.currentPage >= totalPages;
 
     }
@@ -2938,11 +3063,15 @@ if (totalPagesElement) {
     ======================================================
     */
 
-    if (paginationInfo) {
+    if (
+        this.lblPaginationInfo
+    ) {
 
-        if (totalRecords === 0) {
+        if (
+            totalRecords === 0
+        ) {
 
-            paginationInfo.textContent =
+            this.lblPaginationInfo.textContent =
                 "Displaying Record 0 - 0 of 0";
 
         }
@@ -2951,22 +3080,22 @@ if (totalPagesElement) {
 
             const startRecord =
                 (
-                    (this.currentPage - 1)
-                    * this.pageSize
+                    (
+                        this.currentPage - 1
+                    ) *
+                    this.pageSize
                 ) + 1;
+
 
             const endRecord =
                 Math.min(
-
-                    this.currentPage
-                    * this.pageSize,
-
+                    this.currentPage *
+                    this.pageSize,
                     totalRecords
-
                 );
 
-            paginationInfo.textContent =
 
+            this.lblPaginationInfo.textContent =
                 `Displaying Record ${startRecord} - ${endRecord} of ${totalRecords}`;
 
         }
@@ -2980,21 +3109,27 @@ if (totalPagesElement) {
     ======================================================
     */
 
-    if (firstButton) {
+    if (
+        this.btnFirst
+    ) {
 
-        firstButton.onclick = () => {
+        this.btnFirst.onclick =
+            () => {
 
-            if (this.currentPage <= 1) {
+                if (
+                    this.currentPage <= 1
+                ) {
 
-                return;
+                    return;
 
-            }
+                }
 
-            this.currentPage = 1;
+                this.currentPage =
+                    1;
 
-            this.renderTable();
+                this.renderTable();
 
-        };
+            };
 
     }
 
@@ -3005,21 +3140,26 @@ if (totalPagesElement) {
     ======================================================
     */
 
-    if (previousButton) {
+    if (
+        this.btnPrev
+    ) {
 
-        previousButton.onclick = () => {
+        this.btnPrev.onclick =
+            () => {
 
-            if (this.currentPage <= 1) {
+                if (
+                    this.currentPage <= 1
+                ) {
 
-                return;
+                    return;
 
-            }
+                }
 
-            this.currentPage--;
+                this.currentPage--;
 
-            this.renderTable();
+                this.renderTable();
 
-        };
+            };
 
     }
 
@@ -3030,24 +3170,27 @@ if (totalPagesElement) {
     ======================================================
     */
 
-    if (nextButton) {
+    if (
+        this.btnNext
+    ) {
 
-        nextButton.onclick = () => {
+        this.btnNext.onclick =
+            () => {
 
-            if (
-                this.currentPage >=
-                totalPages
-            ) {
+                if (
+                    this.currentPage >=
+                    totalPages
+                ) {
 
-                return;
+                    return;
 
-            }
+                }
 
-            this.currentPage++;
+                this.currentPage++;
 
-            this.renderTable();
+                this.renderTable();
 
-        };
+            };
 
     }
 
@@ -3058,39 +3201,89 @@ if (totalPagesElement) {
     ======================================================
     */
 
-    if (lastButton) {
+    if (
+        this.btnLast
+    ) {
 
-        lastButton.onclick = () => {
+        this.btnLast.onclick =
+            () => {
 
-            if (
-                this.currentPage >=
-                totalPages
-            ) {
+                if (
+                    this.currentPage >=
+                    totalPages
+                ) {
 
-                return;
+                    return;
 
-            }
+                }
 
-            this.currentPage =
-                totalPages;
+                this.currentPage =
+                    totalPages;
 
-            this.renderTable();
+                this.renderTable();
 
-        };
+            };
 
     }
 
 
     /*
     ======================================================
-    DIRECT PAGE INPUT
+    DIRECT PAGE INPUT - CHANGE
     ======================================================
     */
 
-    if (pageInput) {
+    if (
+        this.txtPage
+    ) {
 
-        pageInput.onkeydown =
-            (event) => {
+        this.txtPage.onchange =
+            () => {
+
+                let page =
+                    parseInt(
+                        this.txtPage.value,
+                        10
+                    );
+
+
+                if (
+                    Number.isNaN(page)
+                ) {
+
+                    page =
+                        this.currentPage;
+
+                }
+
+
+                page =
+                    Math.max(
+                        1,
+                        Math.min(
+                            page,
+                            totalPages
+                        )
+                    );
+
+
+                this.currentPage =
+                    page;
+
+
+                this.renderTable();
+
+            };
+
+
+        /*
+        ==================================================
+        DIRECT PAGE INPUT - ENTER
+        ==================================================
+        */
+
+        this.txtPage.onkeydown =
+            event => {
 
                 if (
                     event.key !== "Enter"
@@ -3100,63 +3293,59 @@ if (totalPagesElement) {
 
                 }
 
+
                 event.preventDefault();
+
 
                 let page =
                     parseInt(
-                        pageInput.value,
+                        this.txtPage.value,
                         10
                     );
 
-                if (isNaN(page)) {
+
+                if (
+                    Number.isNaN(page)
+                ) {
 
                     page =
                         this.currentPage;
 
                 }
 
-                page = Math.max(
 
-                    1,
+                page =
+                    Math.max(
+                        1,
+                        Math.min(
+                            page,
+                            totalPages
+                        )
+                    );
 
-                    Math.min(
-                        page,
-                        totalPages
-                    )
-
-                );
 
                 this.currentPage =
                     page;
 
+
                 this.renderTable();
 
-                pageInput.blur();
+
+                this.txtPage.blur();
 
             };
 
 
-        pageInput.onclick = () => {
+        /*
+        ==================================================
+        SELECT PAGE INPUT
+        ==================================================
+        */
 
-            pageInput.select();
+        this.txtPage.onclick =
+            () => {
 
-        };
-
-    }
-
-
-    /*
-    ======================================================
-    REFRESH
-    ======================================================
-    */
-
-    if (refreshButton) {
-
-        refreshButton.onclick =
-            async () => {
-
-                await this.loadData();
+                this.txtPage.select();
 
             };
 

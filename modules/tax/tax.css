@@ -612,7 +612,36 @@ textarea.form-control {
 
 }
 
+#btn-refresh-tax.tax-refreshing {
 
-/* ==========================================================
-   END TAX MASTER CSS
-========================================================== */
+    cursor: wait;
+
+    opacity: 0.75;
+
+}
+
+
+#btn-refresh-tax .tax-refresh-icon {
+
+    display: inline-block;
+
+    animation:
+        tax-refresh-spin
+        0.8s
+        linear
+        infinite;
+
+}
+
+
+@keyframes tax-refresh-spin {
+
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+
+}

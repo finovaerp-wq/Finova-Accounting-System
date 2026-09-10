@@ -445,13 +445,15 @@ bindEvents() {
     */
 
     this.btnRefresh?.addEventListener(
-        "click",
-        () => {
+    "click",
+    event => {
 
-            this.refresh();
+        this.refresh(
+            event.currentTarget
+        );
 
-        }
-    );
+    }
+);
 
 
     /*
@@ -4316,13 +4318,33 @@ async changeTaxStatus(
     }
 
 
-    /*
+   /*
 ======================================================
 REFRESH
 ======================================================
 */
 
-async refresh() {
+async refresh(
+    refreshButton = null
+) {
+
+    /*
+    ==================================================
+    BUTTON TARGET
+    USE ACTUAL CLICKED BUTTON
+    ==================================================
+    */
+
+    const button =
+        refreshButton
+        instanceof HTMLElement
+
+            ? refreshButton
+
+            : document.getElementById(
+                "btn-refresh-tax"
+            );
+
 
     try {
 
@@ -4332,17 +4354,13 @@ async refresh() {
         ==================================================
         */
 
-        this.keyword =
-            "";
+        this.keyword = "";
 
-        this.taxType =
-            "";
+        this.taxType = "";
 
-        this.status =
-            "";
+        this.status = "";
 
-        this.currentPage =
-            1;
+        this.currentPage = 1;
 
 
         /*
@@ -4351,58 +4369,49 @@ async refresh() {
         ==================================================
         */
 
-        if (
-            this.keywordInput
-        ) {
+        if (this.keywordInput) {
 
-            this.keywordInput.value =
-                "";
+            this.keywordInput.value = "";
 
         }
 
 
-        if (
-            this.typeFilter
-        ) {
+        if (this.typeFilter) {
 
-            this.typeFilter.value =
-                "";
+            this.typeFilter.value = "";
 
         }
 
 
-        if (
-            this.statusFilter
-        ) {
+        if (this.statusFilter) {
 
-            this.statusFilter.value =
-                "";
+            this.statusFilter.value = "";
 
         }
 
 
         /*
         ==================================================
-        REFRESH BUTTON LOADING
+        REFRESH FEEDBACK
+        CUSTOM
         ==================================================
         */
 
-        if (
-            this.btnRefresh
-        ) {
+        if (button) {
 
-            this.btnRefresh.disabled =
-                true;
+            button.disabled = true;
 
+            button.classList.add(
+                "tax-refreshing"
+            );
 
-            this.btnRefresh.innerHTML = `
+            button.innerHTML = `
 
-                <span
-                    class="spinner-border spinner-border-sm me-1"
-                    role="status">
+                <i class="fas fa-rotate-right tax-refresh-icon"></i>
+
+                <span>
+                    Refreshing...
                 </span>
-
-                Refreshing...
 
             `;
 
@@ -4412,30 +4421,18 @@ async refresh() {
         /*
         ==================================================
         RELOAD DATA
+        NO BOOTSTRAP TABLE LOADING
         ==================================================
         */
 
         await this.loadData(
             true,
-            true
-        );
-
-
-        /*
-        ==================================================
-        SUCCESS
-        ==================================================
-        */
-
-        this.showSuccess(
-            "Tax Master refreshed successfully."
+            false
         );
 
     }
 
-    catch (
-        error
-    ) {
+    catch (error) {
 
         console.error(
             "Tax.refresh:",
@@ -4455,19 +4452,19 @@ async refresh() {
 
         /*
         ==================================================
-        RESTORE REFRESH BUTTON
+        RESTORE ONLY ACTUAL REFRESH BUTTON
         ==================================================
         */
 
-        if (
-            this.btnRefresh
-        ) {
+        if (button) {
 
-            this.btnRefresh.disabled =
-                false;
+            button.disabled = false;
 
+            button.classList.remove(
+                "tax-refreshing"
+            );
 
-            this.btnRefresh.innerHTML = `
+            button.innerHTML = `
 
                 <i class="fas fa-rotate-right"></i>
 
@@ -4480,28 +4477,25 @@ async refresh() {
     }
 
 }
+/*
+======================================================
+FORMAT RATE
+======================================================
+*/
+
+formatRate(
+    rate
+) {
+
+    const value =
+        Number(
+            rate || 0
+        );
 
 
-    /*
-    ==================================================
-    FORMAT RATE
-    ==================================================
-    */
+    return `${value}%`;
 
-    formatRate(
-        rate
-    ) {
-
-        const value =
-            Number(
-                rate || 0
-            );
-
-
-        return `${value}%`;
-
-    }
-
+}
 
     /*
 ==========================================================

@@ -287,57 +287,90 @@ cacheElement() {
     this.statusFilter =
         document.getElementById("bp-status");
 
-    /* ==========================================
-       BUTTONS
-    ========================================== */
+    /*
+==========================================
+BUTTONS
+==========================================
+*/
 
-    this.btnAdd =
-        document.getElementById("btn-add");
+this.btnAdd =
+    document.getElementById(
+        "bp-btn-add"
+    );
 
-    this.btnSave =
-        document.getElementById("btn-save-business-partner");
-    this.btnConfirmDelete =
+
+this.btnSave =
+    document.getElementById(
+        "btn-save-business-partner"
+    );
+
+
+this.btnConfirmDelete =
     document.getElementById(
         "btn-confirm-bp-delete"
     );
 
-    
-    this.btnRefresh =
-        document.getElementById("btn-refresh");
 
-    this.btnExportExcel =
-        document.getElementById("btn-export-excel");
+this.btnRefresh =
+    document.getElementById(
+        "bp-btn-refresh"
+    );
 
-    this.btnPreview =
-        document.getElementById("btn-preview");
+
+this.btnExportExcel =
+    document.getElementById(
+        "bp-btn-export-excel"
+    );
+
+
+this.btnPreview =
+    document.getElementById(
+        "bp-btn-preview"
+    );
 
     /* ==========================================
-       PAGINATION
-    ========================================== */
+   PAGINATION
+========================================== */
 
-    this.btnFirst =
-    document.getElementById("pagination-first");
+this.btnFirst =
+    document.getElementById(
+        "bp-pagination-first"
+    );
 
 this.btnPrev =
-    document.getElementById("pagination-prev");
+    document.getElementById(
+        "bp-pagination-prev"
+    );
 
 this.btnNext =
-    document.getElementById("pagination-next");
+    document.getElementById(
+        "bp-pagination-next"
+    );
 
 this.btnLast =
-    document.getElementById("pagination-last");
+    document.getElementById(
+        "bp-pagination-last"
+    );
 
 this.btnPaginationRefresh =
-    document.getElementById("pagination-refresh");
+    document.getElementById(
+        "bp-pagination-refresh"
+    );
 
 this.txtPage =
-    document.getElementById("pagination-page-input");
+    document.getElementById(
+        "bp-pagination-page-input"
+    );
 
 this.lblTotalPages =
-    document.getElementById("pagination-total-pages");
+    document.getElementById(
+        "bp-pagination-total-pages"
+    );
 
 this.lblPaginationInfo =
-    document.getElementById("pagination-info");
+    document.getElementById(
+        "bp-pagination-info"
+    );
 
     /* ==========================================
        TOTAL RECORD
@@ -354,25 +387,49 @@ this.lblPaginationInfo =
 
     console.log({
 
-        tableBody: this.tableBody,
+    tableBody:
+        this.tableBody,
 
-        form: this.form,
+    form:
+        this.form,
 
-        modal: this.modalElement,
+    modal:
+        this.modalElement,
 
-        btnAdd: this.btnAdd,
+    btnAdd:
+        this.btnAdd,
 
-        btnSave: this.btnSave,
+    btnSave:
+        this.btnSave,
 
-        searchInput: this.searchInput,
+    searchInput:
+        this.searchInput,
 
-        pagination: this.pagination,
+    btnFirst:
+        this.btnFirst,
 
-        paginationInfo: this.paginationInfo,
+    btnPrev:
+        this.btnPrev,
 
-        totalRecord: this.totalRecord
+    btnNext:
+        this.btnNext,
 
-    });
+    btnLast:
+        this.btnLast,
+
+    txtPage:
+        this.txtPage,
+
+    lblTotalPages:
+        this.lblTotalPages,
+
+    lblPaginationInfo:
+        this.lblPaginationInfo,
+
+    totalRecord:
+        this.totalRecord
+
+});
 
 }
 /*
@@ -477,14 +534,7 @@ if (this.bpTaxNumber) {
         }
     );
 
-    /* ======================================================
-       SEARCH
-    ====================================================== */
-
-    this.btnSearch?.addEventListener(
-        "click",
-        () => this.search()
-    );
+    
 
     /*
 ==========================================================
@@ -541,126 +591,200 @@ this.searchInput?.addEventListener(
         "click",
         () => this.preview()
     );
-    /*
+   /*
 ==========================================================
 PAGINATION
 ==========================================================
 */
 
-this.btnFirst?.addEventListener("click", () => {
-
-    this.currentPage = 1;
-
-    this.renderTable();
-
-});
-
-this.btnPrev?.addEventListener("click", () => {
-
-    if (this.currentPage > 1) {
-
-        this.currentPage--;
-
-        this.renderTable();
-
-    }
-
-});
-
-this.btnNext?.addEventListener("click", () => {
-
-    const totalPages = Math.ceil(
-
-        this.filteredData.length /
-
-        this.pageSize
-
-    );
-
-    if (this.currentPage < totalPages) {
-
-        this.currentPage++;
-
-        this.renderTable();
-
-    }
-
-});
-
-this.btnLast?.addEventListener("click", () => {
-
-    this.currentPage = Math.max(
-
-        1,
-
-        Math.ceil(
-
-            this.filteredData.length /
-
-            this.pageSize
-
-        )
-
-    );
-
-    this.renderTable();
-
-});
-
-this.btnPaginationRefresh?.addEventListener(
-
+this.btnFirst?.addEventListener(
     "click",
-
-    () => this.refresh()
-
-);
-
-this.txtPage?.addEventListener(
-
-    "change",
-
     () => {
 
-        const totalPages = Math.max(
+        this.currentPage = 1;
 
-            1,
+        this.renderTable();
 
-            Math.ceil(
+    }
+);
 
-                this.filteredData.length /
 
-                this.pageSize
+this.btnPrev?.addEventListener(
+    "click",
+    () => {
 
-            )
+        if (
+            this.currentPage > 1
+        ) {
 
-        );
+            this.currentPage--;
 
-        let page = parseInt(
+            this.renderTable();
 
-            this.txtPage.value,
+        }
 
-            10
+    }
+);
 
-        );
 
-        if (isNaN(page))
+this.btnNext?.addEventListener(
+    "click",
+    () => {
+
+        const totalPages =
+            Math.max(
+                1,
+                Math.ceil(
+                    this.filteredData.length /
+                    this.pageSize
+                )
+            );
+
+        if (
+            this.currentPage < totalPages
+        ) {
+
+            this.currentPage++;
+
+            this.renderTable();
+
+        }
+
+    }
+);
+
+
+this.btnLast?.addEventListener(
+    "click",
+    () => {
+
+        const totalPages =
+            Math.max(
+                1,
+                Math.ceil(
+                    this.filteredData.length /
+                    this.pageSize
+                )
+            );
+
+        this.currentPage =
+            totalPages;
+
+        this.renderTable();
+
+    }
+);
+
+
+/*
+==========================================================
+PAGE INPUT
+==========================================================
+*/
+
+this.txtPage?.addEventListener(
+    "change",
+    () => {
+
+        const totalPages =
+            Math.max(
+                1,
+                Math.ceil(
+                    this.filteredData.length /
+                    this.pageSize
+                )
+            );
+
+        let page =
+            parseInt(
+                this.txtPage.value,
+                10
+            );
+
+        if (
+            Number.isNaN(page)
+        ) {
 
             page = 1;
 
-        page = Math.min(
+        }
 
-            Math.max(page, 1),
+        page =
+            Math.min(
+                Math.max(
+                    page,
+                    1
+                ),
+                totalPages
+            );
 
-            totalPages
-
-        );
-
-        this.currentPage = page;
+        this.currentPage =
+            page;
 
         this.renderTable();
 
     }
+);
 
+
+/*
+==========================================================
+PAGE INPUT - ENTER
+==========================================================
+*/
+
+this.txtPage?.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key !== "Enter"
+        ) {
+
+            return;
+
+        }
+
+        event.preventDefault();
+
+        const totalPages =
+            Math.max(
+                1,
+                Math.ceil(
+                    this.filteredData.length /
+                    this.pageSize
+                )
+            );
+
+        let page =
+            parseInt(
+                this.txtPage.value,
+                10
+            );
+
+        if (
+            Number.isNaN(page)
+        ) {
+
+            page = 1;
+
+        }
+
+        page =
+            Math.min(
+                Math.max(
+                    page,
+                    1
+                ),
+                totalPages
+            );
+
+        this.currentPage =
+            page;
+
+        this.renderTable();
+
+    }
 );
 
     
@@ -2460,7 +2584,7 @@ async loadTermOfPayment() {
     }
 
 }
-   /*
+/*
 ==========================================================
 RENDER TABLE
 ==========================================================
@@ -2469,70 +2593,36 @@ RENDER TABLE
 renderTable(data) {
 
     if (!this.tableBody) {
-        return;
-    }
-
-    /* ==========================================
-       STORE FILTERED DATA
-    ========================================== */
-
-    this.filteredData = data ?? this.filteredData;
-
-    /* ==========================================
-       EMPTY STATE
-    ========================================== */
-
-    if (this.filteredData.length === 0) {
-
-        this.renderEmptyState();
-
-        
-        this.updatePagination();
 
         return;
 
     }
 
-    /* ==========================================
-       PAGINATION
-    ========================================== */
+    /*
+    ======================================================
+    STORE FILTERED DATA
+    ======================================================
+    */
 
-    const start =
-        (this.currentPage - 1) * this.pageSize;
+    if (Array.isArray(data)) {
 
-    const end =
-        start + this.pageSize;
+        this.filteredData =
+            data;
 
-    const pageData =
-        this.filteredData.slice(start, end);
+    }
 
-    /* ==========================================
-       RENDER ROWS
-    ========================================== */
+    if (!Array.isArray(this.filteredData)) {
 
-    this.tableBody.innerHTML = pageData
-        .map((item, index) =>
-            this.renderRow(
-                item,
-                start + index
-            )
-        )
-        .join("");
+        this.filteredData =
+            [];
 
-    /* ==========================================
-       UPDATE UI
-    ========================================== */
+    }
 
-    this.updatePagination();
-
-}
-/*
-==========================================================
-UPDATE PAGINATION
-==========================================================
-*/
-
-updatePagination() {
+    /*
+    ======================================================
+    CALCULATE TOTAL PAGE
+    ======================================================
+    */
 
     const totalRecords =
         this.filteredData.length;
@@ -2546,296 +2636,308 @@ updatePagination() {
             )
         );
 
-    if (this.currentPage > totalPages) {
+    /*
+    ======================================================
+    VALIDATE CURRENT PAGE
+    ======================================================
+    */
 
-        this.currentPage = totalPages;
+    if (
+        this.currentPage < 1
+    ) {
+
+        this.currentPage =
+            1;
 
     }
 
-    if (this.txtPage) {
+    if (
+        this.currentPage > totalPages
+    ) {
+
+        this.currentPage =
+            totalPages;
+
+    }
+
+    /*
+    ======================================================
+    EMPTY STATE
+    ======================================================
+    */
+
+    if (
+        totalRecords === 0
+    ) {
+
+        this.currentPage =
+            1;
+
+        this.renderEmptyState();
+
+        this.updatePagination();
+
+        return;
+
+    }
+
+    /*
+    ======================================================
+    PAGINATION
+    ======================================================
+    */
+
+    const start =
+        (
+            this.currentPage - 1
+        ) *
+        this.pageSize;
+
+    const end =
+        start +
+        this.pageSize;
+
+    const pageData =
+        this.filteredData.slice(
+            start,
+            end
+        );
+
+    /*
+    ======================================================
+    RENDER ROWS
+    ======================================================
+    */
+
+    this.tableBody.innerHTML =
+        pageData
+            .map(
+                (
+                    item,
+                    index
+                ) => {
+
+                    return this.renderRow(
+                        item,
+                        start + index
+                    );
+
+                }
+            )
+            .join("");
+
+    /*
+    ======================================================
+    UPDATE PAGINATION
+    ======================================================
+    */
+
+    this.updatePagination();
+
+}
+/*
+==========================================================
+UPDATE PAGINATION
+==========================================================
+*/
+
+updatePagination() {
+
+    /*
+    ======================================================
+    TOTAL RECORD
+    ======================================================
+    */
+
+    const totalRecords =
+        Array.isArray(
+            this.filteredData
+        )
+            ? this.filteredData.length
+            : 0;
+
+    /*
+    ======================================================
+    TOTAL PAGE
+    ======================================================
+    */
+
+    const totalPages =
+        Math.max(
+            1,
+            Math.ceil(
+                totalRecords /
+                this.pageSize
+            )
+        );
+
+    /*
+    ======================================================
+    VALIDATE CURRENT PAGE
+    ======================================================
+    */
+
+    if (
+        this.currentPage < 1
+    ) {
+
+        this.currentPage =
+            1;
+
+    }
+
+    if (
+        this.currentPage > totalPages
+    ) {
+
+        this.currentPage =
+            totalPages;
+
+    }
+
+    /*
+    ======================================================
+    PAGE INPUT
+    ======================================================
+    */
+
+    if (
+        this.txtPage
+    ) {
 
         this.txtPage.value =
             this.currentPage;
+
+        this.txtPage.min =
+            1;
 
         this.txtPage.max =
             totalPages;
 
     }
 
-    if (this.lblTotalPages) {
+    /*
+    ======================================================
+    TOTAL PAGE LABEL
+    ======================================================
+    */
+
+    if (
+        this.lblTotalPages
+    ) {
 
         this.lblTotalPages.textContent =
             totalPages;
 
     }
 
+    /*
+    ======================================================
+    DISPLAY RANGE
+    ======================================================
+    */
+
     const start =
         totalRecords === 0
             ? 0
-            : (this.currentPage - 1) *
-              this.pageSize + 1;
+            : (
+                (
+                    this.currentPage - 1
+                ) *
+                this.pageSize
+            ) + 1;
 
     const end =
-        Math.min(
-            this.currentPage *
-            this.pageSize,
-            totalRecords
-        );
+        totalRecords === 0
+            ? 0
+            : Math.min(
+                this.currentPage *
+                this.pageSize,
+                totalRecords
+            );
 
-    if (this.lblPaginationInfo) {
+    /*
+    ======================================================
+    PAGINATION INFO
+    ======================================================
+    */
+
+    if (
+        this.lblPaginationInfo
+    ) {
 
         this.lblPaginationInfo.textContent =
             `Displaying Record ${start} - ${end} of ${totalRecords}`;
 
     }
 
-    if (this.btnFirst)
-        this.btnFirst.disabled =
-            this.currentPage === 1;
-
-    if (this.btnPrev)
-        this.btnPrev.disabled =
-            this.currentPage === 1;
-
-    if (this.btnNext)
-        this.btnNext.disabled =
-            this.currentPage >= totalPages;
-
-    if (this.btnLast)
-        this.btnLast.disabled =
-            this.currentPage >= totalPages;
-
-}
-/*
-==========================================================
-RENDER PAGINATION
-==========================================================
-*/
-
-renderPagination() {
-
-    if (!this.pagination) {
-        return;
-    }
-
-    const totalRows =
-        this.filteredData.length;
-
-    const totalPages =
-        Math.ceil(totalRows / this.pageSize);
-
-    let html = "";
-
-    /* ==========================================
-       PREVIOUS
-    ========================================== */
-
-    html += `
-
-        <li class="page-item ${this.currentPage === 1 ? "disabled" : ""}">
-
-            <button
-                type="button"
-                class="page-link btn-page-prev">
-
-                Previous
-
-            </button>
-
-        </li>
-
-    `;
-
-    /* ==========================================
-       PAGE NUMBER
-    ========================================== */
-
-    for (let i = 1; i <= totalPages; i++) {
-
-        html += `
-
-            <li class="page-item ${i === this.currentPage ? "active" : ""}">
-
-                <button
-                    type="button"
-                    class="page-link btn-page-number"
-                    data-page="${i}">
-
-                    ${i}
-
-                </button>
-
-            </li>
-
-        `;
-
-    }
-
-    /* ==========================================
-       NEXT
-    ========================================== */
-
-    html += `
-
-        <li class="page-item ${
-
-            this.currentPage === totalPages ||
-
-            totalPages === 0
-
-                ? "disabled"
-
-                : ""
-
-        }">
-
-            <button
-                type="button"
-                class="page-link btn-page-next">
-
-                Next
-
-            </button>
-
-        </li>
-
-    `;
-
-    this.pagination.innerHTML = html;
-    this.bindPaginationEvents();
-
-}
-/*
-==========================================================
-UPDATE PAGINATION INFO
-==========================================================
-*/
-
-updatePaginationInfo() {
-
-    if (!this.paginationInfo) {
-        return;
-    }
-
-    const total =
-        this.filteredData.length;
-
-    if (total === 0) {
-
-        this.paginationInfo.textContent =
-            "Showing 0 of 0 records";
-
-        if (this.totalRecord) {
-
-            this.totalRecord.textContent = "0";
-
-        }
-
-        return;
-
-    }
-
-    const start =
-        ((this.currentPage - 1) * this.pageSize) + 1;
-
-    const end =
-        Math.min(
-            this.currentPage * this.pageSize,
-            total
-        );
-
-    this.paginationInfo.textContent =
-        `Showing ${start}-${end} of ${total} records`;
-
-    if (this.totalRecord) {
-
-        this.totalRecord.textContent = total;
-
-    }
-
-}
-/*
-==========================================================
-PAGINATION EVENTS
-==========================================================
-*/
-
-bindPaginationEvents() {
-
-    if (!this.pagination) {
-        return;
-    }
-
-    this.pagination.onclick = (event) => {
-
-        /* ==========================================
-           PAGE NUMBER
-        ========================================== */
-
-        const pageButton =
-            event.target.closest(".btn-page-number");
-
-        if (pageButton) {
-
-            this.currentPage =
-                Number(pageButton.dataset.page);
-
-            this.renderTable(this.filteredData);
-
-            return;
-
-        }
-
-        /* ==========================================
-           PREVIOUS
-        ========================================== */
-
-        const previousButton =
-            event.target.closest(".btn-page-prev");
-
-        if (previousButton) {
-
-            if (this.currentPage > 1) {
-
-                this.currentPage--;
-
-                this.renderTable(this.filteredData);
-
-            }
-
-            return;
-
-        }
-
-        /* ==========================================
-           NEXT
-        ========================================== */
-
-        const nextButton =
-            event.target.closest(".btn-page-next");
-
-        if (nextButton) {
-
-            const totalPages =
-                Math.ceil(
-                    this.filteredData.length /
-                    this.pageSize
-                );
-
-            if (this.currentPage < totalPages) {
-
-                this.currentPage++;
-
-                this.renderTable(this.filteredData);
-
-            }
-
-        }
-
-    };
-
-}
     /*
+    ======================================================
+    FIRST BUTTON
+    ======================================================
+    */
+
+    if (
+        this.btnFirst
+    ) {
+
+        this.btnFirst.disabled =
+            this.currentPage <= 1;
+
+    }
+
+    /*
+    ======================================================
+    PREVIOUS BUTTON
+    ======================================================
+    */
+
+    if (
+        this.btnPrev
+    ) {
+
+        this.btnPrev.disabled =
+            this.currentPage <= 1;
+
+    }
+
+    /*
+    ======================================================
+    NEXT BUTTON
+    ======================================================
+    */
+
+    if (
+        this.btnNext
+    ) {
+
+        this.btnNext.disabled =
+            totalRecords === 0
+            ||
+            this.currentPage >= totalPages;
+
+    }
+
+    /*
+    ======================================================
+    LAST BUTTON
+    ======================================================
+    */
+
+    if (
+        this.btnLast
+    ) {
+
+        this.btnLast.disabled =
+            totalRecords === 0
+            ||
+            this.currentPage >= totalPages;
+
+    }
+
+}
+
+   /*
 ==========================================================
 RENDER EMPTY STATE
 ==========================================================
@@ -2847,13 +2949,15 @@ renderEmptyState() {
 
         <tr>
 
-            <td colspan="8">
+            <td colspan="9">
 
                 <div class="finova-empty">
 
                     <i class="fa-regular fa-folder-open"></i>
 
-                    <h5>No Business Partner</h5>
+                    <h5>
+                        No Business Partner
+                    </h5>
 
                     <p>
                         Click Add Business Partner
