@@ -16186,6 +16186,9 @@ async postJournal(id) {
 /*
 ==========================================================
 VOID JOURNAL
+FINAL
+NO DATABASE RELOAD
+REALTIME LOCAL UPDATE
 ==========================================================
 */
 
@@ -16204,6 +16207,65 @@ async voidJournal(id) {
             return;
 
         }
+
+
+        /*
+        ======================================================
+        GET CURRENT JOURNAL
+        BEFORE VOID
+
+        IMPORTANT FOR SOURCE MODULE REALTIME
+        ======================================================
+        */
+
+        const result =
+            await this.service.getById(
+                id
+            );
+
+
+        const journal =
+            result?.header
+            ||
+            result;
+
+
+        if (!journal) {
+
+            throw new Error(
+                "GL Journal not found."
+            );
+
+        }
+
+
+        /*
+        ======================================================
+        SOURCE INFORMATION
+        ======================================================
+        */
+
+        const sourceModule =
+            String(
+                journal.source_module
+                || ""
+            )
+            .trim()
+            .toUpperCase();
+
+
+        const sourceDocumentType =
+            String(
+                journal.source_document_type
+                || ""
+            )
+            .trim()
+            .toUpperCase();
+
+
+        const sourceDocumentId =
+            journal.source_document_id
+            || null;
 
 
         /*
@@ -16254,7 +16316,7 @@ async voidJournal(id) {
 
         /*
         ======================================================
-        UPDATE STATUS
+        UPDATE DATABASE
         ======================================================
         */
 
@@ -16266,17 +16328,209 @@ async voidJournal(id) {
 
         /*
         ======================================================
-        RELOAD
+        UPDATE LOCAL JOURNAL DATA
+
+        IMPORTANT:
+        NO loadData()
+        NO DATABASE RELOAD
         ======================================================
         */
 
-        await this.loadData();
+        const updateLocalJournal =
+            (item) => {
+
+                if (
+                    String(
+                        item?.id
+                    )
+                    !==
+                    String(
+                        id
+                    )
+                ) {
+
+                    return item;
+
+                }
+
+
+                return {
+
+                    ...item,
+
+                    status:
+                        "Void",
+
+                    void_reason:
+                        reason
+
+                };
+
+            };
+
+
+        /*
+        ======================================================
+        UPDATE MAIN JOURNAL ARRAY
+        ======================================================
+        */
+
+        if (
+            Array.isArray(
+                this.journals
+            )
+        ) {
+
+            this.journals =
+                this.journals.map(
+                    updateLocalJournal
+                );
+
+        }
+
+
+        /*
+        ======================================================
+        UPDATE FILTERED JOURNAL ARRAY
+        ======================================================
+        */
+
+        if (
+            Array.isArray(
+                this.filteredJournals
+            )
+        ) {
+
+            this.filteredJournals =
+                this.filteredJournals.map(
+                    updateLocalJournal
+                );
+
+        }
+
+
+        /*
+        ======================================================
+        RENDER TABLE DIRECTLY
+
+        NO LOADING
+        NO REFRESH
+        ======================================================
+        */
+
+        if (
+            typeof this.renderTable
+            ===
+            "function"
+        ) {
+
+            this.renderTable();
+
+        }
+
+
+        /*
+        ======================================================
+        UPDATE PAGINATION
+        ======================================================
+        */
+
+        if (
+            typeof this.updatePagination
+            ===
+            "function"
+        ) {
+
+            this.updatePagination();
+
+        }
+
+
+        /*
+        ======================================================
+        NOTIFY SOURCE MODULE
+        GL -> AP / AR
+
+        IMPORTANT:
+        AP / AR MUST KNOW JOURNAL IS VOID
+        ======================================================
+        */
+
+        if (
+            (
+                sourceModule === "AP"
+                ||
+                sourceModule === "AR"
+            )
+            &&
+            sourceDocumentId
+        ) {
+
+            window.dispatchEvent(
+
+                new CustomEvent(
+                    "finova:source-transaction-changed",
+                    {
+                        detail: {
+
+                            sourceModule:
+                                sourceModule,
+
+                            sourceDocumentType:
+                                sourceDocumentType,
+
+                            sourceDocumentId:
+                                sourceDocumentId,
+
+                            journalId:
+                                id,
+
+                            action:
+                                "JOURNAL_VOIDED",
+
+                            accountPayableId:
+                                sourceModule === "AP"
+                                    ? sourceDocumentId
+                                    : null,
+
+                            accountReceivableId:
+                                sourceModule === "AR"
+                                    ? sourceDocumentId
+                                    : null
+
+                        }
+                    }
+                )
+
+            );
+
+
+            console.log(
+                "GL -> SOURCE REALTIME EVENT:",
+                {
+                    source_module:
+                        sourceModule,
+
+                    source_document_type:
+                        sourceDocumentType,
+
+                    source_document_id:
+                        sourceDocumentId,
+
+                    journal_id:
+                        id,
+
+                    action:
+                        "JOURNAL_VOIDED"
+                }
+            );
+
+        }
 
 
         /*
         ======================================================
         SUCCESS
-        BOOTSTRAP ALERT
         ======================================================
         */
 
@@ -16296,6 +16550,8 @@ async voidJournal(id) {
 
         this.showError(
             error?.message
+            ||
+            error?.details
             ||
             "Gagal melakukan Void Journal."
         );
