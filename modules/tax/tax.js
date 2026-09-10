@@ -439,18 +439,16 @@ bindEvents() {
 
 
     /*
-    ==================================================
-    REFRESH
-    ==================================================
-    */
+==================================================
+REFRESH
+==================================================
+*/
 
-    this.btnRefresh?.addEventListener(
+this.btnRefresh?.addEventListener(
     "click",
-    event => {
+    () => {
 
-        this.refresh(
-            event.currentTarget
-        );
+        this.refresh();
 
     }
 );
@@ -819,6 +817,28 @@ async loadData(
                 </tr>
 
             `;
+            /*
+==================================================
+ALLOW BROWSER TO PAINT LOADING STATE
+BEFORE DATABASE REQUEST
+==================================================
+*/
+
+await new Promise(
+    resolve => {
+
+        requestAnimationFrame(
+            () => {
+
+                requestAnimationFrame(
+                    resolve
+                );
+
+            }
+        );
+
+    }
+);
 
         }
 
@@ -4318,33 +4338,15 @@ async changeTaxStatus(
     }
 
 
-   /*
+/*
 ======================================================
 REFRESH
+WITH LOADING
+SAME AS ACCOUNT PAYABLE
 ======================================================
 */
 
-async refresh(
-    refreshButton = null
-) {
-
-    /*
-    ==================================================
-    BUTTON TARGET
-    USE ACTUAL CLICKED BUTTON
-    ==================================================
-    */
-
-    const button =
-        refreshButton
-        instanceof HTMLElement
-
-            ? refreshButton
-
-            : document.getElementById(
-                "btn-refresh-tax"
-            );
-
+async refresh() {
 
     try {
 
@@ -4369,110 +4371,59 @@ async refresh(
         ==================================================
         */
 
-        if (this.keywordInput) {
+        if (
+            this.keywordInput
+        ) {
 
-            this.keywordInput.value = "";
-
-        }
-
-
-        if (this.typeFilter) {
-
-            this.typeFilter.value = "";
+            this.keywordInput.value =
+                "";
 
         }
 
 
-        if (this.statusFilter) {
+        if (
+            this.typeFilter
+        ) {
 
-            this.statusFilter.value = "";
+            this.typeFilter.value =
+                "";
 
         }
 
 
-        /*
-        ==================================================
-        REFRESH FEEDBACK
-        CUSTOM
-        ==================================================
-        */
+        if (
+            this.statusFilter
+        ) {
 
-        if (button) {
-
-            button.disabled = true;
-
-            button.classList.add(
-                "tax-refreshing"
-            );
-
-            button.innerHTML = `
-
-                <i class="fas fa-rotate-right tax-refresh-icon"></i>
-
-                <span>
-                    Refreshing...
-                </span>
-
-            `;
+            this.statusFilter.value =
+                "";
 
         }
 
 
         /*
         ==================================================
-        RELOAD DATA
-        NO BOOTSTRAP TABLE LOADING
+        LOAD DATA
+        REFRESH = WITH TABLE LOADING
+        SAME AS ACCOUNT PAYABLE
         ==================================================
         */
 
         await this.loadData(
             true,
-            false
+            true
         );
 
     }
 
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
             "Tax.refresh:",
             error
         );
-
-
-        this.showError(
-            error?.message
-            ||
-            "Failed to refresh Tax Master."
-        );
-
-    }
-
-    finally {
-
-        /*
-        ==================================================
-        RESTORE ONLY ACTUAL REFRESH BUTTON
-        ==================================================
-        */
-
-        if (button) {
-
-            button.disabled = false;
-
-            button.classList.remove(
-                "tax-refreshing"
-            );
-
-            button.innerHTML = `
-
-                <i class="fas fa-rotate-right"></i>
-
-                Refresh
-
-            `;
-
-        }
 
     }
 
