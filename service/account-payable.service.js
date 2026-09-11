@@ -45,13 +45,24 @@ export class AccountPayableService {
 
 
     /*
-    ==============================================
-    ACCOUNT PAYABLE PAYMENT
-    ==============================================
-    */
+==============================================
+ACCOUNT PAYABLE PAYMENT
+==============================================
+*/
 
-    this.paymentTable =
-        TABLE.AP_PAYMENT;
+this.paymentTable =
+    TABLE.AP_PAYMENT;
+
+
+/*
+==============================================
+ACCOUNT PAYABLE PAYMENT BATCH
+BULK / GROUP PAYMENT HEADER
+==============================================
+*/
+
+this.paymentBatchTable =
+    "trx_ap_payment_batch";
 
 }
 /*
@@ -5602,6 +5613,2133 @@ async linkGLJournal(
     }
 }
 
+/*
+======================================================
+GET OUTSTANDING AP BY VENDOR
+BULK AP PAYMENT
+======================================================
+*/
+
+async getOutstandingInvoicesByVendor(
+    vendorId
+) {
+
+    try {
+
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
+
+        const normalizedVendorId =
+            Number(
+                vendorId
+                || 0
+            );
+
+
+        if (
+            !Number.isFinite(
+                normalizedVendorId
+            )
+            ||
+            normalizedVendorId <= 0
+        ) {
+
+            throw new Error(
+                "Vendor ID is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        VALIDATE VENDOR
+        ONLY ACTIVE VENDOR
+        ==================================================
+        */
+
+        const vendor =
+            await this.getVendorById(
+                normalizedVendorId
+            );
+
+
+        if (
+            !vendor
+        ) {
+
+            throw new Error(
+                "Vendor not found or inactive."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        GET AP INVOICES
+
+        ELIGIBLE STATUS:
+        - Complete
+        - Partial Paid
+
+        EXCLUDED:
+        - Draft
+        - Paid
+        - Void
+        ==================================================
+        */
+
+        const {
+
+            data,
+            error
+
+        } = await supabase
+
+            .from(
+                this.table
+            )
+
+            .select(`
+                id,
+                vendor_id,
+                invoice_no,
+                po_no,
+                invoice_date,
+                date_received,
+                due_date,
+                description,
+                total_amount,
+                paid_amount,
+                outstanding_amount,
+                status,
+                gl_journal_id,
+                created_at
+            `)
+
+            .eq(
+                "vendor_id",
+                normalizedVendorId
+            )
+
+            .in(
+                "status",
+                [
+                    this.STATUS.COMPLETE,
+                    this.STATUS.PARTIAL_PAID
+                ]
+            )
+
+            .gt(
+                "outstanding_amount",
+                0
+            )
+
+            .order(
+                "due_date",
+                {
+                    ascending:
+                        true,
+                    nullsFirst:
+                        false
+                }
+            )
+
+            .order(
+                "invoice_date",
+                {
+                    ascending:
+                        true
+                }
+            )
+
+            .order(
+                "created_at",
+                {
+                    ascending:
+                        true
+                }
+            );
+
+
+        /*
+        ==================================================
+        DATABASE ERROR
+        ==================================================
+        */
+
+        if (
+            error
+        ) {
+
+            console.error(
+                "AP OUTSTANDING BY VENDOR ERROR:",
+                {
+                    message:
+                        error.message,
+
+                    details:
+                        error.details,
+
+                    hint:
+                        error.hint,
+
+                    code:
+                        error.code
+                }
+            );
+
+
+            throw error;
+
+        }
+
+
+        /*
+        ==================================================
+        NORMALIZE DATA
+        ==================================================
+        */
+
+        const invoices =
+            (
+                Array.isArray(
+                    data
+                )
+                    ? data
+                    : []
+            )
+            .map(
+                invoice => {
+
+                    const totalAmount =
+                        Math.round(
+                            Number(
+                                invoice?.total_amount
+                                || 0
+                            )
+                        );
+
+
+                    const paidAmount =
+                        Math.round(
+                            Number(
+                                invoice?.paid_amount
+                                || 0
+                            )
+                        );
+
+
+                    const outstandingAmount =
+                        Math.round(
+                            Number(
+                                invoice?.outstanding_amount
+                                || 0
+                            )
+                        );
+
+
+                    return {
+
+                        ...invoice,
+
+                        total_amount:
+                            totalAmount,
+
+                        paid_amount:
+                            paidAmount,
+
+                        outstanding_amount:
+                            outstandingAmount,
+
+                        /*
+                        ======================================
+                        DEFAULT BULK PAYMENT UI VALUES
+
+                        NOT DATABASE FIELDS.
+                        USED LATER BY MODAL.
+                        ======================================
+                        */
+
+                        selected:
+                            false,
+
+                        payment_amount:
+                            0
+
+                    };
+
+                }
+            )
+
+            /*
+            ==================================================
+            DEFENSIVE FILTER
+
+            DO NOT SHOW INVALID / ZERO OUTSTANDING
+            ==================================================
+            */
+
+            .filter(
+                invoice => {
+
+                    return (
+                        invoice.outstanding_amount > 0
+                        &&
+                        (
+                            invoice.status ===
+                                this.STATUS.COMPLETE
+                            ||
+                            invoice.status ===
+                                this.STATUS.PARTIAL_PAID
+                        )
+                    );
+
+                }
+            );
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "AP OUTSTANDING BY VENDOR:",
+            {
+                vendor_id:
+                    normalizedVendorId,
+
+                vendor:
+                    vendor?.bp_name
+                    || null,
+
+                invoice_count:
+                    invoices.length,
+
+                invoices:
+                    invoices
+            }
+        );
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
+
+        return {
+
+            vendor:
+                vendor,
+
+            invoices:
+                invoices
+
+        };
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "AccountPayableService.getOutstandingInvoicesByVendor:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
+
+/*
+======================================================
+CREATE AP PAYMENT BATCH
+BULK PAYMENT HEADER
+======================================================
+*/
+
+async createPaymentBatch(
+    batch
+) {
+
+    try {
+
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
+
+        if (
+            !batch
+        ) {
+
+            throw new Error(
+                "AP Payment Batch data is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        PAYMENT NUMBER
+        ==================================================
+        */
+
+        const paymentNo =
+            String(
+                batch.payment_no
+                || ""
+            )
+            .trim();
+
+
+        if (
+            !paymentNo
+        ) {
+
+            throw new Error(
+                "Payment Number is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        PAYMENT DATE
+        ==================================================
+        */
+
+        const paymentDate =
+            String(
+                batch.payment_date
+                || ""
+            )
+            .trim();
+
+
+        if (
+            !paymentDate
+        ) {
+
+            throw new Error(
+                "Payment Date is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        ACCOUNTING PERIOD
+        ==================================================
+        */
+
+        await this.validatePaymentAccountingPeriod(
+            paymentDate
+        );
+
+
+        /*
+        ==================================================
+        VENDOR
+        ==================================================
+        */
+
+        const vendorId =
+            Number(
+                batch.vendor_id
+                || 0
+            );
+
+
+        if (
+            !Number.isFinite(
+                vendorId
+            )
+            ||
+            vendorId <= 0
+        ) {
+
+            throw new Error(
+                "Vendor is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        BANK ACCOUNT
+        ==================================================
+        */
+
+        const bankAccountId =
+            Number(
+                batch.bank_account_id
+                || 0
+            );
+
+
+        if (
+            !Number.isFinite(
+                bankAccountId
+            )
+            ||
+            bankAccountId <= 0
+        ) {
+
+            throw new Error(
+                "Bank Account is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        TOTAL PAYMENT
+        ==================================================
+        */
+
+        const totalPayment =
+            Number(
+                batch.total_payment
+                || 0
+            );
+
+
+        if (
+            !Number.isFinite(
+                totalPayment
+            )
+            ||
+            totalPayment < 0
+        ) {
+
+            throw new Error(
+                "Total Payment is invalid."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        STATUS
+        ==================================================
+        */
+
+        const rawStatus =
+            String(
+                batch.status
+                || "Draft"
+            )
+            .trim();
+
+
+        const validStatuses = [
+            "Draft",
+            "Posted",
+            "Void"
+        ];
+
+
+        if (
+            !validStatuses.includes(
+                rawStatus
+            )
+        ) {
+
+            throw new Error(
+                "AP Payment Batch status is invalid."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        REFERENCE
+        ==================================================
+        */
+
+        const referenceNo =
+            batch.reference_no
+                ? String(
+                    batch.reference_no
+                )
+                .trim()
+                : null;
+
+
+        /*
+        ==================================================
+        DESCRIPTION
+        ==================================================
+        */
+
+        const description =
+            batch.description
+                ? String(
+                    batch.description
+                )
+                .trim()
+                : null;
+
+
+        /*
+        ==================================================
+        GL JOURNAL
+        DRAFT MAY NOT HAVE GL JOURNAL YET
+        ==================================================
+        */
+
+        const glJournalId =
+            batch.gl_journal_id
+            || null;
+
+
+        /*
+        ==================================================
+        PREPARE PAYLOAD
+        ==================================================
+        */
+
+        const payload = {
+
+            payment_no:
+                paymentNo,
+
+            payment_date:
+                paymentDate,
+
+            vendor_id:
+                vendorId,
+
+            bank_account_id:
+                bankAccountId,
+
+            reference_no:
+                referenceNo,
+
+            description:
+                description,
+
+            total_payment:
+                Number(
+                    totalPayment.toFixed(
+                        2
+                    )
+                ),
+
+            status:
+                rawStatus,
+
+            gl_journal_id:
+                glJournalId,
+
+            updated_at:
+                new Date()
+                    .toISOString()
+
+        };
+
+
+        /*
+        ==================================================
+        INSERT
+        ==================================================
+        */
+
+        const {
+
+            data,
+            error
+
+        } = await supabase
+
+            .from(
+                this.paymentBatchTable
+            )
+
+            .insert(
+                payload
+            )
+
+            .select(`
+                id,
+                payment_no,
+                payment_date,
+                vendor_id,
+                bank_account_id,
+                reference_no,
+                description,
+                total_payment,
+                status,
+                gl_journal_id,
+                void_reason,
+                void_at,
+                created_at,
+                updated_at
+            `)
+
+            .single();
+
+
+        /*
+        ==================================================
+        ERROR
+        ==================================================
+        */
+
+        if (
+    error
+) {
+
+    const errorDetail = {
+
+        message:
+            error?.message
+            || null,
+
+        details:
+            error?.details
+            || null,
+
+        hint:
+            error?.hint
+            || null,
+
+        code:
+            error?.code
+            || null
+
+    };
+
+
+    console.error(
+        "AP PAYMENT BATCH CREATE ERROR:"
+    );
+
+
+    console.error(
+        JSON.stringify(
+            errorDetail,
+            null,
+            2
+        )
+    );
+
+
+    console.error(
+        "AP PAYMENT BATCH RAW ERROR:",
+        error
+    );
+
+
+    throw error;
+
+}
+
+
+        /*
+        ==================================================
+        VALIDATE RESULT
+        ==================================================
+        */
+
+        if (
+            !data
+            ||
+            !data.id
+        ) {
+
+            throw new Error(
+                "AP Payment Batch was not created."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
+
+        return data;
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+    "AccountPayableService.createPaymentBatch:",
+    JSON.stringify(
+        {
+            message:
+                error?.message
+                || null,
+
+            details:
+                error?.details
+                || null,
+
+            hint:
+                error?.hint
+                || null,
+
+            code:
+                error?.code
+                || null
+        },
+        null,
+        2
+    )
+);
+
+
+        throw error;
+
+    }
+
+}
+/*
+======================================================
+GET AP PAYMENT BATCH BY ID
+======================================================
+*/
+
+async getPaymentBatchById(
+    batchId
+) {
+
+    try {
+
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
+
+        if (
+            !batchId
+        ) {
+
+            throw new Error(
+                "AP Payment Batch ID is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        GET BATCH
+        ==================================================
+        */
+
+        const {
+
+            data,
+            error
+
+        } = await supabase
+
+            .from(
+                this.paymentBatchTable
+            )
+
+            .select(`
+                id,
+                payment_no,
+                payment_date,
+                vendor_id,
+                bank_account_id,
+                reference_no,
+                description,
+                total_payment,
+                status,
+                gl_journal_id,
+                void_reason,
+                void_at,
+                created_at,
+                updated_at
+            `)
+
+            .eq(
+                "id",
+                batchId
+            )
+
+            .maybeSingle();
+
+
+        if (
+            error
+        ) {
+
+            throw error;
+
+        }
+
+
+        return (
+            data
+            ||
+            null
+        );
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "AccountPayableService.getPaymentBatchById:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
+/*
+======================================================
+UPDATE AP PAYMENT BATCH
+======================================================
+*/
+
+async updatePaymentBatch(
+    batchId,
+    updates = {}
+) {
+
+    try {
+
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
+
+        if (
+            !batchId
+        ) {
+
+            throw new Error(
+                "AP Payment Batch ID is required."
+            );
+
+        }
+
+
+        if (
+            !updates
+            ||
+            typeof updates !== "object"
+        ) {
+
+            throw new Error(
+                "AP Payment Batch update data is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        SAFE PAYLOAD
+        ==================================================
+        */
+
+        const payload = {};
+
+
+        if (
+            updates.payment_no !== undefined
+        ) {
+
+            payload.payment_no =
+                String(
+                    updates.payment_no
+                    || ""
+                )
+                .trim();
+
+        }
+
+
+        if (
+            updates.payment_date !== undefined
+        ) {
+
+            const paymentDate =
+                String(
+                    updates.payment_date
+                    || ""
+                )
+                .trim();
+
+
+            if (
+                !paymentDate
+            ) {
+
+                throw new Error(
+                    "Payment Date is required."
+                );
+
+            }
+
+
+            await this.validatePaymentAccountingPeriod(
+                paymentDate
+            );
+
+
+            payload.payment_date =
+                paymentDate;
+
+        }
+
+
+        if (
+            updates.vendor_id !== undefined
+        ) {
+
+            const vendorId =
+                Number(
+                    updates.vendor_id
+                    || 0
+                );
+
+
+            if (
+                !Number.isFinite(
+                    vendorId
+                )
+                ||
+                vendorId <= 0
+            ) {
+
+                throw new Error(
+                    "Vendor is required."
+                );
+
+            }
+
+
+            payload.vendor_id =
+                vendorId;
+
+        }
+
+
+        if (
+            updates.bank_account_id !== undefined
+        ) {
+
+            const bankAccountId =
+                Number(
+                    updates.bank_account_id
+                    || 0
+                );
+
+
+            if (
+                !Number.isFinite(
+                    bankAccountId
+                )
+                ||
+                bankAccountId <= 0
+            ) {
+
+                throw new Error(
+                    "Bank Account is required."
+                );
+
+            }
+
+
+            payload.bank_account_id =
+                bankAccountId;
+
+        }
+
+
+        if (
+            updates.reference_no !== undefined
+        ) {
+
+            payload.reference_no =
+                updates.reference_no
+                    ? String(
+                        updates.reference_no
+                    )
+                    .trim()
+                    : null;
+
+        }
+
+
+        if (
+            updates.description !== undefined
+        ) {
+
+            payload.description =
+                updates.description
+                    ? String(
+                        updates.description
+                    )
+                    .trim()
+                    : null;
+
+        }
+
+
+        if (
+            updates.total_payment !== undefined
+        ) {
+
+            const totalPayment =
+                Number(
+                    updates.total_payment
+                    || 0
+                );
+
+
+            if (
+                !Number.isFinite(
+                    totalPayment
+                )
+                ||
+                totalPayment < 0
+            ) {
+
+                throw new Error(
+                    "Total Payment is invalid."
+                );
+
+            }
+
+
+            payload.total_payment =
+                Number(
+                    totalPayment.toFixed(
+                        2
+                    )
+                );
+
+        }
+
+
+        if (
+            updates.status !== undefined
+        ) {
+
+            const status =
+                String(
+                    updates.status
+                    || ""
+                )
+                .trim();
+
+
+            const validStatuses = [
+                "Draft",
+                "Posted",
+                "Void"
+            ];
+
+
+            if (
+                !validStatuses.includes(
+                    status
+                )
+            ) {
+
+                throw new Error(
+                    "AP Payment Batch status is invalid."
+                );
+
+            }
+
+
+            payload.status =
+                status;
+
+        }
+
+
+        if (
+            updates.gl_journal_id !== undefined
+        ) {
+
+            payload.gl_journal_id =
+                updates.gl_journal_id
+                || null;
+
+        }
+
+
+        if (
+            updates.void_reason !== undefined
+        ) {
+
+            payload.void_reason =
+                updates.void_reason
+                    ? String(
+                        updates.void_reason
+                    )
+                    .trim()
+                    : null;
+
+        }
+
+
+        if (
+            updates.void_at !== undefined
+        ) {
+
+            payload.void_at =
+                updates.void_at
+                || null;
+
+        }
+
+
+        /*
+        ==================================================
+        UPDATED DATE
+        ==================================================
+        */
+
+        payload.updated_at =
+            new Date()
+                .toISOString();
+
+
+        /*
+        ==================================================
+        UPDATE
+        ==================================================
+        */
+
+        const {
+
+            data,
+            error
+
+        } = await supabase
+
+            .from(
+                this.paymentBatchTable
+            )
+
+            .update(
+                payload
+            )
+
+            .eq(
+                "id",
+                batchId
+            )
+
+            .select(`
+                id,
+                payment_no,
+                payment_date,
+                vendor_id,
+                bank_account_id,
+                reference_no,
+                description,
+                total_payment,
+                status,
+                gl_journal_id,
+                void_reason,
+                void_at,
+                created_at,
+                updated_at
+            `)
+
+            .single();
+
+
+        if (
+            error
+        ) {
+
+            throw error;
+
+        }
+
+
+        return data;
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "AccountPayableService.updatePaymentBatch:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
+/*
+======================================================
+GET AP PAYMENT BATCH ALLOCATIONS
+======================================================
+*/
+
+async getPaymentBatchAllocations(
+    batchId
+) {
+
+    try {
+
+        if (
+            !batchId
+        ) {
+
+            throw new Error(
+                "AP Payment Batch ID is required."
+            );
+
+        }
+
+
+        const {
+
+            data,
+            error
+
+        } = await supabase
+
+            .from(
+                this.paymentTable
+            )
+
+            .select(`
+                id,
+                payment_batch_id,
+                account_payable_id,
+                payment_date,
+                bank_account_id,
+                dpp_amount,
+                tax_plus_amount,
+                tax_minus_amount,
+                payment_amount,
+                reference_no,
+                description,
+                gl_journal_id,
+                created_at,
+                updated_at
+            `)
+
+            .eq(
+                "payment_batch_id",
+                batchId
+            )
+
+            .order(
+                "created_at",
+                {
+                    ascending:
+                        true
+                }
+            );
+
+
+        if (
+            error
+        ) {
+
+            throw error;
+
+        }
+
+
+        return (
+            Array.isArray(
+                data
+            )
+                ? data
+                : []
+        );
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "AccountPayableService.getPaymentBatchAllocations:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
+/*
+======================================================
+DELETE AP PAYMENT BATCH
+DRAFT ONLY
+======================================================
+*/
+
+async deletePaymentBatch(
+    batchId
+) {
+
+    try {
+
+        if (
+            !batchId
+        ) {
+
+            throw new Error(
+                "AP Payment Batch ID is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        GET CURRENT BATCH
+        ==================================================
+        */
+
+        const batch =
+            await this.getPaymentBatchById(
+                batchId
+            );
+
+
+        if (
+            !batch
+        ) {
+
+            throw new Error(
+                "AP Payment Batch not found."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        ONLY DRAFT
+        ==================================================
+        */
+
+        if (
+            String(
+                batch.status
+                || ""
+            )
+            .toUpperCase()
+            !==
+            "DRAFT"
+        ) {
+
+            throw new Error(
+                "Only Draft AP Payment Batch can be deleted."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        DELETE
+        ==================================================
+        */
+
+        const {
+
+            error
+
+        } = await supabase
+
+            .from(
+                this.paymentBatchTable
+            )
+
+            .delete()
+
+            .eq(
+                "id",
+                batchId
+            );
+
+
+        if (
+            error
+        ) {
+
+            throw error;
+
+        }
+
+
+        return true;
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "AccountPayableService.deletePaymentBatch:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
+/*
+======================================================
+CREATE AP PAYMENT BATCH ALLOCATIONS
+DRAFT BULK PAYMENT
+======================================================
+*/
+
+async createPaymentBatchAllocations(
+    batchId,
+    allocations
+) {
+
+    try {
+
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
+
+        if (
+            !batchId
+        ) {
+
+            throw new Error(
+                "AP Payment Batch ID is required."
+            );
+
+        }
+
+
+        if (
+            !Array.isArray(
+                allocations
+            )
+            ||
+            allocations.length === 0
+        ) {
+
+            throw new Error(
+                "At least one AP Payment allocation is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        GET BATCH
+        ==================================================
+        */
+
+        const batch =
+            await this.getPaymentBatchById(
+                batchId
+            );
+
+
+        if (
+            !batch
+        ) {
+
+            throw new Error(
+                "AP Payment Batch not found."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        DRAFT ONLY
+        ==================================================
+        */
+
+        if (
+            String(
+                batch.status
+                || ""
+            )
+            .trim()
+            .toUpperCase()
+            !==
+            "DRAFT"
+        ) {
+
+            throw new Error(
+                "AP Payment allocations can only be created for Draft batch."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        NORMALIZE ALLOCATIONS
+        ==================================================
+        */
+
+        const rows =
+            [];
+
+
+        for (
+            const allocation
+            of allocations
+        ) {
+
+            const accountPayableId =
+                allocation?.account_payable_id
+                || null;
+
+
+            const paymentAmount =
+                Math.round(
+                    Number(
+                        allocation?.payment_amount
+                        || 0
+                    )
+                );
+
+
+            if (
+                !accountPayableId
+            ) {
+
+                throw new Error(
+                    "Account Payable ID is required in allocation."
+                );
+
+            }
+
+
+            if (
+                !Number.isFinite(
+                    paymentAmount
+                )
+                ||
+                paymentAmount <= 0
+            ) {
+
+                throw new Error(
+                    "Allocation Payment Amount must be greater than 0."
+                );
+
+            }
+
+
+            /*
+            ==============================================
+            GET FRESH AP
+            ==============================================
+            */
+
+            const result =
+                await this.getById(
+                    accountPayableId
+                );
+
+
+            const invoice =
+                result?.header
+                || null;
+
+
+            if (
+                !invoice
+            ) {
+
+                throw new Error(
+                    "Account Payable allocation not found."
+                );
+
+            }
+
+
+            /*
+            ==============================================
+            SAME VENDOR ONLY
+            ==============================================
+            */
+
+            if (
+                Number(
+                    invoice.vendor_id
+                    || 0
+                )
+                !==
+                Number(
+                    batch.vendor_id
+                    || 0
+                )
+            ) {
+
+                throw new Error(
+                    `Invoice ${invoice.invoice_no || ""} does not belong to selected Vendor.`
+                );
+
+            }
+
+
+            /*
+            ==============================================
+            PAYMENT STATUS
+            ==============================================
+            */
+
+            if (
+                invoice.status !==
+                    this.STATUS.COMPLETE
+                &&
+                invoice.status !==
+                    this.STATUS.PARTIAL_PAID
+            ) {
+
+                throw new Error(
+                    `Invoice ${invoice.invoice_no || ""} is not available for payment.`
+                );
+
+            }
+
+
+            /*
+            ==============================================
+            INVOICE GL MUST ALREADY BE POSTED
+            ==============================================
+            */
+
+            if (
+                !invoice.gl_journal_id
+                ||
+                String(
+                    invoice
+                        ?.gl_journal
+                        ?.status
+                    || ""
+                )
+                !==
+                "Posted"
+            ) {
+
+                throw new Error(
+                    `Invoice ${invoice.invoice_no || ""} GL Journal must be Posted before payment.`
+                );
+
+            }
+
+
+            /*
+            ==============================================
+            FRESH ACTIVE PAYMENT TOTAL
+
+            IMPORTANT:
+            DRAFT BULK ALLOCATION HAS gl_journal_id NULL,
+            SO IT DOES NOT AFFECT ACTIVE PAID AMOUNT YET.
+            ==============================================
+            */
+
+            const activePaid =
+                Number(
+                    await this.getPaymentTotal(
+                        accountPayableId
+                    )
+                    || 0
+                );
+
+
+            const totalAmount =
+                Math.round(
+                    Number(
+                        invoice.total_amount
+                        || 0
+                    )
+                );
+
+
+            const freshOutstanding =
+                Math.max(
+                    totalAmount
+                    -
+                    Math.round(
+                        activePaid
+                    ),
+                    0
+                );
+
+
+            if (
+                freshOutstanding <= 0
+            ) {
+
+                throw new Error(
+                    `Invoice ${invoice.invoice_no || ""} is already fully paid.`
+                );
+
+            }
+
+
+            if (
+                paymentAmount
+                >
+                freshOutstanding
+            ) {
+
+                throw new Error(
+                    `Payment for Invoice ${invoice.invoice_no || ""} cannot exceed Outstanding Amount.`
+                );
+
+            }
+
+
+            /*
+            ==============================================
+            PAYMENT COMPONENT
+
+            SAME FORMULA AS LEGACY AP PAYMENT
+            ==============================================
+            */
+
+            const originalTaxPlus =
+                Number(
+                    invoice.tax_input_amount
+                    || 0
+                );
+
+
+            const originalTaxMinus =
+                Number(
+                    invoice.withholding_tax_amount
+                    || 0
+                );
+
+
+            const ratio =
+                totalAmount > 0
+                    ? (
+                        paymentAmount
+                        /
+                        totalAmount
+                    )
+                    : 0;
+
+
+            const taxPlusAmount =
+                Number(
+                    (
+                        originalTaxPlus
+                        *
+                        ratio
+                    )
+                    .toFixed(
+                        2
+                    )
+                );
+
+
+            const taxMinusAmount =
+                Number(
+                    (
+                        originalTaxMinus
+                        *
+                        ratio
+                    )
+                    .toFixed(
+                        2
+                    )
+                );
+
+
+            const dppAmount =
+                Number(
+                    (
+                        paymentAmount
+                        -
+                        taxPlusAmount
+                        +
+                        taxMinusAmount
+                    )
+                    .toFixed(
+                        2
+                    )
+                );
+
+
+            /*
+            ==============================================
+            ROW
+            ==============================================
+            */
+
+            rows.push({
+
+                payment_batch_id:
+                    batch.id,
+
+                account_payable_id:
+                    accountPayableId,
+
+                payment_date:
+                    batch.payment_date,
+
+                bank_account_id:
+                    batch.bank_account_id,
+
+                dpp_amount:
+                    dppAmount,
+
+                tax_plus_amount:
+                    taxPlusAmount,
+
+                tax_minus_amount:
+                    taxMinusAmount,
+
+                payment_amount:
+                    paymentAmount,
+
+                reference_no:
+                    batch.reference_no
+                    || null,
+
+                description:
+                    batch.description
+                    || (
+                        `Payment AP ${
+                            invoice.invoice_no
+                            || ""
+                        }`
+                    ),
+
+                /*
+                ==========================================
+                DRAFT ALLOCATION
+                NO ACTIVE GL YET
+                ==========================================
+                */
+
+                gl_journal_id:
+                    null
+
+            });
+
+        }
+
+
+        /*
+        ==================================================
+        VALIDATE TOTAL
+        ==================================================
+        */
+
+        const allocationTotal =
+            rows.reduce(
+                (
+                    total,
+                    row
+                ) => {
+
+                    return (
+                        total
+                        +
+                        Number(
+                            row.payment_amount
+                            || 0
+                        )
+                    );
+
+                },
+                0
+            );
+
+
+        if (
+            Math.abs(
+                allocationTotal
+                -
+                Number(
+                    batch.total_payment
+                    || 0
+                )
+            )
+            >
+            0.01
+        ) {
+
+            throw new Error(
+                "Allocation Total does not match AP Payment Batch Total."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        PREVENT DUPLICATE ALLOCATION IN SAME BATCH
+        ==================================================
+        */
+
+        const uniqueInvoiceIds =
+            new Set(
+                rows.map(
+                    row =>
+                        String(
+                            row.account_payable_id
+                        )
+                )
+            );
+
+
+        if (
+            uniqueInvoiceIds.size
+            !==
+            rows.length
+        ) {
+
+            throw new Error(
+                "Duplicate Account Payable invoice found in payment allocation."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        INSERT
+        ==================================================
+        */
+
+        const {
+            data,
+            error
+        } = await supabase
+
+            .from(
+                this.paymentTable
+            )
+
+            .insert(
+                rows
+            )
+
+            .select(`
+                id,
+                payment_batch_id,
+                account_payable_id,
+                payment_date,
+                bank_account_id,
+                dpp_amount,
+                tax_plus_amount,
+                tax_minus_amount,
+                payment_amount,
+                reference_no,
+                description,
+                gl_journal_id,
+                created_at,
+                updated_at
+            `);
+
+
+        if (
+            error
+        ) {
+
+            console.error(
+                "AP PAYMENT BATCH ALLOCATION INSERT ERROR:",
+                error
+            );
+
+
+            throw error;
+
+        }
+
+
+        const created =
+            Array.isArray(
+                data
+            )
+                ? data
+                : [];
+
+
+        if (
+            created.length
+            !==
+            rows.length
+        ) {
+
+            throw new Error(
+                "Not all AP Payment allocations were created."
+            );
+
+        }
+
+
+        return created;
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "AccountPayableService.createPaymentBatchAllocations:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
 
 /*
 ======================================================
@@ -6210,19 +8348,23 @@ async getPaymentTotal(
 
         /*
         ==================================================
-        GET ACTIVE PAYMENT
+        GET ALL PAYMENT ROWS FOR THIS AP
 
-        ACTIVE PAYMENT =
-        gl_journal_id IS NOT NULL
+        FINOVA RULE:
+
+        BULK PAYMENT:
+        - Draft batch  = ACTIVE immediately after Save
+        - Posted batch = ACTIVE
+        - Void batch   = INACTIVE
+
+        LEGACY PAYMENT WITHOUT BATCH:
+        - Active only when gl_journal_id IS NOT NULL
         ==================================================
         */
 
         const {
-
-            data,
-
-            error
-
+            data: paymentRows,
+            error: paymentError
         } = await supabase
 
             .from(
@@ -6231,6 +8373,7 @@ async getPaymentTotal(
 
             .select(`
                 id,
+                payment_batch_id,
                 payment_amount,
                 gl_journal_id
             `)
@@ -6238,46 +8381,186 @@ async getPaymentTotal(
             .eq(
                 "account_payable_id",
                 accountPayableId
-            )
-
-            .not(
-                "gl_journal_id",
-                "is",
-                null
             );
 
 
-        /*
-        ==================================================
-        DATABASE ERROR
-        ==================================================
-        */
-
         if (
-            error
+            paymentError
         ) {
 
             console.error(
                 "AP PAYMENT TOTAL ERROR:",
                 {
                     message:
-                        error.message,
+                        paymentError.message,
 
                     details:
-                        error.details,
+                        paymentError.details,
 
                     hint:
-                        error.hint,
+                        paymentError.hint,
 
                     code:
-                        error.code
+                        paymentError.code
                 }
             );
 
-
-            throw error;
+            throw paymentError;
 
         }
+
+
+        /*
+        ==================================================
+        GET BULK PAYMENT BATCH STATUS
+        ==================================================
+        */
+
+        const batchIds =
+            [
+                ...new Set(
+                    (
+                        paymentRows
+                        || []
+                    )
+                    .map(
+                        payment =>
+                            payment?.payment_batch_id
+                    )
+                    .filter(
+                        Boolean
+                    )
+                )
+            ];
+
+
+        const batchStatusMap =
+            new Map();
+
+
+        if (
+            batchIds.length > 0
+        ) {
+
+            const {
+                data: batches,
+                error: batchError
+            } = await supabase
+
+                .from(
+                    this.paymentBatchTable
+                )
+
+                .select(`
+                    id,
+                    status
+                `)
+
+                .in(
+                    "id",
+                    batchIds
+                );
+
+
+            if (
+                batchError
+            ) {
+
+                console.error(
+                    "AP PAYMENT BATCH STATUS ERROR:",
+                    batchError
+                );
+
+                throw batchError;
+
+            }
+
+
+            for (
+                const batch
+                of (
+                    batches
+                    || []
+                )
+            ) {
+
+                batchStatusMap.set(
+                    String(
+                        batch.id
+                    ),
+                    String(
+                        batch.status
+                        || ""
+                    )
+                    .trim()
+                    .toUpperCase()
+                );
+
+            }
+
+        }
+
+
+        /*
+        ==================================================
+        FILTER ACTIVE PAYMENTS
+        ==================================================
+        */
+
+        const activePayments =
+            (
+                paymentRows
+                || []
+            )
+            .filter(
+                payment => {
+
+                    const batchId =
+                        payment?.payment_batch_id;
+
+
+                    /*
+                    ======================================
+                    BULK PAYMENT
+                    Draft + Posted count immediately.
+                    Void must not count.
+                    ======================================
+                    */
+
+                    if (
+                        batchId
+                    ) {
+
+                        const batchStatus =
+                            batchStatusMap.get(
+                                String(
+                                    batchId
+                                )
+                            )
+                            || "";
+
+
+                        return (
+                            batchStatus !== ""
+                            &&
+                            batchStatus !== "VOID"
+                        );
+
+                    }
+
+
+                    /*
+                    ======================================
+                    LEGACY PAYMENT
+                    ======================================
+                    */
+
+                    return Boolean(
+                        payment?.gl_journal_id
+                    );
+
+                }
+            );
 
 
         /*
@@ -6287,11 +8570,7 @@ async getPaymentTotal(
         */
 
         const totalPaid =
-            (
-                data
-                ||
-                []
-            )
+            activePayments
             .reduce(
                 (
                     total,
@@ -6301,8 +8580,7 @@ async getPaymentTotal(
                     const amount =
                         Number(
                             payment?.payment_amount
-                            ||
-                            0
+                            || 0
                         );
 
 
@@ -6323,12 +8601,6 @@ async getPaymentTotal(
             );
 
 
-        /*
-        ==================================================
-        NORMALIZE TOTAL
-        ==================================================
-        */
-
         const normalizedTotalPaid =
             Number(
                 totalPaid.toFixed(
@@ -6337,39 +8609,27 @@ async getPaymentTotal(
             );
 
 
-        /*
-        ==================================================
-        DEBUG
-        ==================================================
-        */
-
         console.log(
-            "AP ACTIVE PAYMENT TOTAL:",
+            "AP PAYMENT TOTAL:",
             {
-
                 account_payable_id:
                     accountPayableId,
 
-                payment_count:
-                    data?.length
+                payment_row_count:
+                    paymentRows?.length
                     || 0,
+
+                active_payment_count:
+                    activePayments.length,
 
                 total_paid:
                     normalizedTotalPaid,
 
                 payments:
-                    data
-                    || []
-
+                    activePayments
             }
         );
 
-
-        /*
-        ==================================================
-        RETURN
-        ==================================================
-        */
 
         return normalizedTotalPaid;
 
@@ -6381,7 +8641,6 @@ async getPaymentTotal(
             "AccountPayableService.getPaymentTotal:",
             error
         );
-
 
         throw error;
 

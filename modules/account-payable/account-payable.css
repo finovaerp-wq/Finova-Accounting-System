@@ -2949,3 +2949,689 @@ MODAL CONTENT
     overflow: hidden !important;
 
 }
+/*
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+ACCOUNT PAYABLE
+BULK AP PAYMENT MODAL
+TAHAP 4
+==========================================================
+*/
+
+
+/* ==========================================================
+   MODAL SIZE
+========================================================== */
+
+#accountPayablePaymentModal
+.modal-dialog {
+
+    width: calc(100% - 48px);
+
+    max-width: 1180px;
+
+    margin-left: auto;
+
+    margin-right: auto;
+
+}
+
+
+/* ==========================================================
+   MODAL CONTENT
+========================================================== */
+
+#accountPayablePaymentModal
+.modal-content {
+
+    border: 0;
+
+    border-radius: 14px;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   HEADER
+========================================================== */
+
+#accountPayablePaymentModal
+.modal-header {
+
+    padding: 18px 22px;
+
+    background: #FFFFFF;
+
+    border-bottom: 1px solid #E5E7EB;
+
+}
+
+
+/* ==========================================================
+   BODY
+========================================================== */
+
+#accountPayablePaymentModal
+.modal-body {
+
+    padding: 20px;
+
+    background: #F8FAFC;
+
+}
+
+
+/* ==========================================================
+   SECTION
+========================================================== */
+
+#accountPayablePaymentModal
+.ap-bulk-payment-section {
+
+    width: 100%;
+
+    padding: 18px;
+
+    background: #FFFFFF;
+
+    border: 1px solid #E5E7EB;
+
+    border-radius: 12px;
+
+}
+
+
+/* ==========================================================
+   SECTION HEADER
+========================================================== */
+
+#accountPayablePaymentModal
+.ap-bulk-payment-section-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 16px;
+
+    margin-bottom: 16px;
+
+}
+
+
+/* ==========================================================
+   SECTION TITLE
+========================================================== */
+
+#accountPayablePaymentModal
+.ap-bulk-payment-section-title {
+
+    color: #111827;
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+    line-height: 1.35;
+
+}
+
+
+#accountPayablePaymentModal
+.ap-bulk-payment-section-subtitle {
+
+    margin-top: 2px;
+
+    color: #6B7280;
+
+    font-size: 12px;
+
+    line-height: 1.45;
+
+}
+
+
+/* ==========================================================
+   FORM LABEL
+========================================================== */
+
+#accountPayablePaymentModal
+.form-label {
+
+    margin-bottom: 6px;
+
+    color: #374151;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+}
+
+
+/* ==========================================================
+   FORM CONTROL
+========================================================== */
+
+#accountPayablePaymentModal
+.form-control,
+
+#accountPayablePaymentModal
+.form-select {
+
+    min-height: 42px;
+
+    border-color: #DDE2E8;
+
+    border-radius: 8px;
+
+    font-size: 13px;
+
+}
+
+
+#accountPayablePaymentModal
+.form-control:focus,
+
+#accountPayablePaymentModal
+.form-select:focus {
+
+    border-color: #86B7FE;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(
+            13,
+            110,
+            253,
+            .10
+        );
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION
+========================================================== */
+
+#accountPayablePaymentModal
+.ap-payment-description {
+
+    width: 100%;
+
+    min-height: 74px;
+
+    resize: vertical;
+
+    line-height: 1.5;
+
+}
+
+
+/* ==========================================================
+   SELECT ALL
+========================================================== */
+
+#accountPayablePaymentModal
+.ap-bulk-select-all-wrapper {
+
+    flex: 0 0 auto;
+
+    margin: 0;
+
+}
+
+
+/* ==========================================================
+   EMPTY / LOADING STATE
+========================================================== */
+
+#accountPayablePaymentModal
+.ap-bulk-payment-empty {
+
+    display: flex;
+
+    min-height: 150px;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-direction: column;
+
+    text-align: center;
+
+    color: #374151;
+
+    border: 1px dashed #D8DEE7;
+
+    border-radius: 10px;
+
+    background: #FAFBFC;
+
+}
+
+
+#accountPayablePaymentModal
+.ap-bulk-payment-empty-icon {
+
+    display: flex;
+
+    width: 42px;
+
+    height: 42px;
+
+    align-items: center;
+
+    justify-content: center;
+
+    margin-bottom: 10px;
+
+    color: #6B7280;
+
+    font-size: 18px;
+
+    background: #F1F5F9;
+
+    border-radius: 50%;
+
+}
+
+
+/* ==========================================================
+   TABLE WRAPPER
+========================================================== */
+
+#accountPayablePaymentModal
+.ap-bulk-invoice-table-wrapper {
+
+    width: 100%;
+
+    max-height: 330px;
+
+    overflow: auto;
+
+    border: 1px solid #E5E7EB;
+
+    border-radius: 10px;
+
+}
+
+
+/* ==========================================================
+   TABLE
+========================================================== */
+
+#accountPayablePaymentModal
+.ap-bulk-invoice-table {
+
+    width: 100%;
+
+    min-width: 1040px;
+
+    margin: 0;
+
+    font-size: 12px;
+
+}
+
+
+/* ==========================================================
+   TABLE HEADER
+========================================================== */
+
+#accountPayablePaymentModal
+.ap-bulk-invoice-table
+thead
+th {
+
+    position: sticky;
+
+    top: 0;
+
+    z-index: 2;
+
+    padding: 11px 10px;
+
+    color: #374151;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+
+    vertical-align: middle;
+
+    background: #F8FAFC;
+
+    border-bottom: 1px solid #DDE2E8;
+
+}
+
+
+/* ==========================================================
+   TABLE BODY
+========================================================== */
+
+#accountPayablePaymentModal
+.ap-bulk-invoice-table
+tbody
+td {
+
+    padding: 10px;
+
+    color: #374151;
+
+    vertical-align: middle;
+
+    border-bottom-color: #EEF2F6;
+
+}
+
+
+/* ==========================================================
+   CHECK COLUMN
+========================================================== */
+
+#accountPayablePaymentModal
+.ap-bulk-col-check {
+
+    width: 46px;
+
+    min-width: 46px;
+
+}
+
+
+/* ==========================================================
+   PAYMENT INPUT INSIDE TABLE
+   USED ON TAHAP 5
+========================================================== */
+
+#accountPayablePaymentModal
+.ap-bulk-payment-input {
+
+    width: 145px;
+
+    min-height: 36px;
+
+    margin-left: auto;
+
+    text-align: right;
+
+    font-weight: 600;
+
+}
+
+
+/* ==========================================================
+   SELECTED ROW
+========================================================== */
+
+#accountPayablePaymentModal
+.ap-bulk-invoice-table
+tr.ap-bulk-row-selected
+td {
+
+    background: #F5F9FF;
+
+}
+
+
+/* ==========================================================
+   SUMMARY CARD
+========================================================== */
+
+#accountPayablePaymentModal
+.ap-bulk-summary-card {
+
+    height: 100%;
+
+    padding: 14px 16px;
+
+    border: 1px solid #E5E7EB;
+
+    border-radius: 10px;
+
+    background: #FAFBFC;
+
+}
+
+
+#accountPayablePaymentModal
+.ap-bulk-summary-label {
+
+    margin-bottom: 5px;
+
+    color: #6B7280;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    text-transform: uppercase;
+
+    letter-spacing: .02em;
+
+}
+
+
+#accountPayablePaymentModal
+.ap-bulk-summary-value {
+
+    color: #111827;
+
+    font-size: 18px;
+
+    font-weight: 700;
+
+    line-height: 1.25;
+
+}
+
+
+/* ==========================================================
+   TOTAL PAYMENT
+========================================================== */
+
+#accountPayablePaymentModal
+.ap-bulk-summary-card-total {
+
+    border-color: #BFD4F5;
+
+    background: #F5F9FF;
+
+}
+
+
+#accountPayablePaymentModal
+.ap-bulk-summary-total {
+
+    color: #0D6EFD;
+
+}
+
+
+/* ==========================================================
+   VALIDATION MESSAGE
+========================================================== */
+
+#accountPayablePaymentModal
+.ap-bulk-payment-message {
+
+    margin-top: 14px;
+
+    padding: 10px 12px;
+
+    color: #92400E;
+
+    font-size: 12px;
+
+    border: 1px solid #FDE68A;
+
+    border-radius: 8px;
+
+    background: #FFFBEB;
+
+}
+
+
+/* ==========================================================
+   JOURNAL PREVIEW
+========================================================== */
+
+#accountPayablePaymentModal
+.ap-payment-journal-preview {
+
+    padding: 16px 18px;
+
+    background: #FFFFFF;
+
+    border: 1px solid #E5E7EB;
+
+    border-radius: 12px;
+
+}
+
+
+/* ==========================================================
+   JOURNAL LINE
+========================================================== */
+
+#accountPayablePaymentModal
+.ap-bulk-journal-line {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    min-height: 32px;
+
+    padding: 4px 0;
+
+    color: #374151;
+
+    font-size: 12px;
+
+}
+
+
+#accountPayablePaymentModal
+.ap-bulk-journal-line
+> span:first-child {
+
+    width: 50px;
+
+    color: #6B7280;
+
+}
+
+
+/* ==========================================================
+   FOOTER
+========================================================== */
+
+#accountPayablePaymentModal
+.modal-footer {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 14px 20px;
+
+    background: #FFFFFF;
+
+    border-top: 1px solid #E5E7EB;
+
+}
+
+
+/* ==========================================================
+   TABLET
+========================================================== */
+
+@media
+(max-width: 991.98px) {
+
+    #accountPayablePaymentModal
+    .modal-dialog {
+
+        width: calc(100% - 24px);
+
+    }
+
+
+    #accountPayablePaymentModal
+    .modal-body {
+
+        padding: 14px;
+
+    }
+
+
+    #accountPayablePaymentModal
+    .ap-bulk-payment-section {
+
+        padding: 14px;
+
+    }
+
+}
+
+
+/* ==========================================================
+   MOBILE
+========================================================== */
+
+@media
+(max-width: 767.98px) {
+
+    #accountPayablePaymentModal
+    .modal-dialog {
+
+        width: calc(100% - 16px);
+
+        margin:
+            8px
+            auto;
+
+    }
+
+
+    #accountPayablePaymentModal
+    .modal-footer
+    > .me-auto {
+
+        display: none;
+
+    }
+
+
+    #accountPayablePaymentModal
+    .modal-footer {
+
+        justify-content: flex-end;
+
+    }
+
+
+    #accountPayablePaymentModal
+    .ap-bulk-payment-section-header {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+    }
+
+}

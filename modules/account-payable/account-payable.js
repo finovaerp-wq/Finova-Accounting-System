@@ -176,6 +176,79 @@ this.apAccountingPreviewState = {
         this.apPaymentDate = null;
 
         this.apPaymentBankAccount = null;
+                /*
+        ==================================================
+        BULK AP PAYMENT STATE
+        ==================================================
+        */
+
+        this.currentPaymentBatchId =
+            null;
+        this.isSavingBulkAPPayment =
+    false;
+
+        this.apBulkPaymentInvoices =
+            [];
+
+
+        this.apBulkPaymentSelected =
+            new Map();
+
+
+        this.apPaymentBatchNo =
+            null;
+
+
+        this.apPaymentBulkVendor =
+            null;
+
+
+        this.apPaymentBatchStatus =
+            null;
+
+
+        this.apPaymentSelectAll =
+            null;
+
+
+        this.apPaymentInvoiceEmpty =
+            null;
+
+
+        this.apPaymentInvoiceLoading =
+            null;
+
+
+        this.apPaymentInvoiceTableWrapper =
+            null;
+
+
+        this.apPaymentInvoiceBody =
+            null;
+
+
+        this.apPaymentSelectedCount =
+            null;
+
+
+        this.apPaymentSelectedOutstanding =
+            null;
+
+
+        this.apPaymentTotalAllocation =
+            null;
+
+
+        this.apPaymentAllocationMessage =
+            null;
+
+
+        this.apPaymentPreviewDebit =
+            null;
+
+
+        this.apPaymentPreviewCredit =
+            null;
 
         this.apPaymentDPP = null;
 
@@ -1049,7 +1122,9 @@ async init() {
 
         }
 
-        catch (error) {
+        catch (
+            error
+        ) {
 
             console.error(
                 "AccountPayable - loadVendors:",
@@ -1106,17 +1181,18 @@ async init() {
         EXTERNAL SOURCE TRANSACTION CHANGE
         GL JOURNAL -> ACCOUNT PAYABLE
 
-        USED WHEN:
+        TAHAP 12
+        BULK AP PAYMENT AWARE
 
-        AP_INVOICE JOURNAL:
-        - DELETED
-        - VOIDED
-        - CHANGED
+        SUPPORTED:
+        - AP INVOICE
+        - LEGACY AP PAYMENT
+        - BULK AP PAYMENT
 
-        AP_PAYMENT JOURNAL:
-        - DELETED
-        - VOIDED
-        - CHANGED
+        ACTION:
+        - JOURNAL_POSTED
+        - JOURNAL_VOIDED
+        - JOURNAL_DELETED
 
         AP WORKSPACE MAY BE INACTIVE
         BUT STILL OPEN IN MULTI TAB.
@@ -1151,6 +1227,8 @@ async init() {
                     const sourceModule =
                         String(
                             detail.sourceModule
+                            ||
+                            detail.source
                             ||
                             ""
                         )
@@ -1211,6 +1289,120 @@ async init() {
 
                     /*
                     ==========================================
+                    ACTION
+                    ==========================================
+                    */
+
+                    const action =
+                        String(
+                            detail.action
+                            ||
+                            ""
+                        )
+                        .trim()
+                        .toUpperCase();
+
+
+                    /*
+                    ==========================================
+                    SOURCE DOCUMENT ID
+                    ==========================================
+                    */
+
+                    const sourceDocumentId =
+                        detail.sourceDocumentId
+                        ||
+                        null;
+
+
+                    /*
+                    ==========================================
+                    PAYMENT BATCH ID
+
+                    BULK AP:
+                    source_document_id = payment batch id
+                    ==========================================
+                    */
+
+                    const paymentBatchId =
+                        detail.paymentBatchId
+                        ||
+                        (
+                            sourceDocumentType ===
+                                "AP_PAYMENT"
+                                ? sourceDocumentId
+                                : null
+                        )
+                        ||
+                        null;
+
+
+                    /*
+                    ==========================================
+                    SINGLE AP ID
+
+                    USED BY:
+                    - AP INVOICE
+                    - LEGACY AP PAYMENT
+                    ==========================================
+                    */
+
+                    const accountPayableId =
+                        detail.accountPayableId
+                        ||
+                        (
+                            sourceDocumentType ===
+                                "AP_INVOICE"
+                                ? sourceDocumentId
+                                : null
+                        )
+                        ||
+                        null;
+
+
+                    /*
+                    ==========================================
+                    MULTIPLE AP IDS
+                    BULK AP PAYMENT
+                    ==========================================
+                    */
+
+                    const accountPayableIds =
+                        Array.isArray(
+                            detail.accountPayableIds
+                        )
+                            ? [
+                                ...new Set(
+
+                                    detail
+                                        .accountPayableIds
+
+                                        .filter(
+                                            Boolean
+                                        )
+
+                                        .map(
+                                            apId =>
+                                                String(
+                                                    apId
+                                                )
+                                        )
+
+                                )
+                            ]
+                            : (
+                                accountPayableId
+                                    ? [
+                                        String(
+                                            accountPayableId
+                                        )
+                                    ]
+                                    : []
+                            );
+
+
+                    /*
+                    ==========================================
                     DEBUG
                     ==========================================
                     */
@@ -1218,6 +1410,7 @@ async init() {
                     console.log(
                         "ACCOUNT PAYABLE EXTERNAL CHANGE:",
                         {
+
                             source_module:
                                 sourceModule,
 
@@ -1225,14 +1418,16 @@ async init() {
                                 sourceDocumentType,
 
                             source_document_id:
-                                detail.sourceDocumentId
-                                ||
-                                null,
+                                sourceDocumentId,
+
+                            payment_batch_id:
+                                paymentBatchId,
 
                             account_payable_id:
-                                detail.accountPayableId
-                                ||
-                                null,
+                                accountPayableId,
+
+                            account_payable_ids:
+                                accountPayableIds,
 
                             journal_id:
                                 detail.journalId
@@ -1240,16 +1435,188 @@ async init() {
                                 null,
 
                             action:
-                                detail.action
+                                action
                                 ||
                                 null
+
                         }
                     );
 
 
                     /*
                     ==========================================
-                    RELOAD LATEST AP DATA
+                    BULK AP PAYMENT
+                    SYNCHRONIZE CURRENT BATCH STATE
+                    ==========================================
+                    */
+
+                    if (
+                        sourceDocumentType ===
+                            "AP_PAYMENT"
+                        &&
+                        paymentBatchId
+                    ) {
+
+                        const sameCurrentBatch =
+                            this.currentPaymentBatchId
+                            &&
+                            String(
+                                this.currentPaymentBatchId
+                            )
+                            ===
+                            String(
+                                paymentBatchId
+                            );
+
+
+                        /*
+                        ======================================
+                        JOURNAL DELETED
+
+                        BATCH ALREADY DELETED
+                        BY GL deleteJournal().
+
+                        DO NOT QUERY DELETED BATCH.
+                        ======================================
+                        */
+
+                        if (
+                            action ===
+                                "JOURNAL_DELETED"
+                        ) {
+
+                            if (
+                                sameCurrentBatch
+                            ) {
+
+                                this.resetBulkAPPayment();
+
+                            }
+
+                        }
+
+
+                        /*
+                        ======================================
+                        POST / VOID / REPOST / OTHER CHANGE
+                        LOAD FRESH BATCH FROM DATABASE
+                        ======================================
+                        */
+
+                        else {
+
+                            const batch =
+                                await this.service
+                                    .getPaymentBatchById(
+                                        paymentBatchId
+                                    );
+
+
+                            if (
+                                batch
+                                &&
+                                batch.id
+                            ) {
+
+                                /*
+                                ==============================
+                                KEEP CURRENT BATCH ID
+                                ==============================
+                                */
+
+                                if (
+                                    sameCurrentBatch
+                                ) {
+
+                                    this.currentPaymentBatchId =
+                                        batch.id;
+
+                                }
+
+
+                                /*
+                                ==============================
+                                PAYMENT BATCH NUMBER
+                                ==============================
+                                */
+
+                                if (
+                                    sameCurrentBatch
+                                    &&
+                                    this.apPaymentBatchNo
+                                ) {
+
+                                    this.apPaymentBatchNo.value =
+                                        batch.payment_no
+                                        ||
+                                        "";
+
+                                }
+
+
+                                /*
+                                ==============================
+                                PAYMENT BATCH STATUS
+                                ==============================
+                                */
+
+                                if (
+                                    sameCurrentBatch
+                                    &&
+                                    this.apPaymentBatchStatus
+                                ) {
+
+                                    this.apPaymentBatchStatus
+                                        .textContent =
+                                            batch.status
+                                            ||
+                                            "Draft";
+
+                                }
+
+
+                                /*
+                                ==============================
+                                DEBUG
+                                ==============================
+                                */
+
+                                console.log(
+                                    "BULK AP PAYMENT STATE SYNC:",
+                                    {
+
+                                        batch_id:
+                                            batch.id,
+
+                                        payment_no:
+                                            batch.payment_no,
+
+                                        status:
+                                            batch.status,
+
+                                        gl_journal_id:
+                                            batch.gl_journal_id
+
+                                    }
+                                );
+
+                            }
+
+                        }
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    RELOAD LATEST ACCOUNT PAYABLE DATA
+
+                    BULK:
+                    REFRESH ALL AFFECTED INVOICES
+
+                    LEGACY:
+                    REFRESH SINGLE AP
+
                     NO FULL LOADING
                     ==========================================
                     */
@@ -1266,12 +1633,31 @@ async init() {
                     */
 
                     console.log(
-                        "ACCOUNT PAYABLE REALTIME REFRESH COMPLETE."
+                        "ACCOUNT PAYABLE REALTIME REFRESH COMPLETE:",
+                        {
+
+                            source_document_type:
+                                sourceDocumentType,
+
+                            payment_batch_id:
+                                paymentBatchId,
+
+                            affected_ap_count:
+                                accountPayableIds.length,
+
+                            action:
+                                action
+                                ||
+                                null
+
+                        }
                     );
 
                 }
 
-                catch (error) {
+                catch (
+                    error
+                ) {
 
                     console.error(
                         "AccountPayable external refresh:",
@@ -1313,7 +1699,9 @@ async init() {
 
     }
 
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
             "AccountPayable - INIT ERROR:",
@@ -1472,7 +1860,9 @@ async init() {
 
                 }
 
-                catch (error) {
+                catch (
+                    error
+                ) {
 
                     console.error(
                         "AccountPayable.confirmPost:",
@@ -1639,7 +2029,9 @@ async init() {
 
                 }
 
-                catch (error) {
+                catch (
+                    error
+                ) {
 
                     console.error(
                         "AccountPayable.confirmVoid:",
@@ -5604,6 +5996,991 @@ async generateAPPaymentJournal(
     }
 
 }
+
+/*
+======================================================
+GENERATE BULK AP PAYMENT GL JOURNAL
+ONE BATCH = ONE GL JOURNAL
+======================================================
+*/
+
+async generateBulkAPPaymentJournal(
+    batchId
+) {
+
+    let createdJournal =
+        null;
+
+
+    try {
+
+        /*
+        ==================================================
+        VALIDATE BATCH ID
+        ==================================================
+        */
+
+        if (
+            !batchId
+        ) {
+
+            throw new Error(
+                "AP Payment Batch ID is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        GET FRESH BATCH
+        ==================================================
+        */
+
+        const batch =
+            await this.service
+                .getPaymentBatchById(
+                    batchId
+                );
+
+
+        if (
+            !batch
+        ) {
+
+            throw new Error(
+                "AP Payment Batch not found."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        DRAFT ONLY
+        ==================================================
+        */
+
+        const batchStatus =
+            String(
+                batch.status
+                || ""
+            )
+            .trim();
+
+
+        if (
+            batchStatus !==
+            "Draft"
+        ) {
+
+            throw new Error(
+                `AP Payment Batch status is "${batchStatus}". GL Journal can only be generated from Draft batch.`
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        PREVENT DUPLICATE JOURNAL
+        ==================================================
+        */
+
+        if (
+            batch.gl_journal_id
+        ) {
+
+            throw new Error(
+                "AP Payment Batch already has a GL Journal."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        PAYMENT DATE
+        ==================================================
+        */
+
+        const paymentDate =
+            String(
+                batch.payment_date
+                || ""
+            )
+            .trim();
+
+
+        if (
+            !paymentDate
+        ) {
+
+            throw new Error(
+                "AP Payment Date is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        ACCOUNTING PERIOD
+        ==================================================
+        */
+
+        await this.service
+            .validatePaymentAccountingPeriod(
+                paymentDate
+            );
+
+
+        /*
+        ==================================================
+        VENDOR
+        ==================================================
+        */
+
+        const vendorId =
+            Number(
+                batch.vendor_id
+                || 0
+            );
+
+
+        if (
+            !Number.isFinite(
+                vendorId
+            )
+            ||
+            vendorId <= 0
+        ) {
+
+            throw new Error(
+                "AP Payment Vendor is invalid."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        BANK ACCOUNT
+        ==================================================
+        */
+
+        const bankAccountId =
+            Number(
+                batch.bank_account_id
+                || 0
+            );
+
+
+        if (
+            !Number.isFinite(
+                bankAccountId
+            )
+            ||
+            bankAccountId <= 0
+        ) {
+
+            throw new Error(
+                "AP Payment Bank Account is invalid."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        HUTANG USAHA ACCOUNT
+
+        SAME ACCOUNT AS LEGACY AP PAYMENT
+        ==================================================
+        */
+
+        const payableAccountId =
+            39;
+
+
+        /*
+        ==================================================
+        GET DRAFT ALLOCATIONS
+        ==================================================
+        */
+
+        const allocations =
+            await this.service
+                .getPaymentBatchAllocations(
+                    batch.id
+                );
+
+
+        if (
+            !Array.isArray(
+                allocations
+            )
+            ||
+            allocations.length === 0
+        ) {
+
+            throw new Error(
+                "AP Payment Batch has no allocation."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        DRAFT ALLOCATION MUST NOT HAVE JOURNAL YET
+        ==================================================
+        */
+
+        const linkedAllocation =
+            allocations.find(
+                allocation =>
+                    Boolean(
+                        allocation
+                            ?.gl_journal_id
+                    )
+            );
+
+
+        if (
+            linkedAllocation
+        ) {
+
+            throw new Error(
+                "AP Payment Batch contains an allocation that is already linked to a GL Journal."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        VALIDATE ALL ALLOCATION BELONG TO SAME BATCH
+        ==================================================
+        */
+
+        for (
+            const allocation
+            of allocations
+        ) {
+
+            if (
+                String(
+                    allocation
+                        ?.payment_batch_id
+                    || ""
+                )
+                !==
+                String(
+                    batch.id
+                )
+            ) {
+
+                throw new Error(
+                    "Invalid AP Payment Batch allocation."
+                );
+
+            }
+
+        }
+
+
+        /*
+        ==================================================
+        AGGREGATE COMPONENTS
+        ==================================================
+        */
+
+        const totalDPP =
+            Number(
+                allocations
+                    .reduce(
+                        (
+                            total,
+                            allocation
+                        ) => {
+
+                            return (
+                                total
+                                +
+                                Number(
+                                    allocation
+                                        ?.dpp_amount
+                                    || 0
+                                )
+                            );
+
+                        },
+                        0
+                    )
+                    .toFixed(
+                        2
+                    )
+            );
+
+
+        const totalTaxPlus =
+            Number(
+                allocations
+                    .reduce(
+                        (
+                            total,
+                            allocation
+                        ) => {
+
+                            return (
+                                total
+                                +
+                                Number(
+                                    allocation
+                                        ?.tax_plus_amount
+                                    || 0
+                                )
+                            );
+
+                        },
+                        0
+                    )
+                    .toFixed(
+                        2
+                    )
+            );
+
+
+        const totalTaxMinus =
+            Number(
+                allocations
+                    .reduce(
+                        (
+                            total,
+                            allocation
+                        ) => {
+
+                            return (
+                                total
+                                +
+                                Number(
+                                    allocation
+                                        ?.tax_minus_amount
+                                    || 0
+                                )
+                            );
+
+                        },
+                        0
+                    )
+                    .toFixed(
+                        2
+                    )
+            );
+
+
+        const totalAllocation =
+            Number(
+                allocations
+                    .reduce(
+                        (
+                            total,
+                            allocation
+                        ) => {
+
+                            return (
+                                total
+                                +
+                                Number(
+                                    allocation
+                                        ?.payment_amount
+                                    || 0
+                                )
+                            );
+
+                        },
+                        0
+                    )
+                    .toFixed(
+                        2
+                    )
+            );
+
+
+        /*
+        ==================================================
+        VALIDATE BATCH TOTAL
+        ==================================================
+        */
+
+        const batchTotal =
+            Number(
+                Number(
+                    batch.total_payment
+                    || 0
+                )
+                .toFixed(
+                    2
+                )
+            );
+
+
+        if (
+            Math.abs(
+                totalAllocation
+                -
+                batchTotal
+            )
+            >
+            0.01
+        ) {
+
+            throw new Error(
+                "AP Payment allocation total does not match Batch Total."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        VALIDATE COMPONENT FORMULA
+
+        DPP + TAX (+) - TAX (-)
+        = PAYMENT AMOUNT
+        ==================================================
+        */
+
+        const componentTotal =
+            Number(
+                (
+                    totalDPP
+                    +
+                    totalTaxPlus
+                    -
+                    totalTaxMinus
+                )
+                .toFixed(
+                    2
+                )
+            );
+
+
+        if (
+            Math.abs(
+                componentTotal
+                -
+                totalAllocation
+            )
+            >
+            0.01
+        ) {
+
+            throw new Error(
+                "Bulk AP Payment journal components do not match Total Payment."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        PAYMENT DESCRIPTION
+        ==================================================
+        */
+
+        const paymentDescription =
+            String(
+                batch.description
+                ||
+                `AP Payment Batch ${
+                    batch.payment_no
+                    || ""
+                }`
+            )
+            .trim();
+
+
+        /*
+        ==================================================
+        JOURNAL DESCRIPTION
+        ==================================================
+        */
+
+        const journalDescription =
+            `[AUTO] PAYMENT AP\n${paymentDescription}`;
+
+
+        /*
+        ==================================================
+        JOURNAL DETAILS
+
+        MAXIMUM 3 LINES:
+        1. DPP
+        2. TAX (+)
+        3. TAX (-)
+        ==================================================
+        */
+
+        const journalDetails =
+            [];
+
+
+        /*
+        ==================================================
+        DPP
+
+        DR HUTANG USAHA
+        CR BANK
+        ==================================================
+        */
+
+        if (
+            totalDPP > 0
+        ) {
+
+            journalDetails.push({
+
+                debit_account_id:
+                    payableAccountId,
+
+                credit_account_id:
+                    bankAccountId,
+
+                business_partner_id:
+                    vendorId,
+
+                description:
+                    `${paymentDescription} - DPP`,
+
+                amount:
+                    totalDPP
+
+            });
+
+        }
+
+
+        /*
+        ==================================================
+        TAX (+)
+
+        DR HUTANG USAHA
+        CR BANK
+        ==================================================
+        */
+
+        if (
+            totalTaxPlus > 0
+        ) {
+
+            journalDetails.push({
+
+                debit_account_id:
+                    payableAccountId,
+
+                credit_account_id:
+                    bankAccountId,
+
+                business_partner_id:
+                    vendorId,
+
+                description:
+                    `${paymentDescription} - Tax (+)`,
+
+                amount:
+                    totalTaxPlus
+
+            });
+
+        }
+
+
+        /*
+        ==================================================
+        TAX (-)
+
+        DR BANK
+        CR HUTANG USAHA
+        ==================================================
+        */
+
+        if (
+            totalTaxMinus > 0
+        ) {
+
+            journalDetails.push({
+
+                debit_account_id:
+                    bankAccountId,
+
+                credit_account_id:
+                    payableAccountId,
+
+                business_partner_id:
+                    vendorId,
+
+                description:
+                    `${paymentDescription} - Tax (-)`,
+
+                amount:
+                    totalTaxMinus
+
+            });
+
+        }
+
+
+        if (
+            journalDetails.length === 0
+        ) {
+
+            throw new Error(
+                "No valid Bulk AP Payment Journal detail."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        JOURNAL HEADER
+
+        IMPORTANT:
+        source_document_id = PAYMENT BATCH ID
+        NOT INDIVIDUAL AP INVOICE ID
+        ==================================================
+        */
+
+        const journalHeader = {
+
+            journal_no:
+                "",
+
+            journal_date:
+                paymentDate,
+
+            posting_period:
+                paymentDate.substring(
+                    0,
+                    7
+                ),
+
+            description:
+                journalDescription,
+
+            source_module:
+                "AP",
+
+            source_document_type:
+                "AP_PAYMENT",
+
+            source_document_id:
+                batch.id,
+
+            /*
+            ==============================================
+            BULK PAYMENT DOES NOT REPRESENT
+            ONE SINGLE AP INVOICE
+            ==============================================
+            */
+
+            source_invoice_no:
+                batch.payment_no
+                || null,
+
+            source_po_no:
+                batch.reference_no
+                || null,
+
+            status:
+                "Draft"
+
+        };
+
+
+        /*
+        ==================================================
+        CREATE ONE JOURNAL
+        ==================================================
+        */
+
+        createdJournal =
+            await this.journalService
+                .create(
+                    journalHeader,
+                    journalDetails
+                );
+
+
+        if (
+            !createdJournal
+            ||
+            !createdJournal.id
+        ) {
+
+            throw new Error(
+                "Failed to create Bulk AP Payment GL Journal."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        LINK JOURNAL TO BATCH HEADER ONLY
+
+        DO NOT LINK trx_ap_payment allocations yet.
+        THEY MUST REMAIN INACTIVE WHILE JOURNAL IS DRAFT.
+        ==================================================
+        */
+
+        const updatedBatch =
+            await this.service
+                .updatePaymentBatch(
+                    batch.id,
+                    {
+                        gl_journal_id:
+                            createdJournal.id
+                    }
+                );
+
+
+        if (
+            !updatedBatch
+            ||
+            String(
+                updatedBatch.gl_journal_id
+                || ""
+            )
+            !==
+            String(
+                createdJournal.id
+            )
+        ) {
+
+            throw new Error(
+                "Failed to link GL Journal to AP Payment Batch."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        UPDATE CURRENT UI STATE
+        ==================================================
+        */
+
+        this.currentPaymentBatchId =
+            batch.id;
+
+
+        console.log(
+            "BULK AP PAYMENT GL JOURNAL CREATED:",
+            {
+                batch_id:
+                    batch.id,
+
+                payment_no:
+                    batch.payment_no,
+
+                allocation_count:
+                    allocations.length,
+
+                total_dpp:
+                    totalDPP,
+
+                total_tax_plus:
+                    totalTaxPlus,
+
+                total_tax_minus:
+                    totalTaxMinus,
+
+                total_payment:
+                    totalAllocation,
+
+                journal_id:
+                    createdJournal.id,
+
+                journal_no:
+                    createdJournal.journal_no
+                    || null
+            }
+        );
+
+
+        /*
+        ==================================================
+        NOTIFY GL WORKSPACE
+        ==================================================
+        */
+
+        window.dispatchEvent(
+
+            new CustomEvent(
+
+                "finova:gl-journal-changed",
+
+                {
+                    detail: {
+
+                        source:
+                            "AP",
+
+                        sourceModule:
+                            "AP",
+
+                        sourceDocumentType:
+                            "AP_PAYMENT",
+
+                        action:
+                            "AP_PAYMENT_BATCH_JOURNAL_CREATED",
+
+                        sourceDocumentId:
+                            batch.id,
+
+                        paymentBatchId:
+                            batch.id,
+
+                        paymentNo:
+                            batch.payment_no
+                            || null,
+
+                        journalId:
+                            createdJournal.id,
+
+                        journalNo:
+                            createdJournal.journal_no
+                            || null
+
+                    }
+                }
+
+            )
+
+        );
+
+
+        return {
+
+            batch:
+                updatedBatch,
+
+            journal:
+                createdJournal,
+
+            allocations:
+                allocations
+
+        };
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "AccountPayable.generateBulkAPPaymentJournal:",
+            error
+        );
+
+
+        /*
+        ==================================================
+        ROLLBACK CREATED JOURNAL
+
+        ONLY WHEN JOURNAL WAS CREATED BUT
+        BATCH LINK FAILED AFTERWARD.
+        ==================================================
+        */
+
+        if (
+            createdJournal?.id
+        ) {
+
+            try {
+
+                const journalId =
+                    createdJournal.id;
+
+
+                const {
+                    error: detailError
+                } = await supabase
+
+                    .from(
+                        "trx_gl_journal_detail"
+                    )
+
+                    .delete()
+
+                    .eq(
+                        "journal_id",
+                        journalId
+                    );
+
+
+                if (
+                    detailError
+                ) {
+
+                    throw detailError;
+
+                }
+
+
+                const {
+                    error: headerError
+                } = await supabase
+
+                    .from(
+                        "trx_gl_journal"
+                    )
+
+                    .delete()
+
+                    .eq(
+                        "id",
+                        journalId
+                    );
+
+
+                if (
+                    headerError
+                ) {
+
+                    throw headerError;
+
+                }
+
+
+                console.log(
+                    "BULK AP PAYMENT JOURNAL ROLLBACK SUCCESS:",
+                    journalId
+                );
+
+            }
+            catch (
+                rollbackError
+            ) {
+
+                console.error(
+                    "BULK AP PAYMENT JOURNAL ROLLBACK ERROR:",
+                    rollbackError
+                );
+
+            }
+
+        }
+
+
+        throw error;
+
+    }
+
+}
 /*
 ======================================================
 SHOW COMPLETE ACCOUNT PAYABLE CONFIRMATION
@@ -7342,7 +8719,94 @@ this.btnSaveAPPayment =
     document.getElementById(
         "btn-save-ap-payment"
     );
+/*
+==================================================
+BULK AP PAYMENT DOM
+==================================================
+*/
 
+this.apPaymentBatchNo =
+    document.getElementById(
+        "ap-payment-batch-no"
+    );
+
+
+this.apPaymentBulkVendor =
+    document.getElementById(
+        "ap-payment-bulk-vendor"
+    );
+
+
+this.apPaymentBatchStatus =
+    document.getElementById(
+        "ap-payment-batch-status"
+    );
+
+
+this.apPaymentSelectAll =
+    document.getElementById(
+        "ap-payment-select-all"
+    );
+
+
+this.apPaymentInvoiceEmpty =
+    document.getElementById(
+        "ap-payment-invoice-empty"
+    );
+
+
+this.apPaymentInvoiceLoading =
+    document.getElementById(
+        "ap-payment-invoice-loading"
+    );
+
+
+this.apPaymentInvoiceTableWrapper =
+    document.getElementById(
+        "ap-payment-invoice-table-wrapper"
+    );
+
+
+this.apPaymentInvoiceBody =
+    document.getElementById(
+        "ap-payment-invoice-body"
+    );
+
+
+this.apPaymentSelectedCount =
+    document.getElementById(
+        "ap-payment-selected-count"
+    );
+
+
+this.apPaymentSelectedOutstanding =
+    document.getElementById(
+        "ap-payment-selected-outstanding"
+    );
+
+
+this.apPaymentTotalAllocation =
+    document.getElementById(
+        "ap-payment-total-allocation"
+    );
+
+
+this.apPaymentAllocationMessage =
+    document.getElementById(
+        "ap-payment-allocation-message"
+    );
+
+
+this.apPaymentPreviewDebit =
+    document.getElementById(
+        "ap-payment-preview-debit"
+    );
+
+
+this.apPaymentPreviewCredit =
+    document.getElementById(
+        "ap-payment-preview-credit"
+    );
     /*
 ==================================================
 ACCOUNTING PREVIEW
@@ -7402,6 +8866,1385 @@ this.apAccountingPreviewStatusMessage =
         "ap-accounting-preview-status-message"
     );
 
+}
+/*
+======================================================
+RESET BULK AP PAYMENT
+======================================================
+*/
+
+resetBulkAPPayment() {
+
+    /*
+    ==================================================
+    STATE
+    ==================================================
+    */
+
+    this.currentPaymentBatchId =
+        null;
+
+
+    this.apBulkPaymentInvoices =
+        [];
+
+
+    this.apBulkPaymentSelected =
+        new Map();
+
+
+    /*
+    ==================================================
+    HEADER
+    ==================================================
+    */
+
+    if (
+        this.apPaymentBatchNo
+    ) {
+
+        this.apPaymentBatchNo.value =
+            "";
+
+    }
+
+
+    if (
+        this.apPaymentBatchStatus
+    ) {
+
+        this.apPaymentBatchStatus.textContent =
+            "Draft";
+
+    }
+
+
+    if (
+        this.apPaymentBulkVendor
+    ) {
+
+        this.apPaymentBulkVendor.value =
+            "";
+
+    }
+
+
+    /*
+    ==================================================
+    INVOICE AREA
+    ==================================================
+    */
+
+    if (
+        this.apPaymentSelectAll
+    ) {
+
+        this.apPaymentSelectAll.checked =
+            false;
+
+        this.apPaymentSelectAll.indeterminate =
+            false;
+
+        this.apPaymentSelectAll.disabled =
+            true;
+
+    }
+
+
+    if (
+        this.apPaymentInvoiceBody
+    ) {
+
+        this.apPaymentInvoiceBody.innerHTML =
+            "";
+
+    }
+
+
+    this.apPaymentInvoiceEmpty
+        ?.classList
+        .remove(
+            "d-none"
+        );
+
+
+    this.apPaymentInvoiceLoading
+        ?.classList
+        .add(
+            "d-none"
+        );
+
+
+    this.apPaymentInvoiceTableWrapper
+        ?.classList
+        .add(
+            "d-none"
+        );
+
+
+    /*
+    ==================================================
+    SUMMARY
+    ==================================================
+    */
+
+    if (
+        this.apPaymentSelectedCount
+    ) {
+
+        this.apPaymentSelectedCount.textContent =
+            "0";
+
+    }
+
+
+    if (
+        this.apPaymentSelectedOutstanding
+    ) {
+
+        this.apPaymentSelectedOutstanding.textContent =
+            "0";
+
+    }
+
+
+    if (
+        this.apPaymentTotalAllocation
+    ) {
+
+        this.apPaymentTotalAllocation.textContent =
+            "0";
+
+    }
+
+
+    if (
+        this.apPaymentPreviewDebit
+    ) {
+
+        this.apPaymentPreviewDebit.textContent =
+            "0";
+
+    }
+
+
+    if (
+        this.apPaymentPreviewCredit
+    ) {
+
+        this.apPaymentPreviewCredit.textContent =
+            "0";
+
+    }
+
+
+    this.apPaymentAllocationMessage
+        ?.classList
+        .add(
+            "d-none"
+        );
+
+
+   if (
+    this.btnSaveAPPayment
+) {
+
+    this.btnSaveAPPayment.disabled =
+        false;
+
+    this.btnSaveAPPayment.dataset.processing =
+        "false";
+
+}
+
+}
+/*
+======================================================
+LOAD BULK AP OUTSTANDING BY VENDOR
+======================================================
+*/
+
+async loadBulkAPOutstandingInvoices(
+    vendorId
+) {
+
+    try {
+
+        const normalizedVendorId =
+            Number(
+                vendorId
+                || 0
+            );
+
+
+        /*
+        ==================================================
+        RESET INVOICE STATE
+        ==================================================
+        */
+
+        this.apBulkPaymentInvoices =
+            [];
+
+
+        this.apBulkPaymentSelected =
+            new Map();
+
+
+        if (
+            this.apPaymentInvoiceBody
+        ) {
+
+            this.apPaymentInvoiceBody.innerHTML =
+                "";
+
+        }
+
+
+        this.apPaymentInvoiceTableWrapper
+            ?.classList
+            .add(
+                "d-none"
+            );
+
+
+        this.apPaymentInvoiceEmpty
+            ?.classList
+            .add(
+                "d-none"
+            );
+
+
+        /*
+        ==================================================
+        NO VENDOR
+        ==================================================
+        */
+
+        if (
+            !Number.isFinite(
+                normalizedVendorId
+            )
+            ||
+            normalizedVendorId <= 0
+        ) {
+
+            this.apPaymentInvoiceLoading
+                ?.classList
+                .add(
+                    "d-none"
+                );
+
+
+            this.apPaymentInvoiceEmpty
+                ?.classList
+                .remove(
+                    "d-none"
+                );
+
+
+            if (
+                this.apPaymentSelectAll
+            ) {
+
+                this.apPaymentSelectAll.checked =
+                    false;
+
+                this.apPaymentSelectAll.disabled =
+                    true;
+
+            }
+
+
+            this.updateBulkAPPaymentSummary();
+
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        SHOW LOADING
+        ==================================================
+        */
+
+        this.apPaymentInvoiceLoading
+            ?.classList
+            .remove(
+                "d-none"
+            );
+
+
+        /*
+        ==================================================
+        ALLOW BROWSER TO PAINT LOADING
+        ==================================================
+        */
+
+        await new Promise(
+            resolve => {
+
+                requestAnimationFrame(
+                    () => {
+
+                        requestAnimationFrame(
+                            resolve
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+        /*
+        ==================================================
+        SERVICE
+        ==================================================
+        */
+
+        const result =
+            await this.service
+                .getOutstandingInvoicesByVendor(
+                    normalizedVendorId
+                );
+
+
+        const invoices =
+            Array.isArray(
+                result?.invoices
+            )
+                ? result.invoices
+                : [];
+
+
+        this.apBulkPaymentInvoices =
+            invoices;
+
+
+        /*
+        ==================================================
+        HIDE LOADING
+        ==================================================
+        */
+
+        this.apPaymentInvoiceLoading
+            ?.classList
+            .add(
+                "d-none"
+            );
+
+
+        /*
+        ==================================================
+        EMPTY
+        ==================================================
+        */
+
+        if (
+            invoices.length === 0
+        ) {
+
+            if (
+                this.apPaymentInvoiceEmpty
+            ) {
+
+                this.apPaymentInvoiceEmpty.innerHTML =
+                    `
+                    <div class="ap-bulk-payment-empty-icon">
+
+                        <i class="fa-solid fa-circle-check"></i>
+
+                    </div>
+
+                    <div class="fw-semibold">
+                        No Outstanding Invoice
+                    </div>
+
+                    <div class="small text-muted mt-1">
+                        This vendor has no Account Payable
+                        invoice available for payment.
+                    </div>
+                    `;
+
+
+                this.apPaymentInvoiceEmpty.classList
+                    .remove(
+                        "d-none"
+                    );
+
+            }
+
+
+            if (
+                this.apPaymentSelectAll
+            ) {
+
+                this.apPaymentSelectAll.checked =
+                    false;
+
+                this.apPaymentSelectAll.disabled =
+                    true;
+
+            }
+
+
+            this.updateBulkAPPaymentSummary();
+
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        RENDER
+        ==================================================
+        */
+
+        this.renderBulkAPOutstandingInvoices();
+
+
+        this.apPaymentInvoiceTableWrapper
+            ?.classList
+            .remove(
+                "d-none"
+            );
+
+
+        if (
+            this.apPaymentSelectAll
+        ) {
+
+            this.apPaymentSelectAll.disabled =
+                false;
+
+        }
+
+
+        this.updateBulkAPPaymentSummary();
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "AccountPayable.loadBulkAPOutstandingInvoices:",
+            error
+        );
+
+
+        this.apPaymentInvoiceLoading
+            ?.classList
+            .add(
+                "d-none"
+            );
+
+
+        if (
+            this.apPaymentInvoiceEmpty
+        ) {
+
+            this.apPaymentInvoiceEmpty.innerHTML =
+                `
+                <div class="ap-bulk-payment-empty-icon">
+
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+
+                </div>
+
+                <div class="fw-semibold">
+                    Failed to Load Invoice
+                </div>
+
+                <div class="small text-muted mt-1">
+                    ${this.escapeHtml(
+                        error?.message
+                        || "Unable to load outstanding invoices."
+                    )}
+                </div>
+                `;
+
+
+            this.apPaymentInvoiceEmpty.classList
+                .remove(
+                    "d-none"
+                );
+
+        }
+
+
+        if (
+            this.apPaymentSelectAll
+        ) {
+
+            this.apPaymentSelectAll.disabled =
+                true;
+
+        }
+
+
+        this.updateBulkAPPaymentSummary();
+
+    }
+
+}
+/*
+======================================================
+RENDER BULK AP OUTSTANDING
+======================================================
+*/
+
+renderBulkAPOutstandingInvoices() {
+
+    if (
+        !this.apPaymentInvoiceBody
+    ) {
+
+        return;
+
+    }
+
+
+    const invoices =
+        Array.isArray(
+            this.apBulkPaymentInvoices
+        )
+            ? this.apBulkPaymentInvoices
+            : [];
+
+
+    this.apPaymentInvoiceBody.innerHTML =
+        invoices
+            .map(
+                invoice => {
+
+                    const id =
+                        String(
+                            invoice?.id
+                            || ""
+                        );
+
+
+                    const invoiceNo =
+                        this.escapeHtml(
+                            invoice?.invoice_no
+                            || "-"
+                        );
+
+
+                    /*
+                    ==================================================
+                    DATE DISPLAY
+
+                    KEEP SAME SAFE YYYY-MM-DD VALUE
+                    NO DEPENDENCY ON NON-EXISTING FORMATTER
+                    ==================================================
+                    */
+
+                    const invoiceDate =
+                        invoice?.invoice_date
+                        ||
+                        "-";
+
+
+                    const dueDate =
+                        invoice?.due_date
+                        ||
+                        "-";
+
+
+                    const total =
+                        Number(
+                            invoice?.total_amount
+                            || 0
+                        );
+
+
+                    const paid =
+                        Number(
+                            invoice?.paid_amount
+                            || 0
+                        );
+
+
+                    const outstanding =
+                        Number(
+                            invoice?.outstanding_amount
+                            || 0
+                        );
+
+
+                    return `
+                        <tr
+                            data-ap-payment-row="${id}"
+                        >
+
+                            <td class="text-center">
+
+                                <input
+                                    type="checkbox"
+                                    class="
+                                        form-check-input
+                                        ap-bulk-invoice-check
+                                    "
+                                    data-ap-id="${id}"
+                                >
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="fw-semibold">
+                                    ${invoiceNo}
+                                </div>
+
+                                <div
+                                    class="
+                                        small
+                                        text-muted
+                                    "
+                                >
+                                    ${this.escapeHtml(
+                                        invoice?.status
+                                        || ""
+                                    )}
+                                </div>
+
+                            </td>
+
+
+                            <td>
+                                ${invoiceDate}
+                            </td>
+
+
+                            <td>
+                                ${dueDate}
+                            </td>
+
+
+                            <td class="text-end">
+
+                                ${this.formatCurrency(
+                                    total
+                                )}
+
+                            </td>
+
+
+                            <td class="text-end">
+
+                                ${this.formatCurrency(
+                                    paid
+                                )}
+
+                            </td>
+
+
+                            <td
+                                class="
+                                    text-end
+                                    fw-semibold
+                                "
+                            >
+
+                                ${this.formatCurrency(
+                                    outstanding
+                                )}
+
+                            </td>
+
+
+                            <td class="text-end">
+
+                                <input
+                                    type="text"
+                                    class="
+                                        form-control
+                                        ap-bulk-payment-input
+                                    "
+                                    data-ap-payment-amount="${id}"
+                                    inputmode="numeric"
+                                    autocomplete="off"
+                                    value="0"
+                                    disabled
+                                >
+
+                            </td>
+
+                        </tr>
+                    `;
+
+                }
+            )
+            .join(
+                ""
+            );
+
+
+    this.bindBulkAPInvoiceEvents();
+
+}
+/*
+======================================================
+BIND BULK AP INVOICE EVENTS
+======================================================
+*/
+
+bindBulkAPInvoiceEvents() {
+
+    if (
+        !this.apPaymentInvoiceBody
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+    ==================================================
+    CHECKBOX
+    ==================================================
+    */
+
+    this.apPaymentInvoiceBody
+        .querySelectorAll(
+            ".ap-bulk-invoice-check"
+        )
+        .forEach(
+            checkbox => {
+
+                checkbox.addEventListener(
+                    "change",
+                    event => {
+
+                        const apId =
+                            String(
+                                event.currentTarget
+                                    ?.dataset
+                                    ?.apId
+                                || ""
+                            );
+
+
+                        this.toggleBulkAPInvoice(
+                            apId,
+                            event.currentTarget.checked
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+    /*
+    ==================================================
+    PAYMENT AMOUNT
+    ==================================================
+    */
+
+    this.apPaymentInvoiceBody
+        .querySelectorAll(
+            ".ap-bulk-payment-input"
+        )
+        .forEach(
+            input => {
+
+                input.addEventListener(
+                    "input",
+                    event => {
+
+                        const apId =
+                            String(
+                                event.currentTarget
+                                    ?.dataset
+                                    ?.apPaymentAmount
+                                || ""
+                            );
+
+
+                        this.updateBulkAPAllocationAmount(
+                            apId,
+                            event.currentTarget
+                        );
+
+                    }
+                );
+
+
+                input.addEventListener(
+                    "blur",
+                    event => {
+
+                        const value =
+                            this.parseAPPaymentAmount(
+                                event.currentTarget.value
+                            );
+
+
+                        event.currentTarget.value =
+                            this.formatCurrency(
+                                value
+                            );
+
+                    }
+                );
+
+            }
+        );
+
+}
+/*
+======================================================
+TOGGLE BULK AP INVOICE
+======================================================
+*/
+
+toggleBulkAPInvoice(
+    apId,
+    checked
+) {
+
+    const invoice =
+        this.apBulkPaymentInvoices
+            .find(
+                item =>
+                    String(
+                        item?.id
+                    )
+                    ===
+                    String(
+                        apId
+                    )
+            );
+
+
+    if (
+        !invoice
+    ) {
+
+        return;
+
+    }
+
+
+    const outstanding =
+        Math.max(
+            0,
+            Number(
+                invoice.outstanding_amount
+                || 0
+            )
+        );
+
+
+    const row =
+        this.apPaymentInvoiceBody
+            ?.querySelector(
+                `[data-ap-payment-row="${apId}"]`
+            );
+
+
+    const input =
+        this.apPaymentInvoiceBody
+            ?.querySelector(
+                `[data-ap-payment-amount="${apId}"]`
+            );
+
+
+    if (
+        checked
+    ) {
+
+        /*
+        ==============================================
+        DEFAULT = FULL OUTSTANDING
+        USER MAY REDUCE FOR PARTIAL PAYMENT
+        ==============================================
+        */
+
+        this.apBulkPaymentSelected.set(
+            String(
+                apId
+            ),
+            {
+                invoice:
+                    invoice,
+
+                payment_amount:
+                    outstanding
+            }
+        );
+
+
+        if (
+            input
+        ) {
+
+            input.disabled =
+                false;
+
+            input.value =
+                this.formatCurrency(
+                    outstanding
+                );
+
+        }
+
+
+        row?.classList.add(
+            "ap-bulk-row-selected"
+        );
+
+    }
+    else {
+
+        this.apBulkPaymentSelected.delete(
+            String(
+                apId
+            )
+        );
+
+
+        if (
+            input
+        ) {
+
+            input.disabled =
+                true;
+
+            input.value =
+                "0";
+
+        }
+
+
+        row?.classList.remove(
+            "ap-bulk-row-selected"
+        );
+
+    }
+
+
+    this.syncBulkAPSelectAll();
+
+
+    this.updateBulkAPPaymentSummary();
+
+}
+/*
+======================================================
+UPDATE BULK AP ALLOCATION AMOUNT
+======================================================
+*/
+
+updateBulkAPAllocationAmount(
+    apId,
+    input
+) {
+
+    const selected =
+        this.apBulkPaymentSelected.get(
+            String(
+                apId
+            )
+        );
+
+
+    if (
+        !selected
+    ) {
+
+        return;
+
+    }
+
+
+    const outstanding =
+        Number(
+            selected.invoice
+                ?.outstanding_amount
+            || 0
+        );
+
+
+    let amount =
+        this.parseAPPaymentAmount(
+            input?.value
+            || 0
+        );
+
+
+    if (
+        !Number.isFinite(
+            amount
+        )
+        ||
+        amount < 0
+    ) {
+
+        amount =
+            0;
+
+    }
+
+
+    /*
+    ==================================================
+    PREVENT OVERPAYMENT
+    ==================================================
+    */
+
+    if (
+        amount > outstanding
+    ) {
+
+        amount =
+            outstanding;
+
+
+        if (
+            input
+        ) {
+
+            input.value =
+                this.formatCurrency(
+                    outstanding
+                );
+
+        }
+
+    }
+
+
+    selected.payment_amount =
+        Math.round(
+            amount
+        );
+
+
+    this.apBulkPaymentSelected.set(
+        String(
+            apId
+        ),
+        selected
+    );
+
+
+    this.updateBulkAPPaymentSummary();
+
+}
+/*
+======================================================
+TOGGLE ALL BULK AP INVOICES
+======================================================
+*/
+
+toggleAllBulkAPInvoices(
+    checked
+) {
+
+    const checkboxes =
+        this.apPaymentInvoiceBody
+            ?.querySelectorAll(
+                ".ap-bulk-invoice-check"
+            )
+        || [];
+
+
+    checkboxes.forEach(
+        checkbox => {
+
+            if (
+                checkbox.checked
+                !==
+                checked
+            ) {
+
+                checkbox.checked =
+                    checked;
+
+
+                this.toggleBulkAPInvoice(
+                    checkbox.dataset.apId,
+                    checked
+                );
+
+            }
+
+        }
+    );
+
+
+    this.updateBulkAPPaymentSummary();
+
+}
+
+
+/*
+======================================================
+SYNC SELECT ALL
+======================================================
+*/
+
+syncBulkAPSelectAll() {
+
+    if (
+        !this.apPaymentSelectAll
+    ) {
+
+        return;
+
+    }
+
+
+    const total =
+        this.apBulkPaymentInvoices.length;
+
+
+    const selected =
+        this.apBulkPaymentSelected.size;
+
+
+    this.apPaymentSelectAll.checked =
+        total > 0
+        &&
+        selected === total;
+
+
+    this.apPaymentSelectAll.indeterminate =
+        selected > 0
+        &&
+        selected < total;
+
+}
+/*
+======================================================
+UPDATE BULK AP PAYMENT SUMMARY
+======================================================
+*/
+
+updateBulkAPPaymentSummary() {
+
+    const allocations =
+        Array.from(
+            this.apBulkPaymentSelected.values()
+        );
+
+
+    const selectedCount =
+        allocations.length;
+
+
+    const selectedOutstanding =
+        allocations.reduce(
+            (
+                total,
+                item
+            ) => {
+
+                return (
+                    total
+                    +
+                    Number(
+                        item.invoice
+                            ?.outstanding_amount
+                        || 0
+                    )
+                );
+
+            },
+            0
+        );
+
+
+    const totalPayment =
+        allocations.reduce(
+            (
+                total,
+                item
+            ) => {
+
+                return (
+                    total
+                    +
+                    Number(
+                        item.payment_amount
+                        || 0
+                    )
+                );
+
+            },
+            0
+        );
+
+
+    /*
+    ==================================================
+    SUMMARY
+    ==================================================
+    */
+
+    if (
+        this.apPaymentSelectedCount
+    ) {
+
+        this.apPaymentSelectedCount.textContent =
+            String(
+                selectedCount
+            );
+
+    }
+
+
+    if (
+        this.apPaymentSelectedOutstanding
+    ) {
+
+        this.apPaymentSelectedOutstanding.textContent =
+            this.formatCurrency(
+                selectedOutstanding
+            );
+
+    }
+
+
+    if (
+        this.apPaymentTotalAllocation
+    ) {
+
+        this.apPaymentTotalAllocation.textContent =
+            this.formatCurrency(
+                totalPayment
+            );
+
+    }
+
+
+    /*
+    ==================================================
+    JOURNAL PREVIEW
+    ==================================================
+    */
+
+    if (
+        this.apPaymentPreviewDebit
+    ) {
+
+        this.apPaymentPreviewDebit.textContent =
+            this.formatCurrency(
+                totalPayment
+            );
+
+    }
+
+
+    if (
+        this.apPaymentPreviewCredit
+    ) {
+
+        this.apPaymentPreviewCredit.textContent =
+            this.formatCurrency(
+                totalPayment
+            );
+
+    }
+
+
+    /*
+    ==================================================
+    VALIDATION
+    ==================================================
+    */
+
+    const hasZeroAllocation =
+        allocations.some(
+            item =>
+                Number(
+                    item.payment_amount
+                    || 0
+                )
+                <= 0
+        );
+
+
+    if (
+        this.apPaymentAllocationMessage
+    ) {
+
+        if (
+            hasZeroAllocation
+        ) {
+
+            this.apPaymentAllocationMessage.textContent =
+                "Payment Amount must be greater than 0 for every selected invoice.";
+
+
+            this.apPaymentAllocationMessage.classList
+                .remove(
+                    "d-none"
+                );
+
+        }
+        else {
+
+            this.apPaymentAllocationMessage.classList
+                .add(
+                    "d-none"
+                );
+
+        }
+
+    }
+
+
+   /*
+==================================================
+SAVE BUTTON
+FINAL
+
+IMPORTANT:
+BUTTON MUST REMAIN CLICKABLE.
+
+ALL BUSINESS VALIDATION IS HANDLED INSIDE:
+saveBulkAPPaymentDraft()
+
+ONLY DISABLE WHILE SAVE PROCESS IS RUNNING.
+==================================================
+*/
+
+if (
+    this.btnSaveAPPayment
+) {
+
+    this.btnSaveAPPayment.disabled =
+        this.isSavingBulkAPPayment ===
+        true;
+
+
+    /*
+    ==============================================
+    PROCESSING STATE
+    ==============================================
+    */
+
+    this.btnSaveAPPayment.dataset.processing =
+        this.isSavingBulkAPPayment ===
+            true
+            ? "true"
+            : "false";
+
+}
 }
    /*
 ======================================================
@@ -7638,6 +10481,14 @@ async loadVendors() {
 
         this.initializeVendorSearch();
 
+        /*
+==============================================
+BULK AP PAYMENT VENDOR
+==============================================
+*/
+
+this.loadBulkAPPaymentVendors();
+
     }
 
     catch (
@@ -7651,18 +10502,978 @@ async loadVendors() {
 
 
         this.vendorData =
-            [];
+    [];
+
+this.renderVendorOptions();
+
+this.initializeVendorSearch();
+
+/*
+==============================================
+RESET BULK AP PAYMENT VENDOR
+==============================================
+*/
+
+this.loadBulkAPPaymentVendors();
+
+this.showError(
+    "Failed to load Vendor."
+);
+
+    }
+
+}
+/*
+======================================================
+GENERATE AP PAYMENT BATCH NUMBER
+======================================================
+*/
+
+generateAPPaymentBatchNo() {
+
+    const now =
+        new Date();
 
 
-        this.renderVendorOptions();
+    const pad =
+        (
+            value,
+            length = 2
+        ) => {
+
+            return String(
+                value
+            )
+            .padStart(
+                length,
+                "0"
+            );
+
+        };
 
 
-        this.initializeVendorSearch();
+    const year =
+        now.getFullYear();
+
+
+    const month =
+        pad(
+            now.getMonth()
+            +
+            1
+        );
+
+
+    const day =
+        pad(
+            now.getDate()
+        );
+
+
+    const hour =
+        pad(
+            now.getHours()
+        );
+
+
+    const minute =
+        pad(
+            now.getMinutes()
+        );
+
+
+    const second =
+        pad(
+            now.getSeconds()
+        );
+
+
+    const millisecond =
+        pad(
+            now.getMilliseconds(),
+            3
+        );
+
+
+    return (
+        `APP-${year}${month}${day}-${hour}${minute}${second}${millisecond}`
+    );
+
+}
+/*
+======================================================
+SAVE BULK AP PAYMENT DRAFT
+======================================================
+*/
+
+async saveBulkAPPaymentDraft() {
+
+    /*
+    ==================================================
+    PROCESS LOCK
+    ==================================================
+    */
+
+    if (
+        this.isSavingBulkAPPayment ===
+        true
+    ) {
+
+        return null;
+
+    }
+
+
+    this.isSavingBulkAPPayment =
+        true;
+
+
+    let createdBatch =
+    null;
+
+let createdBatchJournal =
+    null;
+
+
+    try {
+
+        /*
+        ==================================================
+        PAYMENT DATE
+        ==================================================
+        */
+
+        const paymentDate =
+            String(
+                this.apPaymentDate
+                    ?.value
+                || ""
+            )
+            .trim();
+
+
+        if (
+            !paymentDate
+        ) {
+
+            throw new Error(
+                "Payment Date is required."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        VENDOR
+        ==================================================
+        */
+
+        const vendorId =
+            Number(
+                this.apPaymentBulkVendor
+                    ?.value
+                || 0
+            );
+
+
+        if (
+            !Number.isFinite(
+                vendorId
+            )
+            ||
+            vendorId <= 0
+        ) {
+
+            throw new Error(
+                "Vendor is required."
+            );
+
+        }
+
+
+        /*
+==================================================
+BANK ACCOUNT
+FINAL VALIDATION
+==================================================
+*/
+
+const bankAccountElement =
+    this.apPaymentBankAccount
+    ||
+    null;
+
+
+if (
+    !bankAccountElement
+) {
+
+    throw new Error(
+        "Bank Account element was not found."
+    );
+
+}
+
+
+/*
+==================================================
+RAW SELECT VALUE
+==================================================
+*/
+
+const rawBankAccountId =
+    String(
+        bankAccountElement.value
+        ||
+        ""
+    )
+    .trim();
+
+
+/*
+==================================================
+SELECTED OPTION
+==================================================
+*/
+
+const selectedBankOption =
+    bankAccountElement
+        .selectedOptions
+        ?.[0]
+    ||
+    null;
+
+
+/*
+==================================================
+DEBUG
+==================================================
+*/
+
+console.log(
+    "BULK AP BANK ACCOUNT VALIDATION:",
+    {
+
+        raw_value:
+            rawBankAccountId,
+
+        selected_text:
+            selectedBankOption
+                ?.textContent
+                ?.trim()
+            ||
+            null,
+
+        option_count:
+            bankAccountElement
+                .options
+                ?.length
+            ||
+            0
+
+    }
+);
+
+
+/*
+==================================================
+REQUIRED
+==================================================
+*/
+
+if (
+    !rawBankAccountId
+) {
+
+    throw new Error(
+        "Bank Account is required."
+    );
+
+}
+
+
+/*
+==================================================
+NUMERIC COA ID
+==================================================
+*/
+
+const bankAccountId =
+    Number(
+        rawBankAccountId
+    );
+
+
+if (
+    !Number.isFinite(
+        bankAccountId
+    )
+    ||
+    bankAccountId <= 0
+) {
+
+    throw new Error(
+        `Bank Account ID "${rawBankAccountId}" is invalid.`
+    );
+
+}
+
+
+        /*
+        ==================================================
+        ALLOCATIONS
+        ==================================================
+        */
+
+        const selected =
+            Array.from(
+                this.apBulkPaymentSelected
+                    .values()
+            );
+
+
+        if (
+            selected.length === 0
+        ) {
+
+            throw new Error(
+                "Select at least one Account Payable invoice."
+            );
+
+        }
+
+
+        const allocations =
+            selected.map(
+                item => {
+
+                    return {
+
+                        account_payable_id:
+                            item
+                                ?.invoice
+                                ?.id,
+
+                        payment_amount:
+                            Math.round(
+                                Number(
+                                    item
+                                        ?.payment_amount
+                                    || 0
+                                )
+                            )
+
+                    };
+
+                }
+            );
+
+
+        /*
+        ==================================================
+        VALIDATE ALLOCATION
+        ==================================================
+        */
+
+        for (
+            const allocation
+            of allocations
+        ) {
+
+            if (
+                !allocation
+                    .account_payable_id
+            ) {
+
+                throw new Error(
+                    "Account Payable allocation is invalid."
+                );
+
+            }
+
+
+            if (
+                !Number.isFinite(
+                    allocation
+                        .payment_amount
+                )
+                ||
+                allocation
+                    .payment_amount
+                <= 0
+            ) {
+
+                throw new Error(
+                    "Payment Amount must be greater than 0 for every selected invoice."
+                );
+
+            }
+
+        }
+
+
+        /*
+        ==================================================
+        TOTAL PAYMENT
+        ==================================================
+        */
+
+        const totalPayment =
+            allocations.reduce(
+                (
+                    total,
+                    allocation
+                ) => {
+
+                    return (
+                        total
+                        +
+                        allocation
+                            .payment_amount
+                    );
+
+                },
+                0
+            );
+
+
+        if (
+            totalPayment <= 0
+        ) {
+
+            throw new Error(
+                "Total Payment must be greater than 0."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        HEADER
+        ==================================================
+        */
+
+        const referenceNo =
+            String(
+                this.apPaymentReferenceNo
+                    ?.value
+                || ""
+            )
+            .trim()
+            ||
+            null;
+
+
+        const description =
+            String(
+                this.apPaymentDescription
+                    ?.value
+                || ""
+            )
+            .trim()
+            ||
+            null;
+
+
+        /*
+        ==================================================
+        PAYMENT NUMBER
+        ==================================================
+        */
+
+        const paymentNo =
+            this.generateAPPaymentBatchNo();
+
+
+        /*
+        ==================================================
+        CREATE BATCH HEADER
+        ==================================================
+        */
+
+        createdBatch =
+            await this.service
+                .createPaymentBatch({
+
+                    payment_no:
+                        paymentNo,
+
+                    payment_date:
+                        paymentDate,
+
+                    vendor_id:
+                        vendorId,
+
+                    bank_account_id:
+                        bankAccountId,
+
+                    reference_no:
+                        referenceNo,
+
+                    description:
+                        description,
+
+                    total_payment:
+                        totalPayment,
+
+                    status:
+                        "Draft",
+
+                    gl_journal_id:
+                        null
+
+                });
+
+
+        if (
+            !createdBatch
+            ||
+            !createdBatch.id
+        ) {
+
+            throw new Error(
+                "Failed to create AP Payment Batch."
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        CREATE DRAFT ALLOCATIONS
+        ==================================================
+        */
+
+        const createdAllocations =
+            await this.service
+                .createPaymentBatchAllocations(
+                    createdBatch.id,
+                    allocations
+                );
+
+
+        if (
+            !Array.isArray(
+                createdAllocations
+            )
+            ||
+            createdAllocations.length
+            !==
+            allocations.length
+        ) {
+
+            throw new Error(
+                "Failed to create AP Payment allocations."
+            );
+
+        }
+        /*
+==================================================
+GENERATE ONE GL JOURNAL FOR PAYMENT BATCH
+==================================================
+*/
+
+const journalResult =
+    await this.generateBulkAPPaymentJournal(
+        createdBatch.id
+    );
+
+
+if (
+    !journalResult
+    ||
+    !journalResult.journal
+    ||
+    !journalResult.journal.id
+) {
+
+    throw new Error(
+        "Failed to generate Bulk AP Payment GL Journal."
+    );
+
+}
+
+
+/*
+==================================================
+USE LATEST BATCH WITH JOURNAL LINK
+==================================================
+*/
+
+createdBatch =
+    journalResult.batch
+    ||
+    createdBatch;
+    createdBatchJournal =
+    journalResult.journal
+    ||
+    null;
+
+        /*
+==================================================
+UPDATE AP PAYMENT STATUS IMMEDIATELY
+AFTER PAYMENT SAVE
+
+RULE:
+SAVED PAYMENT = ACTIVE PAYMENT
+
+GL JOURNAL DOES NOT NEED TO BE POSTED
+TO UPDATE AP STATUS.
+==================================================
+*/
+
+const affectedAccountPayableIds =
+    [
+        ...new Set(
+
+            createdAllocations
+
+                .map(
+                    allocation =>
+
+                        Number(
+                            allocation
+                                ?.account_payable_id
+                            ||
+                            0
+                        )
+                )
+
+                .filter(
+                    accountPayableId =>
+
+                        Number.isFinite(
+                            accountPayableId
+                        )
+                        &&
+                        accountPayableId > 0
+                )
+
+        )
+    ];
+
+
+/*
+==================================================
+RECALCULATE EACH ACCOUNT PAYABLE
+==================================================
+*/
+
+for (
+    const accountPayableId
+    of affectedAccountPayableIds
+) {
+
+    console.log(
+        "AP PAYMENT SAVE - RECALCULATE AP:",
+        {
+            account_payable_id:
+                accountPayableId
+        }
+    );
+
+
+    await this.service
+        .updatePaymentStatus(
+            accountPayableId
+        );
+
+}
+
+
+/*
+==================================================
+DEBUG
+==================================================
+*/
+
+console.log(
+    "AP PAYMENT SAVE - STATUS UPDATED:",
+    {
+        payment_batch_id:
+            createdBatch.id,
+
+        gl_journal_id:
+            createdBatchJournal?.id
+            ||
+            null,
+
+        affected_account_payable_ids:
+            affectedAccountPayableIds
+    }
+);
+
+
+/*
+==================================================
+REFRESH ACCOUNT PAYABLE AFTER PAYMENT SAVE
+==================================================
+*/
+
+await this.loadData(
+    false
+);
+
+
+console.log(
+    "AP PAYMENT SAVE - AP DATA REFRESHED"
+);
+
+
+        /*
+        ==================================================
+        STORE STATE
+        ==================================================
+        */
+
+        this.currentPaymentBatchId =
+            createdBatch.id;
+
+
+        if (
+            this.apPaymentBatchNo
+        ) {
+
+            this.apPaymentBatchNo.value =
+                createdBatch.payment_no
+                || paymentNo;
+
+        }
+
+
+        if (
+            this.apPaymentBatchStatus
+        ) {
+
+            this.apPaymentBatchStatus.textContent =
+                "Draft";
+
+        }
+
+
+        /*
+        ==================================================
+        SUCCESS
+        ==================================================
+        */
+
+        this.showSuccess(
+            `AP Payment Batch ${createdBatch.payment_no || paymentNo} saved as Draft.`
+        );
+
+
+        /*
+        ==================================================
+        CLOSE MODAL
+        ==================================================
+        */
+
+        if (
+            this.accountPayablePaymentModal
+        ) {
+
+            const modal =
+                bootstrap.Modal
+                    .getOrCreateInstance(
+                        this.accountPayablePaymentModal
+                    );
+
+
+            modal.hide();
+
+        }
+
+
+        return {
+
+            batch:
+                createdBatch,
+
+            allocations:
+                createdAllocations
+
+        };
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "AccountPayable.saveBulkAPPaymentDraft:",
+            error
+        );
+
+        /*
+==================================================
+ROLLBACK BULK PAYMENT JOURNAL
+==================================================
+*/
+
+if (
+    createdBatchJournal?.id
+) {
+
+    try {
+
+        const journalId =
+            createdBatchJournal.id;
+
+
+        /*
+        ==============================================
+        DELETE JOURNAL DETAIL
+        ==============================================
+        */
+
+        const {
+            error: detailError
+        } = await supabase
+
+            .from(
+                "trx_gl_journal_detail"
+            )
+
+            .delete()
+
+            .eq(
+                "journal_id",
+                journalId
+            );
+
+
+        if (
+            detailError
+        ) {
+
+            throw detailError;
+
+        }
+
+
+        /*
+        ==============================================
+        CLEAR BATCH JOURNAL LINK FIRST
+        ==============================================
+        */
+
+        if (
+            createdBatch?.id
+        ) {
+
+            await this.service
+                .updatePaymentBatch(
+                    createdBatch.id,
+                    {
+                        gl_journal_id:
+                            null
+                    }
+                );
+
+        }
+
+
+        /*
+        ==============================================
+        DELETE JOURNAL HEADER
+        ==============================================
+        */
+
+        const {
+            error: headerError
+        } = await supabase
+
+            .from(
+                "trx_gl_journal"
+            )
+
+            .delete()
+
+            .eq(
+                "id",
+                journalId
+            );
+
+
+        if (
+            headerError
+        ) {
+
+            throw headerError;
+
+        }
+
+
+        createdBatchJournal =
+            null;
+
+    }
+    catch (
+        journalRollbackError
+    ) {
+
+        console.error(
+            "AP BULK PAYMENT JOURNAL ROLLBACK:",
+            journalRollbackError
+        );
+
+    }
+
+}
+        /*
+        ==================================================
+        ROLLBACK BATCH
+
+        FK ON DELETE CASCADE WILL REMOVE
+        ALLOCATIONS IF SOME WERE INSERTED.
+        ==================================================
+        */
+
+        if (
+            createdBatch?.id
+        ) {
+
+            try {
+
+                await this.service
+                    .deletePaymentBatch(
+                        createdBatch.id
+                    );
+
+            }
+            catch (
+                rollbackError
+            ) {
+
+                console.error(
+                    "AP BULK PAYMENT DRAFT ROLLBACK:",
+                    rollbackError
+                );
+
+            }
+
+        }
 
 
         this.showError(
-            "Failed to load Vendor."
+            error?.message
+            ||
+            "Failed to save AP Payment Batch."
         );
+
+
+        return null;
+
+    }
+    finally {
+
+        this.isSavingBulkAPPayment =
+            false;
+
+
+        this.updateBulkAPPaymentSummary();
 
     }
 
@@ -8081,7 +11892,6 @@ if (btnConfirmCompleteAP) {
                 await this.completeInvoice(
     id
 );
-
 
 /*
 ======================================
@@ -8635,7 +12445,89 @@ detailBody?.addEventListener(
     );
     /*
 ==================================================
-SAVE AP PAYMENT
+BULK AP PAYMENT
+==================================================
+*/
+
+this.apPaymentBulkVendor?.addEventListener(
+    "change",
+    async event => {
+
+        await this.loadBulkAPOutstandingInvoices(
+            event.currentTarget.value
+        );
+
+
+        this.updateBulkAPPaymentSummary();
+
+    }
+);
+/*
+==================================================
+PAYMENT DATE
+==================================================
+*/
+
+this.apPaymentDate?.addEventListener(
+    "change",
+    () => {
+
+        this.updateBulkAPPaymentSummary();
+
+    }
+);
+
+
+/*
+==================================================
+BANK ACCOUNT
+==================================================
+*/
+
+this.apPaymentBankAccount?.addEventListener(
+    "change",
+    () => {
+
+        this.updateBulkAPPaymentSummary();
+
+    }
+);
+
+
+/*
+==================================================
+VENDOR
+==================================================
+*/
+
+this.apPaymentBulkVendor?.addEventListener(
+    "change",
+    async event => {
+
+        await this.loadBulkAPOutstandingInvoices(
+            event.currentTarget.value
+        );
+
+
+        this.updateBulkAPPaymentSummary();
+
+    }
+);
+
+
+this.apPaymentSelectAll?.addEventListener(
+    "change",
+    event => {
+
+        this.toggleAllBulkAPInvoices(
+            event.currentTarget.checked
+        );
+
+    }
+);
+    /*
+==================================================
+SAVE BULK AP PAYMENT DRAFT
 ==================================================
 */
 
@@ -8643,11 +12535,160 @@ this.btnSaveAPPayment?.addEventListener(
     "click",
     async () => {
 
-        await this.saveAPPayment();
+        await this.saveBulkAPPaymentDraft();
 
     }
 );
+/*
+==================================================
+TAHAP 12
+CLEAN BULK AP PAYMENT AFTER MODAL CLOSE
+==================================================
+*/
 
+if (
+    this.accountPayablePaymentModal
+    &&
+    this.accountPayablePaymentModal
+        .dataset
+        .bulkResetBound
+    !==
+    "true"
+) {
+
+    /*
+    ==============================================
+    PREVENT DOUBLE BINDING
+    ==============================================
+    */
+
+    this.accountPayablePaymentModal
+        .dataset
+        .bulkResetBound =
+            "true";
+
+
+    /*
+    ==============================================
+    AFTER MODAL FULLY CLOSED
+    ==============================================
+    */
+
+    this.accountPayablePaymentModal
+        .addEventListener(
+            "hidden.bs.modal",
+            () => {
+
+                try {
+
+                    /*
+                    ==========================================
+                    RESET BULK PAYMENT STATE
+                    ==========================================
+                    */
+
+                    this.resetBulkAPPayment();
+
+
+                    /*
+                    ==========================================
+                    RESET LEGACY AP PAYMENT STATE
+                    ==========================================
+                    */
+
+                    this.currentPaymentAPId =
+                        null;
+
+
+                    if (
+                        this.apPaymentAPId
+                    ) {
+
+                        this.apPaymentAPId.value =
+                            "";
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    RESET PAYMENT HEADER
+                    ==========================================
+                    */
+
+                    if (
+                        this.apPaymentReferenceNo
+                    ) {
+
+                        this.apPaymentReferenceNo.value =
+                            "";
+
+                    }
+
+
+                    if (
+                        this.apPaymentDescription
+                    ) {
+
+                        this.apPaymentDescription.value =
+                            "";
+
+                    }
+
+
+                    if (
+                        this.apPaymentBankAccount
+                    ) {
+
+                        this.apPaymentBankAccount.value =
+                            "";
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    PAYMENT DATE
+                    ==========================================
+                    */
+
+                    if (
+                        this.apPaymentDate
+                    ) {
+
+                        this.apPaymentDate.value =
+                            "";
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    DEBUG
+                    ==========================================
+                    */
+
+                    console.log(
+                        "AP PAYMENT MODAL STATE CLEARED."
+                    );
+
+                }
+
+                catch (
+                    error
+                ) {
+
+                    console.error(
+                        "AccountPayable payment modal cleanup:",
+                        error
+                    );
+
+                }
+
+            }
+        );
+
+}
 
 /*
 ==================================================
@@ -8656,6 +12697,166 @@ TABLE ACTION
 */
 
 this.bindTableActions();
+
+}
+/*
+======================================================
+LOAD BULK AP PAYMENT VENDORS
+======================================================
+*/
+
+loadBulkAPPaymentVendors() {
+
+    if (
+        !this.apPaymentBulkVendor
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+    ==================================================
+    USE EXISTING AP VENDOR DATA
+    SOURCE = loadVendors()
+    ==================================================
+    */
+
+    const vendors =
+        Array.isArray(
+            this.vendorData
+        )
+            ? this.vendorData
+            : [];
+
+
+    const currentValue =
+        String(
+            this.apPaymentBulkVendor.value
+            || ""
+        );
+
+
+    /*
+    ==================================================
+    DEFAULT OPTION
+    ==================================================
+    */
+
+    this.apPaymentBulkVendor.innerHTML =
+        `
+        <option value="">
+            Select Vendor
+        </option>
+        `;
+
+
+    /*
+    ==================================================
+    VENDOR OPTIONS
+    ==================================================
+    */
+
+    vendors.forEach(
+        vendor => {
+
+            const id =
+                vendor?.id;
+
+
+            if (
+                !id
+            ) {
+
+                return;
+
+            }
+
+
+            const code =
+                String(
+                    vendor?.bp_code
+                    || ""
+                );
+
+
+            const name =
+                String(
+                    vendor?.bp_name
+                    || ""
+                );
+
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+
+            option.value =
+                String(
+                    id
+                );
+
+
+            option.textContent =
+                code
+                    ? `${code} :: ${name}`
+                    : (
+                        name
+                        || "-"
+                    );
+
+
+            this.apPaymentBulkVendor
+                .appendChild(
+                    option
+                );
+
+        }
+    );
+
+
+    /*
+    ==================================================
+    RESTORE CURRENT VALUE
+    ==================================================
+    */
+
+    if (
+        currentValue
+        &&
+        vendors.some(
+            vendor =>
+                String(
+                    vendor?.id
+                    || ""
+                )
+                ===
+                currentValue
+        )
+    ) {
+
+        this.apPaymentBulkVendor.value =
+            currentValue;
+
+    }
+
+
+    /*
+    ==================================================
+    DEBUG
+    ==================================================
+    */
+
+    console.log(
+        "AP BULK PAYMENT VENDORS:",
+        {
+            total:
+                vendors.length
+        }
+    );
 
 }
 
@@ -22864,16 +27065,187 @@ console.log(
             outstandingAmount
     }
 );
+/*
+==================================================
+TAHAP 12
+RESET BULK AP PAYMENT STATE
+
+IMPORTANT:
+EVERY NEW PAYMENT OPEN
+MUST START FROM CLEAN BATCH STATE
+==================================================
+*/
+
+this.resetBulkAPPayment();
 
 
-        /*
-        ==================================================
-        STORE CURRENT AP
-        ==================================================
-        */
+/*
+==================================================
+CURRENT AP
 
-        this.currentPaymentAPId =
-            id;
+KEEP LEGACY REFERENCE
+FOR COMPATIBILITY
+==================================================
+*/
+
+this.currentPaymentAPId =
+    id;
+
+
+/*
+==================================================
+LOAD BULK PAYMENT VENDORS
+
+USE EXISTING ACTIVE VENDOR DATA
+==================================================
+*/
+
+this.loadBulkAPPaymentVendors();
+
+
+/*
+==================================================
+VENDOR ID FROM CURRENT AP
+==================================================
+*/
+
+const paymentVendorId =
+    Number(
+        invoice.vendor_id
+        ||
+        invoice
+            ?.mst_business_partner
+            ?.id
+        ||
+        0
+    );
+
+
+if (
+    !Number.isFinite(
+        paymentVendorId
+    )
+    ||
+    paymentVendorId <= 0
+) {
+
+    throw new Error(
+        "Account Payable Vendor ID is invalid."
+    );
+
+}
+
+
+/*
+==================================================
+PRESELECT BULK PAYMENT VENDOR
+==================================================
+*/
+
+if (
+    this.apPaymentBulkVendor
+) {
+
+    const vendorOptionExists =
+        Array.from(
+            this.apPaymentBulkVendor.options
+            ||
+            []
+        )
+        .some(
+            option =>
+                String(
+                    option.value
+                )
+                ===
+                String(
+                    paymentVendorId
+                )
+        );
+
+
+    if (
+        !vendorOptionExists
+    ) {
+
+        throw new Error(
+            "Vendor is not available for AP Payment."
+        );
+
+    }
+
+
+    this.apPaymentBulkVendor.value =
+        String(
+            paymentVendorId
+        );
+
+}
+
+
+/*
+==================================================
+LOAD ALL OUTSTANDING AP
+FOR SAME VENDOR
+
+THIS IS THE CORE OF BULK PAYMENT
+==================================================
+*/
+
+await this.loadBulkAPOutstandingInvoices(
+    paymentVendorId
+);
+
+
+/*
+==================================================
+AUTO SELECT CURRENT INVOICE
+
+USER CLICKED PAYMENT ON THIS AP ROW,
+SO THIS INVOICE SHOULD BE SELECTED FIRST.
+
+OTHER OUTSTANDING INVOICES FROM SAME VENDOR
+REMAIN AVAILABLE FOR ADDITIONAL SELECTION.
+==================================================
+*/
+
+const currentBulkInvoice =
+    this.apBulkPaymentInvoices
+        .find(
+            item =>
+                String(
+                    item?.id
+                    ||
+                    ""
+                )
+                ===
+                String(
+                    id
+                )
+        );
+
+
+if (
+    currentBulkInvoice
+) {
+
+    this.toggleBulkAPInvoice(
+        id,
+        true
+    );
+
+}
+
+
+/*
+==================================================
+FINAL BULK SUMMARY
+==================================================
+*/
+
+this.updateBulkAPPaymentSummary();
+
+        
 
 
         /*
@@ -22990,6 +27362,14 @@ if (
                     );
 
         }
+        /*
+==================================================
+REFRESH BULK PAYMENT SAVE STATE
+AFTER PAYMENT HEADER IS READY
+==================================================
+*/
+
+this.updateBulkAPPaymentSummary();
 
 
         /*
@@ -23220,14 +27600,30 @@ async loadAPPaymentBankAccounts() {
 
     try {
 
+        /*
+        ==================================================
+        VALIDATE DOM
+        ==================================================
+        */
+
         if (
             !this.apPaymentBankAccount
         ) {
+
+            console.warn(
+                "AP Payment Bank Account element not found."
+            );
 
             return;
 
         }
 
+
+        /*
+        ==================================================
+        LOAD COA
+        ==================================================
+        */
 
         const coa =
             await this.service.getCOA();
@@ -23241,65 +27637,313 @@ async loadAPPaymentBankAccounts() {
                 : [];
 
 
-        this.apPaymentBankAccount.innerHTML = `
+        /*
+        ==================================================
+        RESET OPTIONS
+        ==================================================
+        */
 
+        this.apPaymentBankAccount.innerHTML = `
             <option value="">
                 Select Bank Account
             </option>
-
         `;
 
 
-        accounts
+        /*
+        ==================================================
+        FILTER BANK / CASH ACCOUNT
 
-            .filter(
+        IMPORTANT:
+        DO NOT RELY ONLY ON ACCOUNT NAME.
+
+        ACCEPT:
+        - BANK
+        - KAS
+        - CASH
+        - BCA
+        - MANDIRI
+        - BNI
+        - BRI
+        - CIMB
+        - PERMATA
+        - DANAMON
+        - MAYBANK
+
+        ALSO KEEP ONLY:
+        - ACTIVE
+        - TRANSACTION ACCOUNT
+        - NOT HEADER
+        ==================================================
+        */
+
+        const bankAccounts =
+            accounts.filter(
                 account => {
+
+                    /*
+                    ======================================
+                    BASIC ACCOUNT VALIDATION
+                    ======================================
+                    */
+
+                    if (
+                        !account
+                        ||
+                        !account.id
+                    ) {
+
+                        return false;
+
+                    }
+
+
+                    /*
+                    ======================================
+                    STATUS
+                    ======================================
+                    */
+
+                    if (
+                        account.status === false
+                    ) {
+
+                        return false;
+
+                    }
+
+
+                    /*
+                    ======================================
+                    TRANSACTION ACCOUNT
+                    ======================================
+                    */
+
+                    if (
+                        account.allow_transaction === false
+                    ) {
+
+                        return false;
+
+                    }
+
+
+                    /*
+                    ======================================
+                    HEADER ACCOUNT
+                    ======================================
+                    */
+
+                    if (
+                        account.is_header === true
+                    ) {
+
+                        return false;
+
+                    }
+
+
+                    /*
+                    ======================================
+                    NORMALIZE NAME + CODE
+                    ======================================
+                    */
 
                     const name =
                         String(
                             account.account_name
-                            || ""
+                            ||
+                            ""
                         )
+                        .trim()
                         .toUpperCase();
 
 
-                    return (
-                        name.includes("BANK")
-                        ||
-                        name.includes("KAS")
+                    const code =
+                        String(
+                            account.account_code
+                            ||
+                            ""
+                        )
+                        .trim()
+                        .toUpperCase();
+
+
+                    /*
+                    ======================================
+                    BANK KEYWORDS
+                    ======================================
+                    */
+
+                    const keywords = [
+
+                        "BANK",
+                        "KAS",
+                        "CASH",
+                        "BCA",
+                        "MANDIRI",
+                        "BNI",
+                        "BRI",
+                        "CIMB",
+                        "PERMATA",
+                        "DANAMON",
+                        "MAYBANK"
+
+                    ];
+
+
+                    /*
+                    ======================================
+                    MATCH NAME OR CODE
+                    ======================================
+                    */
+
+                    return keywords.some(
+                        keyword =>
+                            name.includes(
+                                keyword
+                            )
+                            ||
+                            code.includes(
+                                keyword
+                            )
                     );
-
-                }
-            )
-
-            .forEach(
-                account => {
-
-                    const option =
-                        document.createElement(
-                            "option"
-                        );
-
-
-                    option.value =
-                        account.id;
-
-
-                    option.textContent =
-                        `${account.account_code} - ${account.account_name}`;
-
-
-                    this.apPaymentBankAccount
-                        .appendChild(
-                            option
-                        );
 
                 }
             );
 
+
+        /*
+        ==================================================
+        SORT BY ACCOUNT CODE
+        ==================================================
+        */
+
+        bankAccounts.sort(
+            (
+                a,
+                b
+            ) => {
+
+                return String(
+                    a.account_code
+                    ||
+                    ""
+                )
+                .localeCompare(
+                    String(
+                        b.account_code
+                        ||
+                        ""
+                    ),
+                    undefined,
+                    {
+                        numeric:
+                            true
+                    }
+                );
+
+            }
+        );
+
+
+        /*
+        ==================================================
+        RENDER OPTIONS
+        ==================================================
+        */
+
+        bankAccounts.forEach(
+            account => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+
+                option.value =
+                    String(
+                        account.id
+                    );
+
+
+                option.textContent =
+                    `${
+                        account.account_code
+                        ||
+                        ""
+                    } - ${
+                        account.account_name
+                        ||
+                        ""
+                    }`;
+
+
+                this.apPaymentBankAccount
+                    .appendChild(
+                        option
+                    );
+
+            }
+        );
+
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "AP PAYMENT BANK ACCOUNTS:",
+            {
+
+                total_coa:
+                    accounts.length,
+
+                bank_accounts:
+                    bankAccounts.length,
+
+                accounts:
+                    bankAccounts.map(
+                        account => ({
+                            id:
+                                account.id,
+
+                            code:
+                                account.account_code,
+
+                            name:
+                                account.account_name
+                        })
+                    )
+
+            }
+        );
+
+
+        /*
+        ==================================================
+        NO BANK ACCOUNT
+        ==================================================
+        */
+
+        if (
+            bankAccounts.length === 0
+        ) {
+
+            console.warn(
+                "No valid AP Payment Bank Account found in Chart of Accounts."
+            );
+
+        }
+
     }
 
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
             "AccountPayable.loadAPPaymentBankAccounts:",

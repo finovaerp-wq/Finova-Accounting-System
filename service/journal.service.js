@@ -674,25 +674,69 @@ const {
 
     .single();
 
-console.log("HEADER RESULT :", journal);
+/*
+==================================================
+HEADER INSERT ERROR
+==================================================
+*/
 
-console.error("HEADER ERROR FULL");
+if (
+    headerError
+) {
 
-console.dir(headerError);
+    console.error(
+        "========== HEADER INSERT ERROR =========="
+    );
 
-console.log("MESSAGE :", headerError?.message);
+    console.error(
+        "MESSAGE :",
+        headerError.message
+    );
 
-console.log("DETAILS :", headerError?.details);
+    console.error(
+        "DETAILS :",
+        headerError.details
+    );
 
-console.log("HINT :", headerError?.hint);
+    console.error(
+        "HINT :",
+        headerError.hint
+    );
 
-console.log("CODE :", headerError?.code);
+    console.error(
+        "CODE :",
+        headerError.code
+    );
 
-if (headerError) {
+    console.error(
+        "FULL ERROR :",
+        headerError
+    );
+
+    console.error(
+        "=========================================="
+    );
+
 
     throw headerError;
 
 }
+
+
+/*
+==================================================
+HEADER INSERT SUCCESS
+==================================================
+*/
+
+console.log(
+    "HEADER RESULT :",
+    journal
+);
+
+console.log(
+    "========== HEADER INSERT SUCCESS =========="
+);
 
         /*
         ======================================================
@@ -763,7 +807,9 @@ console.log(
     "==========================================="
 );
 
-if (insertDetails.length) {
+if (
+    insertDetails.length
+) {
 
     const {
 
@@ -773,103 +819,72 @@ if (insertDetails.length) {
 
     } = await supabase
 
-        .from(TABLE.GL_JOURNAL_DETAIL)
+        .from(
+            TABLE.GL_JOURNAL_DETAIL
+        )
 
-        .insert(insertDetails)
+        .insert(
+            insertDetails
+        )
 
         .select();
 
-    console.log(
-        "DETAIL INSERT RESULT :",
-        insertedDetails
-    );
 
-    if (detailError) {
+    /*
+    ==================================================
+    DETAIL INSERT ERROR
+    ==================================================
+    */
 
-    console.error(
-        "========== DETAIL INSERT ERROR =========="
-    );
+    if (
+        detailError
+    ) {
 
-    console.error(
-        "MESSAGE :",
-        detailError?.message
-    );
+        console.error(
+            "========== DETAIL INSERT ERROR =========="
+        );
 
-    console.error(
-        "DETAILS :",
-        detailError?.details
-    );
+        console.error(
+            "MESSAGE :",
+            detailError.message
+        );
 
-    console.error(
-        "HINT :",
-        detailError?.hint
-    );
+        console.error(
+            "DETAILS :",
+            detailError.details
+        );
 
-    console.error(
-        "CODE :",
-        detailError?.code
-    );
+        console.error(
+            "HINT :",
+            detailError.hint
+        );
 
-    console.error(
-        "FULL ERROR :",
-        JSON.stringify(
-            detailError,
-            null,
-            2
-        )
-    );
+        console.error(
+            "CODE :",
+            detailError.code
+        );
 
-}
-else {
+        console.error(
+            "FULL ERROR :",
+            detailError
+        );
 
-    console.log(
-        "========== DETAIL INSERT SUCCESS =========="
-    );
+        console.error(
+            "=========================================="
+        );
 
-    console.table(
-        insertedDetails
-    );
 
-}
-
-    console.error(
-        "MESSAGE :",
-        detailError?.message
-    );
-
-    console.error(
-        "DETAILS :",
-        detailError?.details
-    );
-
-    console.error(
-        "HINT :",
-        detailError?.hint
-    );
-
-    console.error(
-        "CODE :",
-        detailError?.code
-    );
-
-    console.error(
-        "FULL ERROR :",
-        JSON.stringify(
-            detailError,
-            null,
-            2
-        )
-    );
-
-    console.error(
-        "=========================================="
-    );
-
-    if (detailError) {
+        /*
+        ==============================================
+        ROLLBACK JOURNAL HEADER
+        ==============================================
+        */
 
         await supabase
 
-            .from(TABLE.GL_JOURNAL)
+            .from(
+                TABLE.GL_JOURNAL
+            )
 
             .delete()
 
@@ -878,9 +893,30 @@ else {
                 journal.id
             );
 
+
         throw detailError;
 
     }
+
+
+    /*
+    ==================================================
+    DETAIL INSERT SUCCESS
+    ==================================================
+    */
+
+    console.log(
+        "DETAIL INSERT RESULT :",
+        insertedDetails
+    );
+
+    console.log(
+        "========== DETAIL INSERT SUCCESS =========="
+    );
+
+    console.table(
+        insertedDetails
+    );
 
 }
 

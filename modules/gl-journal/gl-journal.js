@@ -223,10 +223,23 @@ async init() {
 
                     try {
 
+                        /*
+                        ==========================================
+                        EVENT DETAIL
+                        ==========================================
+                        */
+
                         const detail =
                             event?.detail
-                            || {};
+                            ||
+                            {};
 
+
+                        /*
+                        ==========================================
+                        DEBUG
+                        ==========================================
+                        */
 
                         console.log(
                             "GL JOURNAL EXTERNAL CHANGE:",
@@ -237,6 +250,7 @@ async init() {
                         /*
                         ==========================================
                         LOAD LATEST GL JOURNAL DATA
+                        NO FULL LOADING
                         ==========================================
                         */
 
@@ -246,7 +260,9 @@ async init() {
 
                     }
 
-                    catch (error) {
+                    catch (
+                        error
+                    ) {
 
                         console.error(
                             "GeneralJournal external refresh:",
@@ -257,6 +273,12 @@ async init() {
 
                 };
 
+
+            /*
+            ======================================================
+            REGISTER GL JOURNAL CHANGE LISTENER
+            ======================================================
+            */
 
             window.addEventListener(
                 "finova:gl-journal-changed",
@@ -288,7 +310,9 @@ async init() {
 
     }
 
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
             "GL Journal initialization failed.",
@@ -8046,42 +8070,68 @@ updateJournalHeaderStatus(status = "Draft") {
 ==========================================================
 DELETE JOURNAL
 FINAL
+
 HANDLE:
+- MANUAL GL
 - AP INVOICE
-- AP PAYMENT
+- LEGACY AP PAYMENT
+- BULK AP PAYMENT
 - AR INVOICE
 - AR PAYMENT
 
-AR PAYMENT:
-- DELETE PAYMENT RECORD
-- ONLY DRAFT / POSTED PAYMENT IS ACTIVE
-- VOID / MISSING JOURNAL PAYMENT IS INACTIVE
-- RECALCULATE PAID
-- RECALCULATE OUTSTANDING
-- RESTORE AR STATUS
-- REALTIME NOTIFICATION
+DELETE RULE:
+
+DRAFT
+-> CAN DELETE
+
+VOID
+-> CAN DELETE
+
+POSTED
+-> CANNOT DELETE
+
+BULK AP PAYMENT:
+
+1 PAYMENT BATCH
+N PAYMENT ALLOCATIONS
+1 GL JOURNAL
+
+DELETE:
+- PAYMENT BATCH
+- ALL ALLOCATIONS
+- GL JOURNAL
+- RECALCULATE ALL AFFECTED AP
 ==========================================================
 */
 
 async deleteJournal(id) {
 
-    if (!id) {
+    if (
+        !id
+    ) {
+
         return;
+
     }
+
 
     try {
 
         /*
-        ==================================================
+        ======================================================
         GET JOURNAL BEFORE DELETE
-        ==================================================
+        ======================================================
         */
 
         const journal =
-            await this.service.getById(id);
+            await this.service.getById(
+                id
+            );
 
 
-        if (!journal) {
+        if (
+            !journal
+        ) {
 
             throw new Error(
                 "GL Journal not found."
@@ -8091,9 +8141,9 @@ async deleteJournal(id) {
 
 
         /*
-        ==================================================
+        ======================================================
         NORMALIZE JOURNAL HEADER
-        ==================================================
+        ======================================================
         */
 
         const journalHeader =
@@ -8101,6 +8151,12 @@ async deleteJournal(id) {
             ||
             journal;
 
+
+        /*
+        ======================================================
+        SOURCE MODULE
+        ======================================================
+        */
 
         const sourceModule =
             String(
@@ -8112,6 +8168,12 @@ async deleteJournal(id) {
             .toUpperCase();
 
 
+        /*
+        ======================================================
+        SOURCE DOCUMENT TYPE
+        ======================================================
+        */
+
         const sourceDocumentType =
             String(
                 journalHeader?.source_document_type
@@ -8122,6 +8184,12 @@ async deleteJournal(id) {
             .toUpperCase();
 
 
+        /*
+        ======================================================
+        SOURCE DOCUMENT ID
+        ======================================================
+        */
+
         const sourceDocumentId =
             journalHeader?.source_document_id
             ||
@@ -8129,33 +8197,82 @@ async deleteJournal(id) {
 
 
         /*
-        ==================================================
+        ======================================================
+        CURRENT JOURNAL STATUS
+        ======================================================
+        */
+
+        const currentStatus =
+            String(
+                journalHeader?.status
+                ||
+                ""
+            )
+            .trim()
+            .toUpperCase();
+
+
+        /*
+        ======================================================
+        DELETE STATUS RULE
+
+        DRAFT
+        -> DELETE
+
+        VOID
+        -> DELETE
+
+        POSTED
+        -> BLOCK
+        ======================================================
+        */
+
+        if (
+            currentStatus !== "DRAFT"
+            &&
+            currentStatus !== "VOID"
+        ) {
+
+            throw new Error(
+                `Journal status "${journalHeader?.status || ""}" cannot be deleted. Only Draft or Void Journal can be deleted.`
+            );
+
+        }
+
+
+        /*
+        ======================================================
         DEBUG
-        ==================================================
+        ======================================================
         */
 
         console.log(
             "========== DELETE GL JOURNAL =========="
         );
 
-        console.log({
 
-            journal_id:
-                id,
+        console.log(
+            {
+                journal_id:
+                    id,
 
-            journal_no:
-                journalHeader?.journal_no,
+                journal_no:
+                    journalHeader?.journal_no,
 
-            source_module:
-                sourceModule,
+                journal_status:
+                    currentStatus,
 
-            source_document_type:
-                sourceDocumentType,
+                source_module:
+                    sourceModule,
 
-            source_document_id:
-                sourceDocumentId
+                source_document_type:
+                    sourceDocumentType,
 
-        });
+                source_document_id:
+                    sourceDocumentId
+            }
+        );
+
 
         console.log(
             "======================================="
@@ -8163,15 +8280,42 @@ async deleteJournal(id) {
 
 
         /*
-        ==================================================
-        AP PAYMENT
-        GET PAYMENT BEFORE DELETE
-        ==================================================
+        ======================================================
+        AP PAYMENT STATE
+
+        LEGACY:
+        1 JOURNAL
+        1 PAYMENT ROW
+
+        BULK:
+        1 JOURNAL
+        1 PAYMENT BATCH
+        N PAYMENT ROWS
+        ======================================================
         */
 
         let apPayment =
             null;
 
+
+        let apPaymentBatch =
+            null;
+
+
+        let apPaymentBatchAllocations =
+            [];
+
+
+        let apPaymentBatchAPIds =
+            [];
+
+
+        /*
+        ======================================================
+        AP PAYMENT
+        DETECT BULK OR LEGACY
+        ======================================================
+        */
 
         if (
             sourceModule === "AP"
@@ -8179,53 +8323,484 @@ async deleteJournal(id) {
             sourceDocumentType === "AP_PAYMENT"
         ) {
 
-            const {
+            /*
+            ==================================================
+            TRY BULK AP PAYMENT FIRST
 
-                data,
+            BULK:
+            source_document_id
+            =
+            trx_ap_payment_batch.id
+            ==================================================
+            */
 
-                error
-
-            } = await supabase
-
-                .from(
-                    "trx_ap_payment"
-                )
-
-                .select(`
-                    id,
-                    account_payable_id,
-                    payment_amount,
-                    gl_journal_id
-                `)
-
-                .eq(
-                    "gl_journal_id",
-                    id
-                )
-
-                .maybeSingle();
+            let batch =
+                null;
 
 
-            if (error) {
+            if (
+                sourceDocumentId
+            ) {
 
-                throw error;
+                const {
+                    data:
+                        batchData,
+
+                    error:
+                        batchError
+                } = await supabase
+
+                    .from(
+                        "trx_ap_payment_batch"
+                    )
+
+                    .select(`
+                        id,
+                        payment_no,
+                        payment_date,
+                        vendor_id,
+                        bank_account_id,
+                        reference_no,
+                        description,
+                        total_payment,
+                        status,
+                        gl_journal_id,
+                        void_reason,
+                        void_at
+                    `)
+
+                    .eq(
+                        "id",
+                        sourceDocumentId
+                    )
+
+                    .maybeSingle();
+
+
+                if (
+                    batchError
+                ) {
+
+                    throw batchError;
+
+                }
+
+
+                batch =
+                    batchData
+                    ||
+                    null;
 
             }
 
 
-            apPayment =
-                data
-                ||
-                null;
+            /*
+            ==================================================
+            BULK AP PAYMENT FOUND
+            ==================================================
+            */
+
+            if (
+                batch
+            ) {
+
+                apPaymentBatch =
+                    batch;
+
+
+                /*
+                ==============================================
+                JOURNAL LINK MUST MATCH
+                ==============================================
+                */
+
+                if (
+                    !batch.gl_journal_id
+                ) {
+
+                    throw new Error(
+                        "AP Payment Batch is not linked to a GL Journal."
+                    );
+
+                }
+
+
+                if (
+                    String(
+                        batch.gl_journal_id
+                    )
+                    !==
+                    String(
+                        id
+                    )
+                ) {
+
+                    throw new Error(
+                        "AP Payment Batch does not match this GL Journal."
+                    );
+
+                }
+
+
+                /*
+                ==============================================
+                BATCH STATUS MUST MATCH JOURNAL STATUS
+                ==============================================
+                */
+
+                const batchStatus =
+                    String(
+                        batch.status
+                        ||
+                        ""
+                    )
+                    .trim()
+                    .toUpperCase();
+
+
+                if (
+                    currentStatus === "DRAFT"
+                    &&
+                    batchStatus !== "DRAFT"
+                ) {
+
+                    throw new Error(
+                        `AP Payment Batch status "${batch.status || ""}" is not synchronized with Draft GL Journal.`
+                    );
+
+                }
+
+
+                if (
+                    currentStatus === "VOID"
+                    &&
+                    batchStatus !== "VOID"
+                ) {
+
+                    throw new Error(
+                        `AP Payment Batch status "${batch.status || ""}" is not synchronized with Void GL Journal.`
+                    );
+
+                }
+
+
+                /*
+                ==============================================
+                GET ALL BULK PAYMENT ALLOCATIONS
+
+                IMPORTANT:
+                DO NOT USE maybeSingle()
+                ==============================================
+                */
+
+                const {
+                    data:
+                        allocations,
+
+                    error:
+                        allocationsError
+                } = await supabase
+
+                    .from(
+                        "trx_ap_payment"
+                    )
+
+                    .select(`
+                        id,
+                        payment_batch_id,
+                        account_payable_id,
+                        payment_date,
+                        bank_account_id,
+                        dpp_amount,
+                        tax_plus_amount,
+                        tax_minus_amount,
+                        payment_amount,
+                        reference_no,
+                        description,
+                        gl_journal_id
+                    `)
+
+                    .eq(
+                        "payment_batch_id",
+                        batch.id
+                    );
+
+
+                if (
+                    allocationsError
+                ) {
+
+                    throw allocationsError;
+
+                }
+
+
+                apPaymentBatchAllocations =
+                    Array.isArray(
+                        allocations
+                    )
+                        ? allocations
+                        : [];
+
+
+                /*
+                ==============================================
+                BATCH MUST HAVE ALLOCATION
+                ==============================================
+                */
+
+                if (
+                    apPaymentBatchAllocations.length === 0
+                ) {
+
+                    throw new Error(
+                        "AP Payment Batch has no payment allocation."
+                    );
+
+                }
+
+
+                /*
+                ==============================================
+                DRAFT / VOID BULK ALLOCATION
+                MUST BE INACTIVE
+
+                ACTIVE:
+                gl_journal_id != NULL
+
+                INACTIVE:
+                gl_journal_id = NULL
+                ==============================================
+                */
+
+                const activeBulkAllocation =
+                    apPaymentBatchAllocations
+                        .find(
+                            allocation =>
+                                Boolean(
+                                    allocation?.gl_journal_id
+                                )
+                        );
+
+
+                if (
+                    activeBulkAllocation
+                ) {
+
+                    throw new Error(
+                        "AP Payment Batch still contains an active allocation. Journal delete was cancelled to prevent payment inconsistency."
+                    );
+
+                }
+
+
+                /*
+                ==============================================
+                UNIQUE ACCOUNT PAYABLE IDS
+                ==============================================
+                */
+
+                apPaymentBatchAPIds =
+                    [
+                        ...new Set(
+
+                            apPaymentBatchAllocations
+
+                                .map(
+                                    allocation =>
+                                        allocation?.account_payable_id
+                                )
+
+                                .filter(
+                                    Boolean
+                                )
+
+                        )
+                    ];
+
+
+                if (
+                    apPaymentBatchAPIds.length === 0
+                ) {
+
+                    throw new Error(
+                        "No Account Payable invoice was found in this AP Payment Batch."
+                    );
+
+                }
+
+
+                /*
+                ==============================================
+                VALIDATE BATCH TOTAL
+                ==============================================
+                */
+
+                const allocationTotal =
+                    Number(
+
+                        apPaymentBatchAllocations
+
+                            .reduce(
+                                (
+                                    total,
+                                    allocation
+                                ) => {
+
+                                    return (
+                                        total
+                                        +
+                                        Number(
+                                            allocation?.payment_amount
+                                            ||
+                                            0
+                                        )
+                                    );
+
+                                },
+                                0
+                            )
+
+                            .toFixed(
+                                2
+                            )
+
+                    );
+
+
+                const batchTotal =
+                    Number(
+                        Number(
+                            batch.total_payment
+                            ||
+                            0
+                        )
+                        .toFixed(
+                            2
+                        )
+                    );
+
+
+                if (
+                    Math.abs(
+                        allocationTotal
+                        -
+                        batchTotal
+                    )
+                    >
+                    0.01
+                ) {
+
+                    throw new Error(
+                        "AP Payment Batch total does not match its payment allocations."
+                    );
+
+                }
+
+
+                /*
+                ==============================================
+                DEBUG
+                ==============================================
+                */
+
+                console.log(
+                    "BULK AP PAYMENT BEFORE DELETE:",
+                    {
+                        batch_id:
+                            batch.id,
+
+                        payment_no:
+                            batch.payment_no,
+
+                        batch_status:
+                            batch.status,
+
+                        allocation_count:
+                            apPaymentBatchAllocations.length,
+
+                        account_payable_count:
+                            apPaymentBatchAPIds.length,
+
+                        total_payment:
+                            batch.total_payment,
+
+                        allocation_total:
+                            allocationTotal,
+
+                        gl_journal_id:
+                            batch.gl_journal_id,
+
+                        journal_status:
+                            currentStatus
+                    }
+                );
+
+            }
+
+
+            /*
+            ==================================================
+            LEGACY SINGLE AP PAYMENT
+
+            ONLY WHEN BULK BATCH WAS NOT FOUND.
+            ==================================================
+            */
+
+            else {
+
+                const {
+                    data,
+                    error
+                } = await supabase
+
+                    .from(
+                        "trx_ap_payment"
+                    )
+
+                    .select(`
+                        id,
+                        account_payable_id,
+                        payment_amount,
+                        gl_journal_id
+                    `)
+
+                    .eq(
+                        "gl_journal_id",
+                        id
+                    )
+
+                    .maybeSingle();
+
+
+                if (
+                    error
+                ) {
+
+                    throw error;
+
+                }
+
+
+                apPayment =
+                    data
+                    ||
+                    null;
+
+
+                console.log(
+                    "LEGACY AP PAYMENT BEFORE JOURNAL DELETE:",
+                    apPayment
+                );
+
+            }
 
         }
-
-
-        /*
-        ==================================================
+                /*
+        ======================================================
         AR PAYMENT
         GET PAYMENT BEFORE DELETE
-        ==================================================
+        ======================================================
         */
 
         let arPayment =
@@ -8239,11 +8814,8 @@ async deleteJournal(id) {
         ) {
 
             const {
-
                 data,
-
                 error
-
             } = await supabase
 
                 .from(
@@ -8269,12 +8841,15 @@ async deleteJournal(id) {
                 .maybeSingle();
 
 
-            if (error) {
+            if (
+                error
+            ) {
 
                 console.error(
                     "GET AR PAYMENT ERROR:",
                     error
                 );
+
 
                 throw error;
 
@@ -8296,10 +8871,10 @@ async deleteJournal(id) {
 
 
         /*
-        ==========================================================
+        ======================================================
         AP INVOICE
         VALIDATE BEFORE DELETE
-        ==========================================================
+        ======================================================
         */
 
         let apInvoiceBeforeDelete =
@@ -8319,19 +8894,17 @@ async deleteJournal(id) {
         ) {
 
             /*
-            ======================================================
+            ==================================================
             GET AP INVOICE
-            ======================================================
+            ==================================================
             */
 
             const {
-
                 data:
                     apInvoice,
 
                 error:
                     apInvoiceError
-
             } = await supabase
 
                 .from(
@@ -8381,19 +8954,17 @@ async deleteJournal(id) {
 
 
             /*
-            ======================================================
-            GET ACTIVE AP PAYMENTS
-            ======================================================
+            ==================================================
+            GET AP PAYMENT HISTORY
+            ==================================================
             */
 
             const {
-
                 data:
                     payments,
 
                 error:
                     paymentsError
-
             } = await supabase
 
                 .from(
@@ -8422,6 +8993,17 @@ async deleteJournal(id) {
             }
 
 
+            /*
+            ==================================================
+            ACTIVE AP PAYMENTS
+
+            CURRENT AP RULE:
+            gl_journal_id != NULL
+            =
+            ACTIVE PAYMENT
+            ==================================================
+            */
+
             apInvoicePayments =
                 (
                     payments
@@ -8433,6 +9015,12 @@ async deleteJournal(id) {
                         payment?.gl_journal_id
                 );
 
+
+            /*
+            ==================================================
+            DEBUG
+            ==================================================
+            */
 
             console.log(
                 "AP INVOICE BEFORE DELETE:",
@@ -8447,9 +9035,10 @@ async deleteJournal(id) {
 
 
             /*
-            ======================================================
+            ==================================================
             PAYMENT EXISTS
-            ======================================================
+            BLOCK AP INVOICE JOURNAL DELETE
+            ==================================================
             */
 
             if (
@@ -8461,34 +9050,30 @@ async deleteJournal(id) {
 
 
                 const paymentAmount =
-                    apInvoicePayments.reduce(
+                    apInvoicePayments
+                        .reduce(
+                            (
+                                total,
+                                payment
+                            ) => {
 
-                        (
-                            total,
-                            payment
-                        ) => {
+                                return (
+                                    total
+                                    +
+                                    Number(
+                                        payment?.payment_amount
+                                        ||
+                                        0
+                                    )
+                                );
 
-                            return (
-                                total
-                                +
-                                Number(
-                                    payment?.payment_amount
-                                    ||
-                                    0
-                                )
-                            );
-
-                        },
-
-                        0
-
-                    );
+                            },
+                            0
+                        );
 
 
                 throw new Error(
-
                     `Journal invoice AP tidak dapat dihapus karena terdapat ${paymentCount} pembayaran aktif sebesar ${this.formatCurrency(paymentAmount)}. Hapus Journal AP Payment terlebih dahulu.`
-
                 );
 
             }
@@ -8497,11 +9082,12 @@ async deleteJournal(id) {
 
 
         /*
-        ==========================================================
+        ======================================================
         AR INVOICE
         VALIDATE BEFORE DELETE
+
         SAME BEHAVIOR AS ACCOUNT PAYABLE
-        ==========================================================
+        ======================================================
         */
 
         let arInvoiceBeforeDelete =
@@ -8521,19 +9107,17 @@ async deleteJournal(id) {
         ) {
 
             /*
-            ======================================================
+            ==================================================
             GET AR INVOICE
-            ======================================================
+            ==================================================
             */
 
             const {
-
                 data:
                     arInvoice,
 
                 error:
                     arInvoiceError
-
             } = await supabase
 
                 .from(
@@ -8583,19 +9167,17 @@ async deleteJournal(id) {
 
 
             /*
-            ======================================================
+            ==================================================
             GET AR PAYMENT HISTORY
-            ======================================================
+            ==================================================
             */
 
             const {
-
                 data:
                     payments,
 
                 error:
                     paymentsError
-
             } = await supabase
 
                 .from(
@@ -8625,14 +9207,14 @@ async deleteJournal(id) {
 
 
             /*
-            ======================================================
+            ==================================================
             SAME RULE AS AP
 
             PAYMENT WITH GL JOURNAL
             BLOCKS INVOICE JOURNAL DELETE
 
             AR PAYMENT JOURNAL MUST BE DELETED FIRST
-            ======================================================
+            ==================================================
             */
 
             arInvoicePayments =
@@ -8648,9 +9230,9 @@ async deleteJournal(id) {
 
 
             /*
-            ======================================================
+            ==================================================
             DEBUG
-            ======================================================
+            ==================================================
             */
 
             console.log(
@@ -8666,9 +9248,9 @@ async deleteJournal(id) {
 
 
             /*
-            ======================================================
+            ==================================================
             PAYMENT EXISTS
-            ======================================================
+            ==================================================
             */
 
             if (
@@ -8680,56 +9262,349 @@ async deleteJournal(id) {
 
 
                 const paymentAmount =
-                    arInvoicePayments.reduce(
+                    arInvoicePayments
+                        .reduce(
+                            (
+                                total,
+                                payment
+                            ) => {
 
-                        (
-                            total,
-                            payment
-                        ) => {
+                                return (
+                                    total
+                                    +
+                                    Number(
+                                        payment?.amount
+                                        ||
+                                        0
+                                    )
+                                );
 
-                            return (
-                                total
-                                +
-                                Number(
-                                    payment?.amount
-                                    ||
-                                    0
-                                )
-                            );
-
-                        },
-
-                        0
-
-                    );
+                            },
+                            0
+                        );
 
 
                 throw new Error(
-
                     `Journal invoice AR tidak dapat dihapus karena terdapat ${paymentCount} pembayaran aktif sebesar ${this.formatCurrency(paymentAmount)}. Hapus Journal AR Payment terlebih dahulu.`
-
                 );
 
             }
 
         }
+                /*
+        ======================================================
+        BULK AP PAYMENT
+        DELETE BATCH + ALL ALLOCATIONS
+        BEFORE GL JOURNAL DELETE
+        ======================================================
 
+        IMPORTANT:
 
-        /*
-        ==================================================
-        DELETE GL JOURNAL
-        ==================================================
+        trx_ap_payment.payment_batch_id
+        ->
+        FK ON DELETE CASCADE
+
+        THEREFORE:
+
+        DELETE BATCH
+        ->
+        ALL BULK ALLOCATIONS ARE DELETED
+
+        AP IDS WERE SAVED BEFORE DELETE
+        FOR RECALCULATION LATER.
+        ======================================================
         */
 
-        await this.service.delete(id);
+        let deletedAPPaymentBatch =
+            null;
+
+
+        if (
+            sourceModule === "AP"
+            &&
+            sourceDocumentType === "AP_PAYMENT"
+            &&
+            apPaymentBatch
+        ) {
+
+            /*
+            ==================================================
+            FINAL SAFETY CHECK
+            BATCH MUST STILL POINT TO THIS JOURNAL
+            ==================================================
+            */
+
+            const {
+                data:
+                    latestBatch,
+
+                error:
+                    latestBatchError
+            } = await supabase
+
+                .from(
+                    "trx_ap_payment_batch"
+                )
+
+                .select(`
+                    id,
+                    payment_no,
+                    status,
+                    total_payment,
+                    gl_journal_id
+                `)
+
+                .eq(
+                    "id",
+                    apPaymentBatch.id
+                )
+
+                .maybeSingle();
+
+
+            if (
+                latestBatchError
+            ) {
+
+                throw latestBatchError;
+
+            }
+
+
+            if (
+                !latestBatch
+            ) {
+
+                throw new Error(
+                    "AP Payment Batch was not found before delete."
+                );
+
+            }
+
+
+            if (
+                String(
+                    latestBatch.gl_journal_id
+                    ||
+                    ""
+                )
+                !==
+                String(
+                    id
+                )
+            ) {
+
+                throw new Error(
+                    "AP Payment Batch GL Journal relation changed before delete."
+                );
+
+            }
+
+
+            /*
+            ==================================================
+            STATUS REVALIDATION
+            ==================================================
+            */
+
+            const latestBatchStatus =
+                String(
+                    latestBatch.status
+                    ||
+                    ""
+                )
+                .trim()
+                .toUpperCase();
+
+
+            if (
+                latestBatchStatus !== "DRAFT"
+                &&
+                latestBatchStatus !== "VOID"
+            ) {
+
+                throw new Error(
+                    `AP Payment Batch status "${latestBatch.status || ""}" cannot be deleted.`
+                );
+
+            }
+
+
+            /*
+            ==================================================
+            DELETE PAYMENT BATCH
+
+            payment allocations:
+            trx_ap_payment
+            ARE DELETED BY FK CASCADE
+            ==================================================
+            */
+
+            const {
+                data:
+                    deletedBatch,
+
+                error:
+                    deleteBatchError
+            } = await supabase
+
+                .from(
+                    "trx_ap_payment_batch"
+                )
+
+                .delete()
+
+                .eq(
+                    "id",
+                    apPaymentBatch.id
+                )
+
+                .eq(
+                    "gl_journal_id",
+                    id
+                )
+
+                .select(`
+                    id,
+                    payment_no,
+                    status,
+                    total_payment,
+                    gl_journal_id
+                `)
+
+                .maybeSingle();
+
+
+            if (
+                deleteBatchError
+            ) {
+
+                throw deleteBatchError;
+
+            }
+
+
+            if (
+                !deletedBatch
+            ) {
+
+                throw new Error(
+                    "AP Payment Batch could not be deleted."
+                );
+
+            }
+
+
+            deletedAPPaymentBatch =
+                deletedBatch;
+
+
+            /*
+            ==================================================
+            VERIFY ALLOCATIONS WERE REMOVED
+            ==================================================
+            */
+
+            const {
+                data:
+                    remainingBatchAllocations,
+
+                error:
+                    remainingBatchAllocationsError
+            } = await supabase
+
+                .from(
+                    "trx_ap_payment"
+                )
+
+                .select(`
+                    id,
+                    payment_batch_id,
+                    account_payable_id
+                `)
+
+                .eq(
+                    "payment_batch_id",
+                    apPaymentBatch.id
+                );
+
+
+            if (
+                remainingBatchAllocationsError
+            ) {
+
+                throw remainingBatchAllocationsError;
+
+            }
+
+
+            if (
+                (
+                    remainingBatchAllocations
+                    ||
+                    []
+                ).length > 0
+            ) {
+
+                throw new Error(
+                    "AP Payment Batch was deleted but payment allocations still exist."
+                );
+
+            }
+
+
+            /*
+            ==================================================
+            DEBUG
+            ==================================================
+            */
+
+            console.log(
+                "BULK AP PAYMENT BATCH DELETED:",
+                {
+                    batch_id:
+                        deletedBatch.id,
+
+                    payment_no:
+                        deletedBatch.payment_no,
+
+                    allocation_deleted_count:
+                        apPaymentBatchAllocations.length,
+
+                    affected_ap_count:
+                        apPaymentBatchAPIds.length,
+
+                    journal_id:
+                        id
+                }
+            );
+
+        }
 
 
         /*
-        ==================================================
+        ======================================================
+        DELETE GL JOURNAL
+        ======================================================
+
+        BULK AP:
+        BATCH + ALLOCATIONS ALREADY REMOVED
+
+        LEGACY AP / AR:
+        EXISTING FLOW CONTINUES BELOW
+        ======================================================
+        */
+
+        await this.service.delete(
+            id
+        );
+
+
+        /*
+        ======================================================
         AR INVOICE
         RETURN TO DRAFT
-        SAME BEHAVIOR AS ACCOUNT PAYABLE
-        ==================================================
+        ======================================================
         */
 
         if (
@@ -8761,13 +9636,11 @@ async deleteJournal(id) {
             */
 
             const {
-
                 data:
                     resetAR,
 
                 error:
                     resetARError
-
             } = await supabase
 
                 .from(
@@ -8832,7 +9705,6 @@ async deleteJournal(id) {
             console.log(
                 "AR RESET AFTER JOURNAL DELETE:",
                 {
-
                     account_receivable_id:
                         resetAR?.id,
 
@@ -8853,7 +9725,6 @@ async deleteJournal(id) {
 
                     gl_journal_id:
                         resetAR?.gl_journal_id
-
                 }
             );
 
@@ -8861,10 +9732,10 @@ async deleteJournal(id) {
 
 
         /*
-        ==================================================
+        ======================================================
         AP INVOICE
         RETURN TO DRAFT
-        ==================================================
+        ======================================================
         */
 
         if (
@@ -8884,10 +9755,8 @@ async deleteJournal(id) {
 
 
             const {
-
                 error:
                     resetAPError
-
             } = await supabase
 
                 .from(
@@ -8925,13 +9794,11 @@ async deleteJournal(id) {
             }
 
         }
-
-
-        /*
-        ==================================================
-        AP PAYMENT
-        DELETE PAYMENT RECORD
-        ==================================================
+                /*
+        ======================================================
+        BULK AP PAYMENT
+        RECALCULATE ALL AFFECTED ACCOUNT PAYABLE
+        ======================================================
         */
 
         if (
@@ -8939,14 +9806,421 @@ async deleteJournal(id) {
             &&
             sourceDocumentType === "AP_PAYMENT"
             &&
+            apPaymentBatch
+        ) {
+
+            /*
+            ==================================================
+            AP SERVICE
+            ==================================================
+            */
+
+            const apService =
+                window.apService;
+
+
+            /*
+            ==================================================
+            RECALCULATE EACH AP INVOICE
+            ==================================================
+            */
+
+            for (
+                const accountPayableId
+                of
+                apPaymentBatchAPIds
+            ) {
+
+                if (
+                    !accountPayableId
+                ) {
+
+                    continue;
+
+                }
+
+
+                /*
+                ==============================================
+                USE AP SERVICE WHEN AVAILABLE
+                ==============================================
+                */
+
+                if (
+                    apService
+                    &&
+                    typeof apService.updatePaymentStatus
+                    ===
+                    "function"
+                ) {
+
+                    await apService.updatePaymentStatus(
+                        accountPayableId
+                    );
+
+
+                    continue;
+
+                }
+
+
+                /*
+                ==============================================
+                FALLBACK
+                GET AP INVOICE
+                ==============================================
+                */
+
+                const {
+                    data:
+                        apInvoice,
+
+                    error:
+                        apInvoiceError
+                } = await supabase
+
+                    .from(
+                        "trx_account_payable"
+                    )
+
+                    .select(`
+                        id,
+                        invoice_no,
+                        total_amount,
+                        paid_amount,
+                        outstanding_amount,
+                        status
+                    `)
+
+                    .eq(
+                        "id",
+                        accountPayableId
+                    )
+
+                    .maybeSingle();
+
+
+                if (
+                    apInvoiceError
+                ) {
+
+                    throw apInvoiceError;
+
+                }
+
+
+                if (
+                    !apInvoice
+                ) {
+
+                    console.warn(
+                        "BULK AP DELETE RECALC: AP invoice not found:",
+                        accountPayableId
+                    );
+
+
+                    continue;
+
+                }
+
+
+                /*
+                ==============================================
+                GET REMAINING ACTIVE AP PAYMENTS
+
+                CURRENT AP RULE:
+                gl_journal_id != NULL
+                =
+                ACTIVE
+                ==============================================
+                */
+
+                const {
+                    data:
+                        remainingPayments,
+
+                    error:
+                        remainingPaymentsError
+                } = await supabase
+
+                    .from(
+                        "trx_ap_payment"
+                    )
+
+                    .select(`
+                        payment_amount,
+                        gl_journal_id
+                    `)
+
+                    .eq(
+                        "account_payable_id",
+                        accountPayableId
+                    )
+
+                    .not(
+                        "gl_journal_id",
+                        "is",
+                        null
+                    );
+
+
+                if (
+                    remainingPaymentsError
+                ) {
+
+                    throw remainingPaymentsError;
+
+                }
+
+
+                /*
+                ==============================================
+                TOTAL AMOUNT
+                ==============================================
+                */
+
+                const totalAmount =
+                    Number(
+                        apInvoice.total_amount
+                        ||
+                        0
+                    );
+
+
+                /*
+                ==============================================
+                PAID AMOUNT
+                ==============================================
+                */
+
+                const paidAmount =
+                    Number(
+
+                        (
+                            remainingPayments
+                            ||
+                            []
+                        )
+
+                            .reduce(
+                                (
+                                    total,
+                                    payment
+                                ) => {
+
+                                    return (
+                                        total
+                                        +
+                                        Number(
+                                            payment?.payment_amount
+                                            ||
+                                            0
+                                        )
+                                    );
+
+                                },
+                                0
+                            )
+
+                            .toFixed(
+                                2
+                            )
+
+                    );
+
+
+                /*
+                ==============================================
+                OUTSTANDING
+                ==============================================
+                */
+
+                const outstandingAmount =
+                    Number(
+
+                        Math.max(
+                            totalAmount
+                            -
+                            paidAmount,
+                            0
+                        )
+
+                        .toFixed(
+                            2
+                        )
+
+                    );
+
+
+                /*
+                ==============================================
+                STATUS
+                ==============================================
+                */
+
+                let status =
+                    "Complete";
+
+
+                if (
+                    paidAmount > 0
+                    &&
+                    outstandingAmount > 0
+                ) {
+
+                    status =
+                        "Partial Paid";
+
+                }
+
+
+                if (
+                    totalAmount > 0
+                    &&
+                    paidAmount >= totalAmount
+                    &&
+                    outstandingAmount <= 0
+                ) {
+
+                    status =
+                        "Paid";
+
+                }
+
+
+                /*
+                ==============================================
+                UPDATE AP
+                ==============================================
+                */
+
+                const {
+                    error:
+                        updateAPError
+                } = await supabase
+
+                    .from(
+                        "trx_account_payable"
+                    )
+
+                    .update({
+
+                        paid_amount:
+                            paidAmount,
+
+                        outstanding_amount:
+                            outstandingAmount,
+
+                        status:
+                            status
+
+                    })
+
+                    .eq(
+                        "id",
+                        accountPayableId
+                    );
+
+
+                if (
+                    updateAPError
+                ) {
+
+                    throw updateAPError;
+
+                }
+
+
+                /*
+                ==============================================
+                DEBUG
+                ==============================================
+                */
+
+                console.log(
+                    "BULK AP DELETE RECALC RESULT:",
+                    {
+                        account_payable_id:
+                            accountPayableId,
+
+                        total_amount:
+                            totalAmount,
+
+                        paid_amount:
+                            paidAmount,
+
+                        outstanding_amount:
+                            outstandingAmount,
+
+                        status:
+                            status
+                    }
+                );
+
+            }
+
+
+            console.log(
+                "BULK AP PAYMENT RECALC COMPLETE:",
+                {
+                    batch_id:
+                        apPaymentBatch.id,
+
+                    affected_ap_count:
+                        apPaymentBatchAPIds.length
+                }
+            );
+
+        }
+
+
+        /*
+        ======================================================
+        LEGACY AP PAYMENT
+        DELETE PAYMENT RECORD
+        ======================================================
+        */
+
+        if (
+            sourceModule === "AP"
+            &&
+            sourceDocumentType === "AP_PAYMENT"
+            &&
+            !apPaymentBatch
+            &&
             apPayment
         ) {
 
-            const {
+            /*
+            ==================================================
+            ACCOUNT PAYABLE ID
+            ==================================================
+            */
 
+            const accountPayableId =
+                apPayment.account_payable_id;
+
+
+            if (
+                !accountPayableId
+            ) {
+
+                throw new Error(
+                    "Account Payable ID was not found on AP Payment."
+                );
+
+            }
+
+
+            /*
+            ==================================================
+            DELETE LEGACY AP PAYMENT
+            ==================================================
+            */
+
+            const {
                 error:
                     deletePaymentError
-
             } = await supabase
 
                 .from(
@@ -8989,10 +10263,11 @@ async deleteJournal(id) {
             ) {
 
                 await apService.updatePaymentStatus(
-                    apPayment.account_payable_id
+                    accountPayableId
                 );
 
             }
+
 
             else {
 
@@ -9003,13 +10278,11 @@ async deleteJournal(id) {
                 */
 
                 const {
-
                     data:
                         apInvoice,
 
                     error:
                         apInvoiceError
-
                 } = await supabase
 
                     .from(
@@ -9023,7 +10296,7 @@ async deleteJournal(id) {
 
                     .eq(
                         "id",
-                        apPayment.account_payable_id
+                        accountPayableId
                     )
 
                     .maybeSingle();
@@ -9038,6 +10311,17 @@ async deleteJournal(id) {
                 }
 
 
+                if (
+                    !apInvoice
+                ) {
+
+                    throw new Error(
+                        "Account Payable not found."
+                    );
+
+                }
+
+
                 /*
                 ==============================================
                 GET REMAINING ACTIVE AP PAYMENTS
@@ -9045,13 +10329,11 @@ async deleteJournal(id) {
                 */
 
                 const {
-
                     data:
                         remainingPayments,
 
                     error:
                         remainingPaymentsError
-
                 } = await supabase
 
                     .from(
@@ -9065,7 +10347,7 @@ async deleteJournal(id) {
 
                     .eq(
                         "account_payable_id",
-                        apPayment.account_payable_id
+                        accountPayableId
                     )
 
                     .not(
@@ -9092,47 +10374,70 @@ async deleteJournal(id) {
 
                 const totalAmount =
                     Number(
-                        apInvoice?.total_amount
+                        apInvoice.total_amount
                         ||
                         0
                     );
 
 
                 const paidAmount =
-                    (
-                        remainingPayments
-                        ||
-                        []
-                    )
-                    .reduce(
+                    Number(
+
                         (
-                            total,
-                            payment
-                        ) => {
+                            remainingPayments
+                            ||
+                            []
+                        )
 
-                            return (
-                                total
-                                +
-                                Number(
-                                    payment.payment_amount
-                                    ||
-                                    0
-                                )
-                            );
+                            .reduce(
+                                (
+                                    total,
+                                    payment
+                                ) => {
 
-                        },
-                        0
+                                    return (
+                                        total
+                                        +
+                                        Number(
+                                            payment?.payment_amount
+                                            ||
+                                            0
+                                        )
+                                    );
+
+                                },
+                                0
+                            )
+
+                            .toFixed(
+                                2
+                            )
+
                     );
 
 
                 const outstandingAmount =
-                    Math.max(
-                        totalAmount
-                        -
-                        paidAmount,
-                        0
+                    Number(
+
+                        Math.max(
+                            totalAmount
+                            -
+                            paidAmount,
+                            0
+                        )
+
+                        .toFixed(
+                            2
+                        )
+
                     );
 
+
+                /*
+                ==============================================
+                STATUS
+                ==============================================
+                */
 
                 let status =
                     "Complete";
@@ -9141,7 +10446,7 @@ async deleteJournal(id) {
                 if (
                     paidAmount > 0
                     &&
-                    paidAmount < totalAmount
+                    outstandingAmount > 0
                 ) {
 
                     status =
@@ -9154,6 +10459,8 @@ async deleteJournal(id) {
                     totalAmount > 0
                     &&
                     paidAmount >= totalAmount
+                    &&
+                    outstandingAmount <= 0
                 ) {
 
                     status =
@@ -9169,10 +10476,8 @@ async deleteJournal(id) {
                 */
 
                 const {
-
                     error:
                         updateAPError
-
                 } = await supabase
 
                     .from(
@@ -9194,7 +10499,7 @@ async deleteJournal(id) {
 
                     .eq(
                         "id",
-                        apPayment.account_payable_id
+                        accountPayableId
                     );
 
 
@@ -9208,13 +10513,34 @@ async deleteJournal(id) {
 
             }
 
+
+            /*
+            ==================================================
+            DEBUG
+            ==================================================
+            */
+
+            console.log(
+                "LEGACY AP PAYMENT DELETED:",
+                {
+                    payment_id:
+                        apPayment.id,
+
+                    account_payable_id:
+                        accountPayableId,
+
+                    journal_id:
+                        id
+                }
+            );
+
         }
                 /*
-        ==================================================
+        ======================================================
         AR PAYMENT
         DELETE PAYMENT RECORD
         AND RESTORE AR PAYMENT STATUS
-        ==================================================
+        ======================================================
         */
 
         if (
@@ -9226,9 +10552,9 @@ async deleteJournal(id) {
         ) {
 
             /*
-            ==============================================
+            ==================================================
             ACCOUNT RECEIVABLE ID
-            ==============================================
+            ==================================================
             */
 
             const accountReceivableId =
@@ -9258,16 +10584,14 @@ async deleteJournal(id) {
 
 
             /*
-            ==============================================
+            ==================================================
             DELETE AR PAYMENT
-            ==============================================
+            ==================================================
             */
 
             const {
-
                 error:
                     deleteARPaymentError
-
             } = await supabase
 
                 .from(
@@ -9291,6 +10615,7 @@ async deleteJournal(id) {
                     deleteARPaymentError
                 );
 
+
                 throw deleteARPaymentError;
 
             }
@@ -9303,19 +10628,17 @@ async deleteJournal(id) {
 
 
             /*
-            ==============================================
+            ==================================================
             GET ACCOUNT RECEIVABLE
-            ==============================================
+            ==================================================
             */
 
             const {
-
                 data:
                     arInvoice,
 
                 error:
                     arInvoiceError
-
             } = await supabase
 
                 .from(
@@ -9361,14 +10684,15 @@ async deleteJournal(id) {
 
 
             /*
-            ==============================================
+            ==================================================
             GET ALL REMAINING AR PAYMENTS
 
             IMPORTANT:
-            DO NOT ASSUME gl_journal_id != NULL
-            MEANS ACTIVE.
 
-            FINAL RULE:
+            gl_journal_id != NULL
+            ALONE IS NOT ENOUGH.
+
+            FINAL ACTIVE RULE:
 
             DRAFT
             -> ACTIVE
@@ -9384,17 +10708,15 @@ async deleteJournal(id) {
 
             UNKNOWN STATUS
             -> INACTIVE
-            ==============================================
+            ==================================================
             */
 
             const {
-
                 data:
                     remainingARPayments,
 
                 error:
                     remainingARPaymentsError
-
             } = await supabase
 
                 .from(
@@ -9424,40 +10746,45 @@ async deleteJournal(id) {
 
 
             /*
-            ==============================================
-            GET UNIQUE PAYMENT JOURNAL IDS
-            ==============================================
+            ==================================================
+            UNIQUE PAYMENT JOURNAL IDS
+            ==================================================
             */
 
             const paymentJournalIds =
                 [
                     ...new Set(
+
                         (
                             remainingARPayments
                             ||
                             []
                         )
-                        .map(
-                            payment =>
-                                payment?.gl_journal_id
-                        )
-                        .filter(
-                            Boolean
-                        )
-                        .map(
-                            journalId =>
-                                String(
-                                    journalId
-                                )
-                        )
+
+                            .map(
+                                payment =>
+                                    payment?.gl_journal_id
+                            )
+
+                            .filter(
+                                Boolean
+                            )
+
+                            .map(
+                                journalId =>
+                                    String(
+                                        journalId
+                                    )
+                            )
+
                     )
                 ];
 
 
             /*
-            ==============================================
+            ==================================================
             GET PAYMENT JOURNALS
-            ==============================================
+            ==================================================
             */
 
             let paymentJournals =
@@ -9465,18 +10792,15 @@ async deleteJournal(id) {
 
 
             if (
-                paymentJournalIds.length >
-                0
+                paymentJournalIds.length > 0
             ) {
 
                 const {
-
                     data:
                         journalRows,
 
                     error:
                         journalRowsError
-
                 } = await supabase
 
                     .from(
@@ -9515,13 +10839,14 @@ async deleteJournal(id) {
 
 
             /*
-            ==============================================
+            ==================================================
             BUILD JOURNAL MAP
-            ==============================================
+            ==================================================
             */
 
             const journalMap =
                 new Map(
+
                     paymentJournals.map(
                         journal => [
 
@@ -9533,22 +10858,23 @@ async deleteJournal(id) {
 
                         ]
                     )
+
                 );
 
 
             /*
-            ==============================================
+            ==================================================
             FILTER ACTIVE AR PAYMENTS
 
-            FINAL STRICT RULE:
+            STRICT RULE:
 
-            1. PAYMENT MUST HAVE JOURNAL
-            2. JOURNAL MUST EXIST
-            3. SOURCE MODULE MUST BE AR
-            4. SOURCE TYPE MUST BE AR_PAYMENT
-            5. SOURCE DOCUMENT ID MUST MATCH AR
-            6. JOURNAL STATUS MUST BE DRAFT / POSTED
-            ==============================================
+            1. PAYMENT HAS JOURNAL
+            2. JOURNAL EXISTS
+            3. SOURCE MODULE = AR
+            4. SOURCE TYPE = AR_PAYMENT
+            5. SOURCE DOCUMENT ID MATCHES AR
+            6. STATUS = DRAFT / POSTED
+            ==================================================
             */
 
             const activeARPayments =
@@ -9562,7 +10888,7 @@ async deleteJournal(id) {
 
                         /*
                         ======================================
-                        PAYMENT MUST EXIST
+                        PAYMENT MUST HAVE JOURNAL
                         ======================================
                         */
 
@@ -9591,13 +10917,6 @@ async deleteJournal(id) {
                             );
 
 
-                        /*
-                        ======================================
-                        MISSING JOURNAL
-                        -> INACTIVE
-                        ======================================
-                        */
-
                         if (
                             !paymentJournal
                         ) {
@@ -9615,8 +10934,7 @@ async deleteJournal(id) {
 
                         const paymentSourceModule =
                             String(
-                                paymentJournal
-                                    .source_module
+                                paymentJournal.source_module
                                 ||
                                 ""
                             )
@@ -9626,8 +10944,7 @@ async deleteJournal(id) {
 
                         const paymentSourceDocumentType =
                             String(
-                                paymentJournal
-                                    .source_document_type
+                                paymentJournal.source_document_type
                                 ||
                                 ""
                             )
@@ -9636,21 +10953,19 @@ async deleteJournal(id) {
 
 
                         const paymentSourceDocumentId =
-                            paymentJournal
-                                .source_document_id
+                            paymentJournal.source_document_id
                             ||
                             null;
 
 
                         /*
                         ======================================
-                        SOURCE MODULE MUST BE AR
+                        SOURCE MODULE
                         ======================================
                         */
 
                         if (
-                            paymentSourceModule !==
-                            "AR"
+                            paymentSourceModule !== "AR"
                         ) {
 
                             return false;
@@ -9660,7 +10975,7 @@ async deleteJournal(id) {
 
                         /*
                         ======================================
-                        DOCUMENT TYPE MUST BE AR_PAYMENT
+                        DOCUMENT TYPE
                         ======================================
                         */
 
@@ -9699,7 +11014,7 @@ async deleteJournal(id) {
 
                         /*
                         ======================================
-                        NORMALIZE JOURNAL STATUS
+                        JOURNAL STATUS
                         ======================================
                         */
 
@@ -9713,18 +11028,10 @@ async deleteJournal(id) {
                             .toUpperCase();
 
 
-                        /*
-                        ======================================
-                        ONLY DRAFT / POSTED ARE ACTIVE
-                        ======================================
-                        */
-
                         return (
-                            paymentJournalStatus ===
-                                "DRAFT"
+                            paymentJournalStatus === "DRAFT"
                             ||
-                            paymentJournalStatus ===
-                                "POSTED"
+                            paymentJournalStatus === "POSTED"
                         );
 
                     }
@@ -9732,9 +11039,9 @@ async deleteJournal(id) {
 
 
             /*
-            ==============================================
-            TOTAL AR
-            ==============================================
+            ==================================================
+            TOTAL AMOUNT
+            ==================================================
             */
 
             const totalAmount =
@@ -9746,14 +11053,16 @@ async deleteJournal(id) {
 
 
             /*
-            ==============================================
-            CALCULATE ACTIVE PAID AMOUNT
-            ==============================================
+            ==================================================
+            PAID AMOUNT
+            ==================================================
             */
 
             const paidAmount =
                 Number(
+
                     activeARPayments
+
                         .reduce(
                             (
                                 total,
@@ -9773,45 +11082,41 @@ async deleteJournal(id) {
                             },
                             0
                         )
+
                         .toFixed(
                             2
                         )
+
                 );
 
 
             /*
-            ==============================================
+            ==================================================
             OUTSTANDING
-            ==============================================
+            ==================================================
             */
 
             const outstandingAmount =
                 Number(
+
                     Math.max(
                         totalAmount
                         -
                         paidAmount,
                         0
                     )
+
                     .toFixed(
                         2
                     )
+
                 );
 
 
             /*
-            ==============================================
-            AR TECHNICAL STATUS
-
-            NO ACTIVE PAYMENT
-            = COMPLETE
-
-            PARTIAL PAYMENT
-            = PARTIAL PAID
-
-            FULL PAYMENT
-            = PAID
-            ==============================================
+            ==================================================
+            AR STATUS
+            ==================================================
             */
 
             let arStatus =
@@ -9833,11 +11138,9 @@ async deleteJournal(id) {
             if (
                 totalAmount > 0
                 &&
-                paidAmount >=
-                    totalAmount
+                paidAmount >= totalAmount
                 &&
-                outstandingAmount <=
-                    0
+                outstandingAmount <= 0
             ) {
 
                 arStatus =
@@ -9847,19 +11150,17 @@ async deleteJournal(id) {
 
 
             /*
-            ==============================================
+            ==================================================
             UPDATE ACCOUNT RECEIVABLE
-            ==============================================
+            ==================================================
             */
 
             const {
-
                 data:
                     updatedAR,
 
                 error:
                     updateARError
-
             } = await supabase
 
                 .from(
@@ -9907,15 +11208,14 @@ async deleteJournal(id) {
 
 
             /*
-            ==============================================
+            ==================================================
             DEBUG
-            ==============================================
+            ==================================================
             */
 
             console.log(
                 "AR PAYMENT ROLLBACK RESULT:",
                 {
-
                     account_receivable_id:
                         accountReceivableId,
 
@@ -9963,7 +11263,6 @@ async deleteJournal(id) {
                             -
                             activeARPayments.length
                         )
-
                 }
             );
 
@@ -9973,12 +11272,10 @@ async deleteJournal(id) {
             );
 
         }
-
-
-        /*
-        ==================================================
+                /*
+        ======================================================
         CLOSE DELETE MODAL
-        ==================================================
+        ======================================================
         */
 
         if (
@@ -9991,9 +11288,9 @@ async deleteJournal(id) {
 
 
         /*
-        ==================================================
+        ======================================================
         RESET DELETE ID
-        ==================================================
+        ======================================================
         */
 
         this.selectedDeleteJournalId =
@@ -10001,12 +11298,42 @@ async deleteJournal(id) {
 
 
         /*
-        ==================================================
-        SUCCESS
-        ==================================================
+        ======================================================
+        SUCCESS MESSAGE
+        ======================================================
         */
 
         if (
+            sourceModule === "AP"
+            &&
+            sourceDocumentType === "AP_PAYMENT"
+            &&
+            apPaymentBatch
+        ) {
+
+            this.showSuccess(
+                "AP Payment Batch Journal deleted successfully. All payment allocations were removed and Account Payable balances were recalculated."
+            );
+
+        }
+
+
+        else if (
+            sourceModule === "AP"
+            &&
+            sourceDocumentType === "AP_PAYMENT"
+            &&
+            apPayment
+        ) {
+
+            this.showSuccess(
+                "AP Payment Journal deleted successfully. Account Payable payment status was recalculated."
+            );
+
+        }
+
+
+        else if (
             sourceModule === "AR"
             &&
             sourceDocumentType === "AR_PAYMENT"
@@ -10018,6 +11345,7 @@ async deleteJournal(id) {
 
         }
 
+
         else {
 
             this.showSuccess(
@@ -10028,16 +11356,79 @@ async deleteJournal(id) {
 
 
         /*
-        ==================================================
+        ======================================================
+        REALTIME PAYLOAD
+        ======================================================
+
+        BULK AP:
+        - paymentBatchId
+        - accountPayableIds[]
+
+        LEGACY AP:
+        - accountPayableId
+
+        AR:
+        - accountReceivableId
+        ======================================================
+        */
+
+        const realtimeAccountPayableId =
+            apPaymentBatch
+                ? null
+                : (
+                    apPayment?.account_payable_id
+                    ||
+                    (
+                        sourceModule === "AP"
+                        &&
+                        sourceDocumentType === "AP_INVOICE"
+                            ? sourceDocumentId
+                            : null
+                    )
+                );
+
+
+        const realtimeAccountPayableIds =
+            apPaymentBatch
+                ? [
+                    ...apPaymentBatchAPIds
+                ]
+                : (
+                    realtimeAccountPayableId
+                        ? [
+                            realtimeAccountPayableId
+                        ]
+                        : []
+                );
+
+
+        const realtimeAccountReceivableId =
+            arPayment?.account_receivable_id
+            ||
+            (
+                sourceModule === "AR"
+                &&
+                sourceDocumentType === "AR_INVOICE"
+                    ? sourceDocumentId
+                    : null
+            );
+
+
+        /*
+        ======================================================
         NOTIFY SOURCE MODULE
-        GL JOURNAL HAS BEEN DELETED
-        ==================================================
+        JOURNAL DELETED
+        ======================================================
         */
 
         window.dispatchEvent(
+
             new CustomEvent(
+
                 "finova:source-transaction-changed",
+
                 {
+
                     detail: {
 
                         sourceModule:
@@ -10055,48 +11446,138 @@ async deleteJournal(id) {
                         action:
                             "JOURNAL_DELETED",
 
-                        accountPayableId:
-                            apPayment?.account_payable_id
+
+                        /*
+                        ======================================
+                        BULK AP PAYMENT
+                        ======================================
+                        */
+
+                        paymentBatchId:
+                            apPaymentBatch?.id
                             ||
-                            (
-                                sourceModule === "AP"
-                                    ? sourceDocumentId
-                                    : null
-                            ),
+                            null,
+
+
+                        accountPayableIds:
+                            realtimeAccountPayableIds,
+
+
+                        /*
+                        ======================================
+                        LEGACY SINGLE AP
+                        ======================================
+                        */
+
+                        accountPayableId:
+                            realtimeAccountPayableId,
+
+
+                        /*
+                        ======================================
+                        AR
+                        ======================================
+                        */
 
                         accountReceivableId:
-                            arPayment?.account_receivable_id
-                            ||
-                            (
-                                sourceModule === "AR"
-                                    ? sourceDocumentId
-                                    : null
-                            )
+                            realtimeAccountReceivableId
 
                     }
 
                 }
+
             )
+
         );
 
 
         /*
-        ==================================================
+        ======================================================
+        GL JOURNAL CHANGE EVENT
+        ======================================================
+
+        IMPORTANT:
+        OTHER OPEN WORKSPACES MAY LISTEN
+        TO THIS EVENT.
+        ======================================================
+        */
+
+        window.dispatchEvent(
+
+            new CustomEvent(
+
+                "finova:gl-journal-changed",
+
+                {
+
+                    detail: {
+
+                        journalId:
+                            id,
+
+                        action:
+                            "DELETE",
+
+                        sourceModule:
+                            sourceModule,
+
+                        sourceDocumentType:
+                            sourceDocumentType,
+
+                        sourceDocumentId:
+                            sourceDocumentId,
+
+                        paymentBatchId:
+                            apPaymentBatch?.id
+                            ||
+                            null,
+
+                        accountPayableId:
+                            realtimeAccountPayableId,
+
+                        accountPayableIds:
+                            realtimeAccountPayableIds,
+
+                        accountReceivableId:
+                            realtimeAccountReceivableId
+
+                    }
+
+                }
+
+            )
+
+        );
+
+
+        /*
+        ======================================================
         RELOAD GL JOURNAL
-        ==================================================
+        ======================================================
         */
 
         await this.loadData();
+            }
 
-    }
-
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
             "DELETE JOURNAL ERROR:",
             error
         );
 
+
+        /*
+        ======================================================
+        KEEP DELETE ID
+        WHEN ERROR OCCURS
+
+        PURPOSE:
+        USER CAN RETRY WITHOUT LOSING CONTEXT
+        ======================================================
+        */
 
         this.showError(
             error?.message
@@ -16655,6 +18136,338 @@ async postJournal(id) {
             null;
 
 
+        /*
+        ======================================================
+        BULK AP PAYMENT STATE
+        ======================================================
+        */
+
+        let apPaymentBatch =
+            null;
+
+
+        let apPaymentBatchAllocations =
+            [];
+
+
+        let apPaymentBatchAPIds =
+            [];
+
+
+        /*
+        ======================================================
+        BULK AP PAYMENT
+        SOURCE_DOCUMENT_ID = PAYMENT BATCH ID
+        ======================================================
+        */
+
+        if (
+            sourceModule === "AP"
+            &&
+            sourceDocumentType === "AP_PAYMENT"
+            &&
+            sourceDocumentId
+        ) {
+
+            /*
+            ==================================================
+            TRY PAYMENT BATCH FIRST
+            ==================================================
+            */
+
+            const {
+                data: batch,
+                error: batchError
+            } = await supabase
+
+                .from(
+                    "trx_ap_payment_batch"
+                )
+
+                .select(`
+                    id,
+                    payment_no,
+                    payment_date,
+                    vendor_id,
+                    bank_account_id,
+                    total_payment,
+                    status,
+                    gl_journal_id,
+                    reference_no,
+                    description
+                `)
+
+                .eq(
+                    "id",
+                    sourceDocumentId
+                )
+
+                .maybeSingle();
+
+
+            if (
+                batchError
+            ) {
+
+                throw batchError;
+
+            }
+
+
+            /*
+            ==================================================
+            BULK PAYMENT FOUND
+            ==================================================
+            */
+
+            if (
+                batch
+            ) {
+
+                apPaymentBatch =
+                    batch;
+
+
+                /*
+                ==============================================
+                BATCH MUST POINT TO THIS JOURNAL
+                ==============================================
+                */
+
+                if (
+                    !batch.gl_journal_id
+                    ||
+                    String(
+                        batch.gl_journal_id
+                    )
+                    !==
+                    String(
+                        id
+                    )
+                ) {
+
+                    throw new Error(
+                        "AP Payment Batch does not match this GL Journal."
+                    );
+
+                }
+                /*
+==============================================
+BULK AP PAYMENT
+STATUS REGRESSION VALIDATION
+
+JOURNAL DRAFT
+-> BATCH MUST BE DRAFT
+
+JOURNAL VOID
+-> BATCH MUST BE VOID
+
+JOURNAL POSTED
+-> HANDLED BY ALREADY POSTED FLOW
+==============================================
+*/
+
+const batchStatus =
+    String(
+        batch.status
+        ||
+        ""
+    )
+    .trim()
+    .toUpperCase();
+
+
+if (
+    currentStatus === "DRAFT"
+    &&
+    batchStatus !== "DRAFT"
+) {
+
+    throw new Error(
+        `AP Payment Batch status "${batch.status || ""}" is not synchronized with Draft GL Journal.`
+    );
+
+}
+
+
+if (
+    currentStatus === "VOID"
+    &&
+    batchStatus !== "VOID"
+) {
+
+    throw new Error(
+        `AP Payment Batch status "${batch.status || ""}" is not synchronized with Void GL Journal.`
+    );
+
+}
+
+
+                /*
+                ==============================================
+                GET ALL ALLOCATIONS
+                ==============================================
+                */
+
+                const {
+                    data: allocations,
+                    error: allocationsError
+                } = await supabase
+
+                    .from(
+                        "trx_ap_payment"
+                    )
+
+                    .select(`
+                        id,
+                        payment_batch_id,
+                        account_payable_id,
+                        payment_amount,
+                        dpp_amount,
+                        tax_plus_amount,
+                        tax_minus_amount,
+                        gl_journal_id
+                    `)
+
+                    .eq(
+                        "payment_batch_id",
+                        batch.id
+                    );
+
+
+                if (
+                    allocationsError
+                ) {
+
+                    throw allocationsError;
+
+                }
+
+
+                apPaymentBatchAllocations =
+                    Array.isArray(
+                        allocations
+                    )
+                        ? allocations
+                        : [];
+
+
+                if (
+                    apPaymentBatchAllocations.length === 0
+                ) {
+
+                    throw new Error(
+                        "AP Payment Batch has no allocation."
+                    );
+
+                }
+                /*
+==============================================
+BULK AP PAYMENT
+PRE-POST ALLOCATION VALIDATION
+
+DRAFT / VOID:
+
+ALL ALLOCATIONS MUST BE INACTIVE
+
+INACTIVE:
+gl_journal_id = NULL
+
+THIS PREVENTS DUPLICATE PAYMENT
+WHEN POSTING / REPOSTING.
+==============================================
+*/
+
+if (
+    currentStatus === "DRAFT"
+    ||
+    currentStatus === "VOID"
+) {
+
+    const activeAllocationBeforePost =
+        apPaymentBatchAllocations
+            .find(
+                allocation =>
+                    Boolean(
+                        allocation?.gl_journal_id
+                    )
+            );
+
+
+    if (
+        activeAllocationBeforePost
+    ) {
+
+        throw new Error(
+
+            currentStatus === "VOID"
+
+                ? "Void AP Payment Batch still contains an active allocation. Repost was cancelled to prevent duplicate payment."
+
+                : "Draft AP Payment Batch contains an allocation that is already active. Posting was cancelled to prevent duplicate payment."
+
+        );
+
+    }
+
+}
+
+
+                /*
+                ==============================================
+                UNIQUE AP IDS
+                ==============================================
+                */
+
+                apPaymentBatchAPIds =
+                    [
+                        ...new Set(
+                            apPaymentBatchAllocations
+                                .map(
+                                    item =>
+                                        item.account_payable_id
+                                )
+                                .filter(
+                                    Boolean
+                                )
+                        )
+                    ];
+
+
+                console.log(
+                    "BULK AP PAYMENT BEFORE POST:",
+                    {
+                        batch_id:
+                            batch.id,
+
+                        payment_no:
+                            batch.payment_no,
+
+                        batch_status:
+                            batch.status,
+
+                        allocation_count:
+                            apPaymentBatchAllocations.length,
+
+                        account_payable_count:
+                            apPaymentBatchAPIds.length,
+
+                        journal_id:
+                            id
+                    }
+                );
+
+            }
+
+        }
+
+
+        /*
+        ======================================================
+        AR PAYMENT INFORMATION
+        ======================================================
+        */
+
         if (
             sourceModule === "AR"
             &&
@@ -16740,17 +18553,15 @@ async postJournal(id) {
             );
 
         }
-
-
-        /*
+                /*
         ======================================================
         ALREADY POSTED
 
         DO NOT POST AGAIN.
 
         BUT:
-        FOR AR PAYMENT, RECALCULATE AR
-        TO ENSURE SOURCE IS SYNCHRONIZED.
+        - BULK AP PAYMENT MUST REMAIN SYNCHRONIZED
+        - AR PAYMENT MUST BE RECALCULATED
         ======================================================
         */
 
@@ -16761,13 +18572,454 @@ async postJournal(id) {
 
             /*
             ==================================================
-            RECALCULATE AR PAYMENT
+            RECALCULATED AR RESULT
             ==================================================
             */
 
             let updatedAR =
                 null;
 
+
+            /*
+            ==================================================
+            BULK AP PAYMENT
+            ALREADY POSTED
+            ENSURE SOURCE SYNCHRONIZED
+            ==================================================
+            */
+
+            if (
+                apPaymentBatch
+            ) {
+
+                /*
+                ==============================================
+                ENSURE BATCH STATUS POSTED
+                ==============================================
+                */
+
+                if (
+                    String(
+                        apPaymentBatch.status
+                        ||
+                        ""
+                    )
+                    .trim()
+                    .toUpperCase()
+                    !==
+                    "POSTED"
+                ) {
+
+                    const {
+                        error: batchStatusError
+                    } = await supabase
+
+                        .from(
+                            "trx_ap_payment_batch"
+                        )
+
+                        .update({
+
+                            status:
+                                "Posted",
+
+                            void_reason:
+                                null,
+
+                            void_at:
+                                null,
+
+                            updated_at:
+                                new Date()
+                                    .toISOString()
+
+                        })
+
+                        .eq(
+                            "id",
+                            apPaymentBatch.id
+                        )
+
+                        .eq(
+                            "gl_journal_id",
+                            id
+                        );
+
+
+                    if (
+                        batchStatusError
+                    ) {
+
+                        throw batchStatusError;
+
+                    }
+
+                }
+
+
+                /*
+                ==============================================
+                ACTIVATE ALL ALLOCATIONS
+                ==============================================
+                */
+
+                const {
+                    data: linkedAllocations,
+                    error: allocationLinkError
+                } = await supabase
+
+                    .from(
+                        "trx_ap_payment"
+                    )
+
+                    .update({
+
+                        gl_journal_id:
+                            id
+
+                    })
+
+                    .eq(
+                        "payment_batch_id",
+                        apPaymentBatch.id
+                    )
+
+                    .select(`
+                        id,
+                        payment_batch_id,
+                        account_payable_id,
+                        payment_amount,
+                        gl_journal_id
+                    `);
+
+
+                if (
+                    allocationLinkError
+                ) {
+
+                    throw allocationLinkError;
+
+                }
+
+
+                /*
+                ==============================================
+                SAFETY:
+                ALL ALLOCATIONS MUST BE UPDATED
+                ==============================================
+                */
+
+                if (
+                    !Array.isArray(
+                        linkedAllocations
+                    )
+                    ||
+                    linkedAllocations.length
+                    !==
+                    apPaymentBatchAllocations.length
+                ) {
+
+                    throw new Error(
+                        "Not all AP Payment Batch allocations were synchronized."
+                    );
+
+                }
+
+
+                /*
+                ==============================================
+                RECALCULATE ALL AP INVOICES
+                ==============================================
+                */
+
+                const apService =
+                    window.apService;
+
+
+                for (
+                    const accountPayableId
+                    of apPaymentBatchAPIds
+                ) {
+
+                    /*
+                    ==========================================
+                    PREFERRED:
+                    USE AP SERVICE
+                    ==========================================
+                    */
+
+                    if (
+                        apService
+                        &&
+                        typeof apService.updatePaymentStatus
+                        ===
+                        "function"
+                    ) {
+
+                        await apService
+                            .updatePaymentStatus(
+                                accountPayableId
+                            );
+
+
+                        continue;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    FALLBACK:
+                    GET AP INVOICE
+                    ==========================================
+                    */
+
+                    const {
+                        data: apInvoice,
+                        error: apInvoiceError
+                    } = await supabase
+
+                        .from(
+                            "trx_account_payable"
+                        )
+
+                        .select(`
+                            id,
+                            total_amount,
+                            status
+                        `)
+
+                        .eq(
+                            "id",
+                            accountPayableId
+                        )
+
+                        .maybeSingle();
+
+
+                    if (
+                        apInvoiceError
+                    ) {
+
+                        throw apInvoiceError;
+
+                    }
+
+
+                    if (
+                        !apInvoice
+                    ) {
+
+                        throw new Error(
+                            "Account Payable invoice was not found during payment synchronization."
+                        );
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    GET ACTIVE AP PAYMENT ROWS
+                    ==========================================
+                    */
+
+                    const {
+                        data: paymentRows,
+                        error: paymentRowsError
+                    } = await supabase
+
+                        .from(
+                            "trx_ap_payment"
+                        )
+
+                        .select(`
+                            payment_amount,
+                            gl_journal_id
+                        `)
+
+                        .eq(
+                            "account_payable_id",
+                            accountPayableId
+                        )
+
+                        .not(
+                            "gl_journal_id",
+                            "is",
+                            null
+                        );
+
+
+                    if (
+                        paymentRowsError
+                    ) {
+
+                        throw paymentRowsError;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    CALCULATE PAID
+                    ==========================================
+                    */
+
+                    const totalAmount =
+                        Math.round(
+                            Number(
+                                apInvoice.total_amount
+                                ||
+                                0
+                            )
+                        );
+
+
+                    const paidAmount =
+                        Math.round(
+                            (
+                                paymentRows
+                                ||
+                                []
+                            )
+                            .reduce(
+                                (
+                                    total,
+                                    payment
+                                ) => {
+
+                                    return (
+                                        total
+                                        +
+                                        Number(
+                                            payment.payment_amount
+                                            ||
+                                            0
+                                        )
+                                    );
+
+                                },
+                                0
+                            )
+                        );
+
+
+                    const outstandingAmount =
+                        Math.max(
+                            totalAmount
+                            -
+                            paidAmount,
+                            0
+                        );
+
+
+                    /*
+                    ==========================================
+                    DETERMINE AP STATUS
+                    ==========================================
+                    */
+
+                    let apStatus =
+                        "Complete";
+
+
+                    if (
+                        paidAmount > 0
+                        &&
+                        paidAmount < totalAmount
+                    ) {
+
+                        apStatus =
+                            "Partial Paid";
+
+                    }
+
+
+                    if (
+                        totalAmount > 0
+                        &&
+                        paidAmount >= totalAmount
+                    ) {
+
+                        apStatus =
+                            "Paid";
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    UPDATE AP
+                    ==========================================
+                    */
+
+                    const {
+                        error: updateAPError
+                    } = await supabase
+
+                        .from(
+                            "trx_account_payable"
+                        )
+
+                        .update({
+
+                            paid_amount:
+                                paidAmount,
+
+                            outstanding_amount:
+                                outstandingAmount,
+
+                            status:
+                                apStatus
+
+                        })
+
+                        .eq(
+                            "id",
+                            accountPayableId
+                        );
+
+
+                    if (
+                        updateAPError
+                    ) {
+
+                        throw updateAPError;
+
+                    }
+
+                }
+
+
+                console.log(
+                    "BULK AP PAYMENT ALREADY POSTED SYNC:",
+                    {
+                        batch_id:
+                            apPaymentBatch.id,
+
+                        payment_no:
+                            apPaymentBatch.payment_no,
+
+                        allocation_count:
+                            linkedAllocations.length,
+
+                        account_payable_count:
+                            apPaymentBatchAPIds.length,
+
+                        journal_id:
+                            id
+                    }
+                );
+
+            }
+
+
+            /*
+            ==================================================
+            AR PAYMENT
+            ALREADY POSTED
+            RECALCULATE SOURCE
+            ==================================================
+            */
 
             if (
                 sourceModule === "AR"
@@ -16992,86 +19244,60 @@ async postJournal(id) {
 
 
                 /*
-==================================================
-ACTIVE AR PAYMENTS
+                ==================================================
+                ACTIVE AR PAYMENTS
 
-FINAL RULE:
+                FINAL RULE:
 
-DRAFT
--> ACTIVE
+                DRAFT  -> ACTIVE
+                POSTED -> ACTIVE
+                VOID   -> INACTIVE
 
-POSTED
--> ACTIVE
+                MISSING / UNKNOWN JOURNAL
+                -> INACTIVE
+                ==================================================
+                */
 
-VOID
--> INACTIVE
-
-MISSING JOURNAL
--> INACTIVE
-
-UNKNOWN STATUS
--> INACTIVE
-==================================================
-*/
-
-const activePayments =
-    (
-        paymentRows
-        ||
-        []
-    )
-    .filter(
-        payment => {
-
-            /*
-            ==============================================
-            PAYMENT MUST HAVE JOURNAL
-            ==============================================
-            */
-
-            if (
-                !payment
-                ||
-                !payment.gl_journal_id
-            ) {
-
-                return false;
-
-            }
-
-
-            /*
-            ==============================================
-            JOURNAL STATUS
-            ==============================================
-            */
-
-            const paymentJournalStatus =
-                journalStatusMap.get(
-                    String(
-                        payment.gl_journal_id
+                const activePayments =
+                    (
+                        paymentRows
+                        ||
+                        []
                     )
-                )
-                ||
-                "";
+                    .filter(
+                        payment => {
+
+                            if (
+                                !payment
+                                ||
+                                !payment.gl_journal_id
+                            ) {
+
+                                return false;
+
+                            }
 
 
-            /*
-            ==============================================
-            ONLY DRAFT / POSTED ARE ACTIVE
-            ==============================================
-            */
+                            const paymentJournalStatus =
+                                journalStatusMap.get(
+                                    String(
+                                        payment.gl_journal_id
+                                    )
+                                )
+                                ||
+                                "";
 
-            return (
-                paymentJournalStatus ===
-                    "DRAFT"
-                ||
-                paymentJournalStatus ===
-                    "POSTED"
-            );
 
-        }
-    );
+                            return (
+                                paymentJournalStatus ===
+                                    "DRAFT"
+                                ||
+                                paymentJournalStatus ===
+                                    "POSTED"
+                            );
+
+                        }
+                    );
 
 
                 /*
@@ -17230,11 +19456,10 @@ const activePayments =
                     recalculatedAR;
 
             }
-
-
-            /*
+                        /*
             ==================================================
             NOTIFY SOURCE
+            ALREADY POSTED
             ==================================================
             */
 
@@ -17270,29 +19495,112 @@ const activePayments =
                                 action:
                                     "JOURNAL_POSTED",
 
+
+                                /*
+                                ======================================
+                                ACCOUNT PAYABLE ID
+                                ======================================
+                                */
+
                                 accountPayableId:
+
                                     sourceModule === "AP"
-                                        ? sourceDocumentId
+                                    &&
+                                    sourceDocumentType === "AP_PAYMENT"
+                                    &&
+                                    apPaymentBatch
+
+                                        ? null
+
+                                        :
+                                        sourceModule === "AP"
+                                            ? sourceDocumentId
+                                            : null,
+
+
+                                /*
+                                ======================================
+                                BULK AP PAYMENT BATCH ID
+                                ======================================
+                                */
+
+                                paymentBatchId:
+
+                                    sourceModule === "AP"
+                                    &&
+                                    sourceDocumentType === "AP_PAYMENT"
+                                    &&
+                                    apPaymentBatch
+
+                                        ? apPaymentBatch.id
+
                                         : null,
 
+
+                                /*
+                                ======================================
+                                BULK AP PAYMENT
+                                ALL ACCOUNT PAYABLE IDS
+                                ======================================
+                                */
+
+                                accountPayableIds:
+
+                                    sourceModule === "AP"
+                                    &&
+                                    sourceDocumentType === "AP_PAYMENT"
+                                    &&
+                                    apPaymentBatch
+
+                                        ? apPaymentBatchAPIds
+
+                                        : [],
+
+
+                                /*
+                                ======================================
+                                ACCOUNT RECEIVABLE ID
+                                ======================================
+                                */
+
                                 accountReceivableId:
+
                                     sourceModule === "AR"
+
                                         ? (
                                             accountReceivableId
                                             ||
                                             sourceDocumentId
                                         )
+
                                         : null,
 
+
+                                /*
+                                ======================================
+                                AR PAYMENT ID
+                                ======================================
+                                */
+
                                 paymentId:
+
                                     sourceDocumentType ===
                                         "AR_PAYMENT"
+
                                         ? (
                                             arPayment?.id
                                             ||
                                             null
                                         )
+
                                         : null,
+
+
+                                /*
+                                ======================================
+                                AR RECALCULATED RESULT
+                                ======================================
+                                */
 
                                 paidAmount:
                                     updatedAR?.paid_amount
@@ -17359,7 +19667,7 @@ const activePayments =
 
         /*
         ======================================================
-        CONFIRM
+        CONFIRM POST
         ======================================================
         */
 
@@ -17367,7 +19675,9 @@ const activePayments =
             await this.showPostConfirmation();
 
 
-        if (!confirmed) {
+        if (
+            !confirmed
+        ) {
 
             return;
 
@@ -17377,320 +19687,775 @@ const activePayments =
         /*
         ======================================================
         POST THROUGH SERVICE
+
+        AFTER THIS:
+        GL JOURNAL STATUS = POSTED
         ======================================================
         */
 
         await this.service.post(
-    id
-);
-
-
-/*
-======================================================
-AR INVOICE
-VOID -> POST RECOVERY
-
-FINAL RULE:
-
-AR INVOICE JOURNAL DRAFT -> POST
-AR remains COMPLETE
-
-AR INVOICE JOURNAL VOID -> POST
-AR VOID -> COMPLETE
-
-IMPORTANT:
-
-- KEEP SAME AR
-- KEEP SAME GL JOURNAL
-- DO NOT DETACH gl_journal_id
-- PAYMENT MUST BE ZERO
-======================================================
-*/
-
-let updatedARInvoice =
-    null;
-
-
-if (
-    sourceModule === "AR"
-    &&
-    sourceDocumentType === "AR_INVOICE"
-    &&
-    sourceDocumentId
-) {
-
-    /*
-    ==================================================
-    GET ACCOUNT RECEIVABLE
-    ==================================================
-    */
-
-    const {
-
-        data:
-            arInvoice,
-
-        error:
-            arInvoiceError
-
-    } = await supabase
-
-        .from(
-            "trx_account_receivable"
-        )
-
-        .select(`
-            id,
-            invoice_no,
-            status,
-            total_amount,
-            paid_amount,
-            outstanding_amount,
-            gl_journal_id
-        `)
-
-        .eq(
-            "id",
-            sourceDocumentId
-        )
-
-        .maybeSingle();
-
-
-    if (
-        arInvoiceError
-    ) {
-
-        throw arInvoiceError;
-
-    }
-
-
-    if (
-        !arInvoice
-    ) {
-
-        throw new Error(
-            "Account Receivable linked to this GL Journal was not found."
-        );
-
-    }
-
-
-    /*
-    ==================================================
-    JOURNAL LINK VALIDATION
-    ==================================================
-    */
-
-    if (
-        !arInvoice.gl_journal_id
-    ) {
-
-        throw new Error(
-            "Account Receivable is not linked to a GL Journal."
-        );
-
-    }
-
-
-    if (
-        String(
-            arInvoice.gl_journal_id
-        )
-        !==
-        String(
             id
-        )
-    ) {
-
-        throw new Error(
-            "This GL Journal does not match the linked Account Receivable journal."
-        );
-
-    }
-
-
-    /*
-    ==================================================
-    PAYMENT SAFETY
-
-    AR INVOICE VOID SHOULD HAVE NO ACTIVE PAYMENT.
-    ==================================================
-    */
-
-    const paidAmount =
-        Number(
-            arInvoice.paid_amount
-            ||
-            0
         );
 
 
-    if (
-        currentStatus === "VOID"
-        &&
-        paidAmount > 0
-    ) {
+        /*
+        ======================================================
+        BULK AP PAYMENT
+        ACTIVATE AFTER GL JOURNAL POST SUCCESS
+        ======================================================
+        */
 
-        throw new Error(
-            "Void Account Receivable with payment cannot be reposted."
-        );
-
-    }
-
-
-    /*
-    ==================================================
-    TOTAL / OUTSTANDING
-    ==================================================
-    */
-
-    const totalAmount =
-        Number(
-            arInvoice.total_amount
-            ||
-            0
-        );
-
-
-    /*
-    ==================================================
-    RESTORE AR
-
-    ONLY REQUIRED WHEN JOURNAL WAS VOID.
-
-    VOID
-    ->
-    COMPLETE
-    ==================================================
-    */
-
-    if (
-        currentStatus === "VOID"
-    ) {
-
-        const {
-
-            data:
-                restoredAR,
-
-            error:
-                restoreARError
-
-        } = await supabase
-
-            .from(
-                "trx_account_receivable"
-            )
-
-            .update({
-
-                status:
-                    "Complete",
-
-                paid_amount:
-                    0,
-
-                outstanding_amount:
-                    totalAmount
-
-            })
-
-            .eq(
-                "id",
-                sourceDocumentId
-            )
+        if (
+            apPaymentBatch
+        ) {
 
             /*
-            ==========================================
-            SAFETY:
-            AR MUST STILL POINT TO THIS JOURNAL
-            ==========================================
+            ==================================================
+            UPDATE PAYMENT BATCH STATUS
+            ==================================================
             */
 
-            .eq(
-                "gl_journal_id",
-                id
-            )
+            const {
+                data: postedBatch,
+                error: batchPostError
+            } = await supabase
 
-            .select(`
-                id,
-                invoice_no,
-                status,
-                total_amount,
-                paid_amount,
-                outstanding_amount,
-                gl_journal_id
-            `)
+                .from(
+                    "trx_ap_payment_batch"
+                )
 
-            .single();
+                .update({
+
+                    status:
+                        "Posted",
+
+                    /*
+                    ==========================================
+                    CLEAR PREVIOUS VOID INFORMATION
+                    IMPORTANT FOR VOID -> POST
+                    ==========================================
+                    */
+
+                    void_reason:
+                        null,
+
+                    void_at:
+                        null,
+
+                    updated_at:
+                        new Date()
+                            .toISOString()
+
+                })
+
+                .eq(
+                    "id",
+                    apPaymentBatch.id
+                )
+
+                /*
+                ==============================================
+                SAFETY:
+                BATCH MUST STILL POINT TO THIS JOURNAL
+                ==============================================
+                */
+
+                .eq(
+                    "gl_journal_id",
+                    id
+                )
+
+                .select(`
+                    id,
+                    payment_no,
+                    status,
+                    total_payment,
+                    gl_journal_id
+                `)
+
+                .single();
+
+
+            if (
+                batchPostError
+            ) {
+
+                throw batchPostError;
+
+            }
+
+
+            /*
+            ==================================================
+            ACTIVATE ALL PAYMENT ALLOCATIONS
+
+            ONE BATCH
+            MANY AP INVOICES
+            ONE GL JOURNAL
+            ==================================================
+            */
+
+            const {
+                data: linkedAllocations,
+                error: allocationLinkError
+            } = await supabase
+
+                .from(
+                    "trx_ap_payment"
+                )
+
+                .update({
+
+                    gl_journal_id:
+                        id
+
+                })
+
+                .eq(
+                    "payment_batch_id",
+                    apPaymentBatch.id
+                )
+
+                .select(`
+                    id,
+                    payment_batch_id,
+                    account_payable_id,
+                    payment_amount,
+                    gl_journal_id
+                `);
+
+
+            if (
+                allocationLinkError
+            ) {
+
+                throw allocationLinkError;
+
+            }
+
+
+            /*
+            ==================================================
+            SAFETY:
+            ALL ALLOCATIONS MUST BE ACTIVATED
+            ==================================================
+            */
+
+            if (
+                !Array.isArray(
+                    linkedAllocations
+                )
+                ||
+                linkedAllocations.length
+                !==
+                apPaymentBatchAllocations.length
+            ) {
+
+                throw new Error(
+                    "Not all AP Payment Batch allocations were activated."
+                );
+
+            }
+
+
+            /*
+            ==================================================
+            RECALCULATE ALL ACCOUNT PAYABLE INVOICES
+            ==================================================
+            */
+
+            const apService =
+                window.apService;
+
+
+            for (
+                const accountPayableId
+                of apPaymentBatchAPIds
+            ) {
+
+                /*
+                ==============================================
+                PREFERRED:
+                USE ACCOUNT PAYABLE SERVICE
+                ==============================================
+                */
+
+                if (
+                    apService
+                    &&
+                    typeof apService.updatePaymentStatus
+                    ===
+                    "function"
+                ) {
+
+                    await apService
+                        .updatePaymentStatus(
+                            accountPayableId
+                        );
+
+
+                    continue;
+
+                }
+
+
+                /*
+                ==============================================
+                FALLBACK:
+                AP WORKSPACE / SERVICE NOT ACTIVE
+                ==============================================
+                */
+
+                const {
+                    data: apInvoice,
+                    error: apInvoiceError
+                } = await supabase
+
+                    .from(
+                        "trx_account_payable"
+                    )
+
+                    .select(`
+                        id,
+                        total_amount,
+                        status
+                    `)
+
+                    .eq(
+                        "id",
+                        accountPayableId
+                    )
+
+                    .maybeSingle();
+
+
+                if (
+                    apInvoiceError
+                ) {
+
+                    throw apInvoiceError;
+
+                }
+
+
+                if (
+                    !apInvoice
+                ) {
+
+                    throw new Error(
+                        "Account Payable invoice was not found during payment recalculation."
+                    );
+
+                }
+
+
+                /*
+                ==============================================
+                GET ACTIVE AP PAYMENT ROWS
+                ==============================================
+                */
+
+                const {
+                    data: paymentRows,
+                    error: paymentRowsError
+                } = await supabase
+
+                    .from(
+                        "trx_ap_payment"
+                    )
+
+                    .select(`
+                        payment_amount,
+                        gl_journal_id
+                    `)
+
+                    .eq(
+                        "account_payable_id",
+                        accountPayableId
+                    )
+
+                    .not(
+                        "gl_journal_id",
+                        "is",
+                        null
+                    );
+
+
+                if (
+                    paymentRowsError
+                ) {
+
+                    throw paymentRowsError;
+
+                }
+
+
+                /*
+                ==============================================
+                CALCULATE TOTAL
+                ==============================================
+                */
+
+                const totalAmount =
+                    Math.round(
+                        Number(
+                            apInvoice.total_amount
+                            ||
+                            0
+                        )
+                    );
+
+
+                const paidAmount =
+                    Math.round(
+                        (
+                            paymentRows
+                            ||
+                            []
+                        )
+                        .reduce(
+                            (
+                                total,
+                                payment
+                            ) => {
+
+                                return (
+                                    total
+                                    +
+                                    Number(
+                                        payment.payment_amount
+                                        ||
+                                        0
+                                    )
+                                );
+
+                            },
+                            0
+                        )
+                    );
+
+
+                const outstandingAmount =
+                    Math.max(
+                        totalAmount
+                        -
+                        paidAmount,
+                        0
+                    );
+
+
+                /*
+                ==============================================
+                AP STATUS
+                ==============================================
+                */
+
+                let apStatus =
+                    "Complete";
+
+
+                if (
+                    paidAmount > 0
+                    &&
+                    paidAmount < totalAmount
+                ) {
+
+                    apStatus =
+                        "Partial Paid";
+
+                }
+
+
+                if (
+                    totalAmount > 0
+                    &&
+                    paidAmount >= totalAmount
+                ) {
+
+                    apStatus =
+                        "Paid";
+
+                }
+
+
+                /*
+                ==============================================
+                UPDATE ACCOUNT PAYABLE
+                ==============================================
+                */
+
+                const {
+                    error: updateAPError
+                } = await supabase
+
+                    .from(
+                        "trx_account_payable"
+                    )
+
+                    .update({
+
+                        paid_amount:
+                            paidAmount,
+
+                        outstanding_amount:
+                            outstandingAmount,
+
+                        status:
+                            apStatus
+
+                    })
+
+                    .eq(
+                        "id",
+                        accountPayableId
+                    );
+
+
+                if (
+                    updateAPError
+                ) {
+
+                    throw updateAPError;
+
+                }
+
+            }
+
+
+            /*
+            ==================================================
+            BULK AP PAYMENT DEBUG
+            ==================================================
+            */
+
+            console.log(
+                "BULK AP PAYMENT POSTED:",
+                {
+                    batch_id:
+                        postedBatch?.id,
+
+                    payment_no:
+                        postedBatch?.payment_no,
+
+                    allocation_count:
+                        linkedAllocations.length,
+
+                    account_payable_count:
+                        apPaymentBatchAPIds.length,
+
+                    journal_id:
+                        id
+                }
+            );
+
+        }
+                /*
+        ======================================================
+        AR INVOICE
+        VOID -> POST RECOVERY
+
+        FINAL RULE:
+
+        AR INVOICE JOURNAL DRAFT -> POST
+        AR REMAINS COMPLETE
+
+        AR INVOICE JOURNAL VOID -> POST
+        AR VOID -> COMPLETE
+
+        IMPORTANT:
+
+        - KEEP SAME AR
+        - KEEP SAME GL JOURNAL
+        - DO NOT DETACH gl_journal_id
+        - PAYMENT MUST BE ZERO
+        ======================================================
+        */
+
+        let updatedARInvoice =
+            null;
 
 
         if (
-            restoreARError
+            sourceModule === "AR"
+            &&
+            sourceDocumentType === "AR_INVOICE"
+            &&
+            sourceDocumentId
         ) {
 
-            console.error(
-                "AR INVOICE RESTORE AFTER GL POST ERROR:",
-                restoreARError
-            );
+            /*
+            ==================================================
+            GET ACCOUNT RECEIVABLE
+            ==================================================
+            */
+
+            const {
+
+                data:
+                    arInvoice,
+
+                error:
+                    arInvoiceError
+
+            } = await supabase
+
+                .from(
+                    "trx_account_receivable"
+                )
+
+                .select(`
+                    id,
+                    invoice_no,
+                    status,
+                    total_amount,
+                    paid_amount,
+                    outstanding_amount,
+                    gl_journal_id
+                `)
+
+                .eq(
+                    "id",
+                    sourceDocumentId
+                )
+
+                .maybeSingle();
 
 
-            throw restoreARError;
+            if (
+                arInvoiceError
+            ) {
+
+                throw arInvoiceError;
+
+            }
+
+
+            if (
+                !arInvoice
+            ) {
+
+                throw new Error(
+                    "Account Receivable linked to this GL Journal was not found."
+                );
+
+            }
+
+
+            /*
+            ==================================================
+            JOURNAL LINK VALIDATION
+            ==================================================
+            */
+
+            if (
+                !arInvoice.gl_journal_id
+            ) {
+
+                throw new Error(
+                    "Account Receivable is not linked to a GL Journal."
+                );
+
+            }
+
+
+            if (
+                String(
+                    arInvoice.gl_journal_id
+                )
+                !==
+                String(
+                    id
+                )
+            ) {
+
+                throw new Error(
+                    "This GL Journal does not match the linked Account Receivable journal."
+                );
+
+            }
+
+
+            /*
+            ==================================================
+            PAYMENT SAFETY
+
+            VOID AR INVOICE SHOULD HAVE NO ACTIVE PAYMENT.
+            ==================================================
+            */
+
+            const paidAmount =
+                Number(
+                    arInvoice.paid_amount
+                    ||
+                    0
+                );
+
+
+            if (
+                currentStatus === "VOID"
+                &&
+                paidAmount > 0
+            ) {
+
+                throw new Error(
+                    "Void Account Receivable with payment cannot be reposted."
+                );
+
+            }
+
+
+            /*
+            ==================================================
+            TOTAL / OUTSTANDING
+            ==================================================
+            */
+
+            const totalAmount =
+                Number(
+                    arInvoice.total_amount
+                    ||
+                    0
+                );
+
+
+            /*
+            ==================================================
+            RESTORE AR
+
+            ONLY REQUIRED WHEN JOURNAL WAS VOID.
+
+            VOID
+            ->
+            COMPLETE
+            ==================================================
+            */
+
+            if (
+                currentStatus === "VOID"
+            ) {
+
+                const {
+
+                    data:
+                        restoredAR,
+
+                    error:
+                        restoreARError
+
+                } = await supabase
+
+                    .from(
+                        "trx_account_receivable"
+                    )
+
+                    .update({
+
+                        status:
+                            "Complete",
+
+                        paid_amount:
+                            0,
+
+                        outstanding_amount:
+                            totalAmount
+
+                    })
+
+                    .eq(
+                        "id",
+                        sourceDocumentId
+                    )
+
+                    /*
+                    ==========================================
+                    SAFETY:
+                    AR MUST STILL POINT TO THIS JOURNAL
+                    ==========================================
+                    */
+
+                    .eq(
+                        "gl_journal_id",
+                        id
+                    )
+
+                    .select(`
+                        id,
+                        invoice_no,
+                        status,
+                        total_amount,
+                        paid_amount,
+                        outstanding_amount,
+                        gl_journal_id
+                    `)
+
+                    .single();
+
+
+                if (
+                    restoreARError
+                ) {
+
+                    console.error(
+                        "AR INVOICE RESTORE AFTER GL POST ERROR:",
+                        restoreARError
+                    );
+
+
+                    throw restoreARError;
+
+                }
+
+
+                updatedARInvoice =
+                    restoredAR;
+
+
+                console.log(
+                    "AR INVOICE RESTORED FROM VOID:",
+                    {
+                        account_receivable_id:
+                            restoredAR?.id,
+
+                        invoice_no:
+                            restoredAR?.invoice_no,
+
+                        previous_ar_status:
+                            arInvoice.status,
+
+                        current_ar_status:
+                            restoredAR?.status,
+
+                        journal_id:
+                            id,
+
+                        previous_journal_status:
+                            currentStatus,
+
+                        current_journal_status:
+                            "Posted",
+
+                        paid_amount:
+                            restoredAR?.paid_amount,
+
+                        outstanding_amount:
+                            restoredAR?.outstanding_amount,
+
+                        gl_journal_id:
+                            restoredAR?.gl_journal_id
+                    }
+                );
+
+            }
 
         }
 
 
-        updatedARInvoice =
-            restoredAR;
+        /*
+        ======================================================
+        DEBUG
+        ======================================================
+        */
 
-
-        console.log(
-            "AR INVOICE RESTORED FROM VOID:",
-            {
-                account_receivable_id:
-                    restoredAR?.id,
-
-                invoice_no:
-                    restoredAR?.invoice_no,
-
-                previous_ar_status:
-                    arInvoice.status,
-
-                current_ar_status:
-                    restoredAR?.status,
-
-                journal_id:
-                    id,
-
-                previous_journal_status:
-                    currentStatus,
-
-                current_journal_status:
-                    "Posted",
-
-                paid_amount:
-                    restoredAR?.paid_amount,
-
-                outstanding_amount:
-                    restoredAR?.outstanding_amount,
-
-                gl_journal_id:
-                    restoredAR?.gl_journal_id
-            }
-        );
-
-    }
-
-}
-
-
-/*
-======================================================
-DEBUG
-======================================================
-*/
         console.log(
             "GL JOURNAL POSTED:",
             {
@@ -17713,9 +20478,7 @@ DEBUG
                     sourceDocumentId
             }
         );
-
-
-        /*
+                /*
         ======================================================
         AR PAYMENT
         RECALCULATE AFTER POST
@@ -17971,68 +20734,68 @@ DEBUG
 
 
             /*
-==================================================
-ACTIVE AR PAYMENTS
+            ==================================================
+            ACTIVE AR PAYMENTS
 
-FINAL RULE:
+            FINAL RULE:
 
-DRAFT
--> ACTIVE
+            DRAFT
+            -> ACTIVE
 
-POSTED
--> ACTIVE
+            POSTED
+            -> ACTIVE
 
-VOID
--> INACTIVE
+            VOID
+            -> INACTIVE
 
-MISSING JOURNAL
--> INACTIVE
+            MISSING JOURNAL
+            -> INACTIVE
 
-UNKNOWN STATUS
--> INACTIVE
-==================================================
-*/
+            UNKNOWN STATUS
+            -> INACTIVE
+            ==================================================
+            */
 
-const activePayments =
-    (
-        paymentRows
-        ||
-        []
-    )
-    .filter(
-        payment => {
-
-            if (
-                !payment
-                ||
-                !payment.gl_journal_id
-            ) {
-
-                return false;
-
-            }
-
-
-            const paymentJournalStatus =
-                journalStatusMap.get(
-                    String(
-                        payment.gl_journal_id
-                    )
+            const activePayments =
+                (
+                    paymentRows
+                    ||
+                    []
                 )
-                ||
-                "";
+                .filter(
+                    payment => {
+
+                        if (
+                            !payment
+                            ||
+                            !payment.gl_journal_id
+                        ) {
+
+                            return false;
+
+                        }
 
 
-            return (
-                paymentJournalStatus ===
-                    "DRAFT"
-                ||
-                paymentJournalStatus ===
-                    "POSTED"
-            );
+                        const paymentJournalStatus =
+                            journalStatusMap.get(
+                                String(
+                                    payment.gl_journal_id
+                                )
+                            )
+                            ||
+                            "";
 
-        }
-    );
+
+                        return (
+                            paymentJournalStatus ===
+                                "DRAFT"
+                            ||
+                            paymentJournalStatus ===
+                                "POSTED"
+                        );
+
+                    }
+                );
 
 
             /*
@@ -18239,9 +21002,7 @@ const activePayments =
             );
 
         }
-
-
-        /*
+                /*
         ======================================================
         REALTIME GL -> AP / AR
         ======================================================
@@ -18264,6 +21025,12 @@ const activePayments =
                     {
                         detail: {
 
+                            /*
+                            ==========================================
+                            SOURCE
+                            ==========================================
+                            */
+
                             sourceModule:
                                 sourceModule,
 
@@ -18279,68 +21046,181 @@ const activePayments =
                             action:
                                 "JOURNAL_POSTED",
 
+
+                            /*
+                            ==========================================
+                            ACCOUNT PAYABLE ID
+
+                            BULK AP PAYMENT:
+                            sourceDocumentId = BATCH ID
+                            SO DO NOT USE IT AS AP ID.
+                            ==========================================
+                            */
+
                             accountPayableId:
+
                                 sourceModule === "AP"
-                                    ? sourceDocumentId
+                                &&
+                                sourceDocumentType === "AP_PAYMENT"
+                                &&
+                                apPaymentBatch
+
+                                    ? null
+
+                                    :
+                                    sourceModule === "AP"
+                                        ? sourceDocumentId
+                                        : null,
+
+
+                            /*
+                            ==========================================
+                            BULK AP PAYMENT BATCH
+                            ==========================================
+                            */
+
+                            paymentBatchId:
+
+                                sourceModule === "AP"
+                                &&
+                                sourceDocumentType === "AP_PAYMENT"
+                                &&
+                                apPaymentBatch
+
+                                    ? apPaymentBatch.id
+
                                     : null,
 
+
+                            /*
+                            ==========================================
+                            ALL AP INVOICES IN BULK PAYMENT
+                            ==========================================
+                            */
+
+                            accountPayableIds:
+
+                                sourceModule === "AP"
+                                &&
+                                sourceDocumentType === "AP_PAYMENT"
+                                &&
+                                apPaymentBatch
+
+                                    ? apPaymentBatchAPIds
+
+                                    : [],
+
+
+                            /*
+                            ==========================================
+                            ACCOUNT RECEIVABLE
+                            ==========================================
+                            */
+
                             accountReceivableId:
+
                                 sourceModule === "AR"
+
                                     ? (
                                         accountReceivableId
                                         ||
                                         sourceDocumentId
                                     )
+
                                     : null,
 
+
+                            /*
+                            ==========================================
+                            AR PAYMENT
+                            ==========================================
+                            */
+
                             paymentId:
+
                                 sourceDocumentType ===
                                     "AR_PAYMENT"
+
                                     ? (
                                         arPayment?.id
                                         ||
                                         null
                                     )
+
                                     : null,
 
+
+                            /*
+                            ==========================================
+                            AR PAYMENT RESULT
+                            ==========================================
+                            */
+
                             paidAmount:
+
                                 sourceDocumentType ===
                                     "AR_PAYMENT"
+
                                     ? (
                                         updatedAR?.paid_amount
                                         ??
                                         null
                                     )
+
                                     : null,
 
+
                             outstandingAmount:
+
                                 sourceDocumentType ===
                                     "AR_PAYMENT"
+
                                     ? (
                                         updatedAR?.outstanding_amount
                                         ??
                                         null
                                     )
+
                                     : null,
 
+
+                            /*
+                            ==========================================
+                            SOURCE STATUS
+                            ==========================================
+                            */
+
                             sourceStatus:
-    sourceDocumentType ===
-        "AR_PAYMENT"
-        ? (
-            updatedAR?.status
-            ||
-            null
-        )
-        :
-        sourceDocumentType ===
-            "AR_INVOICE"
-            ? (
-                updatedARInvoice?.status
-                ||
-                null
-            )
-            :
-            null
+
+                                sourceDocumentType ===
+                                    "AR_PAYMENT"
+
+                                    ? (
+                                        updatedAR?.status
+                                        ||
+                                        null
+                                    )
+
+                                    :
+                                    sourceDocumentType ===
+                                        "AR_INVOICE"
+
+                                        ? (
+                                            updatedARInvoice?.status
+                                            ||
+                                            null
+                                        )
+
+                                        :
+                                        sourceModule === "AP"
+                                        &&
+                                        sourceDocumentType === "AP_PAYMENT"
+                                        &&
+                                        apPaymentBatch
+
+                                            ? "Posted"
+
+                                            : null
 
                         }
                     }
@@ -18348,6 +21228,12 @@ const activePayments =
 
             );
 
+
+            /*
+            ==================================================
+            DEBUG REALTIME
+            ==================================================
+            */
 
             console.log(
                 "GL -> SOURCE REALTIME EVENT:",
@@ -18361,13 +21247,26 @@ const activePayments =
                     source_document_id:
                         sourceDocumentId,
 
+                    payment_batch_id:
+                        apPaymentBatch?.id
+                        ||
+                        null,
+
+                    account_payable_ids:
+                        apPaymentBatch
+                            ? apPaymentBatchAPIds
+                            : [],
+
                     account_receivable_id:
+
                         sourceModule === "AR"
+
                             ? (
                                 accountReceivableId
                                 ||
                                 sourceDocumentId
                             )
+
                             : null,
 
                     payment_id:
@@ -18400,58 +21299,122 @@ const activePayments =
         await this.loadData(
             false
         );
-
-
-        /*
+                /*
         ======================================================
         SUCCESS
+        FINAL
         ======================================================
         */
 
         if (
-    sourceModule === "AR"
-    &&
-    sourceDocumentType === "AR_PAYMENT"
-) {
+            sourceModule === "AP"
+            &&
+            sourceDocumentType === "AP_PAYMENT"
+            &&
+            apPaymentBatch
+        ) {
 
-    this.showSuccess(
-        currentStatus === "VOID"
-            ? "AR Payment Journal reposted successfully. Account Receivable payment restored."
-            : "AR Payment Journal posted successfully."
-    );
+            /*
+            ==================================================
+            BULK AP PAYMENT
+            ==================================================
+            */
 
-}
+            this.showSuccess(
 
-else if (
-    sourceModule === "AR"
-    &&
-    sourceDocumentType === "AR_INVOICE"
-) {
+                currentStatus === "VOID"
 
-    this.showSuccess(
-        currentStatus === "VOID"
-            ? "AR Invoice Journal reposted successfully. Account Receivable restored to Complete."
-            : "AR Invoice Journal posted successfully."
-    );
+                    ? "AP Payment Batch Journal reposted successfully. All invoice allocations were restored."
 
-}
+                    : "AP Payment Batch Journal posted successfully."
 
-else {
+            );
 
-    this.showSuccess(
-        "Journal posted successfully."
-    );
+        }
 
-}
+        else if (
+            sourceModule === "AR"
+            &&
+            sourceDocumentType === "AR_PAYMENT"
+        ) {
+
+            /*
+            ==================================================
+            AR PAYMENT
+            ==================================================
+            */
+
+            this.showSuccess(
+
+                currentStatus === "VOID"
+
+                    ? "AR Payment Journal reposted successfully. Account Receivable payment restored."
+
+                    : "AR Payment Journal posted successfully."
+
+            );
+
+        }
+
+        else if (
+            sourceModule === "AR"
+            &&
+            sourceDocumentType === "AR_INVOICE"
+        ) {
+
+            /*
+            ==================================================
+            AR INVOICE
+            ==================================================
+            */
+
+            this.showSuccess(
+
+                currentStatus === "VOID"
+
+                    ? "AR Invoice Journal reposted successfully. Account Receivable restored to Complete."
+
+                    : "AR Invoice Journal posted successfully."
+
+            );
+
+        }
+
+        else {
+
+            /*
+            ==================================================
+            AP INVOICE / MANUAL GL / OTHER JOURNAL
+            ==================================================
+            */
+
+            this.showSuccess(
+                "Journal posted successfully."
+            );
+
+        }
+
     }
 
     catch (error) {
+
+        /*
+        ======================================================
+        ERROR LOG
+        ======================================================
+        */
 
         console.error(
             "GeneralJournal.postJournal:",
             error
         );
 
+
+        /*
+        ======================================================
+        ERROR MESSAGE
+        ======================================================
+        */
 
         this.showError(
             error?.message
@@ -18469,29 +21432,39 @@ else {
 VOID JOURNAL
 FINAL
 
-NO DATABASE RELOAD
-REALTIME LOCAL UPDATE
+POSTED -> VOID
 
 HANDLE:
-- MANUAL GL JOURNAL
-- AP_INVOICE
-- AP_PAYMENT
-- AR_INVOICE
-- AR_PAYMENT
+- MANUAL GL
+- AP INVOICE
+- BULK AP PAYMENT
+- AR INVOICE
+- AR PAYMENT
 
-AR PAYMENT:
-- VOID GL JOURNAL
-- KEEP PAYMENT HISTORY
-- KEEP gl_journal_id
-- VOID JOURNAL = PAYMENT INACTIVE
-- RECALCULATE PAID
-- RECALCULATE OUTSTANDING
-- RECALCULATE STATUS
-- REALTIME AR UPDATE
+BULK AP PAYMENT RULE:
 
-IMPORTANT:
-DO NOT DETACH PAYMENT FROM JOURNAL.
-THIS ALLOWS VOID -> POST AGAIN.
+GL JOURNAL:
+POSTED -> VOID
+
+PAYMENT BATCH:
+POSTED -> VOID
+
+PAYMENT BATCH:
+KEEP gl_journal_id
+
+PAYMENT ALLOCATIONS:
+KEEP PAYMENT ROW
+KEEP payment_batch_id
+SET gl_journal_id = NULL
+
+RESULT:
+PAYMENT BECOMES INACTIVE
+AP INVOICES ARE RECALCULATED
+
+THIS ALLOWS:
+VOID -> POST AGAIN
+USING THE SAME BATCH
+AND SAME GL JOURNAL.
 ==========================================================
 */
 
@@ -18505,7 +21478,9 @@ async voidJournal(id) {
         ======================================================
         */
 
-        if (!id) {
+        if (
+            !id
+        ) {
 
             return;
 
@@ -18531,7 +21506,9 @@ async voidJournal(id) {
             result;
 
 
-        if (!journal) {
+        if (
+            !journal
+        ) {
 
             throw new Error(
                 "GL Journal not found."
@@ -18574,7 +21551,7 @@ async voidJournal(id) {
 
         /*
         ======================================================
-        CURRENT STATUS
+        CURRENT JOURNAL STATUS
         ======================================================
         */
 
@@ -18603,6 +21580,7 @@ async voidJournal(id) {
                 "Journal sudah berstatus Void."
             );
 
+
             return;
 
         }
@@ -18627,237 +21605,666 @@ async voidJournal(id) {
 
 
         /*
-======================================================
-AR SOURCE STATE BEFORE VOID
-======================================================
-*/
+        ======================================================
+        SOURCE STATE
+        ======================================================
+        */
 
-let arPayment =
-    null;
-
-
-let accountReceivableId =
-    null;
+        let arPayment =
+            null;
 
 
-let arInvoiceBeforeVoid =
-    null;
+        let accountReceivableId =
+            null;
 
 
-/*
-======================================================
-AR INVOICE
-VALIDATE BEFORE JOURNAL VOID
-======================================================
-*/
+        let arInvoiceBeforeVoid =
+            null;
 
-if (
-    sourceModule === "AR"
-    &&
-    sourceDocumentType === "AR_INVOICE"
-    &&
-    sourceDocumentId
-) {
 
-    const {
+        /*
+        ======================================================
+        BULK AP PAYMENT STATE
+        ======================================================
+        */
 
-        data:
-            arInvoice,
+        let apPaymentBatch =
+            null;
 
-        error:
-            arInvoiceError
 
-    } = await supabase
+        let apPaymentBatchAllocations =
+            [];
 
-        .from(
-            "trx_account_receivable"
-        )
 
-        .select(`
-            id,
-            invoice_no,
-            status,
-            total_amount,
-            paid_amount,
-            outstanding_amount,
-            gl_journal_id
-        `)
+        let apPaymentBatchAPIds =
+            [];
 
-        .eq(
-            "id",
+
+        /*
+        ======================================================
+        BULK AP PAYMENT
+        DETECT BEFORE JOURNAL VOID
+
+        SOURCE_DOCUMENT_ID
+        =
+        trx_ap_payment_batch.id
+        ======================================================
+        */
+
+        if (
+            sourceModule === "AP"
+            &&
+            sourceDocumentType === "AP_PAYMENT"
+            &&
             sourceDocumentId
-        )
+        ) {
 
-        .maybeSingle();
-
-
-    if (
-        arInvoiceError
-    ) {
-
-        throw arInvoiceError;
-
-    }
-
-
-    if (
-        !arInvoice
-    ) {
-
-        throw new Error(
-            "Account Receivable linked to this GL Journal was not found."
-        );
-
-    }
-
-
-    arInvoiceBeforeVoid =
-        arInvoice;
-
-
-    /*
-    ==================================================
-    STATUS
-
-    ONLY COMPLETE CAN VOID
-    ==================================================
-    */
-
-    const arStatus =
-        String(
-            arInvoice.status
-            ||
-            ""
-        )
-        .trim()
-        .toUpperCase();
-
-
-    if (
-        arStatus !==
-        "COMPLETE"
-    ) {
-
-        throw new Error(
-            `Account Receivable status "${arInvoice.status || ""}" cannot be voided. Only Complete Account Receivable can be voided.`
-        );
-
-    }
-
-
-    /*
-    ==================================================
-    PAYMENT VALIDATION
-    ==================================================
-    */
-
-    const paidAmount =
-        Number(
-            arInvoice.paid_amount
-            ||
-            0
-        );
-
-
-    if (
-        paidAmount > 0
-    ) {
-
-        throw new Error(
-            "Account Receivable with payment cannot be voided. Void or delete the AR Payment Journal first."
-        );
-
-    }
-
-
-    /*
-    ==================================================
-    LINKED GL JOURNAL VALIDATION
-    ==================================================
-    */
-
-    const linkedJournalId =
-        arInvoice.gl_journal_id
-        ||
-        null;
-
-
-    if (
-        !linkedJournalId
-    ) {
-
-        throw new Error(
-            "Account Receivable is not linked to this GL Journal."
-        );
-
-    }
-
-
-    if (
-        String(
-            linkedJournalId
-        )
-        !==
-        String(
-            id
-        )
-    ) {
-
-        throw new Error(
-            "This GL Journal does not match the linked Account Receivable journal."
-        );
-
-    }
-
-
-    console.log(
-        "AR INVOICE BEFORE JOURNAL VOID:",
-        {
-            account_receivable_id:
-                arInvoice.id,
-
-            invoice_no:
-                arInvoice.invoice_no,
-
-            status:
-                arInvoice.status,
-
-            paid_amount:
-                arInvoice.paid_amount,
-
-            gl_journal_id:
-                arInvoice.gl_journal_id,
-
-            journal_id:
-                id
-        }
-    );
-
-}
-
-
-/*
-======================================================
-AR PAYMENT
-GET PAYMENT BEFORE VOID
-
-IMPORTANT:
-PAYMENT RELATION MUST REMAIN LINKED.
-======================================================
-*/
-
-if (
-    sourceModule === "AR"
-    &&
-    sourceDocumentType === "AR_PAYMENT"
-) {
+            /*
+            ==================================================
+            TRY PAYMENT BATCH
+            ==================================================
+            */
 
             const {
+                data:
+                    batch,
 
+                error:
+                    batchError
+            } = await supabase
+
+                .from(
+                    "trx_ap_payment_batch"
+                )
+
+                .select(`
+                    id,
+                    payment_no,
+                    payment_date,
+                    vendor_id,
+                    bank_account_id,
+                    reference_no,
+                    description,
+                    total_payment,
+                    status,
+                    gl_journal_id,
+                    void_reason,
+                    void_at
+                `)
+
+                .eq(
+                    "id",
+                    sourceDocumentId
+                )
+
+                .maybeSingle();
+
+
+            if (
+                batchError
+            ) {
+
+                throw batchError;
+
+            }
+
+
+            /*
+            ==================================================
+            BULK PAYMENT FOUND
+            ==================================================
+            */
+
+            if (
+                batch
+            ) {
+
+                apPaymentBatch =
+                    batch;
+
+
+                /*
+                ==============================================
+                BATCH JOURNAL LINK VALIDATION
+                ==============================================
+                */
+
+                if (
+                    !batch.gl_journal_id
+                ) {
+
+                    throw new Error(
+                        "AP Payment Batch is not linked to a GL Journal."
+                    );
+
+                }
+
+
+                if (
+                    String(
+                        batch.gl_journal_id
+                    )
+                    !==
+                    String(
+                        id
+                    )
+                ) {
+
+                    throw new Error(
+                        "AP Payment Batch does not match this GL Journal."
+                    );
+
+                }
+
+
+                /*
+                ==============================================
+                BATCH STATUS VALIDATION
+
+                GL IS POSTED,
+                THEREFORE BATCH MUST ALSO BE POSTED.
+                ==============================================
+                */
+
+                const batchStatus =
+                    String(
+                        batch.status
+                        ||
+                        ""
+                    )
+                    .trim()
+                    .toUpperCase();
+
+
+                if (
+                    batchStatus !==
+                    "POSTED"
+                ) {
+
+                    throw new Error(
+                        `AP Payment Batch status "${batch.status || ""}" cannot be voided. Expected Posted status.`
+                    );
+
+                }
+
+
+                /*
+                ==============================================
+                GET ALL PAYMENT ALLOCATIONS
+                ==============================================
+                */
+
+                const {
+                    data:
+                        allocations,
+
+                    error:
+                        allocationsError
+                } = await supabase
+
+                    .from(
+                        "trx_ap_payment"
+                    )
+
+                    .select(`
+                        id,
+                        payment_batch_id,
+                        account_payable_id,
+                        payment_date,
+                        bank_account_id,
+                        dpp_amount,
+                        tax_plus_amount,
+                        tax_minus_amount,
+                        payment_amount,
+                        reference_no,
+                        description,
+                        gl_journal_id
+                    `)
+
+                    .eq(
+                        "payment_batch_id",
+                        batch.id
+                    );
+
+
+                if (
+                    allocationsError
+                ) {
+
+                    throw allocationsError;
+
+                }
+
+
+                apPaymentBatchAllocations =
+                    Array.isArray(
+                        allocations
+                    )
+                        ? allocations
+                        : [];
+
+
+                /*
+                ==============================================
+                BATCH MUST HAVE ALLOCATION
+                ==============================================
+                */
+
+                if (
+                    apPaymentBatchAllocations.length === 0
+                ) {
+
+                    throw new Error(
+                        "AP Payment Batch has no payment allocation."
+                    );
+
+                }
+
+
+                /*
+                ==============================================
+                EVERY ACTIVE ALLOCATION MUST POINT
+                TO THIS GL JOURNAL
+                ==============================================
+                */
+
+                const invalidAllocation =
+                    apPaymentBatchAllocations
+                        .find(
+                            allocation => {
+
+                                if (
+                                    !allocation
+                                    ||
+                                    !allocation.gl_journal_id
+                                ) {
+
+                                    return true;
+
+                                }
+
+
+                                return (
+                                    String(
+                                        allocation.gl_journal_id
+                                    )
+                                    !==
+                                    String(
+                                        id
+                                    )
+                                );
+
+                            }
+                        );
+
+
+                if (
+                    invalidAllocation
+                ) {
+
+                    throw new Error(
+                        "AP Payment Batch contains an allocation that is not linked to this GL Journal."
+                    );
+
+                }
+
+
+                /*
+                ==============================================
+                UNIQUE ACCOUNT PAYABLE IDS
+                ==============================================
+                */
+
+                apPaymentBatchAPIds =
+                    [
+                        ...new Set(
+
+                            apPaymentBatchAllocations
+
+                                .map(
+                                    allocation =>
+                                        allocation?.account_payable_id
+                                )
+
+                                .filter(
+                                    Boolean
+                                )
+
+                        )
+                    ];
+
+
+                if (
+                    apPaymentBatchAPIds.length === 0
+                ) {
+
+                    throw new Error(
+                        "No Account Payable invoice was found in this AP Payment Batch."
+                    );
+
+                }
+
+
+                /*
+                ==============================================
+                VALIDATE TOTAL ALLOCATION
+                ==============================================
+                */
+
+                const allocationTotal =
+                    Number(
+                        apPaymentBatchAllocations
+                            .reduce(
+                                (
+                                    total,
+                                    allocation
+                                ) => {
+
+                                    return (
+                                        total
+                                        +
+                                        Number(
+                                            allocation?.payment_amount
+                                            ||
+                                            0
+                                        )
+                                    );
+
+                                },
+                                0
+                            )
+                            .toFixed(
+                                2
+                            )
+                    );
+
+
+                const batchTotal =
+                    Number(
+                        Number(
+                            batch.total_payment
+                            ||
+                            0
+                        )
+                        .toFixed(
+                            2
+                        )
+                    );
+
+
+                if (
+                    Math.abs(
+                        allocationTotal
+                        -
+                        batchTotal
+                    )
+                    >
+                    0.01
+                ) {
+
+                    throw new Error(
+                        "AP Payment Batch total does not match its payment allocations."
+                    );
+
+                }
+
+
+                /*
+                ==============================================
+                DEBUG
+                ==============================================
+                */
+
+                console.log(
+                    "BULK AP PAYMENT BEFORE JOURNAL VOID:",
+                    {
+                        batch_id:
+                            batch.id,
+
+                        payment_no:
+                            batch.payment_no,
+
+                        batch_status:
+                            batch.status,
+
+                        total_payment:
+                            batch.total_payment,
+
+                        allocation_total:
+                            allocationTotal,
+
+                        allocation_count:
+                            apPaymentBatchAllocations.length,
+
+                        account_payable_count:
+                            apPaymentBatchAPIds.length,
+
+                        journal_id:
+                            id,
+
+                        journal_status:
+                            currentJournalStatus
+                    }
+                );
+
+            }
+
+        }
+                /*
+        ======================================================
+        AR INVOICE
+        VALIDATE BEFORE JOURNAL VOID
+        ======================================================
+        */
+
+        if (
+            sourceModule === "AR"
+            &&
+            sourceDocumentType === "AR_INVOICE"
+            &&
+            sourceDocumentId
+        ) {
+
+            const {
+                data:
+                    arInvoice,
+
+                error:
+                    arInvoiceError
+            } = await supabase
+
+                .from(
+                    "trx_account_receivable"
+                )
+
+                .select(`
+                    id,
+                    invoice_no,
+                    status,
+                    total_amount,
+                    paid_amount,
+                    outstanding_amount,
+                    gl_journal_id
+                `)
+
+                .eq(
+                    "id",
+                    sourceDocumentId
+                )
+
+                .maybeSingle();
+
+
+            if (
+                arInvoiceError
+            ) {
+
+                throw arInvoiceError;
+
+            }
+
+
+            if (
+                !arInvoice
+            ) {
+
+                throw new Error(
+                    "Account Receivable linked to this GL Journal was not found."
+                );
+
+            }
+
+
+            arInvoiceBeforeVoid =
+                arInvoice;
+
+
+            /*
+            ==================================================
+            STATUS
+
+            ONLY COMPLETE CAN VOID
+            ==================================================
+            */
+
+            const arStatus =
+                String(
+                    arInvoice.status
+                    ||
+                    ""
+                )
+                .trim()
+                .toUpperCase();
+
+
+            if (
+                arStatus !==
+                "COMPLETE"
+            ) {
+
+                throw new Error(
+                    `Account Receivable status "${arInvoice.status || ""}" cannot be voided. Only Complete Account Receivable can be voided.`
+                );
+
+            }
+
+
+            /*
+            ==================================================
+            PAYMENT VALIDATION
+            ==================================================
+            */
+
+            const paidAmount =
+                Number(
+                    arInvoice.paid_amount
+                    ||
+                    0
+                );
+
+
+            if (
+                paidAmount > 0
+            ) {
+
+                throw new Error(
+                    "Account Receivable with payment cannot be voided. Void or delete the AR Payment Journal first."
+                );
+
+            }
+
+
+            /*
+            ==================================================
+            LINKED GL JOURNAL VALIDATION
+            ==================================================
+            */
+
+            const linkedJournalId =
+                arInvoice.gl_journal_id
+                ||
+                null;
+
+
+            if (
+                !linkedJournalId
+            ) {
+
+                throw new Error(
+                    "Account Receivable is not linked to this GL Journal."
+                );
+
+            }
+
+
+            if (
+                String(
+                    linkedJournalId
+                )
+                !==
+                String(
+                    id
+                )
+            ) {
+
+                throw new Error(
+                    "This GL Journal does not match the linked Account Receivable journal."
+                );
+
+            }
+
+
+            /*
+            ==================================================
+            DEBUG
+            ==================================================
+            */
+
+            console.log(
+                "AR INVOICE BEFORE JOURNAL VOID:",
+                {
+                    account_receivable_id:
+                        arInvoice.id,
+
+                    invoice_no:
+                        arInvoice.invoice_no,
+
+                    status:
+                        arInvoice.status,
+
+                    paid_amount:
+                        arInvoice.paid_amount,
+
+                    gl_journal_id:
+                        arInvoice.gl_journal_id,
+
+                    journal_id:
+                        id
+                }
+            );
+
+        }
+
+
+        /*
+        ======================================================
+        AR PAYMENT
+        GET PAYMENT BEFORE VOID
+
+        IMPORTANT:
+        PAYMENT RELATION MUST REMAIN LINKED.
+        ======================================================
+        */
+
+        if (
+            sourceModule === "AR"
+            &&
+            sourceDocumentType === "AR_PAYMENT"
+        ) {
+
+            const {
                 data,
-
                 error
-
             } = await supabase
 
                 .from(
@@ -18891,6 +22298,7 @@ if (
                     "GET AR PAYMENT BEFORE VOID ERROR:",
                     error
                 );
+
 
                 throw error;
 
@@ -18927,6 +22335,57 @@ if (
 
             }
 
+
+            if (
+                !accountReceivableId
+            ) {
+
+                throw new Error(
+                    "Account Receivable linked to this AR Payment was not found."
+                );
+
+            }
+
+
+            /*
+            ==================================================
+            JOURNAL LINK VALIDATION
+            ==================================================
+            */
+
+            if (
+                !arPayment.gl_journal_id
+            ) {
+
+                throw new Error(
+                    "AR Payment is not linked to a GL Journal."
+                );
+
+            }
+
+
+            if (
+                String(
+                    arPayment.gl_journal_id
+                )
+                !==
+                String(
+                    id
+                )
+            ) {
+
+                throw new Error(
+                    "AR Payment does not match this GL Journal."
+                );
+
+            }
+
+
+            /*
+            ==================================================
+            DEBUG
+            ==================================================
+            */
 
             console.log(
                 "AR PAYMENT BEFORE JOURNAL VOID:",
@@ -18993,6 +22452,7 @@ if (
                 "Alasan Void wajib diisi."
             );
 
+
             return;
 
         }
@@ -19003,164 +22463,713 @@ if (
         VOID JOURNAL THROUGH SERVICE
 
         AFTER THIS:
-        JOURNAL STATUS = VOID
+
+        GL JOURNAL STATUS
+        POSTED -> VOID
         ======================================================
         */
 
         await this.service.voidJournal(
-    id,
-    reason
-);
-
-
-/*
-======================================================
-AR SOURCE UPDATE
-======================================================
-*/
-
-let updatedAR =
-    null;
-
-
-/*
-======================================================
-AR INVOICE
-JOURNAL VOID
--> ACCOUNT RECEIVABLE VOID
-
-IMPORTANT:
-
-DO NOT DELETE AR
-DO NOT DETACH gl_journal_id
-
-THE JOURNAL MUST REMAIN LINKED
-FOR AUDIT TRAIL.
-
-AFTER THIS:
-AR STATUS = VOID
-GL STATUS = VOID
-======================================================
-*/
-
-if (
-    sourceModule === "AR"
-    &&
-    sourceDocumentType === "AR_INVOICE"
-    &&
-    sourceDocumentId
-) {
-
-    const {
-
-        data:
-            voidedAR,
-
-        error:
-            arVoidError
-
-    } = await supabase
-
-        .from(
-            "trx_account_receivable"
-        )
-
-        .update({
-
-            status:
-                "Void"
-
-        })
-
-        .eq(
-            "id",
-            sourceDocumentId
-        )
-
-        /*
-        ==============================================
-        SAFETY
-
-        ONLY UPDATE AR LINKED TO THIS JOURNAL
-        ==============================================
+            id,
+            reason
+        );
+                /*
+        ======================================================
+        BULK AP PAYMENT
+        VOID AFTER GL JOURNAL VOID SUCCESS
+        ======================================================
         */
 
-        .eq(
-            "gl_journal_id",
-            id
-        )
+        if (
+            apPaymentBatch
+        ) {
 
-        .select(`
-            id,
-            invoice_no,
-            status,
-            total_amount,
-            paid_amount,
-            outstanding_amount,
-            gl_journal_id
-        `)
+            /*
+            ==================================================
+            UPDATE PAYMENT BATCH STATUS
+            POSTED -> VOID
 
-        .single();
+            IMPORTANT:
+            KEEP gl_journal_id
+            ==================================================
+            */
+
+            const {
+                data:
+                    voidedBatch,
+
+                error:
+                    batchVoidError
+            } = await supabase
+
+                .from(
+                    "trx_ap_payment_batch"
+                )
+
+                .update({
+
+                    status:
+                        "Void",
+
+                    void_reason:
+                        reason,
+
+                    void_at:
+                        new Date()
+                            .toISOString(),
+
+                    updated_at:
+                        new Date()
+                            .toISOString()
+
+                })
+
+                .eq(
+                    "id",
+                    apPaymentBatch.id
+                )
+
+                /*
+                ==============================================
+                SAFETY:
+                BATCH MUST STILL POINT TO THIS JOURNAL
+                ==============================================
+                */
+
+                .eq(
+                    "gl_journal_id",
+                    id
+                )
+
+                .select(`
+                    id,
+                    payment_no,
+                    status,
+                    total_payment,
+                    gl_journal_id,
+                    void_reason,
+                    void_at
+                `)
+
+                .single();
 
 
-    if (
-        arVoidError
-    ) {
+            if (
+                batchVoidError
+            ) {
 
-        console.error(
-            "AR INVOICE STATUS UPDATE AFTER GL VOID ERROR:",
-            arVoidError
-        );
+                throw batchVoidError;
 
-
-        throw arVoidError;
-
-    }
+            }
 
 
-    updatedAR =
-        voidedAR;
+            /*
+            ==================================================
+            DEACTIVATE ALL PAYMENT ALLOCATIONS
+
+            IMPORTANT:
+
+            DO NOT DELETE PAYMENT ROWS
+            DO NOT DELETE BATCH RELATION
+            KEEP payment_batch_id
+
+            ONLY:
+            gl_journal_id = NULL
+            ==================================================
+            */
+
+            const {
+                data:
+                    deactivatedAllocations,
+
+                error:
+                    allocationDeactivateError
+            } = await supabase
+
+                .from(
+                    "trx_ap_payment"
+                )
+
+                .update({
+
+                    gl_journal_id:
+                        null
+
+                })
+
+                .eq(
+                    "payment_batch_id",
+                    apPaymentBatch.id
+                )
+
+                /*
+                ==============================================
+                SAFETY:
+                ONLY ALLOCATIONS LINKED TO THIS JOURNAL
+                ==============================================
+                */
+
+                .eq(
+                    "gl_journal_id",
+                    id
+                )
+
+                .select(`
+                    id,
+                    payment_batch_id,
+                    account_payable_id,
+                    payment_amount,
+                    gl_journal_id
+                `);
 
 
-    console.log(
-        "AR INVOICE VOID FROM GL:",
-        {
-            account_receivable_id:
-                voidedAR?.id,
+            if (
+                allocationDeactivateError
+            ) {
 
-            invoice_no:
-                voidedAR?.invoice_no,
+                throw allocationDeactivateError;
 
-            ar_status:
-                voidedAR?.status,
+            }
 
-            gl_journal_id:
-                voidedAR?.gl_journal_id,
 
-            journal_id:
-                id,
+            /*
+            ==================================================
+            SAFETY:
+            ALL BATCH ALLOCATIONS MUST BE DEACTIVATED
+            ==================================================
+            */
 
-            journal_status:
-                "Void",
+            if (
+                !Array.isArray(
+                    deactivatedAllocations
+                )
+                ||
+                deactivatedAllocations.length
+                !==
+                apPaymentBatchAllocations.length
+            ) {
 
-            void_reason:
-                reason
+                throw new Error(
+                    "Not all AP Payment Batch allocations were deactivated."
+                );
+
+            }
+
+
+            /*
+            ==================================================
+            VERIFY ALL ALLOCATIONS NOW INACTIVE
+            ==================================================
+            */
+
+            const stillActiveAllocation =
+                deactivatedAllocations
+                    .find(
+                        allocation =>
+                            allocation?.gl_journal_id
+                    );
+
+
+            if (
+                stillActiveAllocation
+            ) {
+
+                throw new Error(
+                    "AP Payment Batch still contains an active payment allocation after Void."
+                );
+
+            }
+
+
+            /*
+            ==================================================
+            RECALCULATE ALL AFFECTED AP INVOICES
+            ==================================================
+            */
+
+            const apService =
+                window.apService;
+
+
+            for (
+                const accountPayableId
+                of apPaymentBatchAPIds
+            ) {
+
+                /*
+                ==============================================
+                PREFERRED:
+                USE ACCOUNT PAYABLE SERVICE
+                ==============================================
+                */
+
+                if (
+                    apService
+                    &&
+                    typeof apService.updatePaymentStatus
+                    ===
+                    "function"
+                ) {
+
+                    await apService
+                        .updatePaymentStatus(
+                            accountPayableId
+                        );
+
+
+                    continue;
+
+                }
+
+
+                /*
+                ==============================================
+                FALLBACK
+                GET ACCOUNT PAYABLE
+                ==============================================
+                */
+
+                const {
+                    data:
+                        apInvoice,
+
+                    error:
+                        apInvoiceError
+                } = await supabase
+
+                    .from(
+                        "trx_account_payable"
+                    )
+
+                    .select(`
+                        id,
+                        total_amount,
+                        paid_amount,
+                        outstanding_amount,
+                        status
+                    `)
+
+                    .eq(
+                        "id",
+                        accountPayableId
+                    )
+
+                    .maybeSingle();
+
+
+                if (
+                    apInvoiceError
+                ) {
+
+                    throw apInvoiceError;
+
+                }
+
+
+                if (
+                    !apInvoice
+                ) {
+
+                    throw new Error(
+                        "Account Payable invoice was not found during payment Void recalculation."
+                    );
+
+                }
+
+
+                /*
+                ==============================================
+                GET ACTIVE AP PAYMENTS
+
+                CURRENT AP RULE:
+                gl_journal_id IS NOT NULL
+                =
+                ACTIVE PAYMENT
+                ==============================================
+                */
+
+                const {
+                    data:
+                        activePaymentRows,
+
+                    error:
+                        activePaymentRowsError
+                } = await supabase
+
+                    .from(
+                        "trx_ap_payment"
+                    )
+
+                    .select(`
+                        id,
+                        payment_amount,
+                        gl_journal_id
+                    `)
+
+                    .eq(
+                        "account_payable_id",
+                        accountPayableId
+                    )
+
+                    .not(
+                        "gl_journal_id",
+                        "is",
+                        null
+                    );
+
+
+                if (
+                    activePaymentRowsError
+                ) {
+
+                    throw activePaymentRowsError;
+
+                }
+
+
+                /*
+                ==============================================
+                TOTAL AP
+                ==============================================
+                */
+
+                const totalAmount =
+                    Math.round(
+                        Number(
+                            apInvoice.total_amount
+                            ||
+                            0
+                        )
+                    );
+
+
+                /*
+                ==============================================
+                PAID AMOUNT
+                ONLY ACTIVE PAYMENT
+                ==============================================
+                */
+
+                const paidAmount =
+                    Math.round(
+
+                        (
+                            activePaymentRows
+                            ||
+                            []
+                        )
+                        .reduce(
+                            (
+                                total,
+                                payment
+                            ) => {
+
+                                return (
+                                    total
+                                    +
+                                    Number(
+                                        payment?.payment_amount
+                                        ||
+                                        0
+                                    )
+                                );
+
+                            },
+                            0
+                        )
+
+                    );
+
+
+                /*
+                ==============================================
+                OUTSTANDING
+                ==============================================
+                */
+
+                const outstandingAmount =
+                    Math.max(
+                        totalAmount
+                        -
+                        paidAmount,
+                        0
+                    );
+
+
+                /*
+                ==============================================
+                STATUS
+
+                NO ACTIVE PAYMENT
+                -> COMPLETE
+
+                PARTIAL
+                -> PARTIAL PAID
+
+                FULL
+                -> PAID
+                ==============================================
+                */
+
+                let apStatus =
+                    "Complete";
+
+
+                if (
+                    paidAmount > 0
+                    &&
+                    paidAmount < totalAmount
+                ) {
+
+                    apStatus =
+                        "Partial Paid";
+
+                }
+
+
+                if (
+                    totalAmount > 0
+                    &&
+                    paidAmount >= totalAmount
+                ) {
+
+                    apStatus =
+                        "Paid";
+
+                }
+
+
+                /*
+                ==============================================
+                UPDATE ACCOUNT PAYABLE
+                ==============================================
+                */
+
+                const {
+                    error:
+                        updateAPError
+                } = await supabase
+
+                    .from(
+                        "trx_account_payable"
+                    )
+
+                    .update({
+
+                        paid_amount:
+                            paidAmount,
+
+                        outstanding_amount:
+                            outstandingAmount,
+
+                        status:
+                            apStatus
+
+                    })
+
+                    .eq(
+                        "id",
+                        accountPayableId
+                    );
+
+
+                if (
+                    updateAPError
+                ) {
+
+                    throw updateAPError;
+
+                }
+
+            }
+
+
+            /*
+            ==================================================
+            DEBUG
+            ==================================================
+            */
+
+            console.log(
+                "BULK AP PAYMENT VOIDED:",
+                {
+                    batch_id:
+                        voidedBatch?.id,
+
+                    payment_no:
+                        voidedBatch?.payment_no,
+
+                    batch_status:
+                        voidedBatch?.status,
+
+                    allocation_count:
+                        deactivatedAllocations.length,
+
+                    account_payable_count:
+                        apPaymentBatchAPIds.length,
+
+                    gl_journal_id:
+                        voidedBatch?.gl_journal_id,
+
+                    journal_id:
+                        id,
+
+                    journal_status:
+                        "Void",
+
+                    void_reason:
+                        reason
+                }
+            );
+
         }
-    );
+                /*
+        ======================================================
+        AR SOURCE UPDATE
+        ======================================================
+        */
 
-}
+        let updatedAR =
+            null;
 
 
-/*
-======================================================
-AR PAYMENT ROLLBACK
-======================================================
-*/
+        /*
+        ======================================================
+        AR INVOICE
+        JOURNAL VOID
+        -> ACCOUNT RECEIVABLE VOID
 
-if (
-    sourceModule === "AR"
-    &&
-    sourceDocumentType === "AR_PAYMENT"
+        IMPORTANT:
+
+        DO NOT DELETE AR
+        DO NOT DETACH gl_journal_id
+
+        THE JOURNAL MUST REMAIN LINKED
+        FOR AUDIT TRAIL.
+
+        AFTER THIS:
+
+        AR STATUS = VOID
+        GL STATUS = VOID
+        ======================================================
+        */
+
+        if (
+            sourceModule === "AR"
+            &&
+            sourceDocumentType === "AR_INVOICE"
+            &&
+            sourceDocumentId
+        ) {
+
+            const {
+                data:
+                    voidedAR,
+
+                error:
+                    arVoidError
+            } = await supabase
+
+                .from(
+                    "trx_account_receivable"
+                )
+
+                .update({
+
+                    status:
+                        "Void"
+
+                })
+
+                .eq(
+                    "id",
+                    sourceDocumentId
+                )
+
+                /*
+                ==============================================
+                SAFETY
+
+                ONLY UPDATE AR LINKED TO THIS JOURNAL
+                ==============================================
+                */
+
+                .eq(
+                    "gl_journal_id",
+                    id
+                )
+
+                .select(`
+                    id,
+                    invoice_no,
+                    status,
+                    total_amount,
+                    paid_amount,
+                    outstanding_amount,
+                    gl_journal_id
+                `)
+
+                .single();
+
+
+            if (
+                arVoidError
+            ) {
+
+                console.error(
+                    "AR INVOICE STATUS UPDATE AFTER GL VOID ERROR:",
+                    arVoidError
+                );
+
+
+                throw arVoidError;
+
+            }
+
+
+            updatedAR =
+                voidedAR;
+
+
+            console.log(
+                "AR INVOICE VOID FROM GL:",
+                {
+                    account_receivable_id:
+                        voidedAR?.id,
+
+                    invoice_no:
+                        voidedAR?.invoice_no,
+
+                    ar_status:
+                        voidedAR?.status,
+
+                    gl_journal_id:
+                        voidedAR?.gl_journal_id,
+
+                    journal_id:
+                        id,
+
+                    journal_status:
+                        "Void",
+
+                    void_reason:
+                        reason
+                }
+            );
+
+        }
+
+
+        /*
+        ======================================================
+        AR PAYMENT ROLLBACK
+        ======================================================
+        */
+
+        if (
+            sourceModule === "AR"
+            &&
+            sourceDocumentType === "AR_PAYMENT"
             &&
             accountReceivableId
         ) {
@@ -19185,13 +23194,11 @@ if (
             */
 
             const {
-
                 data:
                     arInvoice,
 
                 error:
                     arInvoiceError
-
             } = await supabase
 
                 .from(
@@ -19225,6 +23232,7 @@ if (
                     arInvoiceError
                 );
 
+
                 throw arInvoiceError;
 
             }
@@ -19249,13 +23257,11 @@ if (
             */
 
             const {
-
                 data:
                     paymentRows,
 
                 error:
                     paymentRowsError
-
             } = await supabase
 
                 .from(
@@ -19288,6 +23294,7 @@ if (
                     "GET AR PAYMENT ROWS ERROR:",
                     paymentRowsError
                 );
+
 
                 throw paymentRowsError;
 
@@ -19334,13 +23341,11 @@ if (
             ) {
 
                 const {
-
                     data:
                         journalRows,
 
                     error:
                         journalRowsError
-
                 } = await supabase
 
                     .from(
@@ -19366,6 +23371,7 @@ if (
                         "GET AR PAYMENT JOURNAL STATUS ERROR:",
                         journalRowsError
                     );
+
 
                     throw journalRowsError;
 
@@ -19406,7 +23412,6 @@ if (
                             .toUpperCase()
 
                         ]
-
                     )
 
                 );
@@ -19486,9 +23491,7 @@ if (
                     ||
                     0
                 );
-
-
-            /*
+                            /*
             ==================================================
             PAID AMOUNT
             ONLY ACTIVE PAYMENT
@@ -19595,13 +23598,11 @@ if (
             */
 
             const {
-
                 data:
                     recalculatedAR,
 
                 error:
                     updateARError
-
             } = await supabase
 
                 .from(
@@ -19647,6 +23648,7 @@ if (
                     "AR PAYMENT VOID RECALCULATE ERROR:",
                     updateARError
                 );
+
 
                 throw updateARError;
 
@@ -19722,9 +23724,7 @@ if (
             );
 
         }
-
-
-        /*
+                /*
         ======================================================
         UPDATE LOCAL JOURNAL
         NO DATABASE RELOAD
@@ -19855,15 +23855,29 @@ if (
             sourceDocumentId
         ) {
 
+            /*
+            ==================================================
+            FINAL ACCOUNT RECEIVABLE ID
+            ==================================================
+            */
+
             const finalAccountReceivableId =
                 sourceModule === "AR"
+
                     ? (
                         accountReceivableId
                         ||
                         sourceDocumentId
                     )
+
                     : null;
 
+
+            /*
+            ==================================================
+            REALTIME EVENT
+            ==================================================
+            */
 
             window.dispatchEvent(
 
@@ -19871,6 +23885,12 @@ if (
                     "finova:source-transaction-changed",
                     {
                         detail: {
+
+                            /*
+                            ==========================================
+                            SOURCE
+                            ==========================================
+                            */
 
                             sourceModule:
                                 sourceModule,
@@ -19887,53 +23907,172 @@ if (
                             action:
                                 "JOURNAL_VOIDED",
 
+
+                            /*
+                            ==========================================
+                            ACCOUNT PAYABLE ID
+
+                            BULK AP PAYMENT:
+                            sourceDocumentId = BATCH ID
+
+                            DO NOT SEND BATCH ID
+                            AS ONE ACCOUNT PAYABLE ID.
+                            ==========================================
+                            */
+
                             accountPayableId:
+
                                 sourceModule === "AP"
-                                    ? sourceDocumentId
+                                &&
+                                sourceDocumentType === "AP_PAYMENT"
+                                &&
+                                apPaymentBatch
+
+                                    ? null
+
+                                    :
+                                    sourceModule === "AP"
+
+                                        ? sourceDocumentId
+
+                                        : null,
+
+
+                            /*
+                            ==========================================
+                            BULK AP PAYMENT BATCH
+                            ==========================================
+                            */
+
+                            paymentBatchId:
+
+                                sourceModule === "AP"
+                                &&
+                                sourceDocumentType === "AP_PAYMENT"
+                                &&
+                                apPaymentBatch
+
+                                    ? apPaymentBatch.id
+
                                     : null,
+
+
+                            /*
+                            ==========================================
+                            ALL AP INVOICES AFFECTED
+                            ==========================================
+                            */
+
+                            accountPayableIds:
+
+                                sourceModule === "AP"
+                                &&
+                                sourceDocumentType === "AP_PAYMENT"
+                                &&
+                                apPaymentBatch
+
+                                    ? apPaymentBatchAPIds
+
+                                    : [],
+
+
+                            /*
+                            ==========================================
+                            ACCOUNT RECEIVABLE
+                            ==========================================
+                            */
 
                             accountReceivableId:
                                 finalAccountReceivableId,
 
+
+                            /*
+                            ==========================================
+                            AR PAYMENT
+                            ==========================================
+                            */
+
                             paymentId:
+
                                 sourceDocumentType ===
                                     "AR_PAYMENT"
+
                                     ? (
                                         arPayment?.id
                                         ||
                                         null
                                     )
+
                                     : null,
 
+
+                            /*
+                            ==========================================
+                            AR PAYMENT RESULT
+                            ==========================================
+                            */
+
                             paidAmount:
+
                                 sourceDocumentType ===
                                     "AR_PAYMENT"
+
                                     ? (
                                         updatedAR?.paid_amount
                                         ??
                                         null
                                     )
+
                                     : null,
 
+
                             outstandingAmount:
+
                                 sourceDocumentType ===
                                     "AR_PAYMENT"
+
                                     ? (
                                         updatedAR?.outstanding_amount
                                         ??
                                         null
                                     )
+
                                     : null,
 
+
+                            /*
+                            ==========================================
+                            SOURCE STATUS
+                            ==========================================
+                            */
+
                             sourceStatus:
-                                sourceDocumentType ===
-                                    "AR_PAYMENT"
-                                    ? (
-                                        updatedAR?.status
-                                        ||
-                                        null
-                                    )
-                                    : null
+
+                                sourceModule === "AP"
+                                &&
+                                sourceDocumentType === "AP_PAYMENT"
+                                &&
+                                apPaymentBatch
+
+                                    ? "Void"
+
+                                    :
+                                    sourceDocumentType ===
+                                        "AR_PAYMENT"
+
+                                        ? (
+                                            updatedAR?.status
+                                            ||
+                                            null
+                                        )
+
+                                        :
+                                        sourceDocumentType ===
+                                            "AR_INVOICE"
+
+                                            ? "Void"
+
+                                            : null
 
                         }
                     }
@@ -19960,16 +24099,32 @@ if (
                     source_document_id:
                         sourceDocumentId,
 
+                    payment_batch_id:
+                        apPaymentBatch?.id
+                        ||
+                        null,
+
+                    account_payable_ids:
+                        apPaymentBatch
+                            ? apPaymentBatchAPIds
+                            : [],
+
                     account_receivable_id:
                         finalAccountReceivableId,
-
-                    journal_id:
-                        id,
 
                     payment_id:
                         arPayment?.id
                         ||
                         null,
+
+                    journal_id:
+                        id,
+
+                    previous_status:
+                        currentJournalStatus,
+
+                    current_status:
+                        "Void",
 
                     action:
                         "JOURNAL_VOIDED"
@@ -19977,15 +24132,28 @@ if (
             );
 
         }
-
-
-        /*
+                /*
         ======================================================
         SUCCESS
+        FINAL
         ======================================================
         */
 
         if (
+            sourceModule === "AP"
+            &&
+            sourceDocumentType === "AP_PAYMENT"
+            &&
+            apPaymentBatch
+        ) {
+
+            this.showSuccess(
+                "AP Payment Batch Journal voided successfully. All invoice allocations were deactivated and Account Payable balances were recalculated."
+            );
+
+        }
+
+        else if (
             sourceModule === "AR"
             &&
             sourceDocumentType === "AR_PAYMENT"
@@ -19993,6 +24161,18 @@ if (
 
             this.showSuccess(
                 "AR Payment Journal voided. Account Receivable payment status restored."
+            );
+
+        }
+
+        else if (
+            sourceModule === "AR"
+            &&
+            sourceDocumentType === "AR_INVOICE"
+        ) {
+
+            this.showSuccess(
+                "AR Invoice Journal voided successfully. Account Receivable status changed to Void."
             );
 
         }
@@ -20009,11 +24189,23 @@ if (
 
     catch (error) {
 
+        /*
+        ======================================================
+        ERROR LOG
+        ======================================================
+        */
+
         console.error(
             "Void Journal Error",
             error
         );
 
+
+        /*
+        ======================================================
+        ERROR MESSAGE
+        ======================================================
+        */
 
         this.showError(
             error?.message
