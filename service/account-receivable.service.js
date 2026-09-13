@@ -1847,87 +1847,131 @@ async search(
 
 }
     /*
-    ======================================================
-    GET CUSTOMERS
-    ======================================================
-    */
+======================================================
+GET CUSTOMERS
+MULTI COMPANY SAFE
+======================================================
+*/
 
-    async getCustomers() {
+async getCustomers() {
 
-        try {
+    try {
 
-            const {
+        /*
+        ==================================================
+        GET ACTIVE CUSTOMER
 
-                data,
+        IMPORTANT:
+        - COMPANY FILTER IS HANDLED BY SUPABASE RLS
+        - DO NOT HARDCODE COMPANY_ID
+        - DO NOT EMBED TOP HERE
+        ==================================================
+        */
 
-                error
+        const {
+            data,
+            error
+        } = await supabase
 
-            } = await supabase
+            .from(
+                TABLE.BUSINESS_PARTNER
+            )
 
-                .from(
-                    TABLE.BUSINESS_PARTNER
-                )
+            .select(`
+                id,
+                bp_code,
+                bp_name,
+                bp_type,
+                top_id,
+                is_active,
+                company_id
+            `)
 
-                .select(`
-                    id,
-                    bp_code,
-                    bp_name,
-                    bp_type,
-                    top_id,
-                    is_active,
-                    mst_term_of_payment (
-                        id,
-                        top_code,
-                        top_name,
-                        days,
-                        status
-                    )
-                `)
+            .eq(
+                "bp_type",
+                "Customer"
+            )
 
-                .eq(
-                    "bp_type",
-                    "Customer"
-                )
+            .eq(
+                "is_active",
+                true
+            )
 
-                .eq(
-                    "is_active",
-                    true
-                )
-
-                .order(
-                    "bp_name",
-                    {
-                        ascending:
-                            true
-                    }
-                );
-
-
-            if (error) {
-
-                throw error;
-
-            }
-
-
-            return data || [];
-
-        }
-
-        catch (error) {
-
-            console.error(
-                "AccountReceivableService.getCustomers:",
-                error
+            .order(
+                "bp_name",
+                {
+                    ascending: true
+                }
             );
 
+
+        /*
+        ==================================================
+        DATABASE ERROR
+        ==================================================
+        */
+
+        if (error) {
+
+            console.error(
+                "AR GET CUSTOMERS ERROR:",
+                {
+                    message: error.message,
+                    details: error.details,
+                    hint: error.hint,
+                    code: error.code
+                }
+            );
 
             throw error;
 
         }
 
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
+
+        console.log(
+            "AR CUSTOMERS LOADED:",
+            {
+                total:
+                    Array.isArray(data)
+                        ? data.length
+                        : 0,
+
+                customers:
+                    data || []
+            }
+        );
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
+
+        return Array.isArray(data)
+            ? data
+            : [];
+
     }
 
+    catch (error) {
+
+        console.error(
+            "AccountReceivableService.getCustomers:",
+            error
+        );
+
+        throw error;
+
+    }
+
+}
 
     /*
 ======================================================

@@ -255,6 +255,12 @@ AR COMPLETE PROCESS STATE
 
 this.arCompleteProcessing = false;
 
+this.accountReceivableCompleteModal =
+    null;
+
+this.pendingCompleteARId =
+    null;
+
         /*
         ==================================================
         TABLE
@@ -426,6 +432,7 @@ async init() {
         await this.loadDetailModalHTML();
 
         await this.loadPaymentModalHTML();
+      
 
 
         /*
@@ -660,6 +667,9 @@ async init() {
     }
 
 }
+
+
+
 
 /*
 ======================================================
@@ -3030,13 +3040,86 @@ async generateARPaymentJournal(
 
 
         /*
-        ==================================================
-        PIUTANG USAHA
-        ==================================================
-        */
+==================================================
+PIUTANG USAHA
+MULTI COMPANY SAFE
+==================================================
+*/
 
-        const receivableAccountId =
-            155;
+const {
+    data: receivableAccount,
+    error: receivableAccountError
+} =
+    await supabase
+        .from(
+            "mst_chart_of_accounts"
+        )
+        .select(`
+            id,
+            account_code,
+            account_name,
+            company_id
+        `)
+        .eq(
+            "account_code",
+            "1-11041"
+        )
+        .eq(
+            "status",
+            true
+        )
+        .eq(
+            "allow_transaction",
+            true
+        )
+        .maybeSingle();
+
+
+if (
+    receivableAccountError
+) {
+
+    console.error(
+        "AR PAYMENT RECEIVABLE ACCOUNT ERROR:",
+        receivableAccountError
+    );
+
+    throw receivableAccountError;
+}
+
+
+if (
+    !receivableAccount?.id
+) {
+
+    throw new Error(
+        "Account Receivable account 1-11041 - PIUTANG USAHA is not configured for this company."
+    );
+}
+
+
+const receivableAccountId =
+    Number(
+        receivableAccount.id
+    );
+
+
+console.log(
+    "AR PAYMENT RECEIVABLE ACCOUNT:",
+    {
+        id:
+            receivableAccount.id,
+
+        account_code:
+            receivableAccount.account_code,
+
+        account_name:
+            receivableAccount.account_name,
+
+        company_id:
+            receivableAccount.company_id
+    }
+);
 
 
         /*
@@ -15089,12 +15172,7 @@ async renderAccountingPreview() {
 
                         account_name:
                             coa?.account_name
-                            ||
-                            (
-                                id === 155
-                                    ? "PIUTANG USAHA"
-                                    : "-"
-                            ),
+                            || "-",
 
                         debit:
                             0,
@@ -19460,10 +19538,10 @@ this.arDetailWithholdingTaxRate?.addEventListener(
             }
 
 
-            /*
+          /*
 ==============================================
 COMPLETE
-PREVENT DOUBLE SUBMIT
+SAME FLOW AS ACCOUNT PAYABLE
 ==============================================
 */
 
@@ -19471,15 +19549,32 @@ if (
     action === "complete"
 ) {
 
-    /*
-    ==========================================
-    BLOCK DOUBLE CLICK
-    ==========================================
-    */
+    if (
+        !id
+    ) {
+
+        this.showError(
+            "Account Receivable ID is required."
+        );
+
+        return;
+
+    }
+
+
+    const modalElement =
+        document.getElementById(
+            "accountReceivableCompleteModal"
+        );
+
 
     if (
-        this.arCompleteProcessing
+        !modalElement
     ) {
+
+        this.showError(
+            "Account Receivable Complete Modal not found."
+        );
 
         return;
 
@@ -19487,125 +19582,231 @@ if (
 
 
     /*
-    ==========================================
-    BUTTON
-    ==========================================
-    */
+==========================================
+STORE PENDING ID
+==========================================
+*/
 
-    const completeButton =
-        event.target.closest(
-            '[data-action="complete"]'
-        );
+this.pendingCompleteARId =
+    id;
 
 
-    const originalHTML =
-        completeButton
-            ?.innerHTML
-        || "";
+/*
+==========================================
+IMPORTANT
+MOVE MODAL DIRECTLY UNDER BODY
 
+PREVENT:
+- BACKDROP ABOVE MODAL
+- MODAL HIDDEN BY PARENT
+- STACKING CONTEXT PROBLEM
+==========================================
+*/
 
-    try {
+if (
+    modalElement.parentElement !==
+    document.body
+) {
 
-        /*
-        ======================================
-        PROCESSING
-        ======================================
-        */
-
-        this.arCompleteProcessing =
-            true;
-
-
-        /*
-        ======================================
-        DISABLE BUTTON
-        ======================================
-        */
-
-        if (
-            completeButton
-        ) {
-
-            completeButton.disabled =
-                true;
-
-
-            completeButton.innerHTML = `
-
-                <span
-                    class="spinner-border spinner-border-sm"
-                    role="status"
-                    aria-hidden="true">
-                </span>
-
-            `;
-
-        }
-
-
-        /*
-        ======================================
-        COMPLETE
-
-        IMPORTANT:
-        completeInvoice() WILL:
-        - LOAD FRESH DATABASE DATA
-        - VALIDATE ACCOUNTING
-        - GENERATE GL
-        - LINK GL
-        - COMPLETE AR
-        - VERIFY RESULT
-        ======================================
-        */
-
-        await this.completeInvoice(
-            id
-        );
-
-    }
-
-    finally {
-
-        /*
-        ======================================
-        RELEASE PROCESS LOCK
-        ======================================
-        */
-
-        this.arCompleteProcessing =
-            false;
-
-
-        /*
-        ======================================
-        RESTORE BUTTON
-
-        THE TABLE MAY ALREADY HAVE BEEN
-        RE-RENDERED BY loadData().
-        ======================================
-        */
-
-        if (
-            completeButton
-            &&
-            completeButton.isConnected
-        ) {
-
-            completeButton.disabled =
-                false;
-
-
-            completeButton.innerHTML =
-                originalHTML;
-
-        }
-
-    }
-
-
-    return;
+    document.body.appendChild(
+        modalElement
+    );
 
 }
+
+
+/*
+==========================================
+CLEAN OLD BACKDROP
+==========================================
+*/
+
+document
+    .querySelectorAll(
+        ".modal-backdrop"
+    )
+    .forEach(
+        backdrop => {
+
+            backdrop.remove();
+
+        }
+    );
+
+
+document.body.classList.remove(
+    "modal-open"
+);
+
+document.body.style.removeProperty(
+    "padding-right"
+);
+
+
+/*
+==========================================
+CREATE BOOTSTRAP MODAL
+==========================================
+*/
+
+this.accountReceivableCompleteModal =
+    bootstrap.Modal
+        .getOrCreateInstance(
+            modalElement,
+            {
+                backdrop:
+                    "static",
+
+                keyboard:
+                    false,
+
+                focus:
+                    true
+            }
+        );
+
+
+/*
+==========================================
+SHOW
+==========================================
+*/
+
+this.accountReceivableCompleteModal
+    .show();
+
+
+return;
+
+
+    
+
+}
+/*
+==================================================
+CONFIRM COMPLETE AR
+SAME AS ACCOUNT PAYABLE
+==================================================
+*/
+
+const btnConfirmCompleteAR =
+    document.getElementById(
+        "btn-confirm-complete-ar"
+    );
+
+
+if (
+    btnConfirmCompleteAR
+) {
+
+    btnConfirmCompleteAR.addEventListener(
+        "click",
+        async () => {
+
+            const id =
+                this.pendingCompleteARId;
+
+
+            if (
+                !id
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                btnConfirmCompleteAR.disabled
+            ) {
+
+                return;
+
+            }
+
+
+            const originalHTML =
+                btnConfirmCompleteAR.innerHTML;
+
+
+            try {
+
+                btnConfirmCompleteAR.disabled =
+                    true;
+
+
+                btnConfirmCompleteAR.innerHTML = `
+
+                    <span
+                        class="spinner-border spinner-border-sm me-2"
+                        aria-hidden="true">
+                    </span>
+
+                    Completing...
+
+                `;
+
+
+                await this.completeInvoice(
+                    id
+                );
+
+
+                if (
+                    this.accountReceivableCompleteModal
+                ) {
+
+                    this.accountReceivableCompleteModal
+                        .hide();
+
+                }
+
+
+                this.pendingCompleteARId =
+                    null;
+
+
+                this.showSuccess(
+                    "Account Receivable completed successfully."
+                );
+
+            }
+
+            catch (
+                error
+            ) {
+
+                console.error(
+                    "AccountReceivable.confirmComplete:",
+                    error
+                );
+
+
+                this.showError(
+                    error?.message
+                    ||
+                    "Failed to complete Account Receivable."
+                );
+
+            }
+
+            finally {
+
+                btnConfirmCompleteAR.disabled =
+                    false;
+
+
+                btnConfirmCompleteAR.innerHTML =
+                    originalHTML;
+
+            }
+
+        }
+    );
+
+}
+
+
 
 
             /*
@@ -23685,15 +23886,77 @@ buildARJournalLines(
 
 
     /*
-    ======================================================
-    PIUTANG USAHA ACCOUNT
+======================================================
+PIUTANG USAHA ACCOUNT
+MULTI COMPANY SAFE
 
-    SAME ACCOUNT AS CURRENT AR JOURNAL
-    ======================================================
-    */
+IMPORTANT:
+currentCOA sudah diload dari mst_chart_of_accounts
+dan otomatis difilter tenant oleh RLS.
+======================================================
+*/
 
-    const receivableAccountId =
-        155;
+const receivableAccount =
+    Array.isArray(
+        this.currentCOA
+    )
+        ? this.currentCOA.find(
+            account =>
+                String(
+                    account.account_code
+                    || ""
+                ).trim()
+                ===
+                "1-11041"
+        )
+        : null;
+
+
+const receivableAccountId =
+    Number(
+        receivableAccount?.id
+        || 0
+    );
+
+
+if (
+    !receivableAccountId
+) {
+
+    if (
+        strictValidation
+    ) {
+
+        throw new Error(
+            "Account Receivable account 1-11041 - PIUTANG USAHA is not configured for this company."
+        );
+
+    }
+
+
+    console.warn(
+        "AR Accounting Preview: PIUTANG USAHA account 1-11041 is not configured for this company."
+    );
+
+
+    return [];
+
+}
+
+
+console.log(
+    "AR RECEIVABLE ACCOUNT:",
+    {
+        id:
+            receivableAccount.id,
+
+        account_code:
+            receivableAccount.account_code,
+
+        account_name:
+            receivableAccount.account_name
+    }
+);
 
 
     /*
@@ -24681,6 +24944,368 @@ async generateARJournal(
         throw error;
 
     }
+
+}
+
+/*
+======================================================
+SHOW AR COMPLETE CONFIRMATION
+BOOTSTRAP MODAL
+SAME PATTERN AS ACCOUNT PAYABLE
+======================================================
+*/
+
+showARCompleteConfirmation(
+    invoice
+) {
+
+    return new Promise(
+        resolve => {
+
+            /*
+            ==============================================
+            REMOVE OLD MODAL
+            ==============================================
+            */
+
+            const oldModal =
+                document.getElementById(
+                    "ar-complete-modal"
+                );
+
+
+            if (
+                oldModal
+            ) {
+
+                const oldInstance =
+                    bootstrap.Modal
+                        .getInstance(
+                            oldModal
+                        );
+
+
+                oldInstance?.dispose();
+
+                oldModal.remove();
+
+            }
+
+
+            /*
+            ==============================================
+            DATA
+            ==============================================
+            */
+
+            const invoiceNo =
+                invoice?.invoice_no
+                || "-";
+
+
+            const customerName =
+                invoice
+                    ?.mst_business_partner
+                    ?.bp_name
+                ||
+                "-";
+
+
+            const totalAmount =
+                Number(
+                    invoice?.total_amount
+                    || 0
+                );
+
+
+            /*
+            ==============================================
+            MODAL HTML
+            ==============================================
+            */
+
+            const modalHTML = `
+
+                <div
+                    class="modal fade"
+                    id="ar-complete-modal"
+                    tabindex="-1"
+                    data-bs-backdrop="static"
+                    data-bs-keyboard="false"
+                    aria-hidden="true">
+
+                    <div
+                        class="modal-dialog modal-dialog-centered">
+
+                        <div
+                            class="modal-content">
+
+
+                            <div
+                                class="modal-header">
+
+                                <h5
+                                    class="modal-title fw-semibold">
+
+                                    <i
+                                        class="fa-solid fa-circle-check text-success me-2">
+                                    </i>
+
+                                    Complete Account Receivable
+
+                                </h5>
+
+
+                                <button
+                                    type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="modal">
+                                </button>
+
+                            </div>
+
+
+                            <div
+                                class="modal-body">
+
+                                <p class="mb-3">
+
+                                    Are you sure you want to complete
+                                    this Account Receivable?
+
+                                </p>
+
+
+                                <div
+                                    class="border rounded p-3 bg-light">
+
+                                    <div class="row mb-2">
+
+                                        <div
+                                            class="col-5 text-muted">
+
+                                            Invoice No.
+
+                                        </div>
+
+                                        <div
+                                            class="col-7 fw-semibold">
+
+                                            ${invoiceNo}
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="row mb-2">
+
+                                        <div
+                                            class="col-5 text-muted">
+
+                                            Customer
+
+                                        </div>
+
+                                        <div
+                                            class="col-7 fw-semibold">
+
+                                            ${customerName}
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="row">
+
+                                        <div
+                                            class="col-5 text-muted">
+
+                                            Total Amount
+
+                                        </div>
+
+                                        <div
+                                            class="col-7 fw-semibold">
+
+                                            ${this.formatCurrency(
+                                                totalAmount
+                                            )}
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div
+                                    class="alert alert-warning mt-3 mb-0 small">
+
+                                    <i
+                                        class="fa-solid fa-triangle-exclamation me-1">
+                                    </i>
+
+                                    Completing this transaction will
+                                    generate the GL Journal.
+
+                                </div>
+
+                            </div>
+
+
+                            <div
+                                class="modal-footer">
+
+                                <button
+                                    type="button"
+                                    class="btn btn-light"
+                                    data-bs-dismiss="modal">
+
+                                    Cancel
+
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    class="btn btn-success"
+                                    id="btn-confirm-ar-complete">
+
+                                    <i
+                                        class="fa-solid fa-check me-1">
+                                    </i>
+
+                                    Complete
+
+                                </button>
+
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            `;
+
+
+            /*
+            ==============================================
+            APPEND
+            ==============================================
+            */
+
+            document.body
+                .insertAdjacentHTML(
+                    "beforeend",
+                    modalHTML
+                );
+
+
+            const modalElement =
+                document.getElementById(
+                    "ar-complete-modal"
+                );
+
+
+            const confirmButton =
+                document.getElementById(
+                    "btn-confirm-ar-complete"
+                );
+
+
+            const modal =
+                bootstrap.Modal
+                    .getOrCreateInstance(
+                        modalElement
+                    );
+
+
+            let resolved =
+                false;
+
+
+            /*
+            ==============================================
+            CONFIRM
+            ==============================================
+            */
+
+            confirmButton
+                ?.addEventListener(
+                    "click",
+                    () => {
+
+                        resolved =
+                            true;
+
+
+                        modal.hide();
+
+
+                        resolve(
+                            true
+                        );
+
+                    }
+                );
+
+
+            /*
+            ==============================================
+            CANCEL / CLOSE
+            ==============================================
+            */
+
+            modalElement
+                ?.addEventListener(
+                    "hidden.bs.modal",
+                    () => {
+
+                        if (
+                            !resolved
+                        ) {
+
+                            resolve(
+                                false
+                            );
+
+                        }
+
+
+                        const instance =
+                            bootstrap.Modal
+                                .getInstance(
+                                    modalElement
+                                );
+
+
+                        instance?.dispose();
+
+                        modalElement.remove();
+
+                    },
+                    {
+                        once:
+                            true
+                    }
+                );
+
+
+            /*
+            ==============================================
+            SHOW
+            ==============================================
+            */
+
+            modal.show();
+
+        }
+    );
 
 }
 /*

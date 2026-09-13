@@ -1661,10 +1661,10 @@ async loadHTML(
     */
 
     const url =
-        new URL(
-            route.html,
-            window.location.origin + "/"
-        );
+    new URL(
+        route.html,
+        document.baseURI
+    );
 
 
     /*
@@ -1763,10 +1763,11 @@ async loadModule(route) {
         */
 
         const url =
-            new URL(
-                route.js,
-                window.location.origin + "/"
-            );
+    new URL(
+        route.js,
+        document.baseURI
+    );
+    
 
 
         /*

@@ -2186,32 +2186,37 @@
 
 
 
-<!-- ==========================================================
-     ACCOUNT RECEIVABLE COMPLETE CONFIRMATION MODAL
-=========================================================== -->
+<!--
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+ACCOUNT RECEIVABLE
+COMPLETE CONFIRMATION MODAL
+SAME DESIGN AS ACCOUNT PAYABLE
+==========================================================
+-->
 
 <div
     class="modal fade"
     id="accountReceivableCompleteModal"
     tabindex="-1"
-    aria-hidden="true">
-
+    aria-hidden="true"
+    data-bs-backdrop="static"
+    data-bs-keyboard="false">
 
     <div
         class="modal-dialog modal-dialog-centered">
 
-
         <div class="modal-content">
 
 
-            <!-- ==================================================
+            <!-- ==========================================
                  HEADER
-            =================================================== -->
+            =========================================== -->
 
             <div class="modal-header">
 
-
-                <h5 class="modal-title">
+                <h5
+                    class="modal-title fw-semibold">
 
                     Complete Account Receivable
 
@@ -2225,52 +2230,66 @@
                     aria-label="Close">
                 </button>
 
-
             </div>
 
 
-            <!-- ==================================================
+            <!-- ==========================================
                  BODY
-            =================================================== -->
+            =========================================== -->
 
-            <div class="modal-body">
-
-
-                <div class="text-center">
+            <div
+                class="modal-body text-center py-3">
 
 
-                    <i
-                        class="fa-solid
-                               fa-circle-check
-                               text-success"
-                        style="font-size: 48px;">
-                    </i>
+                <!-- SUCCESS ICON -->
+
+                <div
+                    class="
+                        d-flex
+                        justify-content-center
+                        align-items-center
+                        mx-auto
+                        mb-3
+                        rounded-circle
+                        bg-success
+                        text-white
+                    "
+                    style="
+                        width: 48px;
+                        height: 48px;
+                        font-size: 24px;
+                    ">
+
+                    <i class="fa-solid fa-check"></i>
+
+                </div>
 
 
-                    <div class="mt-3">
+                <!-- TITLE -->
+
+                <div
+                    class="
+                        fw-semibold
+                        fs-6
+                        mb-1
+                    ">
+
+                    Complete Account Receivable?
+
+                </div>
 
 
-                        <h5>
+                <!-- DESCRIPTION -->
 
-                            Complete Account Receivable?
+                <div
+                    class="text-muted">
 
-                        </h5>
+                    Account Receivable ini akan dibuatkan
+                    GL Journal sebagai
 
-
-                        <p class="text-muted mb-0">
-
-                            Account Receivable ini akan
-                            dibuatkan GL Journal sebagai
-
-                            <strong>
-                                Draft
-                            </strong>.
-
-                        </p>
-
-
-                    </div>
-
+                    <strong>
+                        Draft
+                    </strong>.
 
                 </div>
 
@@ -2278,9 +2297,9 @@
             </div>
 
 
-            <!-- ==================================================
+            <!-- ==========================================
                  FOOTER
-            =================================================== -->
+            =========================================== -->
 
             <div class="modal-footer">
 
@@ -2301,9 +2320,7 @@
                     id="btn-confirm-complete-ar">
 
                     <i
-                        class="fa-solid
-                               fa-check
-                               me-1">
+                        class="fa-solid fa-check me-1">
                     </i>
 
                     Complete

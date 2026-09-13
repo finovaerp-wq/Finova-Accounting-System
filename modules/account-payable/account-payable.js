@@ -4171,23 +4171,87 @@ async buildAPJournalLines(
 
 
     /*
-    ==================================================
-    ACCOUNT PAYABLE
-    HUTANG USAHA
-    ==================================================
-    */
+==================================================
+ACCOUNT PAYABLE
+HUTANG USAHA
+MULTI COMPANY SAFE
 
-    const payableAccountId =
-        39;
+RLS akan otomatis memastikan hanya COA
+milik company user yang sedang login
+yang dapat dibaca.
+==================================================
+*/
+
+const {
+    data: payableAccount,
+    error: payableAccountError
+} =
+    await supabase
+        .from(
+            "mst_chart_of_accounts"
+        )
+        .select(`
+            id,
+            account_code,
+            account_name,
+            company_id
+        `)
+        .eq(
+            "account_code",
+            "2-11011"
+        )
+        .eq(
+            "status",
+            true
+        )
+        .eq(
+            "allow_transaction",
+            true
+        )
+        .maybeSingle();
 
 
-    if (!payableAccountId) {
+if (payableAccountError) {
 
-        throw new Error(
-            "Account Payable account is not configured."
-        );
+    console.error(
+        "AP JOURNAL PAYABLE ACCOUNT ERROR:",
+        payableAccountError
+    );
 
+    throw payableAccountError;
+}
+
+
+if (!payableAccount?.id) {
+
+    throw new Error(
+        "Account Payable account 2-11011 - HUTANG USAHA is not configured for this company."
+    );
+}
+
+
+const payableAccountId =
+    Number(
+        payableAccount.id
+    );
+
+
+console.log(
+    "AP JOURNAL PAYABLE ACCOUNT:",
+    {
+        id:
+            payableAccount.id,
+
+        account_code:
+            payableAccount.account_code,
+
+        account_name:
+            payableAccount.account_name,
+
+        company_id:
+            payableAccount.company_id
     }
+);
 
 
     /*
@@ -5451,22 +5515,73 @@ async generateAPPaymentJournal(
         /*
         ==================================================
         HUTANG USAHA
+        MULTI COMPANY SAFE
+
+        IMPORTANT:
+        - DO NOT USE HARDCODED COA ID
+        - RESOLVE BY ACCOUNT CODE
+        - RLS LIMITS RESULT TO CURRENT COMPANY
         ==================================================
         */
 
-        const payableAccountId =
-            39;
+        const {
+            data: payableAccount,
+            error: payableAccountError
+        } =
+            await supabase
+                .from(
+                    "mst_chart_of_accounts"
+                )
+                .select(`
+                    id,
+                    account_code,
+                    account_name,
+                    company_id
+                `)
+                .eq(
+                    "account_code",
+                    "2-11011"
+                )
+                .eq(
+                    "status",
+                    true
+                )
+                .eq(
+                    "allow_transaction",
+                    true
+                )
+                .maybeSingle();
 
 
         if (
-            !payableAccountId
+            payableAccountError
+        ) {
+
+            console.error(
+                "AP PAYMENT PAYABLE ACCOUNT ERROR:",
+                payableAccountError
+            );
+
+            throw payableAccountError;
+
+        }
+
+
+        if (
+            !payableAccount?.id
         ) {
 
             throw new Error(
-                "Account Payable account is not configured."
+                "Account Payable account 2-11011 - HUTANG USAHA is not configured for this company."
             );
 
         }
+
+
+        const payableAccountId =
+            Number(
+                payableAccount.id
+            );
 
 
         /*
@@ -6192,15 +6307,85 @@ async generateBulkAPPaymentJournal(
 
 
         /*
-        ==================================================
-        HUTANG USAHA ACCOUNT
+==================================================
+HUTANG USAHA ACCOUNT
+MULTI COMPANY SAFE
 
-        SAME ACCOUNT AS LEGACY AP PAYMENT
-        ==================================================
-        */
+RLS memastikan hanya COA tenant aktif
+yang dapat dibaca.
+==================================================
+*/
 
-        const payableAccountId =
-            39;
+const {
+    data: payableAccount,
+    error: payableAccountError
+} =
+    await supabase
+        .from(
+            "mst_chart_of_accounts"
+        )
+        .select(`
+            id,
+            account_code,
+            account_name,
+            company_id
+        `)
+        .eq(
+            "account_code",
+            "2-11011"
+        )
+        .eq(
+            "status",
+            true
+        )
+        .eq(
+            "allow_transaction",
+            true
+        )
+        .maybeSingle();
+
+
+if (payableAccountError) {
+
+    console.error(
+        "BULK AP PAYMENT PAYABLE ACCOUNT ERROR:",
+        payableAccountError
+    );
+
+    throw payableAccountError;
+}
+
+
+if (!payableAccount?.id) {
+
+    throw new Error(
+        "Account Payable account 2-11011 - HUTANG USAHA is not configured for this company."
+    );
+}
+
+
+const payableAccountId =
+    Number(
+        payableAccount.id
+    );
+
+
+console.log(
+    "BULK AP PAYMENT PAYABLE ACCOUNT:",
+    {
+        id:
+            payableAccount.id,
+
+        account_code:
+            payableAccount.account_code,
+
+        account_name:
+            payableAccount.account_name,
+
+        company_id:
+            payableAccount.company_id
+    }
+);
 
 
         /*
@@ -18296,12 +18481,7 @@ async renderAccountingPreview() {
 
                         account_name:
                             coa?.account_name
-                            ||
-                            (
-                                id === 39
-                                    ? "HUTANG USAHA"
-                                    : "-"
-                            ),
+                            || "-",
 
                         debit:
                             0,
