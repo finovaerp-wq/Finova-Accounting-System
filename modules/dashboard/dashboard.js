@@ -11,6 +11,9 @@ import {
     TABLE
 } from "../../assets/js/core/supabase.js";
 
+import {
+    TenantContext
+} from "../../assets/js/core/tenant-context.js";
 
 export class Dashboard {
 
@@ -104,6 +107,8 @@ constructor() {
 
     this.cacheDom();
 
+    await this.loadCompanyName();
+
 
     /*
     ======================================================
@@ -158,6 +163,7 @@ constructor() {
         this.el = {};
 
         const ids = [
+            "dashboard-company-name",
             "dashboard-period-label",
             "dashboard-header-date",
             "dashboard-total-asset",
@@ -218,7 +224,61 @@ constructor() {
 
         this.renderDashboard();
     }
+/*
+==========================================================
+LOAD COMPANY NAME
+==========================================================
+*/
 
+async loadCompanyName() {
+
+    try {
+
+        const companyName =
+            await TenantContext.getCompanyName();
+
+        const element =
+            this.el?.["dashboard-company-name"];
+
+        if (
+            !element
+        ) {
+
+            return;
+
+        }
+
+        element.textContent =
+            companyName
+            ||
+            "FINANCIAL OVERVIEW";
+
+    }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "Dashboard.loadCompanyName:",
+            error
+        );
+
+        const element =
+            this.el?.["dashboard-company-name"];
+
+        if (
+            element
+        ) {
+
+            element.textContent =
+                "FINANCIAL OVERVIEW";
+
+        }
+
+    }
+
+}
     /*
 ==========================================================
 LOAD DASHBOARD DATA
