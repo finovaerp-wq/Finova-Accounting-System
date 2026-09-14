@@ -89,7 +89,7 @@ export class CompanyReport {
                         "",
 
                     displayName:
-                        "FINOVA",
+                         "",
 
                     address:
                         "",
@@ -202,11 +202,11 @@ export class CompanyReport {
                 legalName,
 
                 displayName:
-                    legalName
-                    ||
-                    name
-                    ||
-                    "FINOVA",
+    legalName
+    ||
+    name
+    ||
+    "",
 
                 address,
 
@@ -245,7 +245,7 @@ export class CompanyReport {
                     "",
 
                 displayName:
-                    "FINOVA",
+    "",
 
                 address:
                     "",
@@ -274,13 +274,13 @@ export class CompanyReport {
 
     static getCompanyName() {
 
-        return (
-            this.getIdentity().displayName
-            ||
-            "FINOVA"
-        );
+    return (
+        this.getIdentity().displayName
+        ||
+        ""
+    );
 
-    }
+}
 
 
     /*
@@ -401,15 +401,25 @@ export class CompanyReport {
                 </div>
 
 
-                <div class="company">
+                ${
+    company.displayName
 
-                    ${
-                        this.escapeHTML(
-                            company.displayName
-                        )
-                    }
+        ? `
 
-                </div>
+            <div class="company">
+
+                ${
+                    this.escapeHTML(
+                        company.displayName
+                    )
+                }
+
+            </div>
+
+        `
+
+        : ""
+}
 
 
                 ${
@@ -550,16 +560,22 @@ export class CompanyReport {
 
 
         /*
-        ======================================================
-        COMPANY
-        ======================================================
-        */
+======================================================
+COMPANY
+======================================================
+*/
 
-        rows.push(
-            [
-                company.displayName
-            ]
-        );
+if (
+    company.displayName
+) {
+
+    rows.push(
+        [
+            company.displayName
+        ]
+    );
+
+}
 
 
         /*

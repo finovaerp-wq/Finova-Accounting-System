@@ -5916,19 +5916,25 @@ tfoot td {
          COMPANY IDENTITY
     =========================================== -->
 
-    <div class="company">
+    ${
+    company.displayName
 
-        ${
-            this.escapeHTML(
-                company.legalName
-                ||
-                company.name
-                ||
-                "-"
-            )
-        }
+        ? `
 
-    </div>
+            <div class="company">
+
+                ${
+                    this.escapeHTML(
+                        company.displayName
+                    )
+                }
+
+            </div>
+
+        `
+
+        : ""
+}
 
 
     <!-- ==========================================

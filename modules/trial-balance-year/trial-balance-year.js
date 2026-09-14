@@ -7438,17 +7438,25 @@ tfoot td {
         FINOVA ACCOUNTING SYSTEM
     </div>
 
-    <div class="company">
-        ${
-            this.escapeHTML(
-                company.legalName
-                ||
-                company.name
-                ||
-                "-"
-            )
-        }
-    </div>
+    ${
+    company.displayName
+
+        ? `
+
+            <div class="company">
+
+                ${
+                    this.escapeHTML(
+                        company.displayName
+                    )
+                }
+
+            </div>
+
+        `
+
+        : ""
+}
 
     ${
         companyContact
