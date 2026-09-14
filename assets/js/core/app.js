@@ -29,7 +29,9 @@ import {
 import {
     AuthService
 } from "../../../service/auth.service.js";
-
+import {
+    CustomerConfig
+} from "./customer-config.js";
 
 /*
 ==========================================================
@@ -78,93 +80,120 @@ class FinovaApp {
 
 
     /*
-    ======================================================
-    INITIALIZE
-    ======================================================
-    */
+======================================================
+INITIALIZE
+======================================================
+*/
 
-    async initialize() {
+async initialize() {
 
-        try {
+    try {
 
-            /*
-            ==========================================
-            AUTHENTICATION
-            ==========================================
-            */
+        /*
+        ==========================================
+        AUTHENTICATION
+        ==========================================
+        */
 
-            const authenticated =
-                await this.checkAuthentication();
-
-
-            if (
-                !authenticated
-            ) {
-
-                return;
-
-            }
+        const authenticated =
+            await this.checkAuthentication();
 
 
-            /*
-            ==========================================
-            LAYOUT
-            ==========================================
-            */
-
-            this.renderLayout();
-
-
-            /*
-            ==========================================
-            COMPONENTS
-            ==========================================
-            */
-
-            this.initializeComponents();
-
-
-            /*
-            ==========================================
-            ROUTER
-            ==========================================
-            */
-
-            this.initializeRouter();
-
-
-            /*
-            ==========================================
-            APPLICATION
-            ==========================================
-            */
-
-            this.initializeApplication();
-
-
-            /*
-            ==========================================
-            READY
-            ==========================================
-            */
-
-            console.log(
-                "FINOVA Accounting System Ready."
-            );
-
-        }
-
-        catch (
-            error
+        if (
+            !authenticated
         ) {
 
-            this.handleError(
-                error
-            );
+            return;
 
         }
 
+
+        /*
+        ==========================================
+        CUSTOMER CONFIGURATION
+        ==========================================
+        */
+
+        await CustomerConfig.initialize();
+
+
+        /*
+        ==========================================
+        CUSTOMER CONFIG DEBUG
+        ==========================================
+        */
+
+        console.log(
+            "FINOVA COMPANY :",
+            CustomerConfig.getCompanyCode(),
+            CustomerConfig.getCompanyName()
+        );
+
+        console.log(
+            "FINOVA BASE CURRENCY :",
+            CustomerConfig.getBaseCurrency()
+        );
+
+
+        /*
+        ==========================================
+        LAYOUT
+        ==========================================
+        */
+
+        this.renderLayout();
+
+
+        /*
+        ==========================================
+        COMPONENTS
+        ==========================================
+        */
+
+        this.initializeComponents();
+
+
+        /*
+        ==========================================
+        ROUTER
+        ==========================================
+        */
+
+        this.initializeRouter();
+
+
+        /*
+        ==========================================
+        APPLICATION
+        ==========================================
+        */
+
+        this.initializeApplication();
+
+
+        /*
+        ==========================================
+        READY
+        ==========================================
+        */
+
+        console.log(
+            "FINOVA Accounting System Ready."
+        );
+
     }
+
+    catch (
+        error
+    ) {
+
+        this.handleError(
+            error
+        );
+
+    }
+
+}
 
 
     /*
@@ -509,39 +538,39 @@ renderLayout() {
 
 
         /*
-        ==========================================
-        SIGNED OUT
-        ==========================================
-        */
+==========================================
+SIGNED OUT
+==========================================
+*/
 
-        if (
-            event ===
-            "SIGNED_OUT"
-        ) {
+if (
+    event ===
+    "SIGNED_OUT"
+) {
 
-            /*
-            ======================================
-            STOP APPLICATION INSTANCE
-            ======================================
-            */
+    /*
+    ======================================
+    STOP APPLICATION INSTANCE
+    ======================================
+    */
 
-            this.destroy();
-
-
-            /*
-            ======================================
-            REDIRECT LOGIN
-            ======================================
-            */
-
-            window.location.replace(
-                "login.html"
-            );
+    this.destroy();
 
 
-            return;
+    /*
+    ======================================
+    REDIRECT LOGIN
+    ======================================
+    */
 
-        }
+    window.location.replace(
+        "login.html"
+    );
+
+
+    return;
+
+}
 
 
         /*
@@ -625,6 +654,14 @@ renderLayout() {
     */
 
     destroy() {
+
+        /*
+    ==========================================
+    RESET CUSTOMER CONFIGURATION
+    ==========================================
+    */
+
+    CustomerConfig.reset();
 
         /*
         ==========================================

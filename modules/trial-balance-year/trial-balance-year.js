@@ -11,6 +11,9 @@ import {
     supabase
 } from "../../assets/js/core/supabase.js";
 
+import {
+    CompanyReport
+} from "../../assets/js/core/company-report.js";
 
 export class TrialBalanceYear {
 
@@ -6179,40 +6182,123 @@ downloadExcel() {
                 }-${shortYear}`
 
                 : "-";
+            /*
+==================================================
+REPORT HEADER
+==================================================
+*/
+
+const reportHeaderRows =
+    CompanyReport.getExcelHeaderRows({
+
+        title:
+            "TRIAL BALANCE YEAR",
+
+        period:
+            `Fiscal Year : ${year}`
+
+    });
+
+
+const currentPeriodRow = [
+
+    `Current Period : ${currentPeriodText}`
+
+];
 
 
         /*
-        ==================================================
-        WORKSHEET
-        ==================================================
-        */
+==================================================
+WORKSHEET ROWS
+==================================================
+*/
 
-        const worksheet =
-            XLSX.utils.aoa_to_sheet([
+const worksheetRows = [
 
-                [
-                    "FINOVA ACCOUNTING SYSTEM"
-                ],
+    /*
+    ==============================================
+    COMPANY REPORT HEADER
+    ==============================================
+    */
 
-                [
-                    "TRIAL BALANCE YEAR"
-                ],
+    ...reportHeaderRows,
 
-                [
-                    `Fiscal Year : ${year}`
-                ],
 
-                [
-                    `Current Period : ${currentPeriodText}`
-                ],
+    /*
+    ==============================================
+    CURRENT PERIOD
+    ==============================================
+    */
 
-                [],
+    currentPeriodRow,
 
-                headers,
 
-                ...rows
+    /*
+    ==============================================
+    BLANK ROW
+    ==============================================
+    */
 
-            ]);
+    [],
+
+
+    /*
+    ==============================================
+    TABLE HEADER
+    ==============================================
+    */
+
+    headers,
+
+
+    /*
+    ==============================================
+    DATA
+    ==============================================
+    */
+
+    ...rows
+
+];
+
+
+/*
+==================================================
+WORKSHEET
+==================================================
+*/
+
+const worksheet =
+    XLSX.utils.aoa_to_sheet(
+        worksheetRows
+    );
+    /*
+==================================================
+DYNAMIC DATA START ROW
+==================================================
+
+Find the actual table header position.
+
+This remains correct even when CompanyReport
+adds/removes optional company contact rows.
+
+0 based index.
+==================================================
+*/
+
+const tableHeaderRowIndex =
+    worksheetRows.indexOf(
+        headers
+    );
+
+
+const dataStartRowIndex =
+
+    tableHeaderRowIndex >= 0
+
+        ? tableHeaderRowIndex + 1
+
+        : 0;
 
 
         /*
@@ -6267,56 +6353,73 @@ downloadExcel() {
 
 
             /*
-            ==================================================
-            DATA START ROW = 7 IN EXCEL
-            0 BASE INDEX = 6
-            ==================================================
-            */
+==================================================
+DYNAMIC DATA START ROW
+==================================================
 
-            for (
-                let row = 6;
-                row <= range.e.r;
-                row++
-            ) {
+Start formatting from the actual first data row.
 
-                for (
-                    let column = 1;
-                    column <= 13;
-                    column++
-                ) {
+The position is calculated from worksheetRows,
+so it remains safe when CompanyReport header
+contains optional company contact information.
 
-                    const address =
-                        XLSX.utils.encode_cell({
+==================================================
+*/
 
-                            r:
-                                row,
+for (
+    let row = dataStartRowIndex;
+    row <= range.e.r;
+    row++
+) {
 
-                            c:
-                                column
+    /*
+    ==============================================
+    NUMERIC COLUMNS
 
-                        });
+    0      = Description
+    1      = Beginning Year
+    2 - 13 = Jan - Dec
+    ==============================================
+    */
+
+    for (
+        let column = 1;
+        column <= 13;
+        column++
+    ) {
+
+        const address =
+            XLSX.utils.encode_cell({
+
+                r:
+                    row,
+
+                c:
+                    column
+
+            });
 
 
-                    const cell =
-                        worksheet[
-                            address
-                        ];
+        const cell =
+            worksheet[
+                address
+            ];
 
 
-                    if (
-                        cell
-                        &&
-                        typeof cell.v === "number"
-                    ) {
+        if (
+            cell
+            &&
+            typeof cell.v === "number"
+        ) {
 
-                        cell.z =
-                            '#,##0;[Red]-#,##0';
+            cell.z =
+                '#,##0;[Red]-#,##0';
 
-                    }
+        }
 
-                }
+    }
 
-            }
+}
 
         }
 
@@ -6546,7 +6649,19 @@ downloadExcel() {
                     }-${shortYear}`
 
                     : "-";
+            /*
+==================================================
+COMPANY REPORT IDENTITY
+==================================================
+*/
 
+const company =
+    CompanyReport.getIdentity();
+
+const companyContact =
+    company.contactLine
+    ||
+    "";
 
             /*
             ==================================================
@@ -6963,6 +7078,31 @@ body {
 }
 
 
+/* ==========================================
+   FINOVA PRODUCT BRAND
+========================================== */
+
+.finova-brand {
+
+    margin-bottom: 8px;
+
+    color: #244494;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    letter-spacing: 0.5px;
+
+    line-height: 1.2;
+
+}
+
+
+/* ==========================================
+   COMPANY IDENTITY
+========================================== */
+
 .company {
 
     margin: 0;
@@ -6973,8 +7113,33 @@ body {
 
     font-weight: 700;
 
+    line-height: 1.2;
+
 }
 
+
+/* ==========================================
+   COMPANY CONTACT
+========================================== */
+
+.company-contact {
+
+    margin-top: 3px;
+
+    color: #6B7280;
+
+    font-size: 10px;
+
+    font-weight: 400;
+
+    line-height: 1.4;
+
+}
+
+
+/* ==========================================
+   REPORT TITLE
+========================================== */
 
 .title {
 
@@ -6986,17 +7151,33 @@ body {
 
     font-weight: 700;
 
+    line-height: 1.2;
+
 }
 
+
+/* ==========================================
+   REPORT PERIOD
+========================================== */
 
 .period {
 
     margin-top: 7px;
 
+    color: #111827;
+
+    font-size: 11px;
+
     font-weight: 600;
+
+    line-height: 1.4;
 
 }
 
+
+/* ==========================================
+   GENERATED DATE
+========================================== */
 
 .generated {
 
@@ -7005,6 +7186,10 @@ body {
     color: #6B7280;
 
     font-size: 10px;
+
+    font-weight: 400;
+
+    line-height: 1.4;
 
 }
 
@@ -7247,25 +7432,41 @@ tfoot td {
 <div class="report">
 
 
-    <!-- ==========================================
-         HEADER
-    =========================================== -->
-
     <div class="report-header">
 
+    <div class="finova-brand">
+        FINOVA ACCOUNTING SYSTEM
+    </div>
 
-        <div class="company">
+    <div class="company">
+        ${
+            this.escapeHTML(
+                company.legalName
+                ||
+                company.name
+                ||
+                "-"
+            )
+        }
+    </div>
 
-            FINOVA ACCOUNTING SYSTEM
+    ${
+        companyContact
+            ? `
+                <div class="company-contact">
+                    ${
+                        this.escapeHTML(
+                            companyContact
+                        )
+                    }
+                </div>
+            `
+            : ""
+    }
 
-        </div>
-
-
-        <div class="title">
-
-            TRIAL BALANCE YEAR
-
-        </div>
+    <div class="title">
+        TRIAL BALANCE YEAR
+    </div>
 
 
         <div class="period">

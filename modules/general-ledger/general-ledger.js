@@ -9,6 +9,10 @@ VERSION : 2.2.0 FINAL
 
 import { supabase } from "../../assets/js/core/supabase.js";
 
+import {
+    CompanyReport
+} from "../../assets/js/core/company-report.js";
+
 export class GeneralLedger {
 
     constructor() {
@@ -3426,6 +3430,8 @@ initializeAccountTomSelect() {
         }
 
     }
+    
+    
 
 
     /*
@@ -3514,6 +3520,37 @@ downloadExcel() {
         const totals =
             this.calculateTotals();
 
+        /*
+==================================================
+REPORT HEADER
+==================================================
+*/
+
+const reportPeriod =
+
+    `Period : ${
+        this.dateFrom?.value
+        ||
+        "-"
+    } to ${
+        this.dateTo?.value
+        ||
+        "-"
+    }`;
+
+
+const reportHeaderRows =
+
+    CompanyReport.getExcelHeaderRows({
+
+        title:
+            "GENERAL LEDGER",
+
+        period:
+            reportPeriod
+
+    });
+
 
         /*
         ==================================================
@@ -3521,74 +3558,82 @@ downloadExcel() {
         ==================================================
         */
 
-        const worksheet =
-            XLSX.utils.aoa_to_sheet([
+       const worksheet =
+    XLSX.utils.aoa_to_sheet([
 
 
-                [
-                    "FINOVA ACCOUNTING SYSTEM"
-                ],
+        /*
+        ==============================================
+        COMPANY REPORT HEADER
+        ==============================================
+        */
+
+        ...reportHeaderRows,
 
 
-                [
-                    "GENERAL LEDGER"
-                ],
+        /*
+        ==============================================
+        BLANK ROW
+        ==============================================
+        */
+
+        [],
 
 
-                [
-                    `Period : ${
-                        this.dateFrom?.value
-                        ||
-                        "-"
-                    } to ${
-                        this.dateTo?.value
-                        ||
-                        "-"
-                    }`
-                ],
+        /*
+        ==============================================
+        TABLE HEADER
+        ==============================================
+        */
+
+        [
+            "No",
+            "Date",
+            "Journal No",
+            "Account Code",
+            "Account Name",
+            "Business Partner",
+            "Description",
+            "Debit",
+            "Credit",
+            "Balance"
+        ],
 
 
-                [],
+        /*
+        ==============================================
+        DATA
+        ==============================================
+        */
+
+        ...rows,
 
 
-                [
-                    "No",
-                    "Date",
-                    "Journal No",
-                    "Account Code",
-                    "Account Name",
-                    "Business Partner",
-                    "Description",
-                    "Debit",
-                    "Credit",
-                    "Balance"
-                ],
+        /*
+        ==============================================
+        TOTAL
+        ==============================================
+        */
 
+        [
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "TOTAL",
 
-                ...rows,
+            totals.debit,
 
+            totals.credit,
 
-                [
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "",
-                    "TOTAL",
+            totals.debit
+            -
+            totals.credit
+        ]
 
-                    totals.debit,
-
-                    totals.credit,
-
-                    totals.debit
-                    -
-                    totals.credit
-                ]
-
-            ]);
-
-
+    ]);
         /*
         ==================================================
         COLUMN WIDTH
@@ -3975,6 +4020,50 @@ downloadExcel() {
             const totals =
                 this.calculateTotals();
 
+           /*
+==================================================
+REPORT HEADER
+==================================================
+*/
+
+const reportPeriod =
+
+    `Period : ${
+        this.dateFrom?.value
+        ||
+        "-"
+    } to ${
+        this.dateTo?.value
+        ||
+        "-"
+    }`;
+
+
+const reportGenerated =
+
+    `Print Date : ${
+        new Date()
+            .toLocaleString(
+                "id-ID"
+            )
+    }`;
+
+
+const reportHeader =
+
+    CompanyReport.renderHTMLHeader({
+
+        title:
+            "GENERAL LEDGER",
+
+        period:
+            reportPeriod,
+
+        generated:
+            reportGenerated
+
+    });
+
 
             /*
             ==================================================
@@ -4067,6 +4156,35 @@ body {
     padding-bottom: 14px;
 
     border-bottom: 2px solid #244494;
+
+}
+    .finova-brand {
+
+    margin-bottom: 8px;
+
+    color: #244494;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    letter-spacing: 0.5px;
+
+}
+
+
+
+
+
+.company-contact {
+
+    margin-top: 3px;
+
+    color: #6B7280;
+
+    font-size: 10px;
+
+    font-weight: 400;
 
 }
 
@@ -4276,63 +4394,7 @@ tfoot td {
 <div class="report">
 
 
-    <div class="report-header">
-
-
-        <div class="company">
-
-            FINOVA ACCOUNTING SYSTEM
-
-        </div>
-
-
-        <div class="title">
-
-            GENERAL LEDGER
-
-        </div>
-
-
-        <div class="period">
-
-            Period :
-
-            ${
-                this.escapeHTML(
-                    this.dateFrom?.value
-                    ||
-                    "-"
-                )
-            }
-
-            to
-
-            ${
-                this.escapeHTML(
-                    this.dateTo?.value
-                    ||
-                    "-"
-                )
-            }
-
-        </div>
-
-
-        <div class="generated">
-
-            Print Date :
-
-            ${
-                new Date()
-                    .toLocaleString(
-                        "id-ID"
-                    )
-            }
-
-        </div>
-
-
-    </div>
+     ${reportHeader}
 
 
     <div class="table-container">

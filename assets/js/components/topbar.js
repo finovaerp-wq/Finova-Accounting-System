@@ -11,6 +11,11 @@ import {
 } from "../../../service/user.service.js";
 
 
+import {
+    CustomerConfig
+} from "../core/customer-config.js";
+
+
 export class FinovaTopbar {
 
 
@@ -25,6 +30,7 @@ export class FinovaTopbar {
         this.render();
 
         this.bindEvents();
+        this.loadCompanyIdentity();
 
         this.loadProfile();
 
@@ -112,9 +118,37 @@ export class FinovaTopbar {
                     </button>
 
 
-                    <!-- USER PROFILE -->
+                    <!-- ==========================================
+     COMPANY IDENTITY
+=========================================== -->
 
-                    <div class="finova-user-profile">
+<div
+    class="finova-company-identity"
+    id="finova-company-identity"
+>
+
+    <div
+        class="finova-company-name"
+        id="topbar-company-name"
+    >
+        Loading Company...
+    </div>
+
+    <div
+        class="finova-company-code"
+        id="topbar-company-code"
+    >
+        -
+    </div>
+
+</div>
+
+
+<!-- ==========================================
+     USER PROFILE
+=========================================== -->
+
+<div class="finova-user-profile">
 
 
                         <!-- AVATAR -->
@@ -478,6 +512,131 @@ export class FinovaTopbar {
 
     }
 
+    /*
+==========================================================
+LOAD COMPANY IDENTITY
+==========================================================
+*/
+
+loadCompanyIdentity() {
+
+    try {
+
+        /*
+        ==================================================
+        CUSTOMER CONFIG READY
+        ==================================================
+        */
+
+        if (
+            !CustomerConfig.isInitialized()
+        ) {
+
+            console.warn(
+                "Topbar: CustomerConfig is not initialized."
+            );
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        COMPANY DATA
+        ==================================================
+        */
+
+        const companyName =
+            CustomerConfig.getCompanyName();
+
+        const companyCode =
+            CustomerConfig.getCompanyCode();
+
+
+        /*
+        ==================================================
+        COMPANY NAME
+        ==================================================
+        */
+
+        const nameElement =
+            document.getElementById(
+                "topbar-company-name"
+            );
+
+
+        if (nameElement) {
+
+            nameElement.textContent =
+                companyName
+                ||
+                "FINOVA";
+
+        }
+
+
+        /*
+        ==================================================
+        COMPANY CODE
+        ==================================================
+        */
+
+        const codeElement =
+            document.getElementById(
+                "topbar-company-code"
+            );
+
+
+        if (codeElement) {
+
+            codeElement.textContent =
+                companyCode
+                ||
+                "-";
+
+        }
+
+
+        /*
+        ==================================================
+        TOOLTIP
+        ==================================================
+        */
+
+        const identityElement =
+            document.getElementById(
+                "finova-company-identity"
+            );
+
+
+        if (identityElement) {
+
+            identityElement.title =
+                companyCode
+                    ? `${companyName} (${companyCode})`
+                    : companyName;
+
+        }
+
+
+        console.log(
+            "FINOVA TOPBAR COMPANY:",
+            companyCode,
+            companyName
+        );
+
+    }
+    catch (error) {
+
+        console.error(
+            "Topbar loadCompanyIdentity:",
+            error
+        );
+
+    }
+
+}
 
     /*
     ==========================================================

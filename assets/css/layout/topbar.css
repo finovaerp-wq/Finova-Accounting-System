@@ -97,6 +97,61 @@ Version : 1.0.0
 }
 
 /* ===========================================
+   COMPANY IDENTITY
+=========================================== */
+
+.finova-company-identity {
+
+    display: flex;
+    flex-direction: column;
+
+    justify-content: center;
+    align-items: flex-end;
+
+    min-width: 0;
+    max-width: 220px;
+
+    padding: 0 var(--space-sm);
+
+}
+
+/* Company Name */
+
+.finova-company-name {
+
+    max-width: 220px;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+
+    color: var(--text-primary);
+
+    font-size: var(--font-size-sm);
+
+    font-weight: var(--font-weight-semibold);
+
+}
+
+/* Company Code */
+
+.finova-company-code {
+
+    margin-top: 2px;
+
+    color: var(--text-secondary);
+
+    font-size: var(--font-size-xs);
+
+    font-weight: var(--font-weight-medium);
+
+    letter-spacing: 0.3px;
+
+}
+
+/* ===========================================
    USER PROFILE
 =========================================== */
 
@@ -164,13 +219,15 @@ Version : 1.0.0
 
 }
 
-/* ===========================================
-   RESPONSIVE
-=========================================== */
-
 @media (max-width: 992px) {
 
     .finova-user-info {
+
+        display: none;
+
+    }
+
+    .finova-company-identity {
 
         display: none;
 
