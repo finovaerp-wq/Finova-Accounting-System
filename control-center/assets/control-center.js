@@ -1,8 +1,15 @@
 /*
 ==========================================================
 FINOVA CONTROL CENTER
-TAHAP 3
-FINAL FIX
+Version : 3.1
+FINAL
+==========================================================
+*/
+
+
+/*
+==========================================================
+IMPORT
 ==========================================================
 */
 
@@ -43,33 +50,56 @@ PAGE CONFIGURATION
 const pages = {
 
     overview: [
+
         "Overview",
+
         "Ringkasan seluruh customer FINOVA."
+
     ],
+
 
     companies: [
+
         "Companies",
+
         "Kelola perusahaan/customer FINOVA."
+
     ],
+
 
     subscriptions: [
+
         "Subscriptions",
+
         "Kelola paket, periode, tagihan dan status subscription."
+
     ],
+
 
     users: [
+
         "Users",
+
         "Hubungkan user FINOVA ke perusahaan dan kontrol quota."
+
     ],
+
 
     "backup-monitor": [
+
         "Backup Monitor",
+
         "Monitor status backup platform dan per-company."
+
     ],
 
+
     "audit-log": [
+
         "Audit Log",
-        "Riwayat aktivitas administratif FINOVA Control Center."
+
+        "Riwayat aktivitas dan perubahan data lintas company."
+
     ]
 
 };
@@ -77,62 +107,31 @@ const pages = {
 
 /*
 ==========================================================
-FORMATTER
+FORMAT IDR
 ==========================================================
 */
 
-const idr = (value) => {
+const idr = (
+    value
+) => {
 
     return new Intl.NumberFormat(
         "id-ID",
         {
-            style: "currency",
-            currency: "IDR",
-            maximumFractionDigits: 0
+
+            style:
+                "currency",
+
+            currency:
+                "IDR",
+
+            maximumFractionDigits:
+                0
+
         }
     ).format(
-        Number(value || 0)
-    );
-
-};
-
-
-const esc = (value) => {
-
-    return String(
-        value ?? ""
-    ).replace(
-        /[&<>'"]/g,
-        (char) => ({
-            "&": "&amp;",
-            "<": "&lt;",
-            ">": "&gt;",
-            "'": "&#39;",
-            '"': "&quot;"
-        }[char])
-    );
-
-};
-
-
-const fmtDate = (value) => {
-
-    if (!value) {
-
-        return "-";
-
-    }
-
-    return new Intl.DateTimeFormat(
-        "id-ID",
-        {
-            day: "2-digit",
-            month: "short",
-            year: "numeric"
-        }
-    ).format(
-        new Date(
-            `${value}T00:00:00`
+        Number(
+            value || 0
         )
     );
 
@@ -141,11 +140,109 @@ const fmtDate = (value) => {
 
 /*
 ==========================================================
-BADGE
+ESCAPE HTML
 ==========================================================
 */
 
-function badge(value) {
+const esc = (
+    value
+) => {
+
+    return String(
+        value ?? ""
+    ).replace(
+        /[&<>'"]/g,
+        (
+            char
+        ) => ({
+
+            "&":
+                "&amp;",
+
+            "<":
+                "&lt;",
+
+            ">":
+                "&gt;",
+
+            "'":
+                "&#39;",
+
+            '"':
+                "&quot;"
+
+        }[char])
+    );
+
+};
+
+
+/*
+==========================================================
+FORMAT DATE
+==========================================================
+*/
+
+const fmtDate = (
+    value
+) => {
+
+    if (
+        !value
+    ) {
+
+        return "-";
+
+    }
+
+
+    const date =
+        new Date(
+            `${value}T00:00:00`
+        );
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return "-";
+
+    }
+
+
+    return new Intl.DateTimeFormat(
+        "id-ID",
+        {
+
+            day:
+                "2-digit",
+
+            month:
+                "short",
+
+            year:
+                "numeric"
+
+        }
+    ).format(
+        date
+    );
+
+};
+
+
+/*
+==========================================================
+GENERAL BADGE
+==========================================================
+*/
+
+function badge(
+    value
+) {
 
     const currentValue =
         String(
@@ -153,19 +250,24 @@ function badge(value) {
         ).toUpperCase();
 
 
-    const badgeClass =
+    let badgeClass =
+        "neutral";
 
+
+    if (
         [
             "ACTIVE",
             "PAID"
         ].includes(
             currentValue
         )
+    ) {
 
-            ? "success"
+        badgeClass =
+            "success";
 
-            :
-
+    }
+    else if (
         [
             "SUSPENDED",
             "OVERDUE",
@@ -173,19 +275,629 @@ function badge(value) {
         ].includes(
             currentValue
         )
+    ) {
 
-            ? "warning"
+        badgeClass =
+            "warning";
 
-            :
+    }
+    else if (
+        [
+            "INACTIVE",
+            "CANCELLED"
+        ].includes(
+            currentValue
+        )
+    ) {
 
-        "neutral";
+        badgeClass =
+            "danger";
+
+    }
 
 
     return `
+
         <span class="cc-badge ${badgeClass}">
-            ${esc(currentValue || "-")}
+
+            ${esc(
+                currentValue || "-"
+            )}
+
         </span>
+
     `;
+
+}
+
+
+/*
+==========================================================
+AUDIT ACTION BADGE
+==========================================================
+*/
+
+function auditBadge(
+    value
+) {
+
+    const action =
+        String(
+            value || ""
+        ).toUpperCase();
+
+
+    let badgeClass =
+        "neutral";
+
+
+    switch (
+        action
+    ) {
+
+        case "CREATE":
+
+            badgeClass =
+                "create";
+
+            break;
+
+
+        case "UPDATE":
+
+            badgeClass =
+                "update";
+
+            break;
+
+
+        case "POST":
+
+            badgeClass =
+                "post";
+
+            break;
+
+
+        case "COMPLETE":
+
+            badgeClass =
+                "complete";
+
+            break;
+
+
+        case "PAID":
+
+            badgeClass =
+                "paid";
+
+            break;
+
+
+        case "APPROVE":
+
+            badgeClass =
+                "approve";
+
+            break;
+
+
+        case "DRAFT":
+
+            badgeClass =
+                "draft";
+
+            break;
+
+
+        case "VOID":
+
+            badgeClass =
+                "void";
+
+            break;
+
+
+        case "DELETE":
+
+            badgeClass =
+                "delete";
+
+            break;
+
+    }
+
+
+    return `
+
+        <span class="cc-badge ${badgeClass}">
+
+            ${esc(
+                action || "-"
+            )}
+
+        </span>
+
+    `;
+
+}
+
+
+/*
+==========================================================
+FORMAT AUDIT DATE / TIME
+==========================================================
+*/
+
+function fmtAuditDateTime(
+    value
+) {
+
+    if (
+        !value
+    ) {
+
+        return "-";
+
+    }
+
+
+    const date =
+        new Date(
+            value
+        );
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return "-";
+
+    }
+
+
+    return new Intl.DateTimeFormat(
+        "id-ID",
+        {
+
+            day:
+                "2-digit",
+
+            month:
+                "short",
+
+            year:
+                "numeric",
+
+            hour:
+                "2-digit",
+
+            minute:
+                "2-digit",
+
+            second:
+                "2-digit"
+
+        }
+    ).format(
+        date
+    );
+
+}
+
+
+/*
+==========================================================
+FORMAT AUDIT JSON
+==========================================================
+*/
+
+function formatAuditJson(
+    value
+) {
+
+    if (
+        value === null
+        ||
+        value === undefined
+    ) {
+
+        return "-";
+
+    }
+
+
+    try {
+
+        return JSON.stringify(
+            value,
+            null,
+            2
+        );
+
+    }
+    catch (
+        error
+    ) {
+
+        console.warn(
+            "Unable to format audit JSON:",
+            error
+        );
+
+
+        return String(
+            value
+        );
+
+    }
+
+}
+
+
+/*
+==========================================================
+AUDIT DISPLAY VALUE
+==========================================================
+*/
+
+function auditDisplayValue(
+    value
+) {
+
+    if (
+        value === null
+        ||
+        value === undefined
+        ||
+        value === ""
+    ) {
+
+        return "-";
+
+    }
+
+
+    if (
+        typeof value === "object"
+    ) {
+
+        return formatAuditJson(
+            value
+        );
+
+    }
+
+
+    return String(
+        value
+    );
+
+}
+
+
+/*
+==========================================================
+GET AUDIT CHANGED FIELDS
+==========================================================
+*/
+
+function getAuditChangedFields(
+    oldData,
+    newData
+) {
+
+    const before =
+
+        oldData
+        &&
+        typeof oldData === "object"
+        &&
+        !Array.isArray(
+            oldData
+        )
+
+            ?
+
+        oldData
+
+            :
+
+        {};
+
+
+    const after =
+
+        newData
+        &&
+        typeof newData === "object"
+        &&
+        !Array.isArray(
+            newData
+        )
+
+            ?
+
+        newData
+
+            :
+
+        {};
+
+
+    const keys =
+        new Set(
+            [
+
+                ...Object.keys(
+                    before
+                ),
+
+                ...Object.keys(
+                    after
+                )
+
+            ]
+        );
+
+
+    const changes =
+        [];
+
+
+    keys.forEach(
+        (
+            key
+        ) => {
+
+            const oldValue =
+                before[key];
+
+
+            const newValue =
+                after[key];
+
+
+            let oldCompare;
+
+            let newCompare;
+
+
+            try {
+
+                oldCompare =
+                    JSON.stringify(
+                        oldValue
+                    );
+
+            }
+            catch {
+
+                oldCompare =
+                    String(
+                        oldValue
+                    );
+
+            }
+
+
+            try {
+
+                newCompare =
+                    JSON.stringify(
+                        newValue
+                    );
+
+            }
+            catch {
+
+                newCompare =
+                    String(
+                        newValue
+                    );
+
+            }
+
+
+            if (
+                oldCompare
+                !==
+                newCompare
+            ) {
+
+                changes.push(
+                    {
+
+                        field:
+                            key,
+
+                        oldValue,
+
+                        newValue
+
+                    }
+                );
+
+            }
+
+        }
+    );
+
+
+    return changes;
+
+}
+
+
+/*
+==========================================================
+GET COMPANY DISPLAY
+==========================================================
+*/
+
+function getCompanyDisplay(
+    companyId
+) {
+
+    if (
+        !companyId
+    ) {
+
+        return "SYSTEM";
+
+    }
+
+
+    const company =
+        state.companies.find(
+            (
+                item
+            ) => {
+
+                return (
+                    item.id
+                    ===
+                    companyId
+                );
+
+            }
+        );
+
+
+    if (
+        !company
+    ) {
+
+        return companyId;
+
+    }
+
+
+    return `${company.company_code} — ${company.company_name}`;
+
+}
+
+
+/*
+==========================================================
+GET AUDIT DOCUMENT
+==========================================================
+*/
+
+function getAuditDocument(
+    item
+) {
+
+    if (
+        !item
+    ) {
+
+        return "-";
+
+    }
+
+
+    return (
+        item.document_no
+        ||
+        item.source_no
+        ||
+        "-"
+    );
+
+}
+
+
+/*
+==========================================================
+GET AUDIT RECORD
+==========================================================
+*/
+
+function getAuditRecord(
+    auditId
+) {
+
+    if (
+        !auditId
+    ) {
+
+        return null;
+
+    }
+
+
+    return (
+        state.auditLogs.find(
+            (
+                item
+            ) => {
+
+                return (
+                    String(
+                        item.id
+                    )
+                    ===
+                    String(
+                        auditId
+                    )
+                );
+
+            }
+        )
+        ||
+        null
+    );
+
+}
+
+
+/*
+==========================================================
+SET TEXT
+==========================================================
+*/
+
+function setText(
+    id,
+    value
+) {
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    if (
+        !element
+    ) {
+
+        return;
+
+    }
+
+
+    element.textContent =
+        value === null
+        ||
+        value === undefined
+        ||
+        value === ""
+
+            ?
+
+        "-"
+
+            :
+
+        String(
+            value
+        );
 
 }
 
@@ -196,7 +908,9 @@ SHOW ERROR
 ==========================================================
 */
 
-function showError(error) {
+function showError(
+    error
+) {
 
     console.error(
         error
@@ -207,13 +921,17 @@ function showError(error) {
 
         error?.message === "AUTH_REQUIRED"
 
-            ? "Silakan login terlebih dahulu."
+            ?
+
+        "Silakan login terlebih dahulu."
 
             :
 
         error?.message === "SUPER_ADMIN_REQUIRED"
 
-            ? "Akun ini bukan FINOVA Super Admin."
+            ?
+
+        "Akun ini bukan FINOVA Super Admin."
 
             :
 
@@ -231,19 +949,24 @@ function showError(error) {
 
 
     if (
-        alertElement
+        !alertElement
     ) {
 
-        alertElement.className =
-            "cc-alert error";
-
-        alertElement.textContent =
-            message;
-
-        alertElement.hidden =
-            false;
+        return;
 
     }
+
+
+    alertElement.className =
+        "cc-alert error";
+
+
+    alertElement.textContent =
+        message;
+
+
+    alertElement.hidden =
+        false;
 
 }
 
@@ -254,7 +977,9 @@ SHOW INFO
 ==========================================================
 */
 
-function showInfo(message) {
+function showInfo(
+    message
+) {
 
     const alertElement =
         document.getElementById(
@@ -274,14 +999,16 @@ function showInfo(message) {
     alertElement.className =
         "cc-alert success";
 
+
     alertElement.textContent =
         message;
+
 
     alertElement.hidden =
         false;
 
 
-    setTimeout(
+    window.setTimeout(
         () => {
 
             alertElement.hidden =
@@ -296,18 +1023,109 @@ function showInfo(message) {
 
 /*
 ==========================================================
+CLOSE SIDEBAR
+==========================================================
+*/
+
+function closeSidebar() {
+
+    document
+        .getElementById(
+            "cc-sidebar"
+        )
+        ?.classList.remove(
+            "show"
+        );
+
+
+    document
+        .getElementById(
+            "cc-overlay"
+        )
+        ?.classList.remove(
+            "show"
+        );
+
+}
+
+
+/*
+==========================================================
+OPEN / TOGGLE SIDEBAR
+==========================================================
+*/
+
+function toggleSidebar() {
+
+    const sidebar =
+        document.getElementById(
+            "cc-sidebar"
+        );
+
+
+    const overlay =
+        document.getElementById(
+            "cc-overlay"
+        );
+
+
+    if (
+        !sidebar
+    ) {
+
+        return;
+
+    }
+
+
+    sidebar.classList.toggle(
+        "show"
+    );
+
+
+    overlay
+        ?.classList.toggle(
+            "show",
+            sidebar.classList.contains(
+                "show"
+            )
+        );
+
+}
+
+
+/*
+==========================================================
 NAVIGATION
 ==========================================================
 */
 
-function navigate(name) {
+function navigate(
+    name
+) {
+
+    const targetName =
+        pages[name]
+            ?
+        name
+            :
+        "overview";
+
+
+    /*
+    ======================================================
+    HIDE ALL PAGE
+    ======================================================
+    */
 
     document
         .querySelectorAll(
             ".cc-page"
         )
         .forEach(
-            (element) => {
+            (
+                element
+            ) => {
 
                 element.classList.remove(
                     "active"
@@ -316,13 +1134,21 @@ function navigate(name) {
             }
         );
 
+
+    /*
+    ======================================================
+    RESET NAVIGATION ACTIVE
+    ======================================================
+    */
 
     document
         .querySelectorAll(
             ".cc-nav-item"
         )
         .forEach(
-            (element) => {
+            (
+                element
+            ) => {
 
                 element.classList.remove(
                     "active"
@@ -332,26 +1158,44 @@ function navigate(name) {
         );
 
 
+    /*
+    ======================================================
+    SHOW TARGET PAGE
+    ======================================================
+    */
+
     document
         .getElementById(
-            `page-${name}`
+            `page-${targetName}`
         )
         ?.classList.add(
             "active"
         );
 
+
+    /*
+    ======================================================
+    SET NAVIGATION ACTIVE
+    ======================================================
+    */
 
     document
         .querySelector(
-            `.cc-nav-item[data-page="${name}"]`
+            `.cc-nav-item[data-page="${targetName}"]`
         )
         ?.classList.add(
             "active"
         );
 
 
+    /*
+    ======================================================
+    PAGE TITLE / SUBTITLE
+    ======================================================
+    */
+
     const pageMeta =
-        pages[name]
+        pages[targetName]
         ||
         pages.overview;
 
@@ -388,12 +1232,24 @@ function navigate(name) {
     }
 
 
+    /*
+    ======================================================
+    UPDATE HASH
+    ======================================================
+    */
+
     history.replaceState(
         null,
         "",
-        `#${name}`
+        `#${targetName}`
     );
 
+
+    /*
+    ======================================================
+    CLOSE MOBILE SIDEBAR
+    ======================================================
+    */
 
     closeSidebar();
 
@@ -402,44 +1258,28 @@ function navigate(name) {
 
 /*
 ==========================================================
-CLOSE SIDEBAR
-==========================================================
-*/
-
-function closeSidebar() {
-
-    document
-        .getElementById(
-            "cc-sidebar"
-        )
-        ?.classList.remove(
-            "show"
-        );
-
-
-    document
-        .getElementById(
-            "cc-overlay"
-        )
-        ?.classList.remove(
-            "show"
-        );
-
-}
-
-
-/*
-==========================================================
-LOAD ALL
+LOAD ALL DATA
 ==========================================================
 */
 
 async function loadAll() {
 
+    /*
+    ======================================================
+    SUPER ADMIN GATE
+    ======================================================
+    */
+
     const auth =
         await ControlCenterService
             .requireSuperAdmin();
 
+
+    /*
+    ======================================================
+    ADMIN INITIAL
+    ======================================================
+    */
 
     const initials =
 
@@ -453,16 +1293,37 @@ async function loadAll() {
             .split(
                 /\s+/
             )
-            .map(
-                (item) => item[0]
+            .filter(
+                Boolean
             )
-            .join("")
+            .map(
+                (
+                    item
+                ) => {
+
+                    return (
+                        item[0]
+                        ||
+                        ""
+                    );
+
+                }
+            )
+            .join(
+                ""
+            )
             .slice(
                 0,
                 2
             )
             .toUpperCase();
 
+
+    /*
+    ======================================================
+    ADMIN DOM
+    ======================================================
+    */
 
     const avatarElement =
         document.getElementById(
@@ -503,6 +1364,12 @@ async function loadAll() {
     }
 
 
+    /*
+    ======================================================
+    LOAD DASHBOARD + PLANS + AUDIT
+    ======================================================
+    */
+
     const [
         dashboard,
         plans,
@@ -524,13 +1391,93 @@ async function loadAll() {
         );
 
 
+    /*
+    ======================================================
+    UPDATE STATE
+    ======================================================
+    */
+
     Object.assign(
         state,
         dashboard,
         {
+
             dashboard,
-            plans,
-            auditLogs
+
+            plans:
+                Array.isArray(
+                    plans
+                )
+                    ?
+                plans
+                    :
+                [],
+
+            auditLogs:
+                Array.isArray(
+                    auditLogs
+                )
+                    ?
+                auditLogs
+                    :
+                []
+
+        }
+    );
+
+
+    /*
+    ======================================================
+    RENDER
+    ======================================================
+    */
+
+    renderAll();
+
+}
+
+
+/*
+==========================================================
+REFRESH DATA
+==========================================================
+*/
+
+async function refresh() {
+
+    const [
+        dashboard,
+        auditLogs
+    ] =
+        await Promise.all(
+            [
+
+                ControlCenterService
+                    .getDashboardData(),
+
+                ControlCenterService
+                    .getAuditLogs()
+
+            ]
+        );
+
+
+    Object.assign(
+        state,
+        dashboard,
+        {
+
+            dashboard,
+
+            auditLogs:
+                Array.isArray(
+                    auditLogs
+                )
+                    ?
+                auditLogs
+                    :
+                []
+
         }
     );
 
@@ -584,6 +1531,12 @@ function renderOverview() {
     }
 
 
+    /*
+    ======================================================
+    KPI ELEMENTS
+    ======================================================
+    */
+
     const companiesKpi =
         document.getElementById(
             "kpi-companies"
@@ -608,14 +1561,24 @@ function renderOverview() {
         );
 
 
+    /*
+    ======================================================
+    KPI VALUE
+    ======================================================
+    */
+
     if (
         companiesKpi
     ) {
 
         companiesKpi.textContent =
-            dashboard
-                .activeCompanies
-                .length;
+            Array.isArray(
+                dashboard.activeCompanies
+            )
+                ?
+            dashboard.activeCompanies.length
+                :
+            0;
 
     }
 
@@ -625,9 +1588,13 @@ function renderOverview() {
     ) {
 
         usersKpi.textContent =
-            dashboard
-                .activeUsers
-                .length;
+            Array.isArray(
+                dashboard.activeUsers
+            )
+                ?
+            dashboard.activeUsers.length
+                :
+            0;
 
     }
 
@@ -649,64 +1616,129 @@ function renderOverview() {
     ) {
 
         expiringKpi.textContent =
-            dashboard
-                .expiring
-                .length;
+            Array.isArray(
+                dashboard.expiring
+            )
+                ?
+            dashboard.expiring.length
+                :
+            0;
 
     }
 
 
+    /*
+    ======================================================
+    LATEST COMPANY ROW
+    ======================================================
+    */
+
     const rows =
 
-        state
-            .companies
+        (
+            Array.isArray(
+                state.companies
+            )
+                ?
+            state.companies
+                :
+            []
+        )
             .slice(
                 0,
                 5
             )
             .map(
-                (company) => {
+                (
+                    company
+                ) => {
+
+                    /*
+                    ==============================================
+                    ACTIVE USER COUNT
+                    ==============================================
+                    */
 
                     const activeUserCount =
 
-                        state
-                            .users
+                        (
+                            Array.isArray(
+                                state.users
+                            )
+                                ?
+                            state.users
+                                :
+                            []
+                        )
                             .filter(
-                                (user) =>
+                                (
+                                    user
+                                ) => {
 
-                                    user.company_id
-                                    ===
-                                    company.id
+                                    return (
 
-                                    &&
+                                        user.company_id
+                                        ===
+                                        company.id
 
-                                    user.membership_status
-                                    ===
-                                    "ACTIVE"
+                                        &&
 
+                                        user.membership_status
+                                        ===
+                                        "ACTIVE"
+
+                                    );
+
+                                }
                             )
                             .length;
 
 
+                    /*
+                    ==============================================
+                    ACTIVE SUBSCRIPTION
+                    ==============================================
+                    */
+
                     const subscription =
 
-                        state
-                            .subscriptions
+                        (
+                            Array.isArray(
+                                state.subscriptions
+                            )
+                                ?
+                            state.subscriptions
+                                :
+                            []
+                        )
                             .find(
-                                (item) =>
+                                (
+                                    item
+                                ) => {
 
-                                    item.company_id
-                                    ===
-                                    company.id
+                                    return (
 
-                                    &&
+                                        item.company_id
+                                        ===
+                                        company.id
 
-                                    item.status
-                                    ===
-                                    "ACTIVE"
+                                        &&
 
+                                        item.status
+                                        ===
+                                        "ACTIVE"
+
+                                    );
+
+                                }
                             );
 
+
+                    /*
+                    ==============================================
+                    ROW
+                    ==============================================
+                    */
 
                     return `
 
@@ -715,20 +1747,29 @@ function renderOverview() {
                             <td>
 
                                 <strong>
+
                                     ${esc(
                                         company.company_code
+                                        ||
+                                        "-"
                                     )}
+
                                 </strong>
 
                                 <br>
 
                                 <small>
+
                                     ${esc(
                                         company.company_name
+                                        ||
+                                        "-"
                                     )}
+
                                 </small>
 
                             </td>
+
 
                             <td>
 
@@ -742,13 +1783,19 @@ function renderOverview() {
 
                             </td>
 
+
                             <td>
 
                                 ${activeUserCount}
                                 /
-                                ${company.max_users}
+                                ${esc(
+                                    company.max_users
+                                    ??
+                                    0
+                                )}
 
                             </td>
+
 
                             <td>
 
@@ -764,8 +1811,16 @@ function renderOverview() {
 
                 }
             )
-            .join("");
+            .join(
+                ""
+            );
 
+
+    /*
+    ======================================================
+    RENDER TABLE
+    ======================================================
+    */
 
     const tableBody =
         document.getElementById(
@@ -774,16 +1829,21 @@ function renderOverview() {
 
 
     if (
-        tableBody
+        !tableBody
     ) {
 
-        tableBody.innerHTML =
+        return;
 
-            rows
+    }
 
-            ||
 
-            `
+    tableBody.innerHTML =
+
+        rows
+
+        ||
+
+        `
 
             <tr class="cc-empty">
 
@@ -799,9 +1859,7 @@ function renderOverview() {
 
             </tr>
 
-            `;
-
-    }
+        `;
 
 }
 
@@ -829,37 +1887,104 @@ function renderCompanies() {
     }
 
 
-    const rows =
+    const companies =
 
-        state
-            .companies
+        Array.isArray(
+            state.companies
+        )
+
+            ?
+
+        state.companies
+
+            :
+
+        [];
+
+
+    const users =
+
+        Array.isArray(
+            state.users
+        )
+
+            ?
+
+        state.users
+
+            :
+
+        [];
+
+
+    /*
+    ======================================================
+    BUILD COMPANY ROWS
+    ======================================================
+    */
+
+    const rows =
+        companies
             .map(
-                (company) => {
+                (
+                    company
+                ) => {
+
+                    /*
+                    ==============================================
+                    ACTIVE USER COUNT
+                    ==============================================
+                    */
 
                     const activeUserCount =
-
-                        state
-                            .users
+                        users
                             .filter(
-                                (user) =>
+                                (
+                                    user
+                                ) => {
 
-                                    user.company_id
-                                    ===
-                                    company.id
+                                    return (
 
-                                    &&
+                                        user.company_id
+                                        ===
+                                        company.id
 
-                                    user.membership_status
-                                    ===
-                                    "ACTIVE"
+                                        &&
 
+                                        user.membership_status
+                                        ===
+                                        "ACTIVE"
+
+                                    );
+
+                                }
                             )
                             .length;
 
 
+                    /*
+                    ==============================================
+                    COMPANY STATUS
+                    ==============================================
+                    */
+
+                    const currentStatus =
+                        String(
+                            company.status
+                            ||
+                            ""
+                        ).toUpperCase();
+
+
+                    /*
+                    ==============================================
+                    ACTION BUTTON
+                    ==============================================
+                    */
+
                     const actionButton =
 
-                        company.status
+                        currentStatus
                         ===
                         "ACTIVE"
 
@@ -867,15 +1992,21 @@ function renderCompanies() {
 
                         `
 
-                        <button
-                            type="button"
-                            class="btn btn-outline-danger btn-sm"
-                            data-company-status="${company.id}"
-                            data-status="SUSPENDED">
+                            <button
+                                type="button"
+                                class="cc-btn danger small"
+                                data-company-status="${esc(
+                                    company.id
+                                )}"
+                                data-status="SUSPENDED">
 
-                            Suspend
+                                <i class="fa-solid fa-ban"></i>
 
-                        </button>
+                                <span>
+                                    Suspend
+                                </span>
+
+                            </button>
 
                         `
 
@@ -883,18 +2014,30 @@ function renderCompanies() {
 
                         `
 
-                        <button
-                            type="button"
-                            class="btn btn-outline-success btn-sm"
-                            data-company-status="${company.id}"
-                            data-status="ACTIVE">
+                            <button
+                                type="button"
+                                class="cc-btn success small"
+                                data-company-status="${esc(
+                                    company.id
+                                )}"
+                                data-status="ACTIVE">
 
-                            Activate
+                                <i class="fa-solid fa-circle-check"></i>
 
-                        </button>
+                                <span>
+                                    Activate
+                                </span>
+
+                            </button>
 
                         `;
 
+
+                    /*
+                    ==============================================
+                    ROW
+                    ==============================================
+                    */
 
                     return `
 
@@ -903,38 +2046,87 @@ function renderCompanies() {
                             <td>
 
                                 <strong>
+
                                     ${esc(
                                         company.company_code
+                                        ||
+                                        "-"
                                     )}
+
                                 </strong>
 
                             </td>
 
+
                             <td>
 
-                                ${esc(
+                                <div class="cc-table-primary">
+
+                                    ${esc(
+                                        company.company_name
+                                        ||
+                                        "-"
+                                    )}
+
+                                </div>
+
+
+                                ${
+                                    company.legal_name
+                                    &&
+                                    company.legal_name
+                                    !==
                                     company.company_name
-                                )}
+
+                                        ?
+
+                                    `
+
+                                        <small class="cc-table-secondary">
+
+                                            ${esc(
+                                                company.legal_name
+                                            )}
+
+                                        </small>
+
+                                    `
+
+                                        :
+
+                                    ""
+                                }
 
                             </td>
+
 
                             <td>
 
-                                ${activeUserCount}
-                                /
-                                ${company.max_users}
+                                <span class="cc-mono">
+
+                                    ${activeUserCount}
+                                    /
+                                    ${esc(
+                                        company.max_users
+                                        ??
+                                        0
+                                    )}
+
+                                </span>
 
                             </td>
+
 
                             <td>
 
                                 ${badge(
-                                    company.status
+                                    currentStatus
                                 )}
 
                             </td>
 
-                            <td>
+
+                            <td class="text-end">
 
                                 ${actionButton}
 
@@ -946,8 +2138,16 @@ function renderCompanies() {
 
                 }
             )
-            .join("");
+            .join(
+                ""
+            );
 
+
+    /*
+    ======================================================
+    RENDER
+    ======================================================
+    */
 
     tableBody.innerHTML =
 
@@ -957,31 +2157,40 @@ function renderCompanies() {
 
         `
 
-        <tr class="cc-empty">
+            <tr class="cc-empty">
 
-            <td colspan="5">
+                <td colspan="5">
 
-                <i class="fa-regular fa-folder-open"></i>
+                    <i class="fa-regular fa-folder-open"></i>
 
-                <span>
-                    Belum ada company.
-                </span>
+                    <span>
+                        Belum ada company.
+                    </span>
 
-            </td>
+                </td>
 
-        </tr>
+            </tr>
 
         `;
 
 
-    document
+    /*
+    ======================================================
+    COMPANY STATUS EVENT
+    ======================================================
+    */
+
+    tableBody
         .querySelectorAll(
             "[data-company-status]"
         )
         .forEach(
-            (button) => {
+            (
+                button
+            ) => {
 
-                button.onclick =
+                button.addEventListener(
+                    "click",
                     async () => {
 
                         try {
@@ -990,10 +2199,31 @@ function renderCompanies() {
                                 true;
 
 
+                            const companyId =
+                                button.dataset.companyStatus;
+
+
+                            const nextStatus =
+                                button.dataset.status;
+
+
+                            if (
+                                !companyId
+                                ||
+                                !nextStatus
+                            ) {
+
+                                throw new Error(
+                                    "Company atau status tidak valid."
+                                );
+
+                            }
+
+
                             await ControlCenterService
                                 .setCompanyStatus(
-                                    button.dataset.companyStatus,
-                                    button.dataset.status
+                                    companyId,
+                                    nextStatus
                                 );
 
 
@@ -1021,7 +2251,8 @@ function renderCompanies() {
 
                         }
 
-                    };
+                    }
+                );
 
             }
         );
@@ -1052,40 +2283,92 @@ function renderSubscriptions() {
     }
 
 
-    const rows =
+    const subscriptions =
 
-        state
-            .subscriptions
+        Array.isArray(
+            state.subscriptions
+        )
+
+            ?
+
+        state.subscriptions
+
+            :
+
+        [];
+
+
+    /*
+    ======================================================
+    BUILD SUBSCRIPTION ROWS
+    ======================================================
+    */
+
+    const rows =
+        subscriptions
             .map(
-                (subscription) => {
+                (
+                    subscription
+                ) => {
+
+                    const companyName =
+
+                        subscription
+                            ?.finova_companies
+                            ?.company_name
+
+                        ||
+
+                        "-";
+
+
+                    const planName =
+
+                        subscription
+                            ?.finova_plans
+                            ?.plan_name
+
+                        ||
+
+                        "-";
+
 
                     return `
 
                         <tr>
 
-                            <td>
 
-                                ${esc(
-                                    subscription
-                                        .finova_companies
-                                        ?.company_name
-                                    ||
-                                    "-"
-                                )}
-
-                            </td>
+                            <!-- COMPANY -->
 
                             <td>
 
-                                ${esc(
-                                    subscription
-                                        .finova_plans
-                                        ?.plan_name
-                                    ||
-                                    "-"
-                                )}
+                                <div class="cc-table-primary">
+
+                                    ${esc(
+                                        companyName
+                                    )}
+
+                                </div>
 
                             </td>
+
+
+                            <!-- PLAN -->
+
+                            <td>
+
+                                <strong>
+
+                                    ${esc(
+                                        planName
+                                    )}
+
+                                </strong>
+
+                            </td>
+
+
+                            <!-- START -->
 
                             <td>
 
@@ -1095,6 +2378,9 @@ function renderSubscriptions() {
 
                             </td>
 
+
+                            <!-- END -->
+
                             <td>
 
                                 ${fmtDate(
@@ -1103,13 +2389,23 @@ function renderSubscriptions() {
 
                             </td>
 
+
+                            <!-- AMOUNT -->
+
                             <td class="text-end">
 
-                                ${idr(
-                                    subscription.amount
-                                )}
+                                <strong>
+
+                                    ${idr(
+                                        subscription.amount
+                                    )}
+
+                                </strong>
 
                             </td>
+
+
+                            <!-- PAYMENT -->
 
                             <td>
 
@@ -1119,6 +2415,9 @@ function renderSubscriptions() {
 
                             </td>
 
+
+                            <!-- STATUS -->
+
                             <td>
 
                                 ${badge(
@@ -1127,14 +2426,23 @@ function renderSubscriptions() {
 
                             </td>
 
+
                         </tr>
 
                     `;
 
                 }
             )
-            .join("");
+            .join(
+                ""
+            );
 
+
+    /*
+    ======================================================
+    RENDER
+    ======================================================
+    */
 
     tableBody.innerHTML =
 
@@ -1144,19 +2452,19 @@ function renderSubscriptions() {
 
         `
 
-        <tr class="cc-empty">
+            <tr class="cc-empty">
 
-            <td colspan="7">
+                <td colspan="7">
 
-                <i class="fa-regular fa-folder-open"></i>
+                    <i class="fa-regular fa-folder-open"></i>
 
-                <span>
-                    Belum ada subscription.
-                </span>
+                    <span>
+                        Belum ada subscription.
+                    </span>
 
-            </td>
+                </td>
 
-        </tr>
+            </tr>
 
         `;
 
@@ -1186,24 +2494,116 @@ function renderUsers() {
     }
 
 
-    const rows =
+    const users =
 
-        state
-            .users
+        Array.isArray(
+            state.users
+        )
+
+            ?
+
+        state.users
+
+            :
+
+        [];
+
+
+    /*
+    ======================================================
+    BUILD USER ROWS
+    ======================================================
+    */
+
+    const rows =
+        users
             .map(
-                (user) => {
+                (
+                    user
+                ) => {
+
+                    const hasCompany =
+                        Boolean(
+                            user.company_id
+                        );
+
+
+                    const companyName =
+
+                        user.company_name
+
+                        ||
+
+                        "Belum terhubung";
+
+
+                    const companyRole =
+
+                        user.company_role
+
+                        ||
+
+                        "-";
+
+
+                    /*
+                    ==============================================
+                    USER STATUS
+                    ==============================================
+                    */
+
+                    const statusHtml =
+
+                        hasCompany
+
+                            ?
+
+                        badge(
+                            user.membership_status
+                        )
+
+                            :
+
+                        `
+
+                            <span class="cc-badge neutral">
+
+                                UNASSIGNED
+
+                            </span>
+
+                        `;
+
+
+                    /*
+                    ==============================================
+                    ROW
+                    ==============================================
+                    */
 
                     return `
 
                         <tr>
 
+
+                            <!-- EMAIL -->
+
                             <td>
 
-                                ${esc(
-                                    user.email
-                                )}
+                                <div class="cc-table-primary">
+
+                                    ${esc(
+                                        user.email
+                                        ||
+                                        "-"
+                                    )}
+
+                                </div>
 
                             </td>
+
+
+                            <!-- NAME -->
 
                             <td>
 
@@ -1215,49 +2615,66 @@ function renderUsers() {
 
                             </td>
 
-                            <td>
 
-                                ${esc(
-                                    user.company_name
-                                    ||
-                                    "Belum terhubung"
-                                )}
-
-                            </td>
+                            <!-- COMPANY -->
 
                             <td>
 
-                                ${esc(
-                                    user.company_role
-                                    ||
-                                    "-"
-                                )}
+                                <span
+                                    class="${
+                                        hasCompany
+                                            ?
+                                        ""
+                                            :
+                                        "cc-text-muted"
+                                    }">
+
+                                    ${esc(
+                                        companyName
+                                    )}
+
+                                </span>
 
                             </td>
+
+
+                            <!-- ROLE -->
 
                             <td>
 
                                 ${
-                                    user.company_id
+                                    hasCompany
 
                                         ?
 
-                                    badge(
-                                        user.membership_status
-                                    )
+                                    `
+
+                                        <span class="cc-mono">
+
+                                            ${esc(
+                                                companyRole
+                                            )}
+
+                                        </span>
+
+                                    `
 
                                         :
 
-                                    `
-
-                                    <span class="cc-badge neutral">
-                                        UNASSIGNED
-                                    </span>
-
-                                    `
+                                    "-"
                                 }
 
                             </td>
+
+
+                            <!-- STATUS -->
+
+                            <td>
+
+                                ${statusHtml}
+
+                            </td>
+
 
                         </tr>
 
@@ -1265,8 +2682,16 @@ function renderUsers() {
 
                 }
             )
-            .join("");
+            .join(
+                ""
+            );
 
+
+    /*
+    ======================================================
+    RENDER
+    ======================================================
+    */
 
     tableBody.innerHTML =
 
@@ -1276,24 +2701,23 @@ function renderUsers() {
 
         `
 
-        <tr class="cc-empty">
+            <tr class="cc-empty">
 
-            <td colspan="5">
+                <td colspan="5">
 
-                <i class="fa-regular fa-folder-open"></i>
+                    <i class="fa-regular fa-folder-open"></i>
 
-                <span>
-                    Belum ada user Auth.
-                </span>
+                    <span>
+                        Belum ada user Auth.
+                    </span>
 
-            </td>
+                </td>
 
-        </tr>
+            </tr>
 
         `;
 
 }
-
 
 /*
 ==========================================================
@@ -1308,92 +2732,1231 @@ function renderAuditLogs() {
             "audit-log-body"
         );
 
-    if (!tableBody) {
+
+    if (
+        !tableBody
+    ) {
+
         return;
+
     }
+
+
+    /*
+    ======================================================
+    FILTER VALUE
+    ======================================================
+    */
 
     const searchValue =
         String(
-            document.getElementById("audit-search")?.value || ""
-        ).trim().toLowerCase();
+            document
+                .getElementById(
+                    "audit-search"
+                )
+                ?.value
+            ||
+            ""
+        )
+            .trim()
+            .toLowerCase();
+
 
     const actionValue =
         String(
-            document.getElementById("audit-action")?.value || ""
-        ).trim().toUpperCase();
-
-    const companyMap = new Map(
-        state.companies.map(
-            (company) => [company.id, `${company.company_code} — ${company.company_name}`]
+            document
+                .getElementById(
+                    "audit-action"
+                )
+                ?.value
+            ||
+            ""
         )
+            .trim()
+            .toUpperCase();
+
+
+    /*
+    ======================================================
+    AUDIT DATA
+    ======================================================
+    */
+
+    const auditLogs =
+
+        Array.isArray(
+            state.auditLogs
+        )
+
+            ?
+
+        state.auditLogs
+
+            :
+
+        [];
+
+
+    /*
+    ======================================================
+    FILTER + BUILD ROW
+    ======================================================
+    */
+
+    const rows =
+        auditLogs
+
+            .filter(
+                (
+                    item
+                ) => {
+
+                    const action =
+                        String(
+                            item.action
+                            ||
+                            ""
+                        ).toUpperCase();
+
+
+                    /*
+                    ==============================================
+                    ACTION FILTER
+                    ==============================================
+                    */
+
+                    if (
+                        actionValue
+                        &&
+                        action
+                        !==
+                        actionValue
+                    ) {
+
+                        return false;
+
+                    }
+
+
+                    /*
+                    ==============================================
+                    NO SEARCH FILTER
+                    ==============================================
+                    */
+
+                    if (
+                        !searchValue
+                    ) {
+
+                        return true;
+
+                    }
+
+
+                    /*
+                    ==============================================
+                    SEARCHABLE DATA
+                    ==============================================
+
+                    Search tetap mendukung:
+                    - Company
+                    - Module
+                    - Document
+                    - Action
+                    - User Name
+                    - User Role
+                    - User UID
+                    - Record
+                    - Source
+                    ==============================================
+                    */
+
+                    const haystack =
+                        [
+
+                            getCompanyDisplay(
+                                item.company_id
+                            ),
+
+                            item.company_id,
+
+                            item.module,
+
+                            item.table_name,
+
+                            item.document_no,
+
+                            item.action,
+
+                            item.user_name,
+
+                            item.user_role,
+
+                            item.user_uid,
+
+                            item.record_id,
+
+                            item.source_module,
+
+                            item.source_id,
+
+                            item.source_no
+
+                        ]
+                            .filter(
+                                (
+                                    value
+                                ) => {
+
+                                    return (
+                                        value !== null
+                                        &&
+                                        value !== undefined
+                                    );
+
+                                }
+                            )
+                            .join(
+                                " "
+                            )
+                            .toLowerCase();
+
+
+                    return haystack.includes(
+                        searchValue
+                    );
+
+                }
+            )
+
+            .map(
+                (
+                    item
+                ) => {
+
+                    /*
+                    ==============================================
+                    DISPLAY VALUE
+                    ==============================================
+                    */
+
+                    const createdAt =
+                        fmtAuditDateTime(
+                            item.created_at
+                        );
+
+
+                    const companyName =
+                        getCompanyDisplay(
+                            item.company_id
+                        );
+
+
+                    const documentNo =
+                        getAuditDocument(
+                            item
+                        );
+
+
+                    /*
+                    ==============================================
+                    USER DISPLAY
+                    ==============================================
+
+                    Priority:
+                    1. user_name dari service
+                    2. user_uid jika profile tidak ditemukan
+                    3. SYSTEM jika tidak ada actor
+                    ==============================================
+                    */
+
+                    const userName =
+                        item.user_name
+                        ||
+                        item.user_uid
+                        ||
+                        "SYSTEM";
+
+
+                    const userRole =
+                        item.user_role
+                        ||
+                        "";
+
+
+                    const userUid =
+                        item.user_uid
+                        ||
+                        "SYSTEM";
+
+
+                    /*
+                    ==============================================
+                    USER ROLE HTML
+                    ==============================================
+                    */
+
+                    const userRoleHtml =
+
+                        userRole
+
+                            ?
+
+                        `
+
+                            <small class="cc-table-secondary">
+
+                                ${esc(
+                                    userRole
+                                )}
+
+                            </small>
+
+                        `
+
+                            :
+
+                        "";
+
+
+                    /*
+                    ==============================================
+                    ROW
+                    ==============================================
+                    */
+
+                    return `
+
+                        <tr>
+
+
+                            <!-- DATE / TIME -->
+
+                            <td>
+
+                                <span class="cc-audit-date">
+
+                                    ${esc(
+                                        createdAt
+                                    )}
+
+                                </span>
+
+                            </td>
+
+
+                            <!-- COMPANY -->
+
+                            <td>
+
+                                <div class="cc-table-primary">
+
+                                    ${esc(
+                                        companyName
+                                    )}
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- MODULE -->
+
+                            <td>
+
+                                <div class="cc-table-primary">
+
+                                    ${esc(
+                                        item.module
+                                        ||
+                                        "-"
+                                    )}
+
+                                </div>
+
+                                <small class="cc-table-secondary">
+
+                                    ${esc(
+                                        item.table_name
+                                        ||
+                                        "-"
+                                    )}
+
+                                </small>
+
+                            </td>
+
+
+                            <!-- DOCUMENT -->
+
+                            <td>
+
+                                <span class="cc-mono">
+
+                                    ${esc(
+                                        documentNo
+                                    )}
+
+                                </span>
+
+                            </td>
+
+
+                            <!-- ACTION -->
+
+                            <td>
+
+                                ${auditBadge(
+                                    item.action
+                                )}
+
+                            </td>
+
+
+                            <!-- USER -->
+
+                            <td>
+
+                                <div
+                                    class="cc-audit-user"
+                                    title="${esc(
+                                        userUid
+                                    )}">
+
+                                    <div class="cc-table-primary">
+
+                                        ${esc(
+                                            userName
+                                        )}
+
+                                    </div>
+
+                                    ${userRoleHtml}
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- VIEW -->
+
+                            <td class="text-center">
+
+                                <button
+                                    type="button"
+                                    class="cc-btn icon small"
+                                    data-audit-view="${esc(
+                                        item.id
+                                    )}"
+                                    title="View Audit Detail"
+                                    aria-label="View Audit Detail">
+
+                                    <i class="fa-solid fa-eye"></i>
+
+                                </button>
+
+                            </td>
+
+
+                        </tr>
+
+                    `;
+
+                }
+            )
+            .join(
+                ""
+            );
+
+
+    /*
+    ======================================================
+    RENDER TABLE
+    ======================================================
+    */
+
+    tableBody.innerHTML =
+
+        rows
+
+        ||
+
+        `
+
+            <tr class="cc-empty">
+
+                <td colspan="7">
+
+                    <i class="fa-regular fa-folder-open"></i>
+
+                    <span>
+                        Belum ada audit log yang sesuai.
+                    </span>
+
+                </td>
+
+            </tr>
+
+        `;
+
+
+    /*
+    ======================================================
+    VIEW DETAIL EVENT
+    ======================================================
+    */
+
+    tableBody
+        .querySelectorAll(
+            "[data-audit-view]"
+        )
+        .forEach(
+            (
+                button
+            ) => {
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        const auditId =
+                            button.dataset.auditView;
+
+
+                        openAuditDetail(
+                            auditId
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+}
+/*
+==========================================================
+OPEN AUDIT DETAIL
+==========================================================
+*/
+
+function openAuditDetail(
+    auditId
+) {
+
+    /*
+    ======================================================
+    FIND AUDIT RECORD
+    ======================================================
+    */
+
+    const item =
+        (
+            Array.isArray(
+                state.auditLogs
+            )
+                ? state.auditLogs
+                : []
+        )
+            .find(
+                (
+                    audit
+                ) => {
+
+                    return (
+                        String(
+                            audit?.id
+                            ||
+                            ""
+                        )
+                        ===
+                        String(
+                            auditId
+                            ||
+                            ""
+                        )
+                    );
+
+                }
+            );
+
+
+    /*
+    ======================================================
+    RECORD NOT FOUND
+    ======================================================
+    */
+
+    if (
+        !item
+    ) {
+
+        showAlert(
+            "Audit log tidak ditemukan.",
+            "danger"
+        );
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    BASIC DISPLAY VALUE
+    ======================================================
+    */
+
+    const createdAt =
+        fmtAuditDateTime(
+            item.created_at
+        );
+
+
+    const companyName =
+        getCompanyDisplay(
+            item.company_id
+        );
+
+
+    const documentNo =
+        getAuditDocument(
+            item
+        );
+
+
+    /*
+    ======================================================
+    USER DISPLAY
+    ======================================================
+
+    Service sekarang memberikan:
+
+    user_name
+    user_role
+    user_uid
+
+    Priority:
+    1. Nama user
+    2. UID jika profile tidak ditemukan
+    3. SYSTEM jika audit tidak memiliki actor
+    ======================================================
+    */
+
+    const userName =
+        item.user_name
+        ||
+        item.user_uid
+        ||
+        "SYSTEM";
+
+
+    const userRole =
+        item.user_role
+        ||
+        "";
+
+
+    const userDisplay =
+        userRole
+
+            ?
+
+        `${userName} (${userRole})`
+
+            :
+
+        userName;
+
+
+    /*
+    ======================================================
+    DATE / TIME
+    ======================================================
+    */
+
+    setText(
+        "audit-detail-date",
+        createdAt
     );
 
-    const rows = state.auditLogs
-        .filter((item) => {
-            const action = String(item.action || "").toUpperCase();
-            if (actionValue && action !== actionValue) {
-                return false;
-            }
 
-            if (!searchValue) {
-                return true;
-            }
+    /*
+    ======================================================
+    COMPANY
+    ======================================================
+    */
 
-            const haystack = [
-                companyMap.get(item.company_id) || item.company_id || "",
-                item.module,
-                item.table_name,
-                item.document_no,
-                item.action,
-                item.user_uid,
-                item.source_module,
-                item.source_no
-            ].join(" ").toLowerCase();
+    setText(
+        "audit-detail-company",
+        companyName
+    );
 
-            return haystack.includes(searchValue);
-        })
-        .map((item) => {
-            const createdAt = item.created_at
-                ? new Intl.DateTimeFormat("id-ID", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    second: "2-digit"
-                }).format(new Date(item.created_at))
-                : "-";
 
-            const companyName =
-                companyMap.get(item.company_id)
-                || (item.company_id ? item.company_id : "SYSTEM");
+    /*
+    ======================================================
+    MODULE
+    ======================================================
+    */
 
-            const documentNo =
-                item.document_no
-                || item.source_no
-                || "-";
+    setText(
+        "audit-detail-module",
+        item.module
+        ||
+        "-"
+    );
 
-            return `
-                <tr>
-                    <td>${esc(createdAt)}</td>
-                    <td>${esc(companyName)}</td>
-                    <td><strong>${esc(item.module || "-")}</strong><br><small>${esc(item.table_name || "-")}</small></td>
-                    <td>${esc(documentNo)}</td>
-                    <td>${badge(item.action)}</td>
-                    <td><span class="cc-mono">${esc(item.user_uid || "SYSTEM")}</span></td>
-                </tr>
-            `;
-        })
-        .join("");
 
-    tableBody.innerHTML = rows || `
-        <tr class="cc-empty">
-            <td colspan="6">
-                <i class="fa-regular fa-folder-open"></i>
-                <span>Belum ada audit log yang sesuai.</span>
-            </td>
-        </tr>
+    /*
+    ======================================================
+    DOCUMENT
+    ======================================================
+    */
+
+    setText(
+        "audit-detail-document",
+        documentNo
+    );
+
+
+    /*
+    ======================================================
+    USER
+    ======================================================
+    */
+
+    setText(
+        "audit-detail-user",
+        userDisplay
+    );
+
+
+    /*
+    ======================================================
+    TABLE
+    ======================================================
+    */
+
+    setText(
+        "audit-detail-table",
+        item.table_name
+        ||
+        "-"
+    );
+
+
+    /*
+    ======================================================
+    RECORD ID
+    ======================================================
+    */
+
+    setText(
+        "audit-detail-record-id",
+        item.record_id
+        ||
+        "-"
+    );
+
+
+    /*
+    ======================================================
+    ACTION BADGE
+    ======================================================
+    */
+
+    const actionElement =
+        document.getElementById(
+            "audit-detail-action"
+        );
+
+
+    if (
+        actionElement
+    ) {
+
+        actionElement.innerHTML =
+            auditBadge(
+                item.action
+            );
+
+    }
+
+
+    /*
+    ======================================================
+    DOCUMENT TRACE
+    ======================================================
+    */
+
+    renderAuditDocumentTrace(
+        item
+    );
+
+
+    /*
+    ======================================================
+    CHANGED FIELDS
+    ======================================================
+    */
+
+    renderAuditChangedFields(
+        item
+    );
+
+
+    /*
+    ======================================================
+    BEFORE / AFTER SNAPSHOT
+    ======================================================
+    */
+
+    renderAuditSnapshots(
+        item
+    );
+
+
+    /*
+    ======================================================
+    GET MODAL
+    ======================================================
+    */
+
+    const modalElement =
+        document.getElementById(
+            "audit-detail-modal"
+        );
+
+
+    if (
+        !modalElement
+    ) {
+
+        console.error(
+            "Audit Detail Modal tidak ditemukan."
+        );
+
+        showAlert(
+            "Audit Detail Modal tidak ditemukan.",
+            "danger"
+        );
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    BOOTSTRAP CHECK
+    ======================================================
+    */
+
+    if (
+        typeof bootstrap
+        ===
+        "undefined"
+        ||
+        !bootstrap.Modal
+    ) {
+
+        console.error(
+            "Bootstrap Modal tidak tersedia."
+        );
+
+        showAlert(
+            "Bootstrap Modal tidak tersedia.",
+            "danger"
+        );
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    OPEN MODAL
+    ======================================================
+    */
+
+    const modal =
+        bootstrap.Modal.getOrCreateInstance(
+            modalElement
+        );
+
+
+    modal.show();
+
+}
+
+/*
+==========================================================
+RENDER AUDIT DETAIL ACTION
+==========================================================
+*/
+
+function renderAuditDetailAction(
+    action
+) {
+
+    const element =
+        document.getElementById(
+            "audit-detail-action"
+        );
+
+
+    if (
+        !element
+    ) {
+
+        return;
+
+    }
+
+
+    element.innerHTML =
+        auditBadge(
+            action
+        );
+
+}
+
+
+/*
+==========================================================
+RENDER AUDIT DOCUMENT TRACE
+==========================================================
+*/
+
+function renderAuditDocumentTrace(
+    item
+) {
+
+    /*
+    ======================================================
+    SOURCE
+    ======================================================
+    */
+
+    const sourceModule =
+        item.source_module
+        ||
+        "-";
+
+
+    const sourceNo =
+        item.source_no
+        ||
+        item.source_id
+        ||
+        "-";
+
+
+    /*
+    ======================================================
+    CURRENT DOCUMENT
+    ======================================================
+    */
+
+    const currentModule =
+        item.module
+        ||
+        "-";
+
+
+    const currentDocument =
+        getAuditDocument(
+            item
+        );
+
+
+    /*
+    ======================================================
+    SET DOM
+    ======================================================
+    */
+
+    setText(
+        "audit-detail-source-module",
+        sourceModule
+    );
+
+
+    setText(
+        "audit-detail-source-no",
+        sourceNo
+    );
+
+
+    setText(
+        "audit-detail-current-module",
+        currentModule
+    );
+
+
+    setText(
+        "audit-detail-current-document",
+        currentDocument
+    );
+
+
+    /*
+    ======================================================
+    TRACE CONTAINER STATE
+    ======================================================
+    */
+
+    const traceElement =
+        document.getElementById(
+            "audit-detail-trace"
+        );
+
+
+    if (
+        !traceElement
+    ) {
+
+        return;
+
+    }
+
+
+    const hasSource =
+        Boolean(
+            item.source_module
+            ||
+            item.source_id
+            ||
+            item.source_no
+        );
+
+
+    traceElement.classList.toggle(
+        "no-source",
+        !hasSource
+    );
+
+}
+
+
+/*
+==========================================================
+RENDER AUDIT CHANGED FIELDS
+==========================================================
+*/
+
+function renderAuditChangedFields(
+    item
+) {
+
+    const container =
+        document.getElementById(
+            "audit-detail-changed-fields"
+        );
+
+
+    if (
+        !container
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    GET CHANGES
+    ======================================================
+    */
+
+    const changes =
+        getAuditChangedFields(
+            item.old_data,
+            item.new_data
+        );
+
+
+    /*
+    ======================================================
+    EMPTY
+    ======================================================
+    */
+
+    if (
+        changes.length === 0
+    ) {
+
+        container.innerHTML = `
+
+            <div class="cc-no-changes">
+
+                <i class="fa-regular fa-circle-check"></i>
+
+                <span>
+                    Tidak ada perubahan field yang dapat ditampilkan.
+                </span>
+
+            </div>
+
+        `;
+
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    CHANGED FIELD TABLE
+    ======================================================
+    */
+
+    const rows =
+        changes
+            .map(
+                (
+                    change
+                ) => {
+
+                    return `
+
+                        <tr>
+
+                            <td>
+
+                                <strong class="cc-mono">
+
+                                    ${esc(
+                                        change.field
+                                    )}
+
+                                </strong>
+
+                            </td>
+
+
+                            <td>
+
+                                <pre class="cc-audit-change-value">${esc(
+                                    auditDisplayValue(
+                                        change.oldValue
+                                    )
+                                )}</pre>
+
+                            </td>
+
+
+                            <td>
+
+                                <pre class="cc-audit-change-value">${esc(
+                                    auditDisplayValue(
+                                        change.newValue
+                                    )
+                                )}</pre>
+
+                            </td>
+
+                        </tr>
+
+                    `;
+
+                }
+            )
+            .join(
+                ""
+            );
+
+
+    container.innerHTML = `
+
+        <div class="cc-table-responsive">
+
+            <table class="cc-table cc-audit-change-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Field
+                        </th>
+
+                        <th>
+                            Before
+                        </th>
+
+                        <th>
+                            After
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    ${rows}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
     `;
+
+}
+
+
+/*
+==========================================================
+RENDER AUDIT SNAPSHOTS
+==========================================================
+*/
+
+function renderAuditSnapshots(
+    item
+) {
+
+    const oldDataElement =
+        document.getElementById(
+            "audit-detail-old-data"
+        );
+
+
+    const newDataElement =
+        document.getElementById(
+            "audit-detail-new-data"
+        );
+
+
+    if (
+        oldDataElement
+    ) {
+
+        oldDataElement.textContent =
+            formatAuditJson(
+                item.old_data
+            );
+
+    }
+
+
+    if (
+        newDataElement
+    ) {
+
+        newDataElement.textContent =
+            formatAuditJson(
+                item.new_data
+            );
+
+    }
+
 }
 
 
@@ -1405,31 +3968,67 @@ FILL SELECTS
 
 function fillSelects() {
 
+    /*
+    ======================================================
+    ACTIVE COMPANY OPTIONS
+    ======================================================
+    */
+
     const companyOptions =
 
-        state
-            .companies
+        (
+            Array.isArray(
+                state.companies
+            )
+
+                ?
+
+            state.companies
+
+                :
+
+            []
+        )
             .filter(
-                (company) =>
+                (
+                    company
+                ) => {
 
-                    company.status
-                    ===
-                    "ACTIVE"
+                    return (
+                        String(
+                            company.status
+                            ||
+                            ""
+                        ).toUpperCase()
+                        ===
+                        "ACTIVE"
+                    );
 
+                }
             )
             .map(
-                (company) => {
+                (
+                    company
+                ) => {
 
                     return `
 
-                        <option value="${company.id}">
+                        <option value="${esc(
+                            company.id
+                        )}">
 
                             ${esc(
                                 company.company_code
+                                ||
+                                "-"
                             )}
+
                             —
+
                             ${esc(
                                 company.company_name
+                                ||
+                                "-"
                             )}
 
                         </option>
@@ -1438,8 +4037,16 @@ function fillSelects() {
 
                 }
             )
-            .join("");
+            .join(
+                ""
+            );
 
+
+    /*
+    ======================================================
+    DOM
+    ======================================================
+    */
 
     const subscriptionCompany =
         document.getElementById(
@@ -1459,6 +4066,12 @@ function fillSelects() {
         );
 
 
+    /*
+    ======================================================
+    SUBSCRIPTION COMPANY
+    ======================================================
+    */
+
     if (
         subscriptionCompany
     ) {
@@ -1466,9 +4079,11 @@ function fillSelects() {
         subscriptionCompany.innerHTML =
 
             `
-            <option value="">
-                Pilih company
-            </option>
+
+                <option value="">
+                    Pilih company
+                </option>
+
             `
 
             +
@@ -1477,6 +4092,12 @@ function fillSelects() {
 
     }
 
+
+    /*
+    ======================================================
+    ASSIGN USER COMPANY
+    ======================================================
+    */
 
     if (
         assignCompany
@@ -1485,9 +4106,11 @@ function fillSelects() {
         assignCompany.innerHTML =
 
             `
-            <option value="">
-                Pilih company
-            </option>
+
+                <option value="">
+                    Pilih company
+                </option>
+
             `
 
             +
@@ -1497,44 +4120,74 @@ function fillSelects() {
     }
 
 
+    /*
+    ======================================================
+    PLAN OPTIONS
+    ======================================================
+    */
+
     if (
         subscriptionPlan
     ) {
 
-        subscriptionPlan.innerHTML =
+        const planOptions =
 
-            `
-            <option value="">
-                Pilih paket
-            </option>
-            `
+            (
+                Array.isArray(
+                    state.plans
+                )
 
-            +
+                    ?
 
-            state
-                .plans
+                state.plans
+
+                    :
+
+                []
+            )
                 .filter(
-                    (plan) =>
+                    (
+                        plan
+                    ) => {
 
-                        plan.is_active
-                        !==
-                        false
+                        return (
+                            plan.is_active
+                            !==
+                            false
+                        );
 
+                    }
                 )
                 .map(
-                    (plan) => {
+                    (
+                        plan
+                    ) => {
 
                         return `
 
                             <option
-                                value="${plan.id}"
-                                data-price="${plan.price}"
-                                data-cycle="${plan.billing_cycle}">
+                                value="${esc(
+                                    plan.id
+                                )}"
+                                data-price="${esc(
+                                    plan.price
+                                    ??
+                                    0
+                                )}"
+                                data-cycle="${esc(
+                                    plan.billing_cycle
+                                    ||
+                                    ""
+                                )}">
 
                                 ${esc(
                                     plan.plan_name
+                                    ||
+                                    "-"
                                 )}
+
                                 —
+
                                 ${idr(
                                     plan.price
                                 )}
@@ -1545,37 +4198,26 @@ function fillSelects() {
 
                     }
                 )
-                .join("");
+                .join(
+                    ""
+                );
+
+
+        subscriptionPlan.innerHTML =
+
+            `
+
+                <option value="">
+                    Pilih paket
+                </option>
+
+            `
+
+            +
+
+            planOptions;
 
     }
-
-}
-
-
-/*
-==========================================================
-REFRESH DATA
-==========================================================
-*/
-
-async function refresh() {
-
-    const [dashboard, auditLogs] =
-        await Promise.all([
-            ControlCenterService.getDashboardData(),
-            ControlCenterService.getAuditLogs()
-        ]);
-
-    Object.assign(
-        state,
-        dashboard,
-        {
-            dashboard,
-            auditLogs
-        }
-    );
-
-    renderAll();
 
 }
 
@@ -1586,7 +4228,9 @@ SET SUGGESTED SUBSCRIPTION END DATE
 ==========================================================
 */
 
-function setSuggestedEndDate(cycle) {
+function setSuggestedEndDate(
+    cycle
+) {
 
     const startElement =
         document.getElementById(
@@ -1611,6 +4255,12 @@ function setSuggestedEndDate(cycle) {
     }
 
 
+    /*
+    ======================================================
+    START DATE
+    ======================================================
+    */
+
     const value =
         startElement.value;
 
@@ -1618,6 +4268,9 @@ function setSuggestedEndDate(cycle) {
     if (
         !value
     ) {
+
+        endElement.value =
+            "";
 
         return;
 
@@ -1631,7 +4284,37 @@ function setSuggestedEndDate(cycle) {
 
 
     if (
-        cycle === "ANNUAL"
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        endElement.value =
+            "";
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    BILLING CYCLE
+    ======================================================
+    */
+
+    const billingCycle =
+        String(
+            cycle
+            ||
+            ""
+        ).toUpperCase();
+
+
+    if (
+        billingCycle
+        ===
+        "ANNUAL"
     ) {
 
         date.setFullYear(
@@ -1652,12 +4335,24 @@ function setSuggestedEndDate(cycle) {
     }
 
 
+    /*
+    ======================================================
+    SUBTRACT ONE DAY
+    ======================================================
+    */
+
     date.setDate(
         date.getDate()
         -
         1
     );
 
+
+    /*
+    ======================================================
+    FORMAT YYYY-MM-DD
+    ======================================================
+    */
 
     const year =
         date.getFullYear();
@@ -1705,53 +4400,167 @@ function bind() {
     */
 
     document
-        .getElementById("btn-logout")
-        ?.addEventListener("click", async () => {
-            const button = document.getElementById("btn-logout");
+        .getElementById(
+            "btn-logout"
+        )
+        ?.addEventListener(
+            "click",
+            async (
+                event
+            ) => {
 
-            try {
-                if (button) button.disabled = true;
-                await ControlCenterService.logout();
-                location.replace("../login.html");
+                const button =
+                    event.currentTarget;
+
+
+                try {
+
+                    button.disabled =
+                        true;
+
+
+                    await ControlCenterService
+                        .logout();
+
+
+                    sessionStorage.clear();
+
+
+                    location.replace(
+                        "../login.html"
+                    );
+
+                }
+                catch (
+                    error
+                ) {
+
+                    showError(
+                        error
+                    );
+
+
+                    button.disabled =
+                        false;
+
+                }
+
             }
-            catch (error) {
-                showError(error);
-                if (button) button.disabled = false;
-            }
-        });
+        );
 
 
     /*
     ======================================================
-    AUDIT FILTER / REFRESH
+    AUDIT SEARCH
     ======================================================
     */
 
     document
-        .getElementById("audit-search")
-        ?.addEventListener("input", renderAuditLogs);
+        .getElementById(
+            "audit-search"
+        )
+        ?.addEventListener(
+            "input",
+            () => {
 
-    document
-        .getElementById("audit-action")
-        ?.addEventListener("change", renderAuditLogs);
-
-    document
-        .getElementById("btn-refresh-audit")
-        ?.addEventListener("click", async (event) => {
-            const button = event.currentTarget;
-            try {
-                button.disabled = true;
-                state.auditLogs = await ControlCenterService.getAuditLogs();
                 renderAuditLogs();
-                showInfo("Audit Log diperbarui.");
+
             }
-            catch (error) {
-                showError(error);
+        );
+
+
+    /*
+    ======================================================
+    AUDIT ACTION FILTER
+    ======================================================
+    */
+
+    document
+        .getElementById(
+            "audit-action"
+        )
+        ?.addEventListener(
+            "change",
+            () => {
+
+                renderAuditLogs();
+
             }
-            finally {
-                button.disabled = false;
+        );
+
+
+    /*
+    ======================================================
+    AUDIT REFRESH
+    ======================================================
+    */
+
+    document
+        .getElementById(
+            "btn-refresh-audit"
+        )
+        ?.addEventListener(
+            "click",
+            async (
+                event
+            ) => {
+
+                const button =
+                    event.currentTarget;
+
+
+                try {
+
+                    button.disabled =
+                        true;
+
+
+                    const auditLogs =
+                        await ControlCenterService
+                            .getAuditLogs();
+
+
+                    state.auditLogs =
+
+                        Array.isArray(
+                            auditLogs
+                        )
+
+                            ?
+
+                        auditLogs
+
+                            :
+
+                        [];
+
+
+                    renderAuditLogs();
+
+
+                    showInfo(
+                        "Audit Log diperbarui."
+                    );
+
+                }
+                catch (
+                    error
+                ) {
+
+                    showError(
+                        error
+                    );
+
+                }
+                finally {
+
+                    button.disabled =
+                        false;
+
+                }
+
             }
-        });
+        );
 
 
     /*
@@ -1765,7 +4574,9 @@ function bind() {
             ".cc-nav-item"
         )
         .forEach(
-            (button) => {
+            (
+                button
+            ) => {
 
                 button.addEventListener(
                     "click",
@@ -1793,7 +4604,9 @@ function bind() {
             "[data-nav]"
         )
         .forEach(
-            (button) => {
+            (
+                button
+            ) => {
 
                 button.addEventListener(
                     "click",
@@ -1812,7 +4625,7 @@ function bind() {
 
     /*
     ======================================================
-    MOBILE SIDEBAR
+    MOBILE SIDEBAR BUTTON
     ======================================================
     */
 
@@ -1822,28 +4635,15 @@ function bind() {
         )
         ?.addEventListener(
             "click",
-            () => {
-
-                document
-                    .getElementById(
-                        "cc-sidebar"
-                    )
-                    ?.classList.toggle(
-                        "show"
-                    );
-
-
-                document
-                    .getElementById(
-                        "cc-overlay"
-                    )
-                    ?.classList.toggle(
-                        "show"
-                    );
-
-            }
+            toggleSidebar
         );
 
+
+    /*
+    ======================================================
+    MOBILE SIDEBAR OVERLAY
+    ======================================================
+    */
 
     document
         .getElementById(
@@ -1857,8 +4657,57 @@ function bind() {
 
     /*
     ======================================================
+    ESCAPE KEY
+    ======================================================
+    */
+
+    document.addEventListener(
+        "keydown",
+        (
+            event
+        ) => {
+
+            if (
+                event.key
+                ===
+                "Escape"
+            ) {
+
+                closeSidebar();
+
+            }
+
+        }
+    );
+
+
+    /*
+    ======================================================
+    WINDOW RESIZE
+    ======================================================
+    */
+
+    window.addEventListener(
+        "resize",
+        () => {
+
+            if (
+                window.innerWidth
+                >
+                991
+            ) {
+
+                closeSidebar();
+
+            }
+
+        }
+    );
+
+
+    /*
+    ======================================================
     COMPANY FORM
-    FIX : SAVE FORM REFERENCE BEFORE AWAIT
     ======================================================
     */
 
@@ -1879,8 +4728,9 @@ function bind() {
 
 
                 /*
-                Save form reference before await.
-                Do not use event.currentTarget after await.
+                ==============================================
+                SAVE FORM REFERENCE BEFORE AWAIT
+                ==============================================
                 */
 
                 const form =
@@ -1905,6 +4755,12 @@ function bind() {
                     }
 
 
+                    /*
+                    ==============================================
+                    PAYLOAD
+                    ==============================================
+                    */
+
                     const formData =
                         new FormData(
                             form
@@ -1917,11 +4773,84 @@ function bind() {
                         );
 
 
+                    /*
+                    ==============================================
+                    NORMALIZE COMPANY CODE
+                    ==============================================
+                    */
+
+                    if (
+                        payload.company_code
+                    ) {
+
+                        payload.company_code =
+                            String(
+                                payload.company_code
+                            )
+                                .trim()
+                                .toUpperCase();
+
+                    }
+
+
+                    /*
+                    ==============================================
+                    NORMALIZE COMPANY NAME
+                    ==============================================
+                    */
+
+                    if (
+                        payload.company_name
+                    ) {
+
+                        payload.company_name =
+                            String(
+                                payload.company_name
+                            )
+                                .trim();
+
+                    }
+
+
+                    /*
+                    ==============================================
+                    MAX USERS
+                    ==============================================
+                    */
+
+                    if (
+                        payload.max_users
+                        !==
+                        undefined
+                    ) {
+
+                        payload.max_users =
+                            Number(
+                                payload.max_users
+                                ||
+                                0
+                            );
+
+                    }
+
+
+                    /*
+                    ==============================================
+                    CREATE COMPANY
+                    ==============================================
+                    */
+
                     await ControlCenterService
                         .createCompany(
                             payload
                         );
 
+
+                    /*
+                    ==============================================
+                    CLOSE MODAL
+                    ==============================================
+                    */
 
                     const modalElement =
                         document.getElementById(
@@ -1929,28 +4858,71 @@ function bind() {
                         );
 
 
-                    const modalInstance =
+                    if (
                         modalElement
-                            ?
+                        &&
+                        typeof bootstrap
+                        !==
+                        "undefined"
+                        &&
                         bootstrap.Modal
-                            .getInstance(
+                    ) {
+
+                        bootstrap.Modal
+                            .getOrCreateInstance(
                                 modalElement
                             )
-                            :
-                        null;
+                            .hide();
 
-
-                    modalInstance
-                        ?.hide();
+                    }
 
 
                     /*
-                    IMPORTANT
-                    Form reference is safe.
+                    ==============================================
+                    RESET FORM
+                    ==============================================
                     */
 
                     form.reset();
 
+
+                    const maxUsersElement =
+                        form.querySelector(
+                            '[name="max_users"]'
+                        );
+
+
+                    if (
+                        maxUsersElement
+                    ) {
+
+                        maxUsersElement.value =
+                            "5";
+
+                    }
+
+
+                    const statusElement =
+                        form.querySelector(
+                            '[name="status"]'
+                        );
+
+
+                    if (
+                        statusElement
+                    ) {
+
+                        statusElement.value =
+                            "ACTIVE";
+
+                    }
+
+
+                    /*
+                    ==============================================
+                    MESSAGE + REFRESH
+                    ==============================================
+                    */
 
                     showInfo(
                         "Company berhasil dibuat."
@@ -2008,16 +4980,60 @@ function bind() {
                         .selectedOptions[0];
 
 
+                /*
+                ==============================================
+                EMPTY PLAN
+                ==============================================
+                */
+
                 if (
                     !selectedOption
                     ||
                     !selectedOption.value
                 ) {
 
+                    const amountElement =
+                        document.getElementById(
+                            "sub-amount"
+                        );
+
+
+                    const endElement =
+                        document.getElementById(
+                            "sub-end"
+                        );
+
+
+                    if (
+                        amountElement
+                    ) {
+
+                        amountElement.value =
+                            "";
+
+                    }
+
+
+                    if (
+                        endElement
+                    ) {
+
+                        endElement.value =
+                            "";
+
+                    }
+
+
                     return;
 
                 }
 
+
+                /*
+                ==============================================
+                SET AMOUNT
+                ==============================================
+                */
 
                 const amountElement =
                     document.getElementById(
@@ -2038,6 +5054,12 @@ function bind() {
 
                 }
 
+
+                /*
+                ==============================================
+                SET END DATE
+                ==============================================
+                */
 
                 const startElement =
                     document.getElementById(
@@ -2107,7 +5129,6 @@ function bind() {
     /*
     ======================================================
     SUBSCRIPTION FORM
-    FIX : SAVE FORM REFERENCE BEFORE AWAIT
     ======================================================
     */
 
@@ -2126,6 +5147,12 @@ function bind() {
 
                 event.preventDefault();
 
+
+                /*
+                ==============================================
+                SAVE FORM REFERENCE BEFORE AWAIT
+                ==============================================
+                */
 
                 const form =
                     event.currentTarget;
@@ -2149,6 +5176,12 @@ function bind() {
                     }
 
 
+                    /*
+                    ==============================================
+                    PAYLOAD
+                    ==============================================
+                    */
+
                     const formData =
                         new FormData(
                             form
@@ -2161,11 +5194,45 @@ function bind() {
                         );
 
 
+                    /*
+                    ==============================================
+                    NORMALIZE AMOUNT
+                    ==============================================
+                    */
+
+                    if (
+                        payload.amount
+                        !==
+                        undefined
+                    ) {
+
+                        payload.amount =
+                            Number(
+                                payload.amount
+                                ||
+                                0
+                            );
+
+                    }
+
+
+                    /*
+                    ==============================================
+                    CREATE SUBSCRIPTION
+                    ==============================================
+                    */
+
                     await ControlCenterService
                         .createSubscription(
                             payload
                         );
 
+
+                    /*
+                    ==============================================
+                    CLOSE MODAL
+                    ==============================================
+                    */
 
                     const modalElement =
                         document.getElementById(
@@ -2173,23 +5240,39 @@ function bind() {
                         );
 
 
-                    const modalInstance =
+                    if (
                         modalElement
-                            ?
+                        &&
+                        typeof bootstrap
+                        !==
+                        "undefined"
+                        &&
                         bootstrap.Modal
-                            .getInstance(
+                    ) {
+
+                        bootstrap.Modal
+                            .getOrCreateInstance(
                                 modalElement
                             )
-                            :
-                        null;
+                            .hide();
+
+                    }
 
 
-                    modalInstance
-                        ?.hide();
-
+                    /*
+                    ==============================================
+                    RESET
+                    ==============================================
+                    */
 
                     form.reset();
 
+
+                    /*
+                    ==============================================
+                    MESSAGE + REFRESH
+                    ==============================================
+                    */
 
                     showInfo(
                         "Subscription berhasil dibuat."
@@ -2228,7 +5311,6 @@ function bind() {
     /*
     ======================================================
     ASSIGN USER FORM
-    FIX : SAVE FORM REFERENCE BEFORE AWAIT
     ======================================================
     */
 
@@ -2247,6 +5329,12 @@ function bind() {
 
                 event.preventDefault();
 
+
+                /*
+                ==============================================
+                SAVE FORM REFERENCE BEFORE AWAIT
+                ==============================================
+                */
 
                 const form =
                     event.currentTarget;
@@ -2270,6 +5358,12 @@ function bind() {
                     }
 
 
+                    /*
+                    ==============================================
+                    FORM DATA
+                    ==============================================
+                    */
+
                     const formData =
                         new FormData(
                             form
@@ -2277,22 +5371,72 @@ function bind() {
 
 
                     const email =
-                        formData.get(
-                            "email"
-                        );
+                        String(
+                            formData.get(
+                                "email"
+                            )
+                            ||
+                            ""
+                        )
+                            .trim()
+                            .toLowerCase();
 
 
                     const companyId =
-                        formData.get(
-                            "company_id"
-                        );
+                        String(
+                            formData.get(
+                                "company_id"
+                            )
+                            ||
+                            ""
+                        ).trim();
 
 
                     const role =
-                        formData.get(
-                            "role"
+                        String(
+                            formData.get(
+                                "role"
+                            )
+                            ||
+                            "STAFF"
+                        )
+                            .trim()
+                            .toUpperCase();
+
+
+                    /*
+                    ==============================================
+                    VALIDATION
+                    ==============================================
+                    */
+
+                    if (
+                        !email
+                    ) {
+
+                        throw new Error(
+                            "Email user wajib diisi."
                         );
 
+                    }
+
+
+                    if (
+                        !companyId
+                    ) {
+
+                        throw new Error(
+                            "Company wajib dipilih."
+                        );
+
+                    }
+
+
+                    /*
+                    ==============================================
+                    ASSIGN USER
+                    ==============================================
+                    */
 
                     await ControlCenterService
                         .assignUser(
@@ -2302,29 +5446,67 @@ function bind() {
                         );
 
 
+                    /*
+                    ==============================================
+                    CLOSE MODAL
+                    ==============================================
+                    */
+
                     const modalElement =
                         document.getElementById(
                             "assign-user-modal"
                         );
 
 
-                    const modalInstance =
+                    if (
                         modalElement
-                            ?
+                        &&
+                        typeof bootstrap
+                        !==
+                        "undefined"
+                        &&
                         bootstrap.Modal
-                            .getInstance(
+                    ) {
+
+                        bootstrap.Modal
+                            .getOrCreateInstance(
                                 modalElement
                             )
-                            :
-                        null;
+                            .hide();
+
+                    }
 
 
-                    modalInstance
-                        ?.hide();
-
+                    /*
+                    ==============================================
+                    RESET
+                    ==============================================
+                    */
 
                     form.reset();
 
+
+                    const roleElement =
+                        form.querySelector(
+                            '[name="role"]'
+                        );
+
+
+                    if (
+                        roleElement
+                    ) {
+
+                        roleElement.value =
+                            "STAFF";
+
+                    }
+
+
+                    /*
+                    ==============================================
+                    MESSAGE + REFRESH
+                    ==============================================
+                    */
 
                     showInfo(
                         "User berhasil dihubungkan ke company."
@@ -2361,76 +5543,184 @@ function bind() {
 
 }
 
-
 /*
 ==========================================================
-INITIALIZE
+INITIALIZE CONTROL CENTER
 ==========================================================
 */
 
-bind();
+async function initialize() {
+
+    /*
+    ======================================================
+    BIND EVENTS
+    ======================================================
+    */
+
+    bind();
 
 
-const initialPage =
-    location
-        .hash
-        .replace(
-            "#",
-            ""
+    /*
+    ======================================================
+    INITIAL PAGE FROM HASH
+    ======================================================
+    */
+
+    const initialPage =
+        location.hash
+            .replace(
+                "#",
+                ""
+            )
+            .trim();
+
+
+    navigate(
+        pages[initialPage]
+            ?
+        initialPage
+            :
+        "overview"
+    );
+
+
+    /*
+    ======================================================
+    LOAD DATA
+    ======================================================
+    */
+
+    try {
+
+        await loadAll();
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "Control Center initialization failed:",
+            error
         );
 
 
-navigate(
-    pages[initialPage]
-        ?
-    initialPage
-        :
-    "overview"
-);
+        /*
+        ==================================================
+        AUTH REQUIRED
+        ==================================================
+        */
+
+        if (
+            error?.message
+            ===
+            "AUTH_REQUIRED"
+        ) {
+
+            location.replace(
+                "../login.html"
+            );
 
 
-/*
-==========================================================
-LOAD CONTROL CENTER DATA
-==========================================================
-*/
+            return;
 
-loadAll()
-    .catch(
-        (
-            error
-        ) => {
+        }
+
+
+        /*
+        ==================================================
+        SUPER ADMIN REQUIRED
+        ==================================================
+        */
+
+        if (
+            error?.message
+            ===
+            "SUPER_ADMIN_REQUIRED"
+        ) {
 
             showError(
                 error
             );
 
 
-            document
-                .getElementById(
-                    "cc-loading"
-                )
-                ?.remove();
+            window.setTimeout(
+                () => {
+
+                    location.replace(
+                        "../index.html"
+                    );
+
+                },
+                1800
+            );
 
 
-            if (
-                ["AUTH_REQUIRED", "SUPER_ADMIN_REQUIRED"].includes(
-                    error?.message
-                )
-            ) {
-
-                setTimeout(
-                    () => {
-
-                        location.replace(
-                            "../login.html"
-                        );
-
-                    },
-                    1200
-                );
-
-            }
+            return;
 
         }
-    );
+
+
+        /*
+        ==================================================
+        OTHER ERROR
+        ==================================================
+        */
+
+        showError(
+            error
+        );
+
+    }
+
+}
+
+
+/*
+==========================================================
+HASH CHANGE
+==========================================================
+*/
+
+window.addEventListener(
+    "hashchange",
+    () => {
+
+        const page =
+            location.hash
+                .replace(
+                    "#",
+                    ""
+                )
+                .trim();
+
+
+        if (
+            pages[page]
+        ) {
+
+            navigate(
+                page
+            );
+
+        }
+
+    }
+);
+
+
+/*
+==========================================================
+START
+==========================================================
+*/
+
+initialize();
+
+
+/*
+==========================================================
+FINOVA CONTROL CENTER
+END OF FILE
+==========================================================
+*/

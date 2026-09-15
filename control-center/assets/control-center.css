@@ -1,11 +1,8019 @@
-:root{--cc-navy:#071d35;--cc-navy2:#0d3156;--cc-blue:#1e6cda;--cc-cyan:#20bed3;--cc-bg:#f5f7fa;--cc-text:#233447;--cc-muted:#718096;--cc-line:#e1e7ef;--cc-green:#249b66;--cc-orange:#ed9737;--cc-sidebar:252px}
-*{box-sizing:border-box}body{margin:0;font-family:Poppins,Arial,sans-serif;background:var(--cc-bg);color:var(--cc-text);font-size:13px}.cc-layout{min-height:100vh}.cc-sidebar{position:fixed;inset:0 auto 0 0;width:var(--cc-sidebar);background:linear-gradient(180deg,var(--cc-navy),#06172b);color:#fff;padding:22px 16px;display:flex;flex-direction:column;z-index:1040}.cc-brand{display:flex;align-items:center;gap:12px;padding:2px 8px 18px;border-bottom:1px solid rgba(255,255,255,.08)}.cc-brand img{width:38px;height:38px;object-fit:contain}.cc-brand strong{display:block;font-size:16px;letter-spacing:.4px}.cc-brand span{display:block;color:#9cb3cb;font-size:9px;margin-top:2px}.cc-owner-badge{display:flex;gap:8px;align-items:center;margin:16px 5px 5px;padding:10px 11px;border-radius:8px;background:rgba(32,190,211,.10);color:#77deeb;font-size:9px;font-weight:600}.cc-nav{margin-top:12px}.cc-nav-label{font-size:8px;color:#66819d;letter-spacing:1.1px;padding:10px 10px 7px}.cc-nav-item{width:100%;border:0;background:transparent;color:#adc0d1;border-radius:8px;padding:10px 11px;text-align:left;display:flex;align-items:center;gap:11px;margin:2px 0;font:500 11px Poppins;transition:.15s}.cc-nav-item i{width:17px;text-align:center}.cc-nav-item:hover,.cc-nav-item.active{background:#133f6a;color:#fff}.cc-nav-item.active{box-shadow:inset 3px 0 0 var(--cc-cyan)}.cc-sidebar-footer{margin-top:auto;padding:13px 8px 2px;border-top:1px solid rgba(255,255,255,.08);color:#8fa7be}.cc-sidebar-footer span,.cc-sidebar-footer small{display:block}.cc-sidebar-footer span{font-size:9px;font-weight:600}.cc-sidebar-footer small{font-size:8px;margin-top:3px}.cc-main{margin-left:var(--cc-sidebar);min-height:100vh}.cc-topbar{height:78px;background:#fff;border-bottom:1px solid var(--cc-line);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:1010}.cc-topbar h1{font-size:17px;font-weight:600;margin:0;color:var(--cc-navy)}.cc-topbar p{font-size:9px;margin:3px 0 0;color:var(--cc-muted)}.cc-top-actions{display:flex;align-items:center;gap:12px}.cc-environment{display:flex;align-items:center;gap:7px;border:1px solid var(--cc-line);border-radius:20px;padding:7px 11px;font-size:9px;color:#526477}.cc-environment span{width:7px;height:7px;border-radius:50%;background:var(--cc-green)}.cc-open-app{text-decoration:none;color:var(--cc-blue);font-size:9px;font-weight:600}.cc-avatar{width:34px;height:34px;background:var(--cc-navy);color:#fff;border-radius:9px;display:grid;place-items:center;font-size:10px;font-weight:700}.cc-icon-btn{border:1px solid var(--cc-line);background:#fff;border-radius:7px;width:36px;height:36px}.cc-content{padding:24px 28px 34px}.cc-phase-banner{border:1px solid #c9e6ee;background:#eefafd;color:#2d6772;border-radius:9px;padding:12px 15px;margin-bottom:20px;font-size:10px}.cc-phase-banner i{margin-right:9px;color:var(--cc-cyan)}.cc-page{display:none}.cc-page.active{display:block}.cc-kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.cc-kpi{background:#fff;border:1px solid var(--cc-line);border-radius:11px;min-height:118px;padding:19px;display:flex;align-items:center;gap:15px;box-shadow:0 3px 12px rgba(17,38,64,.035)}.cc-kpi-icon{width:42px;height:42px;border-radius:10px;display:grid;place-items:center;font-size:16px}.cc-kpi-icon.blue{background:#e9f1ff;color:var(--cc-blue)}.cc-kpi-icon.cyan{background:#e9fafc;color:#1499aa}.cc-kpi-icon.green{background:#ebf7f1;color:var(--cc-green)}.cc-kpi-icon.orange{background:#fff4e7;color:var(--cc-orange)}.cc-kpi span,.cc-kpi small{display:block}.cc-kpi span{font-size:9px;color:var(--cc-muted);font-weight:500}.cc-kpi strong{display:block;font-size:22px;color:var(--cc-navy);margin:3px 0}.cc-kpi small{font-size:7.7px;color:#9aa7b5}.cc-grid-2{display:grid;grid-template-columns:1.35fr 1fr;gap:16px}.cc-card{background:#fff;border:1px solid var(--cc-line);border-radius:11px;box-shadow:0 3px 12px rgba(17,38,64,.035);overflow:hidden}.cc-card-head{min-height:67px;padding:15px 17px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--cc-line)}.cc-card h2,.cc-page-toolbar h2{font-size:13px;font-weight:600;color:var(--cc-navy);margin:0}.cc-card p,.cc-page-toolbar p{font-size:8.5px;color:var(--cc-muted);margin:3px 0 0}.cc-table{margin:0;font-size:9px}.cc-table thead th{background:#f8fafc;color:#64758a;font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:.3px;padding:10px 13px;border-bottom:1px solid var(--cc-line)}.cc-table td{padding:12px 13px;vertical-align:middle;border-color:#edf1f5}.cc-empty td{text-align:center!important;color:#93a1b0;height:125px}.cc-empty i,.cc-empty span{display:block}.cc-empty i{font-size:22px;margin-bottom:8px}.cc-badge{font-size:7.5px;font-weight:700;border-radius:18px;padding:5px 9px}.cc-badge.success{color:#16734a;background:#e8f6ef}.cc-status-list{padding:9px 17px 15px}.cc-status-list div{display:flex;justify-content:space-between;align-items:center;padding:11px 1px;border-bottom:1px solid #eef2f6;font-size:9px}.cc-status-list div:last-child{border-bottom:0}.cc-status-list strong{font-size:8px;color:#607184}.cc-page-toolbar{display:flex;align-items:center;justify-content:space-between;margin:2px 0 15px}.cc-empty-panel{text-align:center;padding:70px 30px}.cc-empty-panel i{font-size:35px;color:#9cb4cb}.cc-empty-panel h3{font-size:14px;color:var(--cc-navy);margin:17px 0 7px}.cc-empty-panel p{max-width:610px;margin:auto;font-size:9px;color:var(--cc-muted);line-height:1.7}.cc-overlay{display:none}
-@media(max-width:1100px){.cc-kpi-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:991.98px){.cc-sidebar{transform:translateX(-100%);transition:.2s}.cc-sidebar.show{transform:translateX(0)}.cc-main{margin-left:0}.cc-overlay.show{display:block;position:fixed;inset:0;background:rgba(3,14,28,.45);z-index:1030}.cc-content{padding:20px}.cc-topbar{padding:0 20px}}
-@media(max-width:700px){.cc-kpi-grid,.cc-grid-2{grid-template-columns:1fr}.cc-open-app,.cc-environment{display:none}.cc-content{padding:16px}.cc-topbar{height:70px}.cc-phase-banner{line-height:1.6}}
+/* ==========================================================
+   FINOVA CONTROL CENTER
+   GLOBAL DESIGN SYSTEM
 
-/* ===== TAHAP 2 ===== */
-.cc-alert{border-radius:8px;padding:11px 14px;margin-bottom:14px;font-size:10px;font-weight:500}.cc-alert.error{background:#fff0f0;border:1px solid #f1c2c2;color:#9c3030}.cc-alert.success{background:#edf9f3;border:1px solid #bde8d2;color:#1e7651}.cc-badge.warning{color:#9a5b14;background:#fff2df}.cc-badge.neutral{color:#657485;background:#eef2f6}.cc-table tbody tr:hover{background:#fbfcfe}.cc-table small{font-size:7.5px;color:var(--cc-muted)}.modal-content{border:0;border-radius:12px;box-shadow:0 18px 50px rgba(4,22,42,.18)}.modal-header,.modal-footer{border-color:var(--cc-line)}.modal-title{font-size:14px;font-weight:600;color:var(--cc-navy)}.modal-body label{display:block;font-size:8.5px;font-weight:600;color:#63758a;margin-bottom:5px}.modal-body .form-control,.modal-body .form-select{min-height:38px;font-size:10px;border-color:#dce4ed}.modal-body .form-control:focus,.modal-body .form-select:focus{border-color:#8bb8f6;box-shadow:0 0 0 .15rem rgba(30,108,218,.1)}
+   VERSION : 3.1
+   STYLE   : FINOVA ACCOUNTING SYSTEM
+========================================================== */
 
-/* FINAL CONTROL CENTER */
-.cc-logout-btn{height:34px;border:1px solid #d9e1e8;background:#fff;color:#b42318;border-radius:8px;padding:0 11px;display:flex;align-items:center;gap:7px;font:600 9px Poppins;transition:.15s}.cc-logout-btn:hover{background:#fff3f2;border-color:#f0b8b3}.cc-logout-btn:disabled{opacity:.6;cursor:not-allowed}.cc-audit-filter{display:grid;grid-template-columns:minmax(240px,1fr) 170px;gap:10px;padding:14px 16px;border-bottom:1px solid var(--cc-line);background:#fbfcfd}.cc-mono{font-family:Consolas,Monaco,monospace;font-size:8px;color:#607184}@media(max-width:700px){.cc-logout-btn span{display:none}.cc-logout-btn{width:34px;padding:0;justify-content:center}.cc-audit-filter{grid-template-columns:1fr}.cc-top-actions{gap:8px}}
+
+/* ==========================================================
+   ROOT VARIABLES
+========================================================== */
+
+:root {
+
+    /* ======================================================
+       LAYOUT
+    ====================================================== */
+
+    --cc-sidebar-width: 260px;
+    --cc-topbar-height: 70px;
+
+
+    /* ======================================================
+       FINOVA SIDEBAR
+    ====================================================== */
+
+    --cc-sidebar-bg: #0F172A;
+    --cc-sidebar-hover: #1E293B;
+    --cc-sidebar-active: #2563EB;
+
+    --cc-sidebar-text: #CBD5E1;
+    --cc-sidebar-text-active: #FFFFFF;
+    --cc-sidebar-muted: #94A3B8;
+
+
+    /* ======================================================
+       PAGE
+    ====================================================== */
+
+    --cc-page-bg: #F3F4F6;
+
+    --cc-card-bg: #FFFFFF;
+
+
+    /* ======================================================
+       TEXT
+    ====================================================== */
+
+    --cc-text-primary: #183153;
+    --cc-text-secondary: #64748B;
+    --cc-text-muted: #94A3B8;
+
+
+    /* ======================================================
+       BRAND
+    ====================================================== */
+
+    --cc-primary: #2563EB;
+    --cc-primary-hover: #1D4ED8;
+
+
+    /* ======================================================
+       STATUS
+    ====================================================== */
+
+    --cc-success: #22C55E;
+    --cc-warning: #F59E0B;
+    --cc-danger: #EF4444;
+    --cc-info: #0EA5E9;
+
+
+    /* ======================================================
+       BORDER
+    ====================================================== */
+
+    --cc-border: #E5E7EB;
+
+
+    /* ======================================================
+       RADIUS
+    ====================================================== */
+
+    --cc-radius-sm: 6px;
+    --cc-radius-md: 8px;
+    --cc-radius-lg: 12px;
+
+
+    /* ======================================================
+       SHADOW
+    ====================================================== */
+
+    --cc-shadow-sm:
+        0 1px 2px rgba(15, 23, 42, .04),
+        0 3px 8px rgba(15, 23, 42, .035);
+
+    --cc-shadow-md:
+        0 2px 4px rgba(15, 23, 42, .05),
+        0 6px 14px rgba(15, 23, 42, .045);
+
+}
+
+
+/* ==========================================================
+   RESET
+========================================================== */
+
+* {
+
+    box-sizing: border-box;
+
+}
+
+
+html,
+body {
+
+    width: 100%;
+
+    min-height: 100%;
+
+    margin: 0;
+
+    padding: 0;
+
+}
+
+
+body {
+
+    font-family:
+        "Poppins",
+        sans-serif;
+
+    font-size: 13px;
+
+    color:
+        var(--cc-text-primary);
+
+    background:
+        var(--cc-page-bg);
+
+}
+
+
+/* ==========================================================
+   BUTTON / INPUT FONT
+========================================================== */
+
+button,
+input,
+select,
+textarea {
+
+    font-family:
+        "Poppins",
+        sans-serif;
+
+}
+
+
+/* ==========================================================
+   CONTROL CENTER LAYOUT
+========================================================== */
+
+.cc-layout {
+
+    display: flex;
+
+    width: 100%;
+
+    min-height: 100vh;
+
+    background:
+        var(--cc-page-bg);
+
+}
+
+
+/* ==========================================================
+   SIDEBAR
+========================================================== */
+
+.cc-sidebar {
+
+    position: fixed;
+
+    top: 0;
+
+    left: 0;
+
+    bottom: 0;
+
+    z-index: 1040;
+
+
+    display: flex;
+
+    flex-direction: column;
+
+
+    width:
+        var(--cc-sidebar-width);
+
+    height: 100vh;
+
+
+    padding: 0;
+
+
+    background:
+        var(--cc-sidebar-bg);
+
+    color:
+        var(--cc-sidebar-text);
+
+
+    border-right:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .06
+        );
+
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   SIDEBAR BRAND
+========================================================== */
+
+.cc-brand {
+
+    display: flex;
+
+    align-items: center;
+
+
+    width: 100%;
+
+    height:
+        var(--cc-topbar-height);
+
+    min-height:
+        var(--cc-topbar-height);
+
+
+    padding:
+        0 18px;
+
+
+    gap: 10px;
+
+
+    background:
+        #FFFFFF;
+
+
+    border-bottom:
+        1px solid
+        var(--cc-border);
+
+}
+
+
+/* ==========================================================
+   BRAND LOGO
+========================================================== */
+
+.cc-brand img {
+
+    width: 70px;
+
+    height: 64px;
+
+
+    flex-shrink: 0;
+
+
+    object-fit: contain;
+
+}
+
+
+/* ==========================================================
+   BRAND TEXT CONTAINER
+========================================================== */
+
+.cc-brand > div {
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+
+    min-width: 0;
+
+}
+
+
+/* ==========================================================
+   FINOVA TITLE
+========================================================== */
+
+.cc-brand strong {
+
+    display: block;
+
+
+    margin: 0;
+
+
+    color:
+        #0F172A;
+
+
+    font-size: 20px;
+
+    font-weight: 700;
+
+    line-height: 1.1;
+
+}
+
+
+/* ==========================================================
+   CONTROL CENTER SUBTITLE
+========================================================== */
+
+.cc-brand span {
+
+    display: block;
+
+
+    margin-top: 3px;
+
+
+    color:
+        #64748B;
+
+
+    font-size: 11px;
+
+    font-weight: 500;
+
+    line-height: 1.2;
+
+
+    letter-spacing: .2px;
+
+}
+
+
+/* ==========================================================
+   SUPER ADMIN BADGE
+========================================================== */
+
+.cc-owner-badge {
+
+    display: flex;
+
+    align-items: center;
+
+
+    gap: 9px;
+
+
+    min-height: 38px;
+
+
+    margin:
+        16px 16px 6px;
+
+
+    padding:
+        0 12px;
+
+
+    border-radius:
+        var(--cc-radius-md);
+
+
+    background:
+        rgba(
+            37,
+            99,
+            235,
+            .14
+        );
+
+
+    color:
+        #93C5FD;
+
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+}
+
+
+/* ==========================================================
+   SUPER ADMIN ICON
+========================================================== */
+
+.cc-owner-badge i {
+
+    width: 16px;
+
+
+    flex-shrink: 0;
+
+
+    color:
+        #60A5FA;
+
+
+    text-align: center;
+
+}
+
+
+/* ==========================================================
+   SIDEBAR NAVIGATION
+========================================================== */
+
+.cc-nav {
+
+    flex: 1;
+
+
+    min-height: 0;
+
+
+    margin: 0;
+
+
+    padding:
+        8px 0 16px;
+
+
+    overflow-x: hidden;
+
+    overflow-y: auto;
+
+}
+
+
+/* ==========================================================
+   SIDEBAR SCROLLBAR
+========================================================== */
+
+.cc-nav::-webkit-scrollbar {
+
+    width: 5px;
+
+}
+
+
+.cc-nav::-webkit-scrollbar-track {
+
+    background:
+        transparent;
+
+}
+
+
+.cc-nav::-webkit-scrollbar-thumb {
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            .10
+        );
+
+
+    border-radius: 999px;
+
+}
+
+
+/* ==========================================================
+   NAVIGATION GROUP LABEL
+
+   EXAMPLE:
+   CONTROL CENTER
+   SYSTEM
+========================================================== */
+
+.cc-nav-label {
+
+    padding:
+        16px 24px 8px;
+
+
+    color:
+        var(--cc-sidebar-muted);
+
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+
+    text-transform: uppercase;
+
+
+    letter-spacing: 1px;
+
+}
+
+
+/* ==========================================================
+   SIDEBAR MENU
+========================================================== */
+
+.cc-nav-item {
+
+    position: relative;
+
+
+    display: flex;
+
+    align-items: center;
+
+
+    gap: 12px;
+
+
+    width:
+        calc(
+            100% - 20px
+        );
+
+
+    min-height: 42px;
+
+
+    margin:
+        2px 10px;
+
+
+    padding:
+        0 14px;
+
+
+    border: 0;
+
+    border-radius:
+        var(--cc-radius-md);
+
+
+    background:
+        transparent;
+
+
+    color:
+        var(--cc-sidebar-text);
+
+
+    font-size: 13px;
+
+    font-weight: 500;
+
+
+    line-height: 1;
+
+
+    text-align: left;
+
+
+    cursor: pointer;
+
+
+    transition:
+        background-color .15s ease,
+        color .15s ease;
+
+}
+
+
+/* ==========================================================
+   SIDEBAR MENU ICON
+========================================================== */
+
+.cc-nav-item i {
+
+    width: 18px;
+
+
+    flex-shrink: 0;
+
+
+    color:
+        var(--cc-sidebar-muted);
+
+
+    font-size: 13px;
+
+
+    text-align: center;
+
+
+    transition:
+        color .15s ease;
+
+}
+
+
+/* ==========================================================
+   SIDEBAR MENU HOVER
+========================================================== */
+
+.cc-nav-item:hover {
+
+    background:
+        var(--cc-sidebar-hover);
+
+
+    color:
+        #FFFFFF;
+
+}
+
+
+.cc-nav-item:hover i {
+
+    color:
+        #FFFFFF;
+
+}
+
+
+/* ==========================================================
+   SIDEBAR ACTIVE MENU
+========================================================== */
+
+.cc-nav-item.active {
+
+    background:
+        var(--cc-sidebar-active);
+
+
+    color:
+        var(--cc-sidebar-text-active);
+
+
+    box-shadow: none;
+
+}
+
+
+.cc-nav-item.active i {
+
+    color:
+        #FFFFFF;
+
+}
+
+
+/* ==========================================================
+   REMOVE OLD ACTIVE INDICATOR
+========================================================== */
+
+.cc-nav-item.active::before {
+
+    display: none;
+
+}
+
+
+/* ==========================================================
+   SIDEBAR FOOTER
+========================================================== */
+
+.cc-sidebar-footer {
+
+    flex-shrink: 0;
+
+
+    width: 100%;
+
+
+    margin: 0;
+
+
+    padding:
+        14px 18px;
+
+
+    background:
+        var(--cc-sidebar-bg);
+
+
+    border-top:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .08
+        );
+
+}
+
+
+/* ==========================================================
+   SIDEBAR FOOTER ADMIN
+========================================================== */
+
+.cc-sidebar-footer span {
+
+    display: block;
+
+
+    color:
+        #E2E8F0;
+
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+
+    line-height: 1.4;
+
+}
+
+
+/* ==========================================================
+   SIDEBAR FOOTER DESCRIPTION
+========================================================== */
+
+.cc-sidebar-footer small {
+
+    display: block;
+
+
+    margin-top: 3px;
+
+
+    color:
+        #64748B;
+
+
+    font-size: 9px;
+
+    font-weight: 400;
+
+
+    line-height: 1.4;
+
+}
+
+
+/* ==========================================================
+   MAIN AREA
+========================================================== */
+
+.cc-main {
+
+    display: flex;
+
+    flex-direction: column;
+
+
+    width:
+        calc(
+            100% -
+            var(--cc-sidebar-width)
+        );
+
+
+    min-height: 100vh;
+
+
+    margin-left:
+        var(--cc-sidebar-width);
+
+
+    background:
+        var(--cc-page-bg);
+
+}
+/* ==========================================================
+   FINOVA CONTROL CENTER
+   TAHAP 3.1A — PART 2
+
+   TOPBAR
+   CONTENT
+   PAGE HEADER
+========================================================== */
+
+
+/* ==========================================================
+   TOPBAR
+========================================================== */
+
+.cc-topbar {
+
+    position: sticky;
+
+    top: 0;
+
+    z-index: 1010;
+
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+
+    width: 100%;
+
+
+    height:
+        var(--cc-topbar-height);
+
+    min-height:
+        var(--cc-topbar-height);
+
+
+    padding:
+        0 24px;
+
+
+    background:
+        #FFFFFF;
+
+
+    border-bottom:
+        1px solid
+        var(--cc-border);
+
+}
+
+
+/* ==========================================================
+   TOPBAR LEFT
+========================================================== */
+
+.cc-topbar > div:first-child {
+
+    min-width: 0;
+
+}
+
+
+/* ==========================================================
+   TOPBAR PAGE TITLE
+========================================================== */
+
+.cc-topbar h1 {
+
+    margin: 0;
+
+
+    color:
+        var(--cc-text-primary);
+
+
+    font-size: 18px;
+
+    font-weight: 700;
+
+
+    line-height: 1.2;
+
+
+    letter-spacing: -.2px;
+
+}
+
+
+/* ==========================================================
+   TOPBAR PAGE SUBTITLE
+========================================================== */
+
+.cc-topbar p {
+
+    margin:
+        4px 0 0;
+
+
+    color:
+        var(--cc-text-secondary);
+
+
+    font-size: 11px;
+
+    font-weight: 400;
+
+
+    line-height: 1.4;
+
+}
+
+
+/* ==========================================================
+   TOPBAR ACTION AREA
+========================================================== */
+
+.cc-top-actions {
+
+    display: flex;
+
+    align-items: center;
+
+
+    flex-shrink: 0;
+
+
+    gap: 10px;
+
+}
+
+
+/* ==========================================================
+   ENVIRONMENT INDICATOR
+========================================================== */
+
+.cc-environment {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+
+    gap: 7px;
+
+
+    height: 34px;
+
+
+    padding:
+        0 12px;
+
+
+    background:
+        #FFFFFF;
+
+
+    border:
+        1px solid
+        var(--cc-border);
+
+
+    border-radius: 999px;
+
+
+    color:
+        var(--cc-text-secondary);
+
+
+    font-size: 10px;
+
+    font-weight: 500;
+
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   ENVIRONMENT STATUS DOT
+========================================================== */
+
+.cc-environment span {
+
+    display: block;
+
+
+    width: 7px;
+
+    height: 7px;
+
+
+    flex-shrink: 0;
+
+
+    border-radius: 50%;
+
+
+    background:
+        var(--cc-success);
+
+
+    box-shadow:
+        0 0 0 3px
+        rgba(
+            34,
+            197,
+            94,
+            .10
+        );
+
+}
+
+
+/* ==========================================================
+   SUPER ADMIN AVATAR
+========================================================== */
+
+.cc-avatar {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+
+    width: 36px;
+
+    height: 36px;
+
+
+    flex-shrink: 0;
+
+
+    border-radius:
+        var(--cc-radius-md);
+
+
+    background:
+        #0F172A;
+
+
+    color:
+        #FFFFFF;
+
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+
+    line-height: 1;
+
+
+    user-select: none;
+
+}
+
+
+/* ==========================================================
+   GENERIC ICON BUTTON
+   USED FOR MOBILE MENU
+========================================================== */
+
+.cc-icon-btn {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+
+    width: 38px;
+
+    height: 38px;
+
+
+    flex-shrink: 0;
+
+
+    padding: 0;
+
+
+    background:
+        #FFFFFF;
+
+
+    border:
+        1px solid
+        var(--cc-border);
+
+
+    border-radius:
+        var(--cc-radius-md);
+
+
+    color:
+        var(--cc-text-primary);
+
+
+    font-size: 13px;
+
+
+    cursor: pointer;
+
+
+    transition:
+        background-color .15s ease,
+        border-color .15s ease,
+        color .15s ease;
+
+}
+
+
+.cc-icon-btn:hover {
+
+    background:
+        #F8FAFC;
+
+
+    border-color:
+        #CBD5E1;
+
+}
+
+
+/* ==========================================================
+   LOGOUT BUTTON
+========================================================== */
+
+.cc-logout-btn {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+
+    gap: 7px;
+
+
+    height: 38px;
+
+
+    padding:
+        0 14px;
+
+
+    background:
+        #FFFFFF;
+
+
+    border:
+        1px solid
+        #FECACA;
+
+
+    border-radius:
+        var(--cc-radius-md);
+
+
+    color:
+        #DC2626;
+
+
+    font-family:
+        "Poppins",
+        sans-serif;
+
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+
+    line-height: 1;
+
+
+    white-space: nowrap;
+
+
+    cursor: pointer;
+
+
+    transition:
+        background-color .15s ease,
+        border-color .15s ease,
+        color .15s ease;
+
+}
+
+
+/* ==========================================================
+   LOGOUT ICON
+========================================================== */
+
+.cc-logout-btn i {
+
+    font-size: 12px;
+
+}
+
+
+/* ==========================================================
+   LOGOUT HOVER
+========================================================== */
+
+.cc-logout-btn:hover {
+
+    background:
+        #FEF2F2;
+
+
+    border-color:
+        #FCA5A5;
+
+
+    color:
+        #B91C1C;
+
+}
+
+
+/* ==========================================================
+   LOGOUT DISABLED
+========================================================== */
+
+.cc-logout-btn:disabled {
+
+    opacity: .60;
+
+
+    cursor: not-allowed;
+
+}
+
+
+/* ==========================================================
+   MAIN CONTENT
+========================================================== */
+
+.cc-content {
+
+    display: flex;
+
+    flex-direction: column;
+
+
+    flex: 1;
+
+
+    width: 100%;
+
+
+    min-height: 0;
+
+
+    padding: 24px;
+
+
+    background:
+        var(--cc-page-bg);
+
+}
+
+
+/* ==========================================================
+   SYSTEM / PHASE BANNER
+========================================================== */
+
+.cc-phase-banner {
+
+    display: flex;
+
+    align-items: center;
+
+
+    width: 100%;
+
+
+    min-height: 42px;
+
+
+    margin:
+        0 0 20px;
+
+
+    padding:
+        10px 14px;
+
+
+    background:
+        #F0F9FF;
+
+
+    border:
+        1px solid
+        #BAE6FD;
+
+
+    border-radius:
+        var(--cc-radius-md);
+
+
+    color:
+        #0369A1;
+
+
+    font-size: 11px;
+
+    font-weight: 400;
+
+
+    line-height: 1.5;
+
+}
+
+
+/* ==========================================================
+   SYSTEM BANNER ICON
+========================================================== */
+
+.cc-phase-banner i {
+
+    flex-shrink: 0;
+
+
+    margin-right: 8px;
+
+
+    color:
+        var(--cc-info);
+
+
+    font-size: 12px;
+
+}
+
+
+/* ==========================================================
+   SYSTEM BANNER STRONG
+========================================================== */
+
+.cc-phase-banner strong {
+
+    color:
+        #075985;
+
+
+    font-weight: 600;
+
+}
+
+
+/* ==========================================================
+   PAGE
+========================================================== */
+
+.cc-page {
+
+    display: none;
+
+
+    width: 100%;
+
+
+    min-width: 0;
+
+}
+
+
+/* ==========================================================
+   ACTIVE PAGE
+========================================================== */
+
+.cc-page.active {
+
+    display: block;
+
+}
+
+
+/* ==========================================================
+   PAGE TOOLBAR
+========================================================== */
+
+.cc-page-toolbar {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    justify-content: space-between;
+
+
+    width: 100%;
+
+
+    gap: 24px;
+
+
+    margin:
+        0 0 16px;
+
+}
+
+
+/* ==========================================================
+   PAGE TOOLBAR LEFT
+========================================================== */
+
+.cc-page-toolbar > div:first-child {
+
+    min-width: 0;
+
+}
+
+
+/* ==========================================================
+   PAGE TITLE
+========================================================== */
+
+.cc-page-toolbar h2 {
+
+    margin: 0;
+
+
+    color:
+        var(--cc-text-primary);
+
+
+    font-size: 18px;
+
+    font-weight: 700;
+
+
+    line-height: 1.25;
+
+
+    letter-spacing: -.15px;
+
+}
+
+
+/* ==========================================================
+   PAGE DESCRIPTION
+========================================================== */
+
+.cc-page-toolbar p {
+
+    max-width: 760px;
+
+
+    margin:
+        4px 0 0;
+
+
+    color:
+        var(--cc-text-secondary);
+
+
+    font-size: 11px;
+
+    font-weight: 400;
+
+
+    line-height: 1.5;
+
+}
+
+
+/* ==========================================================
+   PAGE TOOLBAR ACTION
+========================================================== */
+
+.cc-page-toolbar > div:last-child {
+
+    display: flex;
+
+    align-items: center;
+
+
+    flex-shrink: 0;
+
+
+    gap: 8px;
+
+}
+
+
+/* ==========================================================
+   STANDARD CONTROL CENTER BUTTON
+   SAME HEIGHT AS FINOVA
+========================================================== */
+
+.cc-btn {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+
+    gap: 7px;
+
+
+    height: 38px;
+
+
+    padding:
+        0 14px;
+
+
+    border:
+        1px solid
+        transparent;
+
+
+    border-radius:
+        var(--cc-radius-md);
+
+
+    font-family:
+        "Poppins",
+        sans-serif;
+
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+
+    line-height: 1;
+
+
+    white-space: nowrap;
+
+
+    cursor: pointer;
+
+
+    transition:
+        background-color .15s ease,
+        border-color .15s ease,
+        color .15s ease;
+
+}
+
+
+/* ==========================================================
+   PRIMARY BUTTON
+========================================================== */
+
+.cc-btn.primary {
+
+    background:
+        var(--cc-primary);
+
+
+    border-color:
+        var(--cc-primary);
+
+
+    color:
+        #FFFFFF;
+
+}
+
+
+.cc-btn.primary:hover {
+
+    background:
+        var(--cc-primary-hover);
+
+
+    border-color:
+        var(--cc-primary-hover);
+
+}
+
+
+/* ==========================================================
+   SECONDARY BUTTON
+========================================================== */
+
+.cc-btn.secondary {
+
+    background:
+        #FFFFFF;
+
+
+    border-color:
+        var(--cc-border);
+
+
+    color:
+        var(--cc-text-primary);
+
+}
+
+
+.cc-btn.secondary:hover {
+
+    background:
+        #F8FAFC;
+
+
+    border-color:
+        #CBD5E1;
+
+}
+
+
+/* ==========================================================
+   DANGER BUTTON
+========================================================== */
+
+.cc-btn.danger {
+
+    background:
+        #FFFFFF;
+
+
+    border-color:
+        #FECACA;
+
+
+    color:
+        #DC2626;
+
+}
+
+
+.cc-btn.danger:hover {
+
+    background:
+        #FEF2F2;
+
+
+    border-color:
+        #FCA5A5;
+
+}
+
+
+/* ==========================================================
+   DISABLED BUTTON
+========================================================== */
+
+.cc-btn:disabled {
+
+    opacity: .60;
+
+
+    cursor: not-allowed;
+
+}
+
+
+/* ==========================================================
+   MOBILE SIDEBAR OVERLAY
+   RESPONSIVE BEHAVIOUR ADDED IN FINAL RESPONSIVE SECTION
+========================================================== */
+
+.cc-overlay {
+
+    display: none;
+
+}
+/* ==========================================================
+   FINOVA CONTROL CENTER
+   TAHAP 3.1A — PART 3
+
+   KPI CARDS
+   GENERAL CARDS
+   OVERVIEW DASHBOARD
+========================================================== */
+
+
+/* ==========================================================
+   KPI GRID
+========================================================== */
+
+.cc-kpi-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            4,
+            minmax(0, 1fr)
+        );
+
+    gap: 16px;
+
+    width: 100%;
+
+    margin-bottom: 20px;
+
+}
+
+
+/* ==========================================================
+   KPI CARD
+========================================================== */
+
+.cc-kpi {
+
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
+
+    min-width: 0;
+
+    min-height: 112px;
+
+    padding: 18px;
+
+
+    background:
+        var(--cc-card-bg);
+
+
+    border:
+        1px solid
+        var(--cc-border);
+
+
+    border-radius:
+        var(--cc-radius-md);
+
+
+    box-shadow:
+        var(--cc-shadow-sm);
+
+
+    overflow: hidden;
+
+
+    transition:
+        border-color .15s ease,
+        box-shadow .15s ease,
+        transform .15s ease;
+
+}
+
+
+/* ==========================================================
+   KPI HOVER
+========================================================== */
+
+.cc-kpi:hover {
+
+    border-color:
+        #D1D5DB;
+
+
+    box-shadow:
+        var(--cc-shadow-md);
+
+}
+
+
+/* ==========================================================
+   KPI CONTENT
+========================================================== */
+
+.cc-kpi > div:first-child {
+
+    flex: 1;
+
+    min-width: 0;
+
+}
+
+
+/* ==========================================================
+   KPI LABEL
+========================================================== */
+
+.cc-kpi-label {
+
+    display: block;
+
+    margin-bottom: 8px;
+
+
+    color:
+        var(--cc-text-secondary);
+
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+
+    line-height: 1.4;
+
+
+    text-transform: uppercase;
+
+
+    letter-spacing: .35px;
+
+}
+
+
+/* ==========================================================
+   KPI VALUE
+========================================================== */
+
+.cc-kpi-value {
+
+    display: block;
+
+
+    margin: 0;
+
+
+    color:
+        var(--cc-text-primary);
+
+
+    font-size: 24px;
+
+    font-weight: 700;
+
+
+    line-height: 1.15;
+
+
+    letter-spacing: -.4px;
+
+}
+
+
+/* ==========================================================
+   KPI DESCRIPTION
+========================================================== */
+
+.cc-kpi small {
+
+    display: block;
+
+
+    margin-top: 7px;
+
+
+    color:
+        var(--cc-text-muted);
+
+
+    font-size: 9px;
+
+    font-weight: 400;
+
+
+    line-height: 1.4;
+
+}
+
+
+/* ==========================================================
+   KPI ICON
+========================================================== */
+
+.cc-kpi-icon {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+
+    width: 42px;
+
+    height: 42px;
+
+
+    flex-shrink: 0;
+
+
+    margin-left: 14px;
+
+
+    border-radius:
+        var(--cc-radius-md);
+
+
+    background:
+        #EFF6FF;
+
+
+    color:
+        var(--cc-primary);
+
+
+    font-size: 16px;
+
+}
+
+
+/* ==========================================================
+   KPI ICON VARIANTS
+========================================================== */
+
+.cc-kpi-icon.success {
+
+    background:
+        #F0FDF4;
+
+
+    color:
+        #16A34A;
+
+}
+
+
+.cc-kpi-icon.warning {
+
+    background:
+        #FFFBEB;
+
+
+    color:
+        #D97706;
+
+}
+
+
+.cc-kpi-icon.danger {
+
+    background:
+        #FEF2F2;
+
+
+    color:
+        #DC2626;
+
+}
+
+
+.cc-kpi-icon.info {
+
+    background:
+        #F0F9FF;
+
+
+    color:
+        #0284C7;
+
+}
+
+
+/* ==========================================================
+   TWO COLUMN GRID
+========================================================== */
+
+.cc-grid-2 {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0, 1fr)
+        );
+
+
+    gap: 16px;
+
+
+    width: 100%;
+
+
+    margin-bottom: 20px;
+
+}
+
+
+/* ==========================================================
+   GENERAL CARD
+========================================================== */
+
+.cc-card {
+
+    display: flex;
+
+    flex-direction: column;
+
+
+    min-width: 0;
+
+
+    background:
+        var(--cc-card-bg);
+
+
+    border:
+        1px solid
+        var(--cc-border);
+
+
+    border-radius:
+        var(--cc-radius-md);
+
+
+    box-shadow:
+        var(--cc-shadow-sm);
+
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   CARD HEADER
+========================================================== */
+
+.cc-card-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+
+    gap: 16px;
+
+
+    min-height: 52px;
+
+
+    padding:
+        0 16px;
+
+
+    background:
+        #FFFFFF;
+
+
+    border-bottom:
+        1px solid
+        var(--cc-border);
+
+}
+
+
+/* ==========================================================
+   CARD HEADER LEFT
+========================================================== */
+
+.cc-card-header > div:first-child {
+
+    min-width: 0;
+
+}
+
+
+/* ==========================================================
+   CARD TITLE
+========================================================== */
+
+.cc-card-header h3 {
+
+    margin: 0;
+
+
+    color:
+        var(--cc-text-primary);
+
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+
+    line-height: 1.35;
+
+}
+
+
+/* ==========================================================
+   CARD HEADER DESCRIPTION
+========================================================== */
+
+.cc-card-header p {
+
+    margin:
+        3px 0 0;
+
+
+    color:
+        var(--cc-text-secondary);
+
+
+    font-size: 9px;
+
+    font-weight: 400;
+
+
+    line-height: 1.4;
+
+}
+
+
+/* ==========================================================
+   CARD HEADER ICON
+========================================================== */
+
+.cc-card-header-icon {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+
+    width: 32px;
+
+    height: 32px;
+
+
+    flex-shrink: 0;
+
+
+    border-radius:
+        var(--cc-radius-sm);
+
+
+    background:
+        #F8FAFC;
+
+
+    color:
+        var(--cc-text-secondary);
+
+
+    font-size: 12px;
+
+}
+
+
+/* ==========================================================
+   CARD BODY
+========================================================== */
+
+.cc-card-body {
+
+    flex: 1;
+
+
+    min-width: 0;
+
+
+    padding: 16px;
+
+
+    background:
+        #FFFFFF;
+
+}
+
+
+/* ==========================================================
+   CARD BODY WITHOUT PADDING
+
+   USED FOR TABLE CARD
+========================================================== */
+
+.cc-card-body.no-padding {
+
+    padding: 0;
+
+}
+
+
+/* ==========================================================
+   CARD FOOTER
+========================================================== */
+
+.cc-card-footer {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+
+    gap: 12px;
+
+
+    min-height: 46px;
+
+
+    padding:
+        0 16px;
+
+
+    background:
+        #FBFCFD;
+
+
+    border-top:
+        1px solid
+        var(--cc-border);
+
+
+    color:
+        var(--cc-text-secondary);
+
+
+    font-size: 9px;
+
+}
+
+
+/* ==========================================================
+   OVERVIEW INFORMATION LIST
+========================================================== */
+
+.cc-info-list {
+
+    display: flex;
+
+    flex-direction: column;
+
+
+    width: 100%;
+
+}
+
+
+/* ==========================================================
+   INFORMATION ROW
+========================================================== */
+
+.cc-info-row {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+
+    gap: 20px;
+
+
+    min-height: 42px;
+
+
+    padding:
+        8px 0;
+
+
+    border-bottom:
+        1px solid
+        #F1F5F9;
+
+}
+
+
+/* ==========================================================
+   REMOVE LAST BORDER
+========================================================== */
+
+.cc-info-row:last-child {
+
+    border-bottom: 0;
+
+}
+
+
+/* ==========================================================
+   INFORMATION LABEL
+========================================================== */
+
+.cc-info-label {
+
+    color:
+        var(--cc-text-secondary);
+
+
+    font-size: 10px;
+
+    font-weight: 500;
+
+
+    line-height: 1.4;
+
+}
+
+
+/* ==========================================================
+   INFORMATION VALUE
+========================================================== */
+
+.cc-info-value {
+
+    color:
+        var(--cc-text-primary);
+
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+
+    line-height: 1.4;
+
+
+    text-align: right;
+
+
+    word-break: break-word;
+
+}
+
+
+/* ==========================================================
+   STATUS DOT
+========================================================== */
+
+.cc-status-dot {
+
+    display: inline-flex;
+
+    align-items: center;
+
+
+    gap: 7px;
+
+
+    color:
+        var(--cc-text-primary);
+
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+}
+
+
+/* ==========================================================
+   STATUS DOT CIRCLE
+========================================================== */
+
+.cc-status-dot::before {
+
+    content: "";
+
+
+    display: block;
+
+
+    width: 7px;
+
+    height: 7px;
+
+
+    flex-shrink: 0;
+
+
+    border-radius: 50%;
+
+
+    background:
+        var(--cc-success);
+
+}
+
+
+/* ==========================================================
+   WARNING STATUS DOT
+========================================================== */
+
+.cc-status-dot.warning::before {
+
+    background:
+        var(--cc-warning);
+
+}
+
+
+/* ==========================================================
+   DANGER STATUS DOT
+========================================================== */
+
+.cc-status-dot.danger::before {
+
+    background:
+        var(--cc-danger);
+
+}
+
+
+/* ==========================================================
+   NEUTRAL STATUS DOT
+========================================================== */
+
+.cc-status-dot.neutral::before {
+
+    background:
+        var(--cc-text-muted);
+
+}
+
+
+/* ==========================================================
+   OVERVIEW LIST
+========================================================== */
+
+.cc-overview-list {
+
+    display: flex;
+
+    flex-direction: column;
+
+
+    width: 100%;
+
+}
+
+
+/* ==========================================================
+   OVERVIEW LIST ITEM
+========================================================== */
+
+.cc-overview-item {
+
+    display: flex;
+
+    align-items: center;
+
+
+    gap: 12px;
+
+
+    min-height: 50px;
+
+
+    padding:
+        8px 0;
+
+
+    border-bottom:
+        1px solid
+        #F1F5F9;
+
+}
+
+
+/* ==========================================================
+   REMOVE LAST BORDER
+========================================================== */
+
+.cc-overview-item:last-child {
+
+    border-bottom: 0;
+
+}
+
+
+/* ==========================================================
+   OVERVIEW ITEM ICON
+========================================================== */
+
+.cc-overview-item-icon {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+
+    width: 34px;
+
+    height: 34px;
+
+
+    flex-shrink: 0;
+
+
+    border-radius:
+        var(--cc-radius-sm);
+
+
+    background:
+        #F8FAFC;
+
+
+    color:
+        var(--cc-primary);
+
+
+    font-size: 12px;
+
+}
+
+
+/* ==========================================================
+   OVERVIEW ITEM CONTENT
+========================================================== */
+
+.cc-overview-item-content {
+
+    flex: 1;
+
+
+    min-width: 0;
+
+}
+
+
+/* ==========================================================
+   OVERVIEW ITEM TITLE
+========================================================== */
+
+.cc-overview-item-content strong {
+
+    display: block;
+
+
+    color:
+        var(--cc-text-primary);
+
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+
+    line-height: 1.4;
+
+}
+
+
+/* ==========================================================
+   OVERVIEW ITEM DESCRIPTION
+========================================================== */
+
+.cc-overview-item-content small {
+
+    display: block;
+
+
+    margin-top: 2px;
+
+
+    color:
+        var(--cc-text-muted);
+
+
+    font-size: 8.5px;
+
+    font-weight: 400;
+
+
+    line-height: 1.4;
+
+}
+
+
+/* ==========================================================
+   OVERVIEW ITEM VALUE
+========================================================== */
+
+.cc-overview-item-value {
+
+    flex-shrink: 0;
+
+
+    color:
+        var(--cc-text-primary);
+
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+
+    text-align: right;
+
+}
+
+
+/* ==========================================================
+   EMPTY STATE
+========================================================== */
+
+.cc-empty-state {
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+
+    width: 100%;
+
+
+    min-height: 180px;
+
+
+    padding: 30px 20px;
+
+
+    color:
+        var(--cc-text-muted);
+
+
+    text-align: center;
+
+}
+
+
+/* ==========================================================
+   EMPTY STATE ICON
+========================================================== */
+
+.cc-empty-state i {
+
+    margin-bottom: 12px;
+
+
+    color:
+        #CBD5E1;
+
+
+    font-size: 28px;
+
+}
+
+
+/* ==========================================================
+   EMPTY STATE TITLE
+========================================================== */
+
+.cc-empty-state strong {
+
+    display: block;
+
+
+    margin-bottom: 4px;
+
+
+    color:
+        var(--cc-text-secondary);
+
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+}
+
+
+/* ==========================================================
+   EMPTY STATE DESCRIPTION
+========================================================== */
+
+.cc-empty-state span {
+
+    max-width: 360px;
+
+
+    color:
+        var(--cc-text-muted);
+
+
+    font-size: 9px;
+
+
+    line-height: 1.5;
+
+}
+
+
+/* ==========================================================
+   LOADING STATE
+========================================================== */
+
+.cc-loading {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+
+    gap: 8px;
+
+
+    min-height: 120px;
+
+
+    color:
+        var(--cc-text-secondary);
+
+
+    font-size: 10px;
+
+}
+
+
+/* ==========================================================
+   LOADING SPINNER
+========================================================== */
+
+.cc-loading i {
+
+    color:
+        var(--cc-primary);
+
+}
+
+
+/* ==========================================================
+   ALERT
+========================================================== */
+
+.cc-alert {
+
+    width: 100%;
+
+
+    margin-bottom: 14px;
+
+
+    padding:
+        11px 14px;
+
+
+    border-radius:
+        var(--cc-radius-md);
+
+
+    font-size: 10px;
+
+    font-weight: 500;
+
+
+    line-height: 1.5;
+
+}
+
+
+/* ==========================================================
+   ALERT SUCCESS
+========================================================== */
+
+.cc-alert.success {
+
+    background:
+        #F0FDF4;
+
+
+    border:
+        1px solid
+        #BBF7D0;
+
+
+    color:
+        #166534;
+
+}
+
+
+/* ==========================================================
+   ALERT ERROR
+========================================================== */
+
+.cc-alert.error {
+
+    background:
+        #FEF2F2;
+
+
+    border:
+        1px solid
+        #FECACA;
+
+
+    color:
+        #991B1B;
+
+}
+
+
+/* ==========================================================
+   ALERT WARNING
+========================================================== */
+
+.cc-alert.warning {
+
+    background:
+        #FFFBEB;
+
+
+    border:
+        1px solid
+        #FDE68A;
+
+
+    color:
+        #92400E;
+
+}
+
+
+/* ==========================================================
+   ALERT INFO
+========================================================== */
+
+.cc-alert.info {
+
+    background:
+        #F0F9FF;
+
+
+    border:
+        1px solid
+        #BAE6FD;
+
+
+    color:
+        #075985;
+
+}
+/* ==========================================================
+   FINOVA CONTROL CENTER
+   TAHAP 3.1A — PART 4
+
+   FILTER
+   SEARCH
+   TABLE
+   BADGE
+   PAGINATION
+========================================================== */
+
+
+/* ==========================================================
+   FILTER AREA
+========================================================== */
+
+.cc-filter,
+.cc-audit-filter {
+
+    display: flex;
+
+    align-items: flex-end;
+
+    flex-wrap: wrap;
+
+    gap: 10px;
+
+
+    width: 100%;
+
+
+    padding: 14px 16px;
+
+
+    background:
+        #FFFFFF;
+
+
+    border-bottom:
+        1px solid
+        var(--cc-border);
+
+}
+
+
+/* ==========================================================
+   FILTER GROUP
+========================================================== */
+
+.cc-filter-group {
+
+    display: flex;
+
+    flex-direction: column;
+
+
+    min-width: 160px;
+
+
+    gap: 5px;
+
+}
+
+
+/* ==========================================================
+   SEARCH GROUP
+========================================================== */
+
+.cc-filter-group.search {
+
+    flex: 1;
+
+
+    min-width: 240px;
+
+}
+
+
+/* ==========================================================
+   FILTER LABEL
+========================================================== */
+
+.cc-filter label,
+.cc-audit-filter label,
+.cc-filter-group label {
+
+    display: block;
+
+
+    margin: 0;
+
+
+    color:
+        var(--cc-text-secondary);
+
+
+    font-size: 9px;
+
+    font-weight: 600;
+
+
+    line-height: 1.4;
+
+}
+
+
+/* ==========================================================
+   INPUT
+========================================================== */
+
+.cc-input,
+.cc-select,
+.cc-filter input,
+.cc-filter select,
+.cc-audit-filter input,
+.cc-audit-filter select {
+
+    width: 100%;
+
+
+    height: 38px;
+
+
+    padding:
+        0 11px;
+
+
+    background:
+        #FFFFFF;
+
+
+    border:
+        1px solid
+        #D7DBE0;
+
+
+    border-radius:
+        var(--cc-radius-sm);
+
+
+    color:
+        var(--cc-text-primary);
+
+
+    font-family:
+        "Poppins",
+        sans-serif;
+
+
+    font-size: 10px;
+
+    font-weight: 400;
+
+
+    outline: none;
+
+
+    transition:
+        border-color .15s ease,
+        box-shadow .15s ease,
+        background-color .15s ease;
+
+}
+
+
+/* ==========================================================
+   SELECT
+========================================================== */
+
+.cc-select,
+.cc-filter select,
+.cc-audit-filter select {
+
+    cursor: pointer;
+
+}
+
+
+/* ==========================================================
+   INPUT PLACEHOLDER
+========================================================== */
+
+.cc-input::placeholder,
+.cc-filter input::placeholder,
+.cc-audit-filter input::placeholder {
+
+    color:
+        #9CA3AF;
+
+}
+
+
+/* ==========================================================
+   INPUT FOCUS
+========================================================== */
+
+.cc-input:focus,
+.cc-select:focus,
+.cc-filter input:focus,
+.cc-filter select:focus,
+.cc-audit-filter input:focus,
+.cc-audit-filter select:focus {
+
+    background:
+        #FFFFFF;
+
+
+    border-color:
+        #93B4E8;
+
+
+    box-shadow:
+        0 0 0 2px
+        rgba(
+            37,
+            99,
+            235,
+            .08
+        );
+
+}
+
+
+/* ==========================================================
+   SEARCH INPUT WRAPPER
+========================================================== */
+
+.cc-search {
+
+    position: relative;
+
+
+    display: flex;
+
+    align-items: center;
+
+
+    width: 100%;
+
+}
+
+
+/* ==========================================================
+   SEARCH ICON
+========================================================== */
+
+.cc-search > i {
+
+    position: absolute;
+
+
+    left: 12px;
+
+
+    z-index: 2;
+
+
+    color:
+        var(--cc-text-muted);
+
+
+    font-size: 11px;
+
+
+    pointer-events: none;
+
+}
+
+
+/* ==========================================================
+   SEARCH INPUT WITH ICON
+========================================================== */
+
+.cc-search input {
+
+    padding-left: 34px;
+
+}
+
+
+/* ==========================================================
+   TABLE CARD
+========================================================== */
+
+.cc-table-card {
+
+    display: flex;
+
+    flex-direction: column;
+
+
+    width: 100%;
+
+
+    min-width: 0;
+
+
+    background:
+        #FFFFFF;
+
+
+    border:
+        1px solid
+        var(--cc-border);
+
+
+    border-radius:
+        var(--cc-radius-md);
+
+
+    box-shadow:
+        var(--cc-shadow-sm);
+
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   TABLE CONTAINER
+========================================================== */
+
+.cc-table-container {
+
+    display: flex;
+
+    flex-direction: column;
+
+
+    width: 100%;
+
+
+    min-width: 0;
+
+
+    background:
+        #FFFFFF;
+
+}
+
+
+/* ==========================================================
+   TABLE RESPONSIVE
+========================================================== */
+
+.cc-table-responsive {
+
+    width: 100%;
+
+
+    overflow-x: auto;
+
+    overflow-y: visible;
+
+}
+
+
+/* ==========================================================
+   TABLE
+========================================================== */
+
+.cc-table {
+
+    width: 100%;
+
+
+    margin: 0;
+
+
+    border-collapse: separate;
+
+    border-spacing: 0;
+
+
+    background:
+        #FFFFFF;
+
+
+    color:
+        var(--cc-text-primary);
+
+
+    font-size: 10px;
+
+}
+
+
+/* ==========================================================
+   TABLE HEADER
+========================================================== */
+
+.cc-table thead {
+
+    background:
+        #F8FAFC;
+
+}
+
+
+/* ==========================================================
+   TABLE HEADER CELL
+========================================================== */
+
+.cc-table thead th {
+
+    height: 42px;
+
+
+    padding:
+        0 12px;
+
+
+    background:
+        #F8FAFC;
+
+
+    border: 0;
+
+    border-bottom:
+        1px solid
+        var(--cc-border);
+
+
+    color:
+        #475569;
+
+
+    font-size: 9px;
+
+    font-weight: 600;
+
+
+    line-height: 1.3;
+
+
+    text-align: left;
+
+    vertical-align: middle;
+
+
+    white-space: nowrap;
+
+
+    text-transform: uppercase;
+
+
+    letter-spacing: .25px;
+
+}
+
+
+/* ==========================================================
+   TABLE BODY ROW
+========================================================== */
+
+.cc-table tbody tr {
+
+    background:
+        #FFFFFF;
+
+
+    transition:
+        background-color .12s ease;
+
+}
+
+
+/* ==========================================================
+   TABLE BODY ROW HOVER
+========================================================== */
+
+.cc-table tbody tr:hover {
+
+    background:
+        #F8FAFC;
+
+}
+
+
+/* ==========================================================
+   TABLE BODY CELL
+========================================================== */
+
+.cc-table tbody td {
+
+    min-height: 46px;
+
+
+    padding:
+        10px 12px;
+
+
+    border: 0;
+
+    border-bottom:
+        1px solid
+        #EEF2F6;
+
+
+    color:
+        #334155;
+
+
+    font-size: 10px;
+
+    font-weight: 400;
+
+
+    line-height: 1.45;
+
+
+    text-align: left;
+
+    vertical-align: middle;
+
+}
+
+
+/* ==========================================================
+   REMOVE LAST ROW BORDER
+========================================================== */
+
+.cc-table tbody tr:last-child td {
+
+    border-bottom: 0;
+
+}
+
+
+/* ==========================================================
+   TABLE STRONG
+========================================================== */
+
+.cc-table tbody td strong {
+
+    color:
+        var(--cc-text-primary);
+
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+}
+
+
+/* ==========================================================
+   TABLE SMALL TEXT
+========================================================== */
+
+.cc-table tbody td small,
+.cc-table small {
+
+    display: block;
+
+
+    margin-top: 2px;
+
+
+    color:
+        var(--cc-text-muted);
+
+
+    font-size: 8.5px;
+
+    font-weight: 400;
+
+
+    line-height: 1.4;
+
+}
+
+
+/* ==========================================================
+   TABLE LINK
+========================================================== */
+
+.cc-table a {
+
+    color:
+        var(--cc-primary);
+
+
+    text-decoration: none;
+
+
+    font-weight: 500;
+
+}
+
+
+.cc-table a:hover {
+
+    text-decoration: underline;
+
+}
+
+
+/* ==========================================================
+   TABLE NUMERIC
+========================================================== */
+
+.cc-table .text-end,
+.cc-table .cc-number {
+
+    text-align: right;
+
+}
+
+
+/* ==========================================================
+   TABLE CENTER
+========================================================== */
+
+.cc-table .text-center {
+
+    text-align: center;
+
+}
+
+
+/* ==========================================================
+   TABLE ACTION CELL
+========================================================== */
+
+.cc-table .cc-action-cell {
+
+    width: 1%;
+
+
+    text-align: right;
+
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   TABLE ACTION BUTTON
+========================================================== */
+
+.cc-table-action {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+
+    width: 30px;
+
+    height: 30px;
+
+
+    padding: 0;
+
+
+    background:
+        #FFFFFF;
+
+
+    border:
+        1px solid
+        #E2E8F0;
+
+
+    border-radius:
+        var(--cc-radius-sm);
+
+
+    color:
+        #64748B;
+
+
+    font-size: 10px;
+
+
+    cursor: pointer;
+
+
+    transition:
+        background-color .15s ease,
+        border-color .15s ease,
+        color .15s ease;
+
+}
+
+
+/* ==========================================================
+   TABLE ACTION HOVER
+========================================================== */
+
+.cc-table-action:hover {
+
+    background:
+        #EFF6FF;
+
+
+    border-color:
+        #BFDBFE;
+
+
+    color:
+        var(--cc-primary);
+
+}
+
+
+/* ==========================================================
+   TABLE ACTION DANGER
+========================================================== */
+
+.cc-table-action.danger {
+
+    color:
+        #DC2626;
+
+}
+
+
+.cc-table-action.danger:hover {
+
+    background:
+        #FEF2F2;
+
+
+    border-color:
+        #FECACA;
+
+
+    color:
+        #B91C1C;
+
+}
+
+
+/* ==========================================================
+   BADGE BASE
+========================================================== */
+
+.cc-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+
+    min-height: 22px;
+
+
+    padding:
+        3px 8px;
+
+
+    border-radius: 999px;
+
+
+    font-size: 8.5px;
+
+    font-weight: 600;
+
+
+    line-height: 1;
+
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   SUCCESS BADGE
+
+   ACTIVE
+   PAID
+   POST
+   COMPLETE
+   APPROVE
+========================================================== */
+
+.cc-badge.success {
+
+    background:
+        #ECFDF3;
+
+
+    color:
+        #15803D;
+
+}
+
+
+/* ==========================================================
+   WARNING BADGE
+
+   DRAFT
+   PENDING
+   UNPAID
+========================================================== */
+
+.cc-badge.warning {
+
+    background:
+        #FFF7E6;
+
+
+    color:
+        #B45309;
+
+}
+
+
+/* ==========================================================
+   DANGER BADGE
+
+   VOID
+   DELETE
+   SUSPENDED
+========================================================== */
+
+.cc-badge.danger {
+
+    background:
+        #FEF2F2;
+
+
+    color:
+        #DC2626;
+
+}
+
+
+/* ==========================================================
+   INFO BADGE
+
+   CREATE
+========================================================== */
+
+.cc-badge.info {
+
+    background:
+        #EFF6FF;
+
+
+    color:
+        #2563EB;
+
+}
+
+
+/* ==========================================================
+   NEUTRAL BADGE
+
+   UPDATE
+   INACTIVE
+========================================================== */
+
+.cc-badge.neutral {
+
+    background:
+        #F1F5F9;
+
+
+    color:
+        #64748B;
+
+}
+
+
+/* ==========================================================
+   AUDIT ACTION BADGES
+========================================================== */
+
+.cc-badge.create {
+
+    background:
+        #EFF6FF;
+
+
+    color:
+        #2563EB;
+
+}
+
+
+.cc-badge.update {
+
+    background:
+        #F1F5F9;
+
+
+    color:
+        #64748B;
+
+}
+
+
+.cc-badge.post {
+
+    background:
+        #ECFDF3;
+
+
+    color:
+        #15803D;
+
+}
+
+
+.cc-badge.complete {
+
+    background:
+        #ECFDF3;
+
+
+    color:
+        #15803D;
+
+}
+
+
+.cc-badge.paid {
+
+    background:
+        #ECFDF3;
+
+
+    color:
+        #15803D;
+
+}
+
+
+.cc-badge.approve {
+
+    background:
+        #ECFDF3;
+
+
+    color:
+        #15803D;
+
+}
+
+
+.cc-badge.draft {
+
+    background:
+        #FFF7E6;
+
+
+    color:
+        #B45309;
+
+}
+
+
+.cc-badge.void {
+
+    background:
+        #FEF2F2;
+
+
+    color:
+        #DC2626;
+
+}
+
+
+.cc-badge.delete {
+
+    background:
+        #FEF2F2;
+
+
+    color:
+        #DC2626;
+
+}
+
+
+/* ==========================================================
+   MONOSPACE
+
+   UUID
+   RECORD ID
+   SOURCE ID
+========================================================== */
+
+.cc-mono {
+
+    font-family:
+        Consolas,
+        Monaco,
+        "Courier New",
+        monospace;
+
+
+    color:
+        #64748B;
+
+
+    font-size: 9px;
+
+
+    line-height: 1.4;
+
+}
+
+
+/* ==========================================================
+   TABLE EMPTY
+========================================================== */
+
+.cc-table-empty {
+
+    padding:
+        40px 20px !important;
+
+
+    color:
+        var(--cc-text-muted) !important;
+
+
+    text-align: center !important;
+
+}
+
+
+/* ==========================================================
+   TABLE EMPTY ICON
+========================================================== */
+
+.cc-table-empty i {
+
+    display: block;
+
+
+    margin-bottom: 8px;
+
+
+    color:
+        #CBD5E1;
+
+
+    font-size: 24px;
+
+}
+
+
+/* ==========================================================
+   TABLE FOOTER
+========================================================== */
+
+.cc-table-footer {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+
+    gap: 16px;
+
+
+    width: 100%;
+
+
+    min-height: 52px;
+
+
+    padding:
+        8px 14px;
+
+
+    background:
+        #FFFFFF;
+
+
+    border-top:
+        1px solid
+        var(--cc-border);
+
+}
+
+
+/* ==========================================================
+   PAGINATION INFORMATION
+========================================================== */
+
+.cc-pagination-info {
+
+    color:
+        var(--cc-text-secondary);
+
+
+    font-size: 9px;
+
+    font-weight: 400;
+
+
+    line-height: 1.4;
+
+}
+
+
+/* ==========================================================
+   PAGINATION
+========================================================== */
+
+.cc-pagination {
+
+    display: flex;
+
+    align-items: center;
+
+
+    gap: 5px;
+
+
+    margin: 0;
+
+    padding: 0;
+
+
+    list-style: none;
+
+}
+
+
+/* ==========================================================
+   PAGINATION BUTTON
+========================================================== */
+
+.cc-pagination button,
+.cc-page-btn {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+
+    min-width: 30px;
+
+    height: 30px;
+
+
+    padding:
+        0 8px;
+
+
+    background:
+        #FFFFFF;
+
+
+    border:
+        1px solid
+        #E2E8F0;
+
+
+    border-radius:
+        var(--cc-radius-sm);
+
+
+    color:
+        #64748B;
+
+
+    font-family:
+        "Poppins",
+        sans-serif;
+
+
+    font-size: 9px;
+
+    font-weight: 500;
+
+
+    cursor: pointer;
+
+
+    transition:
+        background-color .15s ease,
+        border-color .15s ease,
+        color .15s ease;
+
+}
+
+
+/* ==========================================================
+   PAGINATION HOVER
+========================================================== */
+
+.cc-pagination button:hover:not(:disabled),
+.cc-page-btn:hover:not(:disabled) {
+
+    background:
+        #EFF6FF;
+
+
+    border-color:
+        #BFDBFE;
+
+
+    color:
+        var(--cc-primary);
+
+}
+
+
+/* ==========================================================
+   PAGINATION ACTIVE
+========================================================== */
+
+.cc-pagination button.active,
+.cc-page-btn.active {
+
+    background:
+        var(--cc-primary);
+
+
+    border-color:
+        var(--cc-primary);
+
+
+    color:
+        #FFFFFF;
+
+}
+
+
+/* ==========================================================
+   PAGINATION DISABLED
+========================================================== */
+
+.cc-pagination button:disabled,
+.cc-page-btn:disabled {
+
+    background:
+        #F8FAFC;
+
+
+    color:
+        #CBD5E1;
+
+
+    cursor: not-allowed;
+
+}
+
+
+/* ==========================================================
+   TABLE LOADING ROW
+========================================================== */
+
+.cc-table-loading {
+
+    padding:
+        36px 20px !important;
+
+
+    color:
+        var(--cc-text-secondary) !important;
+
+
+    text-align: center !important;
+
+}
+
+
+/* ==========================================================
+   TABLE LOADING SPINNER
+========================================================== */
+
+.cc-table-loading i {
+
+    margin-right: 6px;
+
+
+    color:
+        var(--cc-primary);
+
+}
+/* ==========================================================
+   FINOVA CONTROL CENTER
+   TAHAP 3.1A — PART 5
+
+   MODAL
+   FORM
+   AUDIT DETAIL
+========================================================== */
+
+
+/* ==========================================================
+   BOOTSTRAP MODAL
+========================================================== */
+
+.modal-backdrop {
+
+    background:
+        #0F172A;
+
+}
+
+
+.modal-backdrop.show {
+
+    opacity: .45;
+
+}
+
+
+/* ==========================================================
+   MODAL DIALOG
+========================================================== */
+
+.modal-dialog {
+
+    margin-top: 40px;
+
+    margin-bottom: 40px;
+
+}
+
+
+/* ==========================================================
+   MODAL CONTENT
+========================================================== */
+
+.modal-content {
+
+    overflow: hidden;
+
+    background:
+        #FFFFFF;
+
+    border: 0;
+
+    border-radius:
+        var(--cc-radius-lg);
+
+    box-shadow:
+        0 20px 50px
+        rgba(
+            15,
+            23,
+            42,
+            .18
+        );
+
+}
+
+
+/* ==========================================================
+   MODAL HEADER
+========================================================== */
+
+.modal-header {
+
+    display: flex;
+
+    align-items: center;
+
+    min-height: 58px;
+
+    padding:
+        0 20px;
+
+    background:
+        #FFFFFF;
+
+    border-bottom:
+        1px solid
+        var(--cc-border);
+
+}
+
+
+/* ==========================================================
+   MODAL TITLE
+========================================================== */
+
+.modal-title {
+
+    margin: 0;
+
+    color:
+        var(--cc-text-primary);
+
+    font-family:
+        "Poppins",
+        sans-serif;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    line-height: 1.4;
+
+}
+
+
+/* ==========================================================
+   MODAL CLOSE
+========================================================== */
+
+.modal-header .btn-close {
+
+    width: 30px;
+
+    height: 30px;
+
+    margin: 0 0 0 auto;
+
+    padding: 0;
+
+    background-size: 10px;
+
+    border-radius:
+        var(--cc-radius-sm);
+
+    opacity: .55;
+
+}
+
+
+.modal-header .btn-close:hover {
+
+    background-color:
+        #F8FAFC;
+
+    opacity: .85;
+
+}
+
+
+/* ==========================================================
+   MODAL BODY
+========================================================== */
+
+.modal-body {
+
+    padding: 20px;
+
+    background:
+        #FFFFFF;
+
+    color:
+        var(--cc-text-primary);
+
+    font-family:
+        "Poppins",
+        sans-serif;
+
+    font-size: 10px;
+
+}
+
+
+/* ==========================================================
+   MODAL FOOTER
+========================================================== */
+
+.modal-footer {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+    gap: 8px;
+
+    min-height: 58px;
+
+    padding:
+        10px 20px;
+
+    background:
+        #FBFCFD;
+
+    border-top:
+        1px solid
+        var(--cc-border);
+
+}
+
+
+/* ==========================================================
+   FORM LABEL
+========================================================== */
+
+.modal-body label,
+.cc-form-label {
+
+    display: block;
+
+    margin-bottom: 5px;
+
+    color:
+        var(--cc-text-secondary);
+
+    font-family:
+        "Poppins",
+        sans-serif;
+
+    font-size: 9px;
+
+    font-weight: 600;
+
+    line-height: 1.4;
+
+}
+
+
+/* ==========================================================
+   REQUIRED
+========================================================== */
+
+.cc-required {
+
+    color:
+        var(--cc-danger);
+
+}
+
+
+/* ==========================================================
+   FORM CONTROL
+========================================================== */
+
+.modal-body .form-control,
+.modal-body .form-select,
+.cc-form-control,
+.cc-form-select {
+
+    width: 100%;
+
+    min-height: 38px;
+
+    padding:
+        7px 10px;
+
+    background:
+        #FFFFFF;
+
+    border:
+        1px solid
+        #D7DBE0;
+
+    border-radius:
+        var(--cc-radius-sm);
+
+    color:
+        var(--cc-text-primary);
+
+    font-family:
+        "Poppins",
+        sans-serif;
+
+    font-size: 10px;
+
+    font-weight: 400;
+
+    outline: none;
+
+    transition:
+        border-color .15s ease,
+        box-shadow .15s ease;
+
+}
+
+
+/* ==========================================================
+   TEXTAREA
+========================================================== */
+
+.modal-body textarea.form-control,
+textarea.cc-form-control {
+
+    min-height: 90px;
+
+    resize: vertical;
+
+}
+
+
+/* ==========================================================
+   FORM FOCUS
+========================================================== */
+
+.modal-body .form-control:focus,
+.modal-body .form-select:focus,
+.cc-form-control:focus,
+.cc-form-select:focus {
+
+    background:
+        #FFFFFF;
+
+    border-color:
+        #93B4E8;
+
+    box-shadow:
+        0 0 0 2px
+        rgba(
+            37,
+            99,
+            235,
+            .08
+        );
+
+}
+
+
+/* ==========================================================
+   READONLY
+========================================================== */
+
+.modal-body .form-control:read-only,
+.cc-form-control:read-only {
+
+    background:
+        #F8FAFC;
+
+    color:
+        #64748B;
+
+}
+
+
+/* ==========================================================
+   DISABLED
+========================================================== */
+
+.modal-body .form-control:disabled,
+.modal-body .form-select:disabled,
+.cc-form-control:disabled,
+.cc-form-select:disabled {
+
+    background:
+        #F1F5F9;
+
+    color:
+        #94A3B8;
+
+    cursor: not-allowed;
+
+}
+
+
+/* ==========================================================
+   FORM HELP
+========================================================== */
+
+.cc-form-help {
+
+    display: block;
+
+    margin-top: 4px;
+
+    color:
+        var(--cc-text-muted);
+
+    font-size: 8px;
+
+    line-height: 1.5;
+
+}
+
+
+/* ==========================================================
+   FORM GRID
+========================================================== */
+
+.cc-form-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0, 1fr)
+        );
+
+    gap: 14px 16px;
+
+    width: 100%;
+
+}
+
+
+/* ==========================================================
+   FULL WIDTH FORM FIELD
+========================================================== */
+
+.cc-form-grid .full {
+
+    grid-column:
+        1 / -1;
+
+}
+
+
+/* ==========================================================
+   AUDIT DETAIL WRAPPER
+========================================================== */
+
+.cc-audit-detail {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 16px;
+
+    width: 100%;
+
+}
+
+
+/* ==========================================================
+   AUDIT DETAIL SECTION
+========================================================== */
+
+.cc-audit-section {
+
+    width: 100%;
+
+    overflow: hidden;
+
+    background:
+        #FFFFFF;
+
+    border:
+        1px solid
+        var(--cc-border);
+
+    border-radius:
+        var(--cc-radius-md);
+
+}
+
+
+/* ==========================================================
+   AUDIT SECTION HEADER
+========================================================== */
+
+.cc-audit-section-header {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    min-height: 40px;
+
+    padding:
+        0 14px;
+
+    background:
+        #F8FAFC;
+
+    border-bottom:
+        1px solid
+        var(--cc-border);
+
+}
+
+
+/* ==========================================================
+   AUDIT SECTION HEADER ICON
+========================================================== */
+
+.cc-audit-section-header i {
+
+    width: 16px;
+
+    color:
+        var(--cc-primary);
+
+    font-size: 11px;
+
+    text-align: center;
+
+}
+
+
+/* ==========================================================
+   AUDIT SECTION TITLE
+========================================================== */
+
+.cc-audit-section-header strong {
+
+    color:
+        var(--cc-text-primary);
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+}
+
+
+/* ==========================================================
+   AUDIT SECTION BODY
+========================================================== */
+
+.cc-audit-section-body {
+
+    padding: 14px;
+
+}
+
+
+/* ==========================================================
+   AUDIT INFORMATION GRID
+========================================================== */
+
+.cc-audit-info-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0, 1fr)
+        );
+
+    column-gap: 24px;
+
+    row-gap: 0;
+
+}
+
+
+/* ==========================================================
+   AUDIT INFORMATION ROW
+========================================================== */
+
+.cc-audit-info-item {
+
+    display: grid;
+
+    grid-template-columns:
+        130px minmax(0, 1fr);
+
+    align-items: start;
+
+    gap: 10px;
+
+    min-height: 36px;
+
+    padding:
+        8px 0;
+
+    border-bottom:
+        1px solid
+        #F1F5F9;
+
+}
+
+
+/* ==========================================================
+   AUDIT LABEL
+========================================================== */
+
+.cc-audit-info-label {
+
+    color:
+        var(--cc-text-secondary);
+
+    font-size: 9px;
+
+    font-weight: 500;
+
+    line-height: 1.5;
+
+}
+
+
+/* ==========================================================
+   AUDIT VALUE
+========================================================== */
+
+.cc-audit-info-value {
+
+    min-width: 0;
+
+    color:
+        var(--cc-text-primary);
+
+    font-size: 9px;
+
+    font-weight: 600;
+
+    line-height: 1.5;
+
+    word-break: break-word;
+
+}
+
+
+/* ==========================================================
+   AUDIT UUID / ID
+========================================================== */
+
+.cc-audit-id {
+
+    font-family:
+        Consolas,
+        Monaco,
+        "Courier New",
+        monospace;
+
+    color:
+        #64748B;
+
+    font-size: 8.5px;
+
+    font-weight: 400;
+
+    word-break: break-all;
+
+}
+
+
+/* ==========================================================
+   SOURCE TRACE
+========================================================== */
+
+.cc-source-trace {
+
+    display: flex;
+
+    align-items: stretch;
+
+    width: 100%;
+
+    overflow-x: auto;
+
+}
+
+
+/* ==========================================================
+   SOURCE TRACE ITEM
+========================================================== */
+
+.cc-source-node {
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    min-width: 170px;
+
+    padding:
+        12px 14px;
+
+    background:
+        #F8FAFC;
+
+    border:
+        1px solid
+        #E2E8F0;
+
+    border-radius:
+        var(--cc-radius-md);
+
+}
+
+
+/* ==========================================================
+   SOURCE MODULE
+========================================================== */
+
+.cc-source-node small {
+
+    display: block;
+
+    margin-bottom: 4px;
+
+    color:
+        var(--cc-text-muted);
+
+    font-size: 8px;
+
+    font-weight: 500;
+
+    text-transform: uppercase;
+
+    letter-spacing: .3px;
+
+}
+
+
+/* ==========================================================
+   SOURCE DOCUMENT
+========================================================== */
+
+.cc-source-node strong {
+
+    color:
+        var(--cc-text-primary);
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+    line-height: 1.4;
+
+}
+
+
+/* ==========================================================
+   SOURCE ID
+========================================================== */
+
+.cc-source-node span {
+
+    display: block;
+
+    margin-top: 3px;
+
+    color:
+        var(--cc-text-muted);
+
+    font-family:
+        Consolas,
+        Monaco,
+        monospace;
+
+    font-size: 8px;
+
+    line-height: 1.4;
+
+}
+
+
+/* ==========================================================
+   SOURCE TRACE ARROW
+========================================================== */
+
+.cc-source-arrow {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: 40px;
+
+    min-width: 40px;
+
+    color:
+        #94A3B8;
+
+    font-size: 11px;
+
+}
+
+
+/* ==========================================================
+   AUDIT CHANGES GRID
+========================================================== */
+
+.cc-audit-changes {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0, 1fr)
+        );
+
+    gap: 14px;
+
+}
+
+
+/* ==========================================================
+   BEFORE / AFTER CARD
+========================================================== */
+
+.cc-audit-snapshot {
+
+    min-width: 0;
+
+    overflow: hidden;
+
+    background:
+        #FFFFFF;
+
+    border:
+        1px solid
+        var(--cc-border);
+
+    border-radius:
+        var(--cc-radius-md);
+
+}
+
+
+/* ==========================================================
+   SNAPSHOT HEADER
+========================================================== */
+
+.cc-audit-snapshot-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    min-height: 38px;
+
+    padding:
+        0 12px;
+
+    background:
+        #F8FAFC;
+
+    border-bottom:
+        1px solid
+        var(--cc-border);
+
+}
+
+
+/* ==========================================================
+   SNAPSHOT TITLE
+========================================================== */
+
+.cc-audit-snapshot-header strong {
+
+    color:
+        var(--cc-text-primary);
+
+    font-size: 9px;
+
+    font-weight: 600;
+
+}
+
+
+/* ==========================================================
+   BEFORE INDICATOR
+========================================================== */
+
+.cc-audit-snapshot.before
+.cc-audit-snapshot-header {
+
+    border-left:
+        3px solid
+        #F59E0B;
+
+}
+
+
+/* ==========================================================
+   AFTER INDICATOR
+========================================================== */
+
+.cc-audit-snapshot.after
+.cc-audit-snapshot-header {
+
+    border-left:
+        3px solid
+        #22C55E;
+
+}
+
+
+/* ==========================================================
+   JSON / SNAPSHOT CONTENT
+========================================================== */
+
+.cc-audit-json {
+
+    width: 100%;
+
+    max-height: 340px;
+
+    margin: 0;
+
+    padding: 14px;
+
+    overflow: auto;
+
+    background:
+        #0F172A;
+
+    color:
+        #E2E8F0;
+
+    font-family:
+        Consolas,
+        Monaco,
+        "Courier New",
+        monospace;
+
+    font-size: 8.5px;
+
+    font-weight: 400;
+
+    line-height: 1.6;
+
+    white-space: pre-wrap;
+
+    word-break: break-word;
+
+}
+
+
+/* ==========================================================
+   JSON SCROLLBAR
+========================================================== */
+
+.cc-audit-json::-webkit-scrollbar {
+
+    width: 6px;
+
+    height: 6px;
+
+}
+
+
+.cc-audit-json::-webkit-scrollbar-track {
+
+    background:
+        #0F172A;
+
+}
+
+
+.cc-audit-json::-webkit-scrollbar-thumb {
+
+    background:
+        #475569;
+
+    border-radius: 999px;
+
+}
+
+
+/* ==========================================================
+   CHANGED FIELDS
+========================================================== */
+
+.cc-changed-fields {
+
+    display: flex;
+
+    flex-direction: column;
+
+    width: 100%;
+
+}
+
+
+/* ==========================================================
+   CHANGED FIELD ROW
+========================================================== */
+
+.cc-changed-field {
+
+    display: grid;
+
+    grid-template-columns:
+        160px minmax(0, 1fr) 28px minmax(0, 1fr);
+
+    align-items: center;
+
+    gap: 10px;
+
+    min-height: 42px;
+
+    padding:
+        8px 0;
+
+    border-bottom:
+        1px solid
+        #F1F5F9;
+
+}
+
+
+/* ==========================================================
+   REMOVE LAST BORDER
+========================================================== */
+
+.cc-changed-field:last-child {
+
+    border-bottom: 0;
+
+}
+
+
+/* ==========================================================
+   CHANGED FIELD NAME
+========================================================== */
+
+.cc-changed-field-name {
+
+    color:
+        var(--cc-text-primary);
+
+    font-size: 9px;
+
+    font-weight: 600;
+
+    word-break: break-word;
+
+}
+
+
+/* ==========================================================
+   OLD / NEW VALUE
+========================================================== */
+
+.cc-changed-field-old,
+.cc-changed-field-new {
+
+    min-width: 0;
+
+    padding:
+        6px 8px;
+
+    border-radius:
+        var(--cc-radius-sm);
+
+    font-family:
+        Consolas,
+        Monaco,
+        monospace;
+
+    font-size: 8.5px;
+
+    line-height: 1.45;
+
+    word-break: break-word;
+
+}
+
+
+/* ==========================================================
+   OLD VALUE
+========================================================== */
+
+.cc-changed-field-old {
+
+    background:
+        #FFF7ED;
+
+    color:
+        #9A3412;
+
+}
+
+
+/* ==========================================================
+   NEW VALUE
+========================================================== */
+
+.cc-changed-field-new {
+
+    background:
+        #F0FDF4;
+
+    color:
+        #166534;
+
+}
+
+
+/* ==========================================================
+   CHANGE ARROW
+========================================================== */
+
+.cc-changed-field-arrow {
+
+    color:
+        #94A3B8;
+
+    font-size: 10px;
+
+    text-align: center;
+
+}
+
+
+/* ==========================================================
+   NO CHANGES
+========================================================== */
+
+.cc-no-changes {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-height: 80px;
+
+    padding: 16px;
+
+    color:
+        var(--cc-text-muted);
+
+    font-size: 9px;
+
+    text-align: center;
+
+}
+
+
+/* ==========================================================
+   AUDIT DOCUMENT NUMBER
+========================================================== */
+
+.cc-audit-document {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    color:
+        var(--cc-text-primary);
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+}
+
+
+/* ==========================================================
+   AUDIT DOCUMENT ICON
+========================================================== */
+
+.cc-audit-document i {
+
+    color:
+        var(--cc-primary);
+
+    font-size: 10px;
+
+}
+
+
+/* ==========================================================
+   AUDIT VIEW BUTTON
+========================================================== */
+
+.cc-audit-view {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 6px;
+
+    height: 30px;
+
+    padding:
+        0 10px;
+
+    background:
+        #FFFFFF;
+
+    border:
+        1px solid
+        #DCE4ED;
+
+    border-radius:
+        var(--cc-radius-sm);
+
+    color:
+        var(--cc-primary);
+
+    font-family:
+        "Poppins",
+        sans-serif;
+
+    font-size: 9px;
+
+    font-weight: 600;
+
+    white-space: nowrap;
+
+    cursor: pointer;
+
+    transition:
+        background-color .15s ease,
+        border-color .15s ease;
+
+}
+
+
+/* ==========================================================
+   AUDIT VIEW HOVER
+========================================================== */
+
+.cc-audit-view:hover {
+
+    background:
+        #EFF6FF;
+
+    border-color:
+        #BFDBFE;
+
+}
+
+
+/* ==========================================================
+   AUDIT VIEW ICON
+========================================================== */
+
+.cc-audit-view i {
+
+    font-size: 9px;
+
+}
+/* ==========================================================
+   FINOVA CONTROL CENTER
+   TAHAP 3.1A — PART 6
+
+   FINAL RESPONSIVE
+   TABLET
+   MOBILE
+   SIDEBAR DRAWER
+   TABLE
+   MODAL
+   AUDIT DETAIL
+========================================================== */
+
+
+/* ==========================================================
+   DESKTOP LARGE
+   >= 1200px
+========================================================== */
+
+@media (min-width: 1200px) {
+
+    .cc-content {
+
+        padding:
+            24px;
+
+    }
+
+
+    .cc-kpi-grid {
+
+        grid-template-columns:
+            repeat(
+                4,
+                minmax(0, 1fr)
+            );
+
+    }
+
+
+    .cc-grid-2 {
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+
+    }
+
+}
+
+
+/* ==========================================================
+   DESKTOP / SMALL LAPTOP
+   <= 1199.98px
+========================================================== */
+
+@media (max-width: 1199.98px) {
+
+    .cc-kpi-grid {
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+
+    }
+
+
+    .cc-audit-info-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .cc-changed-field {
+
+        grid-template-columns:
+            130px
+            minmax(0, 1fr)
+            24px
+            minmax(0, 1fr);
+
+    }
+
+}
+
+
+/* ==========================================================
+   TABLET
+   <= 991.98px
+
+   SIDEBAR BECOMES DRAWER
+========================================================== */
+
+@media (max-width: 991.98px) {
+
+    /* ======================================================
+       SIDEBAR
+    ====================================================== */
+
+    .cc-sidebar {
+
+        transform:
+            translateX(-100%);
+
+
+        box-shadow:
+            12px 0 30px
+            rgba(
+                15,
+                23,
+                42,
+                .12
+            );
+
+
+        transition:
+            transform .20s ease;
+
+    }
+
+
+    /* ======================================================
+       OPEN SIDEBAR
+    ====================================================== */
+
+    .cc-sidebar.show {
+
+        transform:
+            translateX(0);
+
+    }
+
+
+    /* ======================================================
+       MAIN AREA
+    ====================================================== */
+
+    .cc-main {
+
+        width: 100%;
+
+
+        margin-left: 0;
+
+    }
+
+
+    /* ======================================================
+       MOBILE OVERLAY
+    ====================================================== */
+
+    .cc-overlay {
+
+        display: none;
+
+    }
+
+
+    .cc-overlay.show {
+
+        position: fixed;
+
+
+        inset: 0;
+
+
+        z-index: 1030;
+
+
+        display: block;
+
+
+        background:
+            rgba(
+                15,
+                23,
+                42,
+                .45
+            );
+
+
+        backdrop-filter:
+            blur(1px);
+
+    }
+
+
+    /* ======================================================
+       TOPBAR
+    ====================================================== */
+
+    .cc-topbar {
+
+        padding:
+            0 20px;
+
+    }
+
+
+    /* ======================================================
+       CONTENT
+    ====================================================== */
+
+    .cc-content {
+
+        padding:
+            20px;
+
+    }
+
+
+    /* ======================================================
+       TWO COLUMN GRID
+    ====================================================== */
+
+    .cc-grid-2 {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    /* ======================================================
+       FORM GRID
+    ====================================================== */
+
+    .cc-form-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .cc-form-grid .full {
+
+        grid-column:
+            auto;
+
+    }
+
+
+    /* ======================================================
+       AUDIT BEFORE / AFTER
+    ====================================================== */
+
+    .cc-audit-changes {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    /* ======================================================
+       AUDIT CHANGED FIELD
+    ====================================================== */
+
+    .cc-changed-field {
+
+        grid-template-columns:
+            120px
+            minmax(0, 1fr)
+            24px
+            minmax(0, 1fr);
+
+    }
+
+}
+
+
+/* ==========================================================
+   MOBILE / TABLET
+   <= 767.98px
+========================================================== */
+
+@media (max-width: 767.98px) {
+
+    /* ======================================================
+       TOPBAR
+    ====================================================== */
+
+    .cc-topbar {
+
+        height:
+            var(--cc-topbar-height);
+
+
+        min-height:
+            var(--cc-topbar-height);
+
+
+        padding:
+            0 16px;
+
+    }
+
+
+    /* ======================================================
+       TOPBAR TITLE
+    ====================================================== */
+
+    .cc-topbar h1 {
+
+        max-width: 230px;
+
+
+        overflow: hidden;
+
+
+        font-size: 16px;
+
+
+        text-overflow: ellipsis;
+
+
+        white-space: nowrap;
+
+    }
+
+
+    /* ======================================================
+       TOPBAR SUBTITLE
+    ====================================================== */
+
+    .cc-topbar p {
+
+        display: none;
+
+    }
+
+
+    /* ======================================================
+       TOP ACTIONS
+    ====================================================== */
+
+    .cc-top-actions {
+
+        gap: 7px;
+
+    }
+
+
+    /* ======================================================
+       HIDE ENVIRONMENT INDICATOR
+    ====================================================== */
+
+    .cc-environment {
+
+        display: none;
+
+    }
+
+
+    /* ======================================================
+       CONTENT
+    ====================================================== */
+
+    .cc-content {
+
+        padding:
+            16px;
+
+    }
+
+
+    /* ======================================================
+       SYSTEM BANNER
+    ====================================================== */
+
+    .cc-phase-banner {
+
+        align-items: flex-start;
+
+
+        margin-bottom: 16px;
+
+
+        padding:
+            10px 12px;
+
+
+        font-size: 10px;
+
+    }
+
+
+    .cc-phase-banner i {
+
+        margin-top: 2px;
+
+    }
+
+
+    /* ======================================================
+       PAGE TOOLBAR
+    ====================================================== */
+
+    .cc-page-toolbar {
+
+        flex-direction: column;
+
+
+        align-items: stretch;
+
+
+        gap: 12px;
+
+
+        margin-bottom: 14px;
+
+    }
+
+
+    /* ======================================================
+       PAGE TITLE
+    ====================================================== */
+
+    .cc-page-toolbar h2 {
+
+        font-size: 16px;
+
+    }
+
+
+    /* ======================================================
+       PAGE DESCRIPTION
+    ====================================================== */
+
+    .cc-page-toolbar p {
+
+        font-size: 10px;
+
+    }
+
+
+    /* ======================================================
+       PAGE TOOLBAR ACTION
+    ====================================================== */
+
+    .cc-page-toolbar > div:last-child {
+
+        width: 100%;
+
+
+        flex-wrap: wrap;
+
+    }
+
+
+    /* ======================================================
+       KPI GRID
+    ====================================================== */
+
+    .cc-kpi-grid {
+
+        grid-template-columns:
+            1fr;
+
+
+        gap: 12px;
+
+
+        margin-bottom: 16px;
+
+    }
+
+
+    /* ======================================================
+       KPI CARD
+    ====================================================== */
+
+    .cc-kpi {
+
+        min-height: 96px;
+
+
+        padding: 15px;
+
+    }
+
+
+    /* ======================================================
+       KPI VALUE
+    ====================================================== */
+
+    .cc-kpi-value {
+
+        font-size: 21px;
+
+    }
+
+
+    /* ======================================================
+       KPI ICON
+    ====================================================== */
+
+    .cc-kpi-icon {
+
+        width: 38px;
+
+
+        height: 38px;
+
+
+        font-size: 14px;
+
+    }
+
+
+    /* ======================================================
+       TWO COLUMN GRID
+    ====================================================== */
+
+    .cc-grid-2 {
+
+        gap: 12px;
+
+
+        margin-bottom: 16px;
+
+    }
+
+
+    /* ======================================================
+       CARD HEADER
+    ====================================================== */
+
+    .cc-card-header {
+
+        min-height: 50px;
+
+
+        padding:
+            0 14px;
+
+    }
+
+
+    /* ======================================================
+       CARD BODY
+    ====================================================== */
+
+    .cc-card-body {
+
+        padding: 14px;
+
+    }
+
+
+    /* ======================================================
+       FILTER
+    ====================================================== */
+
+    .cc-filter,
+    .cc-audit-filter {
+
+        flex-direction: column;
+
+
+        align-items: stretch;
+
+
+        gap: 10px;
+
+
+        padding:
+            12px 14px;
+
+    }
+
+
+    /* ======================================================
+       FILTER GROUP
+    ====================================================== */
+
+    .cc-filter-group,
+    .cc-filter-group.search {
+
+        width: 100%;
+
+
+        min-width: 0;
+
+    }
+
+
+    /* ======================================================
+       FILTER INPUT
+    ====================================================== */
+
+    .cc-filter input,
+    .cc-filter select,
+    .cc-audit-filter input,
+    .cc-audit-filter select,
+    .cc-input,
+    .cc-select {
+
+        width: 100%;
+
+    }
+
+
+    /* ======================================================
+       TABLE
+    ====================================================== */
+
+    .cc-table {
+
+        min-width: 760px;
+
+    }
+
+
+    /* ======================================================
+       TABLE HEADER
+    ====================================================== */
+
+    .cc-table thead th {
+
+        padding:
+            0 10px;
+
+    }
+
+
+    /* ======================================================
+       TABLE BODY
+    ====================================================== */
+
+    .cc-table tbody td {
+
+        padding:
+            9px 10px;
+
+    }
+
+
+    /* ======================================================
+       TABLE FOOTER
+    ====================================================== */
+
+    .cc-table-footer {
+
+        flex-direction: column;
+
+
+        align-items: stretch;
+
+
+        gap: 8px;
+
+
+        padding:
+            10px 12px;
+
+    }
+
+
+    /* ======================================================
+       PAGINATION INFO
+    ====================================================== */
+
+    .cc-pagination-info {
+
+        width: 100%;
+
+
+        text-align: center;
+
+    }
+
+
+    /* ======================================================
+       PAGINATION
+    ====================================================== */
+
+    .cc-pagination {
+
+        justify-content: center;
+
+
+        width: 100%;
+
+
+        overflow-x: auto;
+
+
+        padding-bottom: 2px;
+
+    }
+
+
+    /* ======================================================
+       MODAL
+    ====================================================== */
+
+    .modal-dialog {
+
+        margin:
+            16px;
+
+    }
+
+
+    /* ======================================================
+       MODAL HEADER
+    ====================================================== */
+
+    .modal-header {
+
+        min-height: 54px;
+
+
+        padding:
+            0 16px;
+
+    }
+
+
+    /* ======================================================
+       MODAL BODY
+    ====================================================== */
+
+    .modal-body {
+
+        padding: 16px;
+
+    }
+
+
+    /* ======================================================
+       MODAL FOOTER
+    ====================================================== */
+
+    .modal-footer {
+
+        min-height: 54px;
+
+
+        padding:
+            10px 16px;
+
+    }
+
+
+    /* ======================================================
+       AUDIT INFO
+    ====================================================== */
+
+    .cc-audit-info-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    /* ======================================================
+       AUDIT INFO ITEM
+    ====================================================== */
+
+    .cc-audit-info-item {
+
+        grid-template-columns:
+            110px
+            minmax(0, 1fr);
+
+    }
+
+
+    /* ======================================================
+       SOURCE TRACE
+    ====================================================== */
+
+    .cc-source-trace {
+
+        align-items: stretch;
+
+    }
+
+
+    .cc-source-node {
+
+        min-width: 150px;
+
+    }
+
+
+    /* ======================================================
+       CHANGED FIELD
+    ====================================================== */
+
+    .cc-changed-field {
+
+        grid-template-columns:
+            1fr;
+
+
+        gap: 6px;
+
+
+        padding:
+            10px 0;
+
+    }
+
+
+    /* ======================================================
+       CHANGE ARROW
+    ====================================================== */
+
+    .cc-changed-field-arrow {
+
+        transform:
+            rotate(90deg);
+
+
+        text-align: center;
+
+    }
+
+}
+
+
+/* ==========================================================
+   SMALL MOBILE
+   <= 575.98px
+========================================================== */
+
+@media (max-width: 575.98px) {
+
+    /* ======================================================
+       SIDEBAR
+    ====================================================== */
+
+    .cc-sidebar {
+
+        width:
+            min(
+                280px,
+                86vw
+            );
+
+    }
+
+
+    /* ======================================================
+       TOPBAR
+    ====================================================== */
+
+    .cc-topbar {
+
+        padding:
+            0 12px;
+
+    }
+
+
+    /* ======================================================
+       TOPBAR TITLE
+    ====================================================== */
+
+    .cc-topbar h1 {
+
+        max-width: 160px;
+
+
+        font-size: 15px;
+
+    }
+
+
+    /* ======================================================
+       CONTENT
+    ====================================================== */
+
+    .cc-content {
+
+        padding:
+            12px;
+
+    }
+
+
+    /* ======================================================
+       LOGOUT BUTTON
+    ====================================================== */
+
+    .cc-logout-btn {
+
+        width: 38px;
+
+
+        padding: 0;
+
+    }
+
+
+    /* ======================================================
+       HIDE LOGOUT TEXT
+    ====================================================== */
+
+    .cc-logout-btn span {
+
+        display: none;
+
+    }
+
+
+    /* ======================================================
+       PAGE BUTTON
+    ====================================================== */
+
+    .cc-page-toolbar .cc-btn {
+
+        flex:
+            1 1 auto;
+
+    }
+
+
+    /* ======================================================
+       KPI
+    ====================================================== */
+
+    .cc-kpi {
+
+        min-height: 90px;
+
+
+        padding:
+            14px;
+
+    }
+
+
+    .cc-kpi-label {
+
+        margin-bottom: 6px;
+
+
+        font-size: 9px;
+
+    }
+
+
+    .cc-kpi-value {
+
+        font-size: 20px;
+
+    }
+
+
+    .cc-kpi small {
+
+        margin-top: 5px;
+
+
+        font-size: 8px;
+
+    }
+
+
+    /* ======================================================
+       CARD HEADER
+    ====================================================== */
+
+    .cc-card-header {
+
+        padding:
+            0 12px;
+
+    }
+
+
+    /* ======================================================
+       CARD BODY
+    ====================================================== */
+
+    .cc-card-body {
+
+        padding: 12px;
+
+    }
+
+
+    /* ======================================================
+       INFO ROW
+    ====================================================== */
+
+    .cc-info-row {
+
+        align-items: flex-start;
+
+
+        gap: 12px;
+
+    }
+
+
+    /* ======================================================
+       INFO VALUE
+    ====================================================== */
+
+    .cc-info-value {
+
+        max-width: 55%;
+
+    }
+
+
+    /* ======================================================
+       FILTER
+    ====================================================== */
+
+    .cc-filter,
+    .cc-audit-filter {
+
+        padding: 12px;
+
+    }
+
+
+    /* ======================================================
+       MODAL
+    ====================================================== */
+
+    .modal-dialog {
+
+        width: auto;
+
+
+        max-width: none;
+
+
+        margin:
+            8px;
+
+    }
+
+
+    /* ======================================================
+       MODAL CONTENT
+    ====================================================== */
+
+    .modal-content {
+
+        border-radius:
+            var(--cc-radius-md);
+
+    }
+
+
+    /* ======================================================
+       MODAL HEADER
+    ====================================================== */
+
+    .modal-header {
+
+        min-height: 52px;
+
+
+        padding:
+            0 14px;
+
+    }
+
+
+    /* ======================================================
+       MODAL TITLE
+    ====================================================== */
+
+    .modal-title {
+
+        font-size: 13px;
+
+    }
+
+
+    /* ======================================================
+       MODAL BODY
+    ====================================================== */
+
+    .modal-body {
+
+        max-height:
+            calc(
+                100vh - 130px
+            );
+
+
+        padding: 14px;
+
+
+        overflow-y: auto;
+
+    }
+
+
+    /* ======================================================
+       MODAL FOOTER
+    ====================================================== */
+
+    .modal-footer {
+
+        padding:
+            9px 14px;
+
+    }
+
+
+    /* ======================================================
+       MODAL FOOTER BUTTON
+    ====================================================== */
+
+    .modal-footer .cc-btn,
+    .modal-footer .btn {
+
+        min-height: 38px;
+
+    }
+
+
+    /* ======================================================
+       AUDIT SECTION BODY
+    ====================================================== */
+
+    .cc-audit-section-body {
+
+        padding: 12px;
+
+    }
+
+
+    /* ======================================================
+       AUDIT INFO ITEM
+    ====================================================== */
+
+    .cc-audit-info-item {
+
+        display: flex;
+
+
+        flex-direction: column;
+
+
+        gap: 3px;
+
+
+        min-height: 0;
+
+
+        padding:
+            8px 0;
+
+    }
+
+
+    /* ======================================================
+       AUDIT LABEL
+    ====================================================== */
+
+    .cc-audit-info-label {
+
+        font-size: 8px;
+
+    }
+
+
+    /* ======================================================
+       AUDIT VALUE
+    ====================================================== */
+
+    .cc-audit-info-value {
+
+        width: 100%;
+
+
+        font-size: 9px;
+
+    }
+
+
+    /* ======================================================
+       SOURCE TRACE
+
+       KEEP HORIZONTAL SCROLL BECAUSE DOCUMENT TRACE
+       SHOULD NOT BE COMPRESSED
+    ====================================================== */
+
+    .cc-source-trace {
+
+        padding-bottom: 4px;
+
+
+        overflow-x: auto;
+
+    }
+
+
+    .cc-source-node {
+
+        min-width: 145px;
+
+
+        padding:
+            10px 12px;
+
+    }
+
+
+    .cc-source-arrow {
+
+        width: 30px;
+
+
+        min-width: 30px;
+
+    }
+
+
+    /* ======================================================
+       AUDIT JSON
+    ====================================================== */
+
+    .cc-audit-json {
+
+        max-height: 260px;
+
+
+        padding: 12px;
+
+
+        font-size: 8px;
+
+    }
+
+}
+
+
+/* ==========================================================
+   VERY SMALL MOBILE
+   <= 420px
+========================================================== */
+
+@media (max-width: 420px) {
+
+    /* ======================================================
+       TOPBAR
+    ====================================================== */
+
+    .cc-topbar h1 {
+
+        max-width: 125px;
+
+    }
+
+
+    /* ======================================================
+       AVATAR
+    ====================================================== */
+
+    .cc-avatar {
+
+        display: none;
+
+    }
+
+
+    /* ======================================================
+       CONTENT
+    ====================================================== */
+
+    .cc-content {
+
+        padding:
+            10px;
+
+    }
+
+
+    /* ======================================================
+       PAGE TITLE
+    ====================================================== */
+
+    .cc-page-toolbar h2 {
+
+        font-size: 15px;
+
+    }
+
+
+    /* ======================================================
+       KPI ICON
+    ====================================================== */
+
+    .cc-kpi-icon {
+
+        width: 36px;
+
+
+        height: 36px;
+
+
+        margin-left: 10px;
+
+    }
+
+
+    /* ======================================================
+       TABLE
+    ====================================================== */
+
+    .cc-table {
+
+        min-width: 700px;
+
+    }
+
+
+    /* ======================================================
+       TABLE FONT
+    ====================================================== */
+
+    .cc-table tbody td {
+
+        font-size: 9px;
+
+    }
+
+
+    /* ======================================================
+       PAGINATION
+    ====================================================== */
+
+    .cc-pagination button,
+    .cc-page-btn {
+
+        min-width: 28px;
+
+
+        height: 28px;
+
+
+        padding:
+            0 6px;
+
+    }
+
+}
+
+
+/* ==========================================================
+   PRINT
+========================================================== */
+
+@media print {
+
+    /* ======================================================
+       HIDE CONTROL ELEMENTS
+    ====================================================== */
+
+    .cc-sidebar,
+    .cc-topbar,
+    .cc-overlay,
+    .cc-phase-banner,
+    .cc-filter,
+    .cc-audit-filter,
+    .cc-table-footer,
+    .cc-page-toolbar > div:last-child {
+
+        display:
+            none !important;
+
+    }
+
+
+    /* ======================================================
+       MAIN
+    ====================================================== */
+
+    .cc-main {
+
+        width:
+            100% !important;
+
+
+        margin:
+            0 !important;
+
+    }
+
+
+    /* ======================================================
+       CONTENT
+    ====================================================== */
+
+    .cc-content {
+
+        padding:
+            0 !important;
+
+
+        background:
+            #FFFFFF !important;
+
+    }
+
+
+    /* ======================================================
+       CARD
+    ====================================================== */
+
+    .cc-card,
+    .cc-table-card {
+
+        border:
+            1px solid
+            #D1D5DB !important;
+
+
+        box-shadow:
+            none !important;
+
+    }
+
+
+    /* ======================================================
+       TABLE
+    ====================================================== */
+
+    .cc-table {
+
+        min-width:
+            0 !important;
+
+    }
+
+}
+
+
+/* ==========================================================
+   ACCESSIBILITY
+   REDUCED MOTION
+========================================================== */
+
+@media (
+    prefers-reduced-motion: reduce
+) {
+
+    *,
+    *::before,
+    *::after {
+
+        scroll-behavior:
+            auto !important;
+
+
+        transition-duration:
+            .01ms !important;
+
+
+        animation-duration:
+            .01ms !important;
+
+
+        animation-iteration-count:
+            1 !important;
+
+    }
+
+}
+/* ==========================================================
+   FINOVA CONTROL CENTER
+   TAHAP 9.4E — AUDIT DETAIL MODAL FINAL
+   Compatible with index(2).html + control-center(2).js
+========================================================== */
+
+
+/* ==========================================================
+   AUDIT MODAL DIALOG / CONTENT
+========================================================== */
+
+#audit-detail-modal .modal-dialog {
+
+    width:
+        calc(
+            100% - 48px
+        );
+
+    max-width: 1180px;
+
+    margin:
+        24px auto;
+
+}
+
+
+#audit-detail-modal .cc-audit-modal {
+
+    display: flex;
+
+    flex-direction: column;
+
+    max-height:
+        calc(
+            100vh - 48px
+        );
+
+    overflow: hidden;
+
+    background:
+        #FFFFFF;
+
+    border:
+        1px solid
+        var(--cc-border);
+
+    border-radius:
+        var(--cc-radius-lg);
+
+    box-shadow:
+        0 24px 60px
+        rgba(
+            15,
+            23,
+            42,
+            .18
+        );
+
+}
+
+
+/* ==========================================================
+   AUDIT MODAL HEADER
+========================================================== */
+
+#audit-detail-modal .cc-audit-modal-header {
+
+    flex-shrink: 0;
+
+    align-items: center;
+
+    min-height: 68px;
+
+    padding:
+        12px 20px;
+
+    background:
+        #FFFFFF;
+
+    border-bottom:
+        1px solid
+        var(--cc-border);
+
+}
+
+
+#audit-detail-modal .cc-audit-modal-header > div {
+
+    min-width: 0;
+
+}
+
+
+#audit-detail-modal .cc-audit-modal-header .modal-title {
+
+    margin: 0;
+
+    color:
+        var(--cc-text-primary);
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+    line-height: 1.3;
+
+}
+
+
+#audit-detail-modal .cc-audit-modal-subtitle {
+
+    margin:
+        3px 0 0;
+
+    color:
+        var(--cc-text-secondary);
+
+    font-size: 9px;
+
+    font-weight: 400;
+
+    line-height: 1.5;
+
+}
+
+
+/* ==========================================================
+   AUDIT MODAL BODY
+========================================================== */
+
+#audit-detail-modal .cc-audit-modal-body {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 14px;
+
+    min-height: 0;
+
+    padding: 16px;
+
+    overflow-x: hidden;
+
+    overflow-y: auto;
+
+    background:
+        #F8FAFC;
+
+}
+
+
+/* ==========================================================
+   AUDIT SECTION
+========================================================== */
+
+#audit-detail-modal .cc-audit-section {
+
+    flex-shrink: 0;
+
+    width: 100%;
+
+    margin: 0;
+
+    overflow: hidden;
+
+    background:
+        #FFFFFF;
+
+    border:
+        1px solid
+        var(--cc-border);
+
+    border-radius:
+        var(--cc-radius-md);
+
+    box-shadow:
+        0 1px 2px
+        rgba(
+            15,
+            23,
+            42,
+            .025
+        );
+
+}
+
+
+/* ==========================================================
+   AUDIT SECTION HEADER
+========================================================== */
+
+#audit-detail-modal .cc-audit-section-header {
+
+    display: flex;
+
+    align-items: center;
+
+    min-height: 50px;
+
+    padding:
+        9px 14px;
+
+    background:
+        #FFFFFF;
+
+    border-bottom:
+        1px solid
+        var(--cc-border);
+
+}
+
+
+#audit-detail-modal .cc-audit-section-header > div {
+
+    min-width: 0;
+
+}
+
+
+#audit-detail-modal .cc-audit-section-header h6 {
+
+    margin: 0;
+
+    color:
+        var(--cc-text-primary);
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    line-height: 1.4;
+
+}
+
+
+#audit-detail-modal .cc-audit-section-header p {
+
+    margin:
+        2px 0 0;
+
+    color:
+        var(--cc-text-muted);
+
+    font-size: 8px;
+
+    font-weight: 400;
+
+    line-height: 1.5;
+
+}
+
+
+/* ==========================================================
+   AUDIT INFORMATION GRID
+========================================================== */
+
+#audit-detail-modal .cc-audit-info-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0, 1fr)
+        );
+
+    column-gap: 24px;
+
+    row-gap: 0;
+
+    width: 100%;
+
+    padding:
+        4px 14px 8px;
+
+}
+
+
+/* ==========================================================
+   AUDIT INFORMATION ITEM
+========================================================== */
+
+#audit-detail-modal .cc-audit-info-item {
+
+    display: grid;
+
+    grid-template-columns:
+        112px minmax(0, 1fr);
+
+    align-items: center;
+
+    gap: 10px;
+
+    min-width: 0;
+
+    min-height: 38px;
+
+    padding:
+        8px 0;
+
+    border-bottom:
+        1px solid
+        #F1F5F9;
+
+}
+
+
+#audit-detail-modal .cc-audit-info-item:nth-last-child(-n + 2) {
+
+    border-bottom: 0;
+
+}
+
+
+/* ==========================================================
+   AUDIT INFORMATION LABEL
+========================================================== */
+
+#audit-detail-modal .cc-audit-info-label {
+
+    min-width: 0;
+
+    color:
+        var(--cc-text-secondary);
+
+    font-size: 8.5px;
+
+    font-weight: 500;
+
+    line-height: 1.5;
+
+}
+
+
+/* ==========================================================
+   AUDIT INFORMATION VALUE
+========================================================== */
+
+#audit-detail-modal .cc-audit-info-value {
+
+    min-width: 0;
+
+    color:
+        var(--cc-text-primary);
+
+    font-size: 9px;
+
+    font-weight: 600;
+
+    line-height: 1.5;
+
+    overflow-wrap: anywhere;
+
+    word-break: break-word;
+
+}
+
+
+#audit-detail-modal .cc-audit-info-value .cc-badge {
+
+    vertical-align: middle;
+
+}
+
+
+/* ==========================================================
+   MONOSPACE VALUE
+========================================================== */
+
+#audit-detail-modal .cc-mono {
+
+    font-family:
+        Consolas,
+        Monaco,
+        "Courier New",
+        monospace;
+
+    font-weight: 500;
+
+}
+
+
+/* ==========================================================
+   DOCUMENT TRACE
+========================================================== */
+
+#audit-detail-modal .cc-audit-trace {
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        44px
+        minmax(0, 1fr);
+
+    align-items: stretch;
+
+    gap: 0;
+
+    width: 100%;
+
+    padding: 14px;
+
+}
+
+
+/* ==========================================================
+   TRACE NODE
+========================================================== */
+
+#audit-detail-modal .cc-audit-trace-node {
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    min-width: 0;
+
+    min-height: 78px;
+
+    padding:
+        12px 14px;
+
+    background:
+        #F8FAFC;
+
+    border:
+        1px solid
+        var(--cc-border);
+
+    border-radius:
+        var(--cc-radius-md);
+
+}
+
+
+/* ==========================================================
+   TRACE LABEL
+========================================================== */
+
+#audit-detail-modal .cc-audit-trace-label {
+
+    display: block;
+
+    margin-bottom: 4px;
+
+    color:
+        var(--cc-text-muted);
+
+    font-size: 8px;
+
+    font-weight: 600;
+
+    line-height: 1.4;
+
+    text-transform: uppercase;
+
+    letter-spacing: .35px;
+
+}
+
+
+/* ==========================================================
+   TRACE MODULE
+========================================================== */
+
+#audit-detail-modal .cc-audit-trace-module {
+
+    display: block;
+
+    min-width: 0;
+
+    color:
+        var(--cc-text-primary);
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    line-height: 1.4;
+
+    overflow-wrap: anywhere;
+
+}
+
+
+/* ==========================================================
+   TRACE DOCUMENT
+========================================================== */
+
+#audit-detail-modal .cc-audit-trace-document {
+
+    display: block;
+
+    min-width: 0;
+
+    margin-top: 4px;
+
+    color:
+        var(--cc-text-secondary);
+
+    font-size: 8.5px;
+
+    line-height: 1.5;
+
+    overflow-wrap: anywhere;
+
+}
+
+
+/* ==========================================================
+   TRACE ARROW
+========================================================== */
+
+#audit-detail-modal .cc-audit-trace-arrow {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-width: 44px;
+
+    color:
+        var(--cc-primary);
+
+    font-size: 12px;
+
+}
+
+
+/* ==========================================================
+   TRACE WITHOUT SOURCE
+========================================================== */
+
+#audit-detail-modal .cc-audit-trace.no-source {
+
+    grid-template-columns:
+        1fr;
+
+}
+
+
+#audit-detail-modal .cc-audit-trace.no-source
+.cc-audit-trace-node:first-child,
+#audit-detail-modal .cc-audit-trace.no-source
+.cc-audit-trace-arrow {
+
+    display: none;
+
+}
+
+
+/* ==========================================================
+   CHANGED FIELDS WRAPPER
+========================================================== */
+
+#audit-detail-modal .cc-changed-fields {
+
+    width: 100%;
+
+    padding: 0;
+
+    overflow-x: auto;
+
+}
+
+
+/* ==========================================================
+   CHANGED FIELDS TABLE
+   JS: .cc-table.cc-audit-change-table
+========================================================== */
+
+#audit-detail-modal .cc-audit-change-table {
+
+    width: 100%;
+
+    min-width: 640px;
+
+    margin: 0;
+
+    table-layout: fixed;
+
+    border-collapse: collapse;
+
+}
+
+
+#audit-detail-modal .cc-audit-change-table th {
+
+    padding:
+        9px 12px;
+
+    background:
+        #F8FAFC;
+
+    color:
+        var(--cc-text-secondary);
+
+    border-bottom:
+        1px solid
+        var(--cc-border);
+
+    font-size: 8px;
+
+    font-weight: 600;
+
+    line-height: 1.4;
+
+    text-transform: uppercase;
+
+    letter-spacing: .25px;
+
+}
+
+
+#audit-detail-modal .cc-audit-change-table th:first-child {
+
+    width: 20%;
+
+}
+
+
+#audit-detail-modal .cc-audit-change-table th:nth-child(2),
+#audit-detail-modal .cc-audit-change-table th:nth-child(3) {
+
+    width: 40%;
+
+}
+
+
+#audit-detail-modal .cc-audit-change-table td {
+
+    padding:
+        9px 12px;
+
+    vertical-align: top;
+
+    background:
+        #FFFFFF;
+
+    border-bottom:
+        1px solid
+        #F1F5F9;
+
+    color:
+        var(--cc-text-primary);
+
+    font-size: 8.5px;
+
+    line-height: 1.5;
+
+}
+
+
+#audit-detail-modal .cc-audit-change-table tbody tr:last-child td {
+
+    border-bottom: 0;
+
+}
+
+
+/* ==========================================================
+   CHANGED FIELD VALUE
+   JS: .cc-audit-change-value
+========================================================== */
+
+#audit-detail-modal .cc-audit-change-value {
+
+    width: 100%;
+
+    max-height: 120px;
+
+    margin: 0;
+
+    padding: 0;
+
+    overflow: auto;
+
+    background:
+        transparent;
+
+    color:
+        var(--cc-text-primary);
+
+    font-family:
+        Consolas,
+        Monaco,
+        "Courier New",
+        monospace;
+
+    font-size: 8px;
+
+    font-weight: 400;
+
+    line-height: 1.55;
+
+    white-space: pre-wrap;
+
+    overflow-wrap: anywhere;
+
+    word-break: break-word;
+
+}
+
+
+/* ==========================================================
+   NO CHANGES
+========================================================== */
+
+#audit-detail-modal .cc-no-changes {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 7px;
+
+    min-height: 72px;
+
+    padding: 14px;
+
+    color:
+        var(--cc-text-muted);
+
+    font-size: 8.5px;
+
+    font-weight: 500;
+
+    text-align: center;
+
+}
+
+
+#audit-detail-modal .cc-no-changes i {
+
+    color:
+        var(--cc-success);
+
+    font-size: 10px;
+
+}
+
+
+/* ==========================================================
+   SNAPSHOT GRID
+========================================================== */
+
+#audit-detail-modal .cc-audit-snapshot-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0, 1fr)
+        );
+
+    align-items: start;
+
+    gap: 14px;
+
+    width: 100%;
+
+}
+
+
+/* ==========================================================
+   SNAPSHOT SECTION
+========================================================== */
+
+#audit-detail-modal .cc-audit-snapshot-section {
+
+    min-width: 0;
+
+}
+
+
+/* ==========================================================
+   JSON CONTAINER
+========================================================== */
+
+#audit-detail-modal .cc-audit-json-container {
+
+    min-width: 0;
+
+    background:
+        #0F172A;
+
+}
+
+
+/* ==========================================================
+   JSON SNAPSHOT
+========================================================== */
+
+#audit-detail-modal .cc-audit-json {
+
+    display: block;
+
+    width: 100%;
+
+    height: 300px;
+
+    max-height: 300px;
+
+    margin: 0;
+
+    padding: 12px 14px;
+
+    overflow: auto;
+
+    background:
+        #0F172A;
+
+    color:
+        #E2E8F0;
+
+    border: 0;
+
+    border-radius: 0;
+
+    font-family:
+        Consolas,
+        Monaco,
+        "Courier New",
+        monospace;
+
+    font-size: 8px;
+
+    font-weight: 400;
+
+    line-height: 1.55;
+
+    white-space: pre-wrap;
+
+    overflow-wrap: anywhere;
+
+    word-break: break-word;
+
+}
+
+
+/* ==========================================================
+   JSON SCROLLBAR
+========================================================== */
+
+#audit-detail-modal .cc-audit-json::-webkit-scrollbar {
+
+    width: 6px;
+
+    height: 6px;
+
+}
+
+
+#audit-detail-modal .cc-audit-json::-webkit-scrollbar-track {
+
+    background:
+        #0F172A;
+
+}
+
+
+#audit-detail-modal .cc-audit-json::-webkit-scrollbar-thumb {
+
+    background:
+        #475569;
+
+    border-radius: 999px;
+
+}
+
+
+/* ==========================================================
+   AUDIT MODAL FOOTER
+========================================================== */
+
+#audit-detail-modal .cc-audit-modal-footer {
+
+    flex-shrink: 0;
+
+    min-height: 58px;
+
+    padding:
+        10px 16px;
+
+    background:
+        #FFFFFF;
+
+    border-top:
+        1px solid
+        var(--cc-border);
+
+}
+
+
+/* ==========================================================
+   AUDIT MODAL BODY SCROLLBAR
+========================================================== */
+
+#audit-detail-modal .cc-audit-modal-body::-webkit-scrollbar {
+
+    width: 7px;
+
+}
+
+
+#audit-detail-modal .cc-audit-modal-body::-webkit-scrollbar-track {
+
+    background:
+        #F8FAFC;
+
+}
+
+
+#audit-detail-modal .cc-audit-modal-body::-webkit-scrollbar-thumb {
+
+    background:
+        #CBD5E1;
+
+    border-radius: 999px;
+
+}
+
+
+/* ==========================================================
+   RESPONSIVE — SMALL LAPTOP / TABLET
+========================================================== */
+
+@media (max-width: 991.98px) {
+
+    #audit-detail-modal .modal-dialog {
+
+        width:
+            calc(
+                100% - 32px
+            );
+
+        margin:
+            16px auto;
+
+    }
+
+
+    #audit-detail-modal .cc-audit-modal {
+
+        max-height:
+            calc(
+                100vh - 32px
+            );
+
+    }
+
+
+    #audit-detail-modal .cc-audit-info-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    #audit-detail-modal .cc-audit-info-item:nth-last-child(-n + 2) {
+
+        border-bottom:
+            1px solid
+            #F1F5F9;
+
+    }
+
+
+    #audit-detail-modal .cc-audit-info-item:last-child {
+
+        border-bottom: 0;
+
+    }
+
+
+    #audit-detail-modal .cc-audit-snapshot-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    #audit-detail-modal .cc-audit-json {
+
+        height: 260px;
+
+        max-height: 260px;
+
+    }
+
+}
+
+
+/* ==========================================================
+   RESPONSIVE — MOBILE
+========================================================== */
+
+@media (max-width: 575.98px) {
+
+    #audit-detail-modal .modal-dialog {
+
+        width:
+            calc(
+                100% - 16px
+            );
+
+        margin:
+            8px auto;
+
+    }
+
+
+    #audit-detail-modal .cc-audit-modal {
+
+        max-height:
+            calc(
+                100vh - 16px
+            );
+
+        border-radius:
+            var(--cc-radius-md);
+
+    }
+
+
+    #audit-detail-modal .cc-audit-modal-header {
+
+        min-height: 62px;
+
+        padding:
+            10px 14px;
+
+    }
+
+
+    #audit-detail-modal .cc-audit-modal-body {
+
+        gap: 10px;
+
+        padding: 10px;
+
+    }
+
+
+    #audit-detail-modal .cc-audit-section-header {
+
+        min-height: 46px;
+
+        padding:
+            8px 10px;
+
+    }
+
+
+    #audit-detail-modal .cc-audit-info-grid {
+
+        padding:
+            2px 10px 6px;
+
+    }
+
+
+    #audit-detail-modal .cc-audit-info-item {
+
+        grid-template-columns:
+            1fr;
+
+        gap: 3px;
+
+        min-height: 0;
+
+        padding:
+            8px 0;
+
+    }
+
+
+    #audit-detail-modal .cc-audit-trace {
+
+        grid-template-columns:
+            1fr;
+
+        gap: 8px;
+
+        padding: 10px;
+
+    }
+
+
+    #audit-detail-modal .cc-audit-trace-arrow {
+
+        min-width: 0;
+
+        min-height: 24px;
+
+        transform:
+            rotate(90deg);
+
+    }
+
+
+    #audit-detail-modal .cc-audit-trace.no-source
+    .cc-audit-trace-arrow {
+
+        display: none;
+
+    }
+
+
+    #audit-detail-modal .cc-audit-change-table {
+
+        min-width: 560px;
+
+    }
+
+
+    #audit-detail-modal .cc-audit-json {
+
+        height: 220px;
+
+        max-height: 220px;
+
+        padding:
+            10px;
+
+        font-size: 7.5px;
+
+    }
+
+
+    #audit-detail-modal .cc-audit-modal-footer {
+
+        min-height: 54px;
+
+        padding:
+            8px 10px;
+
+    }
+
+}
