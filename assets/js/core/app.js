@@ -33,6 +33,10 @@ import {
     CustomerConfig
 } from "./customer-config.js";
 
+import {
+    supabase
+} from "./supabase.js";
+
 /*
 ==========================================================
 APPLICATION
@@ -110,29 +114,88 @@ async initialize() {
 
         /*
         ==========================================
-        CUSTOMER CONFIGURATION
+        CHECK FINOVA SUPER ADMIN
         ==========================================
         */
 
-        await CustomerConfig.initialize();
+        const {
+            data: isSuperAdmin,
+            error: superAdminError
+        } = await supabase.rpc(
+            "is_finova_super_admin"
+        );
+
+
+        if (
+            superAdminError
+        ) {
+
+            console.error(
+                "FINOVA SUPER ADMIN CHECK ERROR :",
+                superAdminError
+            );
+
+            throw superAdminError;
+
+        }
 
 
         /*
         ==========================================
-        CUSTOMER CONFIG DEBUG
+        APPLICATION ACCESS MODE
         ==========================================
         */
 
-        console.log(
-            "FINOVA COMPANY :",
-            CustomerConfig.getCompanyCode(),
-            CustomerConfig.getCompanyName()
-        );
+        this.isSuperAdmin =
+            isSuperAdmin === true;
 
-        console.log(
-            "FINOVA BASE CURRENCY :",
-            CustomerConfig.getBaseCurrency()
-        );
+
+        /*
+        ==========================================
+        CUSTOMER CONFIGURATION
+        TENANT USER ONLY
+        ==========================================
+        */
+
+        if (
+            !this.isSuperAdmin
+        ) {
+
+            await CustomerConfig.initialize();
+
+
+            /*
+            ======================================
+            CUSTOMER CONFIG DEBUG
+            ======================================
+            */
+
+            console.log(
+                "FINOVA COMPANY :",
+                CustomerConfig.getCompanyCode(),
+                CustomerConfig.getCompanyName()
+            );
+
+
+            console.log(
+                "FINOVA BASE CURRENCY :",
+                CustomerConfig.getBaseCurrency()
+            );
+
+        }
+        else {
+
+            /*
+            ======================================
+            SUPER ADMIN MODE
+            ======================================
+            */
+
+            console.log(
+                "FINOVA ACCESS MODE : SUPER ADMIN"
+            );
+
+        }
 
 
         /*
@@ -194,8 +257,6 @@ async initialize() {
     }
 
 }
-
-
     /*
     ======================================================
     CHECK AUTHENTICATION
@@ -376,47 +437,61 @@ renderLayout() {
 
 }
     /*
-    ======================================================
-    INITIALIZE COMPONENTS
-    ======================================================
+======================================================
+INITIALIZE COMPONENTS
+======================================================
+*/
+
+initializeComponents() {
+
+    /*
+    ==========================================
+    SIDEBAR
+    ==========================================
     */
 
-    initializeComponents() {
-
-        /*
-        ==========================================
-        SIDEBAR
-        ==========================================
-        */
-
-        this.sidebar =
-            new FinovaSidebar();
+    this.sidebar =
+        new FinovaSidebar(
+            {
+                isSuperAdmin:
+                    this.isSuperAdmin === true
+            }
+        );
 
 
-        /*
-        ==========================================
-        TOPBAR
-        ==========================================
-        */
+    /*
+    ==========================================
+    TOPBAR
+    ==========================================
+    */
 
-        this.topbar =
-            new FinovaTopbar();
+    this.topbar =
+        new FinovaTopbar();
 
 
-        /*
-        ==========================================
-        GLOBAL ACCESS
-        ==========================================
-        */
+    /*
+    ==========================================
+    GLOBAL ACCESS
+    ==========================================
+    */
 
-        window.finovaSidebar =
-            this.sidebar;
+    window.finovaSidebar =
+        this.sidebar;
 
-        window.finovaTopbar =
-            this.topbar;
+    window.finovaTopbar =
+        this.topbar;
 
-    }
 
+    /*
+    ==========================================
+    GLOBAL ACCESS MODE
+    ==========================================
+    */
+
+    window.finovaIsSuperAdmin =
+        this.isSuperAdmin === true;
+
+}
 
     /*
     ======================================================

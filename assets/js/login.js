@@ -306,7 +306,7 @@ async redirectAuthenticatedUser() {
     ) {
 
         window.location.replace(
-            "control-center/"
+            "index.html"
         );
 
         return;

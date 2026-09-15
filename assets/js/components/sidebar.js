@@ -23,58 +23,95 @@ export class FinovaSidebar {
     ======================================================
     */
 
-    constructor() {
+    constructor(
+    options = {}
+) {
 
-        /*
-        ======================================================
-        CHANGE PASSWORD
-        ======================================================
-        */
+    /*
+    ======================================================
+    OPTIONS
+    ======================================================
+    */
 
-        this.changePassword =
-            null;
-
-
-        /*
-        ======================================================
-        MOBILE
-        ======================================================
-        */
-
-        this.mobileBreakpoint =
-            991.98;
+    this.options =
+        options
+        || {};
 
 
-        /*
-        ======================================================
-        LOGOUT MODAL
-        ======================================================
-        */
+    /*
+    ======================================================
+    ACCESS MODE
+    ======================================================
+    */
 
-        this.logoutModal =
-            null;
-
-        this.logoutConfirmHandler =
-            null;
+    this.isSuperAdmin =
+        this.options.isSuperAdmin === true;
 
 
-        /*
-        ======================================================
-        INITIALIZE
-        ======================================================
-        */
+    /*
+    ======================================================
+    CHANGE PASSWORD
+    ======================================================
+    */
 
-        this.render();
+    this.changePassword =
+        null;
 
-        this.createMobileBackdrop();
 
-        this.createLogoutModal();
+    /*
+    ======================================================
+    MOBILE
+    ======================================================
+    */
 
-        this.bindEvents();
+    this.mobileBreakpoint =
+        991.98;
 
-        this.bindMobileEvents();
 
-    }
+    /*
+    ======================================================
+    LOGOUT MODAL
+    ======================================================
+    */
+
+    this.logoutModal =
+        null;
+
+    this.logoutConfirmHandler =
+        null;
+
+
+    /*
+    ======================================================
+    INITIALIZE
+    ======================================================
+    */
+
+    this.render();
+
+    this.createMobileBackdrop();
+
+    this.createLogoutModal();
+
+    this.bindEvents();
+
+    this.bindMobileEvents();
+
+
+    /*
+    ======================================================
+    DEBUG
+    ======================================================
+    */
+
+    console.log(
+        "FINOVA SIDEBAR ACCESS MODE:",
+        this.isSuperAdmin
+            ? "SUPER ADMIN"
+            : "TENANT USER"
+    );
+
+}
 
 
     /*
@@ -270,7 +307,7 @@ export class FinovaSidebar {
            
 
 
-            ${this.menuGroup(
+                        ${this.menuGroup(
                 "Report",
                 "fa-solid fa-chart-column",
                 [
@@ -306,6 +343,28 @@ export class FinovaSidebar {
 
                 ]
             )}
+
+
+            ${
+                this.isSuperAdmin
+                    ?
+                    `
+
+                        ${this.menuHeader(
+                            "FINOVA ADMIN"
+                        )}
+
+
+                        ${this.menuItem(
+                            "Production",
+                            "fa-solid fa-shield-halved",
+                            "production"
+                        )}
+
+                    `
+                    :
+                    ""
+            }
 
 
             ${this.menuHeader(
@@ -832,13 +891,68 @@ export class FinovaSidebar {
                 }
 
 
-                const module =
+                                const module =
                     menu.dataset.module;
 
 
                 if (
                     !module
                 ) {
+
+                    return;
+
+                }
+
+
+                /*
+                ==================================================
+                FINOVA PRODUCTION
+                SUPER ADMIN ONLY
+                ==================================================
+                */
+
+                if (
+                    module ===
+                    "production"
+                ) {
+
+                    event.preventDefault();
+
+                    event.stopPropagation();
+
+
+                    /*
+                    ==============================================
+                    SECURITY CHECK
+                    ==============================================
+                    */
+
+                    if (
+                        this.isSuperAdmin !== true
+                    ) {
+
+                        console.warn(
+                            "FINOVA PRODUCTION ACCESS DENIED."
+                        );
+
+                        return;
+
+                    }
+
+
+                    /*
+                    ==============================================
+                    OPEN CONTROL CENTER
+                    NEW TAB
+                    ==============================================
+                    */
+
+                    window.open(
+                        "control-center/",
+                        "_blank",
+                        "noopener,noreferrer"
+                    );
+
 
                     return;
 

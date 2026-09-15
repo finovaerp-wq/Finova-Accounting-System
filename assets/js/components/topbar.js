@@ -15,6 +15,10 @@ import {
     CustomerConfig
 } from "../core/customer-config.js";
 
+import {
+    supabase
+} from "../core/supabase.js";
+
 
 export class FinovaTopbar {
 
@@ -512,7 +516,7 @@ export class FinovaTopbar {
 
     }
 
-    /*
+/*
 ==========================================================
 LOAD COMPANY IDENTITY
 ==========================================================
@@ -524,7 +528,30 @@ loadCompanyIdentity() {
 
         /*
         ==================================================
-        CUSTOMER CONFIG READY
+        DOM
+        ==================================================
+        */
+
+        const nameElement =
+            document.getElementById(
+                "topbar-company-name"
+            );
+
+        const codeElement =
+            document.getElementById(
+                "topbar-company-code"
+            );
+
+        const identityElement =
+            document.getElementById(
+                "finova-company-identity"
+            );
+
+
+        /*
+        ==================================================
+        SUPER ADMIN MODE
+        CUSTOMER CONFIG NOT REQUIRED
         ==================================================
         */
 
@@ -532,9 +559,34 @@ loadCompanyIdentity() {
             !CustomerConfig.isInitialized()
         ) {
 
-            console.warn(
-                "Topbar: CustomerConfig is not initialized."
+            if (nameElement) {
+
+                nameElement.textContent =
+                    "FINOVA";
+
+            }
+
+
+            if (codeElement) {
+
+                codeElement.textContent =
+                    "SUPER ADMIN";
+
+            }
+
+
+            if (identityElement) {
+
+                identityElement.title =
+                    "FINOVA Super Admin";
+
+            }
+
+
+            console.log(
+                "FINOVA TOPBAR MODE: SUPER ADMIN"
             );
+
 
             return;
 
@@ -560,12 +612,6 @@ loadCompanyIdentity() {
         ==================================================
         */
 
-        const nameElement =
-            document.getElementById(
-                "topbar-company-name"
-            );
-
-
         if (nameElement) {
 
             nameElement.textContent =
@@ -581,12 +627,6 @@ loadCompanyIdentity() {
         COMPANY CODE
         ==================================================
         */
-
-        const codeElement =
-            document.getElementById(
-                "topbar-company-code"
-            );
-
 
         if (codeElement) {
 
@@ -604,12 +644,6 @@ loadCompanyIdentity() {
         ==================================================
         */
 
-        const identityElement =
-            document.getElementById(
-                "finova-company-identity"
-            );
-
-
         if (identityElement) {
 
             identityElement.title =
@@ -619,6 +653,12 @@ loadCompanyIdentity() {
 
         }
 
+
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
 
         console.log(
             "FINOVA TOPBAR COMPANY:",
@@ -639,108 +679,229 @@ loadCompanyIdentity() {
 }
 
     /*
-    ==========================================================
-    LOAD PROFILE
-    ==========================================================
-    */
+==========================================================
+LOAD PROFILE
+==========================================================
+*/
 
-    async loadProfile() {
+async loadProfile() {
 
-        try {
+    try {
 
-            const profile =
-                await UserService
-                    .getCurrentProfile();
+        /*
+        ==================================================
+        DOM
+        ==================================================
+        */
+
+        const nameElement =
+            document.getElementById(
+                "topbar-user-name"
+            );
+
+        const roleElement =
+            document.getElementById(
+                "topbar-user-position"
+            );
+
+        const avatar =
+            document.getElementById(
+                "topbar-avatar"
+            );
 
 
-            if (!profile) {
+        /*
+        ==================================================
+        CHECK FINOVA SUPER ADMIN
+        ==================================================
+        */
 
-                return;
+        const {
+            data: isSuperAdmin,
+            error: superAdminError
+        } = await supabase.rpc(
+            "is_finova_super_admin"
+        );
+
+
+        if (
+            superAdminError
+        ) {
+
+            throw superAdminError;
+
+        }
+
+
+        /*
+        ==================================================
+        SUPER ADMIN PROFILE
+        ==================================================
+        */
+
+        if (
+            isSuperAdmin === true
+        ) {
+
+            const {
+                data: {
+                    user
+                },
+                error: userError
+            } = await supabase.auth.getUser();
+
+
+            if (
+                userError
+            ) {
+
+                throw userError;
 
             }
 
 
-            /*
-            ==================================================
-            NAME
-            ==================================================
-            */
-
-            const nameElement =
-                document.getElementById(
-                    "topbar-user-name"
-                );
+            const displayName =
+                user?.user_metadata?.full_name
+                ||
+                user?.user_metadata?.name
+                ||
+                user?.email
+                ||
+                "FINOVA Super Admin";
 
 
-            if (nameElement) {
+            if (
+                nameElement
+            ) {
 
                 nameElement.textContent =
-                    profile.full_name
-                    ||
-                    "Unknown User";
+                    displayName;
 
             }
 
 
-            /*
-            ==================================================
-            ROLE
-
-            Manager / Staff
-            ==================================================
-            */
-
-            const roleElement =
-                document.getElementById(
-                    "topbar-user-position"
-                );
-
-
-            if (roleElement) {
+            if (
+                roleElement
+            ) {
 
                 roleElement.textContent =
-                    profile.role
-                    ||
-                    profile.position
-                    ||
-                    "-";
+                    "Super Admin";
 
             }
 
 
-            /*
-            ==================================================
-            AVATAR
-            ==================================================
-            */
-
-            const avatar =
-                document.getElementById(
-                    "topbar-avatar"
-                );
-
-
-            if (avatar) {
+            if (
+                avatar
+            ) {
 
                 avatar.textContent =
                     this.getInitial(
-                        profile.full_name
+                        displayName
                     );
 
             }
 
-        }
-        catch (error) {
 
-            console.error(
-                "Topbar loadProfile:",
-                error
+            console.log(
+                "FINOVA TOPBAR USER: SUPER ADMIN"
             );
+
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        TENANT USER PROFILE
+        ==================================================
+        */
+
+        const profile =
+            await UserService
+                .getCurrentProfile();
+
+
+        if (
+            !profile
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        NAME
+        ==================================================
+        */
+
+        if (
+            nameElement
+        ) {
+
+            nameElement.textContent =
+                profile.full_name
+                ||
+                "Unknown User";
+
+        }
+
+
+        /*
+        ==================================================
+        ROLE
+
+        Manager / Staff
+        ==================================================
+        */
+
+        if (
+            roleElement
+        ) {
+
+            roleElement.textContent =
+                profile.role
+                ||
+                profile.position
+                ||
+                "-";
+
+        }
+
+
+        /*
+        ==================================================
+        AVATAR
+        ==================================================
+        */
+
+        if (
+            avatar
+        ) {
+
+            avatar.textContent =
+                this.getInitial(
+                    profile.full_name
+                );
 
         }
 
     }
+    catch (
+        error
+    ) {
 
+        console.error(
+            "Topbar loadProfile:",
+            error
+        );
+
+    }
+
+}
 
     /*
     ==========================================================

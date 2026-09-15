@@ -204,12 +204,46 @@ export class AuthService {
 
 
         /*
-        ==========================================
-        SYNC PROFILE
-        ==========================================
-        */
+==========================================
+CHECK FINOVA SUPER ADMIN
+==========================================
+*/
 
-        await UserService.syncProfile();
+const {
+    data: isSuperAdmin,
+    error: superAdminError
+} = await supabase.rpc(
+    "is_finova_super_admin"
+);
+
+
+if (
+    superAdminError
+) {
+
+    console.error(
+        "FINOVA SUPER ADMIN CHECK ERROR :",
+        superAdminError
+    );
+
+    throw superAdminError;
+
+}
+
+
+/*
+==========================================
+SYNC TENANT PROFILE
+==========================================
+*/
+
+if (
+    isSuperAdmin !== true
+) {
+
+    await UserService.syncProfile();
+
+}
 
 
         /*
