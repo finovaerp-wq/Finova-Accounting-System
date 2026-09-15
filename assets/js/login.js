@@ -10,6 +10,10 @@ import {
     AuthService
 } from "../../service/auth.service.js";
 
+import {
+    supabase
+} from "./core/supabase.js";
+
 /*
 ==========================================================
 CLASS
@@ -252,7 +256,74 @@ class Login {
 
                 `<i class="fa-solid fa-eye"></i>`;
 
+        
+
     }
+
+    /*
+======================================================
+REDIRECT AUTHENTICATED USER
+======================================================
+*/
+
+async redirectAuthenticatedUser() {
+
+    /*
+    ==========================================
+    CHECK SUPER ADMIN
+    ==========================================
+    */
+
+    const {
+        data: isSuperAdmin,
+        error: superAdminError
+    } = await supabase.rpc(
+        "is_finova_super_admin"
+    );
+
+
+    if (
+        superAdminError
+    ) {
+
+        console.error(
+            "FINOVA SUPER ADMIN CHECK ERROR :",
+            superAdminError
+        );
+
+        throw superAdminError;
+    }
+
+
+    /*
+    ==========================================
+    SUPER ADMIN
+    ==========================================
+    */
+
+    if (
+        isSuperAdmin === true
+    ) {
+
+        window.location.replace(
+            "control-center/"
+        );
+
+        return;
+    }
+
+
+    /*
+    ==========================================
+    CUSTOMER USER
+    ==========================================
+    */
+
+    window.location.replace(
+        "index.html"
+    );
+
+}
         /*
     ======================================================
     LOGIN
@@ -370,16 +441,12 @@ class Login {
            
 
             /*
-            ==========================================
-            REDIRECT
-            ==========================================
-            */
+==========================================
+REDIRECT BY USER TYPE
+==========================================
+*/
 
-            window.location.replace(
-
-                "index.html"
-
-            );
+await this.redirectAuthenticatedUser();
 
         }
 
@@ -425,20 +492,14 @@ class Login {
             await AuthService.isAuthenticated();
 
         if (
+    authenticated
+) {
 
-            authenticated
+    await this.redirectAuthenticatedUser();
 
-        ) {
+    return;
 
-            window.location.replace(
-
-                "index.html"
-
-            );
-
-            return;
-
-        }
+}
 
         /*
         ==============================================

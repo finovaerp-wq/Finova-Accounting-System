@@ -150,4 +150,22 @@ export class ControlCenterService {
         }
         return { companies, subscriptions, users, activeCompanies, activeUsers, expiring, mrr };
     }
+    static async logout() {
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+        sessionStorage.clear();
+        return true;
+    }
+
+    static async getAuditLogs(limit = 200) {
+        const safeLimit = Math.min(Math.max(Number(limit) || 200, 1), 500);
+        const { data, error } = await supabase
+            .from("finova_audit_log")
+            .select("id, company_id, user_uid, module, table_name, record_id, document_no, action, source_module, source_id, source_no, created_at")
+            .order("created_at", { ascending: false })
+            .limit(safeLimit);
+        if (error) throw error;
+        return data ?? [];
+    }
+
 }

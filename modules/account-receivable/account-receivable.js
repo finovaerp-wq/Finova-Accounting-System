@@ -19548,6 +19548,19 @@ SAME FLOW AS ACCOUNT PAYABLE
 if (
     action === "complete"
 ) {
+    console.log(
+    "========== AR COMPLETE CLICK =========="
+);
+
+console.log(
+    "ACTION :",
+    action
+);
+
+console.log(
+    "AR ID :",
+    id
+);
 
     if (
         !id

@@ -27,7 +27,9 @@ const state = {
 
     plans: [],
 
-    dashboard: null
+    dashboard: null,
+
+    auditLogs: []
 
 };
 
@@ -503,7 +505,8 @@ async function loadAll() {
 
     const [
         dashboard,
-        plans
+        plans,
+        auditLogs
     ] =
         await Promise.all(
             [
@@ -512,7 +515,10 @@ async function loadAll() {
                     .getDashboardData(),
 
                 ControlCenterService
-                    .getPlans()
+                    .getPlans(),
+
+                ControlCenterService
+                    .getAuditLogs()
 
             ]
         );
@@ -523,7 +529,8 @@ async function loadAll() {
         dashboard,
         {
             dashboard,
-            plans
+            plans,
+            auditLogs
         }
     );
 
@@ -548,6 +555,8 @@ function renderAll() {
     renderSubscriptions();
 
     renderUsers();
+
+    renderAuditLogs();
 
     fillSelects();
 
@@ -1288,6 +1297,108 @@ function renderUsers() {
 
 /*
 ==========================================================
+RENDER AUDIT LOG
+==========================================================
+*/
+
+function renderAuditLogs() {
+
+    const tableBody =
+        document.getElementById(
+            "audit-log-body"
+        );
+
+    if (!tableBody) {
+        return;
+    }
+
+    const searchValue =
+        String(
+            document.getElementById("audit-search")?.value || ""
+        ).trim().toLowerCase();
+
+    const actionValue =
+        String(
+            document.getElementById("audit-action")?.value || ""
+        ).trim().toUpperCase();
+
+    const companyMap = new Map(
+        state.companies.map(
+            (company) => [company.id, `${company.company_code} — ${company.company_name}`]
+        )
+    );
+
+    const rows = state.auditLogs
+        .filter((item) => {
+            const action = String(item.action || "").toUpperCase();
+            if (actionValue && action !== actionValue) {
+                return false;
+            }
+
+            if (!searchValue) {
+                return true;
+            }
+
+            const haystack = [
+                companyMap.get(item.company_id) || item.company_id || "",
+                item.module,
+                item.table_name,
+                item.document_no,
+                item.action,
+                item.user_uid,
+                item.source_module,
+                item.source_no
+            ].join(" ").toLowerCase();
+
+            return haystack.includes(searchValue);
+        })
+        .map((item) => {
+            const createdAt = item.created_at
+                ? new Intl.DateTimeFormat("id-ID", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit"
+                }).format(new Date(item.created_at))
+                : "-";
+
+            const companyName =
+                companyMap.get(item.company_id)
+                || (item.company_id ? item.company_id : "SYSTEM");
+
+            const documentNo =
+                item.document_no
+                || item.source_no
+                || "-";
+
+            return `
+                <tr>
+                    <td>${esc(createdAt)}</td>
+                    <td>${esc(companyName)}</td>
+                    <td><strong>${esc(item.module || "-")}</strong><br><small>${esc(item.table_name || "-")}</small></td>
+                    <td>${esc(documentNo)}</td>
+                    <td>${badge(item.action)}</td>
+                    <td><span class="cc-mono">${esc(item.user_uid || "SYSTEM")}</span></td>
+                </tr>
+            `;
+        })
+        .join("");
+
+    tableBody.innerHTML = rows || `
+        <tr class="cc-empty">
+            <td colspan="6">
+                <i class="fa-regular fa-folder-open"></i>
+                <span>Belum ada audit log yang sesuai.</span>
+            </td>
+        </tr>
+    `;
+}
+
+
+/*
+==========================================================
 FILL SELECTS
 ==========================================================
 */
@@ -1449,19 +1560,20 @@ REFRESH DATA
 
 async function refresh() {
 
-    const dashboard =
-        await ControlCenterService
-            .getDashboardData();
-
+    const [dashboard, auditLogs] =
+        await Promise.all([
+            ControlCenterService.getDashboardData(),
+            ControlCenterService.getAuditLogs()
+        ]);
 
     Object.assign(
         state,
         dashboard,
         {
-            dashboard
+            dashboard,
+            auditLogs
         }
     );
-
 
     renderAll();
 
@@ -1584,6 +1696,62 @@ BIND EVENTS
 */
 
 function bind() {
+
+
+    /*
+    ======================================================
+    LOGOUT
+    ======================================================
+    */
+
+    document
+        .getElementById("btn-logout")
+        ?.addEventListener("click", async () => {
+            const button = document.getElementById("btn-logout");
+
+            try {
+                if (button) button.disabled = true;
+                await ControlCenterService.logout();
+                location.replace("../login.html");
+            }
+            catch (error) {
+                showError(error);
+                if (button) button.disabled = false;
+            }
+        });
+
+
+    /*
+    ======================================================
+    AUDIT FILTER / REFRESH
+    ======================================================
+    */
+
+    document
+        .getElementById("audit-search")
+        ?.addEventListener("input", renderAuditLogs);
+
+    document
+        .getElementById("audit-action")
+        ?.addEventListener("change", renderAuditLogs);
+
+    document
+        .getElementById("btn-refresh-audit")
+        ?.addEventListener("click", async (event) => {
+            const button = event.currentTarget;
+            try {
+                button.disabled = true;
+                state.auditLogs = await ControlCenterService.getAuditLogs();
+                renderAuditLogs();
+                showInfo("Audit Log diperbarui.");
+            }
+            catch (error) {
+                showError(error);
+            }
+            finally {
+                button.disabled = false;
+            }
+        });
 
 
     /*
@@ -2246,9 +2414,9 @@ loadAll()
 
 
             if (
-                error?.message
-                ===
-                "AUTH_REQUIRED"
+                ["AUTH_REQUIRED", "SUPER_ADMIN_REQUIRED"].includes(
+                    error?.message
+                )
             ) {
 
                 setTimeout(

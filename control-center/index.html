@@ -30,11 +30,17 @@
   <main class="cc-main">
     <header class="cc-topbar">
       <div class="d-flex align-items-center gap-3"><button id="btn-sidebar" class="cc-icon-btn d-lg-none" type="button"><i class="fa-solid fa-bars"></i></button><div><h1 id="cc-page-title">Overview</h1><p id="cc-page-subtitle">Ringkasan seluruh customer FINOVA.</p></div></div>
-      <div class="cc-top-actions"><span class="cc-environment"><span></span> Production</span><a class="cc-open-app" href="../index.html"><i class="fa-solid fa-arrow-up-right-from-square"></i> Buka FINOVA</a><div class="cc-avatar" id="cc-avatar">FA</div></div>
+      <div class="cc-top-actions">
+        <span class="cc-environment"><span></span> Production</span>
+        <div class="cc-avatar" id="cc-avatar">FA</div>
+        <button class="cc-logout-btn" id="btn-logout" type="button" title="Logout">
+          <i class="fa-solid fa-right-from-bracket"></i><span>Logout</span>
+        </button>
+      </div>
     </header>
     <section class="cc-content">
       <div id="cc-alert" class="cc-alert" hidden></div>
-      <div class="cc-phase-banner"><div><i class="fa-solid fa-circle-check"></i><strong>Tahap 2.</strong> Company, Subscription, User-Company dan Super Admin sudah disiapkan. Tabel transaksi accounting belum diubah.</div></div>
+      <div class="cc-phase-banner"><div><i class="fa-solid fa-circle-check"></i><strong>Control Center aktif.</strong> Company, Subscription, User-Company, Super Admin Gate, Logout, dan Audit Log tersedia.</div></div>
 
       <section class="cc-page active" id="page-overview">
         <div class="cc-kpi-grid">
@@ -65,7 +71,26 @@
       </section>
 
       <section class="cc-page" id="page-backup-monitor"><div class="cc-page-toolbar"><div><h2>Backup Monitor</h2><p>Monitor backup platform dan per-company.</p></div></div><div class="cc-card"><div class="cc-empty-panel"><i class="fa-solid fa-database"></i><h3>Dijadwalkan pada Tahap Backup</h3><p>Tahap 2 belum menjalankan backup dari browser. Backup job harus berjalan dari backend/server terjadwal dan halaman ini hanya menampilkan hasil.</p></div></div></section>
-      <section class="cc-page" id="page-audit-log"><div class="cc-page-toolbar"><div><h2>Audit Log</h2><p>Riwayat tindakan administratif Control Center.</p></div></div><div class="cc-card"><div class="cc-empty-panel"><i class="fa-solid fa-clipboard-check"></i><h3>Audit Log akan diaktifkan setelah CRUD utama stabil</h3><p>Tidak ada perubahan pada transaksi accounting customer pada Tahap 2.</p></div></div></section>
+      <section class="cc-page" id="page-audit-log">
+        <div class="cc-page-toolbar">
+          <div><h2>Audit Log</h2><p>Riwayat perubahan data lintas company yang tercatat di database.</p></div>
+          <button class="btn btn-outline-primary" id="btn-refresh-audit" type="button"><i class="fa-solid fa-rotate me-2"></i>Refresh</button>
+        </div>
+        <div class="cc-card">
+          <div class="cc-audit-filter">
+            <input id="audit-search" class="form-control" type="search" placeholder="Cari company, module, document, action, user...">
+            <select id="audit-action" class="form-select">
+              <option value="">All Action</option><option value="CREATE">CREATE</option><option value="UPDATE">UPDATE</option><option value="DELETE">DELETE</option><option value="POST">POST</option><option value="VOID">VOID</option>
+            </select>
+          </div>
+          <div class="table-responsive">
+            <table class="table cc-table">
+              <thead><tr><th>Date/Time</th><th>Company</th><th>Module</th><th>Document</th><th>Action</th><th>User UID</th></tr></thead>
+              <tbody id="audit-log-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
     </section>
   </main>
 </div>
