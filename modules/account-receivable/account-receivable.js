@@ -18896,7 +18896,7 @@ async refresh() {
 }
 
 
-   /*
+  /*
 ======================================================
 BIND EVENTS
 ======================================================
@@ -18937,23 +18937,23 @@ bindEvents() {
 
 
     /*
-==================================================
-INVOICE DATE CHANGE
+    ==================================================
+    INVOICE DATE CHANGE
 
-DUE DATE
-=
-INVOICE DATE + TOP
-==================================================
-*/
+    DUE DATE
+    =
+    INVOICE DATE + TOP
+    ==================================================
+    */
 
-this.arFormInvoiceDate?.addEventListener(
-    "change",
-    async () => {
+    this.arFormInvoiceDate?.addEventListener(
+        "change",
+        async () => {
 
-        await this.calculateARDueDate();
+            await this.calculateARDueDate();
 
-    }
-);
+        }
+    );
 
 
     /*
@@ -19002,99 +19002,101 @@ this.arFormInvoiceDate?.addEventListener(
 
         }
     );
+
+
     /*
-==================================================
-PAYMENT AMOUNT FORMAT
-FORMAT THOUSANDS WHILE TYPING
+    ==================================================
+    PAYMENT AMOUNT FORMAT
+    FORMAT THOUSANDS WHILE TYPING
 
-11000
-→ 11.000
+    11000
+    → 11.000
 
-1100000
-→ 1.100.000
-==================================================
-*/
+    1100000
+    → 1.100.000
+    ==================================================
+    */
 
-this.arPaymentAmount?.addEventListener(
-    "input",
-    event => {
+    this.arPaymentAmount?.addEventListener(
+        "input",
+        event => {
 
-        /*
-        ==============================================
-        GET RAW VALUE
-        ==============================================
-        */
+            /*
+            ==============================================
+            GET RAW VALUE
+            ==============================================
+            */
 
-        let value =
-            String(
-                event.target.value
-                || ""
-            );
-
-
-        /*
-        ==============================================
-        REMOVE NON NUMERIC
-        ==============================================
-        */
-
-        value =
-            value.replace(
-                /[^0-9]/g,
-                ""
-            );
+            let value =
+                String(
+                    event.target.value
+                    || ""
+                );
 
 
-        /*
-        ==============================================
-        EMPTY
-        ==============================================
-        */
+            /*
+            ==============================================
+            REMOVE NON NUMERIC
+            ==============================================
+            */
 
-        if (
-            !value
-        ) {
+            value =
+                value.replace(
+                    /[^0-9]/g,
+                    ""
+                );
+
+
+            /*
+            ==============================================
+            EMPTY
+            ==============================================
+            */
+
+            if (
+                !value
+            ) {
+
+                event.target.value =
+                    "";
+
+                return;
+
+            }
+
+
+            /*
+            ==============================================
+            REMOVE LEADING ZERO
+            ==============================================
+            */
+
+            value =
+                value.replace(
+                    /^0+(?=\d)/,
+                    ""
+                );
+
+
+            /*
+            ==============================================
+            FORMAT INDONESIAN THOUSANDS
+            ==============================================
+            */
 
             event.target.value =
-                "";
-
-            return;
+                Number(
+                    value
+                )
+                .toLocaleString(
+                    "id-ID",
+                    {
+                        maximumFractionDigits: 0
+                    }
+                );
 
         }
-
-
-        /*
-        ==============================================
-        REMOVE LEADING ZERO
-        ==============================================
-        */
-
-        value =
-            value.replace(
-                /^0+(?=\d)/,
-                ""
-            );
-
-
-        /*
-        ==============================================
-        FORMAT INDONESIAN THOUSANDS
-        ==============================================
-        */
-
-        event.target.value =
-            Number(
-                value
-            )
-            .toLocaleString(
-                "id-ID",
-                {
-                    maximumFractionDigits: 0
-                }
-            );
-
-    }
-);
+    );
 
 
     /*
@@ -19213,125 +19215,126 @@ this.arPaymentAmount?.addEventListener(
 
 
     /*
-==================================================
-DETAIL CALCULATION
-ACCOUNT RECEIVABLE
-==================================================
-*/
-
-/*
-==================================================
-QUANTITY
-==================================================
-*/
-
-this.arDetailQuantity?.addEventListener(
-    "input",
-    () => {
-
-        this.calculateDetail();
-
-    }
-);
+    ==================================================
+    DETAIL CALCULATION
+    ACCOUNT RECEIVABLE
+    ==================================================
+    */
 
 
-/*
-==================================================
-UNIT PRICE
-IMPORTANT:
-DO NOT FORMAT WHILE USER IS TYPING
-==================================================
-*/
+    /*
+    ==================================================
+    QUANTITY
+    ==================================================
+    */
 
-this.arDetailUnitPrice?.addEventListener(
-    "input",
-    () => {
+    this.arDetailQuantity?.addEventListener(
+        "input",
+        () => {
 
-        /*
-        ==============================================
-        CALCULATE USING CURRENT RAW VALUE
-        ==============================================
-        */
-
-        this.calculateDetail();
-
-    }
-);
-
-
-/*
-==================================================
-UNIT PRICE
-FORMAT AFTER USER FINISHES INPUT
-==================================================
-*/
-
-this.arDetailUnitPrice?.addEventListener(
-    "blur",
-    () => {
-
-        /*
-        ==============================================
-        FORMAT ONLY FOR TEXT INPUT
-
-        INPUT TYPE NUMBER CANNOT CONTAIN
-        INDONESIAN THOUSANDS SEPARATOR "."
-        ==============================================
-        */
-
-        if (
-            this.arDetailUnitPrice
-            &&
-            this.arDetailUnitPrice.type !== "number"
-        ) {
-
-            this.formatUnitPrice();
+            this.calculateDetail();
 
         }
+    );
 
 
-        /*
-        ==============================================
-        RECALCULATE FINAL VALUE
-        ==============================================
-        */
+    /*
+    ==================================================
+    UNIT PRICE
+    IMPORTANT:
+    DO NOT FORMAT WHILE USER IS TYPING
+    ==================================================
+    */
 
-        this.calculateDetail();
+    this.arDetailUnitPrice?.addEventListener(
+        "input",
+        () => {
 
-    }
-);
+            /*
+            ==============================================
+            CALCULATE USING CURRENT RAW VALUE
+            ==============================================
+            */
 
+            this.calculateDetail();
 
-/*
-==================================================
-TAX (+)
-==================================================
-*/
-
-this.arDetailTaxOutputRate?.addEventListener(
-    "change",
-    () => {
-
-        this.calculateDetail();
-
-    }
-);
+        }
+    );
 
 
-/*
-==================================================
-TAX (-)
-==================================================
-*/
+    /*
+    ==================================================
+    UNIT PRICE
+    FORMAT AFTER USER FINISHES INPUT
+    ==================================================
+    */
 
-this.arDetailWithholdingTaxRate?.addEventListener(
-    "change",
-    () => {
+    this.arDetailUnitPrice?.addEventListener(
+        "blur",
+        () => {
 
-        this.calculateDetail();
+            /*
+            ==============================================
+            FORMAT ONLY FOR TEXT INPUT
 
-    }
-);
+            INPUT TYPE NUMBER CANNOT CONTAIN
+            INDONESIAN THOUSANDS SEPARATOR "."
+            ==============================================
+            */
+
+            if (
+                this.arDetailUnitPrice
+                &&
+                this.arDetailUnitPrice.type !== "number"
+            ) {
+
+                this.formatUnitPrice();
+
+            }
+
+
+            /*
+            ==============================================
+            RECALCULATE FINAL VALUE
+            ==============================================
+            */
+
+            this.calculateDetail();
+
+        }
+    );
+
+
+    /*
+    ==================================================
+    TAX (+)
+    ==================================================
+    */
+
+    this.arDetailTaxOutputRate?.addEventListener(
+        "change",
+        () => {
+
+            this.calculateDetail();
+
+        }
+    );
+
+
+    /*
+    ==================================================
+    TAX (-)
+    ==================================================
+    */
+
+    this.arDetailWithholdingTaxRate?.addEventListener(
+        "change",
+        () => {
+
+            this.calculateDetail();
+
+        }
+    );
 
 
     /*
@@ -19538,288 +19541,174 @@ this.arDetailWithholdingTaxRate?.addEventListener(
             }
 
 
-          /*
-==============================================
-COMPLETE
-SAME FLOW AS ACCOUNT PAYABLE
-==============================================
-*/
-
-if (
-    action === "complete"
-) {
-    console.log(
-    "========== AR COMPLETE CLICK =========="
-);
-
-console.log(
-    "ACTION :",
-    action
-);
-
-console.log(
-    "AR ID :",
-    id
-);
-
-    if (
-        !id
-    ) {
-
-        this.showError(
-            "Account Receivable ID is required."
-        );
-
-        return;
-
-    }
-
-
-    const modalElement =
-        document.getElementById(
-            "accountReceivableCompleteModal"
-        );
-
-
-    if (
-        !modalElement
-    ) {
-
-        this.showError(
-            "Account Receivable Complete Modal not found."
-        );
-
-        return;
-
-    }
-
-
-    /*
-==========================================
-STORE PENDING ID
-==========================================
-*/
-
-this.pendingCompleteARId =
-    id;
-
-
-/*
-==========================================
-IMPORTANT
-MOVE MODAL DIRECTLY UNDER BODY
-
-PREVENT:
-- BACKDROP ABOVE MODAL
-- MODAL HIDDEN BY PARENT
-- STACKING CONTEXT PROBLEM
-==========================================
-*/
-
-if (
-    modalElement.parentElement !==
-    document.body
-) {
-
-    document.body.appendChild(
-        modalElement
-    );
-
-}
-
-
-/*
-==========================================
-CLEAN OLD BACKDROP
-==========================================
-*/
-
-document
-    .querySelectorAll(
-        ".modal-backdrop"
-    )
-    .forEach(
-        backdrop => {
-
-            backdrop.remove();
-
-        }
-    );
-
-
-document.body.classList.remove(
-    "modal-open"
-);
-
-document.body.style.removeProperty(
-    "padding-right"
-);
-
-
-/*
-==========================================
-CREATE BOOTSTRAP MODAL
-==========================================
-*/
-
-this.accountReceivableCompleteModal =
-    bootstrap.Modal
-        .getOrCreateInstance(
-            modalElement,
-            {
-                backdrop:
-                    "static",
-
-                keyboard:
-                    false,
-
-                focus:
-                    true
-            }
-        );
-
-
-/*
-==========================================
-SHOW
-==========================================
-*/
-
-this.accountReceivableCompleteModal
-    .show();
-
-
-return;
-
-
-    
-
-}
-/*
-==================================================
-CONFIRM COMPLETE AR
-SAME AS ACCOUNT PAYABLE
-==================================================
-*/
-
-const btnConfirmCompleteAR =
-    document.getElementById(
-        "btn-confirm-complete-ar"
-    );
-
-
-if (
-    btnConfirmCompleteAR
-) {
-
-    btnConfirmCompleteAR.addEventListener(
-        "click",
-        async () => {
-
-            const id =
-                this.pendingCompleteARId;
-
+            /*
+            ==============================================
+            COMPLETE
+            SAME FLOW AS ACCOUNT PAYABLE
+            ==============================================
+            */
 
             if (
-                !id
+                action === "complete"
             ) {
 
-                return;
+                console.log(
+                    "========== AR COMPLETE CLICK =========="
+                );
 
-            }
+                console.log(
+                    "ACTION :",
+                    action
+                );
 
-
-            if (
-                btnConfirmCompleteAR.disabled
-            ) {
-
-                return;
-
-            }
-
-
-            const originalHTML =
-                btnConfirmCompleteAR.innerHTML;
-
-
-            try {
-
-                btnConfirmCompleteAR.disabled =
-                    true;
-
-
-                btnConfirmCompleteAR.innerHTML = `
-
-                    <span
-                        class="spinner-border spinner-border-sm me-2"
-                        aria-hidden="true">
-                    </span>
-
-                    Completing...
-
-                `;
-
-
-                await this.completeInvoice(
+                console.log(
+                    "AR ID :",
                     id
                 );
 
 
                 if (
-                    this.accountReceivableCompleteModal
+                    !id
                 ) {
 
-                    this.accountReceivableCompleteModal
-                        .hide();
+                    this.showError(
+                        "Account Receivable ID is required."
+                    );
+
+                    return;
 
                 }
 
 
+                const modalElement =
+                    document.getElementById(
+                        "accountReceivableCompleteModal"
+                    );
+
+
+                console.log(
+                    "AR COMPLETE MODAL ELEMENT :",
+                    modalElement
+                );
+
+
+                console.log(
+                    "BOOTSTRAP AVAILABLE :",
+                    typeof bootstrap !== "undefined"
+                );
+
+
+                if (
+                    !modalElement
+                ) {
+
+                    this.showError(
+                        "Account Receivable Complete Modal not found."
+                    );
+
+                    return;
+
+                }
+
+
+                /*
+                ==========================================
+                STORE PENDING ID
+                ==========================================
+                */
+
                 this.pendingCompleteARId =
-                    null;
+                    id;
 
 
-                this.showSuccess(
-                    "Account Receivable completed successfully."
+                /*
+                ==========================================
+                MOVE MODAL DIRECTLY UNDER BODY
+
+                PREVENT:
+                - BACKDROP ABOVE MODAL
+                - MODAL HIDDEN BY PARENT
+                - STACKING CONTEXT PROBLEM
+                ==========================================
+                */
+
+                if (
+                    modalElement.parentElement !==
+                    document.body
+                ) {
+
+                    document.body.appendChild(
+                        modalElement
+                    );
+
+                }
+
+
+                /*
+                ==========================================
+                CLEAN OLD BACKDROP
+                ==========================================
+                */
+
+                document
+                    .querySelectorAll(
+                        ".modal-backdrop"
+                    )
+                    .forEach(
+                        backdrop => {
+
+                            backdrop.remove();
+
+                        }
+                    );
+
+
+                document.body.classList.remove(
+                    "modal-open"
                 );
 
-            }
 
-            catch (
-                error
-            ) {
-
-                console.error(
-                    "AccountReceivable.confirmComplete:",
-                    error
+                document.body.style.removeProperty(
+                    "padding-right"
                 );
 
 
-                this.showError(
-                    error?.message
-                    ||
-                    "Failed to complete Account Receivable."
-                );
+                /*
+                ==========================================
+                CREATE BOOTSTRAP MODAL
+                ==========================================
+                */
+
+                this.accountReceivableCompleteModal =
+                    bootstrap.Modal
+                        .getOrCreateInstance(
+                            modalElement,
+                            {
+                                backdrop:
+                                    "static",
+
+                                keyboard:
+                                    false,
+
+                                focus:
+                                    true
+                            }
+                        );
+
+
+                /*
+                ==========================================
+                SHOW
+                ==========================================
+                */
+
+                this.accountReceivableCompleteModal
+                    .show();
+
+
+                return;
 
             }
-
-            finally {
-
-                btnConfirmCompleteAR.disabled =
-                    false;
-
-
-                btnConfirmCompleteAR.innerHTML =
-                    originalHTML;
-
-            }
-
-        }
-    );
-
-}
-
-
 
 
             /*
@@ -19911,6 +19800,221 @@ if (
 
         }
     );
+
+
+    /*
+    ==================================================
+    CONFIRM COMPLETE AR
+    IMPORTANT:
+    MUST BE OUTSIDE TABLE BODY CLICK EVENT
+    ==================================================
+    */
+
+    const btnConfirmCompleteAR =
+        document.getElementById(
+            "btn-confirm-complete-ar"
+        );
+
+
+    console.log(
+        "INIT AR CONFIRM BUTTON :",
+        btnConfirmCompleteAR
+    );
+
+
+    if (
+        btnConfirmCompleteAR
+    ) {
+
+        btnConfirmCompleteAR.addEventListener(
+            "click",
+            async () => {
+
+                console.log(
+                    "========== AR CONFIRM COMPLETE CLICK =========="
+                );
+
+
+                console.log(
+                    "PENDING AR ID :",
+                    this.pendingCompleteARId
+                );
+
+
+                const id =
+                    this.pendingCompleteARId;
+
+
+                /*
+                ==========================================
+                VALIDATE ID
+                ==========================================
+                */
+
+                if (
+                    !id
+                ) {
+
+                    this.showError(
+                        "Account Receivable ID is required."
+                    );
+
+                    return;
+
+                }
+
+
+                /*
+                ==========================================
+                PREVENT DOUBLE CLICK
+                ==========================================
+                */
+
+                if (
+                    btnConfirmCompleteAR.disabled
+                ) {
+
+                    return;
+
+                }
+
+
+                const originalHTML =
+                    btnConfirmCompleteAR.innerHTML;
+
+
+                try {
+
+                    /*
+                    ======================================
+                    LOADING STATE
+                    ======================================
+                    */
+
+                    btnConfirmCompleteAR.disabled =
+                        true;
+
+
+                    btnConfirmCompleteAR.innerHTML = `
+
+                        <span
+                            class="spinner-border spinner-border-sm me-2"
+                            aria-hidden="true">
+                        </span>
+
+                        Completing...
+
+                    `;
+
+
+                    /*
+                    ======================================
+                    COMPLETE ACCOUNT RECEIVABLE
+
+                    THIS METHOD HANDLES:
+                    - ACCOUNTING VALIDATION
+                    - GL JOURNAL GENERATION
+                    - LINK GL JOURNAL
+                    - STATUS DRAFT -> COMPLETE
+                    - RELOAD DATA
+                    ======================================
+                    */
+
+                    const result =
+                        await this.completeInvoice(
+                            id
+                        );
+
+
+                    /*
+                    ======================================
+                    FAILED
+
+                    completeInvoice()
+                    RETURNS NULL WHEN PROCESS FAILED.
+
+                    DO NOT:
+                    - CLOSE MODAL
+                    - CLEAR PENDING ID
+                    - SHOW FALSE SUCCESS
+                    ======================================
+                    */
+
+                    if (
+                        !result
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    /*
+                    ======================================
+                    CLOSE CONFIRMATION MODAL
+                    ======================================
+                    */
+
+                    if (
+                        this.accountReceivableCompleteModal
+                    ) {
+
+                        this.accountReceivableCompleteModal
+                            .hide();
+
+                    }
+
+
+                    /*
+                    ======================================
+                    CLEAR PENDING ID
+                    ======================================
+                    */
+
+                    this.pendingCompleteARId =
+                        null;
+
+                }
+
+                catch (
+                    error
+                ) {
+
+                    console.error(
+                        "AccountReceivable.confirmComplete:",
+                        error
+                    );
+
+
+                    this.showError(
+                        error?.message
+                        ||
+                        "Failed to complete Account Receivable."
+                    );
+
+                }
+
+                finally {
+
+                    /*
+                    ======================================
+                    RESTORE BUTTON
+                    ======================================
+                    */
+
+                    btnConfirmCompleteAR.disabled =
+                        false;
+
+
+                    btnConfirmCompleteAR.innerHTML =
+                        originalHTML;
+
+                }
+
+            }
+        );
+
+    }
 
 
     /*
