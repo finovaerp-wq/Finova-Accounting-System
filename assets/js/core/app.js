@@ -34,6 +34,10 @@ import {
 } from "./customer-config.js";
 
 import {
+    TenantContext
+} from "./tenant-context.js";
+
+import {
     supabase
 } from "./supabase.js";
 
@@ -83,13 +87,7 @@ class FinovaApp {
     }
 
 
-    /*
-======================================================
-INITIALIZE
-======================================================
-*/
-
-async initialize() {
+    async initialize() {
 
     try {
 
@@ -152,16 +150,141 @@ async initialize() {
 
         /*
         ==========================================
-        CUSTOMER CONFIGURATION
-        TENANT USER ONLY
+        EFFECTIVE COMPANY CONTEXT
+        ==========================================
+        */
+
+        const effectiveCompanyId =
+            await TenantContext.getCompanyId({
+                refresh: true
+            });
+
+
+        this.effectiveCompanyId =
+            effectiveCompanyId ?? null;
+
+
+        this.hasCompanyContext =
+            Boolean(
+                this.effectiveCompanyId
+            );
+
+
+        /*
+        ==========================================
+        ACCESS MODE
         ==========================================
         */
 
         if (
-            !this.isSuperAdmin
+            this.isSuperAdmin
         ) {
 
-            await CustomerConfig.initialize();
+            console.log(
+                "FINOVA ACCESS MODE : SUPER ADMIN"
+            );
+
+
+            console.log(
+                "FINOVA SUPER ADMIN COMPANY CONTEXT :",
+                this.effectiveCompanyId
+                ??
+                "NOT SELECTED"
+            );
+
+        }
+        else {
+
+            /*
+            ======================================
+            TENANT MUST HAVE COMPANY
+            ======================================
+            */
+
+            if (
+                !this.hasCompanyContext
+            ) {
+
+                throw new Error(
+                    "FINOVA company context not found for authenticated tenant user."
+                );
+
+            }
+
+        }
+
+
+        /*
+        ==========================================
+        CUSTOMER CONFIGURATION
+        ==========================================
+
+        TENANT USER
+        -----------
+        Selalu memiliki company context.
+
+        SUPER ADMIN
+        -----------
+        CustomerConfig hanya di-load apabila
+        Company Context sudah dipilih.
+
+        Super Admin tanpa Company Context tetap
+        dapat masuk FINOVA untuk memilih company,
+        tetapi configuration tenant tidak boleh
+        di-load.
+        ==========================================
+        */
+
+        if (
+            this.hasCompanyContext
+        ) {
+
+            /*
+            ======================================
+            RESET OLD CONFIGURATION
+            ======================================
+
+            Penting untuk mencegah configuration
+            company sebelumnya tetap berada di
+            cache.
+            ======================================
+            */
+
+            CustomerConfig.reset();
+
+
+            /*
+            ======================================
+            INITIALIZE EFFECTIVE COMPANY CONFIG
+            ======================================
+            */
+
+            await CustomerConfig.initialize(
+                true
+            );
+
+
+            /*
+            ======================================
+            VALIDATE CONFIG COMPANY
+            ======================================
+            */
+
+            const configCompanyId =
+                CustomerConfig.getCompanyId();
+
+
+            if (
+                configCompanyId
+                !==
+                this.effectiveCompanyId
+            ) {
+
+                throw new Error(
+                    "FINOVA customer configuration does not match the effective company context."
+                );
+
+            }
 
 
             /*
@@ -182,20 +305,47 @@ async initialize() {
                 CustomerConfig.getBaseCurrency()
             );
 
+
+            console.log(
+                "FINOVA CUSTOMER CONFIG COMPANY ID :",
+                configCompanyId
+            );
+
         }
         else {
 
             /*
             ======================================
-            SUPER ADMIN MODE
+            NO COMPANY CONTEXT
+            ======================================
+
+            Berlaku untuk Super Admin yang belum
+            memilih Company Context.
             ======================================
             */
 
+            CustomerConfig.reset();
+
+
             console.log(
-                "FINOVA ACCESS MODE : SUPER ADMIN"
+                "FINOVA CUSTOMER CONFIG : NOT INITIALIZED"
             );
 
         }
+
+
+        /*
+        ==========================================
+        GLOBAL COMPANY CONTEXT STATE
+        ==========================================
+        */
+
+        window.finovaEffectiveCompanyId =
+            this.effectiveCompanyId;
+
+
+        window.finovaHasCompanyContext =
+            this.hasCompanyContext;
 
 
         /*
@@ -245,7 +395,6 @@ async initialize() {
         );
 
     }
-
     catch (
         error
     ) {
@@ -454,7 +603,10 @@ initializeComponents() {
         new FinovaSidebar(
             {
                 isSuperAdmin:
-                    this.isSuperAdmin === true
+                    this.isSuperAdmin === true,
+
+                hasCompanyContext:
+                    this.hasCompanyContext === true
             }
         );
 
@@ -490,6 +642,22 @@ initializeComponents() {
 
     window.finovaIsSuperAdmin =
         this.isSuperAdmin === true;
+
+
+    /*
+    ==========================================
+    GLOBAL COMPANY CONTEXT
+    ==========================================
+    */
+
+    window.finovaHasCompanyContext =
+        this.hasCompanyContext === true;
+
+
+    window.finovaHasAccountingAccess =
+        !this.isSuperAdmin
+        ||
+        this.hasCompanyContext === true;
 
 }
 

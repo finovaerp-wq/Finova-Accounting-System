@@ -50,6 +50,38 @@ export class FinovaSidebar {
 
     /*
     ======================================================
+    COMPANY CONTEXT
+    ======================================================
+    */
+
+    this.hasCompanyContext =
+        this.options.hasCompanyContext === true;
+
+
+    /*
+    ======================================================
+    ACCOUNTING ACCESS
+    ======================================================
+
+    TENANT USER
+    -----------
+    Accounting access tetap tersedia.
+
+    SUPER ADMIN
+    -----------
+    Accounting access hanya tersedia setelah
+    Company Context dipilih.
+    ======================================================
+    */
+
+    this.hasAccountingAccess =
+        !this.isSuperAdmin
+        ||
+        this.hasCompanyContext;
+
+
+    /*
+    ======================================================
     CHANGE PASSWORD
     ======================================================
     */
@@ -109,6 +141,22 @@ export class FinovaSidebar {
         this.isSuperAdmin
             ? "SUPER ADMIN"
             : "TENANT USER"
+    );
+
+
+    console.log(
+        "FINOVA SIDEBAR COMPANY CONTEXT:",
+        this.hasCompanyContext
+            ? "SELECTED"
+            : "NOT SELECTED"
+    );
+
+
+    console.log(
+        "FINOVA SIDEBAR ACCOUNTING ACCESS:",
+        this.hasAccountingAccess
+            ? "ALLOWED"
+            : "LOCKED"
     );
 
 }
@@ -191,15 +239,84 @@ export class FinovaSidebar {
     }
 
 
+    generateMenu() {
+
     /*
     ======================================================
-    GENERATE MENU
+    ACCOUNTING ACCESS
+    ======================================================
+
+    TENANT USER
+    -----------
+    Menu Accounting normal.
+
+    SUPER ADMIN + COMPANY SELECTED
+    ------------------------------
+    Menu Accounting normal.
+
+    SUPER ADMIN + NO COMPANY
+    ------------------------
+    Menu Accounting tetap terlihat tetapi dikunci.
+
+    FINOVA ADMIN / Production tetap tersedia.
     ======================================================
     */
 
-    generateMenu() {
+    const accountingLocked =
+        this.isSuperAdmin === true
+        &&
+        this.hasAccountingAccess !== true;
 
-        return `
+
+    /*
+    ======================================================
+    LOCK ATTRIBUTES
+    ======================================================
+    */
+
+    const accountingLockClass =
+        accountingLocked
+            ? " finova-company-context-locked"
+            : "";
+
+
+    const accountingLockAttribute =
+        accountingLocked
+            ? ` data-company-context-locked="true"`
+            : "";
+
+
+    /*
+    ======================================================
+    LOCK ICON
+    ======================================================
+    */
+
+    const lockIcon =
+        accountingLocked
+            ? `
+                <i
+                    class="
+                        fa-solid
+                        fa-lock
+                        finova-company-context-lock-icon
+                    "
+                    title="Select Company Context to continue">
+                </i>
+            `
+            : "";
+
+
+    return `
+
+        <!-- ==================================================
+             DASHBOARD
+        =================================================== -->
+
+        <div
+            class="finova-accounting-menu-wrapper${accountingLockClass}"
+            ${accountingLockAttribute}
+        >
 
             ${this.menuItem(
                 "Dashboard",
@@ -207,6 +324,19 @@ export class FinovaSidebar {
                 "dashboard"
             )}
 
+            ${lockIcon}
+
+        </div>
+
+
+        <!-- ==================================================
+             MASTER DATA
+        =================================================== -->
+
+        <div
+            class="finova-accounting-menu-wrapper${accountingLockClass}"
+            ${accountingLockAttribute}
+        >
 
             ${this.menuGroup(
                 "Master Data",
@@ -240,16 +370,30 @@ export class FinovaSidebar {
                         "tax",
                         true
                     ),
+
                     this.menuItem(
-                    "Accounting Period",
-                    "fa-solid fa-calendar-days",
-                    "accounting-period",
-                    true
-                )
+                        "Accounting Period",
+                        "fa-solid fa-calendar-days",
+                        "accounting-period",
+                        true
+                    )
 
                 ]
             )}
 
+            ${lockIcon}
+
+        </div>
+
+
+        <!-- ==================================================
+             FINANCE
+        =================================================== -->
+
+        <div
+            class="finova-accounting-menu-wrapper${accountingLockClass}"
+            ${accountingLockAttribute}
+        >
 
             ${this.menuGroup(
                 "Finance",
@@ -287,6 +431,19 @@ export class FinovaSidebar {
                 ]
             )}
 
+            ${lockIcon}
+
+        </div>
+
+
+        <!-- ==================================================
+             ACCOUNTING
+        =================================================== -->
+
+        <div
+            class="finova-accounting-menu-wrapper${accountingLockClass}"
+            ${accountingLockAttribute}
+        >
 
             ${this.menuGroup(
                 "Accounting",
@@ -303,11 +460,21 @@ export class FinovaSidebar {
                 ]
             )}
 
+            ${lockIcon}
 
-           
+        </div>
 
 
-                        ${this.menuGroup(
+        <!-- ==================================================
+             REPORT
+        =================================================== -->
+
+        <div
+            class="finova-accounting-menu-wrapper${accountingLockClass}"
+            ${accountingLockAttribute}
+        >
+
+            ${this.menuGroup(
                 "Report",
                 "fa-solid fa-chart-column",
                 [
@@ -326,7 +493,6 @@ export class FinovaSidebar {
                         true
                     ),
 
-
                     this.menuItem(
                         "Balance Sheet",
                         "fa-solid fa-table",
@@ -344,51 +510,63 @@ export class FinovaSidebar {
                 ]
             )}
 
+            ${lockIcon}
 
-            ${
-                this.isSuperAdmin
-                    ?
-                    `
-
-                        ${this.menuHeader(
-                            "FINOVA ADMIN"
-                        )}
+        </div>
 
 
-                        ${this.menuItem(
-                            "Production",
-                            "fa-solid fa-shield-halved",
-                            "production"
-                        )}
+        <!-- ==================================================
+             FINOVA ADMIN
+             SUPER ADMIN ONLY
+        =================================================== -->
 
-                    `
-                    :
-                    ""
-            }
+        ${
+            this.isSuperAdmin
+                ?
+                `
 
-
-            ${this.menuHeader(
-                "Settings"
-            )}
+                    ${this.menuHeader(
+                        "FINOVA ADMIN"
+                    )}
 
 
-            ${this.menuItem(
-                "Change Password",
-                "fa-solid fa-key",
-                "change-password"
-            )}
+                    ${this.menuItem(
+                        "Production",
+                        "fa-solid fa-shield-halved",
+                        "production"
+                    )}
+
+                `
+                :
+                ""
+        }
 
 
-            ${this.menuItem(
-                "Logout",
-                "fa-solid fa-right-from-bracket",
-                "logout"
-            )}
+        <!-- ==================================================
+             SETTINGS
+        =================================================== -->
 
-        `;
+        ${this.menuHeader(
+            "Settings"
+        )}
 
-    }
 
+        ${this.menuItem(
+            "Change Password",
+            "fa-solid fa-key",
+            "change-password"
+        )}
+
+
+        ${this.menuItem(
+            "Logout",
+            "fa-solid fa-right-from-bracket",
+            "logout"
+        )}
+
+    `;
+
+}
 
     /*
     ======================================================
@@ -796,245 +974,359 @@ export class FinovaSidebar {
     }
 
 
-    /*
-    ==========================================================
-    BIND EVENTS
-    ==========================================================
-    */
+   bindEvents() {
 
-    bindEvents() {
+    const sidebar =
+        document.querySelector(
+            ".finova-sidebar"
+        );
 
-        const sidebar =
-            document.querySelector(
-                ".finova-sidebar"
-            );
 
+    if (
+        !sidebar
+    ) {
 
-        if (
-            !sidebar
-        ) {
+        return;
 
-            return;
+    }
 
-        }
 
+    sidebar.addEventListener(
 
-        sidebar.addEventListener(
+        "click",
 
-            "click",
+        event => {
 
-            event => {
+            /*
+            ==================================================
+            LOCKED ACCOUNTING AREA
+            ==================================================
 
-                /*
-                ==================================================
-                GROUP HEADER
-                ==================================================
-                */
+            Harus diperiksa SEBELUM group header diproses.
 
-                const groupHeader =
-                    event.target.closest(
-                        ".finova-menu-group-header"
-                    );
+            Dengan demikian:
+            - Dashboard tidak dapat dibuka
+            - Master Data tidak dapat dibuka
+            - Finance tidak dapat dibuka
+            - Accounting tidak dapat dibuka
+            - Report tidak dapat dibuka
 
+            Hanya berlaku:
+            SUPER ADMIN + NO COMPANY CONTEXT
+            ==================================================
+            */
 
-                if (
-                    groupHeader
-                ) {
+            const lockedAccountingArea =
+                event.target.closest(
+                    "[data-company-context-locked='true']"
+                );
 
-                    const submenu =
-                        groupHeader.nextElementSibling;
 
+            if (
+                lockedAccountingArea
+                &&
+                this.isSuperAdmin === true
+                &&
+                this.hasAccountingAccess !== true
+            ) {
 
-                    if (
-                        submenu
-                    ) {
+                event.preventDefault();
 
-                        const group =
-                            groupHeader.parentElement;
+                event.stopPropagation();
 
 
-                        group.classList.toggle(
-                            "open"
-                        );
-
-
-                        submenu.classList.toggle(
-                            "open"
-                        );
-
-                    }
-
-
-                    return;
-
-                }
-
-
-                /*
-                ==================================================
-                MENU / SUBMENU
-                ==================================================
-                */
-
-                const menu =
-                    event.target.closest(
-                        ".finova-menu-item, .finova-submenu-item"
-                    );
-
-
-                if (
-                    !menu
-                ) {
-
-                    return;
-
-                }
-
-
-                                const module =
-                    menu.dataset.module;
-
-
-                if (
-                    !module
-                ) {
-
-                    return;
-
-                }
-
-
-                /*
-                ==================================================
-                FINOVA PRODUCTION
-                SUPER ADMIN ONLY
-                ==================================================
-                */
-
-                if (
-                    module ===
-                    "production"
-                ) {
-
-                    event.preventDefault();
-
-                    event.stopPropagation();
-
-
-                    /*
-                    ==============================================
-                    SECURITY CHECK
-                    ==============================================
-                    */
-
-                    if (
-                        this.isSuperAdmin !== true
-                    ) {
-
-                        console.warn(
-                            "FINOVA PRODUCTION ACCESS DENIED."
-                        );
-
-                        return;
-
-                    }
-
-
-                    /*
-                    ==============================================
-                    OPEN CONTROL CENTER
-                    NEW TAB
-                    ==============================================
-                    */
-
-                    window.open(
-                        "control-center/",
-                        "_blank",
-                        "noopener,noreferrer"
-                    );
-
-
-                    return;
-
-                }
-
-
-                /*
-                ==================================================
-                CHANGE PASSWORD
-                ==================================================
-                */
-
-                if (
-                    module ===
-                    "change-password"
-                ) {
-
-                    event.preventDefault();
-
-
-                    this.openChangePasswordModal();
-
-
-                    return;
-
-                }
-
-
-                /*
-                ==================================================
-                LOGOUT
-                ==================================================
-                */
-
-                if (
-                    module ===
-                    "logout"
-                ) {
-
-                    event.preventDefault();
-
-
-                    this.showLogoutConfirmation();
-
-
-                    return;
-
-                }
-
-
-                /*
-                ==================================================
-                ACTIVE MENU
-                ==================================================
-                */
-
-                this.setActiveMenu(
-                    module
+                console.warn(
+                    "FINOVA ACCOUNTING ACCESS LOCKED: SELECT COMPANY CONTEXT."
                 );
 
 
                 /*
-                ==================================================
-                ROUTER
-                ==================================================
+                ==============================================
+                FOCUS COMPANY CONTEXT SELECTOR
+                ==============================================
                 */
 
+                const companySelector =
+                    document.getElementById(
+                        "finova-company-context-selector"
+                    );
+
+
                 if (
-                    window.finovaRouter
+                    companySelector
                 ) {
 
-                    window.finovaRouter.navigate(
-                        module
+                    companySelector.focus();
+
+                }
+
+
+                return;
+
+            }
+
+
+            /*
+            ==================================================
+            GROUP HEADER
+            ==================================================
+            */
+
+            const groupHeader =
+                event.target.closest(
+                    ".finova-menu-group-header"
+                );
+
+
+            if (
+                groupHeader
+            ) {
+
+                const submenu =
+                    groupHeader.nextElementSibling;
+
+
+                if (
+                    submenu
+                ) {
+
+                    const group =
+                        groupHeader.parentElement;
+
+
+                    group.classList.toggle(
+                        "open"
+                    );
+
+
+                    submenu.classList.toggle(
+                        "open"
                     );
 
                 }
 
+
+                return;
+
             }
 
-        );
 
-    }
+            /*
+            ==================================================
+            MENU / SUBMENU
+            ==================================================
+            */
+
+            const menu =
+                event.target.closest(
+                    ".finova-menu-item, .finova-submenu-item"
+                );
+
+
+            if (
+                !menu
+            ) {
+
+                return;
+
+            }
+
+
+            const module =
+                menu.dataset.module;
+
+
+            if (
+                !module
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+            ==================================================
+            FINOVA PRODUCTION
+            SUPER ADMIN ONLY
+            ==================================================
+            */
+
+            if (
+                module ===
+                "production"
+            ) {
+
+                event.preventDefault();
+
+                event.stopPropagation();
+
+
+                /*
+                ==============================================
+                SECURITY CHECK
+                ==============================================
+                */
+
+                if (
+                    this.isSuperAdmin !== true
+                ) {
+
+                    console.warn(
+                        "FINOVA PRODUCTION ACCESS DENIED."
+                    );
+
+                    return;
+
+                }
+
+
+                /*
+                ==============================================
+                OPEN CONTROL CENTER
+                NEW TAB
+                ==============================================
+                */
+
+                window.open(
+                    "control-center/",
+                    "_blank",
+                    "noopener,noreferrer"
+                );
+
+
+                return;
+
+            }
+
+
+            /*
+            ==================================================
+            CHANGE PASSWORD
+            ==================================================
+            */
+
+            if (
+                module ===
+                "change-password"
+            ) {
+
+                event.preventDefault();
+
+
+                this.openChangePasswordModal();
+
+
+                return;
+
+            }
+
+
+            /*
+            ==================================================
+            LOGOUT
+            ==================================================
+            */
+
+            if (
+                module ===
+                "logout"
+            ) {
+
+                event.preventDefault();
+
+
+                this.showLogoutConfirmation();
+
+
+                return;
+
+            }
+
+
+            /*
+            ==================================================
+            ACCOUNTING ACCESS SECURITY GUARD
+            ==================================================
+
+            Guard kedua.
+
+            Wrapper lock di atas menangani interaksi UI.
+
+            Guard ini memastikan accounting module tetap tidak
+            diteruskan ke Router apabila Super Admin belum
+            mempunyai Company Context.
+            ==================================================
+            */
+
+            if (
+                this.isSuperAdmin === true
+                &&
+                this.hasAccountingAccess !== true
+            ) {
+
+                event.preventDefault();
+
+                event.stopPropagation();
+
+
+                console.warn(
+                    "FINOVA ACCOUNTING NAVIGATION DENIED: COMPANY CONTEXT NOT SELECTED."
+                );
+
+
+                const companySelector =
+                    document.getElementById(
+                        "finova-company-context-selector"
+                    );
+
+
+                if (
+                    companySelector
+                ) {
+
+                    companySelector.focus();
+
+                }
+
+
+                return;
+
+            }
+
+
+            /*
+            ==================================================
+            ACTIVE MENU
+            ==================================================
+            */
+
+            this.setActiveMenu(
+                module
+            );
+
+
+            /*
+            ==================================================
+            ROUTER
+            ==================================================
+            */
+
+            if (
+                window.finovaRouter
+            ) {
+
+                window.finovaRouter.navigate(
+                    module
+                );
+
+            }
+
+        }
+
+    );
+
+}
 
 
     /*

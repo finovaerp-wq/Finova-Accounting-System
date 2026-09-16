@@ -1284,6 +1284,62 @@ activateWorkspace(
 
     /*
     ======================================================
+    COMPANY CONTEXT ACCESS
+    ======================================================
+
+    TENANT USER
+    -----------
+    Router berjalan normal.
+
+    SUPER ADMIN + COMPANY SELECTED
+    ------------------------------
+    Router berjalan normal.
+
+    SUPER ADMIN + NO COMPANY
+    ------------------------
+    Dashboard / Accounting Workspace tidak dimuat.
+    ======================================================
+    */
+
+    const isSuperAdmin =
+        window.finovaIsSuperAdmin === true;
+
+
+    const hasCompanyContext =
+        window.finovaHasCompanyContext === true;
+
+
+    const hasAccountingAccess =
+        !isSuperAdmin
+        ||
+        hasCompanyContext;
+
+
+    /*
+    ======================================================
+    LOCK ACCOUNTING WORKSPACE
+    ======================================================
+    */
+
+    if (
+        !hasAccountingAccess
+    ) {
+
+        console.warn(
+            "FINOVA ROUTER LOCKED: COMPANY CONTEXT NOT SELECTED."
+        );
+
+
+        this.showCompanyContextRequired();
+
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
     CREATE HOME TAB
     ======================================================
     */
@@ -1299,6 +1355,546 @@ activateWorkspace(
 
     this.navigate(
         "dashboard"
+    );
+
+}
+/*
+==========================================================
+SHOW COMPANY CONTEXT REQUIRED
+==========================================================
+*/
+
+showCompanyContextRequired() {
+
+    /*
+    ======================================================
+    WORKSPACE
+    ======================================================
+    */
+
+    const workspace =
+        document.getElementById(
+            "finova-content"
+        );
+
+
+    /*
+    ======================================================
+    TAB CONTAINER
+    ======================================================
+    */
+
+    const tabContainer =
+        document.getElementById(
+            "finova-workspace-tabs"
+        );
+
+
+    /*
+    ======================================================
+    VALIDATION
+    ======================================================
+    */
+
+    if (
+        !workspace
+    ) {
+
+        console.warn(
+            "FINOVA ROUTER: #finova-content not found."
+        );
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    CLEAR WORKSPACE TABS
+    ======================================================
+    */
+
+    if (
+        tabContainer
+    ) {
+
+        tabContainer.innerHTML =
+            "";
+
+    }
+
+
+    /*
+    ======================================================
+    RESET ROUTER STATE
+    ======================================================
+    */
+
+    this.currentModule =
+        null;
+
+
+    this.openTabs.clear();
+
+
+    this.tabHistory =
+        [];
+
+
+    /*
+    ======================================================
+    COMPANY CONTEXT REQUIRED VIEW
+    ======================================================
+    */
+
+    workspace.innerHTML = `
+
+        <div
+            class="
+                d-flex
+                align-items-center
+                justify-content-center
+                w-100
+                h-100
+                p-4
+            "
+        >
+
+            <div
+                class="
+                    text-center
+                    bg-white
+                    border
+                    rounded-3
+                    shadow-sm
+                    p-5
+                "
+                style="
+                    width:100%;
+                    max-width:560px;
+                "
+            >
+
+                <div
+                    class="
+                        d-flex
+                        align-items-center
+                        justify-content-center
+                        mx-auto
+                        mb-4
+                    "
+                    style="
+                        width:64px;
+                        height:64px;
+                        border-radius:50%;
+                        background:rgba(37, 99, 235, 0.08);
+                        color:#2563EB;
+                        font-size:24px;
+                    "
+                >
+
+                    <i
+                        class="
+                            fa-solid
+                            fa-building
+                        ">
+                    </i>
+
+                </div>
+
+
+                <h4
+                    class="
+                        mb-2
+                        fw-semibold
+                    "
+                >
+
+                    Select Company to Continue
+
+                </h4>
+
+
+                <p
+                    class="
+                        text-secondary
+                        mb-4
+                    "
+                >
+
+                    Select a Company Context from the topbar
+                    before accessing FINOVA accounting modules.
+
+                </p>
+
+
+                <button
+                    type="button"
+                    id="finova-select-company-context-button"
+                    class="
+                        btn
+                        btn-primary
+                    "
+                >
+
+                    <i
+                        class="
+                            fa-solid
+                            fa-building
+                            me-2
+                        ">
+                    </i>
+
+                    Select Company
+
+                </button>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    /*
+    ======================================================
+    SELECT COMPANY BUTTON
+    ======================================================
+    */
+
+    const selectCompanyButton =
+        document.getElementById(
+            "finova-select-company-context-button"
+        );
+
+
+    selectCompanyButton?.addEventListener(
+        "click",
+        () => {
+
+            const selector =
+                document.getElementById(
+                    "finova-company-context-selector"
+                );
+
+
+            if (
+                !selector
+            ) {
+
+                console.warn(
+                    "FINOVA COMPANY CONTEXT SELECTOR NOT FOUND."
+                );
+
+                return;
+
+            }
+
+
+            /*
+            ==================================================
+            OPEN TOPBAR COMPANY SELECTOR
+            ==================================================
+            */
+
+            selector.focus();
+
+
+            selector.click();
+
+        }
+    );
+
+
+    /*
+    ======================================================
+    TOPBAR
+    ======================================================
+    */
+
+    this.updateTopbar(
+        "Company Context"
+    );
+
+
+    /*
+    ======================================================
+    DEBUG
+    ======================================================
+    */
+
+    console.log(
+        "FINOVA COMPANY CONTEXT REQUIRED VIEW CREATED"
+    );
+
+}
+
+/*
+==========================================================
+SHOW COMPANY CONTEXT REQUIRED
+==========================================================
+*/
+
+showCompanyContextRequired() {
+
+    /*
+    ======================================================
+    WORKSPACE
+    ======================================================
+    */
+
+    const workspace =
+        document.getElementById(
+            "finova-content"
+        );
+
+
+    /*
+    ======================================================
+    TAB CONTAINER
+    ======================================================
+    */
+
+    const tabContainer =
+        document.getElementById(
+            "finova-workspace-tabs"
+        );
+
+
+    /*
+    ======================================================
+    VALIDATION
+    ======================================================
+    */
+
+    if (
+        !workspace
+    ) {
+
+        console.warn(
+            "FINOVA ROUTER: #finova-content not found."
+        );
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    CLEAR WORKSPACE TABS
+    ======================================================
+    */
+
+    if (
+        tabContainer
+    ) {
+
+        tabContainer.innerHTML =
+            "";
+
+    }
+
+
+    /*
+    ======================================================
+    RESET ROUTER STATE
+    ======================================================
+    */
+
+    this.currentModule =
+        null;
+
+
+    this.openTabs.clear();
+
+
+    this.tabHistory =
+        [];
+
+
+    /*
+    ======================================================
+    COMPANY CONTEXT REQUIRED VIEW
+    ======================================================
+    */
+
+    workspace.innerHTML = `
+
+        <div
+            class="
+                d-flex
+                align-items-center
+                justify-content-center
+                w-100
+                h-100
+                p-4
+            "
+        >
+
+            <div
+                class="
+                    text-center
+                    bg-white
+                    border
+                    rounded-3
+                    shadow-sm
+                    p-5
+                "
+                style="
+                    width:100%;
+                    max-width:560px;
+                "
+            >
+
+                <div
+                    class="
+                        d-flex
+                        align-items-center
+                        justify-content-center
+                        mx-auto
+                        mb-4
+                    "
+                    style="
+                        width:64px;
+                        height:64px;
+                        border-radius:50%;
+                        background:rgba(37, 99, 235, 0.08);
+                        color:#2563EB;
+                        font-size:24px;
+                    "
+                >
+
+                    <i
+                        class="
+                            fa-solid
+                            fa-building
+                        ">
+                    </i>
+
+                </div>
+
+
+                <h4
+                    class="
+                        mb-2
+                        fw-semibold
+                    "
+                >
+
+                    Select Company to Continue
+
+                </h4>
+
+
+                <p
+                    class="
+                        text-secondary
+                        mb-4
+                    "
+                >
+
+                    Select a Company Context from the topbar
+                    before accessing FINOVA accounting modules.
+
+                </p>
+
+
+                <button
+                    type="button"
+                    id="finova-select-company-context-button"
+                    class="
+                        btn
+                        btn-primary
+                    "
+                >
+
+                    <i
+                        class="
+                            fa-solid
+                            fa-building
+                            me-2
+                        ">
+                    </i>
+
+                    Select Company
+
+                </button>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    /*
+    ======================================================
+    SELECT COMPANY BUTTON
+    ======================================================
+    */
+
+    const selectCompanyButton =
+        document.getElementById(
+            "finova-select-company-context-button"
+        );
+
+
+    selectCompanyButton?.addEventListener(
+
+        "click",
+
+        () => {
+
+            const selector =
+                document.getElementById(
+                    "finova-company-context-selector"
+                );
+
+
+            if (
+                !selector
+            ) {
+
+                console.warn(
+                    "FINOVA COMPANY CONTEXT SELECTOR NOT FOUND."
+                );
+
+                return;
+
+            }
+
+
+            selector.focus();
+
+
+            selector.click();
+
+        }
+
+    );
+
+
+    /*
+    ======================================================
+    TOPBAR
+    ======================================================
+    */
+
+    this.updateTopbar(
+        "Company Context"
+    );
+
+
+    /*
+    ======================================================
+    DEBUG
+    ======================================================
+    */
+
+    console.log(
+        "FINOVA COMPANY CONTEXT REQUIRED VIEW CREATED"
     );
 
 }
@@ -1342,6 +1938,69 @@ async navigate(
 
     }
 
+
+    /*
+    ======================================================
+    COMPANY CONTEXT ACCESS
+    ======================================================
+
+    TENANT USER
+    -----------
+    Accounting navigation berjalan normal.
+
+    SUPER ADMIN + COMPANY SELECTED
+    ------------------------------
+    Accounting navigation berjalan normal.
+
+    SUPER ADMIN + NO COMPANY
+    ------------------------
+    Semua accounting route diblokir.
+    ======================================================
+    */
+
+    const isSuperAdmin =
+        window.finovaIsSuperAdmin === true;
+
+
+    const hasCompanyContext =
+        window.finovaHasCompanyContext === true;
+
+
+    const hasAccountingAccess =
+        !isSuperAdmin
+        ||
+        hasCompanyContext;
+
+
+    /*
+    ======================================================
+    BLOCK ACCOUNTING NAVIGATION
+    ======================================================
+    */
+
+    if (
+        !hasAccountingAccess
+    ) {
+
+        console.warn(
+            "FINOVA ROUTER NAVIGATION DENIED: COMPANY CONTEXT NOT SELECTED.",
+            moduleName
+        );
+
+
+        this.showCompanyContextRequired();
+
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    LOAD WORKSPACE
+    ======================================================
+    */
 
     try {
 
@@ -1431,95 +2090,95 @@ async navigate(
 
 
         /*
-==========================================================
-CREATE PANEL
-==========================================================
-*/
+        ==========================================================
+        CREATE PANEL
+        ==========================================================
+        */
 
-const panel =
-    this.createWorkspacePanel(
-        moduleName
-    );
+        const panel =
+            this.createWorkspacePanel(
+                moduleName
+            );
 
 
-/*
-==========================================================
-REGISTER WORKSPACE FIRST
-==========================================================
-*/
+        /*
+        ==========================================================
+        REGISTER WORKSPACE FIRST
+        ==========================================================
+        */
 
-this.openTabs.set(
-    moduleName,
-    {
+        this.openTabs.set(
+            moduleName,
+            {
 
-        route:
+                route:
+                    route,
+
+                panel:
+                    panel,
+
+                instance:
+                    null
+
+            }
+        );
+
+
+        /*
+        ==========================================================
+        LOAD HTML
+        ==========================================================
+        */
+
+        await this.loadHTML(
             route,
-
-        panel:
-            panel,
-
-        instance:
-            null
-
-    }
-);
+            panel
+        );
 
 
-/*
-==========================================================
-LOAD HTML
-==========================================================
-*/
+        /*
+        ==========================================================
+        ACTIVATE WORKSPACE
+        ==========================================================
+        */
 
-await this.loadHTML(
-    route,
-    panel
-);
-
-
-/*
-==========================================================
-ACTIVATE WORKSPACE
-==========================================================
-*/
-
-this.activateWorkspace(
-    moduleName
-);
+        this.activateWorkspace(
+            moduleName
+        );
 
 
-/*
-==========================================================
-LOAD MODULE
-==========================================================
-*/
+        /*
+        ==========================================================
+        LOAD MODULE
+        ==========================================================
+        */
 
-const instance =
-    await this.loadModule(
-        route
-    );
-
-
-/*
-==========================================================
-STORE MODULE INSTANCE
-==========================================================
-*/
-
-const workspace =
-    this.openTabs.get(
-        moduleName
-    );
+        const instance =
+            await this.loadModule(
+                route
+            );
 
 
-if (
-    workspace
-) {
+        /*
+        ==========================================================
+        STORE MODULE INSTANCE
+        ==========================================================
+        */
 
-    workspace.instance =
-        instance;
+        const workspace =
+            this.openTabs.get(
+                moduleName
+            );
 
-}
+
+        if (
+            workspace
+        ) {
+
+            workspace.instance =
+                instance;
+
+        }
 
 
         /*

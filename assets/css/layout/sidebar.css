@@ -558,6 +558,302 @@ Version : 1.0.0
     background:#FFFFFF;
 
 }
+
+
+/* ==========================================================
+   COMPANY CONTEXT LOCK
+   SUPER ADMIN ONLY
+========================================================== */
+
+.finova-accounting-menu-wrapper{
+
+    position:relative;
+
+    width:100%;
+
+}
+
+
+/* ==========================================================
+   LOCKED ACCOUNTING AREA
+========================================================== */
+
+.finova-accounting-menu-wrapper.finova-company-context-locked{
+
+    position:relative;
+
+}
+
+
+/* ==========================================================
+   LOCKED MAIN MENU
+========================================================== */
+
+.finova-company-context-locked
+.finova-menu-item,
+
+.finova-company-context-locked
+.finova-menu-group-header{
+
+    color:rgba(
+        255,
+        255,
+        255,
+        .38
+    );
+
+    cursor:not-allowed;
+
+}
+
+
+/* ==========================================================
+   LOCKED MAIN MENU ICON
+========================================================== */
+
+.finova-company-context-locked
+.finova-menu-item > i,
+
+.finova-company-context-locked
+.finova-menu-group-left > i{
+
+    color:rgba(
+        255,
+        255,
+        255,
+        .38
+    );
+
+}
+
+
+/* ==========================================================
+   LOCKED MAIN MENU TEXT
+========================================================== */
+
+.finova-company-context-locked
+.finova-menu-item > span,
+
+.finova-company-context-locked
+.finova-menu-group-left > span{
+
+    color:rgba(
+        255,
+        255,
+        255,
+        .38
+    );
+
+}
+
+
+/* ==========================================================
+   LOCKED GROUP ARROW
+========================================================== */
+
+.finova-company-context-locked
+.finova-menu-arrow{
+
+    color:rgba(
+        255,
+        255,
+        255,
+        .28
+    );
+
+}
+
+
+/* ==========================================================
+   DISABLE LOCKED HOVER
+========================================================== */
+
+.finova-company-context-locked
+.finova-menu-item:hover,
+
+.finova-company-context-locked
+.finova-menu-group-header:hover{
+
+    background:transparent;
+
+    color:rgba(
+        255,
+        255,
+        255,
+        .38
+    );
+
+    transform:none;
+
+}
+
+
+/* ==========================================================
+   LOCKED SUBMENU
+========================================================== */
+
+.finova-company-context-locked
+.finova-submenu-item{
+
+    color:rgba(
+        255,
+        255,
+        255,
+        .32
+    );
+
+    cursor:not-allowed;
+
+}
+
+
+/* ==========================================================
+   LOCKED SUBMENU ICON
+========================================================== */
+
+.finova-company-context-locked
+.finova-submenu-item i{
+
+    color:rgba(
+        255,
+        255,
+        255,
+        .32
+    );
+
+}
+
+
+/* ==========================================================
+   LOCKED SUBMENU TEXT
+========================================================== */
+
+.finova-company-context-locked
+.finova-submenu-item span{
+
+    color:rgba(
+        255,
+        255,
+        255,
+        .32
+    );
+
+}
+
+
+/* ==========================================================
+   DISABLE LOCKED SUBMENU HOVER
+========================================================== */
+
+.finova-company-context-locked
+.finova-submenu-item:hover{
+
+    background:transparent;
+
+    color:rgba(
+        255,
+        255,
+        255,
+        .32
+    );
+
+    transform:none;
+
+}
+
+
+/* ==========================================================
+   LOCK ICON
+========================================================== */
+
+.finova-company-context-lock-icon{
+
+    position:absolute;
+
+    top:50%;
+
+    right:20px;
+
+    transform:translateY(-50%);
+
+    width:18px;
+
+    text-align:center;
+
+    font-size:11px;
+
+    color:rgba(
+        255,
+        255,
+        255,
+        .42
+    );
+
+    pointer-events:none;
+
+    z-index:2;
+
+}
+
+
+/* ==========================================================
+   LOCK ICON
+   MENU GROUP
+========================================================== */
+
+.finova-company-context-locked
+.finova-menu-group-header{
+
+    padding-right:44px;
+
+}
+
+
+/* ==========================================================
+   LOCK ICON
+   DASHBOARD
+========================================================== */
+
+.finova-company-context-locked
+> .finova-menu-item{
+
+    padding-right:44px;
+
+}
+
+
+/* ==========================================================
+   LOCKED ACTIVE STATE RESET
+========================================================== */
+
+.finova-company-context-locked
+.finova-menu-item.active,
+
+.finova-company-context-locked
+.finova-submenu-item.active{
+
+    background:transparent;
+
+    color:rgba(
+        255,
+        255,
+        255,
+        .38
+    );
+
+    font-weight:500;
+
+}
+
+
+.finova-company-context-locked
+.finova-submenu-item.active::before{
+
+    display:none;
+
+}
+
+
 /* ===========================================
    FOOTER
 =========================================== */

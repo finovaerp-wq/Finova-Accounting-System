@@ -23,53 +23,96 @@ export class TenantContext {
     static companyNameCache = undefined;
 
 
+    static async getCompanyId({
+    refresh = false
+} = {}) {
+
     /*
     ======================================================
-    GET CURRENT COMPANY ID
+    RETURN CACHE
     ======================================================
     */
 
-    static async getCompanyId({
-        refresh = false
-    } = {}) {
-
-        if (
-            !refresh
-            &&
-            this.cache !== undefined
-        ) {
-
-            return this.cache;
-
-        }
-
-
-        const {
-            data,
-            error
-        } = await supabase.rpc(
-            "finova_current_company_id"
-        );
-
-
-        if (
-            error
-        ) {
-
-            throw error;
-
-        }
-
-
-        this.cache =
-            data
-            ??
-            null;
-
+    if (
+        !refresh
+        &&
+        this.cache !== undefined
+    ) {
 
         return this.cache;
 
     }
+
+
+    /*
+    ======================================================
+    GET EFFECTIVE COMPANY
+    ======================================================
+
+    TENANT USER
+        -> finova_current_company_id()
+
+    SUPER ADMIN
+        -> selected company context
+
+    ======================================================
+    */
+
+    const {
+        data,
+        error
+    } = await supabase.rpc(
+        "finova_effective_company_id"
+    );
+
+
+    /*
+    ======================================================
+    ERROR
+    ======================================================
+    */
+
+    if (
+        error
+    ) {
+
+        console.error(
+            "FINOVA TENANT CONTEXT ERROR:",
+            error
+        );
+
+        throw error;
+
+    }
+
+
+    /*
+    ======================================================
+    CACHE
+    ======================================================
+    */
+
+    this.cache =
+        data
+        ??
+        null;
+
+
+    /*
+    ======================================================
+    DEBUG
+    ======================================================
+    */
+
+    console.log(
+        "FINOVA EFFECTIVE COMPANY ID:",
+        this.cache
+    );
+
+
+    return this.cache;
+
+}
 
 
     /*
