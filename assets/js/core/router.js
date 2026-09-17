@@ -129,7 +129,25 @@ export class FinovaRouter {
                 html: "modules/profit-loss/profit-loss.html",
                 js: "modules/profit-loss/profit-loss.js",
                 className: "ProfitLoss"
-            }
+            },
+            "financial-statement": {
+
+                title:
+                    "Financial Statement",
+
+                html:
+                    "modules/financial-statement/financial-statement.html",
+
+                css:
+                    "modules/financial-statement/financial-statement.css",
+
+                js:
+                    "modules/financial-statement/financial-statement.js",
+
+                className:
+                    "FinancialStatement"
+
+            },
 
         };
 
@@ -324,6 +342,268 @@ tab.setAttribute(
 
     console.log(
         "FINOVA HOME TAB CREATED"
+    );
+
+}
+
+/*
+==========================================================
+LOAD CSS
+==========================================================
+*/
+
+async loadCSS(
+    route
+) {
+
+    /*
+    ======================================================
+    ROUTE WITHOUT CSS
+    ======================================================
+
+    Existing FINOVA modules are still allowed to operate
+    without a CSS property in their route configuration.
+    ======================================================
+    */
+
+    if (
+        !route
+        ||
+        !route.css
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    CREATE CSS URL
+    ======================================================
+    */
+
+    const url =
+        new URL(
+            route.css,
+            document.baseURI
+        );
+
+
+    /*
+    ======================================================
+    UNIQUE STYLESHEET KEY
+    ======================================================
+
+    Keep one stylesheet element for each module CSS file.
+    This is important for FINOVA multi-tab workspace.
+    ======================================================
+    */
+
+    const stylesheetKey =
+        url.pathname;
+
+
+    /*
+    ======================================================
+    FIND EXISTING STYLESHEET
+    ======================================================
+    */
+
+    const existingStylesheet =
+        Array
+            .from(
+                document.querySelectorAll(
+                    'link[data-finova-module-css]'
+                )
+            )
+            .find(
+                link =>
+                    link.dataset.finovaModuleCss
+                    ===
+                    stylesheetKey
+            );
+
+
+    /*
+    ======================================================
+    ALREADY LOADED
+    ======================================================
+    */
+
+    if (
+        existingStylesheet
+        &&
+        existingStylesheet.dataset.loaded
+        ===
+        "true"
+    ) {
+
+        console.log(
+            "FINOVA MODULE CSS REUSED :",
+            route.css
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    WAIT EXISTING CSS LOAD
+    ======================================================
+
+    Prevent duplicate <link> elements if the same module
+    is requested while its stylesheet is still loading.
+    ======================================================
+    */
+
+    if (
+        existingStylesheet
+    ) {
+
+        await new Promise(
+            (
+                resolve,
+                reject
+            ) => {
+
+                existingStylesheet.addEventListener(
+                    "load",
+                    () => resolve(),
+                    {
+                        once:
+                            true
+                    }
+                );
+
+
+                existingStylesheet.addEventListener(
+                    "error",
+                    () => reject(
+                        new Error(
+                            `Failed to load CSS: ${route.css}`
+                        )
+                    ),
+                    {
+                        once:
+                            true
+                    }
+                );
+
+            }
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    CREATE STYLESHEET
+    ======================================================
+    */
+
+    const stylesheet =
+        document.createElement(
+            "link"
+        );
+
+
+    stylesheet.rel =
+        "stylesheet";
+
+
+    stylesheet.dataset.finovaModuleCss =
+        stylesheetKey;
+
+
+    stylesheet.dataset.loaded =
+        "false";
+
+
+    /*
+    ======================================================
+    CACHE BUSTER
+    ======================================================
+    */
+
+    url.searchParams.set(
+        "v",
+        Date.now().toString()
+    );
+
+
+    stylesheet.href =
+        url.href;
+
+
+    /*
+    ======================================================
+    LOAD STYLESHEET
+    ======================================================
+    */
+
+    await new Promise(
+        (
+            resolve,
+            reject
+        ) => {
+
+            stylesheet.addEventListener(
+                "load",
+                () => {
+
+                    stylesheet.dataset.loaded =
+                        "true";
+
+
+                    console.log(
+                        "FINOVA MODULE CSS LOADED :",
+                        route.css
+                    );
+
+
+                    resolve();
+
+                },
+                {
+                    once:
+                        true
+                }
+            );
+
+
+            stylesheet.addEventListener(
+                "error",
+                () => {
+
+                    stylesheet.remove();
+
+
+                    reject(
+                        new Error(
+                            `Failed to load CSS: ${route.css}`
+                        )
+                    );
+
+                },
+                {
+                    once:
+                        true
+                }
+            );
+
+
+            document.head.appendChild(
+                stylesheet
+            );
+
+        }
     );
 
 }
@@ -2133,6 +2413,21 @@ async navigate(
         await this.loadHTML(
             route,
             panel
+        );
+
+
+        /*
+        ==========================================================
+        LOAD MODULE CSS
+        ==========================================================
+
+        Modules without route.css remain compatible.
+        loadCSS() will simply return when no CSS is declared.
+        ==========================================================
+        */
+
+        await this.loadCSS(
+            route
         );
 
 

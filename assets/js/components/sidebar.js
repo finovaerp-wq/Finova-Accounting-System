@@ -475,40 +475,47 @@ export class FinovaSidebar {
         >
 
             ${this.menuGroup(
-                "Report",
-                "fa-solid fa-chart-column",
-                [
+    "Report",
+    "fa-solid fa-chart-column",
+    [
 
-                    this.menuItem(
-                        "General Ledger",
-                        "fa-solid fa-book-bookmark",
-                        "general-ledger",
-                        true
-                    ),
+        this.menuItem(
+            "General Ledger",
+            "fa-solid fa-book-bookmark",
+            "general-ledger",
+            true
+        ),
 
-                    this.menuItem(
-                        "Trial Balance Year",
-                        "fa-solid fa-scale-balanced",
-                        "trial-balance-year",
-                        true
-                    ),
+        this.menuItem(
+            "Trial Balance Year",
+            "fa-solid fa-scale-balanced",
+            "trial-balance-year",
+            true
+        ),
 
-                    this.menuItem(
-                        "Balance Sheet",
-                        "fa-solid fa-table",
-                        "balance-sheet",
-                        true
-                    ),
+        this.menuItem(
+            "Balance Sheet",
+            "fa-solid fa-table",
+            "balance-sheet",
+            true
+        ),
 
-                    this.menuItem(
-                        "Profit & Loss",
-                        "fa-solid fa-chart-pie",
-                        "profit-loss",
-                        true
-                    )
+        this.menuItem(
+            "Profit & Loss",
+            "fa-solid fa-chart-pie",
+            "profit-loss",
+            true
+        ),
 
-                ]
-            )}
+        this.menuItem(
+            "Financial Statement",
+            "fa-solid fa-file-invoice",
+            "financial-statement",
+            true
+        )
+
+    ]
+)}
 
             ${lockIcon}
 

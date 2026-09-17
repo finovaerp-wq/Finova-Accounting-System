@@ -1,0 +1,877 @@
+<!--
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+FINANCIAL STATEMENT
+Version : 1.2.0
+==========================================================
+-->
+
+<div class="financial-statement-page">
+
+
+    <!-- ==================================================
+         PAGE HEADER
+    =================================================== -->
+
+    <div class="financial-statement-header">
+
+        <div class="financial-statement-header-content">
+
+            <div class="financial-statement-header-icon">
+
+                <i class="fa-solid fa-file-invoice"></i>
+
+            </div>
+
+
+            <div class="financial-statement-header-text">
+
+                <h4 class="financial-statement-title">
+
+                    Financial Statement
+
+                </h4>
+
+
+                <p class="financial-statement-subtitle">
+
+                    Generate complete financial reports
+                    for the selected reporting period.
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ==================================================
+     FINANCIAL STATEMENT PREVIEW
+=================================================== -->
+
+<div
+    id="financial-statement-preview"
+    class="financial-statement-preview d-none">
+
+
+    <!-- ==============================================
+         PREVIEW HEADER
+    =============================================== -->
+
+    <div class="financial-statement-preview-header">
+
+        <div class="financial-statement-preview-header-content">
+
+            <div class="financial-statement-preview-header-icon">
+
+                <i class="fa-solid fa-file-lines"></i>
+
+            </div>
+
+
+            <div>
+
+                <h5 class="financial-statement-preview-title">
+                    Financial Statement Preview
+                </h5>
+
+                <p class="financial-statement-preview-subtitle">
+                    Review the generated financial statements
+                    before downloading the final report.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="financial-statement-preview-status">
+
+            <i class="fa-solid fa-circle-check"></i>
+
+            <span>
+                Report Generated
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==============================================
+         REPORT DOCUMENT
+    =============================================== -->
+
+    <div class="financial-statement-preview-document">
+
+
+        <!-- ==========================================
+             DOCUMENT HEADER
+        =========================================== -->
+
+        <div class="financial-statement-document-header">
+
+            <div class="financial-statement-document-company">
+
+                <div
+                    id="financial-statement-preview-company"
+                    class="financial-statement-document-company-name">
+
+                    FINOVA
+
+                </div>
+
+
+                <div
+                    id="financial-statement-preview-company-detail"
+                    class="financial-statement-document-company-detail">
+
+                    Financial Reporting
+
+                </div>
+
+            </div>
+
+
+            <div class="financial-statement-document-period">
+
+                <div class="financial-statement-document-period-label">
+                    Reporting Period
+                </div>
+
+                <div
+                    id="financial-statement-preview-period"
+                    class="financial-statement-document-period-value">
+
+                    -
+
+                </div>
+
+
+                <div class="financial-statement-document-comparative">
+
+                    Comparative:
+
+                    <span
+                        id="financial-statement-preview-comparative-period">
+
+                        -
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ==========================================
+             STATEMENT NAVIGATION
+        =========================================== -->
+
+        <div
+            id="financial-statement-preview-tabs"
+            class="financial-statement-preview-tabs">
+
+
+            <button
+                type="button"
+                class="financial-statement-preview-tab active"
+                data-financial-statement-preview="balance-sheet">
+
+                <i class="fa-solid fa-scale-balanced"></i>
+
+                <span>
+                    Balance Sheet
+                </span>
+
+            </button>
+
+
+            <button
+                type="button"
+                class="financial-statement-preview-tab"
+                data-financial-statement-preview="profit-loss">
+
+                <i class="fa-solid fa-chart-line"></i>
+
+                <span>
+                    Profit &amp; Loss
+                </span>
+
+            </button>
+
+
+            <button
+                type="button"
+                class="financial-statement-preview-tab"
+                data-financial-statement-preview="trial-balance">
+
+                <i class="fa-solid fa-table-list"></i>
+
+                <span>
+                    Trial Balance
+                </span>
+
+            </button>
+
+        </div>
+
+
+        <!-- ==========================================
+             STATEMENT CONTENT
+        =========================================== -->
+
+        <div
+            id="financial-statement-preview-content"
+            class="financial-statement-preview-content">
+
+
+            <!-- ======================================
+                 EMPTY / INITIAL CONTENT
+            ======================================= -->
+
+            <div class="financial-statement-preview-empty">
+
+                <div class="financial-statement-preview-empty-icon">
+
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+
+                </div>
+
+
+                <div class="financial-statement-preview-empty-title">
+
+                    Financial Statement
+
+                </div>
+
+
+                <div class="financial-statement-preview-empty-text">
+
+                    Generated report content will appear here.
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ==========================================
+             DOCUMENT FOOTER
+        =========================================== -->
+
+        <div class="financial-statement-document-footer">
+
+            <div>
+
+                Generated by
+                <strong>FINOVA Accounting System</strong>
+
+            </div>
+
+
+            <div
+                id="financial-statement-preview-generated-at">
+
+                -
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+    <!-- ==================================================
+         REPORT CONFIGURATION CARD
+    =================================================== -->
+
+    <div class="finova-card financial-statement-config-card">
+
+        <div class="finova-card-body">
+
+
+            <!-- ==========================================
+                 REPORT CONFIGURATION HEADER
+            =========================================== -->
+
+            <div class="financial-statement-section-header">
+
+                <div>
+
+                    <h5 class="financial-statement-section-title">
+
+                        Report Configuration
+
+                    </h5>
+
+
+                    <p class="financial-statement-section-subtitle">
+
+                        Select the reporting period and
+                        comparative period for the financial statement.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ==========================================
+                 PERIOD GRID
+            =========================================== -->
+
+            <div class="financial-statement-period-grid">
+
+
+                <!-- ======================================
+                     REPORTING PERIOD
+                ======================================= -->
+
+                <div class="financial-statement-period-block">
+
+                    <div class="financial-statement-period-heading">
+
+                        <div class="financial-statement-period-icon">
+
+                            <i class="fa-solid fa-calendar-days"></i>
+
+                        </div>
+
+
+                        <div>
+
+                            <div class="financial-statement-period-title">
+
+                                Reporting Period
+
+                            </div>
+
+
+                            <div class="financial-statement-period-description">
+
+                                Main financial statement period.
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="financial-statement-period-fields">
+
+
+                        <!-- YEAR -->
+
+                        <div class="financial-statement-field">
+
+                            <label
+                                for="financial-statement-reporting-year"
+                                class="form-label">
+
+                                Year
+
+                            </label>
+
+
+                            <select
+                                id="financial-statement-reporting-year"
+                                class="form-select">
+
+                                <option value="">
+
+                                    Select Year
+
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+
+                        <!-- PERIOD -->
+
+                        <div class="financial-statement-field">
+
+                            <label
+                                for="financial-statement-reporting-period"
+                                class="form-label">
+
+                                Period
+
+                            </label>
+
+
+                            <select
+                                id="financial-statement-reporting-period"
+                                class="form-select">
+
+                                <option value="12">December</option>
+
+                                <option value="11">November</option>
+
+                                <option value="10">October</option>
+
+                                <option value="09">September</option>
+
+                                <option value="08">August</option>
+
+                                <option value="07">July</option>
+
+                                <option value="06">June</option>
+
+                                <option value="05">May</option>
+
+                                <option value="04">April</option>
+
+                                <option value="03">March</option>
+
+                                <option value="02">February</option>
+
+                                <option value="01">January</option>
+
+                            </select>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- ======================================
+                     COMPARATIVE PERIOD
+                ======================================= -->
+
+                <div class="financial-statement-period-block">
+
+                    <div class="financial-statement-period-heading">
+
+                        <div class="financial-statement-period-icon">
+
+                            <i class="fa-solid fa-code-compare"></i>
+
+                        </div>
+
+
+                        <div>
+
+                            <div class="financial-statement-period-title">
+
+                                Comparative Period
+
+                            </div>
+
+
+                            <div class="financial-statement-period-description">
+
+                                Period used for financial comparison.
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="financial-statement-period-fields">
+
+
+                        <!-- YEAR -->
+
+                        <div class="financial-statement-field">
+
+                            <label
+                                for="financial-statement-comparative-year"
+                                class="form-label">
+
+                                Year
+
+                            </label>
+
+
+                            <select
+                                id="financial-statement-comparative-year"
+                                class="form-select">
+
+                                <option value="">
+
+                                    Select Year
+
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+
+                        <!-- PERIOD -->
+
+                        <div class="financial-statement-field">
+
+                            <label
+                                for="financial-statement-comparative-period"
+                                class="form-label">
+
+                                Period
+
+                            </label>
+
+
+                            <select
+                                id="financial-statement-comparative-period"
+                                class="form-select">
+
+                                <option value="12">December</option>
+
+                                <option value="11">November</option>
+
+                                <option value="10">October</option>
+
+                                <option value="09">September</option>
+
+                                <option value="08">August</option>
+
+                                <option value="07">July</option>
+
+                                <option value="06">June</option>
+
+                                <option value="05">May</option>
+
+                                <option value="04">April</option>
+
+                                <option value="03">March</option>
+
+                                <option value="02">February</option>
+
+                                <option value="01">January</option>
+
+                            </select>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- ==========================================
+                 STATEMENT SELECTION
+            =========================================== -->
+
+            <div class="financial-statement-selection">
+
+
+                <!-- ======================================
+                     STATEMENT SELECTION HEADER
+                ======================================= -->
+
+                <div class="financial-statement-selection-header">
+
+                    <div>
+
+                        <h5 class="financial-statement-section-title">
+
+                            Statement Selection
+
+                        </h5>
+
+
+                        <p class="financial-statement-section-subtitle">
+
+                            Select the financial reports to include
+                            in this financial statement.
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- ======================================
+                     STATEMENT OPTIONS
+                ======================================= -->
+
+                <div class="financial-statement-selection-grid">
+
+
+                    <!-- ==================================
+                         BALANCE SHEET
+                    =================================== -->
+
+                    <label
+                        class="financial-statement-option"
+                        for="financial-statement-balance-sheet">
+
+
+                        <div class="financial-statement-option-control">
+
+                            <input
+                                class="form-check-input"
+                                type="checkbox"
+                                id="financial-statement-balance-sheet"
+                                value="balance-sheet"
+                                checked>
+
+                        </div>
+
+
+                        <div class="financial-statement-option-icon">
+
+                            <i class="fa-solid fa-scale-balanced"></i>
+
+                        </div>
+
+
+                        <div class="financial-statement-option-content">
+
+                            <div class="financial-statement-option-title">
+
+                                Balance Sheet
+
+                            </div>
+
+
+                            <div class="financial-statement-option-description">
+
+                                Assets, liabilities and equity
+                                as of the reporting period.
+
+                            </div>
+
+                        </div>
+
+
+                    </label>
+
+
+
+                    <!-- ==================================
+                         PROFIT & LOSS
+                    =================================== -->
+
+                    <label
+                        class="financial-statement-option"
+                        for="financial-statement-profit-loss">
+
+
+                        <div class="financial-statement-option-control">
+
+                            <input
+                                class="form-check-input"
+                                type="checkbox"
+                                id="financial-statement-profit-loss"
+                                value="profit-loss"
+                                checked>
+
+                        </div>
+
+
+                        <div class="financial-statement-option-icon">
+
+                            <i class="fa-solid fa-chart-line"></i>
+
+                        </div>
+
+
+                        <div class="financial-statement-option-content">
+
+                            <div class="financial-statement-option-title">
+
+                                Profit & Loss
+
+                            </div>
+
+
+                            <div class="financial-statement-option-description">
+
+                                Revenue, expenses and profit
+                                for the reporting period.
+
+                            </div>
+
+                        </div>
+
+
+                    </label>
+
+
+
+                    <!-- ==================================
+                         TRIAL BALANCE
+                    =================================== -->
+
+                    <label
+                        class="financial-statement-option"
+                        for="financial-statement-trial-balance">
+
+
+                        <div class="financial-statement-option-control">
+
+                            <input
+                                class="form-check-input"
+                                type="checkbox"
+                                id="financial-statement-trial-balance"
+                                value="trial-balance"
+                                checked>
+
+                        </div>
+
+
+                        <div class="financial-statement-option-icon">
+
+                            <i class="fa-solid fa-table-list"></i>
+
+                        </div>
+
+
+                        <div class="financial-statement-option-content">
+
+                            <div class="financial-statement-option-title">
+
+                                Trial Balance
+
+                            </div>
+
+
+                            <div class="financial-statement-option-description">
+
+                                Account balances used to support
+                                the financial statements.
+
+                            </div>
+
+                        </div>
+
+
+                    </label>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- ==========================================
+                 ACTION BAR
+            =========================================== -->
+
+            <div class="financial-statement-actions">
+
+
+                <!-- ======================================
+                     ACTION INFORMATION
+                ======================================= -->
+
+                <div class="financial-statement-actions-info">
+
+                    <div class="financial-statement-actions-icon">
+
+                        <i class="fa-solid fa-circle-info"></i>
+
+                    </div>
+
+
+                    <div class="financial-statement-actions-text">
+
+                        Financial statements will be generated
+                        using posted accounting transactions only.
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- ======================================
+                     ACTION BUTTONS
+                ======================================= -->
+
+                <div class="financial-statement-actions-buttons">
+
+
+                    <!-- ==================================
+                         PREVIEW
+                    =================================== -->
+
+                    <button
+                        type="button"
+                        id="btn-financial-statement-preview"
+                        class="btn btn-outline-secondary financial-statement-action-button">
+
+                        <i class="fa-solid fa-eye me-2"></i>
+
+                        Preview
+
+                    </button>
+
+
+
+                    <!-- ==================================
+                         DOWNLOAD EXCEL
+                    =================================== -->
+
+                    <button
+                        type="button"
+                        id="btn-financial-statement-excel"
+                        class="btn btn-outline-primary financial-statement-action-button">
+
+                        <i class="fa-solid fa-file-excel me-2"></i>
+
+                        Download Excel
+
+                    </button>
+
+
+
+                    <!-- ==================================
+                         DOWNLOAD PDF
+                    =================================== -->
+
+                    <button
+                        type="button"
+                        id="btn-financial-statement-pdf"
+                        class="btn btn-primary financial-statement-action-button">
+
+                        <i class="fa-solid fa-file-pdf me-2"></i>
+
+                        Download PDF
+
+                    </button>
+
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+</div>

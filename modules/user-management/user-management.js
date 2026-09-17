@@ -8,7 +8,8 @@ VERSION : 3.0.0 FINAL
 */
 
 import {
-    CONFIG
+    CONFIG,
+    supabase
 } from "../../assets/js/core/supabase.js";
 
 import {
@@ -20,51 +21,129 @@ export class UserManagement {
 
     constructor() {
 
-        this.data = [];
-        this.filteredData = [];
+    /*
+    ======================================================
+    DATA
+    ======================================================
+    */
 
-        this.currentProfile = null;
-        this.currentAuthUser = null;
-        this.isManager = false;
+    this.data = [];
 
-        this.pageSize =
-            CONFIG.PAGE_SIZE
-            ||
-            20;
+    this.filteredData = [];
 
-        this.currentPage = 1;
-        this.totalPages = 1;
-        this.totalRows = 0;
 
-        this.currentMode = "view";
-        this.currentUserUid = null;
+    /*
+    ======================================================
+    ACCESS
+    ======================================================
+    */
 
-        this.pendingDeleteUserUid = null;
-        this.pendingResetPasswordUserUid = null;
+    this.currentProfile = null;
 
-        this.userModal = null;
-        this.deleteModal = null;
+    this.currentAuthUser = null;
 
-        this.resetPasswordModal = null;
+    this.isSuperAdmin = false;
 
-        this.resetPasswordModalElement = null;
-        this.resetPasswordUserName = null;
-        this.resetPasswordUserEmail = null;
+    this.isManager = false;
 
-        this.resetPasswordInput = null;
-        this.resetPasswordConfirmInput = null;
 
-        this.btnToggleResetPassword = null;
-        this.iconToggleResetPassword = null;
+    /*
+    ======================================================
+    PAGINATION
+    ======================================================
+    */
 
-        this.btnToggleResetPasswordConfirm = null;
-        this.iconToggleResetPasswordConfirm = null;
+    this.pageSize =
+        CONFIG.PAGE_SIZE
+        ||
+        20;
 
-        this.btnConfirmResetPassword = null;
 
-        this.initialize();
-    }
+    this.currentPage = 1;
 
+    this.totalPages = 1;
+
+    this.totalRows = 0;
+
+
+    /*
+    ======================================================
+    USER FORM STATE
+    ======================================================
+    */
+
+    this.currentMode = "view";
+
+    this.currentUserUid = null;
+
+
+    /*
+    ======================================================
+    DELETE
+    ======================================================
+    */
+
+    this.pendingDeleteUserUid = null;
+
+
+    /*
+    ======================================================
+    RESET PASSWORD
+    ======================================================
+    */
+
+    this.pendingResetPasswordUserUid = null;
+
+
+    /*
+    ======================================================
+    BOOTSTRAP MODALS
+    ======================================================
+    */
+
+    this.userModal = null;
+
+    this.deleteModal = null;
+
+    this.resetPasswordModal = null;
+
+
+    /*
+    ======================================================
+    RESET PASSWORD DOM
+    ======================================================
+    */
+
+    this.resetPasswordModalElement = null;
+
+    this.resetPasswordUserName = null;
+
+    this.resetPasswordUserEmail = null;
+
+    this.resetPasswordInput = null;
+
+    this.resetPasswordConfirmInput = null;
+
+    this.btnToggleResetPassword = null;
+
+    this.iconToggleResetPassword = null;
+
+    this.btnToggleResetPasswordConfirm = null;
+
+    this.iconToggleResetPasswordConfirm = null;
+
+    this.btnConfirmResetPassword = null;
+
+
+    /*
+    ======================================================
+    INITIALIZE
+    ======================================================
+    */
+
+    this.initialize();
+
+}
 
     /*
     ==========================================================
@@ -74,44 +153,100 @@ export class UserManagement {
 
     async initialize() {
 
-        try {
+    try {
 
-            this.cacheDom();
+        /*
+        ======================================================
+        DOM
+        ======================================================
+        */
 
-            this.initializeBootstrap();
+        this.cacheDom();
 
-            this.bindEvents();
 
-            await this.loadAccess();
+        /*
+        ======================================================
+        BOOTSTRAP
+        ======================================================
+        */
 
-            this.applyAccessUI();
+        this.initializeBootstrap();
 
-            await this.loadData(true);
 
-            console.log(
-                "User Management Initialized :",
-                this.currentProfile?.role
-            );
+        /*
+        ======================================================
+        EVENTS
+        ======================================================
+        */
 
-        }
+        this.bindEvents();
 
-        catch (error) {
 
-            console.error(
-                "UserManagement.initialize:",
-                error
-            );
+        /*
+        ======================================================
+        ACCESS
+        ======================================================
+        */
 
-            this.showError(
-                error?.message
-                ||
-                "Failed to initialize User Management."
-            );
+        await this.loadAccess();
 
-        }
+        this.applyAccessUI();
+
+
+        /*
+        ======================================================
+        LOAD DATA
+        ======================================================
+        */
+
+        await this.loadData(
+            true
+        );
+
+
+        /*
+        ======================================================
+        INITIALIZED
+        ======================================================
+        */
+
+        const accessRole =
+            this.isSuperAdmin
+                ?
+                "SUPER ADMIN"
+                :
+                (
+                    this.currentProfile
+                        ?.role
+                    ||
+                    "UNKNOWN"
+                );
+
+
+        console.log(
+            "User Management Initialized :",
+            accessRole
+        );
 
     }
 
+    catch (error) {
+
+        console.error(
+            "UserManagement.initialize:",
+            error
+        );
+
+
+        this.showError(
+            error?.message
+            ||
+            "Failed to initialize User Management."
+        );
+
+    }
+
+}
 
     /*
     ==========================================================
@@ -593,123 +728,352 @@ export class UserManagement {
 
 
     /*
-    ==========================================================
-    ACCESS
-    ==========================================================
+==========================================================
+ACCESS
+==========================================================
+*/
+
+async loadAccess() {
+
+    /*
+    ======================================================
+    AUTH USER
+    ======================================================
     */
 
-    async loadAccess() {
-
-        this.currentAuthUser =
-            await UserManagementService
-                .getCurrentAuthUser();
+    this.currentAuthUser =
+        await UserManagementService
+            .getCurrentAuthUser();
 
 
-        this.currentProfile =
-            await UserManagementService
-                .getCurrentProfile();
+    if (
+        !this.currentAuthUser
+    ) {
 
-
-        if (
-            !this.currentAuthUser
-        ) {
-
-            throw new Error(
-                "Authentication session was not found."
-            );
-
-        }
-
-
-        if (
-            !this.currentProfile
-        ) {
-
-            throw new Error(
-                "FINOVA user profile was not found."
-            );
-
-        }
-
-
-        this.isManager =
-            String(
-                this.currentProfile.role
-                ||
-                ""
-            )
-                .trim()
-                .toLowerCase()
-            ===
-            "manager";
+        throw new Error(
+            "Authentication session was not found."
+        );
 
     }
 
 
     /*
-    ==========================================================
-    APPLY ACCESS UI
-    ==========================================================
+    ======================================================
+    SUPER ADMIN AUTHORITY
+    ======================================================
     */
 
-    applyAccessUI() {
-
-        this.btnAddUser
-            ?.classList
-            .toggle(
-                "d-none",
-                !this.isManager
-            );
-
-
-        if (
-            this.accessInfo
-        ) {
-
-            this.accessInfo
-                .classList
-                .remove(
-                    "d-none",
-                    "manager",
-                    "staff"
-                );
+    const {
+        data: isSuperAdmin,
+        error: superAdminError
+    } =
+        await supabase.rpc(
+            "is_finova_super_admin"
+        );
 
 
-            this.accessInfo
-                .classList
-                .add(
-                    this.isManager
-                        ?
-                        "manager"
-                        :
-                        "staff"
-                );
+    if (
+        superAdminError
+    ) {
+
+        console.error(
+            "FINOVA SUPER ADMIN ACCESS CHECK:",
+            superAdminError
+        );
 
 
-            this.accessInfo.innerHTML =
-
-                this.isManager
-
-                    ?
-
-                    `
-                    <i class="fa-solid fa-shield-halved me-1"></i>
-                    Logged in as <strong>Manager</strong>.
-                    You have full User Management access.
-                    `
-
-                    :
-
-                    `
-                    <i class="fa-solid fa-eye me-1"></i>
-                    Logged in as <strong>Staff</strong>.
-                    User Management is view only.
-                    `;
-
-        }
+        throw new Error(
+            "Failed to verify FINOVA Super Admin access."
+        );
 
     }
 
+
+    this.isSuperAdmin =
+        isSuperAdmin
+        ===
+        true;
+
+
+    /*
+    ======================================================
+    SUPER ADMIN
+    ======================================================
+    */
+
+    if (
+        this.isSuperAdmin
+    ) {
+
+        /*
+        ==================================================
+        SUPER ADMIN IS NOT A TENANT MST_USERS PROFILE
+        ==================================================
+        */
+
+        this.currentProfile = null;
+
+
+        /*
+        ==================================================
+        USER MANAGEMENT ADMINISTRATIVE ACCESS
+        ==================================================
+        */
+
+        this.isManager = true;
+
+
+        console.log(
+            "FINOVA USER MANAGEMENT ACCESS:",
+            {
+                accessMode:
+                    "SUPER ADMIN",
+
+                isSuperAdmin:
+                    true,
+
+                isManager:
+                    true,
+
+                authUserId:
+                    this.currentAuthUser.id
+            }
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    TENANT PROFILE
+    ======================================================
+    */
+
+    this.currentProfile =
+        await UserManagementService
+            .getCurrentProfile();
+
+
+    if (
+        !this.currentProfile
+    ) {
+
+        throw new Error(
+            "FINOVA user profile was not found."
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    TENANT ROLE
+    ======================================================
+    */
+
+    this.isManager =
+        String(
+            this.currentProfile.role
+            ||
+            ""
+        )
+            .trim()
+            .toLowerCase()
+        ===
+        "manager";
+
+
+    /*
+    ======================================================
+    DEBUG
+    ======================================================
+    */
+
+    console.log(
+        "FINOVA USER MANAGEMENT ACCESS:",
+        {
+            accessMode:
+                "TENANT USER",
+
+            isSuperAdmin:
+                false,
+
+            isManager:
+                this.isManager,
+
+            role:
+                this.currentProfile.role,
+
+            authUserId:
+                this.currentAuthUser.id
+        }
+    );
+
+}
+
+    /*
+==========================================================
+APPLY ACCESS UI
+==========================================================
+*/
+
+applyAccessUI() {
+
+    /*
+    ======================================================
+    ADD USER ACCESS
+    ======================================================
+    */
+
+    this.btnAddUser
+        ?.classList
+        .toggle(
+            "d-none",
+            !this.isManager
+        );
+
+
+    /*
+    ======================================================
+    ACCESS INFORMATION
+    ======================================================
+    */
+
+    if (
+        !this.accessInfo
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    RESET ACCESS STYLE
+    ======================================================
+    */
+
+    this.accessInfo
+        .classList
+        .remove(
+            "d-none",
+            "manager",
+            "staff",
+            "super-admin"
+        );
+
+
+    /*
+    ======================================================
+    SUPER ADMIN
+    ======================================================
+    */
+
+    if (
+        this.isSuperAdmin
+    ) {
+
+        this.accessInfo
+            .classList
+            .add(
+                "manager",
+                "super-admin"
+            );
+
+
+        this.accessInfo.innerHTML = `
+            <i
+                class="
+                    fa-solid
+                    fa-shield-halved
+                    me-1
+                ">
+            </i>
+
+            Logged in as
+            <strong>Super Admin</strong>.
+
+            You have FINOVA administrative access
+            for the selected Company Context.
+        `;
+
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    MANAGER
+    ======================================================
+    */
+
+    if (
+        this.isManager
+    ) {
+
+        this.accessInfo
+            .classList
+            .add(
+                "manager"
+            );
+
+
+        this.accessInfo.innerHTML = `
+            <i
+                class="
+                    fa-solid
+                    fa-shield-halved
+                    me-1
+                ">
+            </i>
+
+            Logged in as
+            <strong>Manager</strong>.
+
+            You have full User Management access.
+        `;
+
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    STAFF
+    ======================================================
+    */
+
+    this.accessInfo
+        .classList
+        .add(
+            "staff"
+        );
+
+
+    this.accessInfo.innerHTML = `
+        <i
+            class="
+                fa-solid
+                fa-eye
+                me-1
+            ">
+        </i>
+
+        Logged in as
+        <strong>Staff</strong>.
+
+        User Management is view only.
+    `;
+
+}
 
     /*
     ==========================================================
