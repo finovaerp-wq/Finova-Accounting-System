@@ -1,0 +1,1140 @@
+/* ==========================================================
+   FINOVA ACCOUNTING SYSTEM
+   CASH FLOW FORECAST
+   Version : 1.1.0 FINAL
+========================================================== */
+
+
+/* ==========================================================
+   WORKSPACE
+========================================================== */
+
+.finova-workspace-panel[data-module="cash-flow-forecast"] {
+
+    height: 100%;
+
+    min-height: 0;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   PAGE
+========================================================== */
+
+.cash-flow-forecast-page {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 12px;
+
+    width: 100%;
+
+    height: 100%;
+
+    min-height: 0;
+
+    overflow-x: hidden;
+
+    overflow-y: auto;
+
+    padding-bottom: 24px;
+
+    box-sizing: border-box;
+
+}
+
+
+.cash-flow-forecast-page > * {
+
+    flex: 0 0 auto;
+
+}
+
+
+/* ==========================================================
+   FILTER
+========================================================== */
+
+.cff-filter-card {
+
+    flex: 0 0 auto;
+
+}
+
+
+.cff-source-note {
+
+    min-height: 38px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 8px 12px;
+
+    border: 1px solid #dbe3ef;
+
+    border-radius: 6px;
+
+    background: #f8fafc;
+
+    font-size: 12px;
+
+    color: #64748b;
+
+}
+
+
+/* ==========================================================
+   SUMMARY
+========================================================== */
+
+.cff-summary-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            4,
+            minmax(0, 1fr)
+        );
+
+    gap: 12px;
+
+    flex: 0 0 auto;
+
+}
+
+
+.cff-summary {
+
+    padding: 16px;
+
+    border-left: 3px solid #0d6efd;
+
+}
+
+
+.cff-summary-label {
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    color: #64748b;
+
+    text-transform: uppercase;
+
+    letter-spacing: .03em;
+
+}
+
+
+.cff-summary-value {
+
+    margin: 6px 0;
+
+    font-size: 22px;
+
+    font-weight: 700;
+
+    color: #0f172a;
+
+}
+
+
+.cff-summary-meta {
+
+    font-size: 11px;
+
+    color: #94a3b8;
+
+}
+
+
+/* ==========================================================
+   MAIN CARD
+========================================================== */
+
+.cff-main-card {
+
+    flex: 0 0 auto;
+
+    min-height: 390px;
+
+}
+
+
+.cff-main-body {
+
+    display: flex;
+
+    flex-direction: column;
+
+    min-height: 0;
+
+}
+
+
+/* ==========================================================
+   SECTION HEADER
+========================================================== */
+
+.cff-section-head {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-start;
+
+    gap: 12px;
+
+    margin-bottom: 12px;
+
+}
+
+
+.cff-section-head h5 {
+
+    margin: 0;
+
+    font-size: 14px;
+
+    font-weight: 700;
+
+    color: #0f172a;
+
+}
+
+
+.cff-section-head p {
+
+    margin: 3px 0 0;
+
+    font-size: 12px;
+
+    color: #64748b;
+
+}
+
+
+.cff-legend {
+
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 12px;
+
+    font-size: 11px;
+
+    color: #64748b;
+
+}
+
+
+/* ==========================================================
+   TABLE
+========================================================== */
+
+.cff-table-scroll {
+
+    width: 100%;
+
+    max-width: 100%;
+
+    overflow-x: auto;
+
+    overflow-y: visible;
+
+    -webkit-overflow-scrolling: touch;
+
+}
+
+
+.cff-table {
+
+    min-width: 1050px;
+
+}
+
+
+.cff-table th,
+.cff-table td {
+
+    white-space: nowrap;
+
+    font-size: 12px;
+
+}
+
+
+.cff-table .cff-row-label {
+
+    position: sticky;
+
+    left: 0;
+
+    z-index: 2;
+
+    min-width: 215px;
+
+    background: #ffffff;
+
+    font-weight: 600;
+
+}
+
+
+.cff-table thead .cff-row-label {
+
+    z-index: 4;
+
+    background: #f8f9fa;
+
+}
+
+
+/* ==========================================================
+   GROUP ROW
+========================================================== */
+
+.cff-group-row td {
+
+    background: #f8fafc;
+
+    color: #475569;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: .03em;
+
+}
+
+
+.cff-group-row .cff-row-label {
+
+    background: #f8fafc;
+
+}
+
+
+/* ==========================================================
+   SUB ROW
+========================================================== */
+
+.cff-sub-row .cff-row-label {
+
+    padding-left: 28px;
+
+    font-weight: 500;
+
+    color: #475569;
+
+}
+
+
+/* ==========================================================
+   TOTAL
+========================================================== */
+
+.cff-total-row td {
+
+    background: #f8fafc;
+
+    font-weight: 700;
+
+}
+
+
+.cff-total-row .cff-row-label {
+
+    background: #f8fafc;
+
+}
+
+
+.cff-ending-row td {
+
+    border-top: 2px solid #cbd5e1;
+
+    font-weight: 700;
+
+}
+
+
+/* ==========================================================
+   CLICKABLE
+========================================================== */
+
+.cff-clickable {
+
+    cursor: pointer;
+
+    text-decoration: underline;
+
+    text-decoration-style: dotted;
+
+    text-underline-offset: 3px;
+
+}
+
+
+.cff-clickable:hover {
+
+    background: #eff6ff;
+
+}
+
+
+/* ==========================================================
+   POSITIVE / NEGATIVE
+========================================================== */
+
+.cff-negative {
+
+    color: #dc3545 !important;
+
+}
+
+
+.cff-positive {
+
+    color: #198754 !important;
+
+}
+
+
+/* ==========================================================
+   BOTTOM
+========================================================== */
+
+.cff-bottom-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 2fr)
+        minmax(0, 1fr);
+
+    gap: 12px;
+
+    width: 100%;
+
+    min-height: 0;
+
+    flex: 0 0 auto;
+
+}
+
+
+.cff-bottom-grid > * {
+
+    min-width: 0;
+
+    min-height: 0;
+
+}
+
+
+/* ==========================================================
+   CHART
+========================================================== */
+
+.cff-chart {
+
+    min-height: 190px;
+
+    width: 100%;
+
+    display: flex;
+
+    align-items: flex-end;
+
+    gap: 10px;
+
+    padding: 16px 4px 4px;
+
+    overflow-x: auto;
+
+    overflow-y: visible;
+
+}
+
+
+.cff-chart-column {
+
+    min-width: 64px;
+
+    flex: 1 0 64px;
+
+    text-align: center;
+
+}
+
+
+.cff-chart-bar-wrap {
+
+    height: 125px;
+
+    display: flex;
+
+    align-items: flex-end;
+
+    justify-content: center;
+
+    border-bottom: 1px solid #e2e8f0;
+
+}
+
+
+.cff-chart-bar {
+
+    width: 28px;
+
+    min-height: 2px;
+
+    background: #0d6efd;
+
+    border-radius: 4px 4px 0 0;
+
+}
+
+
+.cff-chart-bar.negative {
+
+    background: #dc3545;
+
+}
+
+
+.cff-chart-label {
+
+    margin-top: 6px;
+
+    font-size: 10px;
+
+    color: #64748b;
+
+}
+
+
+.cff-chart-value {
+
+    margin-bottom: 4px;
+
+    white-space: nowrap;
+
+    font-size: 9px;
+
+    color: #475569;
+
+}
+
+
+/* ==========================================================
+   LIQUIDITY
+========================================================== */
+
+.cff-liquidity-item {
+
+    margin-bottom: 8px;
+
+    padding: 10px 12px;
+
+    border: 1px solid #fecaca;
+
+    border-radius: 6px;
+
+    background: #fff7f7;
+
+}
+
+
+.cff-liquidity-week {
+
+    font-size: 12px;
+
+    font-weight: 700;
+
+    color: #991b1b;
+
+}
+
+
+.cff-liquidity-value {
+
+    font-size: 12px;
+
+    color: #dc2626;
+
+}
+
+
+.cff-liquidity-ok {
+
+    padding: 14px;
+
+    border: 1px solid #bbf7d0;
+
+    border-radius: 6px;
+
+    background: #f0fdf4;
+
+    color: #166534;
+
+    font-size: 12px;
+
+}
+
+
+/* ==========================================================
+   DETAIL
+========================================================== */
+
+.cff-detail-card {
+
+    flex: 0 0 auto;
+
+    margin-bottom: 4px;
+
+}
+
+
+.cff-detail-card .table {
+
+    min-width: 980px;
+
+}
+
+
+.cff-detail-action {
+
+    white-space: nowrap;
+
+}
+
+
+.cff-detail-action .btn {
+
+    width: 30px;
+
+    height: 30px;
+
+    padding: 0;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+}
+
+
+/* ==========================================================
+   MANUAL BADGE
+========================================================== */
+
+.cff-manual-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    padding: 3px 7px;
+
+    border-radius: 4px;
+
+    background: #eef2ff;
+
+    color: #4338ca;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+}
+
+
+/* ==========================================================
+   MODAL
+========================================================== */
+
+#cffManualModal .modal-title,
+#cffDeleteModal .modal-title {
+
+    font-size: 16px;
+
+    font-weight: 700;
+
+}
+
+
+#cffManualModal .form-label {
+
+    margin-bottom: 5px;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    color: #475569;
+
+}
+
+
+#cffManualModal .form-control,
+#cffManualModal .form-select {
+
+    min-height: 38px;
+
+    font-size: 13px;
+
+}
+
+
+/* ==========================================================
+   SCROLLBAR
+========================================================== */
+
+.cash-flow-forecast-page {
+
+    scrollbar-width: thin;
+
+    scrollbar-color:
+        #cbd5e1
+        transparent;
+
+}
+
+
+.cash-flow-forecast-page::-webkit-scrollbar {
+
+    width: 8px;
+
+}
+
+
+.cash-flow-forecast-page::-webkit-scrollbar-track {
+
+    background: transparent;
+
+}
+
+
+.cash-flow-forecast-page::-webkit-scrollbar-thumb {
+
+    background: #cbd5e1;
+
+    border-radius: 10px;
+
+}
+
+
+.cash-flow-forecast-page::-webkit-scrollbar-thumb:hover {
+
+    background: #94a3b8;
+
+}
+
+
+.cff-table-scroll::-webkit-scrollbar,
+.cff-chart::-webkit-scrollbar {
+
+    height: 7px;
+
+}
+
+
+.cff-table-scroll::-webkit-scrollbar-thumb,
+.cff-chart::-webkit-scrollbar-thumb {
+
+    background: #cbd5e1;
+
+    border-radius: 10px;
+
+}
+/* ==========================================================
+   MANUAL FORECAST LIST
+========================================================== */
+
+.cff-manual-list-card {
+
+    flex: 0 0 auto;
+
+    width: 100%;
+
+    min-width: 0;
+
+    margin-bottom: 4px;
+
+}
+
+
+.cff-manual-summary {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: flex-end;
+
+    flex-wrap: wrap;
+
+    gap: 18px;
+
+    font-size: 12px;
+
+    color: #64748b;
+
+}
+
+
+.cff-manual-summary strong {
+
+    margin-left: 4px;
+
+    font-size: 13px;
+
+}
+
+
+/* ==========================================================
+   MANUAL TABLE
+========================================================== */
+
+.cff-manual-table-scroll {
+
+    width: 100%;
+
+    max-width: 100%;
+
+    overflow-x: auto;
+
+    overflow-y: visible;
+
+    -webkit-overflow-scrolling: touch;
+
+}
+
+
+.cff-manual-table {
+
+    width: 100%;
+
+    min-width: 1180px;
+
+    margin-bottom: 0;
+
+}
+
+
+.cff-manual-table th {
+
+    white-space: nowrap;
+
+    vertical-align: middle;
+
+    font-size: 12px;
+
+}
+
+
+.cff-manual-table td {
+
+    vertical-align: middle;
+
+    font-size: 12px;
+
+}
+
+
+.cff-manual-table th:first-child,
+.cff-manual-table td:first-child {
+
+    width: 55px;
+
+}
+
+
+.cff-manual-table th:nth-child(2),
+.cff-manual-table td:nth-child(2) {
+
+    width: 125px;
+
+    white-space: nowrap;
+
+}
+
+
+.cff-manual-table th:nth-child(3),
+.cff-manual-table td:nth-child(3) {
+
+    width: 110px;
+
+    white-space: nowrap;
+
+}
+
+
+.cff-manual-table th:nth-child(4),
+.cff-manual-table td:nth-child(4) {
+
+    width: 150px;
+
+}
+
+
+.cff-manual-table th:nth-child(7),
+.cff-manual-table td:nth-child(7) {
+
+    width: 150px;
+
+    white-space: nowrap;
+
+}
+
+
+.cff-manual-table th:last-child,
+.cff-manual-table td:last-child {
+
+    width: 90px;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   MANUAL TYPE
+========================================================== */
+
+.cff-manual-type {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-width: 78px;
+
+    padding: 4px 8px;
+
+    border-radius: 4px;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+}
+
+
+.cff-manual-type-in {
+
+    border: 1px solid #bbf7d0;
+
+    background: #f0fdf4;
+
+    color: #166534;
+
+}
+
+
+.cff-manual-type-out {
+
+    border: 1px solid #fecaca;
+
+    background: #fff7f7;
+
+    color: #991b1b;
+
+}
+
+
+/* ==========================================================
+   MANUAL DESCRIPTION
+========================================================== */
+
+.cff-manual-description {
+
+    min-width: 180px;
+
+    max-width: 280px;
+
+    white-space: normal;
+
+    word-break: break-word;
+
+}
+
+
+.cff-manual-notes {
+
+    min-width: 150px;
+
+    max-width: 260px;
+
+    white-space: normal;
+
+    word-break: break-word;
+
+    color: #64748b;
+
+}
+
+
+/* ==========================================================
+   MANUAL ACTION
+========================================================== */
+
+.cff-manual-action {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 5px;
+
+}
+
+
+.cff-manual-action .btn {
+
+    width: 30px;
+
+    height: 30px;
+
+    padding: 0;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+}
+
+
+/* ==========================================================
+   MANUAL TABLE SCROLLBAR
+========================================================== */
+
+.cff-manual-table-scroll::-webkit-scrollbar {
+
+    height: 7px;
+
+}
+
+
+.cff-manual-table-scroll::-webkit-scrollbar-thumb {
+
+    background: #cbd5e1;
+
+    border-radius: 10px;
+
+}
+
+
+.cff-manual-table-scroll::-webkit-scrollbar-thumb:hover {
+
+    background: #94a3b8;
+
+}
+
+
+/* ==========================================================
+   TABLET
+========================================================== */
+
+@media (
+    max-width: 992px
+) {
+
+    .cff-summary-grid {
+
+        grid-template-columns:
+            repeat(
+                2,
+                minmax(0, 1fr)
+            );
+
+    }
+
+
+    .cff-bottom-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+}
+
+
+/* ==========================================================
+   MOBILE
+========================================================== */
+
+@media (
+    max-width: 576px
+) {
+
+    .cash-flow-forecast-page {
+
+        gap: 10px;
+
+        padding-bottom: 20px;
+
+    }
+
+
+    .cff-summary-grid {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .cff-section-head {
+
+        flex-direction: column;
+
+    }
+
+
+    .cff-summary-value {
+
+        font-size: 19px;
+
+    }
+
+
+    .cff-chart-column {
+
+        flex:
+            0
+            0
+            64px;
+
+    }
+
+}

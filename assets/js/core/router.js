@@ -132,24 +132,50 @@ export class FinovaRouter {
             },
             "financial-statement": {
 
-                title:
-                    "Financial Statement",
+    title:
+        "Financial Statement",
 
-                html:
-                    "modules/financial-statement/financial-statement.html",
+    html:
+        "modules/financial-statement/financial-statement.html",
 
-                css:
-                    "modules/financial-statement/financial-statement.css",
+    css:
+        "modules/financial-statement/financial-statement.css",
 
-                js:
-                    "modules/financial-statement/financial-statement.js",
+    js:
+        "modules/financial-statement/financial-statement.js",
 
-                className:
-                    "FinancialStatement"
+    className:
+        "FinancialStatement"
 
-            },
+},
 
-        };
+
+/*
+==========================================================
+CASH FLOW FORECAST
+==========================================================
+*/
+
+"cash-flow-forecast": {
+
+    title:
+        "Cash Flow Forecast",
+
+    html:
+        "modules/cash-flow-forecast/cash-flow-forecast.html",
+
+    css:
+        "modules/cash-flow-forecast/cash-flow-forecast.css",
+
+    js:
+        "modules/cash-flow-forecast/cash-flow-forecast.js",
+
+    className:
+        "CashFlowForecast"
+
+},
+
+};
 
         /*
 ==========================================================
