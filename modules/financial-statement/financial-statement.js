@@ -2,7 +2,7 @@
 ==========================================================
 FINOVA ACCOUNTING SYSTEM
 FINANCIAL STATEMENT
-Version : 1.1.0
+Version : 2.0.0
 ==========================================================
 */
 
@@ -16,6 +16,10 @@ SHARED FINANCIAL REPORT ENGINE
 import {
     FinancialReportService
 } from "../../service/financial-report.service.js";
+
+import {
+    CompanyReport
+} from "../../assets/js/core/company-report.js";
 
 
 /*
@@ -216,7 +220,7 @@ constructor() {
 
     /*
     ======================================================
-    ACTION BUTTONS
+    CONFIGURATION ACTION BUTTONS
     ======================================================
     */
 
@@ -235,6 +239,24 @@ constructor() {
     this.btnPdf =
         document.getElementById(
             "btn-financial-statement-pdf"
+        );
+
+
+    /*
+    ======================================================
+    PREVIEW ACTION BUTTONS
+    ======================================================
+    */
+
+    this.btnPreviewExcel =
+        document.getElementById(
+            "btn-financial-statement-preview-excel"
+        );
+
+
+    this.btnPreviewPdf =
+        document.getElementById(
+            "btn-financial-statement-preview-pdf"
         );
 
 
@@ -323,136 +345,322 @@ constructor() {
             trialBalance:
                 !!this.trialBalanceCheckbox,
 
-            preview:
+            previewButton:
                 !!this.btnPreview,
 
-            excel:
+            excelButton:
                 !!this.btnExcel,
 
-            pdf:
+            pdfButton:
                 !!this.btnPdf,
+
+            previewExcelButton:
+                !!this.btnPreviewExcel,
+
+            previewPdfButton:
+                !!this.btnPreviewPdf,
 
             previewContainer:
                 !!this.previewContainer,
-
-            previewCompany:
-                !!this.previewCompany,
-
-            previewCompanyDetail:
-                !!this.previewCompanyDetail,
-
-            previewPeriod:
-                !!this.previewPeriod,
-
-            previewComparativePeriod:
-                !!this.previewComparativePeriod,
 
             previewTabs:
                 !!this.previewTabs,
 
             previewContent:
-                !!this.previewContent,
-
-            previewGeneratedAt:
-                !!this.previewGeneratedAt
+                !!this.previewContent
 
         }
     );
 
 }
 
+    bindEvents() {
 
     /*
     ======================================================
-    BIND EVENTS
+    CONFIGURATION PREVIEW
     ======================================================
     */
 
-    bindEvents() {
+    if (
+        this.btnPreview
+    ) {
 
-        /*
-        ==================================================
-        PREVIEW
-        ==================================================
-        */
+        this.btnPreview.addEventListener(
+            "click",
+            () => {
 
-        if (
-            this.btnPreview
-        ) {
+                this.handleAction(
+                    "preview"
+                );
 
-            this.btnPreview.addEventListener(
-                "click",
-                () => {
-
-                    this.handleAction(
-                        "preview"
-                    );
-
-                }
-            );
-
-        }
-
-
-        /*
-        ==================================================
-        DOWNLOAD EXCEL
-        ==================================================
-        */
-
-        if (
-            this.btnExcel
-        ) {
-
-            this.btnExcel.addEventListener(
-                "click",
-                () => {
-
-                    this.handleAction(
-                        "excel"
-                    );
-
-                }
-            );
-
-        }
-
-
-        /*
-        ==================================================
-        DOWNLOAD PDF
-        ==================================================
-        */
-
-        if (
-            this.btnPdf
-        ) {
-
-            this.btnPdf.addEventListener(
-                "click",
-                () => {
-
-                    this.handleAction(
-                        "pdf"
-                    );
-
-                }
-            );
-
-        }
-
-
-        /*
-        ==================================================
-        DEBUG
-        ==================================================
-        */
-
-        console.log(
-            "FINOVA FINANCIAL STATEMENT EVENTS BOUND"
+            }
         );
 
     }
+
+
+    /*
+    ======================================================
+    CONFIGURATION DOWNLOAD EXCEL
+    ======================================================
+    */
+
+    if (
+        this.btnExcel
+    ) {
+
+        this.btnExcel.addEventListener(
+            "click",
+            () => {
+
+                this.handleAction(
+                    "excel"
+                );
+
+            }
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    CONFIGURATION DOWNLOAD PDF
+    ======================================================
+    */
+
+    if (
+        this.btnPdf
+    ) {
+
+        this.btnPdf.addEventListener(
+            "click",
+            () => {
+
+                this.handleAction(
+                    "pdf"
+                );
+
+            }
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    PREVIEW DOWNLOAD EXCEL
+    ======================================================
+    */
+
+    if (
+        this.btnPreviewExcel
+    ) {
+
+        this.btnPreviewExcel.addEventListener(
+            "click",
+            () => {
+
+                this.handleAction(
+                    "excel"
+                );
+
+            }
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    PREVIEW DOWNLOAD PDF
+    ======================================================
+    */
+
+    if (
+        this.btnPreviewPdf
+    ) {
+
+        this.btnPreviewPdf.addEventListener(
+            "click",
+            () => {
+
+                this.handleAction(
+                    "pdf"
+                );
+
+            }
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    PREVIEW TABS
+    ======================================================
+    */
+
+    if (
+        this.previewTabs
+    ) {
+
+        this.previewTabs.addEventListener(
+            "click",
+            event => {
+
+                const button =
+                    event.target.closest(
+                        "[data-financial-statement-preview]"
+                    );
+
+
+                if (
+                    !button
+                    ||
+                    !this.previewTabs.contains(
+                        button
+                    )
+                ) {
+
+                    return;
+
+                }
+
+
+                const statement =
+                    button.dataset
+                        .financialStatementPreview;
+
+
+                if (
+                    !statement
+                ) {
+
+                    return;
+
+                }
+
+
+                /*
+                ==========================================
+                ACTIVE TAB
+                ==========================================
+                */
+
+                const tabs =
+                    this.previewTabs.querySelectorAll(
+                        "[data-financial-statement-preview]"
+                    );
+
+
+                tabs.forEach(
+                    tab => {
+
+                        tab.classList.toggle(
+                            "active",
+                            tab === button
+                        );
+
+                    }
+                );
+
+
+                /*
+                ==========================================
+                RENDER STATEMENT
+                ==========================================
+                */
+
+                if (
+                    statement ===
+                    "balance-sheet"
+                ) {
+
+                    if (
+                        this.previewContent
+                    ) {
+
+                        this.previewContent.innerHTML =
+                            this.renderBalanceSheetPreview();
+
+                    }
+
+                }
+
+
+                else if (
+                    statement ===
+                    "profit-loss"
+                ) {
+
+                    if (
+                        this.previewContent
+                    ) {
+
+                        this.previewContent.innerHTML =
+                            this.renderProfitLossPreview();
+
+                    }
+
+                }
+
+
+                else if (
+                    statement ===
+                    "trial-balance"
+                ) {
+
+                    if (
+                        this.previewContent
+                    ) {
+
+                        this.previewContent.innerHTML =
+                            this.renderTrialBalancePreview();
+
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    READY
+    ======================================================
+    */
+
+    console.log(
+        "FINOVA FINANCIAL STATEMENT EVENTS BOUND",
+        {
+
+            configurationPreview:
+                !!this.btnPreview,
+
+            configurationExcel:
+                !!this.btnExcel,
+
+            configurationPdf:
+                !!this.btnPdf,
+
+            previewExcel:
+                !!this.btnPreviewExcel,
+
+            previewPdf:
+                !!this.btnPreviewPdf,
+
+            previewTabs:
+                !!this.previewTabs
+
+        }
+    );
+
+}
 
 
     /*
@@ -1214,6 +1422,2470 @@ formatPreviewPeriod(
     );
 
 }
+
+/*
+==========================================================
+FORMAT FINANCIAL AMOUNT
+==========================================================
+*/
+
+formatFinancialAmount(
+    value
+) {
+
+    const amount =
+        Number(
+            value
+            ??
+            0
+        )
+        ||
+        0;
+
+
+    return new Intl.NumberFormat(
+        "id-ID",
+        {
+
+            minimumFractionDigits:
+                0,
+
+            maximumFractionDigits:
+                0
+
+        }
+    ).format(
+        amount
+    );
+
+}
+
+
+/*
+==========================================================
+ESCAPE PREVIEW HTML
+==========================================================
+*/
+
+escapePreviewHTML(
+    value
+) {
+
+    return String(
+        value
+        ??
+        ""
+    )
+
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+/*
+==========================================================
+BUILD BALANCE SHEET HIERARCHY
+==========================================================
+*/
+
+buildBalanceSheetHierarchy(
+    rows = []
+) {
+
+    /*
+    ======================================================
+    VALIDATE INPUT
+    ======================================================
+    */
+
+    if (
+        !Array.isArray(
+            rows
+        )
+    ) {
+
+        return [];
+
+    }
+
+
+    /*
+    ======================================================
+    ROW MAP
+    ======================================================
+    */
+
+    const rowMap =
+        new Map();
+
+
+    rows.forEach(
+        row => {
+
+            const accountId =
+                row?.account_id
+                ??
+                row?.id;
+
+
+            if (
+                accountId === null
+                ||
+                accountId === undefined
+                ||
+                accountId === ""
+            ) {
+
+                return;
+
+            }
+
+
+            rowMap.set(
+                String(
+                    accountId
+                ),
+                {
+
+                    ...row,
+
+                    account_id:
+                        accountId,
+
+                    level:
+                        0,
+
+                    has_children:
+                        false,
+
+                    is_root:
+                        false
+
+                }
+            );
+
+        }
+    );
+
+
+    /*
+    ======================================================
+    CHILDREN MAP
+    ======================================================
+    */
+
+    const childrenMap =
+        new Map();
+
+
+    rowMap.forEach(
+        row => {
+
+            const parentId =
+                row.parent_id;
+
+
+            if (
+                parentId === null
+                ||
+                parentId === undefined
+                ||
+                parentId === ""
+            ) {
+
+                return;
+
+            }
+
+
+            const parentKey =
+                String(
+                    parentId
+                );
+
+
+            /*
+            ==================================================
+            PARENT MUST EXIST INSIDE CURRENT REPORT GROUP
+            ==================================================
+            */
+
+            if (
+                !rowMap.has(
+                    parentKey
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                !childrenMap.has(
+                    parentKey
+                )
+            ) {
+
+                childrenMap.set(
+                    parentKey,
+                    []
+                );
+
+            }
+
+
+            childrenMap
+                .get(
+                    parentKey
+                )
+                .push(
+                    row
+                );
+
+        }
+    );
+
+
+    /*
+    ======================================================
+    SORT HELPER
+    ======================================================
+    */
+
+    const compareRows =
+        (
+            a,
+            b
+        ) => {
+
+            return String(
+                a?.account_code
+                ??
+                ""
+            ).localeCompare(
+                String(
+                    b?.account_code
+                    ??
+                    ""
+                ),
+                undefined,
+                {
+                    numeric:
+                        true,
+
+                    sensitivity:
+                        "base"
+                }
+            );
+
+        };
+
+
+    /*
+    ======================================================
+    SORT CHILDREN
+    ======================================================
+    */
+
+    childrenMap.forEach(
+        children => {
+
+            children.sort(
+                compareRows
+            );
+
+        }
+    );
+
+
+    /*
+    ======================================================
+    ROOT ACCOUNTS
+    ======================================================
+    */
+
+    const roots =
+        [];
+
+
+    rowMap.forEach(
+        row => {
+
+            const parentId =
+                row.parent_id;
+
+
+            const hasValidParent =
+                parentId !== null
+                &&
+                parentId !== undefined
+                &&
+                parentId !== ""
+                &&
+                rowMap.has(
+                    String(
+                        parentId
+                    )
+                );
+
+
+            if (
+                !hasValidParent
+            ) {
+
+                row.is_root =
+                    true;
+
+
+                roots.push(
+                    row
+                );
+
+            }
+
+        }
+    );
+
+
+    roots.sort(
+        compareRows
+    );
+
+
+    /*
+    ======================================================
+    FLATTEN HIERARCHY
+    ======================================================
+    */
+
+    const result =
+        [];
+
+
+    const visited =
+        new Set();
+
+
+    const appendRow =
+        (
+            row,
+            level = 0
+        ) => {
+
+            const key =
+                String(
+                    row.account_id
+                );
+
+
+            /*
+            ==================================================
+            CYCLE PROTECTION
+            ==================================================
+            */
+
+            if (
+                visited.has(
+                    key
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            visited.add(
+                key
+            );
+
+
+            const children =
+                childrenMap.get(
+                    key
+                )
+                ??
+                [];
+
+
+            row.level =
+                level;
+
+
+            row.has_children =
+                children.length
+                >
+                0;
+
+
+            result.push(
+                row
+            );
+
+
+            children.forEach(
+                child => {
+
+                    appendRow(
+                        child,
+                        level + 1
+                    );
+
+                }
+            );
+
+        };
+
+
+    roots.forEach(
+        root => {
+
+            appendRow(
+                root,
+                0
+            );
+
+        }
+    );
+
+
+    /*
+    ======================================================
+    SAFETY FALLBACK
+
+    Ensures no account disappears if malformed hierarchy
+    or circular parent references exist.
+    ======================================================
+    */
+
+    rowMap.forEach(
+        row => {
+
+            const key =
+                String(
+                    row.account_id
+                );
+
+
+            if (
+                visited.has(
+                    key
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            row.is_root =
+                true;
+
+
+            appendRow(
+                row,
+                0
+            );
+
+        }
+    );
+
+
+    /*
+    ======================================================
+    RETURN
+    ======================================================
+    */
+
+    return result;
+
+}
+
+/*
+==========================================================
+VALIDATE BALANCE SHEET PREVIEW
+==========================================================
+*/
+
+validateBalanceSheetPreview() {
+
+    /*
+    ======================================================
+    VALIDATE DATASET
+    ======================================================
+    */
+
+    if (
+        !this.reportDataset
+    ) {
+
+        console.warn(
+            "FINOVA BALANCE SHEET VALIDATION: DATASET NOT READY"
+        );
+
+
+        return null;
+
+    }
+
+
+    /*
+    ======================================================
+    TOTALS
+    ======================================================
+    */
+
+    const totals =
+        this.reportDataset
+            ?.totals
+            ?.balanceSheet
+        ??
+        {};
+
+
+    /*
+    ======================================================
+    CONTROLS
+    ======================================================
+    */
+
+    const controls =
+        this.reportDataset
+            ?.controls
+        ??
+        {};
+
+
+    /*
+    ======================================================
+    CURRENT PERIOD
+    ======================================================
+    */
+
+    const currentAsset =
+        Number(
+            totals.asset?.current
+            ??
+            0
+        )
+        ||
+        0;
+
+
+    const currentLiabilityAndEquity =
+        Number(
+            totals.liabilityAndEquity?.current
+            ??
+            0
+        )
+        ||
+        0;
+
+
+    const currentDifference =
+        currentAsset
+        -
+        currentLiabilityAndEquity;
+
+
+    const currentEngineBalanced =
+        controls
+            ?.current
+            ?.balanceSheetBalanced
+        ===
+        true;
+
+
+    /*
+    ======================================================
+    COMPARATIVE PERIOD
+    ======================================================
+    */
+
+    const comparativeAsset =
+        Number(
+            totals.asset?.comparative
+            ??
+            0
+        )
+        ||
+        0;
+
+
+    const comparativeLiabilityAndEquity =
+        Number(
+            totals.liabilityAndEquity?.comparative
+            ??
+            0
+        )
+        ||
+        0;
+
+
+    const comparativeDifference =
+        comparativeAsset
+        -
+        comparativeLiabilityAndEquity;
+
+
+    const comparativeEngineBalanced =
+        controls
+            ?.comparative
+            ?.balanceSheetBalanced
+        ===
+        true;
+
+
+    /*
+    ======================================================
+    DISPLAY VALIDATION
+
+    Independent presentation check.
+
+    Engine remains the accounting authority.
+    ======================================================
+    */
+
+    const currentPreviewBalanced =
+        Math.abs(
+            currentDifference
+        )
+        <
+        0.01;
+
+
+    const comparativePreviewBalanced =
+        Math.abs(
+            comparativeDifference
+        )
+        <
+        0.01;
+
+
+    /*
+    ======================================================
+    ENGINE VS PREVIEW CONSISTENCY
+    ======================================================
+    */
+
+    const currentControlMatch =
+        currentEngineBalanced
+        ===
+        currentPreviewBalanced;
+
+
+    const comparativeControlMatch =
+        comparativeEngineBalanced
+        ===
+        comparativePreviewBalanced;
+
+
+    /*
+    ======================================================
+    FINAL RESULT
+    ======================================================
+    */
+
+    const result = {
+
+        current: {
+
+            totalAsset:
+                currentAsset,
+
+            totalLiabilityAndEquity:
+                currentLiabilityAndEquity,
+
+            difference:
+                currentDifference,
+
+            engineBalanced:
+                currentEngineBalanced,
+
+            previewBalanced:
+                currentPreviewBalanced,
+
+            controlMatch:
+                currentControlMatch
+
+        },
+
+
+        comparative: {
+
+            totalAsset:
+                comparativeAsset,
+
+            totalLiabilityAndEquity:
+                comparativeLiabilityAndEquity,
+
+            difference:
+                comparativeDifference,
+
+            engineBalanced:
+                comparativeEngineBalanced,
+
+            previewBalanced:
+                comparativePreviewBalanced,
+
+            controlMatch:
+                comparativeControlMatch
+
+        },
+
+
+        valid:
+
+            currentEngineBalanced
+            &&
+            currentPreviewBalanced
+            &&
+            currentControlMatch
+            &&
+            comparativeEngineBalanced
+            &&
+            comparativePreviewBalanced
+            &&
+            comparativeControlMatch
+
+    };
+
+
+    /*
+    ======================================================
+    DEBUG
+    ======================================================
+    */
+
+    console.log(
+        "FINOVA BALANCE SHEET ACCOUNTING VALIDATION:",
+        result
+    );
+
+
+    /*
+    ======================================================
+    WARNING
+    ======================================================
+    */
+
+    if (
+        result.valid !== true
+    ) {
+
+        console.warn(
+            "FINOVA BALANCE SHEET ACCOUNTING CONTROL FAILED:",
+            result
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    RETURN
+    ======================================================
+    */
+
+    return result;
+
+}
+/*
+==========================================================
+RENDER BALANCE SHEET PREVIEW
+==========================================================
+*/
+
+renderBalanceSheetPreview() {
+
+    /*
+    ======================================================
+    VALIDATE DATASET
+    ======================================================
+    */
+
+    if (
+        !this.reportDataset
+        ||
+        !Array.isArray(
+            this.reportDataset.balanceSheet
+        )
+    ) {
+
+        console.warn(
+            "FINOVA BALANCE SHEET DATASET NOT READY"
+        );
+
+
+        return "";
+
+    }
+
+
+    /*
+    ======================================================
+    DATA
+    ======================================================
+    */
+
+    const rows =
+        this.reportDataset.balanceSheet;
+
+
+    const totals =
+        this.reportDataset
+            ?.totals
+            ?.balanceSheet
+        ??
+        {};
+
+
+    /*
+    ======================================================
+    PERIOD LABELS
+    ======================================================
+    */
+
+    const currentPeriod =
+        this.formatPreviewPeriod(
+            this.reportRequest.reporting.year,
+            this.reportRequest.reporting.month
+        );
+
+
+    const comparativePeriod =
+        this.formatPreviewPeriod(
+            this.reportRequest.comparative.year,
+            this.reportRequest.comparative.month
+        );
+
+
+    /*
+    ======================================================
+    GROUP SOURCE
+    ======================================================
+    */
+
+    const assetSource =
+        rows.filter(
+            row =>
+                row.group === "asset"
+        );
+
+
+    const liabilitySource =
+        rows.filter(
+            row =>
+                row.group === "liability"
+        );
+
+
+    const equitySource =
+        rows.filter(
+            row =>
+                row.group === "equity"
+        );
+
+
+    /*
+    ======================================================
+    BUILD COA HIERARCHY
+    ======================================================
+    */
+
+    const assetRows =
+        this.buildBalanceSheetHierarchy(
+            assetSource
+        );
+
+
+    const liabilityRows =
+        this.buildBalanceSheetHierarchy(
+            liabilitySource
+        );
+
+
+    const equityRows =
+        this.buildBalanceSheetHierarchy(
+            equitySource
+        );
+
+
+    /*
+    ======================================================
+    ACCOUNT ROW RENDERER
+    ======================================================
+    */
+
+    const renderAccountRows =
+        accountRows => {
+
+            if (
+                accountRows.length === 0
+            ) {
+
+                return `
+
+                    <tr>
+
+                        <td
+                            colspan="4"
+                            class="text-muted"
+                        >
+
+                            No account data.
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+
+
+            return accountRows
+
+                .map(
+                    row => {
+
+                        const accountCode =
+                            this.escapePreviewHTML(
+                                row.account_code
+                            );
+
+
+                        const accountName =
+                            this.escapePreviewHTML(
+                                row.account_name
+                            );
+
+
+                        const currentAmount =
+                            this.formatFinancialAmount(
+                                row.current_amount
+                            );
+
+
+                        const comparativeAmount =
+                            this.formatFinancialAmount(
+                                row.comparative_amount
+                            );
+
+
+                        const level =
+                            Math.max(
+                                0,
+                                Number(
+                                    row.level
+                                    ??
+                                    0
+                                )
+                                ||
+                                0
+                            );
+
+
+                        const paddingLeft =
+                            10
+                            +
+                            (
+                                level
+                                *
+                                22
+                            );
+
+
+                        const rowClass =
+                            row.has_children
+                                ? "financial-statement-report-parent-row"
+                                : "financial-statement-report-account-row";
+
+
+                        const nameWeight =
+                            row.has_children
+                                ? "600"
+                                : "400";
+
+
+                        return `
+
+                            <tr
+                                class="${rowClass}"
+                                data-account-id="${this.escapePreviewHTML(
+                                    row.account_id
+                                )}"
+                                data-account-level="${level}"
+                            >
+
+                                <td
+                                    class="financial-statement-report-account-code"
+                                >
+
+                                    ${accountCode}
+
+                                </td>
+
+
+                                <td
+                                    class="financial-statement-report-account-name"
+                                    style="
+                                        padding-left: ${paddingLeft}px;
+                                        font-weight: ${nameWeight};
+                                    "
+                                >
+
+                                    ${accountName}
+
+                                </td>
+
+
+                                <td
+                                    class="financial-statement-report-number"
+                                >
+
+                                    ${currentAmount}
+
+                                </td>
+
+
+                                <td
+                                    class="financial-statement-report-number"
+                                >
+
+                                    ${comparativeAmount}
+
+                                </td>
+
+                            </tr>
+
+                        `;
+
+                    }
+                )
+
+                .join(
+                    ""
+                );
+
+        };
+
+
+    /*
+    ======================================================
+    TOTAL ROW
+    ======================================================
+    */
+
+    const renderTotalRow =
+        (
+            label,
+            total
+        ) => {
+
+            return `
+
+                <tr
+                    class="financial-statement-report-total-row"
+                >
+
+                    <td
+                        colspan="2"
+                    >
+
+                        ${this.escapePreviewHTML(
+                            label
+                        )}
+
+                    </td>
+
+
+                    <td
+                        class="financial-statement-report-number"
+                    >
+
+                        ${this.formatFinancialAmount(
+                            total?.current
+                        )}
+
+                    </td>
+
+
+                    <td
+                        class="financial-statement-report-number"
+                    >
+
+                        ${this.formatFinancialAmount(
+                            total?.comparative
+                        )}
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        };
+
+
+    /*
+    ======================================================
+    GROUP HEADER
+    ======================================================
+    */
+
+    const renderGroupHeader =
+        label => {
+
+            return `
+
+                <tr
+                    class="financial-statement-report-group-row"
+                >
+
+                    <td
+                        colspan="4"
+                    >
+
+                        ${this.escapePreviewHTML(
+                            label
+                        )}
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        };
+
+
+    /*
+    ======================================================
+    BUILD BALANCE SHEET
+    ======================================================
+    */
+
+    const html = `
+
+        <div
+            class="financial-statement-report"
+        >
+
+            <div
+                class="financial-statement-report-header"
+            >
+
+                <div>
+
+                    <h4
+                        class="financial-statement-report-title"
+                    >
+
+                        Balance Sheet
+
+                    </h4>
+
+
+                    <p
+                        class="financial-statement-report-description"
+                    >
+
+                        Statement of Financial Position
+
+                    </p>
+
+                </div>
+
+
+                <div
+                    class="financial-statement-report-currency"
+                >
+
+                    Currency: IDR
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="financial-statement-report-table-wrapper"
+            >
+
+                <table
+                    class="financial-statement-report-table"
+                >
+
+                    <thead>
+
+                        <tr>
+
+                            <th
+                                class="financial-statement-report-account-code"
+                            >
+
+                                Account
+
+                            </th>
+
+
+                            <th
+                                class="financial-statement-report-account-name"
+                            >
+
+                                Account Name
+
+                            </th>
+
+
+                            <th
+                                class="financial-statement-report-number"
+                            >
+
+                                ${this.escapePreviewHTML(
+                                    currentPeriod
+                                )}
+
+                            </th>
+
+
+                            <th
+                                class="financial-statement-report-number"
+                            >
+
+                                ${this.escapePreviewHTML(
+                                    comparativePeriod
+                                )}
+
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        ${renderGroupHeader(
+                            "ASSETS"
+                        )}
+
+
+                        ${renderAccountRows(
+                            assetRows
+                        )}
+
+
+                        ${renderTotalRow(
+                            "TOTAL ASSETS",
+                            totals.asset
+                        )}
+
+
+                        ${renderGroupHeader(
+                            "LIABILITIES"
+                        )}
+
+
+                        ${renderAccountRows(
+                            liabilityRows
+                        )}
+
+
+                        ${renderTotalRow(
+                            "TOTAL LIABILITIES",
+                            totals.liability
+                        )}
+
+
+                        ${renderGroupHeader(
+                            "EQUITY"
+                        )}
+
+
+                        ${renderAccountRows(
+                            equityRows
+                        )}
+
+
+                        ${renderTotalRow(
+                            "TOTAL EQUITY",
+                            totals.equity
+                        )}
+
+
+                        ${renderTotalRow(
+                            "CURRENT YEAR PROFIT / (LOSS)",
+                            totals.currentYearProfit
+                        )}
+
+
+                        ${renderTotalRow(
+                            "TOTAL EQUITY INCLUDING PROFIT / (LOSS)",
+                            totals.equityIncludingProfit
+                        )}
+
+
+                        ${renderTotalRow(
+                            "TOTAL LIABILITIES & EQUITY",
+                            totals.liabilityAndEquity
+                        )}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    /*
+    ======================================================
+    HIERARCHY DIAGNOSTICS
+    ======================================================
+    */
+
+    const hierarchyRows =
+        [
+            ...assetRows,
+            ...liabilityRows,
+            ...equityRows
+        ];
+
+
+    const parentRows =
+        hierarchyRows.filter(
+            row =>
+                row.has_children === true
+        );
+
+
+    const nestedRows =
+        hierarchyRows.filter(
+            row =>
+                Number(
+                    row.level
+                    ??
+                    0
+                )
+                >
+                0
+        );
+
+
+    const maxLevel =
+        hierarchyRows.reduce(
+            (
+                maximum,
+                row
+            ) => {
+
+                return Math.max(
+                    maximum,
+                    Number(
+                        row.level
+                        ??
+                        0
+                    )
+                    ||
+                    0
+                );
+
+            },
+            0
+        );
+
+
+    /*
+    ======================================================
+    DEBUG
+    ======================================================
+    */
+
+    console.log(
+        "FINOVA BALANCE SHEET HIERARCHY:",
+        {
+
+            sourceRows:
+                rows.length,
+
+            renderedRows:
+                hierarchyRows.length,
+
+            assetRows:
+                assetRows.length,
+
+            liabilityRows:
+                liabilityRows.length,
+
+            equityRows:
+                equityRows.length,
+
+            parentRows:
+                parentRows.length,
+
+            nestedRows:
+                nestedRows.length,
+
+            maxLevel:
+                maxLevel
+
+        }
+    );
+
+
+    console.log(
+    "FINOVA BALANCE SHEET PREVIEW:",
+    {
+
+        totalRows:
+            rows.length,
+
+        totalAssetCurrent:
+            totals.asset?.current
+            ??
+            0,
+
+        totalAssetComparative:
+            totals.asset?.comparative
+            ??
+            0,
+
+        totalLiabilityAndEquityCurrent:
+            totals.liabilityAndEquity?.current
+            ??
+            0,
+
+        totalLiabilityAndEquityComparative:
+            totals.liabilityAndEquity
+                ?.comparative
+            ??
+            0
+
+    }
+);
+
+
+/*
+======================================================
+ACCOUNTING VALIDATION
+======================================================
+*/
+
+this.validateBalanceSheetPreview();
+
+
+return html;
+
+}
+
+/*
+==========================================================
+RENDER PROFIT & LOSS PREVIEW
+==========================================================
+*/
+
+renderProfitLossPreview() {
+
+    /*
+    ======================================================
+    VALIDATE DATASET
+    ======================================================
+    */
+
+    if (
+        !this.reportDataset
+        ||
+        !Array.isArray(
+            this.reportDataset.profitLoss
+        )
+    ) {
+
+        console.warn(
+            "FINOVA PROFIT & LOSS DATASET NOT READY"
+        );
+
+
+        return "";
+
+    }
+
+
+    /*
+    ======================================================
+    DATA
+    ======================================================
+    */
+
+    const rows =
+        this.reportDataset.profitLoss;
+
+
+    const totals =
+        this.reportDataset
+            ?.totals
+            ?.profitLoss
+        ??
+        {};
+
+
+    /*
+    ======================================================
+    PERIOD LABELS
+    ======================================================
+    */
+
+    const currentPeriod =
+        this.formatPreviewPeriod(
+            this.reportRequest.reporting.year,
+            this.reportRequest.reporting.month
+        );
+
+
+    const comparativePeriod =
+        this.formatPreviewPeriod(
+            this.reportRequest.comparative.year,
+            this.reportRequest.comparative.month
+        );
+
+
+    /*
+    ======================================================
+    GROUP SOURCE
+    ======================================================
+    */
+
+    const revenueSource =
+        rows.filter(
+            row =>
+                row.group === "revenue"
+        );
+
+
+    const expenseSource =
+        rows.filter(
+            row =>
+                row.group === "expense"
+        );
+
+
+    /*
+    ======================================================
+    BUILD COA HIERARCHY
+
+    Reuse hierarchy builder already validated by
+    Balance Sheet.
+
+    This does NOT recalculate accounting balances.
+    ======================================================
+    */
+
+    const revenueRows =
+        this.buildBalanceSheetHierarchy(
+            revenueSource
+        );
+
+
+    const expenseRows =
+        this.buildBalanceSheetHierarchy(
+            expenseSource
+        );
+
+
+    /*
+    ======================================================
+    ACCOUNT ROW RENDERER
+    ======================================================
+    */
+
+    const renderAccountRows =
+        accountRows => {
+
+            if (
+                accountRows.length === 0
+            ) {
+
+                return `
+
+                    <tr>
+
+                        <td
+                            colspan="4"
+                            class="text-muted"
+                        >
+
+                            No account data.
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+
+
+            return accountRows
+
+                .map(
+                    row => {
+
+                        const accountCode =
+                            this.escapePreviewHTML(
+                                row.account_code
+                            );
+
+
+                        const accountName =
+                            this.escapePreviewHTML(
+                                row.account_name
+                            );
+
+
+                        const currentAmount =
+                            this.formatFinancialAmount(
+                                row.current_amount
+                            );
+
+
+                        const comparativeAmount =
+                            this.formatFinancialAmount(
+                                row.comparative_amount
+                            );
+
+
+                        /*
+                        ==========================================
+                        HIERARCHY LEVEL
+                        ==========================================
+                        */
+
+                        const level =
+                            Math.max(
+                                0,
+                                Number(
+                                    row.level
+                                    ??
+                                    0
+                                )
+                                ||
+                                0
+                            );
+
+
+                        /*
+                        ==========================================
+                        INDENTATION
+
+                        Level 0 = 10px
+                        Level 1 = 32px
+                        Level 2 = 54px
+                        ==========================================
+                        */
+
+                        const paddingLeft =
+                            10
+                            +
+                            (
+                                level
+                                *
+                                22
+                            );
+
+
+                        /*
+                        ==========================================
+                        ROW TYPE
+                        ==========================================
+                        */
+
+                        const rowClass =
+                            row.has_children
+                                ? "financial-statement-report-parent-row"
+                                : "financial-statement-report-account-row";
+
+
+                        const nameWeight =
+                            row.has_children
+                                ? "600"
+                                : "400";
+
+
+                        /*
+                        ==========================================
+                        ROW HTML
+                        ==========================================
+                        */
+
+                        return `
+
+                            <tr
+                                class="${rowClass}"
+                                data-account-id="${this.escapePreviewHTML(
+                                    row.account_id
+                                )}"
+                                data-account-level="${level}"
+                            >
+
+                                <td
+                                    class="financial-statement-report-account-code"
+                                >
+
+                                    ${accountCode}
+
+                                </td>
+
+
+                                <td
+                                    class="financial-statement-report-account-name"
+                                    style="
+                                        padding-left: ${paddingLeft}px;
+                                        font-weight: ${nameWeight};
+                                    "
+                                >
+
+                                    ${accountName}
+
+                                </td>
+
+
+                                <td
+                                    class="financial-statement-report-number"
+                                >
+
+                                    ${currentAmount}
+
+                                </td>
+
+
+                                <td
+                                    class="financial-statement-report-number"
+                                >
+
+                                    ${comparativeAmount}
+
+                                </td>
+
+                            </tr>
+
+                        `;
+
+                    }
+                )
+
+                .join(
+                    ""
+                );
+
+        };
+
+
+    /*
+    ======================================================
+    GROUP HEADER
+    ======================================================
+    */
+
+    const renderGroupHeader =
+        label => {
+
+            return `
+
+                <tr
+                    class="financial-statement-report-group-row"
+                >
+
+                    <td
+                        colspan="4"
+                    >
+
+                        ${this.escapePreviewHTML(
+                            label
+                        )}
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        };
+
+
+    /*
+    ======================================================
+    TOTAL ROW
+    ======================================================
+    */
+
+    const renderTotalRow =
+        (
+            label,
+            total,
+            extraClass = ""
+        ) => {
+
+            return `
+
+                <tr
+                    class="
+                        financial-statement-report-total-row
+                        ${extraClass}
+                    "
+                >
+
+                    <td
+                        colspan="2"
+                    >
+
+                        ${this.escapePreviewHTML(
+                            label
+                        )}
+
+                    </td>
+
+
+                    <td
+                        class="financial-statement-report-number"
+                    >
+
+                        ${this.formatFinancialAmount(
+                            total?.current
+                        )}
+
+                    </td>
+
+
+                    <td
+                        class="financial-statement-report-number"
+                    >
+
+                        ${this.formatFinancialAmount(
+                            total?.comparative
+                        )}
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        };
+
+
+    /*
+    ======================================================
+    BUILD PROFIT & LOSS
+    ======================================================
+    */
+
+    const html = `
+
+        <div
+            class="financial-statement-report"
+        >
+
+            <div
+                class="financial-statement-report-header"
+            >
+
+                <div>
+
+                    <h4
+                        class="financial-statement-report-title"
+                    >
+
+                        Profit & Loss
+
+                    </h4>
+
+
+                    <p
+                        class="financial-statement-report-description"
+                    >
+
+                        Statement of Profit or Loss
+
+                    </p>
+
+                </div>
+
+
+                <div
+                    class="financial-statement-report-currency"
+                >
+
+                    Currency: IDR
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="financial-statement-report-table-wrapper"
+            >
+
+                <table
+                    class="financial-statement-report-table"
+                >
+
+                    <thead>
+
+                        <tr>
+
+                            <th
+                                class="financial-statement-report-account-code"
+                            >
+
+                                Account
+
+                            </th>
+
+
+                            <th
+                                class="financial-statement-report-account-name"
+                            >
+
+                                Account Name
+
+                            </th>
+
+
+                            <th
+                                class="financial-statement-report-number"
+                            >
+
+                                ${this.escapePreviewHTML(
+                                    currentPeriod
+                                )}
+
+                            </th>
+
+
+                            <th
+                                class="financial-statement-report-number"
+                            >
+
+                                ${this.escapePreviewHTML(
+                                    comparativePeriod
+                                )}
+
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        ${renderGroupHeader(
+                            "REVENUE"
+                        )}
+
+
+                        ${renderAccountRows(
+                            revenueRows
+                        )}
+
+
+                        ${renderTotalRow(
+                            "TOTAL REVENUE",
+                            totals.revenue
+                        )}
+
+
+                        ${renderGroupHeader(
+                            "EXPENSE"
+                        )}
+
+
+                        ${renderAccountRows(
+                            expenseRows
+                        )}
+
+
+                        ${renderTotalRow(
+                            "TOTAL EXPENSE",
+                            totals.expense
+                        )}
+
+
+                        ${renderTotalRow(
+                            "NET PROFIT / (LOSS)",
+                            totals.netProfit,
+                            "financial-statement-report-net-profit-row"
+                        )}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    /*
+    ======================================================
+    HIERARCHY DIAGNOSTICS
+    ======================================================
+    */
+
+    const hierarchyRows =
+        [
+            ...revenueRows,
+            ...expenseRows
+        ];
+
+
+    const parentRows =
+        hierarchyRows.filter(
+            row =>
+                row.has_children === true
+        );
+
+
+    const nestedRows =
+        hierarchyRows.filter(
+            row =>
+                Number(
+                    row.level
+                    ??
+                    0
+                )
+                >
+                0
+        );
+
+
+    const maxLevel =
+        hierarchyRows.reduce(
+            (
+                maximum,
+                row
+            ) => {
+
+                return Math.max(
+                    maximum,
+                    Number(
+                        row.level
+                        ??
+                        0
+                    )
+                    ||
+                    0
+                );
+
+            },
+            0
+        );
+
+
+    /*
+    ======================================================
+    HIERARCHY DEBUG
+    ======================================================
+    */
+
+    console.log(
+        "FINOVA PROFIT & LOSS HIERARCHY:",
+        {
+
+            sourceRows:
+                rows.length,
+
+            renderedRows:
+                hierarchyRows.length,
+
+            revenueRows:
+                revenueRows.length,
+
+            expenseRows:
+                expenseRows.length,
+
+            parentRows:
+                parentRows.length,
+
+            nestedRows:
+                nestedRows.length,
+
+            maxLevel:
+                maxLevel
+
+        }
+    );
+
+
+    /*
+    ======================================================
+    PREVIEW DEBUG
+    ======================================================
+    */
+
+    console.log(
+        "FINOVA PROFIT & LOSS PREVIEW:",
+        {
+
+            totalRows:
+                rows.length,
+
+            revenueRows:
+                revenueRows.length,
+
+            expenseRows:
+                expenseRows.length,
+
+            renderedRows:
+                hierarchyRows.length,
+
+            totalRevenueCurrent:
+                totals.revenue?.current
+                ??
+                0,
+
+            totalRevenueComparative:
+                totals.revenue?.comparative
+                ??
+                0,
+
+            totalExpenseCurrent:
+                totals.expense?.current
+                ??
+                0,
+
+            totalExpenseComparative:
+                totals.expense?.comparative
+                ??
+                0,
+
+            netProfitCurrent:
+                totals.netProfit?.current
+                ??
+                0,
+
+            netProfitComparative:
+                totals.netProfit?.comparative
+                ??
+                0
+
+        }
+    );
+
+
+    /*
+    ======================================================
+    RETURN
+    ======================================================
+    */
+
+    return html;
+
+}
+
+/*
+==========================================================
+RENDER TRIAL BALANCE PREVIEW
+==========================================================
+*/
+
+renderTrialBalancePreview() {
+
+    const current = this.reportDataset?.trialBalance?.current;
+    const comparative = this.reportDataset?.trialBalance?.comparative;
+
+    if (!current || !Array.isArray(current.rows)) {
+        console.warn("FINOVA TRIAL BALANCE DATASET NOT READY");
+        return "";
+    }
+
+    const currentRows = current.rows;
+    const comparativeRows = Array.isArray(comparative?.rows) ? comparative.rows : [];
+    const comparativeMap = new Map(
+        comparativeRows.map(row => [String(row.account_id), row])
+    );
+
+    const currentPeriod = this.formatPreviewPeriod(
+        this.reportRequest.reporting.year,
+        this.reportRequest.reporting.month
+    );
+    const comparativePeriod = this.formatPreviewPeriod(
+        this.reportRequest.comparative.year,
+        this.reportRequest.comparative.month
+    );
+
+    const rowsHTML = currentRows.map(row => {
+        const comp = comparativeMap.get(String(row.account_id)) ?? {};
+        return `
+            <tr class="financial-statement-report-account-row">
+                <td class="financial-statement-report-account-code">${this.escapePreviewHTML(row.account_code)}</td>
+                <td class="financial-statement-report-account-name">${this.escapePreviewHTML(row.account_name)}</td>
+                <td class="financial-statement-report-number">${this.formatFinancialAmount(row.ending_debit)}</td>
+                <td class="financial-statement-report-number">${this.formatFinancialAmount(row.ending_credit)}</td>
+                <td class="financial-statement-report-number">${this.formatFinancialAmount(comp.ending_debit)}</td>
+                <td class="financial-statement-report-number">${this.formatFinancialAmount(comp.ending_credit)}</td>
+            </tr>`;
+    }).join("");
+
+    const ct = current.totals ?? {};
+    const pt = comparative?.totals ?? {};
+    const currentDifference = Number(ct.endingDebit ?? 0) - Number(ct.endingCredit ?? 0);
+    const comparativeDifference = Number(pt.endingDebit ?? 0) - Number(pt.endingCredit ?? 0);
+
+    console.log("FINOVA TRIAL BALANCE VALIDATION:", {
+        currentRows: currentRows.length,
+        comparativeRows: comparativeRows.length,
+        currentDifference,
+        comparativeDifference,
+        currentBalanced: Math.abs(currentDifference) < 0.01,
+        comparativeBalanced: Math.abs(comparativeDifference) < 0.01
+    });
+
+    return `
+        <div class="financial-statement-report">
+            <div class="financial-statement-report-header">
+                <div>
+                    <h4 class="financial-statement-report-title">Trial Balance</h4>
+                    <p class="financial-statement-report-description">Ending balances by account</p>
+                </div>
+                <div class="financial-statement-report-currency">Currency: IDR</div>
+            </div>
+            <div class="financial-statement-report-table-wrapper">
+                <table class="financial-statement-report-table financial-statement-trial-balance-table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" class="financial-statement-report-account-code">Account</th>
+                            <th rowspan="2" class="financial-statement-report-account-name">Account Name</th>
+                            <th colspan="2" class="financial-statement-report-number text-center">${this.escapePreviewHTML(currentPeriod)}</th>
+                            <th colspan="2" class="financial-statement-report-number text-center">${this.escapePreviewHTML(comparativePeriod)}</th>
+                        </tr>
+                        <tr>
+                            <th class="financial-statement-report-number">Debit</th>
+                            <th class="financial-statement-report-number">Credit</th>
+                            <th class="financial-statement-report-number">Debit</th>
+                            <th class="financial-statement-report-number">Credit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rowsHTML}
+                        <tr class="financial-statement-report-total-row">
+                            <td colspan="2">TOTAL</td>
+                            <td class="financial-statement-report-number">${this.formatFinancialAmount(ct.endingDebit)}</td>
+                            <td class="financial-statement-report-number">${this.formatFinancialAmount(ct.endingCredit)}</td>
+                            <td class="financial-statement-report-number">${this.formatFinancialAmount(pt.endingDebit)}</td>
+                            <td class="financial-statement-report-number">${this.formatFinancialAmount(pt.endingCredit)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>`;
+}
+
+/*
+==========================================================
+RENDER SELECTED STATEMENT
+==========================================================
+*/
+
+renderSelectedStatement(statement) {
+    if (!this.previewContent) return;
+
+    if (statement === "balance-sheet") {
+        this.previewContent.innerHTML = this.renderBalanceSheetPreview();
+    }
+    else if (statement === "profit-loss") {
+        this.previewContent.innerHTML = this.renderProfitLossPreview();
+    }
+    else if (statement === "trial-balance") {
+        this.previewContent.innerHTML = this.renderTrialBalancePreview();
+    }
+}
+
+/*
+==========================================================
+DOWNLOAD EXCEL
+==========================================================
+*/
+
+async downloadExcel() {
+    const XLSX = await import("https://cdn.jsdelivr.net/npm/xlsx@0.18.5/+esm");
+    const wb = XLSX.utils.book_new();
+    const identity = CompanyReport.getIdentity();
+    const company = identity?.displayName || identity?.legalName || identity?.name || "FINOVA";
+    const currentLabel = this.formatPreviewPeriod(this.reportRequest.reporting.year, this.reportRequest.reporting.month);
+    const comparativeLabel = this.formatPreviewPeriod(this.reportRequest.comparative.year, this.reportRequest.comparative.month);
+
+    const cover = [
+        ["FINOVA ACCOUNTING SYSTEM"],
+        ["FINANCIAL STATEMENT"],
+        [],
+        ["Company", company],
+        ["Reporting Period", currentLabel],
+        ["Comparative Period", comparativeLabel],
+        ["Generated At", (this.reportGeneratedAt ?? new Date()).toLocaleString("id-ID")],
+        [],
+        ["Included Statements", this.reportRequest.statements.join(", ")]
+    ];
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(cover), "Cover");
+
+    if (this.reportRequest.statements.includes("balance-sheet")) {
+        const data = [["Account", "Account Name", currentLabel, comparativeLabel]];
+        for (const row of this.reportDataset.balanceSheet ?? []) {
+            data.push([row.account_code, row.account_name, Number(row.current_amount ?? 0), Number(row.comparative_amount ?? 0)]);
+        }
+        const t = this.reportDataset.totals?.balanceSheet ?? {};
+        data.push([], ["", "TOTAL ASSETS", Number(t.asset?.current ?? 0), Number(t.asset?.comparative ?? 0)]);
+        data.push(["", "TOTAL LIABILITIES & EQUITY", Number(t.liabilityAndEquity?.current ?? 0), Number(t.liabilityAndEquity?.comparative ?? 0)]);
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(data), "Balance Sheet");
+    }
+
+    if (this.reportRequest.statements.includes("profit-loss")) {
+        const data = [["Account", "Account Name", currentLabel, comparativeLabel]];
+        for (const row of this.reportDataset.profitLoss ?? []) {
+            data.push([row.account_code, row.account_name, Number(row.current_amount ?? 0), Number(row.comparative_amount ?? 0)]);
+        }
+        const t = this.reportDataset.totals?.profitLoss ?? {};
+        data.push([], ["", "TOTAL REVENUE", Number(t.revenue?.current ?? 0), Number(t.revenue?.comparative ?? 0)]);
+        data.push(["", "TOTAL EXPENSE", Number(t.expense?.current ?? 0), Number(t.expense?.comparative ?? 0)]);
+        data.push(["", "NET PROFIT / (LOSS)", Number(t.netProfit?.current ?? 0), Number(t.netProfit?.comparative ?? 0)]);
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(data), "Profit & Loss");
+    }
+
+    if (this.reportRequest.statements.includes("trial-balance")) {
+        const c = this.reportDataset.trialBalance?.current ?? {};
+        const p = this.reportDataset.trialBalance?.comparative ?? {};
+        const pMap = new Map((p.rows ?? []).map(row => [String(row.account_id), row]));
+        const data = [["Account", "Account Name", `${currentLabel} Debit`, `${currentLabel} Credit`, `${comparativeLabel} Debit`, `${comparativeLabel} Credit`]];
+        for (const row of c.rows ?? []) {
+            const comp = pMap.get(String(row.account_id)) ?? {};
+            data.push([row.account_code, row.account_name, Number(row.ending_debit ?? 0), Number(row.ending_credit ?? 0), Number(comp.ending_debit ?? 0), Number(comp.ending_credit ?? 0)]);
+        }
+        data.push([], ["", "TOTAL", Number(c.totals?.endingDebit ?? 0), Number(c.totals?.endingCredit ?? 0), Number(p.totals?.endingDebit ?? 0), Number(p.totals?.endingCredit ?? 0)]);
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(data), "Trial Balance");
+    }
+
+    const safeCompany = company.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "");
+    XLSX.writeFile(wb, `Financial-Statement-${safeCompany}-${this.reportRequest.reporting.year}-${String(this.reportRequest.reporting.month).padStart(2, "0")}.xlsx`);
+    console.log("FINOVA FINANCIAL STATEMENT EXCEL DOWNLOADED");
+}
+
+/*
+==========================================================
+DOWNLOAD PDF
+==========================================================
+*/
+
+async downloadPDF() {
+    const { jsPDF } = await import("https://cdn.jsdelivr.net/npm/jspdf@2.5.2/+esm");
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    const identity = CompanyReport.getIdentity();
+    const company = identity?.displayName || identity?.legalName || identity?.name || "FINOVA";
+    const currentLabel = this.formatPreviewPeriod(this.reportRequest.reporting.year, this.reportRequest.reporting.month);
+    const comparativeLabel = this.formatPreviewPeriod(this.reportRequest.comparative.year, this.reportRequest.comparative.month);
+    const money = value => this.formatFinancialAmount(value);
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const left = 14;
+    const right = pageWidth - 14;
+
+    const header = title => {
+        doc.setFont("helvetica", "bold"); doc.setFontSize(14); doc.text(company, left, 16);
+        doc.setFontSize(11); doc.text(title, left, 23);
+        doc.setFont("helvetica", "normal"); doc.setFontSize(8);
+        doc.text(`${currentLabel} | Comparative: ${comparativeLabel} | Currency: IDR`, left, 29);
+        doc.line(left, 32, right, 32);
+        return 39;
+    };
+
+    const ensurePage = (y, title) => {
+        if (y <= 280) return y;
+        doc.addPage();
+        return header(title);
+    };
+
+    doc.setFont("helvetica", "bold"); doc.setFontSize(20); doc.text("FINANCIAL STATEMENT", pageWidth / 2, 70, { align: "center" });
+    doc.setFontSize(14); doc.text(company, pageWidth / 2, 84, { align: "center" });
+    doc.setFont("helvetica", "normal"); doc.setFontSize(10);
+    doc.text(`Reporting Period: ${currentLabel}`, pageWidth / 2, 98, { align: "center" });
+    doc.text(`Comparative Period: ${comparativeLabel}`, pageWidth / 2, 105, { align: "center" });
+    doc.text("Generated by FINOVA Accounting System", pageWidth / 2, 240, { align: "center" });
+
+    const renderFourColumn = (title, rows, totals) => {
+        doc.addPage(); let y = header(title);
+        doc.setFont("helvetica", "bold"); doc.setFontSize(7);
+        doc.text("Account", left, y); doc.text("Account Name", 38, y); doc.text(currentLabel, 151, y, { align: "right" }); doc.text(comparativeLabel, right, y, { align: "right" }); y += 5;
+        doc.setFont("helvetica", "normal");
+        for (const row of rows) {
+            y = ensurePage(y, title); doc.setFontSize(6.5);
+            doc.text(String(row.account_code ?? ""), left, y);
+            const name = doc.splitTextToSize(String(row.account_name ?? ""), 90)[0] ?? "";
+            doc.text(name, 38, y);
+            doc.text(money(row.current_amount), 151, y, { align: "right" });
+            doc.text(money(row.comparative_amount), right, y, { align: "right" }); y += 4;
+        }
+        doc.setFont("helvetica", "bold");
+        for (const [label, value] of totals) {
+            y = ensurePage(y + 2, title); doc.text(label, 38, y); doc.text(money(value?.current), 151, y, { align: "right" }); doc.text(money(value?.comparative), right, y, { align: "right" }); y += 5;
+        }
+    };
+
+    if (this.reportRequest.statements.includes("balance-sheet")) {
+        const t = this.reportDataset.totals?.balanceSheet ?? {};
+        renderFourColumn("Balance Sheet", this.reportDataset.balanceSheet ?? [], [["TOTAL ASSETS", t.asset], ["TOTAL LIABILITIES & EQUITY", t.liabilityAndEquity]]);
+    }
+    if (this.reportRequest.statements.includes("profit-loss")) {
+        const t = this.reportDataset.totals?.profitLoss ?? {};
+        renderFourColumn("Profit & Loss", this.reportDataset.profitLoss ?? [], [["TOTAL REVENUE", t.revenue], ["TOTAL EXPENSE", t.expense], ["NET PROFIT / (LOSS)", t.netProfit]]);
+    }
+    if (this.reportRequest.statements.includes("trial-balance")) {
+        doc.addPage(); let y = header("Trial Balance");
+        const c = this.reportDataset.trialBalance?.current ?? {};
+        const p = this.reportDataset.trialBalance?.comparative ?? {};
+        const pMap = new Map((p.rows ?? []).map(row => [String(row.account_id), row]));
+        doc.setFont("helvetica", "bold"); doc.setFontSize(6.5);
+        doc.text("Account", left, y); doc.text("Account Name", 35, y); doc.text("Dr", 125, y, {align:"right"}); doc.text("Cr", 148, y, {align:"right"}); doc.text("Comp Dr", 172, y, {align:"right"}); doc.text("Comp Cr", right, y, {align:"right"}); y += 5;
+        doc.setFont("helvetica", "normal");
+        for (const row of c.rows ?? []) {
+            y = ensurePage(y, "Trial Balance"); const comp = pMap.get(String(row.account_id)) ?? {};
+            doc.text(String(row.account_code ?? ""), left, y); doc.text((doc.splitTextToSize(String(row.account_name ?? ""), 72)[0] ?? ""), 35, y);
+            doc.text(money(row.ending_debit), 125, y, {align:"right"}); doc.text(money(row.ending_credit), 148, y, {align:"right"}); doc.text(money(comp.ending_debit), 172, y, {align:"right"}); doc.text(money(comp.ending_credit), right, y, {align:"right"}); y += 4;
+        }
+    }
+
+    const safeCompany = company.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "");
+    doc.save(`Financial-Statement-${safeCompany}-${this.reportRequest.reporting.year}-${String(this.reportRequest.reporting.month).padStart(2, "0")}.pdf`);
+    console.log("FINOVA FINANCIAL STATEMENT PDF DOWNLOADED");
+}
+
 /*
 ==========================================================
 RENDER PREVIEW SHELL
@@ -1282,51 +3954,31 @@ renderPreviewShell() {
     ======================================================
     COMPANY IDENTITY
 
-    FINOVA App already loads CustomerConfig for the
-    effective Company Context.
+    Official FINOVA report identity source.
 
-    Use available application identity without making
-    another accounting-data query.
+    CompanyReport reads the currently initialized
+    CustomerConfig which already follows the effective
+    Company Context.
     ======================================================
     */
 
-    const customerConfig =
-        window.CustomerConfig
-        ??
-        window.customerConfig
-        ??
-        null;
+    const companyIdentity =
+        CompanyReport.getIdentity();
 
 
-    const company =
-        window.finovaCompany
-        ??
-        window.currentCompany
-        ??
-        null;
-
+    /*
+    ======================================================
+    COMPANY NAME
+    ======================================================
+    */
 
     const companyName =
-        customerConfig?.company_name
-        ??
-        customerConfig?.companyName
-        ??
-        company?.company_name
-        ??
-        company?.companyName
-        ??
-        "FINOVA";
-
-
-    const companyCode =
-        customerConfig?.company_code
-        ??
-        customerConfig?.companyCode
-        ??
-        company?.company_code
-        ??
-        company?.companyCode
-        ??
+        companyIdentity?.displayName
+        ||
+        companyIdentity?.legalName
+        ||
+        companyIdentity?.name
+        ||
         "";
 
 
@@ -1336,38 +3988,28 @@ renderPreviewShell() {
     ======================================================
     */
 
-    const companyDetailParts =
-        [];
-
-
-    if (
-        companyCode
-    ) {
-
-        companyDetailParts.push(
-            companyCode
-        );
-
-    }
-
-
-    if (
-        customerConfig?.address
-    ) {
-
-        companyDetailParts.push(
-            customerConfig.address
-        );
-
-    }
-
-
     const companyDetail =
-        companyDetailParts.length > 0
-            ? companyDetailParts.join(
-                " • "
-            )
-            : "Financial Reporting";
+        companyIdentity?.contactLine
+        ||
+        "";
+
+
+    /*
+    ======================================================
+    VALIDATE COMPANY IDENTITY
+    ======================================================
+    */
+
+    if (
+        !companyName
+    ) {
+
+        console.warn(
+            "FINOVA FINANCIAL STATEMENT COMPANY IDENTITY NOT READY",
+            companyIdentity
+        );
+
+    }
 
 
     /*
@@ -1392,16 +4034,20 @@ renderPreviewShell() {
 
     /*
     ======================================================
-    APPLY COMPANY
+    APPLY COMPANY IDENTITY
     ======================================================
     */
 
     this.previewCompany.textContent =
-        companyName;
+        companyName
+        ||
+        "FINOVA";
 
 
     this.previewCompanyDetail.textContent =
-        companyDetail;
+        companyDetail
+        ||
+        "Financial Reporting";
 
 
     /*
@@ -1491,16 +4137,34 @@ renderPreviewShell() {
                 );
 
 
+            /*
+            ==================================================
+            SHOW / HIDE BASED ON STATEMENT SELECTION
+            ==================================================
+            */
+
             tab.classList.toggle(
                 "d-none",
                 !selected
             );
 
 
+            /*
+            ==================================================
+            RESET ACTIVE STATE
+            ==================================================
+            */
+
             tab.classList.remove(
                 "active"
             );
 
+
+            /*
+            ==================================================
+            FIRST AVAILABLE STATEMENT
+            ==================================================
+            */
 
             if (
                 selected
@@ -1536,12 +4200,7 @@ renderPreviewShell() {
 
     /*
     ======================================================
-    INITIAL PREVIEW CONTENT
-
-    FS-3.2C only connects the shell.
-
-    Actual Balance Sheet / Profit & Loss / Trial Balance
-    rows will be rendered in the next substep.
+    FIRST STATEMENT
     ======================================================
     */
 
@@ -1552,6 +4211,12 @@ renderPreviewShell() {
         ??
         null;
 
+
+    /*
+    ======================================================
+    STATEMENT TITLE
+    ======================================================
+    */
 
     const statementTitles = {
 
@@ -1567,42 +4232,88 @@ renderPreviewShell() {
     };
 
 
-    const statementTitle =
-        statementTitles[
-            firstStatement
-        ]
-        ??
-        "Financial Statement";
+    /*
+    ======================================================
+    PREVIEW CONTENT
+    ======================================================
+    */
+
+    if (
+        firstStatement === "balance-sheet"
+    ) {
+
+        this.previewContent.innerHTML =
+            this.renderBalanceSheetPreview();
+
+    }
+    else if (
+        firstStatement === "profit-loss"
+    ) {
+
+        this.previewContent.innerHTML =
+            this.renderProfitLossPreview();
+
+    }
+    else if (
+        firstStatement === "trial-balance"
+    ) {
+
+        this.previewContent.innerHTML =
+            this.renderTrialBalancePreview();
+
+    }
+    else {
+
+        const statementTitle =
+            statementTitles[
+                firstStatement
+            ]
+            ??
+            "Financial Statement";
 
 
-    this.previewContent.innerHTML = `
+        this.previewContent.innerHTML = `
 
-        <div class="financial-statement-preview-empty">
+            <div
+                class="financial-statement-preview-empty"
+            >
 
-            <div class="financial-statement-preview-empty-icon">
+                <div
+                    class="financial-statement-preview-empty-icon"
+                >
 
-                <i class="fa-solid fa-file-invoice-dollar"></i>
+                    <i
+                        class="fa-solid fa-file-invoice-dollar"
+                    ></i>
+
+                </div>
+
+
+                <div
+                    class="financial-statement-preview-empty-title"
+                >
+
+                    ${this.escapePreviewHTML(
+                        statementTitle
+                    )}
+
+                </div>
+
+
+                <div
+                    class="financial-statement-preview-empty-text"
+                >
+
+                    Financial statement data is ready.
+                    Report rows will be rendered in the next stage.
+
+                </div>
 
             </div>
 
+        `;
 
-            <div class="financial-statement-preview-empty-title">
-
-                ${statementTitle}
-
-            </div>
-
-
-            <div class="financial-statement-preview-empty-text">
-
-                Financial statement data is ready.
-                Report rows will be rendered in the next stage.
-
-            </div>
-
-        </div>
-
-    `;
+    }
 
 
     /*
@@ -1623,6 +4334,39 @@ renderPreviewShell() {
     */
 
     console.log(
+        "FINOVA FINANCIAL STATEMENT PREVIEW IDENTITY:",
+        {
+
+            brand:
+                companyIdentity?.brand
+                ??
+                "",
+
+            name:
+                companyIdentity?.name
+                ??
+                "",
+
+            legalName:
+                companyIdentity?.legalName
+                ??
+                "",
+
+            displayName:
+                companyIdentity?.displayName
+                ??
+                "",
+
+            contactLine:
+                companyIdentity?.contactLine
+                ??
+                ""
+
+        }
+    );
+
+
+    console.log(
         "FINOVA FINANCIAL STATEMENT PREVIEW SHELL:",
         {
 
@@ -1635,9 +4379,6 @@ renderPreviewShell() {
 
             companyName:
                 companyName,
-
-            companyCode:
-                companyCode,
 
             reportingPeriod:
                 reportingLabel,
@@ -2260,11 +5001,7 @@ canReuseDataset(
 
             case "excel":
 
-                console.log(
-                    "FINOVA FINANCIAL STATEMENT EXCEL DATA READY",
-                    this.reportDataset
-                );
-
+                await this.downloadExcel();
 
                 break;
 
@@ -2277,11 +5014,7 @@ canReuseDataset(
 
             case "pdf":
 
-                console.log(
-                    "FINOVA FINANCIAL STATEMENT PDF DATA READY",
-                    this.reportDataset
-                );
-
+                await this.downloadPDF();
 
                 break;
 
