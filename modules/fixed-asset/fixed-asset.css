@@ -1,0 +1,833 @@
+/* ==========================================================
+   FINOVA ACCOUNTING SYSTEM
+   FIXED ASSET
+   Version : 1.1.0
+   GL JOURNAL LAYOUT STANDARD
+========================================================== */
+
+
+/* ==========================================================
+   PAGE
+========================================================== */
+
+.fixed-asset-page {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    width: 100%;
+
+}
+
+
+/* ==========================================================
+   PAGE HEADER
+========================================================== */
+
+.fixed-asset-page
+> .finova-page-header {
+
+    width: 100%;
+
+    margin-bottom: 8px !important;
+
+    flex-shrink: 0;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   FILTER CARD
+========================================================== */
+
+.fixed-asset-page
+> .fixed-asset-filter-card {
+
+    width: 100% !important;
+
+    max-width: none !important;
+
+    margin: 0 !important;
+
+    flex: 0 0 auto;
+
+    box-sizing: border-box;
+
+    border-radius: 12px;
+
+}
+
+
+/* ==========================================================
+   FILTER CARD BODY
+========================================================== */
+
+.fixed-asset-filter-card
+> .finova-card-body {
+
+    width: 100%;
+
+    padding: 8px 20px 8px 20px !important;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   FILTER ROW
+========================================================== */
+
+.fixed-asset-filter-card
+> .finova-card-body
+> .row {
+
+    width: 100% !important;
+
+    margin: 0 !important;
+
+    padding: 0 !important;
+
+    box-sizing: border-box;
+
+    align-items: end !important;
+
+}
+
+
+/* ==========================================================
+   FILTER COLUMN
+========================================================== */
+
+.fixed-asset-filter-card
+> .finova-card-body
+> .row
+> [class*="col-"] {
+
+    min-width: 0;
+
+    margin: 0;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   FILTER LABEL
+========================================================== */
+
+.fixed-asset-filter-card
+.form-label {
+
+    display: block;
+
+    margin-top: 0 !important;
+
+    margin-bottom: 6px !important;
+
+    color: #1F2937;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    line-height: 1.2;
+
+    text-align: left;
+
+}
+
+
+/* ==========================================================
+   FILTER CONTROL
+========================================================== */
+
+.fixed-asset-filter-card
+.form-control,
+
+.fixed-asset-filter-card
+.form-select {
+
+    width: 100% !important;
+
+    height: 46px !important;
+
+    min-height: 46px !important;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   INPUT GROUP
+========================================================== */
+
+.fixed-asset-filter-card
+.input-group {
+
+    display: flex !important;
+
+    flex-wrap: nowrap !important;
+
+    align-items: stretch;
+
+    width: 100% !important;
+
+    height: 46px !important;
+
+    margin: 0 !important;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==========================================================
+   STATUS SELECT
+========================================================== */
+
+.fixed-asset-filter-card
+.input-group
+#fa-status {
+
+    flex: 1 1 auto !important;
+
+    width: 1% !important;
+
+    min-width: 0 !important;
+
+    height: 46px !important;
+
+    border-top-right-radius: 0 !important;
+
+    border-bottom-right-radius: 0 !important;
+
+}
+
+
+/* ==========================================================
+   FIND BUTTON
+========================================================== */
+
+.fixed-asset-filter-card
+.input-group
+#btn-fa-find {
+
+    display: inline-flex !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    gap: 6px;
+
+    flex: 0 0 90px !important;
+
+    width: 90px !important;
+
+    min-width: 90px !important;
+
+    height: 46px !important;
+
+    padding: 0 12px !important;
+
+    white-space: nowrap;
+
+    border-top-left-radius: 0 !important;
+
+    border-bottom-left-radius: 0 !important;
+
+}
+
+
+/* ==========================================================
+   TABLE CARD
+========================================================== */
+
+.fixed-asset-page
+> .finova-table-card {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    width: 100%;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   TABLE CARD BODY
+========================================================== */
+
+.fixed-asset-page
+> .finova-table-card
+> .finova-card-body {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    padding: 0 !important;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   TABLE CONTAINER
+========================================================== */
+
+.fixed-asset-page
+> .finova-table-card
+> .finova-card-body
+> .finova-table-container {
+
+    display: flex;
+
+    flex-direction: column;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    width: 100%;
+
+    height: 100%;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   TABLE RESPONSIVE
+========================================================== */
+
+.fixed-asset-page
+> .finova-table-card
+> .finova-card-body
+> .finova-table-container
+> .table-responsive {
+
+    display: block;
+
+    flex: 1 1 auto;
+
+    min-height: 0;
+
+    width: 100%;
+
+    overflow-x: auto;
+
+    overflow-y: auto;
+
+}
+
+
+/* ==========================================================
+   MAIN TABLE
+========================================================== */
+
+#fixed-asset-table {
+
+    width: 100%;
+
+    min-width: 1100px;
+
+    table-layout: fixed;
+
+    margin-bottom: 0;
+
+}
+
+
+/* ==========================================================
+   COLUMN WIDTH
+========================================================== */
+
+#fixed-asset-table
+.fa-col-no {
+
+    width: 48px;
+
+}
+
+
+#fixed-asset-table
+.fa-col-asset-no {
+
+    width: 125px;
+
+}
+
+
+#fixed-asset-table
+.fa-col-name {
+
+    width: auto;
+
+}
+
+
+#fixed-asset-table
+.fa-col-category {
+
+    width: 150px;
+
+}
+
+
+#fixed-asset-table
+.fa-col-acquisition {
+
+    width: 110px;
+
+}
+
+
+#fixed-asset-table
+.fa-col-cost {
+
+    width: 130px;
+
+}
+
+
+#fixed-asset-table
+.fa-col-depreciation {
+
+    width: 135px;
+
+}
+
+
+#fixed-asset-table
+.fa-col-book-value {
+
+    width: 135px;
+
+}
+
+
+#fixed-asset-table
+.fa-col-status {
+
+    width: 90px;
+
+}
+
+
+#fixed-asset-table
+.fa-col-action {
+
+    width: 150px;
+
+}
+
+
+/* ==========================================================
+   TABLE HEADER
+========================================================== */
+
+#fixed-asset-table
+> thead
+> tr
+> th {
+
+    vertical-align: middle;
+
+    white-space: nowrap;
+
+    font-weight: 700 !important;
+
+    color: #111827 !important;
+
+}
+
+
+/* ==========================================================
+   TABLE BODY
+========================================================== */
+
+#fixed-asset-table
+> tbody
+> tr
+> td {
+
+    height: auto !important;
+
+    padding-top: 10px;
+
+    padding-bottom: 10px;
+
+    font-size: 14px;
+
+    font-weight: 400 !important;
+
+    line-height: 1.55;
+
+    color: #1F2937 !important;
+
+    vertical-align: middle;
+
+}
+
+
+/* ==========================================================
+   TABLE ROW
+========================================================== */
+
+#fixed-asset-table
+> tbody
+> tr {
+
+    height: auto !important;
+
+    min-height: 0 !important;
+
+    transition: background-color .15s ease;
+
+}
+
+
+#fixed-asset-table
+> tbody
+> tr:hover {
+
+    background-color: #F8F9FA;
+
+}
+
+
+/* ==========================================================
+   NO
+========================================================== */
+
+#fixed-asset-table
+td:nth-child(1) {
+
+    text-align: center;
+
+    white-space: nowrap;
+
+    color: var(--text-secondary);
+
+}
+
+
+/* ==========================================================
+   ASSET NUMBER
+========================================================== */
+
+#fixed-asset-table
+td:nth-child(2) {
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   ASSET NAME
+========================================================== */
+
+#fixed-asset-table
+td:nth-child(3) {
+
+    min-width: 0;
+
+    white-space: normal;
+
+    overflow-wrap: anywhere;
+
+}
+
+
+/* ==========================================================
+   CATEGORY
+========================================================== */
+
+#fixed-asset-table
+td:nth-child(4) {
+
+    min-width: 0;
+
+    white-space: normal;
+
+    overflow-wrap: anywhere;
+
+}
+
+
+/* ==========================================================
+   ACQUISITION DATE
+========================================================== */
+
+#fixed-asset-table
+td:nth-child(5) {
+
+    text-align: center;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   AMOUNT COLUMNS
+========================================================== */
+
+#fixed-asset-table
+td:nth-child(6),
+
+#fixed-asset-table
+td:nth-child(7),
+
+#fixed-asset-table
+td:nth-child(8) {
+
+    text-align: right;
+
+    white-space: nowrap;
+
+    font-size: 13px;
+
+    font-weight: 500;
+
+}
+
+
+/* ==========================================================
+   STATUS CELL
+========================================================== */
+
+#fixed-asset-table
+td:nth-child(9) {
+
+    text-align: center;
+
+    vertical-align: middle;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   STATUS BADGE
+========================================================== */
+
+#fixed-asset-table
+.fa-status {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    min-width: 60px;
+
+    padding: 6px 9px;
+
+    font-size: 11.5px;
+
+    font-weight: 600;
+
+    line-height: 1;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   ACTION CELL
+========================================================== */
+
+#fixed-asset-table
+td:nth-child(10) {
+
+    text-align: center;
+
+    vertical-align: middle;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   ACTION WRAPPER
+========================================================== */
+
+#fixed-asset-table
+.fa-actions {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 4px;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   ACTION BUTTON
+========================================================== */
+
+#fixed-asset-table
+.fa-actions
+.btn {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: 30px;
+
+    height: 30px;
+
+    padding: 0;
+
+}
+
+
+/* ==========================================================
+   ACTION ICON
+========================================================== */
+
+#fixed-asset-table
+.fa-actions
+.btn
+i {
+
+    margin: 0 !important;
+
+    font-size: 12px;
+
+}
+
+
+/* ==========================================================
+   MODAL
+========================================================== */
+
+#faAssetModal
+.modal-body,
+
+#faCategoryModal
+.modal-body,
+
+#faDepModal
+.modal-body,
+
+#faDisposeModal
+.modal-body {
+
+    font-size: 13px;
+
+}
+
+
+/* ==========================================================
+   MODAL TABLE
+========================================================== */
+
+#faCategoryModal
+.finova-table,
+
+#faDepModal
+.finova-table {
+
+    width: 100%;
+
+    margin-bottom: 0;
+
+}
+
+
+/* ==========================================================
+   TABLET
+========================================================== */
+
+@media (max-width: 1200px) {
+
+    .fixed-asset-filter-card
+    > .finova-card-body {
+
+        padding-left: 16px !important;
+
+        padding-right: 16px !important;
+
+    }
+
+}
+
+
+/* ==========================================================
+   MOBILE
+========================================================== */
+
+@media (max-width: 768px) {
+
+    .fixed-asset-filter-card
+    > .finova-card-body {
+
+        padding: 8px 16px !important;
+
+    }
+
+
+    .fixed-asset-filter-card
+    .input-group
+    #btn-fa-find {
+
+        flex: 0 0 75px !important;
+
+        width: 75px !important;
+
+        min-width: 75px !important;
+
+    }
+
+
+    #fixed-asset-table {
+
+        min-width: 1050px;
+
+    }
+
+}

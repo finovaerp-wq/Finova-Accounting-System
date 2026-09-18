@@ -1,0 +1,1364 @@
+<!-- ==========================================================
+     FINOVA ACCOUNTING SYSTEM
+     FIXED ASSET
+     Version : 1.1.0
+     GL JOURNAL LAYOUT STANDARD
+========================================================== -->
+
+<div class="fixed-asset-page">
+
+
+    <!-- ======================================================
+         PAGE HEADER
+    ======================================================= -->
+
+    <div class="finova-page-header">
+
+
+        <!-- LEFT -->
+
+        <div class="finova-page-header-left">
+
+            <h1 class="finova-page-title">
+                Fixed Asset
+            </h1>
+
+            <p class="finova-page-subtitle">
+                Accounting / Fixed Asset Register &amp; Depreciation
+            </p>
+
+        </div>
+
+
+        <!-- RIGHT -->
+
+        <div class="finova-page-header-right">
+
+
+            <button
+                id="btn-fa-category"
+                type="button"
+                class="btn btn-outline-primary finova-btn"
+            >
+                <i class="fa-solid fa-layer-group"></i>
+
+                Asset Category
+            </button>
+
+
+            <button
+                id="btn-fa-add"
+                type="button"
+                class="btn btn-primary finova-btn"
+            >
+                <i class="fa-solid fa-plus"></i>
+
+                New Fixed Asset
+            </button>
+
+
+            <button
+                id="btn-fa-excel"
+                type="button"
+                class="btn btn-outline-success finova-btn"
+            >
+                <i class="fa-solid fa-file-excel"></i>
+
+                Download Excel
+            </button>
+
+
+            <button
+                id="btn-fa-refresh"
+                type="button"
+                class="btn btn-outline-secondary finova-btn"
+            >
+                <i class="fa-solid fa-rotate-right"></i>
+
+                Refresh
+            </button>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ======================================================
+         FILTER CARD
+    ======================================================= -->
+
+    <div class="finova-card fixed-asset-filter-card">
+
+        <div class="finova-card-body">
+
+            <div class="row g-3 align-items-end">
+
+
+                <!-- SEARCH -->
+
+                <div class="col-xl-8 col-lg-7 col-md-7">
+
+                    <label
+                        for="fa-search"
+                        class="form-label"
+                    >
+                        Search
+                    </label>
+
+
+                    <input
+                        id="fa-search"
+                        type="text"
+                        class="form-control"
+                        placeholder="Asset No, Asset Name, Category or Location..."
+                        autocomplete="off"
+                    >
+
+                </div>
+
+
+                <!-- STATUS + FIND -->
+
+                <div class="col-xl-4 col-lg-5 col-md-5">
+
+                    <label
+                        for="fa-status"
+                        class="form-label"
+                    >
+                        Status
+                    </label>
+
+
+                    <div class="input-group">
+
+
+                        <select
+                            id="fa-status"
+                            class="form-select"
+                        >
+
+                            <option value="">
+                                All Status
+                            </option>
+
+                            <option value="Active">
+                                Active
+                            </option>
+
+                            <option value="Disposed">
+                                Disposed
+                            </option>
+
+                            <option value="Inactive">
+                                Inactive
+                            </option>
+
+                        </select>
+
+
+                        <button
+                            id="btn-fa-find"
+                            type="button"
+                            class="btn btn-primary"
+                        >
+                            <i class="fa-solid fa-magnifying-glass"></i>
+
+                            Find
+                        </button>
+
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ======================================================
+         TABLE CARD
+    ======================================================= -->
+
+    <div class="finova-card finova-table-card">
+
+        <div class="finova-card-body no-padding">
+
+            <div class="finova-table-container">
+
+
+                <!-- ==================================================
+                     TABLE
+                =================================================== -->
+
+                <div
+                    id="fixed-asset-table-wrapper"
+                    class="table-responsive"
+                >
+
+
+                    <table
+                        id="fixed-asset-table"
+                        class="
+                            table
+                            finova-table
+                            finova-table-bordered
+                            table-hover
+                            fixed-asset-main-table
+                        "
+                    >
+
+
+                        <!-- ==========================================
+                             COLUMN WIDTH
+                        =========================================== -->
+
+                        <colgroup>
+
+                            <col class="fa-col-no">
+
+                            <col class="fa-col-asset-no">
+
+                            <col class="fa-col-name">
+
+                            <col class="fa-col-category">
+
+                            <col class="fa-col-acquisition">
+
+                            <col class="fa-col-cost">
+
+                            <col class="fa-col-depreciation">
+
+                            <col class="fa-col-book-value">
+
+                            <col class="fa-col-status">
+
+                            <col class="fa-col-action">
+
+                        </colgroup>
+
+
+                        <!-- ==========================================
+                             TABLE HEADER
+                        =========================================== -->
+
+                        <thead class="finova-table-header">
+
+                            <tr>
+
+
+                                <th class="text-center">
+                                    No
+                                </th>
+
+
+                                <th>
+                                    Asset No
+                                </th>
+
+
+                                <th>
+                                    Asset Name
+                                </th>
+
+
+                                <th>
+                                    Category
+                                </th>
+
+
+                                <th class="text-center">
+                                    Acquisition
+                                </th>
+
+
+                                <th class="text-end">
+                                    Cost
+                                </th>
+
+
+                                <th class="text-end">
+                                    Accum. Dep.
+                                </th>
+
+
+                                <th class="text-end">
+                                    Book Value
+                                </th>
+
+
+                                <th class="text-center">
+                                    Status
+                                </th>
+
+
+                                <th class="text-center">
+                                    Action
+                                </th>
+
+
+                            </tr>
+
+                        </thead>
+
+
+                        <!-- ==========================================
+                             TABLE BODY
+                        =========================================== -->
+
+                        <tbody id="fa-table-body">
+
+                            <!-- Render By JavaScript -->
+
+                        </tbody>
+
+
+                    </table>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+
+<!-- ==========================================================
+     FIXED ASSET MODAL
+========================================================== -->
+
+<div
+    class="modal fade"
+    id="faAssetModal"
+    tabindex="-1"
+    aria-hidden="true"
+>
+
+    <div
+        class="
+            modal-dialog
+            modal-xl
+            modal-dialog-scrollable
+            modal-dialog-centered
+        "
+    >
+
+        <div class="modal-content">
+
+
+            <!-- HEADER -->
+
+            <div class="modal-header">
+
+                <h5
+                    id="fa-asset-modal-title"
+                    class="modal-title"
+                >
+                    Fixed Asset
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                >
+                </button>
+
+            </div>
+
+
+            <!-- BODY -->
+
+            <div class="modal-body">
+
+                <input
+                    id="fa-id"
+                    type="hidden"
+                >
+
+
+                <div class="row g-3">
+
+
+                    <!-- ASSET NO -->
+
+                    <div class="col-md-3">
+
+                        <label
+                            for="fa-no"
+                            class="form-label"
+                        >
+                            Asset No *
+                        </label>
+
+                        <input
+                            id="fa-no"
+                            type="text"
+                            class="form-control"
+                            autocomplete="off"
+                        >
+
+                    </div>
+
+
+                    <!-- ASSET NAME -->
+
+                    <div class="col-md-5">
+
+                        <label
+                            for="fa-name"
+                            class="form-label"
+                        >
+                            Asset Name *
+                        </label>
+
+                        <input
+                            id="fa-name"
+                            type="text"
+                            class="form-control"
+                            autocomplete="off"
+                        >
+
+                    </div>
+
+
+                    <!-- CATEGORY -->
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="fa-category"
+                            class="form-label"
+                        >
+                            Category *
+                        </label>
+
+                        <select
+                            id="fa-category"
+                            class="form-select"
+                        >
+                        </select>
+
+                    </div>
+
+
+                    <!-- ACQUISITION DATE -->
+
+                    <div class="col-md-3">
+
+                        <label
+                            for="fa-acquisition-date"
+                            class="form-label"
+                        >
+                            Acquisition Date *
+                        </label>
+
+                        <input
+                            id="fa-acquisition-date"
+                            type="date"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <!-- DEPRECIATION START -->
+
+                    <div class="col-md-3">
+
+                        <label
+                            for="fa-start-date"
+                            class="form-label"
+                        >
+                            Depreciation Start *
+                        </label>
+
+                        <input
+                            id="fa-start-date"
+                            type="date"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <!-- ACQUISITION COST -->
+
+                    <div class="col-md-3">
+
+                        <label
+                            for="fa-cost"
+                            class="form-label"
+                        >
+                            Acquisition Cost *
+                        </label>
+
+                        <input
+                            id="fa-cost"
+                            type="number"
+                            min="0"
+                            step="1"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <!-- SALVAGE VALUE -->
+
+                    <div class="col-md-3">
+
+                        <label
+                            for="fa-salvage"
+                            class="form-label"
+                        >
+                            Salvage Value
+                        </label>
+
+                        <input
+                            id="fa-salvage"
+                            type="number"
+                            min="0"
+                            step="1"
+                            value="0"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <!-- USEFUL LIFE -->
+
+                    <div class="col-md-3">
+
+                        <label
+                            for="fa-life"
+                            class="form-label"
+                        >
+                            Useful Life (Months) *
+                        </label>
+
+                        <input
+                            id="fa-life"
+                            type="number"
+                            min="1"
+                            step="1"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <!-- METHOD -->
+
+                    <div class="col-md-3">
+
+                        <label
+                            for="fa-method"
+                            class="form-label"
+                        >
+                            Method
+                        </label>
+
+                        <select
+                            id="fa-method"
+                            class="form-select"
+                        >
+
+                            <option value="STRAIGHT_LINE">
+                                Straight Line
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- LOCATION -->
+
+                    <div class="col-md-3">
+
+                        <label
+                            for="fa-location"
+                            class="form-label"
+                        >
+                            Location
+                        </label>
+
+                        <input
+                            id="fa-location"
+                            type="text"
+                            class="form-control"
+                            autocomplete="off"
+                        >
+
+                    </div>
+
+
+                    <!-- STATUS -->
+
+                    <div class="col-md-3">
+
+                        <label
+                            for="fa-form-status"
+                            class="form-label"
+                        >
+                            Status
+                        </label>
+
+                        <select
+                            id="fa-form-status"
+                            class="form-select"
+                        >
+
+                            <option value="Active">
+                                Active
+                            </option>
+
+                            <option value="Inactive">
+                                Inactive
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- DESCRIPTION -->
+
+                    <div class="col-12">
+
+                        <label
+                            for="fa-description"
+                            class="form-label"
+                        >
+                            Description
+                        </label>
+
+                        <textarea
+                            id="fa-description"
+                            rows="3"
+                            class="form-control"
+                        ></textarea>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+            <!-- FOOTER -->
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    id="btn-fa-save"
+                    type="button"
+                    class="btn btn-primary"
+                >
+                    <i class="fa-solid fa-floppy-disk me-1"></i>
+
+                    Save Fixed Asset
+                </button>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- ==========================================================
+     FIXED ASSET CATEGORY MODAL
+========================================================== -->
+
+<div
+    class="modal fade"
+    id="faCategoryModal"
+    tabindex="-1"
+    aria-hidden="true"
+>
+
+    <div
+        class="
+            modal-dialog
+            modal-xl
+            modal-dialog-scrollable
+            modal-dialog-centered
+        "
+    >
+
+        <div class="modal-content">
+
+
+            <!-- HEADER -->
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+                    Fixed Asset Category
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                >
+                </button>
+
+            </div>
+
+
+            <!-- BODY -->
+
+            <div class="modal-body">
+
+                <input
+                    id="fac-id"
+                    type="hidden"
+                >
+
+
+                <!-- CATEGORY FORM -->
+
+                <div class="row g-3">
+
+
+                    <!-- CODE -->
+
+                    <div class="col-md-2">
+
+                        <label
+                            for="fac-code"
+                            class="form-label"
+                        >
+                            Code *
+                        </label>
+
+                        <input
+                            id="fac-code"
+                            type="text"
+                            class="form-control"
+                            autocomplete="off"
+                        >
+
+                    </div>
+
+
+                    <!-- CATEGORY NAME -->
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="fac-name"
+                            class="form-label"
+                        >
+                            Category Name *
+                        </label>
+
+                        <input
+                            id="fac-name"
+                            type="text"
+                            class="form-control"
+                            autocomplete="off"
+                        >
+
+                    </div>
+
+
+                    <!-- USEFUL LIFE -->
+
+                    <div class="col-md-2">
+
+                        <label
+                            for="fac-life"
+                            class="form-label"
+                        >
+                            Useful Life (Months) *
+                        </label>
+
+                        <input
+                            id="fac-life"
+                            type="number"
+                            min="1"
+                            step="1"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <!-- ACTIVE -->
+
+                    <div class="col-md-2">
+
+                        <label
+                            for="fac-active"
+                            class="form-label"
+                        >
+                            Active
+                        </label>
+
+                        <select
+                            id="fac-active"
+                            class="form-select"
+                        >
+
+                            <option value="true">
+                                Active
+                            </option>
+
+                            <option value="false">
+                                Inactive
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- ASSET ACCOUNT -->
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="fac-asset-account"
+                            class="form-label"
+                        >
+                            Asset Account *
+                        </label>
+
+                        <select
+                            id="fac-asset-account"
+                            class="form-select"
+                        >
+                        </select>
+
+                    </div>
+
+
+                    <!-- ACCUMULATED DEPRECIATION -->
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="fac-accum-account"
+                            class="form-label"
+                        >
+                            Accumulated Depreciation *
+                        </label>
+
+                        <select
+                            id="fac-accum-account"
+                            class="form-select"
+                        >
+                        </select>
+
+                    </div>
+
+
+                    <!-- DEPRECIATION EXPENSE -->
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="fac-expense-account"
+                            class="form-label"
+                        >
+                            Depreciation Expense *
+                        </label>
+
+                        <select
+                            id="fac-expense-account"
+                            class="form-select"
+                        >
+                        </select>
+
+                    </div>
+
+
+                    <!-- GAIN ACCOUNT -->
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="fac-gain-account"
+                            class="form-label"
+                        >
+                            Gain on Disposal
+                        </label>
+
+                        <select
+                            id="fac-gain-account"
+                            class="form-select"
+                        >
+                        </select>
+
+                    </div>
+
+
+                    <!-- LOSS ACCOUNT -->
+
+                    <div class="col-md-4">
+
+                        <label
+                            for="fac-loss-account"
+                            class="form-label"
+                        >
+                            Loss on Disposal
+                        </label>
+
+                        <select
+                            id="fac-loss-account"
+                            class="form-select"
+                        >
+                        </select>
+
+                    </div>
+
+
+                    <!-- SAVE CATEGORY -->
+
+                    <div class="col-md-4 d-flex align-items-end">
+
+                        <button
+                            id="btn-fac-save"
+                            type="button"
+                            class="btn btn-primary w-100"
+                        >
+                            <i class="fa-solid fa-floppy-disk me-1"></i>
+
+                            Save Category
+                        </button>
+
+                    </div>
+
+
+                </div>
+
+
+                <hr class="my-4">
+
+
+                <!-- CATEGORY LIST -->
+
+                <div class="table-responsive">
+
+                    <table
+                        class="
+                            table
+                            finova-table
+                            finova-table-bordered
+                            mb-0
+                        "
+                    >
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Code
+                                </th>
+
+                                <th>
+                                    Category
+                                </th>
+
+                                <th>
+                                    Life
+                                </th>
+
+                                <th>
+                                    Asset Account
+                                </th>
+
+                                <th>
+                                    Accum. Dep.
+                                </th>
+
+                                <th>
+                                    Expense
+                                </th>
+
+                                <th class="finova-table-action">
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="fac-body">
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- ==========================================================
+     DEPRECIATION MODAL
+========================================================== -->
+
+<div
+    class="modal fade"
+    id="faDepModal"
+    tabindex="-1"
+    aria-hidden="true"
+>
+
+    <div
+        class="
+            modal-dialog
+            modal-lg
+            modal-dialog-scrollable
+            modal-dialog-centered
+        "
+    >
+
+        <div class="modal-content">
+
+
+            <!-- HEADER -->
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+                    Depreciation
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                >
+                </button>
+
+            </div>
+
+
+            <!-- BODY -->
+
+            <div class="modal-body">
+
+                <input
+                    id="fad-asset-id"
+                    type="hidden"
+                >
+
+
+                <!-- ASSET INFORMATION -->
+
+                <div
+                    id="fad-asset-info"
+                    class="alert alert-light border"
+                >
+                </div>
+
+
+                <!-- DEPRECIATION INPUT -->
+
+                <div class="row g-3">
+
+
+                    <div class="col-md-5">
+
+                        <label
+                            for="fad-date"
+                            class="form-label"
+                        >
+                            Depreciation Date
+                        </label>
+
+                        <input
+                            id="fad-date"
+                            type="date"
+                            class="form-control"
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-7 d-flex align-items-end">
+
+                        <button
+                            id="btn-fad-create"
+                            type="button"
+                            class="btn btn-primary"
+                        >
+                            <i class="fa-solid fa-plus me-1"></i>
+
+                            Create Draft Depreciation
+                        </button>
+
+                    </div>
+
+
+                </div>
+
+
+                <hr class="my-4">
+
+
+                <!-- DEPRECIATION HISTORY -->
+
+                <div class="table-responsive">
+
+                    <table
+                        class="
+                            table
+                            finova-table
+                            finova-table-bordered
+                            mb-0
+                        "
+                    >
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Period
+                                </th>
+
+                                <th class="finova-table-number">
+                                    Amount
+                                </th>
+
+                                <th class="finova-table-number">
+                                    Accumulated
+                                </th>
+
+                                <th class="finova-table-number">
+                                    Book Value
+                                </th>
+
+                                <th class="finova-table-status">
+                                    Status
+                                </th>
+
+                                <th class="finova-table-action">
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="fad-body">
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- ==========================================================
+     DISPOSAL MODAL
+========================================================== -->
+
+<div
+    class="modal fade"
+    id="faDisposeModal"
+    tabindex="-1"
+    aria-hidden="true"
+>
+
+    <div
+        class="
+            modal-dialog
+            modal-dialog-centered
+        "
+    >
+
+        <div class="modal-content">
+
+
+            <!-- HEADER -->
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">
+                    Dispose Fixed Asset
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                >
+                </button>
+
+            </div>
+
+
+            <!-- BODY -->
+
+            <div class="modal-body">
+
+                <input
+                    id="fadis-asset-id"
+                    type="hidden"
+                >
+
+
+                <!-- INFORMATION -->
+
+                <div
+                    id="fadis-info"
+                    class="alert alert-warning"
+                >
+                </div>
+
+
+                <!-- DISPOSAL DATE -->
+
+                <div class="mb-3">
+
+                    <label
+                        for="fadis-date"
+                        class="form-label"
+                    >
+                        Disposal Date *
+                    </label>
+
+                    <input
+                        id="fadis-date"
+                        type="date"
+                        class="form-control"
+                    >
+
+                </div>
+
+
+                <!-- SELLING PRICE -->
+
+                <div class="mb-3">
+
+                    <label
+                        for="fadis-amount"
+                        class="form-label"
+                    >
+                        Proceeds / Selling Price
+                    </label>
+
+                    <input
+                        id="fadis-amount"
+                        type="number"
+                        min="0"
+                        step="1"
+                        value="0"
+                        class="form-control"
+                    >
+
+                </div>
+
+
+                <!-- PROCEEDS ACCOUNT -->
+
+                <div class="mb-3">
+
+                    <label
+                        for="fadis-account"
+                        class="form-label"
+                    >
+                        Cash / Bank / Disposal Proceeds Account *
+                    </label>
+
+                    <select
+                        id="fadis-account"
+                        class="form-select"
+                    >
+                    </select>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- FOOTER -->
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    data-bs-dismiss="modal"
+                >
+                    Cancel
+                </button>
+
+
+                <button
+                    id="btn-fadis-save"
+                    type="button"
+                    class="btn btn-danger"
+                >
+                    <i class="fa-solid fa-trash-can me-1"></i>
+
+                    Dispose &amp; Create Journal
+                </button>
+
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>

@@ -100,6 +100,31 @@ export class FinovaRouter {
 
             },
 
+            /*
+==========================================================
+FIXED ASSET
+==========================================================
+*/
+
+"fixed-asset": {
+
+    title:
+        "Fixed Asset",
+
+    html:
+        "modules/fixed-asset/fixed-asset.html",
+
+    css:
+        "modules/fixed-asset/fixed-asset.css",
+
+    js:
+        "modules/fixed-asset/fixed-asset.js",
+
+    className:
+        "FixedAsset"
+
+},
+
             
 
             "general-ledger": {

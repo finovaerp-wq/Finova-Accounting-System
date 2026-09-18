@@ -450,11 +450,18 @@ generateMenu() {
                 [
 
                     this.menuItem(
-                        "GL Journal",
-                        "fa-solid fa-book-journal-whills",
-                        "gl-journal",
-                        true
-                    )
+    "GL Journal",
+    "fa-solid fa-book-journal-whills",
+    "gl-journal",
+    true
+),
+
+this.menuItem(
+    "Fixed Asset",
+    "fa-solid fa-building",
+    "fixed-asset",
+    true
+)
 
                 ]
             )}
