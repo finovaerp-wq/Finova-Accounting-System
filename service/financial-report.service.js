@@ -3,7 +3,7 @@
 FINOVA ACCOUNTING SYSTEM
 SERVICE : FINANCIAL REPORT
 FILE    : financial-report.service.js
-VERSION : 1.0.0
+VERSION : 1.2.0 FINAL - FINANCIAL STATEMENT BOOK SUPPORT
 ==========================================================
 */
 
@@ -1985,6 +1985,823 @@ static async calculatePeriodBalances(
     };
 
 }
+
+/*
+==========================================================
+CALCULATE STATEMENT OF CHANGES IN EQUITY
+==========================================================
+
+This engine reconciles:
+Opening equity
++ Profit / (loss) for period
++ Direct movements posted to equity
+= Closing equity
+
+Direct equity movements are kept as actual posted movements and are
+not guessed as dividend / capital / OCI unless FINOVA later stores a
+dedicated transaction classification.
+==========================================================
+*/
+static async calculateChangesInEquity(
+    dateFrom,
+    dateTo
+) {
+
+    if (!dateFrom || !dateTo) {
+        throw new Error(
+            "Changes in Equity reporting period is required."
+        );
+    }
+
+    const accounts =
+        await this.loadAccounts();
+
+    const accountMap =
+        new Map(
+            accounts.map(
+                account => [
+                    String(account.id),
+                    account
+                ]
+            )
+        );
+
+    const openingDate =
+        new Date(
+            `${dateFrom}T00:00:00`
+        );
+
+    openingDate.setDate(
+        openingDate.getDate() - 1
+    );
+
+    const openingDateTo =
+        [
+            openingDate.getFullYear(),
+            String(openingDate.getMonth() + 1).padStart(2, "0"),
+            String(openingDate.getDate()).padStart(2, "0")
+        ].join("-");
+
+    const openingJournals =
+        await this.loadPostedJournals(
+            null,
+            openingDateTo
+        );
+
+    const openingDetails =
+        await this.loadJournalDetails(
+            openingJournals
+        );
+
+    const openingBalances =
+        this.calculateAccountBalances(
+            accounts,
+            this.normalizePostings(
+                openingDetails
+            )
+        );
+
+    const periodJournals =
+        await this.loadPostedJournals(
+            dateFrom,
+            dateTo
+        );
+
+    const periodDetails =
+        await this.loadJournalDetails(
+            periodJournals
+        );
+
+    const periodPostings =
+        this.normalizePostings(
+            periodDetails
+        );
+
+    const periodBalances =
+        this.calculateAccountBalances(
+            accounts,
+            periodPostings
+        );
+
+    const closingJournals =
+        await this.loadPostedJournals(
+            null,
+            dateTo
+        );
+
+    const closingDetails =
+        await this.loadJournalDetails(
+            closingJournals
+        );
+
+    const closingBalances =
+        this.calculateAccountBalances(
+            accounts,
+            this.normalizePostings(
+                closingDetails
+            )
+        );
+
+    const equityAccounts =
+        accounts.filter(
+            account =>
+                this.resolveAccountGroup(
+                    account,
+                    accountMap
+                ) === "equity"
+        );
+
+    const openingMap =
+        new Map(
+            openingBalances.map(
+                row => [
+                    String(row.account_id),
+                    Number(row.balance || 0)
+                ]
+            )
+        );
+
+    const closingMap =
+        new Map(
+            closingBalances.map(
+                row => [
+                    String(row.account_id),
+                    Number(row.balance || 0)
+                ]
+            )
+        );
+
+    const periodMap =
+        new Map(
+            periodBalances.map(
+                row => [
+                    String(row.account_id),
+                    Number(row.balance || 0)
+                ]
+            )
+        );
+
+    const components =
+        equityAccounts.map(
+            account => {
+
+                const key =
+                    String(account.id);
+
+                return {
+                    account_id:
+                        account.id,
+
+                    account_code:
+                        account.account_code,
+
+                    account_name:
+                        account.account_name,
+
+                    parent_id:
+                        account.parent_id ?? null,
+
+                    opening_balance:
+                        openingMap.get(key) || 0,
+
+                    direct_movement:
+                        periodMap.get(key) || 0,
+
+                    closing_balance:
+                        closingMap.get(key) || 0
+                };
+
+            }
+        );
+
+    const openingEquity =
+        components.reduce(
+            (total, row) =>
+                total
+                +
+                Number(
+                    row.opening_balance || 0
+                ),
+            0
+        );
+
+    const directEquityMovement =
+        components.reduce(
+            (total, row) =>
+                total
+                +
+                Number(
+                    row.direct_movement || 0
+                ),
+            0
+        );
+
+    const closingEquityAccounts =
+        components.reduce(
+            (total, row) =>
+                total
+                +
+                Number(
+                    row.closing_balance || 0
+                ),
+            0
+        );
+
+    const periodProfitLoss =
+        periodBalances.filter(
+            account =>
+                account.group === "revenue"
+                ||
+                account.group === "expense"
+        );
+
+    const revenue =
+        periodProfitLoss
+            .filter(
+                account =>
+                    account.group === "revenue"
+            )
+            .reduce(
+                (total, account) =>
+                    total
+                    +
+                    Number(
+                        account.balance || 0
+                    ),
+                0
+            );
+
+    const expense =
+        periodProfitLoss
+            .filter(
+                account =>
+                    account.group === "expense"
+            )
+            .reduce(
+                (total, account) =>
+                    total
+                    +
+                    Number(
+                        account.balance || 0
+                    ),
+                0
+            );
+
+    const profitForPeriod =
+        revenue - expense;
+
+    return {
+        period: {
+            dateFrom,
+            dateTo
+        },
+
+        components,
+
+        totals: {
+            openingEquity,
+            profitForPeriod,
+            directEquityMovement,
+            closingEquityAccounts,
+            closingEquityIncludingProfit:
+                closingEquityAccounts
+                +
+                profitForPeriod
+        }
+    };
+
+}
+
+
+/*
+==========================================================
+CALCULATE CASH FLOW
+==========================================================
+
+FINOVA uses transaction-level Posted GL data.
+
+Cash / cash-equivalent accounts are identified from the COA name/code.
+Each journal's cash-side movement is analysed against its non-cash
+counter-account group.
+
+Classification:
+- counter Asset (non-cash)        -> Investing
+- counter Equity                  -> Financing
+- counter Liability:
+    operating names               -> Operating
+    financing names               -> Financing
+- counter Revenue / Expense       -> Operating
+
+This is intentionally conservative. Ambiguous items are returned in
+"unclassified" rather than silently forced into a PSAK 207 category.
+==========================================================
+*/
+static async calculateCashFlow(
+    dateFrom,
+    dateTo
+) {
+
+    if (!dateFrom || !dateTo) {
+        throw new Error(
+            "Cash Flow reporting period is required."
+        );
+    }
+
+    const accounts =
+        await this.loadAccounts();
+
+    const accountMap =
+        new Map(
+            accounts.map(
+                account => [
+                    String(account.id),
+                    account
+                ]
+            )
+        );
+
+    const cashPattern =
+        /\b(CASH|KAS|BANK|GIRO|PETTY CASH|CASH EQUIVALENT|SETARA KAS)\b/i;
+
+    const cashAccounts =
+        accounts.filter(
+            account =>
+                this.resolveAccountGroup(
+                    account,
+                    accountMap
+                ) === "asset"
+                &&
+                cashPattern.test(
+                    `${account.account_code || ""} ${account.account_name || ""}`
+                )
+        );
+
+    const cashIds =
+        new Set(
+            cashAccounts.map(
+                account =>
+                    String(account.id)
+            )
+        );
+
+    const journals =
+        await this.loadPostedJournals(
+            dateFrom,
+            dateTo
+        );
+
+    const details =
+        await this.loadJournalDetails(
+            journals
+        );
+
+    const postings =
+        this.normalizePostings(
+            details
+        );
+
+    const postingsByJournal =
+        new Map();
+
+    postings.forEach(
+        posting => {
+
+            const key =
+                String(
+                    posting.journal_id
+                );
+
+            if (!postingsByJournal.has(key)) {
+                postingsByJournal.set(
+                    key,
+                    []
+                );
+            }
+
+            postingsByJournal
+                .get(key)
+                .push(posting);
+
+        }
+    );
+
+    const journalMap =
+        new Map(
+            journals.map(
+                journal => [
+                    String(journal.id),
+                    journal
+                ]
+            )
+        );
+
+    const operatingLiabilityPattern =
+        /(PAYABLE|UTANG USAHA|HUTANG USAHA|ACCRUED|ACCRUAL|TAX PAYABLE|UTANG PAJAK|VAT|PPN|PPh|SALARY|PAYROLL|WAGE)/i;
+
+    const financingLiabilityPattern =
+        /(LOAN|PINJAMAN|BANK LOAN|DEBT|LEASE LIABILITY|LIABILITAS SEWA|OBLIGATION|BOND|NOTES PAYABLE)/i;
+
+    const classifyCounterAccount =
+        account => {
+
+            if (!account) {
+                return "unclassified";
+            }
+
+            const group =
+                this.resolveAccountGroup(
+                    account,
+                    accountMap
+                );
+
+            const label =
+                `${account.account_code || ""} ${account.account_name || ""}`;
+
+            if (
+                group === "revenue"
+                ||
+                group === "expense"
+            ) {
+                return "operating";
+            }
+
+            if (
+                group === "equity"
+            ) {
+                return "financing";
+            }
+
+            if (
+                group === "liability"
+            ) {
+
+                if (
+                    financingLiabilityPattern.test(
+                        label
+                    )
+                ) {
+                    return "financing";
+                }
+
+                if (
+                    operatingLiabilityPattern.test(
+                        label
+                    )
+                ) {
+                    return "operating";
+                }
+
+                return "unclassified";
+            }
+
+            if (
+                group === "asset"
+            ) {
+                return "investing";
+            }
+
+            return "unclassified";
+        };
+
+    const activities = {
+        operating: [],
+        investing: [],
+        financing: [],
+        unclassified: []
+    };
+
+    postingsByJournal.forEach(
+        (
+            journalPostings,
+            journalId
+        ) => {
+
+            const cashPostings =
+                journalPostings.filter(
+                    posting =>
+                        cashIds.has(
+                            String(
+                                posting.account_id
+                            )
+                        )
+                );
+
+            if (
+                cashPostings.length === 0
+            ) {
+                return;
+            }
+
+            const nonCashPostings =
+                journalPostings.filter(
+                    posting =>
+                        !cashIds.has(
+                            String(
+                                posting.account_id
+                            )
+                        )
+                );
+
+            const cashMovement =
+                cashPostings.reduce(
+                    (total, posting) =>
+                        total
+                        +
+                        Number(
+                            posting.debit || 0
+                        )
+                        -
+                        Number(
+                            posting.credit || 0
+                        ),
+                    0
+                );
+
+            if (
+                Math.abs(
+                    cashMovement
+                )
+                <
+                0.01
+            ) {
+                return;
+            }
+
+            const categoryWeights = {
+                operating: 0,
+                investing: 0,
+                financing: 0,
+                unclassified: 0
+            };
+
+            nonCashPostings.forEach(
+                posting => {
+
+                    const account =
+                        accountMap.get(
+                            String(
+                                posting.account_id
+                            )
+                        );
+
+                    const category =
+                        classifyCounterAccount(
+                            account
+                        );
+
+                    categoryWeights[category] +=
+                        Math.abs(
+                            Number(
+                                posting.debit || 0
+                            )
+                            -
+                            Number(
+                                posting.credit || 0
+                            )
+                        );
+
+                }
+            );
+
+            const categories =
+                Object.entries(
+                    categoryWeights
+                )
+                .filter(
+                    ([, amount]) =>
+                        amount > 0.009
+                )
+                .sort(
+                    (a, b) =>
+                        b[1] - a[1]
+                );
+
+            let category =
+                "unclassified";
+
+            if (
+                categories.length === 1
+            ) {
+                category =
+                    categories[0][0];
+            }
+            else if (
+                categories.length > 1
+                &&
+                categories[0][1]
+                >
+                categories[1][1] * 1.5
+            ) {
+                category =
+                    categories[0][0];
+            }
+
+            const journal =
+                journalMap.get(
+                    journalId
+                )
+                || {};
+
+            activities[category].push({
+                journal_id:
+                    journalId,
+
+                journal_no:
+                    journal.journal_no
+                    ||
+                    journal.reference_no
+                    ||
+                    "-",
+
+                journal_date:
+                    journal.journal_date
+                    ||
+                    null,
+
+                description:
+                    journal.description
+                    ||
+                    "",
+
+                amount:
+                    cashMovement
+            });
+
+        }
+    );
+
+    const total =
+        rows =>
+            rows.reduce(
+                (sum, row) =>
+                    sum
+                    +
+                    Number(
+                        row.amount || 0
+                    ),
+                0
+            );
+
+    const openingDate =
+        new Date(
+            `${dateFrom}T00:00:00`
+        );
+
+    openingDate.setDate(
+        openingDate.getDate() - 1
+    );
+
+    const openingDateTo =
+        [
+            openingDate.getFullYear(),
+            String(openingDate.getMonth() + 1).padStart(2, "0"),
+            String(openingDate.getDate()).padStart(2, "0")
+        ].join("-");
+
+    const openingJournals =
+        await this.loadPostedJournals(
+            null,
+            openingDateTo
+        );
+
+    const openingDetails =
+        await this.loadJournalDetails(
+            openingJournals
+        );
+
+    const openingBalances =
+        this.calculateAccountBalances(
+            accounts,
+            this.normalizePostings(
+                openingDetails
+            )
+        );
+
+    const closingJournals =
+        await this.loadPostedJournals(
+            null,
+            dateTo
+        );
+
+    const closingDetails =
+        await this.loadJournalDetails(
+            closingJournals
+        );
+
+    const closingBalances =
+        this.calculateAccountBalances(
+            accounts,
+            this.normalizePostings(
+                closingDetails
+            )
+        );
+
+    const sumCashBalance =
+        balances =>
+            balances
+                .filter(
+                    row =>
+                        cashIds.has(
+                            String(
+                                row.account_id
+                            )
+                        )
+                )
+                .reduce(
+                    (sum, row) =>
+                        sum
+                        +
+                        Number(
+                            row.balance || 0
+                        ),
+                    0
+                );
+
+    const openingCash =
+        sumCashBalance(
+            openingBalances
+        );
+
+    const closingCash =
+        sumCashBalance(
+            closingBalances
+        );
+
+    const operating =
+        total(
+            activities.operating
+        );
+
+    const investing =
+        total(
+            activities.investing
+        );
+
+    const financing =
+        total(
+            activities.financing
+        );
+
+    const unclassified =
+        total(
+            activities.unclassified
+        );
+
+    const classifiedNetChange =
+        operating
+        +
+        investing
+        +
+        financing;
+
+    const actualNetChange =
+        closingCash
+        -
+        openingCash;
+
+    return {
+        period: {
+            dateFrom,
+            dateTo
+        },
+
+        cashAccounts:
+            cashAccounts.map(
+                account => ({
+                    id:
+                        account.id,
+                    account_code:
+                        account.account_code,
+                    account_name:
+                        account.account_name
+                })
+            ),
+
+        activities,
+
+        totals: {
+            operating,
+            investing,
+            financing,
+            unclassified,
+            classifiedNetChange,
+            actualNetChange,
+            openingCash,
+            closingCash,
+            reconciliationDifference:
+                actualNetChange
+                -
+                (
+                    classifiedNetChange
+                    +
+                    unclassified
+                )
+        }
+    };
+
+}
+
+
 /*
 ==========================================================
 CALCULATE TRIAL BALANCE
@@ -3507,6 +4324,38 @@ static async buildFinancialStatementDataset(
     };
 
 
+
+    /*
+    ======================================================
+    ADDITIONAL COMPLETE FINANCIAL STATEMENT COMPONENTS
+    ======================================================
+    */
+
+    const changesInEquityCurrent =
+        await this.calculateChangesInEquity(
+            currentDateFrom,
+            currentDateTo
+        );
+
+    const changesInEquityComparative =
+        await this.calculateChangesInEquity(
+            comparativeDateFrom,
+            comparativeDateTo
+        );
+
+    const cashFlowCurrent =
+        await this.calculateCashFlow(
+            currentDateFrom,
+            currentDateTo
+        );
+
+    const cashFlowComparative =
+        await this.calculateCashFlow(
+            comparativeDateFrom,
+            comparativeDateTo
+        );
+
+
     /*
     ======================================================
     FINAL DATASET
@@ -3550,6 +4399,32 @@ static async buildFinancialStatementDataset(
 
         trialBalance:
             trialBalance,
+
+
+        changesInEquity: {
+            current:
+                changesInEquityCurrent,
+            comparative:
+                changesInEquityComparative
+        },
+
+
+        cashFlow: {
+            current:
+                cashFlowCurrent,
+            comparative:
+                cashFlowComparative
+        },
+
+
+        notes: {
+            presentationCurrency:
+                "IDR",
+            source:
+                "Posted GL only",
+            requiresEntityDisclosures:
+                true
+        },
 
 
         totals:

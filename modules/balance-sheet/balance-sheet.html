@@ -1,9 +1,50 @@
+
+<style>
+/* Balance Sheet v3.0 report hierarchy */
+.balance-sheet-table .bs-section-row td,
+.balance-sheet-table .bs-section-cell {
+    background: #E8EEFC !important;
+    color: #1E3A8A !important;
+    font-weight: 700;
+    letter-spacing: .2px;
+    border-top: 2px solid #244494 !important;
+    border-color: #CBD5E1 !important;
+}
+.balance-sheet-table .bs-subtotal-row td {
+    background: #F3F4F6 !important;
+    font-weight: 700;
+    border-top: 2px solid #9CA3AF !important;
+}
+.balance-sheet-table .bs-root-row td {
+    background: #EEF2FF;
+    font-weight: 700;
+}
+.balance-sheet-table .bs-parent-row td {
+    background: #F8FAFC;
+    font-weight: 600;
+}
+.balance-sheet-table .bs-level-1 .bs-description-text { padding-left: 18px; }
+.balance-sheet-table .bs-level-2 .bs-description-text { padding-left: 36px; }
+.balance-sheet-table .bs-level-3 .bs-description-text { padding-left: 54px; }
+.balance-sheet-table .bs-level-4 .bs-description-text { padding-left: 72px; }
+.balance-sheet-table .bs-level-5 .bs-description-text { padding-left: 90px; }
+.balance-sheet-table .bs-account-separator { margin: 0 5px; color: #9CA3AF; }
+.balance-sheet-table .bs-negative { color: #B91C1C; }
+.balance-sheet-table .bs-future-period,
+.balance-sheet-table .bs-future-period-header { background: #F8FAFC !important; color: #94A3B8 !important; }
+.balance-sheet-table tfoot th {
+    background: #DBEAFE !important;
+    font-weight: 700;
+    border-top: 2px solid #244494 !important;
+}
+</style>
+
 <!--
 ==========================================================
 FINOVA ACCOUNTING SYSTEM
 MODULE  : BALANCE SHEET
 FILE    : balance-sheet.html
-VERSION : 2.0.0
+VERSION : 3.0.0 FINAL - MONTHLY POSITION
 ==========================================================
 -->
 
@@ -150,7 +191,7 @@ VERSION : 2.0.0
 
                         <option value="">
 
-                            Show All Accounts
+                            Show All Balance Sheet Accounts
 
                         </option>
 
@@ -424,9 +465,9 @@ VERSION : 2.0.0
 
                             <tr>
 
-                                <th class="bs-total-label">
+                                <th id="bs-total-label" class="bs-total-label">
 
-                                    TOTAL NET BALANCE
+                                    TOTAL LIABILITIES AND EQUITY
 
                                 </th>
 

@@ -2,7 +2,7 @@
 ==========================================================
 FINOVA ACCOUNTING SYSTEM
 FINANCIAL STATEMENT
-Version : 2.0.0
+Version : 3.0.0 FINAL - FINANCIAL STATEMENT BOOK
 ==========================================================
 */
 
@@ -2413,4 +2413,256 @@ tbody
 
     }
 
+}
+
+
+/* ==========================================================
+   FINOVA FINANCIAL STATEMENT
+   VERSION 2.1.0
+   COMPLETE FINANCIAL STATEMENT COMPONENTS
+========================================================== */
+
+/* Six statement cards: 3 columns desktop */
+.financial-statement-selection-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* New report warning / control information */
+.financial-statement-report-warning {
+    width: 100%;
+    margin: 0 0 14px;
+    padding: 10px 12px;
+    border: 1px solid #F1C56A;
+    border-radius: 6px;
+    background: #FFF9EC;
+    color: #7C5A10;
+    font-size: 10px;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+.financial-statement-report-note {
+    margin-top: 10px;
+    color: #64748B;
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+/* Notes to Financial Statements */
+.financial-statement-notes {
+    min-width: 0;
+}
+
+.financial-statement-note-section {
+    padding: 14px 0;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.financial-statement-note-section:last-child {
+    border-bottom: 0;
+}
+
+.financial-statement-note-section h5 {
+    margin: 0 0 7px;
+    color: #183153;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.financial-statement-note-section p {
+    margin: 0 0 7px;
+    color: #475569;
+    font-size: 10px;
+    font-weight: 400;
+    line-height: 1.6;
+}
+
+/* New statement section rows match TB / BS visual language */
+.financial-statement-report-group-row td {
+    background: #E8EEFC !important;
+    color: #1E3A8A !important;
+    font-weight: 700 !important;
+    border-top: 2px solid #244494 !important;
+}
+
+/* Accounting report typography */
+.financial-statement-preview-document,
+.financial-statement-preview-document table,
+.financial-statement-preview-document th,
+.financial-statement-preview-document td {
+    font-family: Tahoma, Arial, sans-serif;
+}
+
+.financial-statement-document-company-name {
+    font-size: 20px;
+}
+
+.financial-statement-report-title {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.financial-statement-report-table {
+    font-size: 10px;
+}
+
+/* Tabs may contain six reports */
+.financial-statement-preview-tabs {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+}
+
+@media (max-width: 991.98px) {
+    .financial-statement-selection-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 575.98px) {
+    .financial-statement-selection-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* ==========================================================
+   FINOVA FINANCIAL STATEMENT BOOK
+   VERSION 3.0.0
+   Formal presentation inspired by a complete FS workbook
+========================================================== */
+.financial-statement-preview-document{background:#fff;font-family:Tahoma,Arial,sans-serif;border:1px solid #d7dbe0;box-shadow:0 2px 10px rgba(15,23,42,.06)}
+.financial-statement-document-header{padding:22px 28px 16px;border-bottom:2px solid #244494;background:#fff}
+.financial-statement-document-company-name{font-family:Tahoma,Arial,sans-serif;font-size:20px;font-weight:700;color:#111827;text-transform:uppercase}
+.financial-statement-document-company-detail{font-size:9px;color:#64748b;margin-top:3px}
+.financial-statement-document-period-label{font-size:8px;text-transform:uppercase;letter-spacing:.4px;color:#64748b}
+.financial-statement-document-period-value{font-size:11px;font-weight:700;color:#111827}
+.financial-statement-document-comparative{font-size:9px;color:#475569}
+.financial-statement-preview-tabs{padding:8px 12px;background:#f8fafc;border-bottom:1px solid #d7dbe0}
+.financial-statement-preview-tab{font-family:Tahoma,Arial,sans-serif;font-size:9px}
+.financial-statement-preview-content{padding:28px 34px;background:#fff}
+.financial-statement-book-page{max-width:1000px;margin:0 auto}
+.financial-statement-book-heading{text-align:center;margin:0 0 18px}
+.financial-statement-book-heading .financial-statement-report-title,.financial-statement-report-header .financial-statement-report-title{font-family:Tahoma,Arial,sans-serif;font-size:14px;font-weight:700;letter-spacing:.15px;color:#111827;text-transform:uppercase}
+.financial-statement-report-description{font-family:Tahoma,Arial,sans-serif;font-size:10px;color:#111827;margin-top:3px}
+.financial-statement-report-currency{font-family:Tahoma,Arial,sans-serif;font-size:9px;color:#475569}
+.financial-statement-report-table{font-family:Tahoma,Arial,sans-serif;font-size:9px;border-collapse:collapse}
+.financial-statement-report-table thead th{background:#fff;color:#111827;border-top:1px solid #111827;border-bottom:1px solid #111827;font-weight:700;padding:7px 8px}
+.financial-statement-report-table tbody td{padding:5px 8px;border-bottom:1px solid #e5e7eb}
+.financial-statement-report-group-row td{background:#E8EEFC!important;color:#1E3A8A!important;font-weight:700!important;border-top:2px solid #244494!important;border-bottom:1px solid #b9c7e8!important}
+.financial-statement-report-subtotal-row td{font-weight:700;border-top:1px solid #64748b!important}
+.financial-statement-report-total-row td{font-weight:700;border-top:2px solid #111827!important;border-bottom:3px double #111827!important}
+.financial-statement-report-account-name{padding-left:12px!important}
+.financial-statement-document-footer{font-family:Tahoma,Arial,sans-serif;font-size:8px;padding:10px 28px;border-top:1px solid #d7dbe0;color:#64748b;background:#fff}
+.financial-statement-notes .financial-statement-note-section{padding:12px 0;border-bottom:1px solid #e5e7eb}
+.financial-statement-notes .financial-statement-note-section h5{font-family:Tahoma,Arial,sans-serif;font-size:10px;font-weight:700;color:#111827;text-transform:uppercase}
+.financial-statement-notes .financial-statement-note-section p{font-family:Tahoma,Arial,sans-serif;font-size:9px;line-height:1.65;color:#1f2937}
+
+
+/* ==========================================================
+   FINOVA FS BOOK - FORMAL ACCOUNT HEADER / SUBTOTAL LAYOUT
+   ========================================================== */
+.financial-statement-report-account-header-row td {
+    background: #FFFFFF !important;
+    color: #111827 !important;
+    font-weight: 700 !important;
+    border-top: 0 !important;
+    border-bottom: 0 !important;
+    padding-top: 9px !important;
+    padding-bottom: 3px !important;
+}
+
+.financial-statement-report-subtotal-row td {
+    background: #FFFFFF !important;
+    color: #111827 !important;
+    font-weight: 700 !important;
+    border-top: 1px solid #111827 !important;
+    border-bottom: 0 !important;
+}
+
+.financial-statement-report-group-row td {
+    background: #E8EEFC !important;
+    color: #1E3A8A !important;
+    font-weight: 700 !important;
+    border-top: 2px solid #244494 !important;
+    border-bottom: 1px solid #B9C7E8 !important;
+}
+
+.financial-statement-report-account-row td {
+    border-top: 0 !important;
+    border-bottom: 0 !important;
+}
+
+.financial-statement-report-account-row .financial-statement-report-account-name {
+    font-weight: 400 !important;
+}
+
+/* Trial Balance is intentionally excluded from the Financial Statement Book. */
+#financial-statement-trial-balance,
+label[for="financial-statement-trial-balance"],
+[data-financial-statement-preview="trial-balance"] {
+    display: none !important;
+}
+
+
+/* ==========================================================
+   FINOVA FS 2.2.0 - FORMAL ACCOUNT GROUPING
+========================================================== */
+
+.financial-statement-report-account-header-row td {
+    padding-top: 9px !important;
+    padding-bottom: 5px !important;
+    background: #FFFFFF !important;
+    color: #111827 !important;
+    font-weight: 700 !important;
+    border-bottom: 0 !important;
+}
+
+.financial-statement-report-subtotal-row td {
+    background: #F7FAFD !important;
+    color: #183153 !important;
+    font-weight: 700 !important;
+    border-top: 1px solid #B8C6D9 !important;
+    border-bottom: 1px solid #B8C6D9 !important;
+}
+
+.financial-statement-report-account-row td {
+    background: #FFFFFF;
+}
+
+.financial-statement-report-group-row td {
+    background: #E8EEFC !important;
+    color: #1E3A8A !important;
+    font-weight: 700 !important;
+    border-top: 2px solid #244494 !important;
+}
+
+
+/* ==========================================================
+   FINOVA FS 2.3.0 - PROFIT & LOSS FORMAL GROUPING
+========================================================== */
+
+.financial-statement-report-account-header-row td{
+    background:#FFFFFF !important;
+    color:#111827 !important;
+    font-weight:700 !important;
+    padding-top:8px !important;
+    padding-bottom:4px !important;
+}
+
+.financial-statement-report-subtotal-row td{
+    background:#EAF3FC !important;
+    color:#183153 !important;
+    font-weight:700 !important;
+    border-top:1px solid #B8C6D9 !important;
+    border-bottom:1px solid #B8C6D9 !important;
+}
+
+.financial-statement-report-grand-total-row td{
+    background:#DCEBFA !important;
+    color:#0B3266 !important;
+    font-weight:700 !important;
+    border-top:2px solid #244494 !important;
+    border-bottom:2px solid #244494 !important;
 }

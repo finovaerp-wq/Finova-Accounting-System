@@ -1,26 +1,84 @@
-FINOVA USER MANAGEMENT - FINAL DEPLOY
+FINOVA ACCOUNTING SYSTEM - DEPLOYMENT NOTES
 
-1. Copy folder:
-   supabase/functions/admin-user-management/index.ts
-   into the FINOVA project root.
+A. FRONTEND
 
-2. Copy:
-   modules/user-management/user-management.js
-   to replace the existing file.
+1.  Pastikan project root memuat: assets/ modules/ service/ database/
+    supabase/ control-center/ index.html login.html
 
-3. Open PowerShell in the FINOVA project root and run:
+2.  Untuk production web: Local Project -> Git Repository -> Vercel ->
+    Deploy
 
-   supabase login
-   supabase link --project-ref YOUR_PROJECT_REF
-   supabase functions deploy admin-user-management
+3.  Setelah deploy cek:
 
-4. Check deployment:
+    -   login/session
+    -   dynamic module imports
+    -   company context
+    -   sidebar/router
+    -   RLS errors
+    -   Supabase Auth redirect URL
+    -   case-sensitive asset paths
 
-   supabase functions list
+B. DATABASE
 
-5. Reload FINOVA with Ctrl + F5 and test Add User.
+1.  Backup database sebelum migration production.
 
-IMPORTANT:
-- Do not place SUPABASE_SERVICE_ROLE_KEY in frontend JavaScript.
-- Supabase Edge Functions receive SUPABASE_URL, SUPABASE_ANON_KEY,
-  and SUPABASE_SERVICE_ROLE_KEY as server-side environment variables.
+2.  Migration project saat ini berada di: database/migration/
+
+3.  Migration versioned saat ini mencakup 001 sampai 033:
+
+    -   baseline master
+    -   Control Center / multi-company
+    -   user-company isolation
+    -   customer configuration
+    -   Super Admin company context
+    -   effective-company RLS
+    -   secure Bank Master
+    -   tenant guard
+    -   audit trigger/writer
+
+4.  Verifikasi migration pada target Supabase sebelum menganggap
+    repository sama dengan live schema.
+
+C. USER MANAGEMENT EDGE FUNCTION
+
+File: supabase/functions/admin-user-management/index.ts
+
+Deploy:
+
+supabase login supabase link –project-ref YOUR_PROJECT_REF supabase
+functions deploy admin-user-management supabase functions list
+
+Kemudian reload FINOVA dan test Add/Edit/User Management sesuai
+permission.
+
+D. SECURITY
+
+IMPORTANT: - JANGAN menaruh SUPABASE_SERVICE_ROLE_KEY di frontend
+JavaScript. - Edge Function menerima server-side environment variables
+dari Supabase. - Frontend hanya menggunakan public/publishable client
+configuration. - RLS adalah database security boundary utama. - Test
+Company A tidak dapat membaca/mengubah Company B. - Test Super Admin
+dengan dan tanpa selected company context. - Jangan mencetak auth
+session/token sensitif ke production console.
+
+E. FINAL SMOKE TEST
+
+-   Dashboard
+-   User Management
+-   Business Partner
+-   Chart of Accounts
+-   Tax Master
+-   Accounting Period
+-   Account Payable + Payment
+-   Account Receivable + Payment
+-   Aging AP/AR
+-   GL Journal
+-   Fixed Asset
+-   General Ledger
+-   Trial Balance
+-   Balance Sheet
+-   Profit & Loss
+-   Financial Statement
+-   Cash Flow Forecast
+-   Multi-company isolation
+-   Audit/RLS

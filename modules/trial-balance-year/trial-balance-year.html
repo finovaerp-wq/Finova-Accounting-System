@@ -1,9 +1,38 @@
+<style>
+/* TRIAL BALANCE YEAR 3.1 - GROUPED */
+.trial-balance-table .tb-section-row td {
+    background:#E8EEFC !important;
+    color:#1E3A8A !important;
+    font-weight:700;
+    border-top:2px solid #244494 !important;
+}
+.trial-balance-table .tb-section-cell {
+    text-align:left !important;
+}
+</style>
+
+<style>
+/* TRIAL BALANCE YEAR 3.0 - MONTH END BALANCE */
+.trial-balance-table .tb-col-ending { width:150px; }
+.trial-balance-table .tb-ending-header,
+.trial-balance-table .tb-ending-balance,
+.trial-balance-table .tb-total-ending {
+    font-weight:700;
+    border-left:2px solid #CBD5E1 !important;
+}
+.trial-balance-table .tb-future-period,
+.trial-balance-table .tb-future-period-header {
+    background:#F8FAFC !important;
+    color:#94A3B8 !important;
+}
+.trial-balance-table .tb-negative { color:#B91C1C; }
+</style>
 <!--
 ==========================================================
 FINOVA ACCOUNTING SYSTEM
 MODULE  : TRIAL BALANCE YEAR
 FILE    : trial-balance-year.html
-VERSION : 2.0.0
+VERSION : 3.1.0 FINAL - GROUPED MONTH END BALANCE
 ==========================================================
 -->
 
@@ -262,6 +291,8 @@ VERSION : 2.0.0
                             <col class="tb-col-month">
                             <col class="tb-col-month">
 
+                            <col class="tb-col-ending">
+
                         </colgroup>
 
 
@@ -400,6 +431,12 @@ VERSION : 2.0.0
 
                                     Dec
 
+                                </th>
+
+                            
+                                <th
+                                    class="finova-table-number tb-period-header tb-ending-header">
+                                    Ending Balance
                                 </th>
 
                             </tr>
@@ -545,6 +582,13 @@ VERSION : 2.0.0
 
                                     0
 
+                                </th>
+
+                            
+                                <th
+                                    id="tb-total-ending"
+                                    class="finova-table-number tb-total-ending">
+                                    0
                                 </th>
 
                             </tr>

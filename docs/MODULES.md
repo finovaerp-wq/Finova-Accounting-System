@@ -1,12 +1,14 @@
 # Module Reference
 
+Dokumen ini mengikuti route yang saat ini terdaftar pada
+`assets/js/core/router.js`.
+
 ## Dashboard
 
 **Route:** `dashboard`\
 **Class:** `Dashboard`
 
-Purpose: accounting summary landing page. It loads dashboard
-KPIs/summaries from the accounting data available to the frontend.
+Landing page ringkasan aktivitas dan informasi akuntansi.
 
 ## User Management
 
@@ -14,9 +16,9 @@ KPIs/summaries from the accounting data available to the frontend.
 **Class:** `UserManagement`\
 **Service:** `UserManagementService`
 
-Purpose: maintain application users, roles, and status. UI behavior
-distinguishes Manager and Staff capabilities. Authorization must also be
-enforced server-side.
+Mengelola user, role/status, company assignment, dan operasi
+administratif yang terkait. Operasi privileged menggunakan server-side
+Supabase Edge Function.
 
 ## Business Partner
 
@@ -25,11 +27,8 @@ enforced server-side.
 **Services:** `BusinessPartnerService`, `BusinessPartnerBankService`,
 `TermOfPaymentService`
 
-Purpose: Customer/Vendor/Employee master data, TOP, contact/address
-information, active status, and bank-grid support.
-
-Operational rule: inactive partners should not appear in AP/AR/GL
-transaction selectors.
+Master Customer, Vendor, Employee, TOP, alamat/kontak, status aktif, dan
+rekening bank. Partner inactive tidak digunakan untuk transaksi baru.
 
 ## Chart of Accounts
 
@@ -37,8 +36,8 @@ transaction selectors.
 **Class:** `ChartOfAccounts`\
 **Service:** `ChartOfAccountsService`
 
-Purpose: maintain account code/name, hierarchy/parent, currency, normal
-balance, transaction permission, and status.
+Master akun, hierarchy/parent, currency, normal balance, transaction
+permission, dan status.
 
 ## Tax Master
 
@@ -46,8 +45,16 @@ balance, transaction permission, and status.
 **Class:** `Tax`\
 **Service:** `TaxService`
 
-Purpose: tax code/name/type/rate and accounting mappings used by
-transaction modules.
+Master tax code/type/rate dan account mapping.
+
+## Accounting Period
+
+**Route:** `accounting-period`\
+**Class:** `AccountingPeriod`\
+**Service:** `AccountingPeriodService`
+
+Mengelola periode akuntansi dan status periode yang menjadi kontrol
+transaksi/posting.
 
 ## Account Payable
 
@@ -55,17 +62,9 @@ transaction modules.
 **Class:** `AccountPayable`\
 **Service:** `AccountPayableService`
 
-Purpose: Vendor invoices, invoice detail, Tax (+), Tax (-), TOP/due
-date, payment interaction, status lifecycle, and AP-generated GL
-Journal.
-
-Supporting modal files:
-
-``` text
-account-payable-modal.html
-account-payable-detail-modal.html
-account-payable-payment-modal.html
-```
+Vendor invoice, detail invoice, Tax (+), Tax (-), TOP/due date, status,
+payment, dan integrasi GL Journal. AP Payment diproses dari module ini,
+bukan route standalone.
 
 ## Account Receivable
 
@@ -73,30 +72,22 @@ account-payable-payment-modal.html
 **Class:** `AccountReceivable`\
 **Service:** `AccountReceivableService`
 
-Purpose: Customer invoices, invoice detail, taxes, payment interaction,
-status lifecycle, and AR-generated GL Journal.
-
-Supporting modal files:
-
-``` text
-account-receivable-modal.html
-account-receivable-detail-modal.html
-account-receivable-payment-modal.html
-```
+Customer invoice, detail, tax, status, payment, dan integrasi GL
+Journal. AR Payment diproses dari module ini, bukan route standalone.
 
 ## Aging Payable
 
 **Route:** `aging-payable`\
 **Class:** `AgingPayable`
 
-Purpose: analyze outstanding payable balances by age/due-date bucket.
+Analisis outstanding AP berdasarkan due date/aging bucket.
 
 ## Aging Receivable
 
 **Route:** `aging-receivable`\
 **Class:** `AgingReceivable`
 
-Purpose: analyze outstanding receivable balances by age/due-date bucket.
+Analisis outstanding AR berdasarkan due date/aging bucket.
 
 ## GL Journal
 
@@ -104,94 +95,95 @@ Purpose: analyze outstanding receivable balances by age/due-date bucket.
 **Class:** `GeneralJournal`\
 **Service:** `GeneralJournalService`
 
-Purpose: manual and source-generated journal listing/detail,
-Draft/Posted/Void lifecycle, balancing, source traceability, export, and
-preview.
+Manual/source-generated journal, detail debit-credit, Draft/Posted/Void,
+source traceability, export, dan preview.
 
-Supporting modal files:
+## Fixed Asset
 
-``` text
-gl-journal-modal.html
-journal-detail-modal.html
-```
+**Route:** `fixed-asset`\
+**Class:** `FixedAsset`\
+**Service:** `FixedAssetService`
 
-## AP Payment
-
-**Route:** `ap-payment`\
-**Class:** `APPayment`
-
-Purpose: dedicated AP payment module route. AP invoice-level payment
-handling also exists in the Account Payable module, so future
-development should keep one authoritative payment workflow and avoid
-duplicate posting logic.
-
-## AR Payment
-
-**Route:** `ar-payment`\
-**Class:** `ARPayment`
-
-Purpose: dedicated AR payment module route. AR invoice-level payment
-handling also exists in Account Receivable; future development should
-keep posting/status logic synchronized.
+Mengelola fixed asset category, fixed asset, depreciation transaction,
+dan integrasi GL Journal. Service saat ini mereferensikan
+`mst_fixed_asset_category`, `mst_fixed_asset`, dan
+`trx_fixed_asset_depreciation`.
 
 ## General Ledger
 
 **Route:** `general-ledger`\
 **Class:** `GeneralLedger`
 
-Purpose: account-level ledger reporting sourced from journal
-transactions.
+Ledger per akun dari GL Journal.
 
 ## Trial Balance Year
 
 **Route:** `trial-balance-year`\
 **Class:** `TrialBalanceYear`
 
-Purpose: yearly trial-balance presentation with account balances and
-debit/credit reconciliation.
-
-## Income Statement
-
-**Route:** `income-statement`\
-**Class:** `IncomeStatement`
-
-Purpose: income-statement reporting route. Final production
-classification should be tied to explicit COA financial-statement
-grouping.
+Trial balance tahunan dan rekonsiliasi debit-credit.
 
 ## Balance Sheet
 
 **Route:** `balance-sheet`\
 **Class:** `BalanceSheet`
 
-Purpose: Balance Sheet presentation using accounting balances and
-explicit COA classification/hierarchy.
+Laporan posisi keuangan berdasarkan saldo akuntansi dan klasifikasi COA.
 
 ## Profit & Loss
 
 **Route:** `profit-loss`\
 **Class:** `ProfitLoss`
 
-Purpose: Profit & Loss reporting using accounting balances and explicit
-COA classification/hierarchy.
+Laporan laba rugi berdasarkan saldo akuntansi dan klasifikasi COA.
+
+## Financial Statement
+
+**Route:** `financial-statement`\
+**Class:** `FinancialStatement`\
+**Service terkait:** `FinancialReportService`
+
+Module laporan keuangan terintegrasi yang tersedia pada router saat ini.
+
+## Cash Flow Forecast
+
+**Route:** `cash-flow-forecast`\
+**Class:** `CashFlowForecast`\
+**Service:** `CashFlowForecastService`
+
+Module forecast arus kas yang tersedia pada router saat ini.
+
+## Master Bank
+
+Folder `modules/master bank/` dan `service/bank.service.js` tersedia
+sebagai bagian master/reference bank. Bank Master juga memiliki RLS
+global yang diamankan pada migration database. Module ini tidak
+terdaftar sebagai route utama tersendiri pada `FinovaRouter` saat
+dokumentasi ini diperbarui.
 
 ## Settings
 
-A `modules/settings/` folder exists with HTML/CSS/JS, but it is not
-currently registered as a router route in `FinovaRouter`. Change
-Password and Logout are handled as global/sidebar actions rather than a
-normal routed settings page.
+Folder `modules/settings/` tersedia, tetapi bukan route normal pada
+`FinovaRouter`. Change Password dan Logout dijalankan sebagai
+global/sidebar actions.
+
+## Control Center
+
+Folder `control-center/` tersedia sebagai area administrasi terpisah
+dari SPA accounting utama. Struktur saat ini mencakup overview,
+companies, users, subscriptions, audit-log, dan backup-monitor
+placeholders/services.
 
 ## Cross-Module Components
 
-Common components/services include:
-
 -   Sidebar
 -   Topbar
--   global table
--   global pagination
--   Excel export
--   HTML preview
--   authentication/session
--   change password
--   shared layout/theme CSS
+-   Workspace tabs
+-   Global Table
+-   Global Pagination
+-   Excel Export
+-   HTML Preview
+-   Authentication/session
+-   Company/Tenant Context
+-   Customer Configuration Layer
+-   Shared layout/theme

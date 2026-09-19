@@ -1,56 +1,67 @@
 # Catatan Perubahan
 
-Semua perubahan penting pada FINOVA Accounting System dicatat dalam file
-ini.
+Dokumentasi ini diperbarui untuk mencerminkan kondisi project
+`FINOVA-PRODUCTION(10)` yang diaudit pada 2026-09-19.
 
-Dokumentasi ini diperbarui berdasarkan kondisi project **BACKUP 26
-FINISH**.
+## \[Belum Dirilis\] - 2026-09-19
 
-## \[Belum Dirilis\]
+### Ditambahkan
 
-### Dokumentasi
-
--   Memperbarui Accounting Flow setelah penghapusan module AP Payment
-    dan AR Payment standalone.
--   Menjelaskan bahwa payment tetap diproses langsung dari Account
-    Payable dan Account Receivable.
--   Memperjelas dasar Accounting Period untuk AP, AR, GL Journal, dan
-    payment.
+-   Accounting Period route/service.
+-   Fixed Asset route/module/service.
+-   Financial Statement route/module dan financial report service.
+-   Cash Flow Forecast route/module/service.
+-   Company Context service.
+-   Customer Configuration Layer.
+-   FINOVA Control Center structure.
+-   Supabase Edge Function `admin-user-management`.
+-   Multi-company database migrations.
+-   Effective-company RLS migrations.
+-   Tenant guard dan audit migrations.
 
 ### Diubah
 
--   AP Payment sekarang diproses langsung dari module Account Payable.
--   AR Payment sekarang diproses langsung dari module Account
-    Receivable.
--   AP Payment tetap menggunakan Payment Date sebagai dasar Accounting
-    Period.
--   AR Payment tetap menggunakan Payment Date sebagai dasar Accounting
-    Period.
--   Logic transaksi payment dan integrasi GL Journal tetap berada di
-    dalam Account Payable dan Account Receivable.
+-   Arsitektur berkembang dari single-company baseline menjadi
+    multi-company/effective-company.
+-   User Management privileged operations menggunakan server-side Edge
+    Function.
+-   Payment tetap diproses dari Account Payable/Account Receivable,
+    bukan route standalone.
+-   Database documentation sekarang mengikuti migration 001--033.
+-   Dokumentasi module mengikuti route aktual `FinovaRouter`.
 
-### Dihapus
+### Keamanan
 
--   Menu AP Payment standalone.
--   Menu AR Payment standalone.
--   Route AP Payment standalone.
--   Route AR Payment standalone.
--   Module standalone `modules/ap-payment`.
--   Module standalone `modules/ar-payment`.
+-   Effective-company RLS tersedia untuk master dan transaction tables.
+-   Secure global Bank Master RLS tersedia.
+-   Tenant guard layer tersedia.
+-   Audit trigger/writer effective-company tersedia.
+-   Service-role credential tetap server-side.
+
+### Catatan Audit
+
+-   `assets/js/core/supabase.js` masih mempunyai blok debug
+    `getSession()` pada snapshot project yang diaudit; blok tersebut
+    dapat dihapus untuk production logging hygiene.
+-   `modules/master bank/bank.service.js` perlu memastikan relative
+    import ke core Supabase menggunakan path yang benar dari lokasi
+    module.
+-   Versi komponen core belum seluruhnya menggunakan satu version
+    source.
 
 ## \[1.0.0-baseline\] - 2026-08-30
 
 ### Core
 
--   SPA Router dengan pemuatan module secara dinamis.
--   Integrasi Supabase Client dan Authentication.
--   Global Sidebar, Topbar, dan Layout.
--   Global Table dan Pagination.
+-   SPA Router.
+-   Supabase Client/Auth.
+-   Sidebar/Topbar/Layout.
+-   Global Table/Pagination.
 
 ### Master Data
 
 -   User Management.
--   Business Partner dengan tipe Customer, Vendor, dan Employee.
+-   Business Partner.
 -   Business Partner Bank.
 -   Term of Payment.
 -   Chart of Accounts.
@@ -58,42 +69,32 @@ FINISH**.
 
 ### Finance
 
--   Account Payable beserta proses AP Payment di dalam module.
--   Account Receivable beserta proses AR Payment di dalam module.
+-   Account Payable.
+-   Account Receivable.
 -   Aging Payable.
 -   Aging Receivable.
+-   Payment terintegrasi pada AP/AR.
 
 ### Accounting
 
--   GL Journal dengan status Draft, Posted, dan Void.
--   Source metadata untuk jurnal yang dibuat dari transaksi.
--   Integrasi jurnal AP/AR Invoice dan Payment.
+-   GL Journal.
+-   Source metadata.
+-   AP/AR invoice/payment journal integration.
 
 ### Report
 
 -   General Ledger.
 -   Trial Balance Year.
--   Income Statement.
 -   Balance Sheet.
 -   Profit & Loss.
 
 ## Format Changelog
 
-Untuk versi berikutnya gunakan:
-
 ``` text
 ## [x.y.z] - YYYY-MM-DD
-
 ### Ditambahkan
 ### Diubah
 ### Diperbaiki
 ### Dihapus
 ### Keamanan
 ```
-
-Gunakan semantic versioning jika memungkinkan:
-
--   MAJOR --- perubahan arsitektur/data yang tidak kompatibel dengan
-    versi sebelumnya.
--   MINOR --- penambahan module atau fitur yang tetap kompatibel.
--   PATCH --- perbaikan yang tetap kompatibel.

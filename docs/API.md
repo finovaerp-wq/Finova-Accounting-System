@@ -1,23 +1,15 @@
 # Internal API / Service Reference
 
-This document describes the internal JavaScript service layer used by
-FINOVA. It is not a public HTTP REST API.
+Dokumen ini menjelaskan internal JavaScript service layer FINOVA. Ini
+bukan public REST API.
 
 ## Supabase Core
 
-File:
+File: `assets/js/core/supabase.js`
 
-``` text
-assets/js/core/supabase.js
-```
+Exports utama: - `supabase` - `TABLE` - `CONFIG`
 
-Exports:
-
--   `supabase` --- configured Supabase client
--   `TABLE` --- centralized table-name constants
--   `CONFIG` --- application defaults
-
-Current table constants include:
+Runtime table constants yang saat ini didefinisikan pada core:
 
 ``` text
 mst_users
@@ -38,151 +30,158 @@ trx_ap_payment
 trx_ar_payment
 ```
 
-## AuthService
+Beberapa service, seperti Fixed Asset, juga menggunakan nama tabel
+domain secara langsung.
+
+## Core/Context Services
+
+### AuthService
 
 File: `service/auth.service.js`
 
-Responsibility:
+Authentication, session, login/logout, password/session-related flow.
 
--   authentication/session operations;
--   login/logout support;
--   interaction with Supabase Auth.
+### CompanyContextService
 
-Privileged user-management operations should not expose
-admin/service-role credentials in the browser.
+File: `service/company-context.service.js`
 
-## UserService
+Mendukung company context/effective company workflow pada multi-company
+architecture.
 
-File: `service/user.service.js`
+### CustomerConfigService
 
-Responsibility:
+File: `service/customer-config.service.js`
 
--   application user/profile data used by the UI.
+Customer/company configuration layer yang digunakan aplikasi.
 
-## UserManagementService
+## Master Services
 
-File: `service/user-management.service.js`
+### UserService
 
-Responsibility:
+`service/user.service.js`
 
--   user-management data operations;
--   role/status administration support.
+Profile/user data untuk UI.
 
-Manager/Staff authorization must still be enforced server-side/RLS;
-hiding UI controls alone is not sufficient security.
+### UserManagementService
 
-## BusinessPartnerService
+`service/user-management.service.js`
 
-File: `service/business-partner.service.js`
+User administration. Privileged auth-user operations harus melalui
+trusted server-side mechanism/Edge Function.
 
-Responsibility:
+### BusinessPartnerService
 
--   Business Partner CRUD/search;
--   customer/vendor/employee master data.
+`service/business-partner.service.js`
 
-Operational modules should filter by partner type and active status.
+Business Partner CRUD/search.
 
-## BusinessPartnerBankService
+### BusinessPartnerBankService
 
-File: `service/business-partner-bank.service.js`
+`service/business-partner-bank.service.js`
 
-Responsibility:
+Rekening bank Business Partner.
 
--   bank-account rows associated with a Business Partner.
+### TermOfPaymentService
 
-## TermOfPaymentService
+`service/term-of-payment.service.js`
 
-File: `service/term-of-payment.service.js`
+Term of Payment.
 
-Responsibility:
+### BankService
 
--   Term of Payment master data used by AP/AR and Business Partner.
+`service/bank.service.js`
 
-## BankService
+Bank master/reference.
 
-File: `service/bank.service.js`
+### ChartOfAccountsService
 
-Responsibility:
+`service/chart-of-accounts.service.js`
 
--   bank master/reference data.
+COA CRUD, hierarchy, transactional account selection.
 
-## ChartOfAccountsService
+### TaxService
 
-File: `service/chart-of-accounts.service.js`
+`service/tax-service.js`
 
-Responsibility:
+Tax master/rate/account mapping.
 
--   Chart of Accounts CRUD/search;
--   hierarchy/parent-account data;
--   transactional-account selection.
+### AccountingPeriodService
 
-## TaxService
+`service/accounting-period.service.js`
 
-File: `service/tax-service.js`
+Accounting Period dan kontrol period.
 
-Responsibility:
+## Transaction Services
 
--   tax master data;
--   tax type/rate/account mappings used by transaction modules.
+### AccountPayableService
 
-## AccountPayableService
+`service/account-payable.service.js`
 
-File: `service/account-payable.service.js`
+AP invoice/header/detail/status dan supporting payment/posting workflow.
 
-Responsibility:
+### AccountReceivableService
 
--   AP invoice header/detail persistence;
--   vendor-linked invoice retrieval;
--   AP status lifecycle support.
+`service/account-receivable.service.js`
 
-AP UI also contains payment/posting orchestration that integrates with
-GL Journal.
+AR invoice/header/detail/status dan supporting payment/posting workflow.
 
-## AccountReceivableService
+### GeneralJournalService
 
-File: `service/account-receivable.service.js`
+`service/journal.service.js`
 
-Responsibility:
+GL Journal header/detail dan source-generated journal operations.
 
--   AR invoice header/detail persistence;
--   customer-linked invoice retrieval;
--   payment/status lifecycle support.
+### FixedAssetService
 
-## GeneralJournalService
+`service/fixed-asset.service.js`
 
-File: `service/journal.service.js`
+Fixed asset category, asset, depreciation, dan GL integration. Service
+mereferensikan: - `mst_fixed_asset_category` - `mst_fixed_asset` -
+`trx_fixed_asset_depreciation` - GL Journal tables
 
-Responsibility:
+### CashFlowForecastService
 
--   GL Journal header/detail operations;
--   journal creation used by manual and source-generated postings.
+`service/cash-flow-forecast.service.js`
 
-Source metadata should be preserved when journals are generated from
-AP/AR/payment processes.
+Supporting service untuk Cash Flow Forecast.
 
-## ExcelExportService
+## Reporting/Output Services
 
-File: `service/excel-export.service.js`
+### FinancialReportService
 
-Responsibility:
+`service/financial-report.service.js`
 
--   client-side Excel export support used by modules.
+Supporting financial reporting logic.
 
-## PreviewService
+### ExcelExportService
 
-File: `service/preview.service.js`
+`service/excel-export.service.js`
 
-Responsibility:
+Client-side Excel export.
 
--   HTML preview/report presentation support.
+### PreviewService
+
+`service/preview.service.js`
+
+HTML preview/report presentation.
+
+## Supabase Edge Function
+
+`supabase/functions/admin-user-management/index.ts`
+
+Digunakan untuk privileged User Management operations.
+`SUPABASE_SERVICE_ROLE_KEY` hanya boleh berada pada server-side
+environment, tidak di frontend.
 
 ## Service Design Rules
 
-1.  Validate required IDs before querying.
-2.  Throw errors from the service; let the module decide how to present
-    them.
-3.  Keep table names centralized in `TABLE`.
-4.  Keep posting logic deterministic and auditable.
-5.  Never embed service-role credentials in frontend code.
-6.  Prefer one source of truth for status values.
-7.  Preserve source document references on generated journals.
+1.  Validasi required ID sebelum query.
+2.  Database access ditempatkan di service bila service domain tersedia.
+3.  Throw technical errors dari service; UI menentukan presentation.
+4.  Pertahankan deterministic posting.
+5.  Pertahankan source document metadata.
+6.  Gunakan satu source of truth untuk status.
+7.  Hormati effective company context.
+8.  Jangan menjadikan frontend filter sebagai security boundary.
+9.  Jangan embed service-role credential di browser.
+10. Perubahan schema/service harus diikuti update dokumentasi.

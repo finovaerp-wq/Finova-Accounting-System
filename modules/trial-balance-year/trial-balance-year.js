@@ -3,7 +3,7 @@
 FINOVA ACCOUNTING SYSTEM
 MODULE  : TRIAL BALANCE YEAR
 FILE    : trial-balance-year.js
-VERSION : 2.1.0 FINAL
+VERSION : 3.1.1 FINAL - GROUPED MONTH END BALANCE / UNIFIED PREVIEW TYPOGRAPHY
 ==========================================================
 */
 
@@ -347,6 +347,11 @@ export class TrialBalanceYear {
             );
 
         }
+        this.totalEnding =
+            document.getElementById(
+                "tb-total-ending"
+            );
+
 
 
         /*
@@ -3396,831 +3401,78 @@ buildTrialBalance(
 
     /*
     ======================================================
-    FINANCIAL CALCULATED ROWS
-    ======================================================
-
-    COA STRUCTURE REFERENCE
-
-    4xxxxx
-    =
-    OPERATING REVENUE
-
-    5xxxxx
-    =
-    OPERATING EXPENSES
-
-    6xxxxx
-    =
-    GA EXPENSES
-
-    701xxx
-    =
-    OTHER REVENUE
-
-    702xxx
-    =
-    OTHER EXPENSE
-
-    703xxx
-    =
-    TAX EXPENSE
+    GROUPED TRIAL BALANCE
     ======================================================
     */
 
+    const sections = [
+        ["asset", "ASSETS"],
+        ["liability", "LIABILITIES"],
+        ["equity", "EQUITY"],
+        ["revenue", "REVENUE"],
+        ["expense", "EXPENSES"]
+    ];
 
-    /*
-    ======================================================
-    SUMMARY ARRAY
-    ======================================================
-    */
+    const groupedRows = [];
 
-    const operatingRevenue =
-        new Array(
-            12
-        )
-        .fill(
-            0
-        );
+    sections.forEach(([group, label]) => {
 
+        const rows =
+            flattened.filter(
+                row => row.group === group
+            );
 
-    const operatingExpense =
-        new Array(
-            12
-        )
-        .fill(
-            0
-        );
+        if (!rows.length) return;
 
+        groupedRows.push({
+            id: `__TB_SECTION_${group.toUpperCase()}__`,
+            account_code: "",
+            account_name: label,
+            parent_id: null,
+            group,
+            is_periodic: false,
+            beginning: null,
+            movements: new Array(12).fill(0),
+            months: new Array(12).fill(null),
+            level: 0,
+            has_children: false,
+            is_root: false,
+            is_calculated: false,
+            is_section: true
+        });
 
-    const gaExpense =
-        new Array(
-            12
-        )
-        .fill(
-            0
-        );
+        groupedRows.push(...rows);
+    });
 
-
-    const otherRevenue =
-        new Array(
-            12
-        )
-        .fill(
-            0
-        );
-
-
-    const otherExpense =
-        new Array(
-            12
-        )
-        .fill(
-            0
-        );
-
-
-    const taxExpense =
-        new Array(
-            12
-        )
-        .fill(
-            0
-        );
-
-
-    /*
-    ======================================================
-    READ DIRECT GL MOVEMENT
-
-    IMPORTANT:
-
-    Use directMap.
-
-    Do not total flattened hierarchy because parent
-    already contains child values.
-    ======================================================
-    */
-
-    directMap.forEach(
-
-        (
-            balance,
-            accountKey
-        ) => {
-
-            const account =
-                accountMap.get(
-                    String(
-                        accountKey
-                    )
-                );
-
-
-            if (
-                !account
-            ) {
-
-                return;
-
-            }
-
-
-            const code =
-                String(
-                    account.account_code
-                    ||
-                    ""
+    const unclassified =
+        flattened.filter(
+            row =>
+                !sections.some(
+                    ([group]) => group === row.group
                 )
-                .trim();
-
-
-            const movements =
-                Array.isArray(
-                    balance.movements
-                )
-
-                    ? balance.movements
-
-                    : [];
-
-
-            for (
-                let month = 0;
-                month < 12;
-                month++
-            ) {
-
-                const amount =
-                    this.toNumber(
-                        movements[
-                            month
-                        ]
-                    );
-
-
-                /*
-                ==============================================
-                OPERATING REVENUE
-                ==============================================
-                */
-
-                if (
-                    code.startsWith(
-                        "4"
-                    )
-                ) {
-
-                    operatingRevenue[
-                        month
-                    ] +=
-                        amount;
-
-
-                    continue;
-
-                }
-
-
-                /*
-                ==============================================
-                OPERATING EXPENSE
-                ==============================================
-                */
-
-                if (
-                    code.startsWith(
-                        "5"
-                    )
-                ) {
-
-                    operatingExpense[
-                        month
-                    ] +=
-                        amount;
-
-
-                    continue;
-
-                }
-
-
-                /*
-                ==============================================
-                GA EXPENSE
-                ==============================================
-                */
-
-                if (
-                    code.startsWith(
-                        "6"
-                    )
-                ) {
-
-                    gaExpense[
-                        month
-                    ] +=
-                        amount;
-
-
-                    continue;
-
-                }
-
-
-                /*
-                ==============================================
-                OTHER REVENUE
-                ==============================================
-                */
-
-                if (
-                    code.startsWith(
-                        "701"
-                    )
-                ) {
-
-                    otherRevenue[
-                        month
-                    ] +=
-                        amount;
-
-
-                    continue;
-
-                }
-
-
-                /*
-                ==============================================
-                OTHER EXPENSE
-                ==============================================
-                */
-
-                if (
-                    code.startsWith(
-                        "702"
-                    )
-                ) {
-
-                    otherExpense[
-                        month
-                    ] +=
-                        amount;
-
-
-                    continue;
-
-                }
-
-
-                /*
-                ==============================================
-                TAX EXPENSE
-                ==============================================
-                */
-
-                if (
-                    code.startsWith(
-                        "703"
-                    )
-                ) {
-
-                    taxExpense[
-                        month
-                    ] +=
-                        amount;
-
-                }
-
-            }
-
-        }
-
-    );
-
-
-    /*
-    ======================================================
-    CLEAN SUMMARY
-    ======================================================
-    */
-
-    for (
-        let month = 0;
-        month < 12;
-        month++
-    ) {
-
-        operatingRevenue[
-            month
-        ] =
-            this.cleanNumber(
-                operatingRevenue[
-                    month
-                ]
-            );
-
-
-        operatingExpense[
-            month
-        ] =
-            this.cleanNumber(
-                operatingExpense[
-                    month
-                ]
-            );
-
-
-        gaExpense[
-            month
-        ] =
-            this.cleanNumber(
-                gaExpense[
-                    month
-                ]
-            );
-
-
-        otherRevenue[
-            month
-        ] =
-            this.cleanNumber(
-                otherRevenue[
-                    month
-                ]
-            );
-
-
-        otherExpense[
-            month
-        ] =
-            this.cleanNumber(
-                otherExpense[
-                    month
-                ]
-            );
-
-
-        taxExpense[
-            month
-        ] =
-            this.cleanNumber(
-                taxExpense[
-                    month
-                ]
-            );
-
+        );
+
+    if (unclassified.length) {
+        groupedRows.push({
+            id: "__TB_SECTION_UNCLASSIFIED__",
+            account_code: "",
+            account_name: "UNCLASSIFIED",
+            parent_id: null,
+            group: null,
+            is_periodic: false,
+            beginning: null,
+            movements: new Array(12).fill(0),
+            months: new Array(12).fill(null),
+            level: 0,
+            has_children: false,
+            is_root: false,
+            is_calculated: false,
+            is_section: true
+        });
+        groupedRows.push(...unclassified);
     }
 
-
-    /*
-    ======================================================
-    CALCULATED ARRAYS
-    ======================================================
-    */
-
-    const operatingProfit =
-        new Array(
-            12
-        )
-        .fill(
-            null
-        );
-
-
-    const otherRevenueExpense =
-        new Array(
-            12
-        )
-        .fill(
-            null
-        );
-
-
-    const ebit =
-        new Array(
-            12
-        )
-        .fill(
-            null
-        );
-
-
-    const netProfit =
-        new Array(
-            12
-        )
-        .fill(
-            null
-        );
-
-
-    const currentEarning =
-        new Array(
-            12
-        )
-        .fill(
-            null
-        );
-
-
-    /*
-    ======================================================
-    CALCULATE MONTHLY RESULT
-    ======================================================
-    */
-
-    for (
-        let month = 0;
-        month < 12;
-        month++
-    ) {
-
-        const monthNumber =
-            month + 1;
-
-
-        /*
-        ==================================================
-        FUTURE PERIOD
-        ==================================================
-        */
-
-        if (
-            monthNumber
-            >
-            currentReportMonth
-        ) {
-
-            operatingProfit[
-                month
-            ] =
-                null;
-
-
-            otherRevenueExpense[
-                month
-            ] =
-                null;
-
-
-            ebit[
-                month
-            ] =
-                null;
-
-
-            netProfit[
-                month
-            ] =
-                null;
-
-
-            currentEarning[
-                month
-            ] =
-                null;
-
-
-            continue;
-
-        }
-
-
-        /*
-        ==================================================
-        OPERATING PROFIT
-
-        Operating Revenue
-        -
-        Operating Expense
-        ==================================================
-        */
-
-        operatingProfit[
-            month
-        ] =
-            this.cleanNumber(
-
-                operatingRevenue[
-                    month
-                ]
-
-                -
-
-                operatingExpense[
-                    month
-                ]
-
-            );
-
-
-        /*
-        ==================================================
-        OTHER REVENUE & EXPENSE
-
-        Other Revenue
-        -
-        Other Expense
-        ==================================================
-        */
-
-        otherRevenueExpense[
-            month
-        ] =
-            this.cleanNumber(
-
-                otherRevenue[
-                    month
-                ]
-
-                -
-
-                otherExpense[
-                    month
-                ]
-
-            );
-
-
-        /*
-        ==================================================
-        EBIT
-
-        Operating Profit
-        -
-        GA Expense
-        +
-        Other Revenue
-        -
-        Other Expense
-        ==================================================
-        */
-
-        ebit[
-            month
-        ] =
-            this.cleanNumber(
-
-                operatingProfit[
-                    month
-                ]
-
-                -
-
-                gaExpense[
-                    month
-                ]
-
-                +
-
-                otherRevenueExpense[
-                    month
-                ]
-
-            );
-
-
-        /*
-        ==================================================
-        NET PROFIT
-
-        EBIT
-        -
-        Tax Expense
-        ==================================================
-        */
-
-        netProfit[
-            month
-        ] =
-            this.cleanNumber(
-
-                ebit[
-                    month
-                ]
-
-                -
-
-                taxExpense[
-                    month
-                ]
-
-            );
-
-
-        /*
-        ==================================================
-        CURRENT EARNING BALANCE
-
-        Reference TB:
-        Only current report period carries current earning.
-        Previous month = 0.
-        ==================================================
-        */
-
-        currentEarning[
-            month
-        ] =
-
-            monthNumber
-            ===
-            currentReportMonth
-
-                ? netProfit[
-                    month
-                ]
-
-                : 0;
-
-    }
-
-
-    /*
-    ======================================================
-    CREATE CALCULATED ROW
-    ======================================================
-    */
-
-    const createCalculatedRow =
-        (
-            id,
-            name,
-            months
-        ) => {
-
-            return {
-
-                id,
-
-                account_code:
-                    "",
-
-                account_name:
-                    name,
-
-                parent_id:
-                    null,
-
-                allow_transaction:
-                    false,
-
-                status:
-                    true,
-
-                group:
-                    "calculated",
-
-                is_periodic:
-                    true,
-
-                beginning:
-                    0,
-
-                movements:
-                    months.map(
-
-                        value => {
-
-                            if (
-                                value === null
-                                ||
-                                value === undefined
-                            ) {
-
-                                return 0;
-
-                            }
-
-
-                            return this.toNumber(
-                                value
-                            );
-
-                        }
-
-                    ),
-
-                months:
-                    [
-                        ...months
-                    ],
-
-                level:
-                    0,
-
-                has_children:
-                    true,
-
-                is_root:
-                    false,
-
-                is_calculated:
-                    true
-
-            };
-
-        };
-
-
-    /*
-    ======================================================
-    APPEND CALCULATED ROWS
-    ======================================================
-    */
-
-
-    /*
-    ======================================================
-    OPERATING PROFIT
-    ======================================================
-    */
-
-    flattened.push(
-
-        createCalculatedRow(
-
-            "__TB_OPERATING_PROFIT__",
-
-            "OPERATING PROFIT",
-
-            operatingProfit
-
-        )
-
-    );
-
-
-    /*
-    ======================================================
-    EBIT
-    ======================================================
-    */
-
-    flattened.push(
-
-        createCalculatedRow(
-
-            "__TB_EBIT__",
-
-            "EBIT",
-
-            ebit
-
-        )
-
-    );
-
-
-    /*
-    ======================================================
-    NET PROFIT
-    ======================================================
-    */
-
-    flattened.push(
-
-        createCalculatedRow(
-
-            "__TB_NET_PROFIT__",
-
-            "NET PROFIT",
-
-            netProfit
-
-        )
-
-    );
-
-
-    /*
-    ======================================================
-    CURRENT EARNING
-    ======================================================
-    */
-
-    flattened.push(
-
-        createCalculatedRow(
-
-            "__TB_CURRENT_EARNING__",
-
-            "CURRENT EARNING (BALANCE)",
-
-            currentEarning
-
-        )
-
-    );
-
-
-    /*
-    ======================================================
-    RETURN
-    ======================================================
-    */
-
-    return flattened;
+    return groupedRows;
 
 }
    /*
@@ -4266,103 +3518,12 @@ buildMonthlyBalances(
     isPeriodic = false
 ) {
 
-    const months =
-        [];
-
-
-    /*
-    ======================================================
-    PERIODIC ACCOUNT
-
-    Revenue / Expense
-
-    No carry forward.
-    ======================================================
-    */
-
-    if (
-        isPeriodic
-    ) {
-
-        for (
-            let index = 0;
-            index < 12;
-            index++
-        ) {
-
-            const monthNumber =
-                index + 1;
-
-
-            /*
-            ==================================================
-            FUTURE MONTH
-
-            Always display 0.
-            ==================================================
-            */
-
-            if (
-                monthNumber
-                >
-                currentReportMonth
-            ) {
-
-                months.push(
-                    0
-                );
-
-
-                continue;
-
-            }
-
-
-            /*
-            ==================================================
-            CURRENT / COMPLETED MONTH
-
-            Monthly movement only.
-            ==================================================
-            */
-
-            months.push(
-
-                this.cleanNumber(
-
-                    this.toNumber(
-
-                        movements?.[
-                            index
-                        ]
-
-                    )
-
-                )
-
-            );
-
-        }
-
-
-        return months;
-
-    }
-
-
-    /*
-    ======================================================
-    BALANCE SHEET ACCOUNT
-
-    Asset / Liability / Equity
-    ======================================================
-    */
-
     let running =
-        this.toNumber(
-            beginning
-        );
+        isPeriodic
+            ? 0
+            : this.toNumber(beginning);
 
+    const months = [];
 
     for (
         let index = 0;
@@ -4370,82 +3531,57 @@ buildMonthlyBalances(
         index++
     ) {
 
-        const monthNumber =
-            index + 1;
-
-
-        /*
-        ==================================================
-        FUTURE MONTH
-
-        Oct / Nov / Dec etc
-        =
-        0
-
-        Do NOT carry current balance into future month.
-        ==================================================
-        */
-
         if (
-            monthNumber
-            >
+            index + 1 >
             currentReportMonth
         ) {
-
-            months.push(
-                0
-            );
-
-
+            months.push(null);
             continue;
-
         }
-
-
-        /*
-        ==================================================
-        CURRENT / COMPLETED MONTH
-
-        Closing Balance
-        =
-        Previous Balance
-        +
-        Current Month Movement
-
-        Therefore:
-
-        August Closing = 100
-
-        September movement = 0
-
-        September Closing = 100
-        ==================================================
-        */
 
         running +=
             this.toNumber(
-
-                movements?.[
-                    index
-                ]
-
+                movements?.[index]
             );
 
-
         months.push(
-
-            this.cleanNumber(
-                running
-            )
-
+            this.cleanNumber(running)
         );
-
     }
 
-
     return months;
-
 }
+
+
+    getEndingBalance(row) {
+
+        const months =
+            Array.isArray(row?.months)
+                ? row.months
+                : [];
+
+        for (
+            let index = months.length - 1;
+            index >= 0;
+            index--
+        ) {
+            if (
+                months[index] !== null
+                &&
+                months[index] !== undefined
+            ) {
+                return this.cleanNumber(
+                    months[index]
+                );
+            }
+        }
+
+        return row?.is_periodic
+            ? 0
+            : this.cleanNumber(
+                row?.beginning
+            );
+    }
 
 
     /*
@@ -4910,6 +4046,17 @@ createRow(
     row
 ) {
 
+    if (row.is_section) {
+        return `
+            <tr class="tb-section-row">
+                <td class="tb-section-cell">
+                    ${this.escapeHTML(row.account_name)}
+                </td>
+                ${new Array(14).fill('<td class="tb-section-value"></td>').join("")}
+            </tr>
+        `;
+    }
+
     const rowClass =
         this.getRowClass(
             row
@@ -5085,6 +4232,18 @@ createRow(
             ${monthCells}
 
 
+        
+            <!-- ENDING BALANCE -->
+            <td
+                class="
+                    finova-table-number
+                    tb-number
+                    tb-ending-balance
+                    ${this.getAmountClass(this.getEndingBalance(row))}
+                ">
+                ${this.formatAmount(this.getEndingBalance(row))}
+            </td>
+
         </tr>
 
     `;
@@ -5251,7 +4410,7 @@ getRowClass(
             <tr>
 
                 <td
-                    colspan="14"
+                    colspan="15"
                     class="
                         text-center
                         py-5
@@ -5291,7 +4450,7 @@ getRowClass(
             <tr>
 
                 <td
-                    colspan="14"
+                    colspan="15"
                     class="text-center py-5">
 
                     <div
@@ -5660,6 +4819,34 @@ renderTotals() {
         }
 
     );
+
+
+    if (this.totalEnding) {
+
+        let endingValue =
+            totals.beginning;
+
+        for (
+            let index = totals.months.length - 1;
+            index >= 0;
+            index--
+        ) {
+            if (
+                totals.months[index] !== null
+                &&
+                totals.months[index] !== undefined
+            ) {
+                endingValue =
+                    totals.months[index];
+                break;
+            }
+        }
+
+        this.totalEnding.textContent =
+            this.formatAmount(
+                endingValue
+            );
+    }
 
 }
 
@@ -6064,7 +5251,9 @@ downloadExcel() {
                 month =>
                     `${month}-${shortYear}`
 
-            )
+            ),
+
+            "Ending Balance"
 
         ];
 
@@ -6083,6 +5272,15 @@ downloadExcel() {
             this.filteredData.map(
 
                 row => {
+
+                    if (row.is_section) {
+                        return [
+                            row.account_name,
+                            null,
+                            ...new Array(12).fill(null),
+                            null
+                        ];
+                    }
 
                     const description =
 
@@ -6149,7 +5347,11 @@ downloadExcel() {
                             row.beginning
                         ),
 
-                        ...monthValues
+                        ...monthValues,
+
+                        this.toNumber(
+                            this.getEndingBalance(row)
+                        )
 
                     ];
 
@@ -6318,7 +5520,7 @@ const dataStartRowIndex =
             },
 
             ...new Array(
-                12
+                13
             )
             .fill(
                 null
@@ -6384,7 +5586,7 @@ for (
 
     for (
         let column = 1;
-        column <= 13;
+        column <= 14;
         column++
     ) {
 
@@ -6721,6 +5923,15 @@ const companyContact =
 
                         row => {
 
+                            if (row.is_section) {
+                                return `
+                                    <tr class="section">
+                                        <td>${this.escapeHTML(row.account_name)}</td>
+                                        ${new Array(14).fill("<td></td>").join("")}
+                                    </tr>
+                                `;
+                            }
+
                             /*
                             ==========================================
                             MONTH CELLS
@@ -6900,6 +6111,11 @@ const companyContact =
 
                                     ${monthCells}
 
+                                    <td
+                                        class="amount ${this.getEndingBalance(row) < 0 ? "negative" : ""}">
+                                        ${this.formatAmount(this.getEndingBalance(row))}
+                                    </td>
+
                                 </tr>
 
                             `;
@@ -6918,6 +6134,25 @@ const companyContact =
 
             const totals =
                 this.calculateTotals();
+
+            let totalEndingValue =
+                totals.beginning;
+
+            for (
+                let index = totals.months.length - 1;
+                index >= 0;
+                index--
+            ) {
+                if (
+                    totals.months[index] !== null
+                    &&
+                    totals.months[index] !== undefined
+                ) {
+                    totalEndingValue =
+                        totals.months[index];
+                    break;
+                }
+            }
 
 
             const totalMonthCells =
@@ -7045,11 +6280,11 @@ body {
     color: #1F2937;
 
     font-family:
+        Tahoma,
         Arial,
-        Helvetica,
         sans-serif;
 
-    font-size: 11px;
+    font-size: 10px;
 
 }
 
@@ -7109,7 +6344,7 @@ body {
 
     color: #111827;
 
-    font-size: 21px;
+    font-size: 20px;
 
     font-weight: 700;
 
@@ -7147,7 +6382,7 @@ body {
 
     color: #244494;
 
-    font-size: 17px;
+    font-size: 16px;
 
     font-weight: 700;
 
@@ -7325,6 +6560,16 @@ td {
 
 }
 
+
+/* ==========================================
+   SECTION
+========================================== */
+tr.section td {
+    background:#E8EEFC;
+    color:#1E3A8A;
+    font-weight:700;
+    border-top:2px solid #244494;
+}
 
 /* ==========================================
    ROOT
@@ -7540,6 +6785,8 @@ tfoot td {
 
                         ${monthHeaders}
 
+                        <th>Ending Balance</th>
+
                     </tr>
 
                 </thead>
@@ -7587,6 +6834,11 @@ tfoot td {
 
 
                         ${totalMonthCells}
+
+                        <td
+                            class="amount ${this.toNumber(totalEndingValue) < 0 ? "negative" : ""}">
+                            ${this.formatAmount(totalEndingValue)}
+                        </td>
 
                     </tr>
 

@@ -2,14 +2,16 @@
 
 ## Architecture
 
-FINOVA is a vanilla JavaScript SPA.
-
-Core flow:
+FINOVA adalah vanilla JavaScript SPA dengan Supabase backend.
 
 ``` text
 index.html
   ↓
-core/application components
+application/core
+  ↓
+Auth + Company/Tenant Context
+  ↓
+Sidebar / Topbar / Workspace
   ↓
 FinovaRouter
   ↓
@@ -21,176 +23,118 @@ module class
   ↓
 service layer
   ↓
-Supabase
+Supabase + RLS
 ```
 
-The router is defined in `assets/js/core/router.js`.
+Router: `assets/js/core/router.js`.
 
 ## Module Convention
-
-A standard module should follow:
 
 ``` text
 modules/<module-name>/
 ├── <module-name>.html
 ├── <module-name>.css
 ├── <module-name>.js
-└── optional modal HTML files
+└── optional modal HTML
 ```
 
-The JavaScript module exports one class matching the router `className`.
-
-Example:
-
-``` javascript
-export class BusinessPartner {
-    constructor() {
-        // initialize module
-    }
-}
-```
+Class export harus sesuai `className` pada router.
 
 ## Service Convention
 
-Database access belongs under `service/`.
+Database/domain logic ditempatkan pada `service/` bila service tersedia.
 
-Examples:
+Service saat ini antara lain: - auth - user/user-management -
+company-context - customer-config - business-partner/bank/TOP - COA -
+tax - accounting-period - AP - AR - journal - fixed-asset -
+financial-report - cash-flow-forecast - Excel export - preview
 
--   `auth.service.js`
--   `user-management.service.js`
--   `business-partner.service.js`
--   `chart-of-accounts.service.js`
--   `tax-service.js`
--   `account-payable.service.js`
--   `account-receivable.service.js`
--   `journal.service.js`
--   `excel-export.service.js`
--   `preview.service.js`
+## Multi-Company Rule
 
-Keep SQL/Supabase calls out of presentation code where a service already
-exists.
+Semua module tenant-aware harus menghormati effective company context.
+
+Jangan menganggap filter JavaScript sebagai security. Database
+RLS/tenant guard harus tetap menjadi enforcement utama.
 
 ## UI Rules
 
-Maintain the FINOVA design system:
+Pertahankan: - Poppins; - Bootstrap-compatible controls; - fixed desktop
+sidebar; - global table; - global pagination; - page/card header
+consistency; - date alignment; - amount formatting/alignment sesuai
+FINOVA; - action/status column consistency.
 
--   Poppins typography
--   Bootstrap-compatible controls
--   fixed desktop sidebar
--   global table component
--   global pagination component
--   consistent card/page header structure
--   numeric values aligned consistently
--   dates centered where applicable
--   action columns centered
-
-Do not redesign the desktop sidebar independently inside a module.
-
-## Table and Pagination
-
-Module-specific CSS should not fight the global table/pagination rules.
-Prefer global classes such as:
-
-``` text
-.finova-table
-.finova-table-index
-.finova-table-code
-.finova-table-name
-.finova-table-date
-.finova-table-number
-.finova-table-status
-.finova-table-action
-```
-
-Keep pagination at the bottom of the table card rather than inside the
-scrolling table body.
+Jangan membuat module-specific CSS yang merusak global table/pagination.
 
 ## Data Rules
 
 ### Business Partner
 
-Operational selectors should only expose appropriate active partners:
-
 -   AP → active Vendor
 -   AR → active Customer
--   GL detail → active Business Partner where applicable
+-   GL → active Business Partner jika diperlukan
 
-### Chart of Accounts
+### COA
 
-Transactional selectors should prefer:
+Transactional selector:
 
 ``` text
-status = active
+active
 allow_transaction = true
 ```
 
-Header/non-transaction accounts should not be used as posting accounts.
-
 ### Journal
 
-Journal header and detail should remain balanced. Source-generated
-journals should preserve source metadata for traceability.
+-   balance sebelum posting;
+-   source-generated journal mempertahankan source metadata;
+-   Posted/Voided behavior harus konsisten dengan report/audit rules.
 
-## Adding a New Route
+### Accounting Period
 
-Add an entry to `FinovaRouter.routes`:
+Tanggal dasar: - AP Invoice → Date Received - AR Invoice → Invoice
+Date - GL → Accounting Date - Payment → Payment Date
 
-``` javascript
-"module-name": {
-    title: "Module Name",
-    html: "modules/module-name/module-name.html",
-    js: "modules/module-name/module-name.js",
-    className: "ModuleName"
-}
-```
+### Fixed Asset
 
-Then add the corresponding sidebar item and module files.
+Depreciation dan journal integration harus traceable ke asset/source
+transaction.
 
 ## Error Handling
 
-Preferred direction:
+-   Hindari native `alert()`/`confirm()` untuk production UI.
+-   Gunakan Bootstrap modal/toast/FINOVA notification.
+-   Console untuk technical diagnostics, tetapi jangan mencetak
+    sensitive session/token data.
+-   User message harus ringkas dan actionable.
 
--   avoid native `alert()` and `confirm()` for production UI;
--   use Bootstrap modal/toast/FINOVA notification components;
--   log technical details to the console;
--   show users concise actionable messages.
+## Security
+
+-   Jangan menaruh `SUPABASE_SERVICE_ROLE_KEY` di frontend.
+-   Privileged user administration melalui Edge Function.
+-   RLS harus diuji menggunakan authenticated non-admin/tenant user.
+-   Cross-company isolation wajib diuji.
 
 ## Source Control
 
-Recommended branch model:
+Recommended:
 
 ``` text
 main        → stable/deployable
 develop     → integration
-feature/*   → new work
-fix/*       → bug fixes
+feature/*   → feature
+fix/*       → bug fix
 ```
-
-Commit by functional change, not by unrelated batches.
 
 ## Testing Checklist
 
-For each module change test:
-
-1.  initial load;
-2.  refresh;
-3.  create;
-4.  edit;
-5.  delete/void where allowed;
-6.  status transitions;
-7.  empty state;
-8.  pagination;
-9.  filters;
-10. responsive layout;
-11. Supabase/RLS errors;
-12. cross-module integration.
+Untuk setiap perubahan: 1. initial load; 2. refresh; 3. create; 4. edit;
+5. delete/void bila diizinkan; 6. status transition; 7. empty state; 8.
+pagination; 9. filter/search; 10. responsive layout; 11. Supabase/RLS
+error; 12. cross-module integration; 13. company isolation; 14.
+accounting-period validation; 15. source journal traceability.
 
 ## Documentation Rule
 
-When a module changes materially, update:
-
--   `MODULES.md`
--   `API.md` if service methods change
--   `DATABASE.md` if schema changes
--   `ACCOUNTING-FLOW.md` if posting logic changes
--   `CHANGELOG.md`
+Perubahan material harus memperbarui: - `MODULES.md` - `API.md` bila
+service berubah - `DATABASE.md` bila schema/RLS berubah -
+`ACCOUNTING-FLOW.md` bila posting berubah - `CHANGELOG.md` - `README.md`
+bila scope/architecture berubah
