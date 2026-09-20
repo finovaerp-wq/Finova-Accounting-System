@@ -6872,7 +6872,43 @@ console.log(
             */
 
             source_invoice_no:
-                batch.payment_no
+                (
+                    await Promise.all(
+                        allocations.map(
+                            async allocation => {
+
+                                const apResult =
+                                    await this.service.getById(
+                                        allocation
+                                            ?.account_payable_id
+                                    );
+
+                                return String(
+                                    apResult
+                                        ?.header
+                                        ?.invoice_no
+                                    || ""
+                                )
+                                .trim();
+
+                            }
+                        )
+                    )
+                )
+                .filter(Boolean)
+                .filter(
+                    (
+                        invoiceNo,
+                        index,
+                        list
+                    ) =>
+                        list.indexOf(
+                            invoiceNo
+                        )
+                        ===
+                        index
+                )
+                .join(", ")
                 || null,
 
             source_po_no:
@@ -6914,10 +6950,12 @@ console.log(
 
         /*
         ==================================================
-        LINK JOURNAL TO BATCH HEADER ONLY
+        LINK JOURNAL TO PAYMENT BATCH + ALLOCATIONS
 
-        DO NOT LINK trx_ap_payment allocations yet.
-        THEY MUST REMAIN INACTIVE WHILE JOURNAL IS DRAFT.
+        SAME AS AR PAYMENT:
+        DRAFT PAYMENT GL IS ALREADY AN ACTIVE PAYMENT.
+
+        AP STATUS MUST NOT WAIT FOR GL POSTING.
         ==================================================
         */
 
@@ -6930,6 +6968,13 @@ console.log(
                             createdJournal.id
                     }
                 );
+
+
+        await this.service
+            .linkPaymentBatchAllocationsGLJournal(
+                batch.id,
+                createdJournal.id
+            );
 
 
         if (
@@ -8739,6 +8784,12 @@ this.btnFind =
         );
 
 
+    this.btnVendorPaymentTrace =
+        document.getElementById(
+            "btn-vendor-payment-trace-ap"
+        );
+
+
     this.btnRefresh =
         document.getElementById(
             "btn-refresh-ap"
@@ -9107,6 +9158,9 @@ resetBulkAPPayment() {
     if (
         this.apPaymentBulkVendor
     ) {
+
+        this.apPaymentBulkVendor.disabled =
+            false;
 
         this.apPaymentBulkVendor.value =
             "";
@@ -11342,27 +11396,72 @@ const affectedAccountPayableIds =
 
 /*
 ==================================================
-RECALCULATE EACH ACCOUNT PAYABLE
+UPDATE EACH AP DIRECTLY FROM THE PAYMENT
+THAT HAS JUST BEEN SAVED
+
+IMPORTANT:
+DO NOT RECALCULATE AGAIN FROM GL POSTING STATUS.
+SAVE PAYMENT ITSELF CHANGES AP STATUS.
 ==================================================
 */
 
 for (
-    const accountPayableId
-    of affectedAccountPayableIds
+    const allocation
+    of createdAllocations
 ) {
 
-    console.log(
-        "AP PAYMENT SAVE - RECALCULATE AP:",
-        {
-            account_payable_id:
-                accountPayableId
-        }
-    );
+    /*
+    ==============================================
+    ACCOUNT PAYABLE ID
 
+    IMPORTANT:
+    DO NOT COERCE DATABASE ID WITH Number().
+
+    FINOVA IDs may be UUID/string values.
+    Number(UUID) becomes NaN and incorrectly throws:
+    "Saved AP Payment allocation has invalid Account Payable ID."
+    ==============================================
+    */
+
+    const accountPayableId =
+        String(
+            allocation
+                ?.account_payable_id
+            || ""
+        )
+        .trim();
+
+    const savedPaymentAmount =
+        Math.round(
+            Number(
+                allocation
+                    ?.payment_amount
+                || 0
+            )
+        );
+
+    if (
+        !accountPayableId
+    ) {
+        throw new Error(
+            "Saved AP Payment allocation has no Account Payable ID."
+        );
+    }
+
+    if (
+        !Number.isFinite(savedPaymentAmount)
+        ||
+        savedPaymentAmount <= 0
+    ) {
+        throw new Error(
+            "Saved AP Payment allocation has invalid Payment Amount."
+        );
+    }
 
     await this.service
-        .updatePaymentStatus(
-            accountPayableId
+        .applySavedPaymentStatus(
+            accountPayableId,
+            savedPaymentAmount
         );
 
 }
@@ -11373,6 +11472,18 @@ for (
 DEBUG
 ==================================================
 */
+
+console.log(
+    "AP PAYMENT SAVE - CURRENT DRAFT BATCH COUNTED AS ACTIVE:",
+    {
+        payment_batch_id:
+            createdBatch.id,
+
+        rule:
+            "Save Payment = Active Payment; GL may remain Draft"
+    }
+);
+
 
 console.log(
     "AP PAYMENT SAVE - STATUS UPDATED:",
@@ -11386,7 +11497,10 @@ console.log(
             null,
 
         affected_account_payable_ids:
-            affectedAccountPayableIds
+            createdAllocations.map(
+                allocation =>
+                    allocation?.account_payable_id
+            )
     }
 );
 
@@ -12512,6 +12626,22 @@ detailBody?.addEventListener(
 
     /*
     ==================================================
+    VENDOR PAYMENT TRACE
+    ==================================================
+    */
+
+    this.btnVendorPaymentTrace?.addEventListener(
+        "click",
+        async () => {
+
+            await this.openVendorPaymentTrace();
+
+        }
+    );
+
+
+    /*
+    ==================================================
     REFRESH
     ==================================================
     */
@@ -12825,8 +12955,29 @@ if (
                         this.apPaymentBankAccount
                     ) {
 
-                        this.apPaymentBankAccount.value =
-                            "";
+                        if (
+                            this.apPaymentBankAccount.tomselect
+                        ) {
+
+                            this.apPaymentBankAccount
+                                .tomselect
+                                .clear(
+                                    true
+                                );
+
+                            this.apPaymentBankAccount
+                                .tomselect
+                                .setTextboxValue(
+                                    ""
+                                );
+
+                        }
+                        else {
+
+                            this.apPaymentBankAccount.value =
+                                "";
+
+                        }
 
                     }
 
@@ -27360,6 +27511,19 @@ if (
             paymentVendorId
         );
 
+
+    /*
+    ==================================================
+    LOCK VENDOR TO THE AP TRANSACTION THAT WAS CLICKED
+
+    USER MAY SELECT OTHER OUTSTANDING INVOICES,
+    BUT ONLY FROM THIS SAME VENDOR.
+    ==================================================
+    */
+
+    this.apPaymentBulkVendor.disabled =
+        true;
+
 }
 
 
@@ -27776,6 +27940,132 @@ LOAD AP PAYMENT BANK ACCOUNTS
 ======================================================
 */
 
+initializeAPPaymentBankAccountSearch() {
+
+    try {
+
+        if (
+            !this.apPaymentBankAccount
+        ) {
+            return;
+        }
+
+
+        if (
+            typeof TomSelect
+            ===
+            "undefined"
+        ) {
+
+            console.warn(
+                "TomSelect library is not loaded for AP Payment Bank Account."
+            );
+
+            return;
+
+        }
+
+
+        /*
+        ==================================================
+        REBUILD SEARCH INSTANCE FROM CURRENT SELECT OPTIONS
+        ==================================================
+        */
+
+        if (
+            this.apPaymentBankAccount.tomselect
+        ) {
+
+            this.apPaymentBankAccount
+                .tomselect
+                .destroy();
+
+        }
+
+
+        this.apPaymentBankAccountSearch =
+            new TomSelect(
+                this.apPaymentBankAccount,
+                {
+                    create:
+                        false,
+
+                    allowEmptyOption:
+                        true,
+
+                    placeholder:
+                        "Type account code or bank account name",
+
+                    searchField: [
+                        "text"
+                    ],
+
+                    maxOptions:
+                        100,
+
+                    closeAfterSelect:
+                        true,
+
+                    hideSelected:
+                        false,
+
+                    selectOnTab:
+                        true,
+
+                    persist:
+                        false,
+
+                    onItemAdd() {
+
+                        this.setTextboxValue(
+                            ""
+                        );
+
+                    }
+                }
+            );
+
+
+        this.apPaymentBankAccountSearch
+            .clear(
+                true
+            );
+
+
+        this.apPaymentBankAccountSearch
+            .setTextboxValue(
+                ""
+            );
+
+
+        console.log(
+            "AP Payment Bank Account search initialized."
+        );
+
+    }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "AccountPayable.initializeAPPaymentBankAccountSearch:",
+            error
+        );
+
+        throw error;
+
+    }
+
+}
+
+
+/*
+======================================================
+LOAD AP PAYMENT BANK ACCOUNTS
+======================================================
+*/
+
 async loadAPPaymentBankAccounts() {
 
     try {
@@ -28118,6 +28408,16 @@ async loadAPPaymentBankAccounts() {
             );
 
         }
+
+
+        /*
+        ==================================================
+        SEARCHABLE BANK ACCOUNT
+        SAME BEHAVIOR AS AR PAYMENT
+        ==================================================
+        */
+
+        this.initializeAPPaymentBankAccountSearch();
 
     }
 
@@ -30878,6 +31178,818 @@ getPaymentStatus(
     return "Unpaid";
 
 }
+/*
+======================================================
+OPEN VENDOR PAYMENT TRACE
+VENDOR -> AP INVOICE -> PAYMENT -> GL JOURNAL
+======================================================
+*/
+
+async openVendorPaymentTrace() {
+
+    try {
+
+        if (
+            !Array.isArray(
+                this.vendorData
+            )
+            ||
+            this.vendorData.length === 0
+        ) {
+
+            await this.loadVendors();
+
+        }
+
+
+        const oldModal =
+            document.getElementById(
+                "apVendorPaymentTraceModal"
+            );
+
+
+        if (
+            oldModal
+        ) {
+
+            bootstrap.Modal
+                .getInstance(
+                    oldModal
+                )
+                ?.dispose();
+
+            oldModal.remove();
+
+        }
+
+
+        const vendorOptions =
+            this.vendorData
+                .map(
+                    vendor => {
+
+                        const id =
+                            vendor?.id;
+
+                        const code =
+                            String(
+                                vendor?.bp_code
+                                ||
+                                ""
+                            )
+                            .trim();
+
+                        const name =
+                            String(
+                                vendor?.bp_name
+                                ||
+                                ""
+                            )
+                            .trim();
+
+
+                        if (
+                            !id
+                        ) {
+
+                            return "";
+
+                        }
+
+
+                        return `
+                            <option value="${id}">
+                                ${
+                                    code
+                                        ? `${code} :: ${name}`
+                                        : name
+                                }
+                            </option>
+                        `;
+
+                    }
+                )
+                .join("");
+
+
+        const modalHTML = `
+
+            <div
+                class="modal fade"
+                id="apVendorPaymentTraceModal"
+                tabindex="-1"
+                aria-hidden="true">
+
+                <div
+                    class="
+                        modal-dialog
+                        modal-xl
+                        modal-dialog-centered
+                        modal-dialog-scrollable
+                    ">
+
+                    <div class="modal-content">
+
+                        <div class="modal-header">
+
+                            <div>
+
+                                <h5 class="modal-title fw-semibold">
+
+                                    <i class="fa-solid fa-route me-2"></i>
+                                    Vendor Payment Trace
+
+                                </h5>
+
+                                <div class="text-muted small mt-1">
+                                    Vendor → AP Invoice → Payment → GL Journal
+                                </div>
+
+                            </div>
+
+                            <button
+                                type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal">
+                            </button>
+
+                        </div>
+
+                        <div class="modal-body">
+
+                            <div class="row g-3 align-items-end mb-4">
+
+                                <div class="col-md-5">
+
+                                    <label class="form-label">
+                                        Vendor
+                                    </label>
+
+                                    <select
+                                        id="ap-trace-vendor"
+                                        class="form-select">
+
+                                        <option value="">
+                                            Select Vendor
+                                        </option>
+
+                                        ${vendorOptions}
+
+                                    </select>
+
+                                </div>
+
+                                <div class="col-md-2">
+
+                                    <label class="form-label">
+                                        Payment Date From
+                                    </label>
+
+                                    <input
+                                        type="date"
+                                        id="ap-trace-date-from"
+                                        class="form-control">
+
+                                </div>
+
+                                <div class="col-md-2">
+
+                                    <label class="form-label">
+                                        Payment Date To
+                                    </label>
+
+                                    <input
+                                        type="date"
+                                        id="ap-trace-date-to"
+                                        class="form-control">
+
+                                </div>
+
+                                <div class="col-md-3">
+
+                                    <button
+                                        type="button"
+                                        id="btn-ap-trace-find"
+                                        class="btn btn-primary w-100">
+
+                                        <i class="fa-solid fa-magnifying-glass me-1"></i>
+                                        Trace Payment
+
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+
+                            <div
+                                id="ap-trace-summary"
+                                class="row g-3 mb-3">
+                            </div>
+
+
+                            <div class="table-responsive">
+
+                                <table
+                                    class="
+                                        table
+                                        table-bordered
+                                        table-hover
+                                        align-middle
+                                        mb-0
+                                    ">
+
+                                    <thead>
+
+                                        <tr>
+
+                                            <th class="text-center">
+                                                No
+                                            </th>
+
+                                            <th class="text-center">
+                                                Payment Date
+                                            </th>
+
+                                            <th>
+                                                Invoice No
+                                            </th>
+
+                                            <th class="text-center">
+                                                Invoice Date
+                                            </th>
+
+                                            <th>
+                                                Reference No
+                                            </th>
+
+                                            <th class="text-end">
+                                                Paid Amount
+                                            </th>
+
+                                            <th>
+                                                GL Journal
+                                            </th>
+
+                                            <th class="text-center">
+                                                GL Status
+                                            </th>
+
+                                        </tr>
+
+                                    </thead>
+
+                                    <tbody id="ap-trace-body">
+
+                                        <tr>
+
+                                            <td
+                                                colspan="8"
+                                                class="text-center text-muted py-4">
+
+                                                Select Vendor and click Trace Payment.
+
+                                            </td>
+
+                                        </tr>
+
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+
+                        </div>
+
+                        <div class="modal-footer">
+
+                            <button
+                                type="button"
+                                class="btn btn-secondary"
+                                data-bs-dismiss="modal">
+
+                                Close
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        `;
+
+
+        document.body.insertAdjacentHTML(
+            "beforeend",
+            modalHTML
+        );
+
+
+        const modalElement =
+            document.getElementById(
+                "apVendorPaymentTraceModal"
+            );
+
+
+        const modal =
+            bootstrap.Modal
+                .getOrCreateInstance(
+                    modalElement
+                );
+
+
+        document
+            .getElementById(
+                "btn-ap-trace-find"
+            )
+            ?.addEventListener(
+                "click",
+                async () => {
+
+                    await this.loadVendorPaymentTrace();
+
+                }
+            );
+
+
+        modalElement.addEventListener(
+            "hidden.bs.modal",
+            () => {
+
+                modal.dispose();
+
+                modalElement.remove();
+
+            },
+            {
+                once:
+                    true
+            }
+        );
+
+
+        modal.show();
+
+    }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "AccountPayable.openVendorPaymentTrace:",
+            error
+        );
+
+
+        this.showError(
+            error?.message
+            ||
+            "Failed to open Vendor Payment Trace."
+        );
+
+    }
+
+}
+
+
+/*
+======================================================
+LOAD VENDOR PAYMENT TRACE
+======================================================
+*/
+
+async loadVendorPaymentTrace() {
+
+    const vendorId =
+        document
+            .getElementById(
+                "ap-trace-vendor"
+            )
+            ?.value
+        ||
+        "";
+
+
+    const dateFrom =
+        document
+            .getElementById(
+                "ap-trace-date-from"
+            )
+            ?.value
+        ||
+        null;
+
+
+    const dateTo =
+        document
+            .getElementById(
+                "ap-trace-date-to"
+            )
+            ?.value
+        ||
+        null;
+
+
+    if (
+        !vendorId
+    ) {
+
+        this.showError(
+            "Please select Vendor."
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+        const body =
+            document.getElementById(
+                "ap-trace-body"
+            );
+
+
+        const summary =
+            document.getElementById(
+                "ap-trace-summary"
+            );
+
+
+        if (
+            body
+        ) {
+
+            body.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="8"
+                        class="text-center py-4">
+
+                        <span
+                            class="
+                                spinner-border
+                                spinner-border-sm
+                                me-2
+                            ">
+                        </span>
+
+                        Loading payment trace...
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        }
+
+
+        const rows =
+            await this.service
+                .getVendorPaymentTrace(
+                    vendorId,
+                    dateFrom,
+                    dateTo
+                );
+
+
+        const vendor =
+            this.vendorData.find(
+                item =>
+                    String(
+                        item?.id
+                    )
+                    ===
+                    String(
+                        vendorId
+                    )
+            )
+            ||
+            null;
+
+
+        const totalPaid =
+            rows.reduce(
+                (
+                    total,
+                    row
+                ) =>
+                    total
+                    +
+                    Number(
+                        row?.payment_amount
+                        ||
+                        0
+                    ),
+                0
+            );
+
+
+        const invoiceIds =
+            new Set(
+                rows
+                    .map(
+                        row =>
+                            row?.account_payable_id
+                    )
+                    .filter(
+                        Boolean
+                    )
+            );
+
+
+        if (
+            summary
+        ) {
+
+            summary.innerHTML = `
+
+                <div class="col-md-4">
+
+                    <div class="border rounded p-3 h-100">
+
+                        <div class="text-muted small">
+                            Vendor
+                        </div>
+
+                        <div class="fw-semibold mt-1">
+                            ${
+                                vendor?.bp_code
+                                    ? `${vendor.bp_code} :: ${vendor.bp_name}`
+                                    : (
+                                        vendor?.bp_name
+                                        ||
+                                        "-"
+                                    )
+                            }
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-2">
+
+                    <div class="border rounded p-3 h-100">
+
+                        <div class="text-muted small">
+                            Paid Invoices
+                        </div>
+
+                        <div class="fw-bold fs-5 mt-1">
+                            ${invoiceIds.size}
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-2">
+
+                    <div class="border rounded p-3 h-100">
+
+                        <div class="text-muted small">
+                            Payments
+                        </div>
+
+                        <div class="fw-bold fs-5 mt-1">
+                            ${rows.length}
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <div class="border rounded p-3 h-100">
+
+                        <div class="text-muted small">
+                            Total Paid
+                        </div>
+
+                        <div class="fw-bold fs-5 mt-1">
+                            ${
+                                this.formatCurrency(
+                                    totalPaid
+                                )
+                            }
+                        </div>
+
+                    </div>
+
+                </div>
+
+            `;
+
+        }
+
+
+        if (
+            !body
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            rows.length === 0
+        ) {
+
+            body.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="8"
+                        class="text-center text-muted py-4">
+
+                        No active payment history found for this Vendor.
+
+                    </td>
+
+                </tr>
+
+            `;
+
+            return;
+
+        }
+
+
+        body.innerHTML =
+            rows
+                .map(
+                    (
+                        row,
+                        index
+                    ) => {
+
+                        const invoice =
+                            row?.invoice
+                            ||
+                            null;
+
+
+                        const journal =
+                            row?.trx_gl_journal
+                            ||
+                            null;
+
+
+                        const journalStatus =
+                            String(
+                                journal?.status
+                                ||
+                                "-"
+                            );
+
+
+                        let badgeClass =
+                            "bg-secondary";
+
+
+                        if (
+                            journalStatus ===
+                            "Posted"
+                        ) {
+
+                            badgeClass =
+                                "bg-success";
+
+                        }
+
+                        else if (
+                            journalStatus ===
+                            "Draft"
+                        ) {
+
+                            badgeClass =
+                                "bg-warning text-dark";
+
+                        }
+
+                        else if (
+                            journalStatus ===
+                            "Void"
+                        ) {
+
+                            badgeClass =
+                                "bg-danger";
+
+                        }
+
+
+                        return `
+
+                            <tr>
+
+                                <td class="text-center">
+                                    ${index + 1}
+                                </td>
+
+                                <td class="text-center">
+                                    ${
+                                        row?.payment_date
+                                        ||
+                                        "-"
+                                    }
+                                </td>
+
+                                <td>
+                                    ${
+                                        invoice?.invoice_no
+                                        ||
+                                        "-"
+                                    }
+                                </td>
+
+                                <td class="text-center">
+                                    ${
+                                        invoice?.invoice_date
+                                        ||
+                                        "-"
+                                    }
+                                </td>
+
+                                <td>
+                                    ${
+                                        row?.reference_no
+                                        ||
+                                        "-"
+                                    }
+                                </td>
+
+                                <td class="text-end fw-semibold">
+                                    ${
+                                        this.formatCurrency(
+                                            Number(
+                                                row?.payment_amount
+                                                ||
+                                                0
+                                            )
+                                        )
+                                    }
+                                </td>
+
+                                <td>
+                                    ${
+                                        journal?.journal_no
+                                        ||
+                                        "-"
+                                    }
+                                </td>
+
+                                <td class="text-center">
+
+                                    <span class="badge ${badgeClass}">
+                                        ${journalStatus}
+                                    </span>
+
+                                </td>
+
+                            </tr>
+
+                        `;
+
+                    }
+                )
+                .join("");
+
+    }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "AccountPayable.loadVendorPaymentTrace:",
+            error
+        );
+
+
+        this.showError(
+            error?.message
+            ||
+            "Failed to load Vendor Payment Trace."
+        );
+
+    }
+
+}
+
+
 /*
 ======================================================
 RENDER VIEW PAYMENT

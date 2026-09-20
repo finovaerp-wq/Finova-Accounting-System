@@ -5331,3 +5331,693 @@ FINAL - MATCH ACCOUNT PAYABLE
     flex: 0 0 auto !important;
 
 }
+
+/* ==========================================================
+   AR PAYMENT — SAME VISUAL STRUCTURE AS AP PAYMENT
+========================================================== */
+/*
+==========================================================
+FINOVA ACCOUNTING SYSTEM
+ACCOUNT PAYABLE
+BULK AR PAYMENT MODAL
+TAHAP 4
+==========================================================
+*/
+
+
+/* ==========================================================
+   MODAL SIZE
+========================================================== */
+
+#accountReceivablePaymentModal
+.modal-dialog {
+
+    width: calc(100% - 48px);
+
+    max-width: 1180px;
+
+    margin-left: auto;
+
+    margin-right: auto;
+
+}
+
+
+/* ==========================================================
+   MODAL CONTENT
+========================================================== */
+
+#accountReceivablePaymentModal
+.modal-content {
+
+    border: 0;
+
+    border-radius: 14px;
+
+    overflow: hidden;
+
+}
+
+
+/* ==========================================================
+   HEADER
+========================================================== */
+
+#accountReceivablePaymentModal
+.modal-header {
+
+    padding: 18px 22px;
+
+    background: #FFFFFF;
+
+    border-bottom: 1px solid #E5E7EB;
+
+}
+
+
+/* ==========================================================
+   BODY
+========================================================== */
+
+#accountReceivablePaymentModal
+.modal-body {
+
+    padding: 20px;
+
+    background: #F8FAFC;
+
+}
+
+
+/* ==========================================================
+   SECTION
+========================================================== */
+
+#accountReceivablePaymentModal
+.ar-bulk-payment-section {
+
+    width: 100%;
+
+    padding: 18px;
+
+    background: #FFFFFF;
+
+    border: 1px solid #E5E7EB;
+
+    border-radius: 12px;
+
+}
+
+
+/* ==========================================================
+   SECTION HEADER
+========================================================== */
+
+#accountReceivablePaymentModal
+.ar-bulk-payment-section-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 16px;
+
+    margin-bottom: 16px;
+
+}
+
+
+/* ==========================================================
+   SECTION TITLE
+========================================================== */
+
+#accountReceivablePaymentModal
+.ar-bulk-payment-section-title {
+
+    color: #111827;
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+    line-height: 1.35;
+
+}
+
+
+#accountReceivablePaymentModal
+.ar-bulk-payment-section-subtitle {
+
+    margin-top: 2px;
+
+    color: #6B7280;
+
+    font-size: 12px;
+
+    line-height: 1.45;
+
+}
+
+
+/* ==========================================================
+   FORM LABEL
+========================================================== */
+
+#accountReceivablePaymentModal
+.form-label {
+
+    margin-bottom: 6px;
+
+    color: #374151;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+}
+
+
+/* ==========================================================
+   FORM CONTROL
+========================================================== */
+
+#accountReceivablePaymentModal
+.form-control,
+
+#accountReceivablePaymentModal
+.form-select {
+
+    min-height: 42px;
+
+    border-color: #DDE2E8;
+
+    border-radius: 8px;
+
+    font-size: 13px;
+
+}
+
+
+#accountReceivablePaymentModal
+.form-control:focus,
+
+#accountReceivablePaymentModal
+.form-select:focus {
+
+    border-color: #86B7FE;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(
+            13,
+            110,
+            253,
+            .10
+        );
+
+}
+
+
+/* ==========================================================
+   DESCRIPTION
+========================================================== */
+
+#accountReceivablePaymentModal
+.ar-payment-description {
+
+    width: 100%;
+
+    min-height: 74px;
+
+    resize: vertical;
+
+    line-height: 1.5;
+
+}
+
+
+/* ==========================================================
+   SELECT ALL
+========================================================== */
+
+#accountReceivablePaymentModal
+.ar-bulk-select-all-wrapper {
+
+    flex: 0 0 auto;
+
+    margin: 0;
+
+}
+
+
+/* ==========================================================
+   EMPTY / LOADING STATE
+========================================================== */
+
+#accountReceivablePaymentModal
+.ar-bulk-payment-empty {
+
+    display: flex;
+
+    min-height: 150px;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-direction: column;
+
+    text-align: center;
+
+    color: #374151;
+
+    border: 1px dashed #D8DEE7;
+
+    border-radius: 10px;
+
+    background: #FAFBFC;
+
+}
+
+
+#accountReceivablePaymentModal
+.ar-bulk-payment-empty-icon {
+
+    display: flex;
+
+    width: 42px;
+
+    height: 42px;
+
+    align-items: center;
+
+    justify-content: center;
+
+    margin-bottom: 10px;
+
+    color: #6B7280;
+
+    font-size: 18px;
+
+    background: #F1F5F9;
+
+    border-radius: 50%;
+
+}
+
+
+/* ==========================================================
+   TABLE WRAPPER
+========================================================== */
+
+#accountReceivablePaymentModal
+.ar-bulk-invoice-table-wrapper {
+
+    width: 100%;
+
+    max-height: 330px;
+
+    overflow: auto;
+
+    border: 1px solid #E5E7EB;
+
+    border-radius: 10px;
+
+}
+
+
+/* ==========================================================
+   TABLE
+========================================================== */
+
+#accountReceivablePaymentModal
+.ar-bulk-invoice-table {
+
+    width: 100%;
+
+    min-width: 1040px;
+
+    margin: 0;
+
+    font-size: 12px;
+
+}
+
+
+/* ==========================================================
+   TABLE HEADER
+========================================================== */
+
+#accountReceivablePaymentModal
+.ar-bulk-invoice-table
+thead
+th {
+
+    position: sticky;
+
+    top: 0;
+
+    z-index: 2;
+
+    padding: 11px 10px;
+
+    color: #374151;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+
+    vertical-align: middle;
+
+    background: #F8FAFC;
+
+    border-bottom: 1px solid #DDE2E8;
+
+}
+
+
+/* ==========================================================
+   TABLE BODY
+========================================================== */
+
+#accountReceivablePaymentModal
+.ar-bulk-invoice-table
+tbody
+td {
+
+    padding: 10px;
+
+    color: #374151;
+
+    vertical-align: middle;
+
+    border-bottom-color: #EEF2F6;
+
+}
+
+
+/* ==========================================================
+   CHECK COLUMN
+========================================================== */
+
+#accountReceivablePaymentModal
+.ar-bulk-col-check {
+
+    width: 46px;
+
+    min-width: 46px;
+
+}
+
+
+/* ==========================================================
+   PAYMENT INPUT INSIDE TABLE
+   USED ON TAHAP 5
+========================================================== */
+
+#accountReceivablePaymentModal
+.ar-bulk-payment-input {
+
+    width: 145px;
+
+    min-height: 36px;
+
+    margin-left: auto;
+
+    text-align: right;
+
+    font-weight: 600;
+
+}
+
+
+/* ==========================================================
+   SELECTED ROW
+========================================================== */
+
+#accountReceivablePaymentModal
+.ar-bulk-invoice-table
+tr.ar-bulk-row-selected
+td {
+
+    background: #F5F9FF;
+
+}
+
+
+/* ==========================================================
+   SUMMARY CARD
+========================================================== */
+
+#accountReceivablePaymentModal
+.ar-bulk-summary-card {
+
+    height: 100%;
+
+    padding: 14px 16px;
+
+    border: 1px solid #E5E7EB;
+
+    border-radius: 10px;
+
+    background: #FAFBFC;
+
+}
+
+
+#accountReceivablePaymentModal
+.ar-bulk-summary-label {
+
+    margin-bottom: 5px;
+
+    color: #6B7280;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    text-transform: uppercase;
+
+    letter-spacing: .02em;
+
+}
+
+
+#accountReceivablePaymentModal
+.ar-bulk-summary-value {
+
+    color: #111827;
+
+    font-size: 18px;
+
+    font-weight: 700;
+
+    line-height: 1.25;
+
+}
+
+
+/* ==========================================================
+   TOTAL PAYMENT
+========================================================== */
+
+#accountReceivablePaymentModal
+.ar-bulk-summary-card-total {
+
+    border-color: #BFD4F5;
+
+    background: #F5F9FF;
+
+}
+
+
+#accountReceivablePaymentModal
+.ar-bulk-summary-total {
+
+    color: #0D6EFD;
+
+}
+
+
+/* ==========================================================
+   VALIDATION MESSAGE
+========================================================== */
+
+#accountReceivablePaymentModal
+.ar-bulk-payment-message {
+
+    margin-top: 14px;
+
+    padding: 10px 12px;
+
+    color: #92400E;
+
+    font-size: 12px;
+
+    border: 1px solid #FDE68A;
+
+    border-radius: 8px;
+
+    background: #FFFBEB;
+
+}
+
+
+/* ==========================================================
+   JOURNAL PREVIEW
+========================================================== */
+
+#accountReceivablePaymentModal
+.ar-payment-journal-preview {
+
+    padding: 16px 18px;
+
+    background: #FFFFFF;
+
+    border: 1px solid #E5E7EB;
+
+    border-radius: 12px;
+
+}
+
+
+/* ==========================================================
+   JOURNAL LINE
+========================================================== */
+
+#accountReceivablePaymentModal
+.ar-bulk-journal-line {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    min-height: 32px;
+
+    padding: 4px 0;
+
+    color: #374151;
+
+    font-size: 12px;
+
+}
+
+
+#accountReceivablePaymentModal
+.ar-bulk-journal-line
+> span:first-child {
+
+    width: 50px;
+
+    color: #6B7280;
+
+}
+
+
+/* ==========================================================
+   FOOTER
+========================================================== */
+
+#accountReceivablePaymentModal
+.modal-footer {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 14px 20px;
+
+    background: #FFFFFF;
+
+    border-top: 1px solid #E5E7EB;
+
+}
+
+
+/* ==========================================================
+   TABLET
+========================================================== */
+
+@media
+(max-width: 991.98px) {
+
+    #accountReceivablePaymentModal
+    .modal-dialog {
+
+        width: calc(100% - 24px);
+
+    }
+
+
+    #accountReceivablePaymentModal
+    .modal-body {
+
+        padding: 14px;
+
+    }
+
+
+    #accountReceivablePaymentModal
+    .ar-bulk-payment-section {
+
+        padding: 14px;
+
+    }
+
+}
+
+
+/* ==========================================================
+   MOBILE
+========================================================== */
+
+@media
+(max-width: 767.98px) {
+
+    #accountReceivablePaymentModal
+    .modal-dialog {
+
+        width: calc(100% - 16px);
+
+        margin:
+            8px
+            auto;
+
+    }
+
+
+    #accountReceivablePaymentModal
+    .modal-footer
+    > .me-auto {
+
+        display: none;
+
+    }
+
+
+    #accountReceivablePaymentModal
+    .modal-footer {
+
+        justify-content: flex-end;
+
+    }
+
+
+    #accountReceivablePaymentModal
+    .ar-bulk-payment-section-header {
+
+        align-items: flex-start;
+
+        flex-direction: column;
+
+    }
+
+}

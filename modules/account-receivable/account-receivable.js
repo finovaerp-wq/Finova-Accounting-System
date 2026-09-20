@@ -146,6 +146,15 @@ this.accountReceivablePaymentModal = null;
 
 this.currentPaymentARId = null;
 
+/*
+==================================================
+BULK AR PAYMENT / SELECT TRANSACTION
+==================================================
+*/
+
+this.arBulkPaymentInvoices = [];
+this.arBulkSelectedPayments = new Map();
+
 
 /*
 ==================================================
@@ -298,6 +307,8 @@ this.pendingCompleteARId =
         this.btnAdd = null;
 
         this.btnRefresh = null;
+
+        this.btnCustomerPaymentTrace = null;
 
         this.btnDownloadExcel = null;
 
@@ -1480,6 +1491,12 @@ cacheDOM() {
         );
 
 
+    this.btnCustomerPaymentTrace =
+        document.getElementById(
+            "btn-customer-payment-trace-ar"
+        );
+
+
     this.btnDownloadExcel =
         document.getElementById(
             "btn-download-excel-ar"
@@ -2137,6 +2154,1353 @@ RULE :
 ======================================================
 */
 
+
+
+/*
+======================================================
+AR PAYMENT BANK ACCOUNT SEARCH
+MANUAL TYPEAHEAD
+======================================================
+*/
+
+initARPaymentBankAccountSearch() {
+
+    const searchInput =
+        document.getElementById(
+            "ar-payment-account-search"
+        );
+
+    const select =
+        document.getElementById(
+            "ar-payment-account"
+        );
+
+    const results =
+        document.getElementById(
+            "ar-payment-account-results"
+        );
+
+    if (
+        !searchInput
+        ||
+        !select
+        ||
+        !results
+    ) {
+        return;
+    }
+
+    const getOptions =
+        () =>
+            Array.from(select.options)
+                .filter(
+                    option =>
+                        String(option.value || "").trim()
+                );
+
+    const closeResults =
+        () => {
+            results.classList.add("d-none");
+            results.innerHTML = "";
+        };
+
+    const renderResults =
+        keyword => {
+
+            const normalized =
+                String(keyword || "")
+                    .trim()
+                    .toLowerCase();
+
+            const options =
+                getOptions()
+                    .filter(option => {
+                        const text =
+                            String(option.textContent || "")
+                                .trim()
+                                .toLowerCase();
+
+                        return (
+                            !normalized
+                            ||
+                            text.includes(normalized)
+                        );
+                    })
+                    .slice(0, 30);
+
+            if (options.length === 0) {
+                results.innerHTML = `
+                    <div class="list-group-item text-muted small">
+                        Bank account not found.
+                    </div>
+                `;
+                results.classList.remove("d-none");
+                return;
+            }
+
+            results.innerHTML =
+                options.map(option => `
+                    <button
+                        type="button"
+                        class="list-group-item list-group-item-action"
+                        data-ar-bank-id="${option.value}">
+                        ${String(option.textContent || "").trim()}
+                    </button>
+                `).join("");
+
+            results.classList.remove("d-none");
+
+            results
+                .querySelectorAll("[data-ar-bank-id]")
+                .forEach(button => {
+                    button.addEventListener(
+                        "click",
+                        () => {
+
+                            const value =
+                                button.dataset.arBankId
+                                || "";
+
+                            const option =
+                                getOptions()
+                                    .find(
+                                        item =>
+                                            String(item.value)
+                                            === String(value)
+                                    );
+
+                            select.value =
+                                value;
+
+                            searchInput.value =
+                                option
+                                    ? String(option.textContent || "").trim()
+                                    : "";
+
+                            select.dispatchEvent(
+                                new Event(
+                                    "change",
+                                    {
+                                        bubbles: true
+                                    }
+                                )
+                            );
+
+                            closeResults();
+
+                        }
+                    );
+                });
+
+        };
+
+    searchInput.onfocus =
+        () => {
+            renderResults(
+                searchInput.value
+            );
+        };
+
+    searchInput.oninput =
+        () => {
+
+            /*
+            IMPORTANT:
+            MANUAL TEXT IS ONLY FOR SEARCH.
+            ACTUAL ACCOUNT ID MUST COME FROM A SELECTED RESULT.
+            */
+            select.value = "";
+
+            renderResults(
+                searchInput.value
+            );
+
+        };
+
+    searchInput.onkeydown =
+        event => {
+
+            if (
+                event.key === "Escape"
+            ) {
+                closeResults();
+            }
+
+        };
+
+    document.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target === searchInput
+                ||
+                results.contains(event.target)
+            ) {
+                return;
+            }
+
+            closeResults();
+
+        },
+        {
+            once: false
+        }
+    );
+
+    /*
+    SYNC EXISTING SELECTED ACCOUNT
+    */
+    const selectedOption =
+        select.options[
+            select.selectedIndex
+        ];
+
+    if (
+        select.value
+        &&
+        selectedOption
+    ) {
+        searchInput.value =
+            String(
+                selectedOption.textContent
+                ||
+                ""
+            )
+            .trim();
+    }
+
+}
+
+
+/*
+======================================================
+BULK AR PAYMENT
+SELECT TRANSACTION
+SAME PAYMENT UX AS ACCOUNT PAYABLE
+======================================================
+*/
+
+async loadBulkAROutstandingInvoices(
+    customerId
+) {
+
+    const normalizedCustomerId =
+        Number(customerId);
+
+    if (
+        !Number.isFinite(normalizedCustomerId)
+        ||
+        normalizedCustomerId <= 0
+    ) {
+        throw new Error(
+            "Account Receivable Customer ID is invalid."
+        );
+    }
+
+    /*
+    ==================================================
+    LOAD ALL AR FOR CUSTOMER
+    DO NOT TRUST STORED status / paid_amount HERE.
+
+    WHY:
+    A PAYMENT MAY HAVE BEEN VOIDED OR ITS GL JOURNAL
+    MAY HAVE BEEN DELETED. IN THAT CASE THE INVOICE
+    MUST BECOME SELECTABLE AGAIN.
+    ==================================================
+    */
+
+    const allInvoices =
+        await this.service.getAll();
+
+    const customerInvoices =
+        (Array.isArray(allInvoices) ? allInvoices : [])
+            .filter(invoice => {
+
+                const invoiceCustomerId =
+                    Number(
+                        invoice?.customer_id
+                        ||
+                        invoice?.mst_business_partner?.id
+                        ||
+                        0
+                    );
+
+                const invoiceStatus =
+                    String(
+                        invoice?.status
+                        ||
+                        ""
+                    )
+                    .trim()
+                    .toLowerCase();
+
+                const invoiceJournalStatus =
+                    String(
+                        invoice?.trx_gl_journal?.status
+                        ||
+                        ""
+                    )
+                    .trim()
+                    .toLowerCase();
+
+                return (
+                    invoiceCustomerId
+                    === normalizedCustomerId
+                    &&
+                    invoiceStatus !== "void"
+                    &&
+                    Boolean(
+                        invoice?.gl_journal_id
+                    )
+                    &&
+                    invoiceJournalStatus === "posted"
+                );
+
+            });
+
+    /*
+    ==================================================
+    RECALCULATE ACTIVE PAID AMOUNT FROM PAYMENT HISTORY
+
+    ACTIVE PAYMENT:
+    - payment still has a GL Journal relation
+    - GL Journal still exists
+    - GL Journal status is NOT Void
+
+    INACTIVE:
+    - GL Journal Void
+    - GL Journal was deleted / relation resolves null
+
+    This intentionally ignores stale AR paid_amount/status
+    when deciding whether an invoice can be selected.
+    ==================================================
+    */
+
+    const recalculated =
+        await Promise.all(
+            customerInvoices.map(
+                async invoice => {
+
+                    const paymentHistory =
+                        await this.service
+                            .getPaymentHistory(
+                                invoice.id
+                            );
+
+                    const activePayments =
+                        (
+                            Array.isArray(
+                                paymentHistory
+                            )
+                                ? paymentHistory
+                                : []
+                        )
+                        .filter(
+                            payment => {
+
+                                const journal =
+                                    payment?.trx_gl_journal
+                                    ||
+                                    null;
+
+                                const journalStatus =
+                                    String(
+                                        journal?.status
+                                        ||
+                                        ""
+                                    )
+                                    .trim()
+                                    .toLowerCase();
+
+                                return (
+                                    Boolean(
+                                        payment?.gl_journal_id
+                                    )
+                                    &&
+                                    Boolean(
+                                        journal?.id
+                                    )
+                                    &&
+                                    journalStatus !== "void"
+                                );
+
+                            }
+                        );
+
+                    const activePaid =
+                        activePayments.reduce(
+                            (
+                                total,
+                                payment
+                            ) =>
+                                total
+                                +
+                                Number(
+                                    payment?.amount
+                                    ||
+                                    0
+                                ),
+                            0
+                        );
+
+                    const total =
+                        Number(
+                            invoice?.total_amount
+                            ||
+                            0
+                        );
+
+                    const outstanding =
+                        Math.max(
+                            0,
+                            total - activePaid
+                        );
+
+                    return {
+                        ...invoice,
+
+                        /*
+                        IMPORTANT:
+                        UI PAYMENT VALUES ARE RECALCULATED
+                        FROM ACTIVE PAYMENT HISTORY.
+                        */
+                        paid_amount:
+                            activePaid,
+
+                        outstanding_amount:
+                            outstanding,
+
+                        payment_outstanding:
+                            outstanding,
+
+                        active_payment_count:
+                            activePayments.length
+                    };
+
+                }
+            )
+        );
+
+    this.arBulkPaymentInvoices =
+        recalculated.filter(
+            invoice =>
+                Number(
+                    invoice?.payment_outstanding
+                    ||
+                    0
+                )
+                > 0
+        );
+
+    this.arBulkSelectedPayments =
+        new Map();
+
+    this.renderBulkAROutstandingInvoices();
+    this.updateBulkARPaymentSummary();
+
+}
+
+renderBulkAROutstandingInvoices() {
+
+    const body =
+        document.getElementById(
+            "ar-payment-invoice-body"
+        );
+
+    if (!body) {
+        return;
+    }
+
+    const emptyState =
+        document.getElementById(
+            "ar-payment-invoice-empty"
+        );
+
+    const loadingState =
+        document.getElementById(
+            "ar-payment-invoice-loading"
+        );
+
+    const tableWrapper =
+        document.getElementById(
+            "ar-payment-invoice-table-wrapper"
+        );
+
+    const hasInvoices =
+        Array.isArray(
+            this.arBulkPaymentInvoices
+        )
+        &&
+        this.arBulkPaymentInvoices.length > 0;
+
+    if (loadingState) {
+        loadingState.classList.add(
+            "d-none"
+        );
+    }
+
+    if (emptyState) {
+        emptyState.classList.toggle(
+            "d-none",
+            hasInvoices
+        );
+    }
+
+    if (tableWrapper) {
+        tableWrapper.classList.toggle(
+            "d-none",
+            !hasInvoices
+        );
+    }
+
+    const selectAllControl =
+        document.getElementById(
+            "ar-payment-select-all"
+        );
+
+    if (selectAllControl) {
+        selectAllControl.disabled =
+            !hasInvoices;
+    }
+
+    if (!hasInvoices) {
+
+        body.innerHTML = `
+            <tr>
+                <td colspan="7"
+                    class="text-center text-muted py-4">
+                    No selectable outstanding AR transaction is available for this customer.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+    body.innerHTML =
+        this.arBulkPaymentInvoices
+            .map(invoice => {
+
+                const id =
+                    String(invoice?.id || "");
+
+                const selected =
+                    this.arBulkSelectedPayments
+                        .get(id);
+
+                const isSelected =
+                    Boolean(selected);
+
+                const allocation =
+                    Number(
+                        selected?.amount
+                        ||
+                        invoice.payment_outstanding
+                        ||
+                        0
+                    );
+
+                return `
+                    <tr>
+                        <td class="text-center">
+                            <input
+                                type="checkbox"
+                                class="form-check-input ar-payment-invoice-check"
+                                data-ar-id="${id}"
+                                ${isSelected ? "checked" : ""}>
+                        </td>
+
+                        <td>
+                            <div class="fw-semibold">
+                                ${invoice?.invoice_no || "-"}
+                            </div>
+                        </td>
+
+                        <td class="text-center">
+                            ${invoice?.invoice_date || "-"}
+                        </td>
+
+                        <td class="text-end">
+                            ${this.formatCurrency(
+                                Number(invoice?.total_amount || 0)
+                            )}
+                        </td>
+
+                        <td class="text-end">
+                            ${this.formatCurrency(
+                                Number(invoice?.paid_amount || 0)
+                            )}
+                        </td>
+
+                        <td class="text-end fw-semibold">
+                            ${this.formatCurrency(
+                                Number(invoice?.payment_outstanding || 0)
+                            )}
+                        </td>
+
+                        <td>
+                            <input
+                                type="text"
+                                class="form-control form-control-sm text-end ar-payment-allocation"
+                                data-ar-id="${id}"
+                                inputmode="numeric"
+                                value="${this.formatCurrency(allocation)}"
+                                ${isSelected ? "" : "disabled"}>
+                        </td>
+                    </tr>
+                `;
+
+            })
+            .join("");
+
+    body
+        .querySelectorAll(
+            ".ar-payment-invoice-check"
+        )
+        .forEach(checkbox => {
+
+            checkbox.addEventListener(
+                "change",
+                () => {
+
+                    this.toggleBulkARInvoice(
+                        checkbox.dataset.arId,
+                        checkbox.checked
+                    );
+
+                }
+            );
+
+        });
+
+    body
+        .querySelectorAll(
+            ".ar-payment-allocation"
+        )
+        .forEach(input => {
+
+            input.addEventListener(
+                "input",
+                () => {
+
+                    this.updateBulkARAllocationAmount(
+                        input.dataset.arId,
+                        input
+                    );
+
+                }
+            );
+
+        });
+
+    const selectAll =
+        document.getElementById(
+            "ar-payment-select-all"
+        );
+
+    if (selectAll) {
+
+        selectAll.onchange =
+            () => {
+
+                this.toggleAllBulkARInvoices(
+                    selectAll.checked
+                );
+
+            };
+
+    }
+
+    this.syncBulkARSelectAll();
+
+}
+
+
+toggleBulkARInvoice(
+    id,
+    checked
+) {
+
+    const key =
+        String(id || "");
+
+    const invoice =
+        this.arBulkPaymentInvoices
+            .find(
+                item =>
+                    String(item?.id || "")
+                    === key
+            );
+
+    if (!invoice) {
+        return;
+    }
+
+    if (checked) {
+
+        this.arBulkSelectedPayments.set(
+            key,
+            {
+                invoice,
+                amount:
+                    Number(
+                        invoice.payment_outstanding
+                        ||
+                        0
+                    )
+            }
+        );
+
+    }
+    else {
+
+        this.arBulkSelectedPayments.delete(
+            key
+        );
+
+    }
+
+    this.renderBulkAROutstandingInvoices();
+    this.updateBulkARPaymentSummary();
+
+}
+
+
+updateBulkARAllocationAmount(
+    id,
+    input
+) {
+
+    const key =
+        String(id || "");
+
+    const selected =
+        this.arBulkSelectedPayments
+            .get(key);
+
+    if (!selected) {
+        return;
+    }
+
+    const maximum =
+        Number(
+            selected.invoice
+                ?.payment_outstanding
+            ||
+            0
+        );
+
+    let amount =
+        this.parseNumber(
+            input?.value
+        );
+
+    if (amount < 0) {
+        amount = 0;
+    }
+
+    if (amount > maximum) {
+        amount = maximum;
+    }
+
+    selected.amount =
+        amount;
+
+    this.arBulkSelectedPayments.set(
+        key,
+        selected
+    );
+
+    if (input) {
+        input.value =
+            this.formatCurrency(
+                amount
+            );
+    }
+
+    this.updateBulkARPaymentSummary();
+
+}
+
+
+toggleAllBulkARInvoices(
+    checked
+) {
+
+    this.arBulkSelectedPayments =
+        new Map();
+
+    if (checked) {
+
+        this.arBulkPaymentInvoices
+            .forEach(invoice => {
+
+                const id =
+                    String(invoice?.id || "");
+
+                if (!id) {
+                    return;
+                }
+
+                this.arBulkSelectedPayments.set(
+                    id,
+                    {
+                        invoice,
+                        amount:
+                            Number(
+                                invoice.payment_outstanding
+                                ||
+                                0
+                            )
+                    }
+                );
+
+            });
+
+    }
+
+    this.renderBulkAROutstandingInvoices();
+    this.updateBulkARPaymentSummary();
+
+}
+
+
+syncBulkARSelectAll() {
+
+    const selectAll =
+        document.getElementById(
+            "ar-payment-select-all"
+        );
+
+    if (!selectAll) {
+        return;
+    }
+
+    const total =
+        this.arBulkPaymentInvoices.length;
+
+    const selected =
+        this.arBulkSelectedPayments.size;
+
+    selectAll.checked =
+        total > 0
+        &&
+        selected === total;
+
+    selectAll.indeterminate =
+        selected > 0
+        &&
+        selected < total;
+
+}
+
+
+updateBulkARPaymentSummary() {
+
+    const selected =
+        Array.from(
+            this.arBulkSelectedPayments.values()
+        );
+
+    const selectedOutstanding =
+        selected.reduce(
+            (total, item) =>
+                total
+                +
+                Number(
+                    item?.invoice
+                        ?.payment_outstanding
+                    ||
+                    0
+                ),
+            0
+        );
+
+    const totalAllocation =
+        selected.reduce(
+            (total, item) =>
+                total
+                +
+                Number(
+                    item?.amount
+                    ||
+                    0
+                ),
+            0
+        );
+
+    const countElement =
+        document.getElementById(
+            "ar-payment-selected-count"
+        );
+
+    const outstandingElement =
+        document.getElementById(
+            "ar-payment-selected-outstanding"
+        );
+
+    const allocationElement =
+        document.getElementById(
+            "ar-payment-total-allocation"
+        );
+
+    if (countElement) {
+        countElement.textContent =
+            String(selected.length);
+    }
+
+    if (outstandingElement) {
+        outstandingElement.textContent =
+            this.formatCurrency(
+                selectedOutstanding
+            );
+    }
+
+    if (allocationElement) {
+        allocationElement.textContent =
+            this.formatCurrency(
+                totalAllocation
+            );
+    }
+
+    if (this.arPaymentAmount) {
+        this.arPaymentAmount.value =
+            this.formatCurrency(
+                totalAllocation
+            );
+    }
+
+    this.syncBulkARSelectAll();
+
+}
+
+
+/*
+======================================================
+SAVE BULK AR PAYMENT
+ONE SELECTED TRANSACTION = ONE AR PAYMENT RECORD
+AND ONE TRACEABLE AR PAYMENT GL JOURNAL.
+
+NO NEW DATABASE TABLE IS REQUIRED.
+======================================================
+*/
+
+async saveBulkARPayment() {
+
+    if (
+        this.btnSaveARPayment
+        &&
+        this.btnSaveARPayment.dataset.processing
+        === "true"
+    ) {
+        return;
+    }
+
+    const selected =
+        Array.from(
+            this.arBulkSelectedPayments.values()
+        );
+
+    if (selected.length === 0) {
+        this.showError(
+            "Select at least one AR transaction."
+        );
+        return;
+    }
+
+    const paymentDate =
+        this.arPaymentDate?.value
+        || "";
+
+    const paymentAccountId =
+        Number(
+            this.arPaymentAccount?.value
+            ||
+            0
+        );
+
+    const referenceNo =
+        this.arPaymentReferenceNo
+            ?.value
+            ?.trim()
+        || null;
+
+    const description =
+        this.arPaymentDescription
+            ?.value
+            ?.trim()
+        || null;
+
+    if (!paymentDate) {
+        this.showError(
+            "Payment Date is required."
+        );
+        return;
+    }
+
+    if (
+        !Number.isFinite(paymentAccountId)
+        ||
+        paymentAccountId <= 0
+    ) {
+        this.showError(
+            "Payment Account is required."
+        );
+        return;
+    }
+
+    for (const item of selected) {
+
+        const amount =
+            Number(item?.amount || 0);
+
+        const maximum =
+            Number(
+                item?.invoice
+                    ?.payment_outstanding
+                ||
+                0
+            );
+
+        if (amount <= 0) {
+            this.showError(
+                "Payment Amount must be greater than 0 for every selected invoice."
+            );
+            return;
+        }
+
+        if (amount > maximum) {
+            this.showError(
+                `Payment Amount cannot exceed Outstanding Amount for invoice ${
+                    item?.invoice?.invoice_no || ""
+                }.`
+            );
+            return;
+        }
+
+    }
+
+    if (this.btnSaveARPayment) {
+        this.btnSaveARPayment.dataset.processing =
+            "true";
+        this.btnSaveARPayment.disabled =
+            true;
+    }
+
+    let completed =
+        0;
+
+    try {
+
+        for (const item of selected) {
+
+            const id =
+                item.invoice.id;
+
+            /*
+            ==============================================
+            RECONCILE VOID / DELETED PAYMENT GL FIRST
+            ==============================================
+            */
+
+            await this.service
+                .recalculateActivePaymentStatus(
+                    id
+                );
+
+
+            const freshResult =
+                await this.service.getById(
+                    id
+                );
+
+            const invoice =
+                freshResult?.header;
+
+            if (!invoice) {
+                throw new Error(
+                    "Account Receivable not found."
+                );
+            }
+
+            const totalAmount =
+                Number(
+                    invoice.total_amount
+                    ||
+                    0
+                );
+
+            const paidAmount =
+                Number(
+                    invoice.paid_amount
+                    ||
+                    0
+                );
+
+            const outstandingAmount =
+                Number(
+                    invoice.outstanding_amount
+                    ??
+                    (totalAmount - paidAmount)
+                );
+
+            const paymentAmount =
+                Number(item.amount || 0);
+
+            if (
+                outstandingAmount <= 0
+                ||
+                paymentAmount > outstandingAmount
+            ) {
+                throw new Error(
+                    `Outstanding Amount changed for invoice ${
+                        invoice.invoice_no || ""
+                    }. Please reopen Payment and try again.`
+                );
+            }
+
+            if (!invoice.gl_journal_id) {
+                throw new Error(
+                    `Invoice ${
+                        invoice.invoice_no || ""
+                    } must be completed before receiving payment.`
+                );
+            }
+
+            const {
+                data: originalJournal,
+                error: journalError
+            } =
+                await supabase
+                    .from("trx_gl_journal")
+                    .select(`
+                        id,
+                        journal_no,
+                        status
+                    `)
+                    .eq(
+                        "id",
+                        invoice.gl_journal_id
+                    )
+                    .maybeSingle();
+
+            if (journalError) {
+                throw journalError;
+            }
+
+            if (
+                String(
+                    originalJournal?.status
+                    ||
+                    ""
+                )
+                .trim()
+                .toLowerCase()
+                !== "posted"
+            ) {
+                throw new Error(
+                    `GL Journal ${
+                        originalJournal?.journal_no || ""
+                    } for invoice ${
+                        invoice.invoice_no || ""
+                    } must be Posted before receiving payment.`
+                );
+            }
+
+            const paymentDescription =
+                description
+                ||
+                invoice.description
+                ||
+                `Payment AR ${
+                    invoice.invoice_no || ""
+                }`;
+
+            const journal =
+                await this.generateARPaymentJournal(
+                    invoice,
+                    {
+                        payment_date:
+                            paymentDate,
+                        payment_account_id:
+                            paymentAccountId,
+                        amount:
+                            paymentAmount,
+                        reference_no:
+                            referenceNo,
+                        description:
+                            paymentDescription
+                    }
+                );
+
+            if (
+                !journal
+                ||
+                !journal.id
+            ) {
+                throw new Error(
+                    `Failed to generate AR Payment GL Journal for invoice ${
+                        invoice.invoice_no || ""
+                    }.`
+                );
+            }
+
+            let payment;
+
+            try {
+
+                payment =
+                    await this.service.createPayment({
+                        account_receivable_id:
+                            id,
+                        payment_date:
+                            paymentDate,
+                        payment_account_id:
+                            paymentAccountId,
+                        amount:
+                            paymentAmount,
+                        reference_no:
+                            referenceNo,
+                        description:
+                            paymentDescription,
+                        gl_journal_id:
+                            journal.id
+                    });
+
+            }
+            catch (paymentError) {
+
+                const {
+                    error: rollbackError
+                } =
+                    await supabase
+                        .from(
+                            "trx_gl_journal"
+                        )
+                        .delete()
+                        .eq(
+                            "id",
+                            journal.id
+                        );
+
+                if (rollbackError) {
+                    console.error(
+                        "AR BULK PAYMENT JOURNAL ROLLBACK ERROR:",
+                        rollbackError
+                    );
+                }
+
+                throw paymentError;
+
+            }
+
+            if (
+                !payment
+                ||
+                !payment.id
+            ) {
+                throw new Error(
+                    `Failed to save AR Payment for invoice ${
+                        invoice.invoice_no || ""
+                    }.`
+                );
+            }
+
+            await this.service
+                .updatePaymentStatus(
+                    id
+                );
+
+            completed +=
+                1;
+
+        }
+
+        if (
+            this.accountReceivablePaymentModal
+        ) {
+
+            bootstrap.Modal
+                .getOrCreateInstance(
+                    this.accountReceivablePaymentModal
+                )
+                .hide();
+
+        }
+
+        this.currentPaymentARId =
+            null;
+
+        this.arBulkPaymentInvoices =
+            [];
+
+        this.arBulkSelectedPayments =
+            new Map();
+
+        await this.loadData(
+            false
+        );
+
+        window.dispatchEvent(
+            new CustomEvent(
+                "finova:gl-journal-changed",
+                {
+                    detail: {
+                        source:
+                            "AR",
+                        sourceModule:
+                            "AR",
+                        sourceDocumentType:
+                            "AR_PAYMENT",
+                        action:
+                            "AR_BULK_PAYMENT_CREATED",
+                        paymentCount:
+                            completed
+                    }
+                }
+            )
+        );
+
+        this.showSuccess(
+            `${completed} AR payment transaction${
+                completed === 1 ? "" : "s"
+            } saved successfully.`
+        );
+
+    }
+    catch (error) {
+
+        console.error(
+            "AccountReceivable.saveBulkARPayment:",
+            error
+        );
+
+        this.showError(
+            completed > 0
+                ? `${completed} payment transaction(s) were saved before the error. ${error?.message || ""}`
+                : (
+                    error?.message
+                    ||
+                    "Failed to save AR Payment."
+                )
+        );
+
+    }
+    finally {
+
+        if (this.btnSaveARPayment) {
+            this.btnSaveARPayment.dataset.processing =
+                "false";
+            this.btnSaveARPayment.disabled =
+                false;
+        }
+
+    }
+
+}
+
+
 async receivePayment(
     id
 ) {
@@ -2686,6 +4050,8 @@ if (
 
         await this.loadPaymentAccounts();
 
+        this.initARPaymentBankAccountSearch();
+
 
         /*
         ==================================================
@@ -2732,13 +4098,200 @@ if (
         ) {
 
             this.arPaymentCustomer.value =
-                invoice
-                    ?.mst_business_partner
-                    ?.bp_name
-                ||
-                "";
+                String(
+                    invoice.customer_id
+                    ||
+                    invoice?.mst_business_partner?.id
+                    ||
+                    ""
+                );
 
         }
+
+
+        /*
+        ==================================================
+        SELECT TRANSACTION
+        LOAD ALL OUTSTANDING AR FOR SAME CUSTOMER
+        ==================================================
+        */
+
+        const paymentCustomerId =
+            Number(
+                invoice.customer_id
+                ||
+                invoice?.mst_business_partner?.id
+                ||
+                0
+            );
+
+        await this.loadBulkAROutstandingInvoices(
+            paymentCustomerId
+        );
+
+        /*
+        ==================================================
+        AR PAYMENT CUSTOMER
+        SAME VISUAL FLOW AS AP PAYMENT
+        ==================================================
+        */
+
+        const bulkCustomerId =
+            document.getElementById(
+                "ar-payment-customer"
+            );
+
+        const bulkCustomerDisplay =
+            document.getElementById(
+                "ar-payment-customer-display"
+            );
+
+        /*
+        ==================================================
+        CUSTOMER SOURCE
+
+        PRIMARY:
+        FRESH AR HEADER JOIN mst_business_partner
+
+        FALLBACK:
+        customerData loaded in AR module
+        ==================================================
+        */
+
+        const joinedCustomer =
+            invoice?.mst_business_partner
+            ||
+            null;
+
+        const selectedCustomer =
+            joinedCustomer
+            ||
+            this.customerData.find(
+                customer =>
+                    Number(customer?.id)
+                    === paymentCustomerId
+            )
+            ||
+            null;
+
+        const customerCode =
+            String(
+                selectedCustomer?.bp_code
+                ||
+                ""
+            )
+            .trim();
+
+        const customerName =
+            String(
+                selectedCustomer?.bp_name
+                ||
+                ""
+            )
+            .trim();
+
+        if (bulkCustomerId) {
+            bulkCustomerId.value =
+                String(
+                    paymentCustomerId
+                    ||
+                    selectedCustomer?.id
+                    ||
+                    ""
+                );
+        }
+
+        if (bulkCustomerDisplay) {
+
+            bulkCustomerDisplay.value =
+                customerCode
+                    ? `${customerCode} :: ${customerName}`
+                    : customerName;
+
+            /*
+            NEVER LEAVE THE CUSTOMER FIELD BLANK
+            WHEN THE FRESH AR HEADER HAS A CUSTOMER.
+            */
+            if (
+                !bulkCustomerDisplay.value
+                &&
+                invoice?.customer_id
+            ) {
+
+                const fallbackCustomer =
+                    this.customerData.find(
+                        customer =>
+                            Number(customer?.id)
+                            === Number(invoice.customer_id)
+                    );
+
+                bulkCustomerDisplay.value =
+                    fallbackCustomer
+                        ? `${
+                            fallbackCustomer.bp_code
+                            ||
+                            ""
+                          }${
+                            fallbackCustomer.bp_code
+                                ? " :: "
+                                : ""
+                          }${
+                            fallbackCustomer.bp_name
+                            ||
+                            ""
+                          }`
+                        : `Customer ID ${invoice.customer_id}`;
+
+            }
+
+        }
+
+
+        const paymentBatchNo =
+            document.getElementById(
+                "ar-payment-batch-no"
+            );
+
+        if (paymentBatchNo) {
+            paymentBatchNo.value =
+                "AUTO";
+        }
+
+        const paymentBatchStatus =
+            document.getElementById(
+                "ar-payment-batch-status"
+            );
+
+        if (paymentBatchStatus) {
+            paymentBatchStatus.textContent =
+                "Draft";
+        }
+
+
+        const currentBulkInvoice =
+            this.arBulkPaymentInvoices
+                .find(
+                    item =>
+                        String(item?.id || "")
+                        ===
+                        String(id)
+                );
+
+        if (currentBulkInvoice) {
+            this.toggleBulkARInvoice(
+                id,
+                true
+            );
+        }
+
+        /*
+        ==================================================
+        ENSURE OUTSTANDING TABLE IS VISIBLE
+        AFTER CUSTOMER + INVOICE DATA ARE READY
+        ==================================================
+        */
+
+        this.renderBulkAROutstandingInvoices();
 
 
         /*
@@ -2847,7 +4400,16 @@ if (
 
             this.arPaymentAmount.value =
                 this.formatCurrency(
-                    outstandingAmount
+                    Array.from(
+                        this.arBulkSelectedPayments.values()
+                    )
+                    .reduce(
+                        (total, item) =>
+                            total
+                            +
+                            Number(item?.amount || 0),
+                        0
+                    )
                 );
 
         }
@@ -8173,6 +9735,426 @@ ONLY ACTIVE PAYMENT
 WITH BANK / PAYMENT ACCOUNT
 ======================================================
 */
+
+
+/*
+======================================================
+CUSTOMER PAYMENT TRACE
+CUSTOMER -> AR INVOICE -> PAYMENT -> GL JOURNAL
+======================================================
+*/
+
+async openCustomerPaymentTrace() {
+
+    try {
+
+        if (
+            !Array.isArray(this.customerData)
+            ||
+            this.customerData.length === 0
+        ) {
+            await this.loadCustomers();
+        }
+
+        const oldModal =
+            document.getElementById(
+                "arCustomerPaymentTraceModal"
+            );
+
+        if (oldModal) {
+            bootstrap.Modal
+                .getInstance(oldModal)
+                ?.dispose();
+            oldModal.remove();
+        }
+
+        const customerOptions =
+            this.customerData
+                .map(customer => {
+                    const code =
+                        String(customer?.bp_code || "").trim();
+                    const name =
+                        String(customer?.bp_name || "").trim();
+
+                    return customer?.id
+                        ? `<option value="${customer.id}">${
+                            code
+                                ? `${code} :: ${name}`
+                                : name
+                          }</option>`
+                        : "";
+                })
+                .join("");
+
+        document.body.insertAdjacentHTML(
+            "beforeend",
+            `
+            <div class="modal fade"
+                 id="arCustomerPaymentTraceModal"
+                 tabindex="-1"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                    <div class="modal-content">
+
+                        <div class="modal-header">
+                            <div>
+                                <h5 class="modal-title fw-semibold">
+                                    <i class="fa-solid fa-route me-2"></i>
+                                    Customer Payment Trace
+                                </h5>
+                                <div class="text-muted small mt-1">
+                                    Customer → AR Invoice → Payment → GL Journal
+                                </div>
+                            </div>
+                            <button type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <div class="modal-body">
+
+                            <div class="row g-3 align-items-end mb-4">
+                                <div class="col-md-5">
+                                    <label class="form-label">Customer</label>
+                                    <select id="ar-trace-customer"
+                                            class="form-select">
+                                        <option value="">Select Customer</option>
+                                        ${customerOptions}
+                                    </select>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <label class="form-label">
+                                        Payment Date From
+                                    </label>
+                                    <input type="date"
+                                           id="ar-trace-date-from"
+                                           class="form-control">
+                                </div>
+
+                                <div class="col-md-2">
+                                    <label class="form-label">
+                                        Payment Date To
+                                    </label>
+                                    <input type="date"
+                                           id="ar-trace-date-to"
+                                           class="form-control">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <button type="button"
+                                            id="btn-ar-trace-find"
+                                            class="btn btn-primary w-100">
+                                        <i class="fa-solid fa-magnifying-glass me-1"></i>
+                                        Trace Payment
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="ar-trace-summary"
+                                 class="row g-3 mb-3"></div>
+
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover align-middle mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-center">No</th>
+                                            <th class="text-center">Payment Date</th>
+                                            <th>Invoice No</th>
+                                            <th class="text-center">Invoice Date</th>
+                                            <th>Reference No</th>
+                                            <th class="text-end">Received Amount</th>
+                                            <th>GL Journal</th>
+                                            <th class="text-center">GL Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ar-trace-body">
+                                        <tr>
+                                            <td colspan="8"
+                                                class="text-center text-muted py-4">
+                                                Select Customer and click Trace Payment.
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button"
+                                    class="btn btn-secondary"
+                                    data-bs-dismiss="modal">
+                                Close
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            `
+        );
+
+        const modalElement =
+            document.getElementById(
+                "arCustomerPaymentTraceModal"
+            );
+
+        const modal =
+            bootstrap.Modal
+                .getOrCreateInstance(modalElement);
+
+        document
+            .getElementById("btn-ar-trace-find")
+            ?.addEventListener(
+                "click",
+                async () => {
+                    await this.loadCustomerPaymentTrace();
+                }
+            );
+
+        modalElement.addEventListener(
+            "hidden.bs.modal",
+            () => {
+                modal.dispose();
+                modalElement.remove();
+            },
+            { once: true }
+        );
+
+        modal.show();
+
+    }
+    catch (error) {
+
+        console.error(
+            "AccountReceivable.openCustomerPaymentTrace:",
+            error
+        );
+
+        this.showError(
+            error?.message
+            || "Failed to open Customer Payment Trace."
+        );
+
+    }
+
+}
+
+
+async loadCustomerPaymentTrace() {
+
+    const customerId =
+        document.getElementById("ar-trace-customer")?.value
+        || "";
+
+    const dateFrom =
+        document.getElementById("ar-trace-date-from")?.value
+        || null;
+
+    const dateTo =
+        document.getElementById("ar-trace-date-to")?.value
+        || null;
+
+    if (!customerId) {
+        this.showError("Please select Customer.");
+        return;
+    }
+
+    try {
+
+        const body =
+            document.getElementById("ar-trace-body");
+
+        const summary =
+            document.getElementById("ar-trace-summary");
+
+        if (body) {
+            body.innerHTML = `
+                <tr>
+                    <td colspan="8"
+                        class="text-center py-4">
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                        Loading payment trace...
+                    </td>
+                </tr>
+            `;
+        }
+
+        const rows =
+            await this.service
+                .getCustomerPaymentTrace(
+                    customerId,
+                    dateFrom,
+                    dateTo
+                );
+
+        const customer =
+            this.customerData.find(
+                item =>
+                    String(item?.id)
+                    === String(customerId)
+            )
+            || null;
+
+        const activeRows =
+            rows.filter(
+                row =>
+                    String(
+                        row?.trx_gl_journal?.status || ""
+                    )
+                    .trim()
+                    .toLowerCase()
+                    !== "void"
+            );
+
+        const totalReceived =
+            activeRows.reduce(
+                (total, row) =>
+                    total
+                    + Number(row?.amount || 0),
+                0
+            );
+
+        const invoiceIds =
+            new Set(
+                activeRows
+                    .map(row => row?.account_receivable_id)
+                    .filter(Boolean)
+            );
+
+        if (summary) {
+            summary.innerHTML = `
+                <div class="col-md-4">
+                    <div class="border rounded p-3 h-100">
+                        <div class="text-muted small">Customer</div>
+                        <div class="fw-semibold mt-1">
+                            ${
+                                customer?.bp_code
+                                    ? `${customer.bp_code} :: ${customer.bp_name}`
+                                    : (customer?.bp_name || "-")
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="border rounded p-3 h-100">
+                        <div class="text-muted small">Paid Invoices</div>
+                        <div class="fw-bold fs-5 mt-1">
+                            ${invoiceIds.size}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="border rounded p-3 h-100">
+                        <div class="text-muted small">Payments</div>
+                        <div class="fw-bold fs-5 mt-1">
+                            ${activeRows.length}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="border rounded p-3 h-100">
+                        <div class="text-muted small">Total Received</div>
+                        <div class="fw-bold fs-5 mt-1">
+                            ${this.formatCurrency(totalReceived)}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        if (!body) {
+            return;
+        }
+
+        if (rows.length === 0) {
+            body.innerHTML = `
+                <tr>
+                    <td colspan="8"
+                        class="text-center text-muted py-4">
+                        No payment history found for this Customer.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        body.innerHTML =
+            rows.map(
+                (row, index) => {
+
+                    const invoice =
+                        row?.invoice || null;
+
+                    const journal =
+                        row?.trx_gl_journal || null;
+
+                    const journalStatus =
+                        String(journal?.status || "-");
+
+                    let badgeClass =
+                        "bg-secondary";
+
+                    if (journalStatus === "Posted") {
+                        badgeClass = "bg-success";
+                    }
+                    else if (journalStatus === "Draft") {
+                        badgeClass = "bg-warning text-dark";
+                    }
+                    else if (journalStatus === "Void") {
+                        badgeClass = "bg-danger";
+                    }
+
+                    return `
+                        <tr>
+                            <td class="text-center">${index + 1}</td>
+                            <td class="text-center">
+                                ${row?.payment_date || "-"}
+                            </td>
+                            <td>${invoice?.invoice_no || "-"}</td>
+                            <td class="text-center">
+                                ${invoice?.invoice_date || "-"}
+                            </td>
+                            <td>${row?.reference_no || "-"}</td>
+                            <td class="text-end fw-semibold">
+                                ${
+                                    this.formatCurrency(
+                                        Number(row?.amount || 0)
+                                    )
+                                }
+                            </td>
+                            <td>${journal?.journal_no || "-"}</td>
+                            <td class="text-center">
+                                <span class="badge ${badgeClass}">
+                                    ${journalStatus}
+                                </span>
+                            </td>
+                        </tr>
+                    `;
+                }
+            )
+            .join("");
+
+    }
+    catch (error) {
+
+        console.error(
+            "AccountReceivable.loadCustomerPaymentTrace:",
+            error
+        );
+
+        this.showError(
+            error?.message
+            || "Failed to load Customer Payment Trace."
+        );
+
+    }
+
+}
+
 
 async viewPayment(
     id
@@ -18998,7 +20980,7 @@ bindEvents() {
         "click",
         async () => {
 
-            await this.savePayment();
+            await this.saveBulkARPayment();
 
         }
     );
@@ -19135,6 +21117,20 @@ bindEvents() {
 
             this.addInvoice();
 
+        }
+    );
+
+
+    /*
+    ==================================================
+    CUSTOMER PAYMENT TRACE
+    ==================================================
+    */
+
+    this.btnCustomerPaymentTrace?.addEventListener(
+        "click",
+        async () => {
+            await this.openCustomerPaymentTrace();
         }
     );
 

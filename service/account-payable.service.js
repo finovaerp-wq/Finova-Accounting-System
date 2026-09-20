@@ -3654,7 +3654,7 @@ async deletePaymentHistoryForAP(
         } = await supabase
 
             .from(
-                this.paymentTable
+                "trx_ap_payment"
             )
 
             .select(`
@@ -7741,6 +7741,128 @@ async createPaymentBatchAllocations(
 
 }
 
+
+/*
+======================================================
+LINK AP PAYMENT BATCH ALLOCATIONS TO GL JOURNAL
+
+SAME PRINCIPLE AS AR PAYMENT:
+- Payment row has gl_journal_id
+- GL Draft  = ACTIVE PAYMENT
+- GL Posted = ACTIVE PAYMENT
+- GL Void   = INACTIVE PAYMENT
+
+IMPORTANT:
+Payment does NOT wait for GL Posted to update AP status.
+======================================================
+*/
+
+async linkPaymentBatchAllocationsGLJournal(
+    batchId,
+    journalId
+) {
+
+    try {
+
+        if (!batchId) {
+            throw new Error(
+                "AP Payment Batch ID is required."
+            );
+        }
+
+        if (!journalId) {
+            throw new Error(
+                "AP Payment GL Journal ID is required."
+            );
+        }
+
+        const {
+            data,
+            error
+        } = await supabase
+
+            .from(
+                this.paymentTable
+            )
+
+            .update({
+                gl_journal_id:
+                    journalId
+            })
+
+            .eq(
+                "payment_batch_id",
+                batchId
+            )
+
+            .select(`
+                id,
+                payment_batch_id,
+                account_payable_id,
+                payment_amount,
+                gl_journal_id
+            `);
+
+
+        if (error) {
+            console.error(
+                "AP PAYMENT ALLOCATION GL LINK ERROR:",
+                error
+            );
+            throw error;
+        }
+
+
+        const rows =
+            Array.isArray(data)
+                ? data
+                : [];
+
+
+        if (rows.length === 0) {
+            throw new Error(
+                "No AP Payment allocation was linked to GL Journal."
+            );
+        }
+
+
+        const invalid =
+            rows.find(
+                row =>
+                    String(
+                        row.gl_journal_id
+                        || ""
+                    )
+                    !==
+                    String(journalId)
+            );
+
+
+        if (invalid) {
+            throw new Error(
+                "AP Payment allocation GL Journal link verification failed."
+            );
+        }
+
+
+        return rows;
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountPayableService.linkPaymentBatchAllocationsGLJournal:",
+            error
+        );
+
+        throw error;
+
+    }
+
+}
+
+
 /*
 ======================================================
 CREATE AP PAYMENT
@@ -8324,7 +8446,8 @@ ONLY ACTIVE PAYMENT
 */
 
 async getPaymentTotal(
-    accountPayableId
+    accountPayableId,
+    activeBatchId = null
 ) {
 
     try {
@@ -8540,6 +8663,29 @@ async getPaymentTotal(
                             || "";
 
 
+                        /*
+                        ==================================
+                        CURRENT JUST-SAVED BATCH
+
+                        Save Payment itself is the event
+                        that makes the allocation ACTIVE.
+                        Do not wait for GL Journal Posted.
+                        ==================================
+                        */
+
+                        if (
+                            activeBatchId
+                            &&
+                            String(batchId)
+                            ===
+                            String(activeBatchId)
+                        ) {
+
+                            return true;
+
+                        }
+
+
                         return (
                             batchStatus !== ""
                             &&
@@ -8647,6 +8793,248 @@ async getPaymentTotal(
     }
 
 }
+/*
+======================================================
+GET VENDOR PAYMENT TRACE
+VENDOR -> AP INVOICE -> PAYMENT -> GL JOURNAL
+======================================================
+*/
+
+async getVendorPaymentTrace(
+    vendorId,
+    dateFrom = null,
+    dateTo = null
+) {
+
+    const normalizedVendorId =
+        Number(
+            vendorId
+        );
+
+
+    if (
+        !Number.isFinite(
+            normalizedVendorId
+        )
+        ||
+        normalizedVendorId <= 0
+    ) {
+
+        throw new Error(
+            "Vendor is required."
+        );
+
+    }
+
+
+    const {
+        data: invoices,
+        error: invoiceError
+    } =
+        await supabase
+            .from(
+                this.table
+            )
+            .select(`
+                id,
+                vendor_id,
+                invoice_no,
+                invoice_date,
+                due_date,
+                total_amount,
+                paid_amount,
+                status,
+                gl_journal_id
+            `)
+            .eq(
+                "vendor_id",
+                normalizedVendorId
+            )
+            .order(
+                "invoice_date",
+                {
+                    ascending:
+                        true
+                }
+            );
+
+
+    if (
+        invoiceError
+    ) {
+
+        throw invoiceError;
+
+    }
+
+
+    const invoiceRows =
+        Array.isArray(
+            invoices
+        )
+            ? invoices
+            : [];
+
+
+    if (
+        invoiceRows.length === 0
+    ) {
+
+        return [];
+
+    }
+
+
+    const invoiceIds =
+        invoiceRows
+            .map(
+                invoice =>
+                    invoice.id
+            )
+            .filter(
+                Boolean
+            );
+
+
+    let paymentQuery =
+        supabase
+            .from(
+                this.paymentTable
+            )
+            .select(`
+                id,
+                account_payable_id,
+                payment_batch_id,
+                payment_date,
+                bank_account_id,
+                dpp_amount,
+                tax_plus_amount,
+                tax_minus_amount,
+                payment_amount,
+                reference_no,
+                description,
+                gl_journal_id,
+                created_at,
+                trx_gl_journal (
+                    id,
+                    journal_no,
+                    journal_date,
+                    status
+                )
+            `)
+            .in(
+                "account_payable_id",
+                invoiceIds
+            )
+            .not(
+                "gl_journal_id",
+                "is",
+                null
+            );
+
+
+    if (
+        dateFrom
+    ) {
+
+        paymentQuery =
+            paymentQuery.gte(
+                "payment_date",
+                dateFrom
+            );
+
+    }
+
+
+    if (
+        dateTo
+    ) {
+
+        paymentQuery =
+            paymentQuery.lte(
+                "payment_date",
+                dateTo
+            );
+
+    }
+
+
+    const {
+        data: payments,
+        error: paymentError
+    } =
+        await paymentQuery
+            .order(
+                "payment_date",
+                {
+                    ascending:
+                        false
+                }
+            )
+            .order(
+                "created_at",
+                {
+                    ascending:
+                        false
+                }
+            );
+
+
+    if (
+        paymentError
+    ) {
+
+        throw paymentError;
+
+    }
+
+
+    const invoiceMap =
+        new Map(
+            invoiceRows.map(
+                invoice => [
+                    String(
+                        invoice.id
+                    ),
+                    invoice
+                ]
+            )
+        );
+
+
+    return (
+        Array.isArray(
+            payments
+        )
+            ? payments
+            : []
+    )
+    .map(
+        payment => {
+
+            const invoice =
+                invoiceMap.get(
+                    String(
+                        payment.account_payable_id
+                    )
+                )
+                || null;
+
+
+            return {
+
+                ...payment,
+
+                invoice
+
+            };
+
+        }
+    );
+
+}
+
+
 /*
 ======================================================
 GET ACTIVE AP PAYMENT
@@ -8887,7 +9275,8 @@ UPDATE AP PAYMENT STATUS
 */
 
 async updatePaymentStatus(
-    accountPayableId
+    accountPayableId,
+    activeBatchId = null
 ) {
 
     try {
@@ -8975,7 +9364,8 @@ TOTAL ACTIVE PAYMENT
 const rawPaidAmount =
     Number(
         await this.getPaymentTotal(
-            accountPayableId
+            accountPayableId,
+            activeBatchId
         )
         ||
         0
@@ -9327,6 +9717,190 @@ outstanding_amount:
     }
 
 }
+
+/*
+======================================================
+APPLY SAVED PAYMENT STATUS IMMEDIATELY
+
+BUSINESS RULE:
+SAVE PAYMENT IS THE STATUS EVENT.
+DO NOT WAIT FOR PAYMENT GL JOURNAL TO BE POSTED.
+
+FULL PAYMENT    -> PAID
+PARTIAL PAYMENT -> PARTIAL PAID
+======================================================
+*/
+
+async applySavedPaymentStatus(
+    accountPayableId,
+    paymentAmount
+) {
+
+    try {
+
+        if (!accountPayableId) {
+            throw new Error(
+                "Account Payable ID is required."
+            );
+        }
+
+        const savedPaymentAmount =
+            Math.round(
+                Number(
+                    paymentAmount
+                    || 0
+                )
+            );
+
+        if (
+            !Number.isFinite(savedPaymentAmount)
+            ||
+            savedPaymentAmount <= 0
+        ) {
+            throw new Error(
+                "Saved AP Payment Amount is invalid."
+            );
+        }
+
+        const result =
+            await this.getById(
+                accountPayableId
+            );
+
+        const invoice =
+            result?.header
+            || null;
+
+        if (!invoice) {
+            throw new Error(
+                "Account Payable not found."
+            );
+        }
+
+        const totalAmount =
+            Math.round(
+                Number(
+                    invoice.total_amount
+                    || 0
+                )
+            );
+
+        const previousPaidAmount =
+            Math.round(
+                Number(
+                    invoice.paid_amount
+                    || 0
+                )
+            );
+
+        if (totalAmount <= 0) {
+            throw new Error(
+                "Account Payable Total Amount is invalid."
+            );
+        }
+
+        const paidAmount =
+            Math.min(
+                previousPaidAmount
+                +
+                savedPaymentAmount,
+                totalAmount
+            );
+
+        const outstandingAmount =
+            Math.max(
+                totalAmount
+                -
+                paidAmount,
+                0
+            );
+
+        const status =
+            outstandingAmount <= 0
+                ? this.STATUS.PAID
+                : this.STATUS.PARTIAL_PAID;
+
+        const {
+            data,
+            error
+        } = await supabase
+            .from(
+                this.table
+            )
+            .update({
+                paid_amount:
+                    paidAmount,
+                outstanding_amount:
+                    outstandingAmount,
+                status:
+                    status
+            })
+            .eq(
+                "id",
+                accountPayableId
+            )
+            .select()
+            .single();
+
+        if (error) {
+            console.error(
+                "AP DIRECT PAYMENT STATUS UPDATE ERROR:",
+                error
+            );
+            throw error;
+        }
+
+        if (!data) {
+            throw new Error(
+                "Account Payable status was not updated after Save Payment."
+            );
+        }
+
+        if (
+            String(data.status || "")
+            !==
+            String(status)
+        ) {
+            throw new Error(
+                `Account Payable status verification failed. Expected "${status}", received "${data.status || ""}".`
+            );
+        }
+
+        console.log(
+            "AP SAVE PAYMENT -> STATUS UPDATED DIRECTLY:",
+            {
+                account_payable_id:
+                    accountPayableId,
+                saved_payment_amount:
+                    savedPaymentAmount,
+                paid_amount:
+                    paidAmount,
+                outstanding_amount:
+                    outstandingAmount,
+                status:
+                    status,
+                rule:
+                    "GL Payment Journal may remain Draft"
+            }
+        );
+
+        return data;
+
+    }
+    catch (error) {
+
+        console.error(
+            "AccountPayableService.applySavedPaymentStatus:",
+            error
+        );
+
+        throw error;
+
+    }
+
+}
+
+
 /*
 ======================================================
 RECOVER ACCOUNT PAYABLE TOTALS

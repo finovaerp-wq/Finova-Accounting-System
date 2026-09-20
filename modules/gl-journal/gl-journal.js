@@ -2200,6 +2200,26 @@ async loadData(
 
                             /*
                             ==========================================
+                            AP PAYMENT ORIGINAL INVOICE NO
+
+                            IMPORTANT:
+                            For AP Payment, Inv No shown in GL must
+                            come from the original AP invoice(s).
+                            ==========================================
+                            */
+
+                            const resolvedSourceInvoiceNo =
+                                await this.resolveAPPaymentOriginalInvoiceNo(
+                                    fullJournal?.header
+                                    ||
+                                    fullJournal
+                                    ||
+                                    journal
+                                );
+
+
+                            /*
+                            ==========================================
                             DATABASE DETAIL
 
                             DB FORMAT:
@@ -2259,6 +2279,15 @@ async loadData(
                                 ...journal,
 
                                 ...(fullJournal || {}),
+
+                                source_invoice_no:
+                                    resolvedSourceInvoiceNo
+                                    ||
+                                    fullJournal?.source_invoice_no
+                                    ||
+                                    journal?.source_invoice_no
+                                    ||
+                                    null,
 
                                 /*
                                 ======================================
@@ -3236,6 +3265,242 @@ getJournalSourceInfo(
     };
 
 }
+
+
+/*
+==========================================================
+RESOLVE AP PAYMENT ORIGINAL INVOICE NO
+FINAL
+
+AP PAYMENT:
+source_document_id = trx_ap_payment_batch.id
+
+DISPLAY RULE:
+GL Inv No must come from original AP invoice(s),
+NOT from APP payment number / payment reference.
+==========================================================
+*/
+
+async resolveAPPaymentOriginalInvoiceNo(
+    journal
+) {
+
+    try {
+
+        const sourceModule =
+            String(
+                journal?.source_module
+                ||
+                journal?.source
+                ||
+                ""
+            )
+            .trim()
+            .toUpperCase();
+
+
+        const sourceDocumentType =
+            String(
+                journal?.source_document_type
+                ||
+                ""
+            )
+            .trim()
+            .toUpperCase();
+
+
+        if (
+            sourceModule !== "AP"
+            ||
+            sourceDocumentType !== "AP_PAYMENT"
+        ) {
+
+            return (
+                journal?.source_invoice_no
+                ||
+                ""
+            );
+
+        }
+
+
+        const paymentBatchId =
+            journal?.source_document_id
+            ||
+            null;
+
+
+        if (
+            !paymentBatchId
+        ) {
+
+            return (
+                journal?.source_invoice_no
+                ||
+                ""
+            );
+
+        }
+
+
+        const {
+            data:
+                allocations,
+
+            error:
+                allocationError
+        } =
+            await supabase
+
+                .from(
+                    "trx_ap_payment"
+                )
+
+                .select(`
+                    account_payable_id
+                `)
+
+                .eq(
+                    "payment_batch_id",
+                    paymentBatchId
+                );
+
+
+        if (
+            allocationError
+        ) {
+
+            throw allocationError;
+
+        }
+
+
+        const accountPayableIds =
+            [
+                ...new Set(
+                    (
+                        Array.isArray(
+                            allocations
+                        )
+                            ? allocations
+                            : []
+                    )
+                    .map(
+                        item =>
+                            item?.account_payable_id
+                    )
+                    .filter(Boolean)
+                    .map(String)
+                )
+            ];
+
+
+        if (
+            accountPayableIds.length === 0
+        ) {
+
+            return (
+                journal?.source_invoice_no
+                ||
+                ""
+            );
+
+        }
+
+
+        const apTable =
+            TABLE.ACCOUNT_PAYABLE
+            ||
+            "trx_account_payable";
+
+
+        const {
+            data:
+                invoices,
+
+            error:
+                invoiceError
+        } =
+            await supabase
+
+                .from(
+                    apTable
+                )
+
+                .select(`
+                    id,
+                    invoice_no
+                `)
+
+                .in(
+                    "id",
+                    accountPayableIds
+                );
+
+
+        if (
+            invoiceError
+        ) {
+
+            throw invoiceError;
+
+        }
+
+
+        const invoiceNos =
+            [
+                ...new Set(
+                    (
+                        Array.isArray(
+                            invoices
+                        )
+                            ? invoices
+                            : []
+                    )
+                    .map(
+                        item =>
+                            String(
+                                item?.invoice_no
+                                ||
+                                ""
+                            )
+                            .trim()
+                    )
+                    .filter(Boolean)
+                )
+            ];
+
+
+        return (
+            invoiceNos.join(", ")
+            ||
+            journal?.source_invoice_no
+            ||
+            ""
+        );
+
+    }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "GL JOURNAL RESOLVE AP PAYMENT ORIGINAL INVOICE:",
+            error
+        );
+
+
+        return (
+            journal?.source_invoice_no
+            ||
+            ""
+        );
+
+    }
+
+}
+
 
 createTableRow(
     journal,
@@ -8562,36 +8827,81 @@ async deleteJournal(id) {
 
                 /*
                 ==============================================
-                DRAFT / VOID BULK ALLOCATION
-                MUST BE INACTIVE
+                BULK AP PAYMENT ALLOCATION RULE
 
-                ACTIVE:
-                gl_journal_id != NULL
+                CURRENT FINOVA PAYMENT RULE:
+                - Save Payment makes the allocation ACTIVE
+                  immediately.
+                - The AP Payment GL Journal may still be Draft.
+                - Therefore gl_journal_id != NULL is EXPECTED
+                  for an active Draft AP Payment.
 
-                INACTIVE:
-                gl_journal_id = NULL
+                DELETE RULE:
+                - Draft / Void payment journal may be deleted.
+                - The batch + allocations are reversed first.
+                - A payment allocation is valid only when its
+                  gl_journal_id is either this journal or NULL.
+                - An allocation linked to another journal is
+                  blocked to prevent cross-journal corruption.
                 ==============================================
                 */
 
-                const activeBulkAllocation =
+                const foreignBulkAllocation =
                     apPaymentBatchAllocations
                         .find(
-                            allocation =>
-                                Boolean(
+                            allocation => {
+
+                                const allocationJournalId =
                                     allocation?.gl_journal_id
-                                )
+                                    ||
+                                    null;
+
+                                return (
+                                    allocationJournalId
+                                    &&
+                                    String(
+                                        allocationJournalId
+                                    )
+                                    !==
+                                    String(
+                                        id
+                                    )
+                                );
+
+                            }
                         );
 
 
                 if (
-                    activeBulkAllocation
+                    foreignBulkAllocation
                 ) {
 
                     throw new Error(
-                        "AP Payment Batch still contains an active allocation. Journal delete was cancelled to prevent payment inconsistency."
+                        "AP Payment allocation is linked to another GL Journal. Delete was cancelled to prevent payment inconsistency."
                     );
 
                 }
+
+
+                console.log(
+                    "AP PAYMENT DELETE REVERSAL ALLOWED:",
+                    {
+                        batch_id:
+                            batch.id,
+
+                        journal_id:
+                            id,
+
+                        journal_status:
+                            currentStatus,
+
+                        allocation_count:
+                            apPaymentBatchAllocations.length,
+
+                        rule:
+                            "Draft/Posted payment allocation is active after Save; Draft/Void GL delete reverses batch before deleting journal."
+                    }
+                );
 
 
                 /*

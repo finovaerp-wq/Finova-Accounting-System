@@ -5900,6 +5900,295 @@ MUST BE PRESERVED FOR AUDIT
 ======================================================
 */
 
+
+async getCustomerPaymentTrace(
+    customerId,
+    dateFrom = null,
+    dateTo = null
+) {
+
+    const normalizedCustomerId =
+        Number(customerId);
+
+    if (
+        !Number.isFinite(normalizedCustomerId)
+        ||
+        normalizedCustomerId <= 0
+    ) {
+        throw new Error("Customer is required.");
+    }
+
+    const {
+        data: invoices,
+        error: invoiceError
+    } =
+        await supabase
+            .from(this.table)
+            .select(`
+                id,
+                customer_id,
+                invoice_no,
+                invoice_date,
+                due_date,
+                total_amount,
+                paid_amount,
+                outstanding_amount,
+                status,
+                gl_journal_id
+            `)
+            .eq("customer_id", normalizedCustomerId)
+            .order("invoice_date", { ascending: true });
+
+    if (invoiceError) {
+        throw invoiceError;
+    }
+
+    const invoiceRows =
+        Array.isArray(invoices)
+            ? invoices
+            : [];
+
+    if (invoiceRows.length === 0) {
+        return [];
+    }
+
+    const invoiceIds =
+        invoiceRows
+            .map(invoice => invoice.id)
+            .filter(Boolean);
+
+    let paymentQuery =
+        supabase
+            .from(this.paymentTable)
+            .select(`
+                *,
+                trx_gl_journal (
+                    id,
+                    journal_no,
+                    journal_date,
+                    status,
+                    source_module,
+                    source_document_type,
+                    source_document_id
+                )
+            `)
+            .in("account_receivable_id", invoiceIds);
+
+    if (dateFrom) {
+        paymentQuery =
+            paymentQuery.gte("payment_date", dateFrom);
+    }
+
+    if (dateTo) {
+        paymentQuery =
+            paymentQuery.lte("payment_date", dateTo);
+    }
+
+    const {
+        data: payments,
+        error: paymentError
+    } =
+        await paymentQuery
+            .order("payment_date", { ascending: false })
+            .order("created_at", { ascending: false });
+
+    if (paymentError) {
+        throw paymentError;
+    }
+
+    const invoiceMap =
+        new Map(
+            invoiceRows.map(
+                invoice => [
+                    String(invoice.id),
+                    invoice
+                ]
+            )
+        );
+
+    return (
+        Array.isArray(payments)
+            ? payments
+            : []
+    ).map(
+        payment => ({
+            ...payment,
+            invoice:
+                invoiceMap.get(
+                    String(payment.account_receivable_id)
+                )
+                || null
+        })
+    );
+}
+
+
+/*
+======================================================
+GET PAYMENT HISTORY
+ACCOUNT RECEIVABLE
+FINAL
+======================================================
+*/
+
+async recalculateActivePaymentStatus(id) {
+
+    if (!id) {
+        throw new Error(
+            "Account Receivable ID is required."
+        );
+    }
+
+    const {
+        data: invoice,
+        error: invoiceError
+    } =
+        await supabase
+            .from(this.table)
+            .select(`
+                id,
+                total_amount,
+                status
+            `)
+            .eq("id", id)
+            .maybeSingle();
+
+    if (invoiceError) {
+        throw invoiceError;
+    }
+
+    if (!invoice) {
+        throw new Error(
+            "Account Receivable not found."
+        );
+    }
+
+    const history =
+        await this.getPaymentHistory(id);
+
+    const activePayments =
+        (Array.isArray(history) ? history : [])
+            .filter(payment => {
+
+                const journal =
+                    payment?.trx_gl_journal
+                    ||
+                    null;
+
+                const journalStatus =
+                    String(
+                        journal?.status
+                        ||
+                        ""
+                    )
+                    .trim()
+                    .toLowerCase();
+
+                return (
+                    Boolean(payment?.gl_journal_id)
+                    &&
+                    Boolean(journal?.id)
+                    &&
+                    journalStatus !== "void"
+                );
+
+            });
+
+    const activePaid =
+        activePayments.reduce(
+            (total, payment) =>
+                total
+                +
+                Number(
+                    payment?.amount
+                    ||
+                    0
+                ),
+            0
+        );
+
+    const total =
+        Number(
+            invoice.total_amount
+            ||
+            0
+        );
+
+    const outstanding =
+        Math.max(
+            0,
+            total - activePaid
+        );
+
+    let status =
+        "Posted";
+
+    if (
+        activePaid > 0
+        &&
+        outstanding > 0
+    ) {
+        status =
+            "Partial Paid";
+    }
+    else if (
+        total > 0
+        &&
+        outstanding <= 0
+    ) {
+        status =
+            "Paid";
+    }
+
+    const {
+        data: updated,
+        error: updateError
+    } =
+        await supabase
+            .from(this.table)
+            .update({
+                paid_amount:
+                    activePaid,
+
+                outstanding_amount:
+                    outstanding,
+
+                status:
+                    status
+            })
+            .eq("id", id)
+            .select()
+            .maybeSingle();
+
+    if (updateError) {
+        throw updateError;
+    }
+
+    return (
+        updated
+        ||
+        {
+            ...invoice,
+            paid_amount:
+                activePaid,
+            outstanding_amount:
+                outstanding,
+            status:
+                status
+        }
+    );
+
+}
+
+
+/*
+======================================================
+GET PAYMENT HISTORY
+ACCOUNT RECEIVABLE
+FINAL
+======================================================
+*/
+
 async getPaymentHistory(id) {
 
     try {
@@ -5940,11 +6229,6 @@ async getPaymentHistory(id) {
 
             .select(`
                 *,
-                payment_account:mst_chart_of_accounts!trx_account_receivable_payment_payment_account_id_fkey (
-                    id,
-                    account_code,
-                    account_name
-                ),
                 trx_gl_journal (
                     id,
                     journal_no,
@@ -6024,6 +6308,116 @@ async getPaymentHistory(id) {
 
         /*
         ==================================================
+        LOAD PAYMENT ACCOUNT WITHOUT FK RELATIONSHIP
+
+        IMPORTANT:
+        Do not depend on a PostgREST relationship between
+        trx_account_receivable_payment and
+        mst_chart_of_accounts because that relationship is
+        not present in the current schema cache.
+        ==================================================
+        */
+
+        const paymentAccountIds =
+            [
+                ...new Set(
+                    payments
+                        .map(
+                            payment =>
+                                payment?.payment_account_id
+                        )
+                        .filter(
+                            Boolean
+                        )
+                )
+            ];
+
+
+        let paymentAccountMap =
+            new Map();
+
+
+        if (
+            paymentAccountIds.length > 0
+        ) {
+
+            const {
+                data: paymentAccounts,
+                error: paymentAccountError
+            } =
+                await supabase
+
+                    .from(
+                        "mst_chart_of_accounts"
+                    )
+
+                    .select(`
+                        id,
+                        account_code,
+                        account_name
+                    `)
+
+                    .in(
+                        "id",
+                        paymentAccountIds
+                    );
+
+
+            if (
+                paymentAccountError
+            ) {
+
+                console.error(
+                    "AR GET PAYMENT ACCOUNT ERROR:",
+                    paymentAccountError
+                );
+
+                throw paymentAccountError;
+
+            }
+
+
+            paymentAccountMap =
+                new Map(
+                    (
+                        paymentAccounts
+                        ||
+                        []
+                    )
+                    .map(
+                        account => [
+                            String(
+                                account.id
+                            ),
+                            account
+                        ]
+                    )
+                );
+
+        }
+
+
+        const normalizedPayments =
+            payments.map(
+                payment => ({
+                    ...payment,
+
+                    payment_account:
+                        paymentAccountMap.get(
+                            String(
+                                payment?.payment_account_id
+                                ||
+                                ""
+                            )
+                        )
+                        ||
+                        null
+                })
+            );
+
+
+        /*
+        ==================================================
         DEBUG
         ==================================================
         */
@@ -6074,7 +6468,7 @@ async getPaymentHistory(id) {
         );
 
 
-        return payments;
+        return normalizedPayments;
 
     }
 
