@@ -2666,3 +2666,384 @@ label[for="financial-statement-trial-balance"],
     border-top:2px solid #244494 !important;
     border-bottom:2px solid #244494 !important;
 }
+
+
+/* ==========================================================
+   FINOVA FS
+   PREVIEW LAYOUT FINAL FIX
+   Version : 3.1.0
+========================================================== */
+
+/*
+   IMPORTANT:
+   Preview is a document, not an inner scroll panel.
+   The old max-height / overflow rules made the report look cut off.
+*/
+
+.financial-statement-preview {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: auto !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+.financial-statement-preview-header {
+    position: relative !important;
+    width: 100% !important;
+    flex: none !important;
+}
+
+.financial-statement-preview-document {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: auto !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    background: #FFFFFF !important;
+}
+
+.financial-statement-document-header {
+    width: 100% !important;
+    min-height: 92px;
+}
+
+.financial-statement-preview-tabs {
+    position: relative !important;
+    width: 100% !important;
+    min-height: 44px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+}
+
+.financial-statement-preview-content {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 420px !important;
+    height: auto !important;
+    max-height: none !important;
+    padding: 28px 34px 36px !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    scrollbar-gutter: auto !important;
+    overscroll-behavior: auto !important;
+    background: #FFFFFF !important;
+}
+
+/* Report must grow according to its real content. */
+.financial-statement-report {
+    display: block !important;
+    width: 100% !important;
+    min-width: 900px !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 auto !important;
+    overflow: visible !important;
+}
+
+/* No sticky table header inside a document preview. */
+.financial-statement-report-table thead th {
+    position: static !important;
+    top: auto !important;
+    z-index: auto !important;
+}
+
+/* Give the report proper document spacing. */
+.financial-statement-report-header {
+    margin-bottom: 18px !important;
+}
+
+.financial-statement-report-table-wrapper {
+    width: 100% !important;
+    overflow: visible !important;
+}
+
+.financial-statement-report-table {
+    width: 100% !important;
+    table-layout: auto !important;
+}
+
+/* Footer must come after the complete report, never over the table. */
+.financial-statement-document-footer {
+    position: static !important;
+    width: 100% !important;
+    margin-top: 0 !important;
+    clear: both !important;
+}
+
+/* Desktop: page-like white report with enough breathing room. */
+@media (min-width: 992px) {
+    .financial-statement-preview-content {
+        padding-left: 42px !important;
+        padding-right: 42px !important;
+    }
+}
+
+/* Tablet/mobile: horizontal scroll only when the report is wider. */
+@media (max-width: 991.98px) {
+    .financial-statement-preview {
+        max-height: none !important;
+    }
+
+    .financial-statement-preview-content {
+        max-height: none !important;
+        padding: 22px !important;
+        overflow-y: visible !important;
+    }
+
+    .financial-statement-report {
+        min-width: 760px !important;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .financial-statement-preview {
+        max-height: none !important;
+    }
+
+    .financial-statement-preview-content {
+        max-height: none !important;
+        padding: 16px !important;
+        overflow-y: visible !important;
+    }
+}
+
+
+/* ==========================================================
+   FINOVA FINANCIAL STATEMENT
+   UNIFORM 5-REPORT PREVIEW + SCROLL
+   Version : 3.2.0 FINAL
+========================================================== */
+
+/*
+   Preview shell has one fixed visual size for:
+   1. Balance Sheet
+   2. Profit & Loss
+   3. Changes in Equity
+   4. Cash Flow
+   5. Notes
+
+   Only .financial-statement-preview-content scrolls vertically.
+*/
+
+.financial-statement-preview {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    min-width: 0 !important;
+
+    height: 720px !important;
+    min-height: 720px !important;
+    max-height: 720px !important;
+
+    overflow: hidden !important;
+    background: #FFFFFF !important;
+}
+
+.financial-statement-preview-header {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+}
+
+.financial-statement-preview-document {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+
+    overflow: hidden !important;
+    background: #FFFFFF !important;
+}
+
+.financial-statement-document-header {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    min-height: 92px !important;
+}
+
+.financial-statement-preview-tabs {
+    position: relative !important;
+    flex: 0 0 52px !important;
+
+    display: flex !important;
+    align-items: stretch !important;
+
+    width: 100% !important;
+    min-height: 52px !important;
+    height: 52px !important;
+    max-height: 52px !important;
+
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    background: #F8FAFC !important;
+}
+
+.financial-statement-preview-tab {
+    flex: 0 0 auto !important;
+    height: 52px !important;
+}
+
+/*
+   THIS IS THE ONLY VERTICAL SCROLL AREA.
+*/
+.financial-statement-preview-content {
+    display: block !important;
+    flex: 1 1 auto !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: 0 !important;
+    max-height: none !important;
+
+    padding: 28px 34px 40px !important;
+
+    overflow-x: auto !important;
+    overflow-y: scroll !important;
+
+    scrollbar-gutter: stable !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+
+    background: #FFFFFF !important;
+}
+
+/*
+   Every report uses the SAME document width.
+*/
+.financial-statement-report {
+    display: block !important;
+
+    width: 100% !important;
+    min-width: 980px !important;
+    max-width: none !important;
+
+    min-height: 100% !important;
+    height: auto !important;
+
+    margin: 0 auto !important;
+    overflow: visible !important;
+    box-sizing: border-box !important;
+}
+
+.financial-statement-report-header {
+    width: 100% !important;
+    margin: 0 0 18px !important;
+}
+
+.financial-statement-report-table-wrapper {
+    width: 100% !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+}
+
+.financial-statement-report-table {
+    width: 100% !important;
+    min-width: 980px !important;
+    table-layout: fixed !important;
+}
+
+/*
+   SAME COLUMN PROPORTIONS ACROSS FINANCIAL REPORT TABLES.
+*/
+.financial-statement-report-table th:nth-child(1),
+.financial-statement-report-table td:nth-child(1) {
+    width: 8% !important;
+}
+
+.financial-statement-report-table th:nth-child(2),
+.financial-statement-report-table td:nth-child(2) {
+    width: 62% !important;
+}
+
+.financial-statement-report-table th:nth-child(3),
+.financial-statement-report-table td:nth-child(3),
+.financial-statement-report-table th:nth-child(4),
+.financial-statement-report-table td:nth-child(4) {
+    width: 15% !important;
+}
+
+/*
+   Sticky column heading is useful INSIDE the single preview scroll area.
+*/
+.financial-statement-report-table thead th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 5 !important;
+    background: #FFFFFF !important;
+}
+
+/*
+   Footer belongs to preview shell, never overlays report.
+*/
+.financial-statement-document-footer {
+    position: relative !important;
+    flex: 0 0 42px !important;
+
+    width: 100% !important;
+    min-height: 42px !important;
+    height: 42px !important;
+
+    margin: 0 !important;
+    overflow: hidden !important;
+    background: #FFFFFF !important;
+}
+
+/*
+   Changes in Equity / Cash Flow / Notes must not introduce
+   their own different preview dimensions.
+*/
+.financial-statement-preview-content > *,
+.financial-statement-preview-content .financial-statement-report {
+    box-sizing: border-box !important;
+}
+
+/* Desktop */
+@media (min-width: 1200px) {
+    .financial-statement-preview {
+        height: 720px !important;
+        min-height: 720px !important;
+        max-height: 720px !important;
+    }
+}
+
+/* Smaller screens: same behavior, slightly shorter viewport. */
+@media (max-width: 1199.98px) {
+    .financial-statement-preview {
+        height: 650px !important;
+        min-height: 650px !important;
+        max-height: 650px !important;
+    }
+
+    .financial-statement-preview-content {
+        padding: 22px !important;
+    }
+
+    .financial-statement-report,
+    .financial-statement-report-table {
+        min-width: 900px !important;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .financial-statement-preview {
+        height: 600px !important;
+        min-height: 600px !important;
+        max-height: 600px !important;
+    }
+
+    .financial-statement-preview-content {
+        padding: 16px !important;
+    }
+}

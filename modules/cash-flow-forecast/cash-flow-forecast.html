@@ -1,7 +1,7 @@
 <!-- ==========================================================
      FINOVA ACCOUNTING SYSTEM
      CASH FLOW FORECAST
-     Version : 1.1.0 FINAL
+     Version : 2.0.0 ENTERPRISE TREASURY FINAL
 ========================================================== -->
 
 <div class="finova-page cash-flow-forecast-page">
@@ -112,7 +112,7 @@
                             4 Weeks
                         </option>
 
-                        <option value="8" selected>
+                        <option value="8">
                             8 Weeks
                         </option>
 
@@ -120,7 +120,7 @@
                             12 Weeks
                         </option>
 
-                        <option value="13">
+                        <option value="13" selected>
                             13 Weeks
                         </option>
                     </select>
@@ -162,6 +162,136 @@
 
             </div>
 
+        </div>
+
+    </div>
+
+
+
+    <!-- ======================================================
+         ENTERPRISE TREASURY CONTROL
+         Default values preserve the existing forecast result.
+    ====================================================== -->
+
+    <div class="finova-card cff-enterprise-card">
+
+        <div class="finova-card-body">
+
+            <div class="cff-section-head cff-enterprise-head">
+                <div>
+                    <h5>Treasury Forecast Control</h5>
+                    <p>
+                        Scenario, realization assumptions, minimum cash buffer,
+                        and available credit facility.
+                    </p>
+                </div>
+
+                <span class="cff-enterprise-badge">
+                    13-Week Treasury Ready
+                </span>
+            </div>
+
+            <div class="cff-enterprise-grid">
+
+                <div class="cff-enterprise-field">
+                    <label for="cff-scenario">Scenario</label>
+                    <select id="cff-scenario" class="form-select finova-control">
+                        <option value="BASE" selected>Base</option>
+                        <option value="OPTIMISTIC">Optimistic</option>
+                        <option value="PESSIMISTIC">Pessimistic</option>
+                    </select>
+                </div>
+
+                <div class="cff-enterprise-field">
+                    <label for="cff-ar-realization">AR Realization (%)</label>
+                    <input
+                        id="cff-ar-realization"
+                        class="form-control finova-control text-end"
+                        type="number"
+                        min="0"
+                        max="150"
+                        step="1"
+                        value="100"
+                    >
+                </div>
+
+                <div class="cff-enterprise-field">
+                    <label for="cff-ap-realization">AP Payment (%)</label>
+                    <input
+                        id="cff-ap-realization"
+                        class="form-control finova-control text-end"
+                        type="number"
+                        min="0"
+                        max="150"
+                        step="1"
+                        value="100"
+                    >
+                </div>
+
+                <div class="cff-enterprise-field">
+                    <label for="cff-minimum-cash">Minimum Cash Buffer</label>
+                    <input
+                        id="cff-minimum-cash"
+                        class="form-control finova-control text-end"
+                        type="number"
+                        min="0"
+                        step="1000"
+                        value="0"
+                    >
+                </div>
+
+                <div class="cff-enterprise-field">
+                    <label for="cff-credit-facility">Available Credit Facility</label>
+                    <input
+                        id="cff-credit-facility"
+                        class="form-control finova-control text-end"
+                        type="number"
+                        min="0"
+                        step="1000"
+                        value="0"
+                    >
+                </div>
+
+            </div>
+
+            <div class="cff-enterprise-note">
+                <i class="fa-solid fa-circle-info"></i>
+                <span>
+                    Base + 100% AR/AP + zero buffer/facility keeps the original
+                    FINOVA forecast calculation unchanged.
+                </span>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ENTERPRISE TREASURY KPI -->
+
+    <div class="cff-treasury-grid">
+
+        <div class="finova-card cff-treasury-kpi">
+            <div class="cff-treasury-label">Minimum Projected Cash</div>
+            <div id="cff-min-projected-cash" class="cff-treasury-value">Rp0</div>
+            <div id="cff-min-projected-week" class="cff-treasury-meta">-</div>
+        </div>
+
+        <div class="finova-card cff-treasury-kpi">
+            <div class="cff-treasury-label">Liquidity Headroom</div>
+            <div id="cff-liquidity-headroom" class="cff-treasury-value">Rp0</div>
+            <div class="cff-treasury-meta">Ending cash + facility − minimum buffer</div>
+        </div>
+
+        <div class="finova-card cff-treasury-kpi">
+            <div class="cff-treasury-label">Lowest Headroom</div>
+            <div id="cff-lowest-headroom" class="cff-treasury-value">Rp0</div>
+            <div id="cff-lowest-headroom-week" class="cff-treasury-meta">-</div>
+        </div>
+
+        <div class="finova-card cff-treasury-kpi">
+            <div class="cff-treasury-label">Liquidity Status</div>
+            <div id="cff-liquidity-status" class="cff-treasury-value cff-status-value">SAFE</div>
+            <div id="cff-liquidity-status-meta" class="cff-treasury-meta">No shortfall projected</div>
         </div>
 
     </div>

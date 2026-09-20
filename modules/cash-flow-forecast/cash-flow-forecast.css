@@ -1,7 +1,7 @@
 /* ==========================================================
    FINOVA ACCOUNTING SYSTEM
    CASH FLOW FORECAST
-   Version : 1.1.0 FINAL
+   Version : 2.0.0 ENTERPRISE TREASURY FINAL
 ========================================================== */
 
 
@@ -1137,4 +1137,164 @@
 
     }
 
+}
+
+/* ==========================================================
+   FINOVA CASH FLOW FORECAST
+   ENTERPRISE TREASURY LAYER
+   Version : 2.0.0
+========================================================== */
+
+.cff-enterprise-card {
+    flex: 0 0 auto;
+    overflow: hidden;
+}
+
+.cff-enterprise-head {
+    align-items: center;
+}
+
+.cff-enterprise-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 5px 10px;
+    border: 1px solid #bfdbfe;
+    border-radius: 999px;
+    background: #eff6ff;
+    color: #1e40af;
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.cff-enterprise-grid {
+    display: grid;
+    grid-template-columns:
+        minmax(150px, 1fr)
+        minmax(150px, 1fr)
+        minmax(150px, 1fr)
+        minmax(180px, 1.2fr)
+        minmax(190px, 1.2fr);
+    gap: 12px;
+    width: 100%;
+}
+
+.cff-enterprise-field {
+    min-width: 0;
+}
+
+.cff-enterprise-field label {
+    display: block;
+    margin-bottom: 5px;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.cff-enterprise-field .form-control,
+.cff-enterprise-field .form-select {
+    width: 100%;
+    min-height: 38px;
+    font-size: 12px;
+}
+
+.cff-enterprise-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #e2e8f0;
+    color: #64748b;
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.cff-treasury-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    width: 100%;
+    flex: 0 0 auto;
+}
+
+.cff-treasury-kpi {
+    min-width: 0;
+    padding: 14px 16px;
+    border-top: 3px solid #244494;
+}
+
+.cff-treasury-label {
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+}
+
+.cff-treasury-value {
+    margin: 5px 0 3px;
+    overflow: hidden;
+    color: #0f172a;
+    font-size: 18px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cff-status-value {
+    font-size: 15px;
+}
+
+.cff-treasury-meta {
+    overflow: hidden;
+    color: #94a3b8;
+    font-size: 10px;
+    line-height: 1.35;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Liquidity rows now also support minimum-cash/facility control. */
+.cff-liquidity-item {
+    box-shadow: none;
+}
+
+/* Keep wide forecast tables readable and independent of page width. */
+.cff-main-card,
+.cff-enterprise-card,
+.cff-detail-card,
+.cff-manual-list-card {
+    width: 100%;
+    min-width: 0;
+}
+
+@media (max-width: 1199.98px) {
+    .cff-enterprise-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .cff-treasury-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 767.98px) {
+    .cff-enterprise-grid,
+    .cff-treasury-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .cff-enterprise-head {
+        align-items: flex-start;
+    }
+
+    .cff-enterprise-badge {
+        margin-top: 4px;
+    }
+
+    .cff-treasury-meta {
+        white-space: normal;
+    }
 }

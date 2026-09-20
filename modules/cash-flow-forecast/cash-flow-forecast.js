@@ -3,7 +3,7 @@
 FINOVA ACCOUNTING SYSTEM
 MODULE  : CASH FLOW FORECAST
 FILE    : cash-flow-forecast.js
-VERSION : 1.1.0 FINAL
+VERSION : 2.0.0 ENTERPRISE TREASURY FINAL
 ==========================================================
 */
 
@@ -174,6 +174,47 @@ export class CashFlowForecast {
             "cff-detail-body"
         );
 
+
+
+    /* ======================================================
+       ENTERPRISE TREASURY CONTROL
+    ====================================================== */
+
+    this.scenario =
+        document.getElementById("cff-scenario");
+
+    this.arRealization =
+        document.getElementById("cff-ar-realization");
+
+    this.apRealization =
+        document.getElementById("cff-ap-realization");
+
+    this.minimumCash =
+        document.getElementById("cff-minimum-cash");
+
+    this.creditFacility =
+        document.getElementById("cff-credit-facility");
+
+    this.minProjectedCash =
+        document.getElementById("cff-min-projected-cash");
+
+    this.minProjectedWeek =
+        document.getElementById("cff-min-projected-week");
+
+    this.liquidityHeadroom =
+        document.getElementById("cff-liquidity-headroom");
+
+    this.lowestHeadroom =
+        document.getElementById("cff-lowest-headroom");
+
+    this.lowestHeadroomWeek =
+        document.getElementById("cff-lowest-headroom-week");
+
+    this.liquidityStatus =
+        document.getElementById("cff-liquidity-status");
+
+    this.liquidityStatusMeta =
+        document.getElementById("cff-liquidity-status-meta");
 
     /* ======================================================
        MANUAL FORECAST LIST
@@ -1023,6 +1064,24 @@ showSuccess(
                     );
 
 
+            /*
+            ==================================================
+            ENTERPRISE TREASURY LAYER
+
+            The service remains the single source for:
+            - Posted GL opening cash
+            - Aging AR
+            - Aging AP
+            - Manual Forecast
+
+            Default configuration does not change the original
+            forecast values.
+            ==================================================
+            */
+
+            this.applyEnterpriseTreasuryLayer();
+
+
             if (this.destroyed) {
                 return;
             }
@@ -1110,7 +1169,7 @@ async refresh() {
         if (this.numberWeeks) {
 
             this.numberWeeks.value =
-                "8";
+                "13";
 
         }
 
@@ -1398,6 +1457,511 @@ async refresh() {
 
 }
 
+
+    /* ======================================================
+       ENTERPRISE TREASURY SETTINGS
+    ====================================================== */
+
+    getTreasurySettings() {
+
+        const clamp = (
+            value,
+            min,
+            max
+        ) =>
+            Math.min(
+                Math.max(
+                    Number(value) || 0,
+                    min
+                ),
+                max
+            );
+
+
+        const scenario =
+            String(
+                this.scenario?.value
+                ||
+                "BASE"
+            ).toUpperCase();
+
+
+        const scenarioMap = {
+
+            BASE: {
+                arFactor: 1,
+                apFactor: 1
+            },
+
+            OPTIMISTIC: {
+                arFactor: 1.05,
+                apFactor: 0.95
+            },
+
+            PESSIMISTIC: {
+                arFactor: 0.85,
+                apFactor: 1.05
+            }
+
+        };
+
+
+        const selected =
+            scenarioMap[scenario]
+            ||
+            scenarioMap.BASE;
+
+
+        return {
+
+            scenario,
+
+            arRealization:
+                clamp(
+                    this.arRealization?.value ?? 100,
+                    0,
+                    150
+                ) / 100,
+
+            apRealization:
+                clamp(
+                    this.apRealization?.value ?? 100,
+                    0,
+                    150
+                ) / 100,
+
+            minimumCash:
+                Math.max(
+                    Number(
+                        this.minimumCash?.value
+                        ??
+                        0
+                    ) || 0,
+                    0
+                ),
+
+            creditFacility:
+                Math.max(
+                    Number(
+                        this.creditFacility?.value
+                        ??
+                        0
+                    ) || 0,
+                    0
+                ),
+
+            scenarioARFactor:
+                selected.arFactor,
+
+            scenarioAPFactor:
+                selected.apFactor
+
+        };
+
+    }
+
+
+    applyEnterpriseTreasuryLayer() {
+
+        const d =
+            this.dataset;
+
+
+        if (
+            !d
+            ||
+            !Array.isArray(d.weeks)
+        ) {
+            return;
+        }
+
+
+        const settings =
+            this.getTreasurySettings();
+
+
+        let runningCash =
+            Number(
+                d.openingCash
+                ??
+                0
+            ) || 0;
+
+
+        d.weeks.forEach(
+            week => {
+
+                /*
+                Manual Forecast is intentionally NOT adjusted.
+                Only automatic AR/AP forecast is scenario-adjusted.
+                */
+
+                const originalAutoCashIn =
+                    Number(
+                        week.autoCashIn
+                        ??
+                        0
+                    ) || 0;
+
+                const originalAutoCashOut =
+                    Number(
+                        week.autoCashOut
+                        ??
+                        0
+                    ) || 0;
+
+
+                week.baseAutoCashIn =
+                    originalAutoCashIn;
+
+                week.baseAutoCashOut =
+                    originalAutoCashOut;
+
+
+                week.autoCashIn =
+                    originalAutoCashIn
+                    *
+                    settings.arRealization
+                    *
+                    settings.scenarioARFactor;
+
+
+                week.autoCashOut =
+                    originalAutoCashOut
+                    *
+                    settings.apRealization
+                    *
+                    settings.scenarioAPFactor;
+
+
+                week.cashIn =
+                    week.autoCashIn
+                    +
+                    (
+                        Number(
+                            week.manualCashIn
+                            ??
+                            0
+                        ) || 0
+                    );
+
+
+                week.cashOut =
+                    week.autoCashOut
+                    +
+                    (
+                        Number(
+                            week.manualCashOut
+                            ??
+                            0
+                        ) || 0
+                    );
+
+
+                week.openingCash =
+                    runningCash;
+
+
+                week.netCashFlow =
+                    week.cashIn
+                    -
+                    week.cashOut;
+
+
+                week.endingCash =
+                    week.openingCash
+                    +
+                    week.netCashFlow;
+
+
+                week.liquidityHeadroom =
+                    week.endingCash
+                    +
+                    settings.creditFacility
+                    -
+                    settings.minimumCash;
+
+
+                week.isLiquidityRisk =
+                    week.liquidityHeadroom < 0;
+
+
+                runningCash =
+                    week.endingCash;
+
+            }
+        );
+
+
+        d.totalAutoCashIn =
+            d.weeks.reduce(
+                (sum, week) =>
+                    sum
+                    +
+                    week.autoCashIn,
+                0
+            );
+
+
+        d.totalManualCashIn =
+            d.weeks.reduce(
+                (sum, week) =>
+                    sum
+                    +
+                    (
+                        Number(
+                            week.manualCashIn
+                            ??
+                            0
+                        ) || 0
+                    ),
+                0
+            );
+
+
+        d.totalCashIn =
+            d.totalAutoCashIn
+            +
+            d.totalManualCashIn;
+
+
+        d.totalAutoCashOut =
+            d.weeks.reduce(
+                (sum, week) =>
+                    sum
+                    +
+                    week.autoCashOut,
+                0
+            );
+
+
+        d.totalManualCashOut =
+            d.weeks.reduce(
+                (sum, week) =>
+                    sum
+                    +
+                    (
+                        Number(
+                            week.manualCashOut
+                            ??
+                            0
+                        ) || 0
+                    ),
+                0
+            );
+
+
+        d.totalCashOut =
+            d.totalAutoCashOut
+            +
+            d.totalManualCashOut;
+
+
+        d.netCashFlow =
+            d.totalCashIn
+            -
+            d.totalCashOut;
+
+
+        d.endingCash =
+            d.weeks.length
+                ? d.weeks[
+                    d.weeks.length - 1
+                ].endingCash
+                : d.openingCash;
+
+
+        const minimumWeek =
+            d.weeks.reduce(
+                (
+                    lowest,
+                    week
+                ) =>
+                    !lowest
+                    ||
+                    week.endingCash
+                        <
+                        lowest.endingCash
+                        ? week
+                        : lowest,
+                null
+            );
+
+
+        const lowestHeadroomWeek =
+            d.weeks.reduce(
+                (
+                    lowest,
+                    week
+                ) =>
+                    !lowest
+                    ||
+                    week.liquidityHeadroom
+                        <
+                        lowest.liquidityHeadroom
+                        ? week
+                        : lowest,
+                null
+            );
+
+
+        d.treasury = {
+
+            ...settings,
+
+            minimumProjectedCash:
+                minimumWeek?.endingCash
+                ??
+                d.endingCash,
+
+            minimumProjectedWeek:
+                minimumWeek?.label
+                ??
+                "-",
+
+            endingLiquidityHeadroom:
+                d.endingCash
+                +
+                settings.creditFacility
+                -
+                settings.minimumCash,
+
+            lowestLiquidityHeadroom:
+                lowestHeadroomWeek
+                    ?.liquidityHeadroom
+                ??
+                0,
+
+            lowestLiquidityWeek:
+                lowestHeadroomWeek
+                    ?.label
+                ??
+                "-",
+
+            riskWeeks:
+                d.weeks.filter(
+                    week =>
+                        week.isLiquidityRisk
+                ).length
+
+        };
+
+    }
+
+
+    renderTreasuryControl() {
+
+        const d =
+            this.dataset;
+
+        const t =
+            d?.treasury;
+
+
+        if (!t) {
+            return;
+        }
+
+
+        if (this.minProjectedCash) {
+
+            this.minProjectedCash.textContent =
+                this.money(
+                    t.minimumProjectedCash
+                );
+
+            this.minProjectedCash.classList.toggle(
+                "cff-negative",
+                t.minimumProjectedCash < 0
+            );
+
+        }
+
+
+        if (this.minProjectedWeek) {
+
+            this.minProjectedWeek.textContent =
+                `Lowest cash position: ${t.minimumProjectedWeek}`;
+
+        }
+
+
+        if (this.liquidityHeadroom) {
+
+            this.liquidityHeadroom.textContent =
+                this.money(
+                    t.endingLiquidityHeadroom
+                );
+
+            this.liquidityHeadroom.classList.toggle(
+                "cff-negative",
+                t.endingLiquidityHeadroom < 0
+            );
+
+        }
+
+
+        if (this.lowestHeadroom) {
+
+            this.lowestHeadroom.textContent =
+                this.money(
+                    t.lowestLiquidityHeadroom
+                );
+
+            this.lowestHeadroom.classList.toggle(
+                "cff-negative",
+                t.lowestLiquidityHeadroom < 0
+            );
+
+        }
+
+
+        if (this.lowestHeadroomWeek) {
+
+            this.lowestHeadroomWeek.textContent =
+                `Lowest headroom: ${t.lowestLiquidityWeek}`;
+
+        }
+
+
+        if (
+            this.liquidityStatus
+            &&
+            this.liquidityStatusMeta
+        ) {
+
+            const risk =
+                t.riskWeeks > 0;
+
+
+            this.liquidityStatus.textContent =
+                risk
+                    ? "ACTION REQUIRED"
+                    : "SAFE";
+
+
+            this.liquidityStatus.classList.toggle(
+                "cff-negative",
+                risk
+            );
+
+
+            this.liquidityStatus.classList.toggle(
+                "cff-positive",
+                !risk
+            );
+
+
+            this.liquidityStatusMeta.textContent =
+                risk
+                    ? `${t.riskWeeks} week(s) below required liquidity`
+                    : "No liquidity shortfall projected";
+
+        }
+
+    }
+
+
     /* ======================================================
        RENDER
     ====================================================== */
@@ -1486,6 +2050,8 @@ async refresh() {
     this.renderChart();
 
     this.renderLiquidity();
+
+    this.renderTreasuryControl();
 
 
     /* ======================================================

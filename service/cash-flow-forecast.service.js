@@ -3,7 +3,7 @@
 FINOVA ACCOUNTING SYSTEM
 SERVICE : CASH FLOW FORECAST
 FILE    : cash-flow-forecast.service.js
-VERSION : 1.1.0 FINAL
+VERSION : 2.0.0 ENTERPRISE TREASURY FINAL
 ==========================================================
 */
 

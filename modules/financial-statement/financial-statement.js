@@ -2601,6 +2601,43 @@ renderBalanceSheetPreview() {
 
     /*
     ======================================================
+    TOTAL ROW RENDERER
+    ======================================================
+    */
+
+    const renderTotalRow =
+        (
+            label,
+            currentAmount,
+            comparativeAmount,
+            grandTotal = false
+        ) => {
+
+            const rowClass =
+                grandTotal
+                    ? "financial-statement-report-grand-total-row"
+                    : "financial-statement-report-total-row";
+
+            return `
+                <tr class="${rowClass}">
+                    <td></td>
+                    <td class="financial-statement-report-account-name">
+                        ${this.escapePreviewHTML(label)}
+                    </td>
+                    <td class="financial-statement-report-number">
+                        ${this.formatFinancialAmount(currentAmount)}
+                    </td>
+                    <td class="financial-statement-report-number">
+                        ${this.formatFinancialAmount(comparativeAmount)}
+                    </td>
+                </tr>
+            `;
+
+        };
+
+
+    /*
+    ======================================================
     BUILD BALANCE SHEET
     ======================================================
     */

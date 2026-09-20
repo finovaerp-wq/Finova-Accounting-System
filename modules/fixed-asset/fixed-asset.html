@@ -46,6 +46,16 @@
             </button>
 
 
+
+            <button
+                id="btn-fa-fiscal"
+                type="button"
+                class="btn btn-outline-primary finova-btn"
+            >
+                <i class="fa-solid fa-scale-balanced"></i>
+                Fiscal Register
+            </button>
+
             <button
                 id="btn-fa-add"
                 type="button"
@@ -637,6 +647,89 @@
                     </div>
 
 
+
+                    <!-- ==================================================
+                         FISCAL DEPRECIATION - INDONESIA
+                         PMK 72/2023
+                    =================================================== -->
+
+                    <div class="col-12">
+                        <hr class="my-2">
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                            <div>
+                                <div class="fw-bold">Fiscal Depreciation (Indonesia)</div>
+                                <div class="small text-muted">
+                                    Tax subledger only. Fiscal depreciation does not create or replace the commercial GL journal.
+                                </div>
+                            </div>
+                            <span class="badge text-bg-light border">PMK 72/2023</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="fa-fiscal-enabled" class="form-label">Fiscal Depreciation</label>
+                        <select id="fa-fiscal-enabled" class="form-select">
+                            <option value="true" selected>Enabled</option>
+                            <option value="false">Disabled</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="fa-fiscal-class" class="form-label">Fiscal Classification</label>
+                        <select id="fa-fiscal-class" class="form-select">
+                            <option value="NON_BUILDING">Non-Building</option>
+                            <option value="BUILDING_PERMANENT">Permanent Building</option>
+                            <option value="BUILDING_NON_PERMANENT">Non-Permanent Building</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="fa-fiscal-group" class="form-label">Fiscal Group</label>
+                        <select id="fa-fiscal-group" class="form-select">
+                            <option value="1">Group 1 - 4 Years</option>
+                            <option value="2">Group 2 - 8 Years</option>
+                            <option value="3" selected>Group 3 - 16 Years</option>
+                            <option value="4">Group 4 - 20 Years</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="fa-fiscal-method" class="form-label">Fiscal Method</label>
+                        <select id="fa-fiscal-method" class="form-select">
+                            <option value="STRAIGHT_LINE">Straight Line</option>
+                            <option value="DECLINING_BALANCE">Declining Balance</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="fa-fiscal-start-date" class="form-label">Fiscal Start</label>
+                        <input id="fa-fiscal-start-date" type="date" class="form-control">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="fa-fiscal-life" class="form-label">Fiscal Life (Months)</label>
+                        <input id="fa-fiscal-life" type="number" class="form-control" readonly>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="fa-fiscal-rate" class="form-label">Fiscal Rate / Year (%)</label>
+                        <input id="fa-fiscal-rate" type="number" step="0.01" class="form-control" readonly>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="fa-fiscal-reference" class="form-label">Tax Reference</label>
+                        <input id="fa-fiscal-reference" type="text" class="form-control" value="PMK 72/2023" readonly>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="alert alert-light border py-2 mb-0 small">
+                            <strong>Important:</strong>
+                            commercial depreciation remains the source of the GL journal.
+                            Fiscal depreciation is calculated separately for tax reconciliation.
+                        </div>
+                    </div>
+
+
                     <!-- DESCRIPTION -->
 
                     <div class="col-12">
@@ -856,11 +949,14 @@
                             Asset Account *
                         </label>
 
-                        <select
-                            id="fac-asset-account"
-                            class="form-select"
-                        >
-                        </select>
+                        <div class="position-relative">
+                        <input id="fac-asset-account-search" type="text" class="form-control"
+                               autocomplete="off" placeholder="Type COA code or account name...">
+                        <input id="fac-asset-account" type="hidden">
+                        <div id="fac-asset-account-results"
+                             class="list-group position-absolute top-100 start-0 end-0 shadow-sm d-none"
+                             style="z-index:1080;max-height:240px;overflow-y:auto;"></div>
+                    </div>
 
                     </div>
 
@@ -876,11 +972,14 @@
                             Accumulated Depreciation *
                         </label>
 
-                        <select
-                            id="fac-accum-account"
-                            class="form-select"
-                        >
-                        </select>
+                        <div class="position-relative">
+                        <input id="fac-accum-account-search" type="text" class="form-control"
+                               autocomplete="off" placeholder="Type COA code or account name...">
+                        <input id="fac-accum-account" type="hidden">
+                        <div id="fac-accum-account-results"
+                             class="list-group position-absolute top-100 start-0 end-0 shadow-sm d-none"
+                             style="z-index:1080;max-height:240px;overflow-y:auto;"></div>
+                    </div>
 
                     </div>
 
@@ -896,11 +995,14 @@
                             Depreciation Expense *
                         </label>
 
-                        <select
-                            id="fac-expense-account"
-                            class="form-select"
-                        >
-                        </select>
+                        <div class="position-relative">
+                        <input id="fac-expense-account-search" type="text" class="form-control"
+                               autocomplete="off" placeholder="Type COA code or account name...">
+                        <input id="fac-expense-account" type="hidden">
+                        <div id="fac-expense-account-results"
+                             class="list-group position-absolute top-100 start-0 end-0 shadow-sm d-none"
+                             style="z-index:1080;max-height:240px;overflow-y:auto;"></div>
+                    </div>
 
                     </div>
 
@@ -916,11 +1018,14 @@
                             Gain on Disposal
                         </label>
 
-                        <select
-                            id="fac-gain-account"
-                            class="form-select"
-                        >
-                        </select>
+                        <div class="position-relative">
+                        <input id="fac-gain-account-search" type="text" class="form-control"
+                               autocomplete="off" placeholder="Type COA code or account name...">
+                        <input id="fac-gain-account" type="hidden">
+                        <div id="fac-gain-account-results"
+                             class="list-group position-absolute top-100 start-0 end-0 shadow-sm d-none"
+                             style="z-index:1080;max-height:240px;overflow-y:auto;"></div>
+                    </div>
 
                     </div>
 
@@ -936,11 +1041,14 @@
                             Loss on Disposal
                         </label>
 
-                        <select
-                            id="fac-loss-account"
-                            class="form-select"
-                        >
-                        </select>
+                        <div class="position-relative">
+                        <input id="fac-loss-account-search" type="text" class="form-control"
+                               autocomplete="off" placeholder="Type COA code or account name...">
+                        <input id="fac-loss-account" type="hidden">
+                        <div id="fac-loss-account-results"
+                             class="list-group position-absolute top-100 start-0 end-0 shadow-sm d-none"
+                             style="z-index:1080;max-height:240px;overflow-y:auto;"></div>
+                    </div>
 
                     </div>
 
@@ -1036,6 +1144,75 @@
 
 
 
+
+
+<!-- ==========================================================
+     DELETE FIXED ASSET CONFIRMATION
+========================================================== -->
+<div class="modal fade" id="faDeleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Fixed Asset</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input id="fa-delete-id" type="hidden">
+                <p class="mb-2">Are you sure you want to delete this Fixed Asset?</p>
+                <div id="fa-delete-info" class="alert alert-light border mb-0"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button id="btn-fa-confirm-delete" type="button" class="btn btn-danger">
+                    <i class="fa-solid fa-trash-can me-1"></i>
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================================
+     FISCAL FIXED ASSET REGISTER
+========================================================== -->
+
+<div class="modal fade" id="faFiscalModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h5 class="modal-title mb-0">Fiscal Fixed Asset Register</h5>
+                    <div class="small text-muted">Commercial vs Fiscal Depreciation - Indonesia</div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-light border small">
+                    Fiscal values are maintained as a tax subledger and do not post depreciation journals to the General Ledger.
+                </div>
+                <div class="table-responsive">
+                    <table class="table finova-table finova-table-bordered table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Asset No</th>
+                                <th>Asset Name</th>
+                                <th>Fiscal Group</th>
+                                <th>Method</th>
+                                <th class="text-end">Cost</th>
+                                <th class="text-end">Commercial Accum.</th>
+                                <th class="text-end">Fiscal Accum.</th>
+                                <th class="text-end">Fiscal NBV</th>
+                                <th class="text-end">Difference</th>
+                            </tr>
+                        </thead>
+                        <tbody id="faf-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- ==========================================================
      DEPRECIATION MODAL
 ========================================================== -->
@@ -1086,6 +1263,12 @@
                     id="fad-asset-id"
                     type="hidden"
                 >
+
+                <div
+                    id="fad-action-message"
+                    class="alert d-none"
+                    role="alert"
+                ></div>
 
 
                 <!-- ASSET INFORMATION -->
@@ -1254,6 +1437,12 @@
                     type="hidden"
                 >
 
+                <div
+                    id="fadis-action-message"
+                    class="alert d-none"
+                    role="alert"
+                ></div>
+
 
                 <!-- INFORMATION -->
 
@@ -1361,4 +1550,31 @@
 
     </div>
 
+</div>
+
+<!-- =========================================================
+     DELETE DEPRECIATION CONFIRMATION
+========================================================= -->
+<div class="modal fade" id="faDepDeleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Depreciation History</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="fad-delete-id">
+                <div id="fad-delete-info" class="alert alert-warning mb-0">
+                    Are you sure you want to delete this depreciation history?
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="btn-fad-confirm-delete">
+                    <i class="fa-solid fa-trash me-1"></i>
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
 </div>

@@ -137,6 +137,9 @@ export class FixedAsset {
         this.btnCategory =
             $("btn-fa-category");
 
+        this.btnFiscal =
+            $("btn-fa-fiscal");
+
         this.btnRefresh =
             $("btn-fa-refresh");
 
@@ -175,6 +178,9 @@ export class FixedAsset {
 
         this.btnDisposeSave =
             $("btn-fadis-save");
+
+        this.btnConfirmDelete =
+            $("btn-fa-confirm-delete");
 
     }
 
@@ -279,17 +285,7 @@ export class FixedAsset {
            REFRESH
         ================================================== */
 
-        this.on(
-            this.btnRefresh,
-            "click",
-            async event => {
 
-                event.preventDefault();
-
-                await this.refresh();
-
-            }
-        );
 
 
         /* ==================================================
@@ -317,6 +313,22 @@ export class FixedAsset {
             () => {
 
                 this.openCategories();
+
+            }
+        );
+
+
+
+        /* ==================================================
+           FISCAL REGISTER
+        ================================================== */
+
+        this.on(
+            this.btnFiscal,
+            "click",
+            async () => {
+
+                await this.openFiscalRegister();
 
             }
         );
@@ -356,27 +368,196 @@ export class FixedAsset {
            CREATE DEPRECIATION
         ================================================== */
 
-        this.on(
-            this.btnFadCreate,
-            "click",
-            async () => {
 
-                await this.createDep();
-
-            }
-        );
 
 
         /* ==================================================
            DISPOSAL
         ================================================== */
 
+
+
+
+        /* ==================================================
+           FIXED ASSET MODAL ACTIONS
+           Delegated binding is used because FINOVA is an SPA
+           and modal DOM can be recreated by the router.
+        ================================================== */
+
         this.on(
-            this.btnDisposeSave,
+            document,
+            "click",
+            async event => {
+
+                const refreshButton =
+                    event.target.closest(
+                        "#btn-fa-refresh"
+                    );
+
+
+                if (
+                    refreshButton
+                ) {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    this.btnRefresh =
+                        refreshButton;
+
+                    await this.refresh();
+
+                    return;
+
+                }
+
+
+                const createDepButton =
+                    event.target.closest(
+                        "#btn-fad-create"
+                    );
+
+
+                if (
+                    createDepButton
+                ) {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    this.btnFadCreate =
+                        createDepButton;
+
+                    await this.createDep();
+
+                    return;
+
+                }
+
+
+                const confirmDeleteButton =
+                    event.target.closest(
+                        "#btn-fa-confirm-delete"
+                    );
+
+
+                if (
+                    confirmDeleteButton
+                ) {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    this.btnConfirmDelete =
+                        confirmDeleteButton;
+
+                    await this.confirmDeleteAsset();
+
+                    return;
+
+                }
+
+
+                const deleteDepButton =
+                    event.target.closest(
+                        "[data-fad-delete]"
+                    );
+
+
+                if (
+                    deleteDepButton
+                ) {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    await this.openDeleteDepreciation(
+                        deleteDepButton.dataset.fadDelete
+                    );
+
+                    return;
+
+                }
+
+
+                const confirmDeleteDepButton =
+                    event.target.closest(
+                        "#btn-fad-confirm-delete"
+                    );
+
+
+                if (
+                    confirmDeleteDepButton
+                ) {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    await this.confirmDeleteDepreciation(
+                        confirmDeleteDepButton
+                    );
+
+                    return;
+
+                }
+
+
+                const createJournalButton =
+                    event.target.closest(
+                        "[data-fad-post]"
+                    );
+
+
+                if (
+                    createJournalButton
+                ) {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    await this.createDepreciationJournal(
+                        createJournalButton
+                    );
+
+                    return;
+
+                }
+
+
+                const disposeButton =
+                    event.target.closest(
+                        "#btn-fadis-save"
+                    );
+
+
+                if (
+                    disposeButton
+                ) {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    this.btnDisposeSave =
+                        disposeButton;
+
+                    await this.dispose();
+
+                }
+
+            }
+        );
+
+
+        /* ==================================================
+           CONFIRM DELETE
+        ================================================== */
+
+        this.on(
+            this.btnConfirmDelete,
             "click",
             async () => {
 
-                await this.dispose();
+                await this.confirmDeleteAsset();
 
             }
         );
@@ -392,6 +573,25 @@ export class FixedAsset {
             () => {
 
                 this.downloadExcel();
+
+            }
+        );
+
+
+
+        [
+            "fa-fiscal-class",
+            "fa-fiscal-group",
+            "fa-fiscal-method"
+        ].forEach(
+            id => {
+
+                this.on(
+                    document.getElementById(id),
+                    "change",
+                    () =>
+                        this.syncFiscalFields()
+                );
 
             }
         );
@@ -435,17 +635,7 @@ export class FixedAsset {
            DEPRECIATION TABLE ACTION
         ================================================== */
 
-        this.on(
-            this.fadBody,
-            "click",
-            async event => {
 
-                await this.handleDepAction(
-                    event
-                );
-
-            }
-        );
 
     }
 
@@ -467,6 +657,22 @@ async refresh() {
 
     this.isRefreshing =
         true;
+
+
+    const refreshButton =
+        document.getElementById(
+            "btn-fa-refresh"
+        );
+
+
+    if (
+        refreshButton
+    ) {
+
+        refreshButton.disabled =
+            true;
+
+    }
 
 
     const startedAt =
@@ -618,6 +824,22 @@ async refresh() {
         this.isRefreshing =
             false;
 
+
+        const currentRefreshButton =
+            document.getElementById(
+                "btn-fa-refresh"
+            );
+
+
+        if (
+            currentRefreshButton
+        ) {
+
+            currentRefreshButton.disabled =
+                false;
+
+        }
+
     }
 
 }
@@ -732,6 +954,508 @@ async refresh() {
             ||
             0
         );
+
+    }
+
+
+
+    /* ======================================================
+       INDONESIA FISCAL DEPRECIATION
+       PMK 72/2023 - TAX SUBLEDGER ONLY
+    ====================================================== */
+
+    fiscalRule(
+        classification,
+        group,
+        method
+    ) {
+
+        const cls =
+            String(
+                classification
+                ||
+                "NON_BUILDING"
+            );
+
+        const m =
+            String(
+                method
+                ||
+                "STRAIGHT_LINE"
+            );
+
+
+        if (
+            cls ===
+            "BUILDING_PERMANENT"
+        ) {
+
+            return {
+                lifeMonths: 240,
+                rate: 5,
+                method: "STRAIGHT_LINE"
+            };
+
+        }
+
+
+        if (
+            cls ===
+            "BUILDING_NON_PERMANENT"
+        ) {
+
+            return {
+                lifeMonths: 120,
+                rate: 10,
+                method: "STRAIGHT_LINE"
+            };
+
+        }
+
+
+        const rules = {
+            "1": {
+                lifeMonths: 48,
+                straight: 25,
+                declining: 50
+            },
+            "2": {
+                lifeMonths: 96,
+                straight: 12.5,
+                declining: 25
+            },
+            "3": {
+                lifeMonths: 192,
+                straight: 6.25,
+                declining: 12.5
+            },
+            "4": {
+                lifeMonths: 240,
+                straight: 5,
+                declining: 10
+            }
+        };
+
+
+        const rule =
+            rules[
+                String(
+                    group
+                    ||
+                    "3"
+                )
+            ]
+            ||
+            rules["3"];
+
+
+        return {
+            lifeMonths:
+                rule.lifeMonths,
+
+            rate:
+                m ===
+                "DECLINING_BALANCE"
+                    ? rule.declining
+                    : rule.straight,
+
+            method:
+                m
+        };
+
+    }
+
+
+    fiscalMonthsUsed(
+        startDate,
+        asOfDate = new Date()
+    ) {
+
+        if (
+            !startDate
+        ) {
+            return 0;
+        }
+
+
+        const start =
+            new Date(
+                `${startDate}T00:00:00`
+            );
+
+
+        const end =
+            asOfDate instanceof Date
+                ? asOfDate
+                : new Date(
+                    `${asOfDate}T00:00:00`
+                );
+
+
+        if (
+            Number.isNaN(
+                start.getTime()
+            )
+            ||
+            Number.isNaN(
+                end.getTime()
+            )
+            ||
+            end < start
+        ) {
+            return 0;
+        }
+
+
+        return Math.max(
+            0,
+            (
+                (
+                    end.getFullYear()
+                    -
+                    start.getFullYear()
+                )
+                *
+                12
+            )
+            +
+            (
+                end.getMonth()
+                -
+                start.getMonth()
+            )
+            +
+            1
+        );
+
+    }
+
+
+    calculateFiscalValue(
+        asset,
+        asOfDate = new Date()
+    ) {
+
+        const enabled =
+            asset?.fiscal_enabled !==
+            false;
+
+
+        const cost =
+            Number(
+                asset?.acquisition_cost
+                ||
+                0
+            );
+
+
+        if (
+            !enabled
+            ||
+            cost <= 0
+        ) {
+
+            return {
+                accumulated: 0,
+                bookValue: cost,
+                depreciation: 0,
+                lifeMonths: 0,
+                rate: 0
+            };
+
+        }
+
+
+        const rule =
+            this.fiscalRule(
+                asset?.fiscal_classification,
+                asset?.fiscal_group,
+                asset?.fiscal_method
+            );
+
+
+        const start =
+            asset?.fiscal_start_date
+            ||
+            asset?.acquisition_date;
+
+
+        const months =
+            Math.min(
+                this.fiscalMonthsUsed(
+                    start,
+                    asOfDate
+                ),
+                rule.lifeMonths
+            );
+
+
+        if (
+            months <= 0
+        ) {
+
+            return {
+                accumulated: 0,
+                bookValue: cost,
+                depreciation: 0,
+                ...rule
+            };
+
+        }
+
+
+        let accumulated =
+            0;
+
+
+        if (
+            rule.method ===
+            "DECLINING_BALANCE"
+        ) {
+
+            let balance =
+                cost;
+
+
+            for (
+                let month = 1;
+                month <= months;
+                month++
+            ) {
+
+                const monthly =
+                    balance
+                    *
+                    (
+                        rule.rate
+                        /
+                        100
+                    )
+                    /
+                    12;
+
+
+                const amount =
+                    month ===
+                    rule.lifeMonths
+                        ? balance
+                        : Math.min(
+                            monthly,
+                            balance
+                        );
+
+
+                accumulated +=
+                    amount;
+
+                balance -=
+                    amount;
+
+            }
+
+        }
+
+        else {
+
+            accumulated =
+                Math.min(
+                    cost,
+                    cost
+                    *
+                    months
+                    /
+                    rule.lifeMonths
+                );
+
+        }
+
+
+        accumulated =
+            Math.min(
+                cost,
+                Math.max(
+                    0,
+                    accumulated
+                )
+            );
+
+
+        return {
+            accumulated,
+            bookValue:
+                Math.max(
+                    0,
+                    cost
+                    -
+                    accumulated
+                ),
+            depreciation:
+                accumulated,
+            ...rule
+        };
+
+    }
+
+
+    syncFiscalFields() {
+
+        const cls =
+            document.getElementById(
+                "fa-fiscal-class"
+            );
+
+        const group =
+            document.getElementById(
+                "fa-fiscal-group"
+            );
+
+        const method =
+            document.getElementById(
+                "fa-fiscal-method"
+            );
+
+        const life =
+            document.getElementById(
+                "fa-fiscal-life"
+            );
+
+        const rate =
+            document.getElementById(
+                "fa-fiscal-rate"
+            );
+
+
+        if (
+            !cls
+            ||
+            !group
+            ||
+            !method
+        ) {
+            return;
+        }
+
+
+        const building =
+            cls.value ===
+            "BUILDING_PERMANENT"
+            ||
+            cls.value ===
+            "BUILDING_NON_PERMANENT";
+
+
+        group.disabled =
+            building;
+
+        method.disabled =
+            building;
+
+
+        if (
+            building
+        ) {
+            method.value =
+                "STRAIGHT_LINE";
+        }
+
+
+        const rule =
+            this.fiscalRule(
+                cls.value,
+                group.value,
+                method.value
+            );
+
+
+        if (life) {
+            life.value =
+                rule.lifeMonths;
+        }
+
+
+        if (rate) {
+            rate.value =
+                rule.rate;
+        }
+
+    }
+
+
+    async openFiscalRegister() {
+
+        const body =
+            document.getElementById(
+                "faf-body"
+            );
+
+
+        if (
+            !body
+        ) {
+            return;
+        }
+
+
+        body.innerHTML =
+            this.assets.length
+                ? this.assets
+                    .map(
+                        asset => {
+
+                            const fiscal =
+                                this.calculateFiscalValue(
+                                    asset
+                                );
+
+
+                            const commercialAccum =
+                                Number(
+                                    asset
+                                        .accumulated_depreciation
+                                    ||
+                                    0
+                                );
+
+
+                            const difference =
+                                commercialAccum
+                                -
+                                fiscal.accumulated;
+
+
+                            return `
+                                <tr>
+                                    <td>${this.esc(asset.asset_no)}</td>
+                                    <td>${this.esc(asset.asset_name)}</td>
+                                    <td>${this.esc(asset.fiscal_group || "-")}</td>
+                                    <td>${this.esc(asset.fiscal_method || "STRAIGHT_LINE")}</td>
+                                    <td class="text-end">${this.money(asset.acquisition_cost)}</td>
+                                    <td class="text-end">${this.money(commercialAccum)}</td>
+                                    <td class="text-end">${this.money(fiscal.accumulated)}</td>
+                                    <td class="text-end">${this.money(fiscal.bookValue)}</td>
+                                    <td class="text-end">${this.money(difference)}</td>
+                                </tr>
+                            `;
+
+                        }
+                    )
+                    .join("")
+                : `
+                    <tr>
+                        <td colspan="9" class="text-center text-muted py-4">
+                            No fixed asset data.
+                        </td>
+                    </tr>
+                `;
+
+
+        bootstrap.Modal
+            .getOrCreateInstance(
+                document.getElementById(
+                    "faFiscalModal"
+                )
+            )
+            .show();
 
     }
 
@@ -1344,51 +2068,34 @@ async refresh() {
                 .map(
                     account => `
 
-                        <option value="${account.id}">
-
-                            ${this.esc(
-                                account.account_code
-                            )}
-                            ::
-                            ${this.esc(
-                                account.account_name
-                            )}
-
-                        </option>
+                        <option value="${account.id}">${this.esc(
+                            account.account_code
+                        )} :: ${this.esc(
+                            account.account_name
+                        )}</option>
 
                     `
                 )
                 .join("");
 
 
-        [
-            "fac-asset-account",
-            "fac-accum-account",
-            "fac-expense-account",
-            "fac-gain-account",
-            "fac-loss-account",
-            "fadis-account"
-        ]
-            .forEach(
-                id => {
-
-                    const element =
-                        document.getElementById(
-                            id
-                        );
-
-
-                    if (
-                        element
-                    ) {
-
-                        element.innerHTML =
-                            accountOptions;
-
-                    }
-
-                }
+        const disposalAccount =
+            document.getElementById(
+                "fadis-account"
             );
+
+
+        if (
+            disposalAccount
+        ) {
+
+            disposalAccount.innerHTML =
+                accountOptions;
+
+        }
+
+
+        this.setupCategoryCOAPickers();
 
 
         /* ==================================================
@@ -1781,9 +2488,33 @@ async refresh() {
                         .getElementById(
                             "fa-form-status"
                         )
-                        .value
+                        .value,
 
-            };
+                fiscal_enabled:
+                    document.getElementById("fa-fiscal-enabled")?.value !== "false",
+
+                fiscal_classification:
+                    document.getElementById("fa-fiscal-class")?.value || "NON_BUILDING",
+
+                fiscal_group:
+                    document.getElementById("fa-fiscal-group")?.value || "3",
+
+                fiscal_method:
+                    document.getElementById("fa-fiscal-method")?.value || "STRAIGHT_LINE",
+
+                fiscal_start_date:
+                    document.getElementById("fa-fiscal-start-date")?.value || null,
+
+                fiscal_useful_life_months:
+                    Number(document.getElementById("fa-fiscal-life")?.value || 0),
+
+                fiscal_rate:
+                    Number(document.getElementById("fa-fiscal-rate")?.value || 0),
+
+                fiscal_reference:
+                    "PMK 72/2023",
+
+            }
 
 
             /* ==============================================
@@ -1905,6 +2636,345 @@ async refresh() {
 
 
     /* ======================================================
+       SEARCHABLE COA PICKER - ASSET CATEGORY
+    ====================================================== */
+
+    setupCategoryCOAPickers() {
+
+        [
+            "fac-asset-account",
+            "fac-accum-account",
+            "fac-expense-account",
+            "fac-gain-account",
+            "fac-loss-account"
+        ].forEach(
+            id =>
+                this.setupCategoryCOAPicker(
+                    id
+                )
+        );
+
+    }
+
+
+    setupCategoryCOAPicker(
+        id
+    ) {
+
+        const input =
+            document.getElementById(
+                `${id}-search`
+            );
+
+        const hidden =
+            document.getElementById(
+                id
+            );
+
+        const results =
+            document.getElementById(
+                `${id}-results`
+            );
+
+
+        if (
+            !input
+            ||
+            !hidden
+            ||
+            !results
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            input.dataset.coaBound ===
+            "true"
+        ) {
+
+            return;
+
+        }
+
+
+        input.dataset.coaBound =
+            "true";
+
+
+        const renderResults =
+            () => {
+
+                const keyword =
+                    String(
+                        input.value
+                        ||
+                        ""
+                    )
+                    .trim()
+                    .toLowerCase();
+
+
+                const rows =
+                    this.coa
+                        .filter(
+                            account => {
+
+                                const code =
+                                    String(
+                                        account.account_code
+                                        ||
+                                        ""
+                                    )
+                                    .toLowerCase();
+
+                                const name =
+                                    String(
+                                        account.account_name
+                                        ||
+                                        ""
+                                    )
+                                    .toLowerCase();
+
+
+                                return (
+                                    !keyword
+                                    ||
+                                    code.includes(
+                                        keyword
+                                    )
+                                    ||
+                                    name.includes(
+                                        keyword
+                                    )
+                                    ||
+                                    `${code} :: ${name}`
+                                        .includes(
+                                            keyword
+                                        )
+                                );
+
+                            }
+                        )
+                        .slice(
+                            0,
+                            50
+                        );
+
+
+                results.innerHTML =
+                    rows.length
+                        ? rows
+                            .map(
+                                account => `
+                                    <button
+                                        type="button"
+                                        class="list-group-item list-group-item-action"
+                                        data-category-coa-id="${account.id}"
+                                    >
+                                        <strong>${this.esc(account.account_code)}</strong>
+                                        ::
+                                        ${this.esc(account.account_name)}
+                                    </button>
+                                `
+                            )
+                            .join("")
+                        : `
+                            <div class="list-group-item text-muted small">
+                                COA not found.
+                            </div>
+                        `;
+
+
+                results.classList
+                    .remove(
+                        "d-none"
+                    );
+
+            };
+
+
+        this.on(
+            input,
+            "focus",
+            renderResults
+        );
+
+
+        this.on(
+            input,
+            "input",
+            () => {
+
+                hidden.value =
+                    "";
+
+                renderResults();
+
+            }
+        );
+
+
+        this.on(
+            results,
+            "mousedown",
+            event => {
+
+                const button =
+                    event.target.closest(
+                        "[data-category-coa-id]"
+                    );
+
+
+                if (
+                    !button
+                ) {
+
+                    return;
+
+                }
+
+
+                event.preventDefault();
+
+
+                const account =
+                    this.coa.find(
+                        item =>
+                            String(
+                                item.id
+                            )
+                            ===
+                            String(
+                                button.dataset.categoryCoaId
+                            )
+                    );
+
+
+                if (
+                    !account
+                ) {
+
+                    return;
+
+                }
+
+
+                hidden.value =
+                    account.id;
+
+                input.value =
+                    `${account.account_code} :: ${account.account_name}`;
+
+
+                results.classList
+                    .add(
+                        "d-none"
+                    );
+
+            }
+        );
+
+
+        this.on(
+            input,
+            "keydown",
+            event => {
+
+                if (
+                    event.key ===
+                    "Escape"
+                ) {
+
+                    results.classList
+                        .add(
+                            "d-none"
+                        );
+
+                }
+
+            }
+        );
+
+
+        this.on(
+            input,
+            "blur",
+            () => {
+
+                window.setTimeout(
+                    () =>
+                        results.classList
+                            .add(
+                                "d-none"
+                            ),
+                    150
+                );
+
+            }
+        );
+
+    }
+
+
+    setCategoryCOAValue(
+        id,
+        accountId
+    ) {
+
+        const hidden =
+            document.getElementById(
+                id
+            );
+
+        const input =
+            document.getElementById(
+                `${id}-search`
+            );
+
+
+        if (
+            !hidden
+            ||
+            !input
+        ) {
+
+            return;
+
+        }
+
+
+        const account =
+            this.coa.find(
+                item =>
+                    String(
+                        item.id
+                    )
+                    ===
+                    String(
+                        accountId
+                        ||
+                        ""
+                    )
+            );
+
+
+        hidden.value =
+            account?.id
+            ||
+            "";
+
+        input.value =
+            account
+                ? `${account.account_code} :: ${account.account_name}`
+                : "";
+
+    }
+
+
+    /* ======================================================
        OPEN CATEGORY
     ====================================================== */
 
@@ -1962,6 +3032,21 @@ async refresh() {
                 "",
 
             "fac-loss-account":
+                "",
+
+            "fac-asset-account-search":
+                "",
+
+            "fac-accum-account-search":
+                "",
+
+            "fac-expense-account-search":
+                "",
+
+            "fac-gain-account-search":
+                "",
+
+            "fac-loss-account-search":
                 ""
 
         };
@@ -2321,6 +3406,32 @@ async refresh() {
                 ||
                 "";
 
+
+        this.setCategoryCOAValue(
+            "fac-asset-account",
+            category.asset_account_id
+        );
+
+        this.setCategoryCOAValue(
+            "fac-accum-account",
+            category.accumulated_depreciation_account_id
+        );
+
+        this.setCategoryCOAValue(
+            "fac-expense-account",
+            category.depreciation_expense_account_id
+        );
+
+        this.setCategoryCOAValue(
+            "fac-gain-account",
+            category.disposal_gain_account_id
+        );
+
+        this.setCategoryCOAValue(
+            "fac-loss-account",
+            category.disposal_loss_account_id
+        );
+
     }
 
 
@@ -2668,56 +3779,175 @@ async refresh() {
             "delete"
         ) {
 
-            const confirmed =
-                window.confirm(
-                    `Delete ${asset.asset_no} - ${asset.asset_name}?`
+            this.openDeleteAsset(
+                asset
+            );
+
+            return;
+
+        }
+
+    }
+
+
+    /* ======================================================
+       BOOTSTRAP DELETE CONFIRMATION
+    ====================================================== */
+
+    openDeleteAsset(
+        asset
+    ) {
+
+        document
+            .getElementById(
+                "fa-delete-id"
+            )
+            .value =
+                asset.id;
+
+
+        document
+            .getElementById(
+                "fa-delete-info"
+            )
+            .innerHTML = `
+                <strong>${this.esc(asset.asset_no)}</strong>
+                -
+                ${this.esc(asset.asset_name)}
+            `;
+
+
+        bootstrap.Modal
+            .getOrCreateInstance(
+                document.getElementById(
+                    "faDeleteModal"
+                )
+            )
+            .show();
+
+    }
+
+
+    async confirmDeleteAsset() {
+
+        const button =
+            this.btnConfirmDelete;
+
+
+        if (
+            button?.disabled
+        ) {
+            return;
+        }
+
+
+        try {
+
+            if (button) {
+                button.disabled = true;
+            }
+
+
+            const id =
+                document
+                    .getElementById(
+                        "fa-delete-id"
+                    )
+                    .value;
+
+
+            if (!id) {
+                throw new Error(
+                    "Fixed Asset is not selected."
+                );
+            }
+
+
+            const deleted =
+                await this.service
+                    .deleteAsset(
+                        id
+                    );
+
+
+            if (
+                !deleted?.id
+            ) {
+
+                throw new Error(
+                    "Fixed Asset was not deleted."
+                );
+
+            }
+
+
+            bootstrap.Modal
+                .getInstance(
+                    document.getElementById(
+                        "faDeleteModal"
+                    )
+                )
+                ?.hide();
+
+
+            await this.load(
+                false
+            );
+
+
+            this.showSuccess(
+                "Fixed Asset successfully deleted."
+            );
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "FixedAsset.confirmDeleteAsset",
+                error
+            );
+
+
+            const message =
+                error?.message
+                ||
+                error?.details
+                ||
+                error?.hint
+                ||
+                "Failed to delete Fixed Asset.";
+
+
+            const info =
+                document.getElementById(
+                    "fa-delete-info"
                 );
 
 
             if (
-                !confirmed
+                info
             ) {
 
-                return;
+                info.className =
+                    "alert alert-danger mb-0";
+
+                info.textContent =
+                    message;
 
             }
 
 
-            try {
+            this.showError(
+                message
+            );
 
-                await this.service
-                    .deleteAsset(
-                        asset.id
-                    );
+        }
 
+        finally {
 
-                await this.load(
-                    false
-                );
-
-
-                this.showSuccess(
-                    "Fixed Asset successfully deleted."
-                );
-
-            }
-
-            catch (
-                error
-            ) {
-
-                console.error(
-                    "FixedAsset.deleteAsset",
-                    error
-                );
-
-
-                this.showError(
-                    error?.message
-                    ||
-                    "Failed to delete Fixed Asset."
-                );
-
+            if (button) {
+                button.disabled = false;
             }
 
         }
@@ -2960,41 +4190,108 @@ async refresh() {
                                 ${
                                     depreciation.status ===
                                     "Draft"
+                                        ? (
+                                            depreciation.gl_journal_id
+                                                ? `
+                                                    <button
+                                                        type="button"
+                                                        class="btn btn-sm btn-outline-secondary"
+                                                        disabled
+                                                    >
+                                                        <i class="fa-solid fa-file-circle-check me-1"></i>
+                                                        Journal Created
+                                                    </button>
+                                                `
+                                                : `
+                                                    <button
+                                                        type="button"
+                                                        class="btn btn-sm btn-success"
+                                                        data-fad-post="${depreciation.id}"
+                                                    >
+                                                        <i class="fa-solid fa-file-circle-plus me-1"></i>
+                                                        Create Draft GL Journal
+                                                    </button>
+                                                `
+                                        )
+                                        : "-"
+                                }
+
+                            
+
+                                ${
+                                    depreciation.status ===
+                                        "Draft"
+                                    &&
+                                    !depreciation.gl_journal_id
                                         ? `
 
                                             <button
                                                 type="button"
-                                                class="
-                                                    btn
-                                                    btn-sm
-                                                    btn-success
-                                                "
-                                                data-fad-post="${depreciation.id}"
+                                                class="btn btn-sm btn-outline-danger ms-1"
+                                                data-fad-delete="${depreciation.id}"
+                                                title="Delete Depreciation"
                                             >
-
-                                                <i
-                                                    class="
-                                                        fa-solid
-                                                        fa-check
-                                                        me-1
-                                                    "
-                                                ></i>
-
-                                                Post
-
+                                                <i class="fa-solid fa-trash"></i>
                                             </button>
 
                                         `
-                                        : "-"
+                                        : ""
                                 }
 
-                            </td>
+</td>
 
                         </tr>
 
                     `
                 )
                 .join("");
+
+    }
+
+
+    /* ======================================================
+       MODAL ACTION MESSAGE
+    ====================================================== */
+
+    setActionMessage(
+        id,
+        message = "",
+        type = "danger"
+    ) {
+
+        const element =
+            document.getElementById(
+                id
+            );
+
+
+        if (
+            !element
+        ) {
+            return;
+        }
+
+
+        if (
+            !message
+        ) {
+
+            element.textContent =
+                "";
+
+            element.className =
+                "alert d-none";
+
+            return;
+
+        }
+
+
+        element.textContent =
+            message;
+
+        element.className =
+            `alert alert-${type}`;
 
     }
 
@@ -3033,6 +4330,13 @@ async refresh() {
 
 
         try {
+
+            this.setActionMessage(
+                "fad-action-message",
+                "Creating draft depreciation...",
+                "info"
+            );
+
 
             if (
                 button
@@ -3088,14 +4392,33 @@ async refresh() {
             }
 
 
-            await this.service
-                .createDepreciation(
-                    this.currentDepAsset,
-                    depreciationDate
+            const created =
+                await this.service
+                    .createDepreciation(
+                        this.currentDepAsset,
+                        depreciationDate
+                    );
+
+
+            if (
+                !created?.id
+            ) {
+
+                throw new Error(
+                    "Draft depreciation was not created."
                 );
+
+            }
 
 
             await this.renderDeps();
+
+
+            this.setActionMessage(
+                "fad-action-message",
+                "Draft depreciation successfully created.",
+                "success"
+            );
 
 
             this.showSuccess(
@@ -3114,10 +4437,25 @@ async refresh() {
             );
 
 
-            this.showError(
+            const message =
                 error?.message
                 ||
-                "Failed to create depreciation."
+                error?.details
+                ||
+                error?.hint
+                ||
+                "Failed to create depreciation.";
+
+
+            this.setActionMessage(
+                "fad-action-message",
+                message,
+                "danger"
+            );
+
+
+            this.showError(
+                message
             );
 
         }
@@ -3141,6 +4479,393 @@ async refresh() {
     /* ======================================================
        POST DEPRECIATION
     ====================================================== */
+
+    async openDeleteDepreciation(
+        depreciationId
+    ) {
+
+        if (
+            !this.currentDepAsset
+        ) {
+            return;
+        }
+
+
+        try {
+
+            const rows =
+                await this.service
+                    .getDepreciations(
+                        this.currentDepAsset.id
+                    );
+
+
+            const depreciation =
+                rows.find(
+                    row =>
+                        String(
+                            row.id
+                        )
+                        ===
+                        String(
+                            depreciationId
+                        )
+                );
+
+
+            if (
+                !depreciation
+            ) {
+
+                throw new Error(
+                    "Depreciation history not found."
+                );
+
+            }
+
+
+            if (
+                depreciation.status !==
+                "Draft"
+            ) {
+
+                throw new Error(
+                    "Only Draft depreciation history can be deleted."
+                );
+
+            }
+
+
+            if (
+                depreciation.gl_journal_id
+            ) {
+
+                throw new Error(
+                    "Depreciation already has a GL Journal and cannot be deleted."
+                );
+
+            }
+
+
+            document
+                .getElementById(
+                    "fad-delete-id"
+                )
+                .value =
+                    depreciation.id;
+
+
+            const info =
+                document.getElementById(
+                    "fad-delete-info"
+                );
+
+
+            if (
+                info
+            ) {
+
+                info.className =
+                    "alert alert-warning mb-0";
+
+                info.textContent =
+                    `Delete depreciation period ${depreciation.period_key || "-"}? This action cannot be undone.`;
+
+            }
+
+
+            bootstrap.Modal
+                .getOrCreateInstance(
+                    document.getElementById(
+                        "faDepDeleteModal"
+                    )
+                )
+                .show();
+
+        }
+
+        catch (error) {
+
+            this.showError(
+                error?.message
+                ||
+                "Failed to open depreciation delete confirmation."
+            );
+
+        }
+
+    }
+
+
+    async confirmDeleteDepreciation(
+        button
+    ) {
+
+        const id =
+            document
+                .getElementById(
+                    "fad-delete-id"
+                )
+                ?.value;
+
+
+        if (
+            !id
+        ) {
+
+            this.showError(
+                "Depreciation ID is not available."
+            );
+
+            return;
+
+        }
+
+
+        try {
+
+            button.disabled =
+                true;
+
+
+            await this.service
+                .deleteDepreciation(
+                    id
+                );
+
+
+            bootstrap.Modal
+                .getInstance(
+                    document.getElementById(
+                        "faDepDeleteModal"
+                    )
+                )
+                ?.hide();
+
+
+            await this.renderDeps();
+
+
+            this.showSuccess(
+                "Depreciation history successfully deleted."
+            );
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "FixedAsset.confirmDeleteDepreciation",
+                error
+            );
+
+
+            const message =
+                error?.message
+                ||
+                error?.details
+                ||
+                error?.hint
+                ||
+                "Failed to delete depreciation history.";
+
+
+            const info =
+                document.getElementById(
+                    "fad-delete-info"
+                );
+
+
+            if (
+                info
+            ) {
+
+                info.className =
+                    "alert alert-danger mb-0";
+
+                info.textContent =
+                    message;
+
+            }
+
+
+            this.showError(
+                message
+            );
+
+        }
+
+        finally {
+
+            button.disabled =
+                false;
+
+        }
+
+    }
+
+
+    async createDepreciationJournal(
+        button
+    ) {
+
+        if (
+            !button
+            ||
+            !this.currentDepAsset
+        ) {
+            return;
+        }
+
+
+        if (
+            button.disabled
+        ) {
+            return;
+        }
+
+
+        try {
+
+            button.disabled =
+                true;
+
+            this.setActionMessage(
+                "fad-action-message",
+                "Creating Draft GL Journal...",
+                "info"
+            );
+
+
+            const depreciations =
+                await this.service
+                    .getDepreciations(
+                        this.currentDepAsset.id
+                    );
+
+
+            const depreciation =
+                depreciations.find(
+                    item =>
+                        String(
+                            item.id
+                        )
+                        ===
+                        String(
+                            button.dataset.fadPost
+                        )
+                );
+
+
+            if (
+                !depreciation
+            ) {
+
+                throw new Error(
+                    "Depreciation transaction not found."
+                );
+
+            }
+
+
+            if (
+                depreciation.gl_journal_id
+            ) {
+
+                throw new Error(
+                    "This depreciation already has a GL Journal."
+                );
+
+            }
+
+
+            if (
+                depreciation.status !==
+                "Draft"
+            ) {
+
+                throw new Error(
+                    "Only Draft depreciation can create a GL Journal."
+                );
+
+            }
+
+
+            const journal =
+                await this.service
+                    .postDepreciationJournal(
+                        depreciation,
+                        this.currentDepAsset
+                    );
+
+
+            if (
+                !journal?.id
+            ) {
+
+                throw new Error(
+                    "Draft GL Journal was not created."
+                );
+
+            }
+
+
+            await this.renderDeps();
+
+
+            this.setActionMessage(
+                "fad-action-message",
+                `Draft GL Journal successfully created: ${journal.journal_no || journal.id}`,
+                "success"
+            );
+
+
+            this.showSuccess(
+                "Draft GL Journal successfully created."
+            );
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "FixedAsset.createDepreciationJournal",
+                error
+            );
+
+
+            const message =
+                error?.message
+                ||
+                error?.details
+                ||
+                error?.hint
+                ||
+                "Failed to create Draft GL Journal.";
+
+
+            this.setActionMessage(
+                "fad-action-message",
+                message,
+                "danger"
+            );
+
+
+            this.showError(
+                message
+            );
+
+        }
+
+        finally {
+
+            button.disabled =
+                false;
+
+        }
+
+    }
+
 
     async handleDepAction(
         event
@@ -3304,7 +5029,7 @@ async refresh() {
 
 
             this.showSuccess(
-                "Depreciation successfully posted to GL Journal."
+                "Draft GL Journal successfully created for depreciation."
             );
 
         }
@@ -3350,6 +5075,10 @@ async refresh() {
     openDispose(
         asset
     ) {
+
+        this.setActionMessage(
+            "fadis-action-message"
+        );
 
         if (
             asset.status ===
@@ -3476,6 +5205,13 @@ async refresh() {
 
         try {
 
+            this.setActionMessage(
+                "fadis-action-message",
+                "Creating disposal journal...",
+                "info"
+            );
+
+
             if (
                 button
             ) {
@@ -3548,12 +5284,23 @@ async refresh() {
 
             if (
                 !disposalDate
-                ||
+            ) {
+
+                throw new Error(
+                    "Disposal Date is required."
+                );
+
+            }
+
+
+            if (
+                amount > 0
+                &&
                 !accountId
             ) {
 
                 throw new Error(
-                    "Disposal Date and Proceeds Account are required."
+                    "Proceeds Account is required when Selling Price is greater than 0."
                 );
 
             }
@@ -3605,8 +5352,15 @@ async refresh() {
             );
 
 
+            this.setActionMessage(
+                "fadis-action-message",
+                "Fixed Asset successfully disposed and Draft GL Journal created.",
+                "success"
+            );
+
+
             this.showSuccess(
-                "Fixed Asset successfully disposed and GL Journal created."
+                "Fixed Asset successfully disposed and Draft GL Journal created."
             );
 
         }
@@ -3621,10 +5375,25 @@ async refresh() {
             );
 
 
-            this.showError(
+            const message =
                 error?.message
                 ||
-                "Failed to dispose Fixed Asset."
+                error?.details
+                ||
+                error?.hint
+                ||
+                "Failed to dispose Fixed Asset.";
+
+
+            this.setActionMessage(
+                "fadis-action-message",
+                message,
+                "danger"
+            );
+
+
+            this.showError(
+                message
             );
 
         }

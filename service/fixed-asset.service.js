@@ -187,6 +187,46 @@ export class FixedAssetService {
        GET CATEGORIES
     ====================================================== */
 
+    /* ======================================================
+       FISCAL ASSET COMPATIBILITY
+       Allows frontend deployment before optional fiscal DB
+       columns are installed. Existing commercial functions
+       remain operational.
+    ====================================================== */
+
+    fiscalPayload(
+        payload = {}
+    ) {
+
+        const fiscalKeys =
+            new Set([
+                "fiscal_enabled",
+                "fiscal_classification",
+                "fiscal_group",
+                "fiscal_method",
+                "fiscal_start_date",
+                "fiscal_useful_life_months",
+                "fiscal_rate",
+                "fiscal_reference"
+            ]);
+
+
+        return Object.fromEntries(
+            Object.entries(
+                payload
+            ).filter(
+                ([key]) =>
+                    fiscalKeys.has(
+                        key
+                    )
+            )
+        );
+
+    }
+
+
+
+
     async getCategories() {
 
         const {
@@ -931,14 +971,40 @@ export class FixedAssetService {
             );
 
 
-        /* ==================================================
-           CHECK ASSET
-        ================================================== */
+        if (
+            !Number.isFinite(
+                assetId
+            )
+            ||
+            assetId <= 0
+        ) {
+
+            throw new Error(
+                "Invalid Fixed Asset ID."
+            );
+
+        }
+
+
+        const companyId =
+            await this.companyId();
+
 
         const asset =
             await this.getAssetById(
                 assetId
             );
+
+
+        if (
+            !asset?.id
+        ) {
+
+            throw new Error(
+                "Fixed Asset not found."
+            );
+
+        }
 
 
         if (
@@ -964,17 +1030,9 @@ export class FixedAssetService {
         }
 
 
-        /* ==================================================
-           CHECK DEPRECIATION
-        ================================================== */
-
         const {
-            data:
-                depreciations,
-
-            error:
-                depreciationError
-
+            data: depreciations,
+            error: depreciationError
         } =
             await supabase
                 .from(
@@ -988,9 +1046,6 @@ export class FixedAssetService {
                 .eq(
                     "asset_id",
                     assetId
-                )
-                .limit(
-                    1
                 );
 
 
@@ -1004,26 +1059,92 @@ export class FixedAssetService {
 
 
         if (
-            depreciations
-            &&
-            depreciations.length
+            depreciations?.length
         ) {
 
-            throw new Error(
-                "Asset already has depreciation history and cannot be deleted."
-            );
+            const linkedJournal =
+                depreciations.find(
+                    row =>
+                        row.gl_journal_id
+                );
+
+
+            if (
+                linkedJournal
+            ) {
+
+                throw new Error(
+                    "Asset has depreciation linked to a GL Journal and cannot be deleted."
+                );
+
+            }
+
+
+            const nonVoid =
+                depreciations.filter(
+                    row =>
+                        row.status !==
+                        "Void"
+                );
+
+
+            if (
+                nonVoid.length
+            ) {
+
+                throw new Error(
+                    "Asset has depreciation history. Delete/void its depreciation first before deleting the asset."
+                );
+
+            }
+
+
+            const voidIds =
+                depreciations
+                    .map(
+                        row =>
+                            Number(
+                                row.id
+                            )
+                    )
+                    .filter(
+                        Number.isFinite
+                    );
+
+
+            if (
+                voidIds.length
+            ) {
+
+                const {
+                    error: voidDeleteError
+                } =
+                    await supabase
+                        .from(
+                            this.TABLE_DEPRECIATION
+                        )
+                        .delete()
+                        .in(
+                            "id",
+                            voidIds
+                        );
+
+
+                if (
+                    voidDeleteError
+                ) {
+
+                    throw voidDeleteError;
+
+                }
+
+            }
 
         }
 
 
-        /* ==================================================
-           DELETE
-        ================================================== */
-
-        const {
-            error
-        } =
-            await supabase
+        let query =
+            supabase
                 .from(
                     this.TABLE_ASSET
                 )
@@ -1035,18 +1156,64 @@ export class FixedAssetService {
 
 
         if (
+            companyId
+        ) {
+
+            query =
+                query.eq(
+                    "company_id",
+                    companyId
+                );
+
+        }
+
+
+        const {
+            data: deleted,
+            error
+        } =
+            await query
+                .select(
+                    "id, asset_no, asset_name"
+                )
+                .maybeSingle();
+
+
+        if (
             error
         ) {
+
+            console.error(
+                "FixedAssetService.deleteAsset",
+                {
+                    message: error?.message,
+                    details: error?.details,
+                    hint: error?.hint,
+                    code: error?.code,
+                    assetId,
+                    companyId
+                }
+            );
 
             throw error;
 
         }
 
 
-        return true;
+        if (
+            !deleted?.id
+        ) {
+
+            throw new Error(
+                "Fixed Asset was not deleted. Check company access / RLS policy."
+            );
+
+        }
+
+
+        return deleted;
 
     }
-
 
     /* ======================================================
        GET DEPRECIATIONS
@@ -1129,6 +1296,164 @@ export class FixedAssetService {
             ||
             []
         );
+
+    }
+
+
+    /* ======================================================
+       DELETE DEPRECIATION HISTORY
+       ONLY DRAFT + NO GL JOURNAL
+    ====================================================== */
+
+    async deleteDepreciation(
+        id
+    ) {
+
+        const depreciationId =
+            Number(
+                id
+            );
+
+
+        if (
+            !Number.isFinite(
+                depreciationId
+            )
+            ||
+            depreciationId <= 0
+        ) {
+
+            throw new Error(
+                "Invalid depreciation transaction ID."
+            );
+
+        }
+
+
+        const {
+            data: depreciation,
+            error: readError
+        } =
+            await supabase
+                .from(
+                    this.TABLE_DEPRECIATION
+                )
+                .select(`
+                    id,
+                    asset_id,
+                    period_key,
+                    status,
+                    gl_journal_id
+                `)
+                .eq(
+                    "id",
+                    depreciationId
+                )
+                .maybeSingle();
+
+
+        if (
+            readError
+        ) {
+
+            throw readError;
+
+        }
+
+
+        if (
+            !depreciation?.id
+        ) {
+
+            throw new Error(
+                "Depreciation history not found."
+            );
+
+        }
+
+
+        if (
+            depreciation.status !==
+            "Draft"
+        ) {
+
+            throw new Error(
+                "Only Draft depreciation history can be deleted."
+            );
+
+        }
+
+
+        if (
+            depreciation.gl_journal_id
+        ) {
+
+            throw new Error(
+                "Depreciation already has a GL Journal and cannot be deleted."
+            );
+
+        }
+
+
+        const {
+            data: deleted,
+            error
+        } =
+            await supabase
+                .from(
+                    this.TABLE_DEPRECIATION
+                )
+                .delete()
+                .eq(
+                    "id",
+                    depreciationId
+                )
+                .eq(
+                    "status",
+                    "Draft"
+                )
+                .is(
+                    "gl_journal_id",
+                    null
+                )
+                .select(
+                    "id, asset_id, period_key"
+                )
+                .maybeSingle();
+
+
+        if (
+            error
+        ) {
+
+            console.error(
+                "FixedAssetService.deleteDepreciation",
+                {
+                    message: error?.message,
+                    details: error?.details,
+                    hint: error?.hint,
+                    code: error?.code,
+                    depreciationId
+                }
+            );
+
+            throw error;
+
+        }
+
+
+        if (
+            !deleted?.id
+        ) {
+
+            throw new Error(
+                "Depreciation history was not deleted. It may already be linked to a GL Journal or blocked by RLS."
+            );
+
+        }
+
+
+        return deleted;
 
     }
 
@@ -1237,9 +1562,26 @@ export class FixedAssetService {
         }
 
 
+        const depreciationStartDate =
+            asset.depreciation_start_date
+            ||
+            asset.acquisition_date;
+
+
+        if (
+            !depreciationStartDate
+        ) {
+
+            throw new Error(
+                "Depreciation Start Date is required."
+            );
+
+        }
+
+
         if (
             depreciationDate <
-            asset.depreciation_start_date
+            depreciationStartDate
         ) {
 
             throw new Error(
@@ -1366,11 +1708,13 @@ export class FixedAssetService {
 
 
         const depreciationAmount =
-            Math.min(
-                this.monthly(
-                    asset
-                ),
-                remaining
+            Math.round(
+                Math.min(
+                    this.monthly(
+                        asset
+                    ),
+                    remaining
+                )
             );
 
 
@@ -1479,7 +1823,29 @@ export class FixedAssetService {
             error
         ) {
 
+            console.error(
+                "FixedAssetService.createDepreciation",
+                {
+                    message: error?.message,
+                    details: error?.details,
+                    hint: error?.hint,
+                    code: error?.code,
+                    payload
+                }
+            );
+
             throw error;
+
+        }
+
+
+        if (
+            !data?.id
+        ) {
+
+            throw new Error(
+                "Depreciation draft insert returned no transaction ID."
+            );
 
         }
 
@@ -1641,9 +2007,14 @@ export class FixedAssetService {
            CREATE GL JOURNAL
         ================================================== */
 
-        const journal =
-            await this.journalService
-                .create(
+        let journal;
+
+
+        try {
+
+            journal =
+                await this.journalService
+                    .create(
                     {
 
                         journal_date:
@@ -1685,6 +2056,24 @@ export class FixedAssetService {
                     details
                 );
 
+        }
+
+        catch (error) {
+
+            console.error(
+                "FixedAssetService.postDepreciationJournal.create",
+                {
+                    message: error?.message,
+                    details: error?.details,
+                    hint: error?.hint,
+                    code: error?.code
+                }
+            );
+
+            throw error;
+
+        }
+
 
         if (
             !journal?.id
@@ -1718,7 +2107,7 @@ export class FixedAssetService {
                 .update({
 
                     status:
-                        "Posted",
+                        "Draft",
 
                     gl_journal_id:
                         journal.id,
@@ -1759,7 +2148,7 @@ export class FixedAssetService {
         ) {
 
             throw new Error(
-                "Depreciation status could not be updated."
+                "Depreciation GL Journal link could not be updated."
             );
 
         }
@@ -2264,9 +2653,14 @@ export class FixedAssetService {
            CREATE JOURNAL
         ================================================== */
 
-        const journal =
-            await this.journalService
-                .create(
+        let journal;
+
+
+        try {
+
+            journal =
+                await this.journalService
+                    .create(
                     {
 
                         journal_date:
@@ -2304,6 +2698,24 @@ export class FixedAssetService {
 
                     details
                 );
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "FixedAssetService.disposeAsset.createJournal",
+                {
+                    message: error?.message,
+                    details: error?.details,
+                    hint: error?.hint,
+                    code: error?.code
+                }
+            );
+
+            throw error;
+
+        }
 
 
         if (
