@@ -1056,3 +1056,415 @@ Version : 1.0.0
     }
 
 }
+/* ==========================================================
+   FINOVA SIDEBAR — PREMIUM OUTLINE + ACCENT
+   Version : 2.0.0
+   Design  : Outline + Accent / Enterprise Financial UI
+   Scope   : Visual only. Menu structure and routing unchanged.
+========================================================== */
+
+.finova-sidebar{
+    background:
+        linear-gradient(
+            180deg,
+            #07172F 0%,
+            #081A34 48%,
+            #07172F 100%
+        );
+    border-right:1px solid rgba(148,163,184,.14);
+    color:#E8EEF8;
+}
+
+/* Brand stays inside the navy sidebar */
+.finova-sidebar-logo{
+    height:76px;
+    padding:0 16px;
+    gap:10px;
+    background:transparent;
+    border-bottom:1px solid rgba(148,163,184,.12);
+}
+
+.finova-sidebar-logo-image{
+    width:62px;
+    height:66px;
+    filter:drop-shadow(0 3px 10px rgba(37,99,235,.18));
+}
+
+.finova-sidebar-title{
+    color:#F8FAFC;
+    font-size:21px;
+    font-weight:700;
+    letter-spacing:.4px;
+}
+
+.finova-sidebar-subtitle{
+    color:#8FB7EE;
+    font-size:10px;
+    font-weight:600;
+    letter-spacing:1.15px;
+    text-transform:uppercase;
+}
+
+.finova-sidebar-menu{
+    padding:12px 0 18px;
+}
+
+/* Main item / group geometry */
+.finova-menu-item,
+.finova-menu-group-header{
+    min-height:42px;
+    margin:2px 8px;
+    padding:0 14px;
+    border:1px solid transparent;
+    border-radius:9px;
+    color:#E7EDF7;
+    background:transparent;
+    transition:
+        background-color .18s ease,
+        border-color .18s ease,
+        color .18s ease,
+        transform .18s ease;
+}
+
+.finova-menu-item > i,
+.finova-menu-group-left > i{
+    width:22px;
+    font-size:16px;
+    color:#38A8F8;
+    opacity:.96;
+    filter:none;
+}
+
+.finova-menu-item span,
+.finova-menu-group-left span{
+    color:inherit;
+    font-size:13px;
+    font-weight:550;
+}
+
+.finova-menu-group-header:hover,
+.finova-menu-item:hover{
+    color:#FFFFFF;
+    background:rgba(30,64,105,.34);
+    border-color:rgba(96,165,250,.12);
+    transform:none;
+}
+
+/* Dashboard / standalone active module */
+.finova-menu-item.active{
+    color:#FFFFFF;
+    background:linear-gradient(90deg,#1559B7 0%,#124A91 100%);
+    border-color:rgba(96,165,250,.22);
+    box-shadow:0 7px 18px rgba(2,12,27,.16);
+    font-weight:600;
+}
+
+.finova-menu-item.active::before{
+    content:"";
+    position:absolute;
+    left:-9px;
+    top:7px;
+    bottom:7px;
+    width:3px;
+    border-radius:999px;
+    background:#38A8F8;
+}
+
+.finova-menu-item.active > i{
+    color:#DDF2FF;
+}
+
+/* Group headings: premium accent, no colored cards */
+.finova-menu-group.open .finova-menu-group-header{
+    color:#FFFFFF;
+    background:transparent;
+    border-color:transparent;
+}
+
+.finova-menu-arrow{
+    color:#9EB2CC;
+    font-size:10px;
+}
+
+/* Submenu rail */
+.finova-submenu{
+    margin-left:18px;
+}
+
+.finova-submenu::before{
+    left:24px;
+    top:7px;
+    bottom:7px;
+    background:linear-gradient(
+        180deg,
+        rgba(56,168,248,.42),
+        rgba(148,163,184,.10)
+    );
+}
+
+.finova-submenu-item{
+    min-height:39px;
+    padding:0 14px 0 42px;
+    margin:1px 8px;
+    border:1px solid transparent;
+    border-radius:8px;
+    color:#D8E2F0;
+    background:transparent;
+}
+
+.finova-submenu-item i{
+    width:17px;
+    font-size:13px;
+    color:#B8CAE2;
+    opacity:.98;
+}
+
+.finova-submenu-item span{
+    font-size:12.5px;
+    font-weight:450;
+}
+
+.finova-submenu-item:hover{
+    color:#FFFFFF;
+    background:rgba(30,64,105,.28);
+    border-color:rgba(96,165,250,.10);
+    transform:translateX(2px);
+}
+
+.finova-submenu-item:hover i{
+    color:#7CC8FF;
+}
+
+/* Active submenu: restrained accent instead of a bright block */
+.finova-submenu-item.active{
+    color:#FFFFFF;
+    background:rgba(24,82,151,.34);
+    border-color:rgba(96,165,250,.12);
+    font-weight:600;
+}
+
+.finova-submenu-item.active::before{
+    left:0;
+    top:8px;
+    bottom:8px;
+    width:3px;
+    border-radius:0 999px 999px 0;
+    background:#38A8F8;
+}
+
+.finova-submenu-item.active i{
+    color:#5EBBFF;
+}
+
+/* Section accents — muted, consistent and easy on the eyes */
+.finova-menu-group[data-group="master-data"] .finova-menu-group-left > i{
+    color:#38A8F8;
+}
+
+.finova-menu-group[data-group="finance"] .finova-menu-group-left > i{
+    color:#4FB7E8;
+}
+
+.finova-menu-group[data-group="accounting"] .finova-menu-group-left > i{
+    color:#6C9DFF;
+}
+
+.finova-menu-group[data-group="report"] .finova-menu-group-left > i{
+    color:#35BCE8;
+}
+
+/* Small module-specific accents; icons remain mostly outline-like/soft */
+.finova-submenu-item[data-module="user-management"] i,
+.finova-submenu-item[data-module="business-partner"] i{
+    color:#9CC8F3;
+}
+
+.finova-submenu-item[data-module="chart-of-accounts"] i,
+.finova-submenu-item[data-module="accounting-period"] i{
+    color:#B8CAE2;
+}
+
+.finova-submenu-item[data-module="tax"] i{
+    color:#D5B56A;
+}
+
+.finova-submenu-item[data-module="account-payable"] i{
+    color:#D59A9A;
+}
+
+.finova-submenu-item[data-module="account-receivable"] i{
+    color:#86C6B4;
+}
+
+.finova-submenu-item[data-module="aging-payable"] i,
+.finova-submenu-item[data-module="aging-receivable"] i{
+    color:#B8CAE2;
+}
+
+.finova-submenu-item[data-module="gl-journal"] i{
+    color:#9DBAF5;
+}
+
+.finova-submenu-item[data-module="fixed-asset"] i{
+    color:#D8B579;
+}
+
+.finova-submenu-item[data-module="general-ledger"] i,
+.finova-submenu-item[data-module="financial-statement"] i{
+    color:#8FC5EE;
+}
+
+.finova-submenu-item[data-module="trial-balance-year"] i{
+    color:#B7A4E8;
+}
+
+.finova-submenu-item[data-module="balance-sheet"] i{
+    color:#8DC5A6;
+}
+
+.finova-submenu-item[data-module="profit-loss"] i{
+    color:#D6B075;
+}
+
+.finova-submenu-item[data-module="cash-flow-forecast"] i{
+    color:#68C5C8;
+}
+
+/* Headers: FINOVA ADMIN / SETTINGS */
+.finova-menu-header{
+    padding:16px 18px 6px;
+    color:#7893B5;
+    font-size:9px;
+    font-weight:700;
+    letter-spacing:1.25px;
+}
+
+.finova-menu-item[data-module="production"] > i{
+    color:#69B995;
+}
+
+.finova-menu-item[data-module="change-password"] > i{
+    color:#D5B56A;
+}
+
+.finova-menu-item[data-module="logout"] > i{
+    color:#D9838C;
+}
+
+/* Footer */
+.finova-sidebar-footer{
+    padding:10px 14px;
+    border-top:1px solid rgba(148,163,184,.10);
+    background:rgba(2,12,27,.08);
+}
+
+.finova-sidebar-version{
+    color:#607A9A;
+    font-size:9px;
+    letter-spacing:.4px;
+}
+
+/* Keep company-context lock stronger than accent colors */
+.finova-company-context-locked .finova-menu-item > i,
+.finova-company-context-locked .finova-menu-group-left > i,
+.finova-company-context-locked .finova-submenu-item i{
+    color:rgba(255,255,255,.30) !important;
+}
+
+/* Mobile keeps the same premium visual language */
+@media (max-width:991.98px){
+    .finova-sidebar-logo{
+        height:70px;
+    }
+
+    .finova-menu-item,
+    .finova-menu-group-header{
+        min-height:44px;
+    }
+
+    .finova-submenu-item{
+        min-height:41px;
+    }
+}
+
+
+/* ==========================================================
+   FINOVA SIDEBAR — WHITE BRAND HEADER FINAL
+   Only the logo/header block becomes white.
+   Navigation below remains navy.
+========================================================== */
+
+.finova-sidebar-logo{
+    background:#FFFFFF !important;
+    border-bottom:1px solid #E5E7EB !important;
+}
+
+.finova-sidebar-title{
+    color:#0B1F3A !important;
+}
+
+.finova-sidebar-subtitle{
+    color:#5F83B5 !important;
+}
+
+.finova-sidebar-logo-image{
+    background:transparent !important;
+    filter:drop-shadow(0 3px 8px rgba(37,99,235,.16));
+}
+
+/* Collapsed/mobile brand area stays white as well */
+.finova-sidebar.collapsed .finova-sidebar-logo{
+    background:#FFFFFF !important;
+}
+
+@media (max-width:991.98px){
+    .finova-sidebar-logo{
+        background:#FFFFFF !important;
+    }
+}
+
+
+/* ==========================================================
+   FINOVA SIDEBAR — REMOVE BRAND/TOPBAR DIVIDER
+========================================================== */
+
+.finova-sidebar-logo{
+    border-right:0 !important;
+    border-bottom:0 !important;
+    box-shadow:none !important;
+}
+
+.finova-sidebar,
+.finova-sidebar-header,
+.finova-sidebar-brand{
+    border-right:0 !important;
+}
+
+
+
+/* ==========================================================
+   FINOVA SIDEBAR — HEADER BOTTOM LINE ALIGNMENT FINAL
+   Make the line below FINOVA logo level with Dashboard topbar
+========================================================== */
+
+/* Keep brand/header exactly the same height as FINOVA topbar */
+.finova-sidebar-logo{
+    height:70px !important;
+    min-height:70px !important;
+    box-sizing:border-box !important;
+    border-bottom:1px solid #E5E7EB !important;
+}
+
+/* No vertical divider */
+.finova-sidebar,
+.finova-sidebar-logo,
+.finova-sidebar-header,
+.finova-sidebar-brand{
+    border-right:0 !important;
+}
+
+/* Ensure the first navigation row begins after the aligned header */
+.finova-sidebar-nav{
+    margin-top:0 !important;
+}
+

@@ -680,7 +680,13 @@ this.menuItem(
 
         return `
 
-            <div class="finova-menu-group">
+            <div
+                class="finova-menu-group"
+                data-group="${title
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, "-")
+                    .replace(/^-|-$/g, "")}"
+            >
 
                 <div class="finova-menu-group-header">
 
