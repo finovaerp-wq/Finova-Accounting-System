@@ -7608,472 +7608,156 @@ async completeInvoice(id) {
     try {
 
         if (!id) {
-
             throw new Error(
                 "Account Payable ID is required."
             );
-
         }
-
 
         /*
         ==================================================
-        LOAD ACCOUNT PAYABLE
+        LOAD FRESH AP DATA
         ==================================================
         */
 
         const result =
-            await this.service.getById(
-                id
-            );
-
-
-        if (!result) {
-
-            throw new Error(
-                "Account Payable not found."
-            );
-
-        }
-
+            await this.service.getById(id);
 
         const invoice =
-            result.header;
-
+            result?.header || null;
 
         const details =
-            Array.isArray(
-                result.details
-            )
+            Array.isArray(result?.details)
                 ? result.details
                 : [];
 
+        if (!invoice) {
+            throw new Error(
+                "Account Payable not found."
+            );
+        }
+
+        if (String(invoice.status || "").trim() !== "Draft") {
+            throw new Error(
+                `Account Payable status is "${invoice.status}". Only Draft Account Payable can be completed.`
+            );
+        }
 
         /*
         ==================================================
-        DEBUG
+        ACCOUNTING VALIDATION
+        Keep the existing FINOVA accounting rules.
         ==================================================
         */
 
-        console.log(
-            "========== COMPLETE AP DEBUG =========="
-        );
-
-        console.log(
-            "AP ID:",
-            id
-        );
-
-        console.log(
-            "AP INVOICE:",
-            invoice?.invoice_no
-        );
-
-        console.log(
-            "AP STATUS:",
-            invoice?.status
-        );
-
-        console.log(
-            "AP GL JOURNAL ID:",
-            invoice?.gl_journal_id
-        );
-
-        console.log(
-            "AP DETAIL COUNT:",
-            details.length
-        );
-
-        console.log(
-            "======================================="
-        );
-
-
-        /*
-        ==================================================
-        CHECK STATUS
-        ONLY DRAFT CAN BE COMPLETED
-        ==================================================
-        */
-
-        const currentStatus =
-            String(
-                invoice?.status
-                || ""
-            )
-            .trim();
-
+        const accountingValidation =
+            await this.validateAPAccounting(
+                invoice,
+                details
+            );
 
         if (
-            currentStatus !== "Draft"
+            !accountingValidation
+            || accountingValidation.valid !== true
         ) {
-
             throw new Error(
-                `Account Payable status is "${currentStatus}". Only Draft Account Payable can be completed.`
+                "Account Payable accounting validation failed."
             );
-
         }
-        /*
-==================================================
-VALIDATE ACCOUNTING
-BEFORE GENERATE / LINK GL JOURNAL
-==================================================
-*/
-
-const accountingValidation =
-    await this.validateAPAccounting(
-        invoice,
-        details
-    );
-
-
-if (
-    !accountingValidation
-    ||
-    accountingValidation.valid !== true
-) {
-
-    throw new Error(
-        "Account Payable accounting validation failed."
-    );
-
-}
-
-
-/*
-==================================================
-DEBUG ACCOUNTING VALIDATION
-==================================================
-*/
-
-console.log(
-    "AP COMPLETE ACCOUNTING VALIDATION:",
-    accountingValidation
-);
-
 
         /*
         ==================================================
-        EXISTING GL JOURNAL
+        BUILD JOURNAL LINES
+        Same source-of-truth used by AP preview/journal.
         ==================================================
         */
 
-        let journal = null;
-
-        let journalId =
-            invoice?.gl_journal_id
-            || null;
-
-
-        /*
-        ==================================================
-        GENERATE GL JOURNAL
-        ONLY IF NOT EXISTS
-        ==================================================
-        */
-
-        if (!journalId) {
-
-            console.log(
-                "AP COMPLETE: GENERATING GL JOURNAL..."
-            );
-
-
-            journal =
-                await this.generateAPJournal(
-                    invoice,
-                    details
-                );
-
-
-            /*
-            ==============================================
-            VALIDATE JOURNAL RESULT
-            ==============================================
-            */
-
-            if (!journal) {
-
-                throw new Error(
-                    "Failed to generate GL Journal."
-                );
-
-            }
-
-
-            console.log(
-                "AP GENERATED JOURNAL:",
-                journal
-            );
-
-
-            journalId =
-                journal?.id
-                || null;
-
-
-            if (!journalId) {
-
-                throw new Error(
-                    "GL Journal was created but Journal ID is missing."
-                );
-
-            }
-
-
-            /*
-            ==============================================
-            LINK GL JOURNAL
-            ==============================================
-            */
-
-            console.log(
-                "AP LINK GL JOURNAL:",
+        const builtJournalDetails =
+            await this.buildAPJournalLines(
+                invoice,
+                details,
                 {
-                    apId: id,
-                    journalId
+                    reloadTaxMaster: true,
+                    strictValidation: true
                 }
             );
 
+        const journalLines =
+            builtJournalDetails.map(line => ({
 
-            const linked =
-                await this.service.linkGLJournal(
-                    id,
-                    journalId
-                );
+                debit_account_id:
+                    line.debit_account_id,
 
+                credit_account_id:
+                    line.credit_account_id,
 
-            /*
-            ==============================================
-            VALIDATE LINK RESULT
-            ==============================================
-            */
+                business_partner_id:
+                    line.business_partner_id,
 
-            if (!linked) {
+                description:
+                    line.description,
 
-                throw new Error(
-                    "GL Journal was created but could not be linked to Account Payable."
-                );
+                amount:
+                    Number(line.amount || 0)
 
-            }
+            }));
 
-
-            console.log(
-                "AP GL LINK RESULT:",
-                linked
-            );
-
-        }
-
-
-        /*
-        ==================================================
-        VERIFY AP → GL LINK
-        ==================================================
-        */
-
-        const verifyLink =
-            await this.service.getById(
-                id
-            );
-
-
-        const linkedJournalId =
-            verifyLink?.header?.gl_journal_id
-            || null;
-
-
-        console.log(
-            "========== VERIFY AP GL LINK =========="
-        );
-
-        console.log(
-            "AP ID:",
-            id
-        );
-
-        console.log(
-            "EXPECTED GL ID:",
-            journalId
-        );
-
-        console.log(
-            "DATABASE GL ID:",
-            linkedJournalId
-        );
-
-        console.log(
-            "========================================"
-        );
-
-
-        /*
-        ==================================================
-        LINK MUST EXIST
-        ==================================================
-        */
-
-        if (
-            !linkedJournalId
-        ) {
-
+        if (!journalLines.length) {
             throw new Error(
-                "GL Journal was generated, but the Account Payable was not linked to the GL Journal."
+                "No valid AP detail available for GL Journal."
             );
-
         }
-
 
         /*
         ==================================================
-        VERIFY SAME JOURNAL
+        ATOMIC DATABASE TRANSACTION
+
+        PostgreSQL now performs all of these together:
+        1. Lock AP row
+        2. Create GL header
+        3. Create GL details
+        4. Link AP -> GL
+        5. Draft -> Complete
+
+        Any failure rolls back everything.
         ==================================================
         */
-
-        if (
-            String(linkedJournalId)
-            !==
-            String(journalId)
-        ) {
-
-            throw new Error(
-                "Account Payable GL Journal link is invalid."
-            );
-
-        }
-
-
-        /*
-        ==================================================
-        COMPLETE ACCOUNT PAYABLE
-        ==================================================
-        */
-
-        console.log(
-            "AP LINK VERIFIED. COMPLETING AP..."
-        );
-
 
         const completed =
-            await this.service.completeInvoice(
-                id
+            await this.service.completeInvoiceAtomic(
+                id,
+                journalLines
             );
 
+        await this.loadData(false);
 
-        if (!completed) {
-
-            throw new Error(
-                "Failed to complete Account Payable."
-            );
-
-        }
-
-
-        /*
-        ==================================================
-        LOG
-        ==================================================
-        */
-
-        console.log(
-            "========== AP COMPLETED =========="
+        window.dispatchEvent(
+            new CustomEvent(
+                "finova:gl-journal-changed",
+                {
+                    detail: {
+                        source: "AP",
+                        action: "AP_COMPLETE",
+                        documentId: id,
+                        documentNo: invoice.invoice_no || null,
+                        journalId: completed.gl_journal_id || null,
+                        journalNo: completed.journal_no || null
+                    }
+                }
+            )
         );
 
-        console.log(
-            {
-                ap_id:
-                    id,
-
-                invoice_no:
-                    invoice?.invoice_no,
-
-                gl_journal_id:
-                    journalId,
-
-                journal_no:
-                    journal?.journal_no
-                    || null,
-
-                status:
-                    completed?.status
+        return {
+            ap: {
+                ...invoice,
+                status: completed.status,
+                gl_journal_id: completed.gl_journal_id
+            },
+            journal: {
+                id: completed.gl_journal_id,
+                journal_no: completed.journal_no,
+                status: completed.journal_status || "Draft"
             }
-        );
-
-
-        /*
-==================================================
-RELOAD AP DATA
-==================================================
-*/
-
-await this.loadData(
-    false
-);
-
-
-/*
-==================================================
-NOTIFY GL JOURNAL
-
-IMPORTANT:
-Journal has already been:
-1. Generated
-2. Linked to AP
-3. AP successfully completed
-
-Notify any open GL Journal workspace
-to reload latest journal data.
-==================================================
-*/
-
-window.dispatchEvent(
-    new CustomEvent(
-        "finova:gl-journal-changed",
-        {
-            detail: {
-
-                source:
-                    "AP",
-
-                action:
-                    "AP_COMPLETE",
-
-                documentId:
-                    id,
-
-                documentNo:
-                    invoice?.invoice_no
-                    || null,
-
-                journalId:
-                    journalId
-                    || null,
-
-                journalNo:
-                    journal?.journal_no
-                    || null
-
-            }
-        }
-    )
-);
-
-
-/*
-==================================================
-RETURN
-==================================================
-*/
-
-return {
-
-    ap:
-        completed,
-
-    journal:
-        journal
-
-};
+        };
 
     }
     catch (error) {
@@ -8088,6 +7772,7 @@ return {
     }
 
 }
+
 /*
 ======================================================
 LOAD ACCOUNT PAYABLE DETAIL MODAL HTML
@@ -10001,6 +9686,25 @@ toggleBulkAPInvoice(
             );
 
 
+    const checkbox =
+        this.apPaymentInvoiceBody
+            ?.querySelector(
+                `.ap-bulk-invoice-check[data-ap-id="${apId}"]`
+            );
+
+
+    if (
+        checkbox
+    ) {
+
+        checkbox.checked =
+            Boolean(
+                checked
+            );
+
+    }
+
+
     if (
         checked
     ) {
@@ -10847,936 +10551,298 @@ SAVE BULK AP PAYMENT DRAFT
 
 async saveBulkAPPaymentDraft() {
 
-    /*
-    ==================================================
-    PROCESS LOCK
-    ==================================================
-    */
-
-    if (
-        this.isSavingBulkAPPayment ===
-        true
-    ) {
-
+    if (this.isSavingBulkAPPayment === true) {
         return null;
-
     }
 
-
-    this.isSavingBulkAPPayment =
-        true;
-
-
-    let createdBatch =
-    null;
-
-let createdBatchJournal =
-    null;
-
+    this.isSavingBulkAPPayment = true;
 
     try {
 
+        const paymentDate = String(this.apPaymentDate?.value || "").trim();
+        const vendorId = Number(this.apPaymentBulkVendor?.value || 0);
+        const rawBankAccountId = String(this.apPaymentBankAccount?.value || "").trim();
+        const bankAccountId = Number(rawBankAccountId || 0);
+
+        if (!paymentDate) {
+            throw new Error("Payment Date is required.");
+        }
+        if (!Number.isFinite(vendorId) || vendorId <= 0) {
+            throw new Error("Vendor is required.");
+        }
+        if (!rawBankAccountId || !Number.isFinite(bankAccountId) || bankAccountId <= 0) {
+            throw new Error("Bank Account is required.");
+        }
+
         /*
         ==================================================
-        PAYMENT DATE
+        SYNCHRONIZE PAYMENT SELECTION BEFORE SAVE
+
+        The payment modal can be opened from a specific AP
+        row and the invoice is auto-selected. Rebuild the
+        Map from the current DOM before validation so the
+        Save action never reads stale selection state.
         ==================================================
         */
 
-        const paymentDate =
-            String(
-                this.apPaymentDate
-                    ?.value
-                || ""
-            )
-            .trim();
+        const checkedInvoices =
+            this.apPaymentInvoiceBody
+                ?.querySelectorAll(
+                    ".ap-bulk-invoice-check:checked"
+                )
+            || [];
 
+
+        checkedInvoices.forEach(
+            checkbox => {
+
+                const apId =
+                    String(
+                        checkbox?.dataset?.apId
+                        || ""
+                    );
+
+                if (
+                    !apId
+                    ||
+                    this.apBulkPaymentSelected.has(
+                        apId
+                    )
+                ) {
+
+                    return;
+
+                }
+
+                const invoice =
+                    this.apBulkPaymentInvoices
+                        .find(
+                            item =>
+                                String(
+                                    item?.id
+                                    || ""
+                                )
+                                === apId
+                        );
+
+                if (!invoice) {
+                    return;
+                }
+
+                const amountInput =
+                    this.apPaymentInvoiceBody
+                        ?.querySelector(
+                            `[data-ap-payment-amount="${apId}"]`
+                        );
+
+                const enteredAmount =
+                    this.parseAPPaymentAmount(
+                        amountInput?.value
+                        || 0
+                    );
+
+                const outstanding =
+                    Math.max(
+                        0,
+                        Number(
+                            invoice?.outstanding_amount
+                            || 0
+                        )
+                    );
+
+                this.apBulkPaymentSelected.set(
+                    apId,
+                    {
+                        invoice,
+                        payment_amount:
+                            enteredAmount > 0
+                                ? Math.min(
+                                    enteredAmount,
+                                    outstanding
+                                )
+                                : outstanding
+                    }
+                );
+
+            }
+        );
+
+
+        /*
+        ==================================================
+        CURRENT AP FALLBACK
+
+        Payment was opened from this AP row, therefore the
+        current invoice is the minimum valid selection.
+        ==================================================
+        */
 
         if (
-            !paymentDate
+            this.apBulkPaymentSelected.size === 0
+            &&
+            this.currentPaymentAPId
         ) {
 
-            throw new Error(
-                "Payment Date is required."
-            );
+            const currentInvoice =
+                this.apBulkPaymentInvoices
+                    .find(
+                        item =>
+                            String(
+                                item?.id
+                                || ""
+                            )
+                            ===
+                            String(
+                                this.currentPaymentAPId
+                            )
+                    );
+
+            if (
+                currentInvoice
+                &&
+                Number(
+                    currentInvoice?.outstanding_amount
+                    || 0
+                ) > 0
+            ) {
+
+                this.toggleBulkAPInvoice(
+                    String(
+                        currentInvoice.id
+                    ),
+                    true
+                );
+
+            }
 
         }
 
-
-        /*
-        ==================================================
-        VENDOR
-        ==================================================
-        */
-
-        const vendorId =
-            Number(
-                this.apPaymentBulkVendor
-                    ?.value
-                || 0
-            );
-
-
-        if (
-            !Number.isFinite(
-                vendorId
-            )
-            ||
-            vendorId <= 0
-        ) {
-
-            throw new Error(
-                "Vendor is required."
-            );
-
-        }
-
-
-        /*
-==================================================
-BANK ACCOUNT
-FINAL VALIDATION
-==================================================
-*/
-
-const bankAccountElement =
-    this.apPaymentBankAccount
-    ||
-    null;
-
-
-if (
-    !bankAccountElement
-) {
-
-    throw new Error(
-        "Bank Account element was not found."
-    );
-
-}
-
-
-/*
-==================================================
-RAW SELECT VALUE
-==================================================
-*/
-
-const rawBankAccountId =
-    String(
-        bankAccountElement.value
-        ||
-        ""
-    )
-    .trim();
-
-
-/*
-==================================================
-SELECTED OPTION
-==================================================
-*/
-
-const selectedBankOption =
-    bankAccountElement
-        .selectedOptions
-        ?.[0]
-    ||
-    null;
-
-
-/*
-==================================================
-DEBUG
-==================================================
-*/
-
-console.log(
-    "BULK AP BANK ACCOUNT VALIDATION:",
-    {
-
-        raw_value:
-            rawBankAccountId,
-
-        selected_text:
-            selectedBankOption
-                ?.textContent
-                ?.trim()
-            ||
-            null,
-
-        option_count:
-            bankAccountElement
-                .options
-                ?.length
-            ||
-            0
-
-    }
-);
-
-
-/*
-==================================================
-REQUIRED
-==================================================
-*/
-
-if (
-    !rawBankAccountId
-) {
-
-    throw new Error(
-        "Bank Account is required."
-    );
-
-}
-
-
-/*
-==================================================
-NUMERIC COA ID
-==================================================
-*/
-
-const bankAccountId =
-    Number(
-        rawBankAccountId
-    );
-
-
-if (
-    !Number.isFinite(
-        bankAccountId
-    )
-    ||
-    bankAccountId <= 0
-) {
-
-    throw new Error(
-        `Bank Account ID "${rawBankAccountId}" is invalid.`
-    );
-
-}
-
-
-        /*
-        ==================================================
-        ALLOCATIONS
-        ==================================================
-        */
 
         const selected =
             Array.from(
-                this.apBulkPaymentSelected
-                    .values()
+                this.apBulkPaymentSelected.values()
             );
 
 
-        if (
-            selected.length === 0
-        ) {
-
-            throw new Error(
-                "Select at least one Account Payable invoice."
-            );
-
+        if (selected.length === 0) {
+            throw new Error("Select at least one Account Payable invoice.");
         }
 
+        const allocations = selected.map(item => ({
+            account_payable_id: String(item?.invoice?.id || "").trim(),
+            payment_amount: Math.round(Number(item?.payment_amount || 0))
+        }));
 
-        const allocations =
-            selected.map(
-                item => {
-
-                    return {
-
-                        account_payable_id:
-                            item
-                                ?.invoice
-                                ?.id,
-
-                        payment_amount:
-                            Math.round(
-                                Number(
-                                    item
-                                        ?.payment_amount
-                                    || 0
-                                )
-                            )
-
-                    };
-
-                }
-            );
-
-
-        /*
-        ==================================================
-        VALIDATE ALLOCATION
-        ==================================================
-        */
-
-        for (
-            const allocation
-            of allocations
-        ) {
-
-            if (
-                !allocation
-                    .account_payable_id
-            ) {
-
-                throw new Error(
-                    "Account Payable allocation is invalid."
-                );
-
+        for (const allocation of allocations) {
+            if (!allocation.account_payable_id) {
+                throw new Error("Account Payable allocation is invalid.");
             }
-
-
-            if (
-                !Number.isFinite(
-                    allocation
-                        .payment_amount
-                )
-                ||
-                allocation
-                    .payment_amount
-                <= 0
-            ) {
-
-                throw new Error(
-                    "Payment Amount must be greater than 0 for every selected invoice."
-                );
-
+            if (!Number.isFinite(allocation.payment_amount) || allocation.payment_amount <= 0) {
+                throw new Error("Payment Amount must be greater than 0 for every selected invoice.");
             }
-
         }
 
-
-        /*
-        ==================================================
-        TOTAL PAYMENT
-        ==================================================
-        */
-
-        const totalPayment =
-            allocations.reduce(
-                (
-                    total,
-                    allocation
-                ) => {
-
-                    return (
-                        total
-                        +
-                        allocation
-                            .payment_amount
-                    );
-
-                },
-                0
-            );
-
-
-        if (
-            totalPayment <= 0
-        ) {
-
-            throw new Error(
-                "Total Payment must be greater than 0."
-            );
-
-        }
-
-
-        /*
-        ==================================================
-        HEADER
-        ==================================================
-        */
-
-        const referenceNo =
-            String(
-                this.apPaymentReferenceNo
-                    ?.value
-                || ""
-            )
-            .trim()
-            ||
-            null;
-
-
-        const description =
-            String(
-                this.apPaymentDescription
-                    ?.value
-                || ""
-            )
-            .trim()
-            ||
-            null;
-
-
-        /*
-        ==================================================
-        PAYMENT NUMBER
-        ==================================================
-        */
-
-        const paymentNo =
-            this.generateAPPaymentBatchNo();
-
-
-        /*
-        ==================================================
-        CREATE BATCH HEADER
-        ==================================================
-        */
-
-        createdBatch =
-            await this.service
-                .createPaymentBatch({
-
-                    payment_no:
-                        paymentNo,
-
-                    payment_date:
-                        paymentDate,
-
-                    vendor_id:
-                        vendorId,
-
-                    bank_account_id:
-                        bankAccountId,
-
-                    reference_no:
-                        referenceNo,
-
-                    description:
-                        description,
-
-                    total_payment:
-                        totalPayment,
-
-                    status:
-                        "Draft",
-
-                    gl_journal_id:
-                        null
-
-                });
-
-
-        if (
-            !createdBatch
-            ||
-            !createdBatch.id
-        ) {
-
-            throw new Error(
-                "Failed to create AP Payment Batch."
-            );
-
-        }
-
-
-        /*
-        ==================================================
-        CREATE DRAFT ALLOCATIONS
-        ==================================================
-        */
-
-        const createdAllocations =
-            await this.service
-                .createPaymentBatchAllocations(
-                    createdBatch.id,
-                    allocations
-                );
-
-
-        if (
-            !Array.isArray(
-                createdAllocations
-            )
-            ||
-            createdAllocations.length
-            !==
-            allocations.length
-        ) {
-
-            throw new Error(
-                "Failed to create AP Payment allocations."
-            );
-
-        }
-        /*
-==================================================
-GENERATE ONE GL JOURNAL FOR PAYMENT BATCH
-==================================================
-*/
-
-const journalResult =
-    await this.generateBulkAPPaymentJournal(
-        createdBatch.id
-    );
-
-
-if (
-    !journalResult
-    ||
-    !journalResult.journal
-    ||
-    !journalResult.journal.id
-) {
-
-    throw new Error(
-        "Failed to generate Bulk AP Payment GL Journal."
-    );
-
-}
-
-
-/*
-==================================================
-USE LATEST BATCH WITH JOURNAL LINK
-==================================================
-*/
-
-createdBatch =
-    journalResult.batch
-    ||
-    createdBatch;
-    createdBatchJournal =
-    journalResult.journal
-    ||
-    null;
-
-        /*
-==================================================
-UPDATE AP PAYMENT STATUS IMMEDIATELY
-AFTER PAYMENT SAVE
-
-RULE:
-SAVED PAYMENT = ACTIVE PAYMENT
-
-GL JOURNAL DOES NOT NEED TO BE POSTED
-TO UPDATE AP STATUS.
-==================================================
-*/
-
-const affectedAccountPayableIds =
-    [
-        ...new Set(
-
-            createdAllocations
-
-                .map(
-                    allocation =>
-
-                        Number(
-                            allocation
-                                ?.account_payable_id
-                            ||
-                            0
-                        )
-                )
-
-                .filter(
-                    accountPayableId =>
-
-                        Number.isFinite(
-                            accountPayableId
-                        )
-                        &&
-                        accountPayableId > 0
-                )
-
-        )
-    ];
-
-
-/*
-==================================================
-UPDATE EACH AP DIRECTLY FROM THE PAYMENT
-THAT HAS JUST BEEN SAVED
-
-IMPORTANT:
-DO NOT RECALCULATE AGAIN FROM GL POSTING STATUS.
-SAVE PAYMENT ITSELF CHANGES AP STATUS.
-==================================================
-*/
-
-for (
-    const allocation
-    of createdAllocations
-) {
-
-    /*
-    ==============================================
-    ACCOUNT PAYABLE ID
-
-    IMPORTANT:
-    DO NOT COERCE DATABASE ID WITH Number().
-
-    FINOVA IDs may be UUID/string values.
-    Number(UUID) becomes NaN and incorrectly throws:
-    "Saved AP Payment allocation has invalid Account Payable ID."
-    ==============================================
-    */
-
-    const accountPayableId =
-        String(
-            allocation
-                ?.account_payable_id
-            || ""
-        )
-        .trim();
-
-    const savedPaymentAmount =
-        Math.round(
-            Number(
-                allocation
-                    ?.payment_amount
-                || 0
-            )
+        const totalPayment = allocations.reduce(
+            (total, allocation) => total + allocation.payment_amount,
+            0
         );
 
-    if (
-        !accountPayableId
-    ) {
-        throw new Error(
-            "Saved AP Payment allocation has no Account Payable ID."
-        );
-    }
+        if (totalPayment <= 0) {
+            throw new Error("Total Payment must be greater than 0.");
+        }
 
-    if (
-        !Number.isFinite(savedPaymentAmount)
-        ||
-        savedPaymentAmount <= 0
-    ) {
-        throw new Error(
-            "Saved AP Payment allocation has invalid Payment Amount."
-        );
-    }
-
-    await this.service
-        .applySavedPaymentStatus(
-            accountPayableId,
-            savedPaymentAmount
-        );
-
-}
-
-
-/*
-==================================================
-DEBUG
-==================================================
-*/
-
-console.log(
-    "AP PAYMENT SAVE - CURRENT DRAFT BATCH COUNTED AS ACTIVE:",
-    {
-        payment_batch_id:
-            createdBatch.id,
-
-        rule:
-            "Save Payment = Active Payment; GL may remain Draft"
-    }
-);
-
-
-console.log(
-    "AP PAYMENT SAVE - STATUS UPDATED:",
-    {
-        payment_batch_id:
-            createdBatch.id,
-
-        gl_journal_id:
-            createdBatchJournal?.id
-            ||
-            null,
-
-        affected_account_payable_ids:
-            createdAllocations.map(
-                allocation =>
-                    allocation?.account_payable_id
-            )
-    }
-);
-
-
-/*
-==================================================
-REFRESH ACCOUNT PAYABLE AFTER PAYMENT SAVE
-==================================================
-*/
-
-await this.loadData(
-    false
-);
-
-
-console.log(
-    "AP PAYMENT SAVE - AP DATA REFRESHED"
-);
-
+        const paymentNo = this.generateAPPaymentBatchNo();
+        const referenceNo = String(this.apPaymentReferenceNo?.value || "").trim() || null;
+        const description = String(this.apPaymentDescription?.value || "").trim() || null;
 
         /*
         ==================================================
-        STORE STATE
+        ONE DATABASE TRANSACTION
+        - locks all AP rows
+        - validates Posted invoice GL
+        - prevents concurrent overpayment
+        - creates payment batch + allocations
+        - creates Draft AP_PAYMENT GL
+        - updates AP Paid/Outstanding/Status
+        - rollback everything on any error
         ==================================================
         */
+        const result = await this.service.savePaymentBatchAtomic(
+            {
+                payment_no: paymentNo,
+                payment_date: paymentDate,
+                vendor_id: vendorId,
+                bank_account_id: bankAccountId,
+                reference_no: referenceNo,
+                description: description,
+                total_payment: totalPayment
+            },
+            allocations
+        );
 
-        this.currentPaymentBatchId =
-            createdBatch.id;
+        const createdBatch = result?.batch || null;
+        const createdAllocations = Array.isArray(result?.allocations)
+            ? result.allocations
+            : [];
 
-
-        if (
-            this.apPaymentBatchNo
-        ) {
-
-            this.apPaymentBatchNo.value =
-                createdBatch.payment_no
-                || paymentNo;
-
+        if (!createdBatch?.id) {
+            throw new Error("Atomic AP Payment did not return Payment Batch ID.");
         }
 
+        this.currentPaymentBatchId = createdBatch.id;
 
-        if (
-            this.apPaymentBatchStatus
-        ) {
-
-            this.apPaymentBatchStatus.textContent =
-                "Draft";
-
+        if (this.apPaymentBatchNo) {
+            this.apPaymentBatchNo.value = createdBatch.payment_no || paymentNo;
         }
 
+        if (this.apPaymentBatchStatus) {
+            this.apPaymentBatchStatus.textContent = "Draft";
+        }
 
-        /*
-        ==================================================
-        SUCCESS
-        ==================================================
-        */
+        await this.loadData(false);
 
         this.showSuccess(
             `AP Payment Batch ${createdBatch.payment_no || paymentNo} saved as Draft.`
         );
 
-
-        /*
-        ==================================================
-        CLOSE MODAL
-        ==================================================
-        */
-
-        if (
-            this.accountPayablePaymentModal
-        ) {
-
-            const modal =
-                bootstrap.Modal
-                    .getOrCreateInstance(
-                        this.accountPayablePaymentModal
-                    );
-
-
-            modal.hide();
-
+        if (this.accountPayablePaymentModal) {
+            bootstrap.Modal
+                .getOrCreateInstance(this.accountPayablePaymentModal)
+                .hide();
         }
 
-
         return {
-
-            batch:
-                createdBatch,
-
-            allocations:
-                createdAllocations
-
+            batch: createdBatch,
+            journal: result?.journal || null,
+            allocations: createdAllocations
         };
 
     }
-    catch (
-        error
-    ) {
+    catch (error) {
 
         console.error(
             "AccountPayable.saveBulkAPPaymentDraft:",
-            error
-        );
-
-        /*
-==================================================
-ROLLBACK BULK PAYMENT JOURNAL
-==================================================
-*/
-
-if (
-    createdBatchJournal?.id
-) {
-
-    try {
-
-        const journalId =
-            createdBatchJournal.id;
-
-
-        /*
-        ==============================================
-        DELETE JOURNAL DETAIL
-        ==============================================
-        */
-
-        const {
-            error: detailError
-        } = await supabase
-
-            .from(
-                "trx_gl_journal_detail"
-            )
-
-            .delete()
-
-            .eq(
-                "journal_id",
-                journalId
-            );
-
-
-        if (
-            detailError
-        ) {
-
-            throw detailError;
-
-        }
-
-
-        /*
-        ==============================================
-        CLEAR BATCH JOURNAL LINK FIRST
-        ==============================================
-        */
-
-        if (
-            createdBatch?.id
-        ) {
-
-            await this.service
-                .updatePaymentBatch(
-                    createdBatch.id,
-                    {
-                        gl_journal_id:
-                            null
-                    }
-                );
-
-        }
-
-
-        /*
-        ==============================================
-        DELETE JOURNAL HEADER
-        ==============================================
-        */
-
-        const {
-            error: headerError
-        } = await supabase
-
-            .from(
-                "trx_gl_journal"
-            )
-
-            .delete()
-
-            .eq(
-                "id",
-                journalId
-            );
-
-
-        if (
-            headerError
-        ) {
-
-            throw headerError;
-
-        }
-
-
-        createdBatchJournal =
-            null;
-
-    }
-    catch (
-        journalRollbackError
-    ) {
-
-        console.error(
-            "AP BULK PAYMENT JOURNAL ROLLBACK:",
-            journalRollbackError
-        );
-
-    }
-
-}
-        /*
-        ==================================================
-        ROLLBACK BATCH
-
-        FK ON DELETE CASCADE WILL REMOVE
-        ALLOCATIONS IF SOME WERE INSERTED.
-        ==================================================
-        */
-
-        if (
-            createdBatch?.id
-        ) {
-
-            try {
-
-                await this.service
-                    .deletePaymentBatch(
-                        createdBatch.id
-                    );
-
+            {
+                message: error?.message,
+                details: error?.details,
+                hint: error?.hint,
+                code: error?.code,
+                raw: error
             }
-            catch (
-                rollbackError
-            ) {
-
-                console.error(
-                    "AP BULK PAYMENT DRAFT ROLLBACK:",
-                    rollbackError
-                );
-
-            }
-
-        }
-
+        );
 
         this.showError(
-            error?.message
-            ||
-            "Failed to save AP Payment Batch."
+            error?.message || "Failed to save AP Payment Batch."
         );
 
-
         return null;
-
     }
     finally {
-
-        this.isSavingBulkAPPayment =
-            false;
-
-
+        this.isSavingBulkAPPayment = false;
         this.updateBulkAPPaymentSummary();
-
     }
-
 }
+
 /*
 ======================================================
 RENDER VENDOR OPTIONS
@@ -29213,6 +28279,55 @@ async loadData(
 
         let data =
             await this.service.getAll();
+
+
+        /*
+        ==================================================
+        REPAIR LEGACY COMPLETE AP WITHOUT GL
+
+        Historical invalid state:
+        status = Complete + gl_journal_id = NULL
+
+        Migration 036 performs the repair inside the
+        authenticated active-company context. No extra
+        table action/button is added.
+        ==================================================
+        */
+
+        const legacyCompleteWithoutGL =
+            Array.isArray(data)
+                ? data.filter(invoice =>
+                    String(invoice?.status || "").trim() === "Complete"
+                    && !invoice?.gl_journal_id
+                )
+                : [];
+
+        if (legacyCompleteWithoutGL.length > 0) {
+
+            for (const invoice of legacyCompleteWithoutGL) {
+
+                try {
+
+                    await this.service.repairCompleteWithoutGL(
+                        invoice.id
+                    );
+
+                }
+                catch (repairError) {
+
+                    console.error(
+                        "AccountPayable.loadData legacy AP repair failed:",
+                        invoice?.id,
+                        repairError
+                    );
+                }
+            }
+
+            // Reload once so the table reflects the repaired
+            // Draft status or the relinked existing journal.
+            data =
+                await this.service.getAll();
+        }
 
 
         /*

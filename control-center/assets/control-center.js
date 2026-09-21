@@ -40,6 +40,25 @@ const state = {
 
 };
 
+/*
+==========================================================
+AUDIT LOG REALTIME STATE
+==========================================================
+*/
+
+let auditRealtimeChannel =
+    null;
+
+let auditRealtimeRefreshTimer =
+    null;
+
+let auditRealtimeRefreshing =
+    false;
+
+let auditRealtimeRefreshPending =
+    false;
+
+
 
 /*
 ==========================================================
@@ -1433,6 +1452,386 @@ async function loadAll() {
     */
 
     renderAll();
+
+}
+
+
+/*
+==========================================================
+REFRESH AUDIT LOG ONLY
+==========================================================
+*/
+
+async function refreshAuditLogsRealtime() {
+
+    /*
+    ==================================================
+    PREVENT PARALLEL REFRESH
+    ==================================================
+    */
+
+    if (
+        auditRealtimeRefreshing
+    ) {
+
+        auditRealtimeRefreshPending =
+            true;
+
+        return;
+
+    }
+
+
+    auditRealtimeRefreshing =
+        true;
+
+
+    try {
+
+        console.log(
+            "CONTROL CENTER AUDIT: REALTIME REFRESH START"
+        );
+
+
+        /*
+        ==================================================
+        LOAD LATEST AUDIT LOG
+
+        Uses:
+        finova_admin_list_audit_logs()
+        ==================================================
+        */
+
+        const auditLogs =
+            await ControlCenterService
+                .getAuditLogs();
+
+
+        /*
+        ==================================================
+        UPDATE STATE
+        ==================================================
+        */
+
+        state.auditLogs =
+            Array.isArray(
+                auditLogs
+            )
+                ?
+            auditLogs
+                :
+            [];
+
+
+        console.log(
+            "CONTROL CENTER AUDIT: REALTIME DATA LOADED",
+            {
+                total:
+                    state.auditLogs.length,
+
+                latest:
+                    state.auditLogs[0]
+                    || null
+            }
+        );
+
+
+        /*
+        ==================================================
+        RENDER CURRENT AUDIT PAGE
+        ==================================================
+        */
+
+        renderAuditLogs();
+
+
+        console.log(
+            "CONTROL CENTER AUDIT: REALTIME RENDER COMPLETE"
+        );
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "CONTROL CENTER AUDIT: REALTIME REFRESH ERROR",
+            error
+        );
+
+    }
+    finally {
+
+        auditRealtimeRefreshing =
+            false;
+
+
+        /*
+        ==================================================
+        EVENT ARRIVED WHILE REFRESHING
+        ==================================================
+        */
+
+        if (
+            auditRealtimeRefreshPending
+        ) {
+
+            auditRealtimeRefreshPending =
+                false;
+
+            queueAuditRealtimeRefresh();
+
+        }
+
+    }
+
+}
+
+
+/*
+==========================================================
+QUEUE AUDIT REALTIME REFRESH
+==========================================================
+*/
+
+function queueAuditRealtimeRefresh() {
+
+    /*
+    ==================================================
+    DEBOUNCE
+
+    One business transaction can generate multiple
+    Audit Log INSERT events.
+    ==================================================
+    */
+
+    if (
+        auditRealtimeRefreshTimer
+    ) {
+
+        window.clearTimeout(
+            auditRealtimeRefreshTimer
+        );
+
+    }
+
+
+    auditRealtimeRefreshTimer =
+        window.setTimeout(
+            async () => {
+
+                auditRealtimeRefreshTimer =
+                    null;
+
+
+                await refreshAuditLogsRealtime();
+
+            },
+            250
+        );
+
+}
+
+
+/*
+==========================================================
+START AUDIT LOG REALTIME
+==========================================================
+*/
+
+function startAuditLogRealtime() {
+
+    /*
+    ==================================================
+    PREVENT DUPLICATE SUBSCRIPTION
+    ==================================================
+    */
+
+    if (
+        auditRealtimeChannel
+    ) {
+
+        console.log(
+            "CONTROL CENTER AUDIT: REALTIME ALREADY ACTIVE"
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+        console.log(
+            "CONTROL CENTER AUDIT: START REALTIME"
+        );
+
+
+        /*
+        ==================================================
+        SUBSCRIBE
+
+        Callback runs every time finova_audit_log
+        receives a visible realtime database event.
+        ==================================================
+        */
+
+        auditRealtimeChannel =
+            ControlCenterService
+                .subscribeAuditLogs(
+                    payload => {
+
+                        console.log(
+                            "CONTROL CENTER AUDIT: EVENT RECEIVED",
+                            {
+                                eventType:
+                                    payload?.eventType
+                                    || null,
+
+                                table:
+                                    payload?.table
+                                    || null,
+
+                                id:
+                                    payload?.new?.id
+                                    ||
+                                    payload?.old?.id
+                                    ||
+                                    null
+                            }
+                        );
+
+
+                        /*
+                        ==========================================
+                        GET FRESH DATA FROM RPC
+
+                        Do not insert payload directly into state.
+                        RPC remains the source of truth.
+                        ==========================================
+                        */
+
+                        queueAuditRealtimeRefresh();
+
+                    }
+                );
+
+
+        /*
+        ==================================================
+        VALIDATE CHANNEL OBJECT
+        ==================================================
+        */
+
+        if (
+            !auditRealtimeChannel
+        ) {
+
+            throw new Error(
+                "Audit Realtime channel was not created."
+            );
+
+        }
+
+    }
+    catch (
+        error
+    ) {
+
+        auditRealtimeChannel =
+            null;
+
+
+        console.error(
+            "CONTROL CENTER AUDIT: START REALTIME ERROR",
+            error
+        );
+
+    }
+
+}
+
+
+/*
+==========================================================
+STOP AUDIT LOG REALTIME
+==========================================================
+*/
+
+async function stopAuditLogRealtime() {
+
+    /*
+    ==================================================
+    CLEAR PENDING REFRESH
+    ==================================================
+    */
+
+    if (
+        auditRealtimeRefreshTimer
+    ) {
+
+        window.clearTimeout(
+            auditRealtimeRefreshTimer
+        );
+
+        auditRealtimeRefreshTimer =
+            null;
+
+    }
+
+
+    /*
+    ==================================================
+    NO ACTIVE CHANNEL
+    ==================================================
+    */
+
+    if (
+        !auditRealtimeChannel
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+    ==================================================
+    STORE CHANNEL BEFORE CLEARING STATE
+    ==================================================
+    */
+
+    const channel =
+        auditRealtimeChannel;
+
+
+    auditRealtimeChannel =
+        null;
+
+
+    try {
+
+        await ControlCenterService
+            .unsubscribeAuditLogs(
+                channel
+            );
+
+
+        console.log(
+            "CONTROL CENTER AUDIT: REALTIME STOPPED"
+        );
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "CONTROL CENTER AUDIT: REALTIME STOP ERROR",
+            error
+        );
+
+    }
 
 }
 
@@ -5594,6 +5993,14 @@ async function initialize() {
 
         await loadAll();
 
+        /*
+        ==================================================
+        START AUDIT LOG REALTIME AFTER AUTH + DATA LOAD
+        ==================================================
+        */
+
+        startAuditLogRealtime();
+
     }
     catch (
         error
@@ -5674,6 +6081,22 @@ async function initialize() {
     }
 
 }
+
+
+/*
+==========================================================
+CONTROL CENTER CLEANUP
+==========================================================
+*/
+
+window.addEventListener(
+    "pagehide",
+    () => {
+
+        stopAuditLogRealtime();
+
+    }
+);
 
 
 /*

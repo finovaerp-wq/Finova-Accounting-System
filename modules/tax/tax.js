@@ -264,6 +264,11 @@ cacheDOM() {
             "tax-form-offset-account"
         );
 
+    this.taxAccountSearch = document.getElementById("tax-form-account-search");
+    this.taxAccountResults = document.getElementById("tax-form-account-results");
+    this.offsetAccountSearch = document.getElementById("tax-form-offset-account-search");
+    this.offsetAccountResults = document.getElementById("tax-form-offset-account-results");
+
     this.description =
         document.getElementById(
             "tax-form-description"
@@ -670,6 +675,10 @@ this.btnRefresh?.addEventListener(
 
         }
     );
+
+
+    this.bindCOASearch(this.taxAccountSearch, this.taxAccount, this.taxAccountResults, true);
+    this.bindCOASearch(this.offsetAccountSearch, this.offsetAccount, this.offsetAccountResults, false);
 
 }
 /*
@@ -3453,6 +3462,8 @@ exportExcel() {
 
         }
 
+        this.syncCOASearchDisplay();
+
 
         if (this.description) {
 
@@ -3500,6 +3511,12 @@ exportExcel() {
                 true;
 
         }
+
+        if (this.taxAccount) this.taxAccount.value = "";
+        if (this.offsetAccount) this.offsetAccount.value = "";
+        if (this.taxAccountSearch) this.taxAccountSearch.value = "";
+        if (this.offsetAccountSearch) this.offsetAccountSearch.value = "";
+        this.hideCOAResults();
 
     }
 
@@ -4257,84 +4274,91 @@ async changeTaxStatus(
         accounts
     ) {
 
-        if (!this.taxAccount) {
+        this.coaAccounts = Array.isArray(accounts) ? accounts : [];
+        this.syncCOASearchDisplay();
 
-            return;
+    }
 
+    getCOALabel(account) {
+        if (!account) return "";
+        return `${account.account_code || ""} :: ${account.account_name || ""}`.trim();
+    }
+
+    syncCOASearchDisplay() {
+        const findById = id => this.coaAccounts?.find(account => String(account.id) === String(id));
+
+        if (this.taxAccountSearch) {
+            this.taxAccountSearch.value = this.getCOALabel(findById(this.taxAccount?.value));
         }
 
-
-        const currentTaxAccount =
-            this.taxAccount.value;
-
-
-        const currentOffsetAccount =
-            this.offsetAccount?.value;
-
-
-        const options = accounts
-            .map(
-                account => `
-
-                    <option
-                        value="${account.id}">
-
-                        ${account.account_code}
-                        -
-                        ${account.account_name}
-
-                    </option>
-
-                `
-            )
-            .join("");
-
-
-        this.taxAccount.innerHTML = `
-
-            <option value="">
-                Select Tax Account
-            </option>
-
-            ${options}
-
-        `;
-
-
-        if (this.offsetAccount) {
-
-            this.offsetAccount.innerHTML = `
-
-                <option value="">
-                    Select Offset Account
-                </option>
-
-                ${options}
-
-            `;
-
+        if (this.offsetAccountSearch) {
+            this.offsetAccountSearch.value = this.getCOALabel(findById(this.offsetAccount?.value));
         }
+    }
 
+    bindCOASearch(input, hidden, results, required = false) {
+        if (!input || !hidden || !results) return;
 
-        if (currentTaxAccount) {
+        const render = () => {
+            const keyword = String(input.value || "").trim().toLowerCase();
+            const matches = (this.coaAccounts || []).filter(account => {
+                const text = `${account.account_code || ""} ${account.account_name || ""}`.toLowerCase();
+                return !keyword || text.includes(keyword);
+            }).slice(0, 50);
 
-            this.taxAccount.value =
-                currentTaxAccount;
+            results.innerHTML = matches.length
+                ? matches.map(account => `
+                    <button type="button" class="list-group-item list-group-item-action"
+                        data-coa-id="${account.id}">
+                        <strong>${this.escapeHTML(account.account_code || "")}</strong>
+                        <span class="text-muted"> :: ${this.escapeHTML(account.account_name || "")}</span>
+                    </button>`).join("")
+                : `<div class="list-group-item text-muted">No account found.</div>`;
 
-        }
+            results.classList.remove("d-none");
+        };
 
+        input.addEventListener("focus", render);
+        input.addEventListener("input", () => {
+            hidden.value = "";
+            render();
+        });
 
-        if (
-            this.offsetAccount
-            &&
-            currentOffsetAccount
-        ) {
+        results.addEventListener("click", event => {
+            const item = event.target.closest("[data-coa-id]");
+            if (!item) return;
+            const account = (this.coaAccounts || []).find(row => String(row.id) === String(item.dataset.coaId));
+            if (!account) return;
+            hidden.value = account.id;
+            input.value = this.getCOALabel(account);
+            results.classList.add("d-none");
+        });
 
-            this.offsetAccount.value =
-                currentOffsetAccount;
+        input.addEventListener("blur", () => {
+            setTimeout(() => {
+                results.classList.add("d-none");
+                if (!hidden.value) {
+                    input.value = "";
+                } else {
+                    const account = (this.coaAccounts || []).find(row => String(row.id) === String(hidden.value));
+                    input.value = this.getCOALabel(account);
+                }
+            }, 150);
+        });
+    }
 
-        }
+    hideCOAResults() {
+        this.taxAccountResults?.classList.add("d-none");
+        this.offsetAccountResults?.classList.add("d-none");
+    }
 
+    escapeHTML(value) {
+        return String(value ?? "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
     }
 
 

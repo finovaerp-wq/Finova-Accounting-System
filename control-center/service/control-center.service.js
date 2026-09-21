@@ -1645,6 +1645,276 @@ export class ControlCenterService {
 
     /*
 ======================================================
+SUBSCRIBE AUDIT LOG REALTIME
+======================================================
+*/
+
+static subscribeAuditLogs(
+    onChange
+) {
+
+    /*
+    ==================================================
+    CALLBACK
+    ==================================================
+    */
+
+    const callback =
+        typeof onChange ===
+        "function"
+            ?
+        onChange
+            :
+        () => {};
+
+
+    /*
+    ==================================================
+    UNIQUE CHANNEL NAME
+
+    Prevent stale / duplicate channel collision when
+    Control Center is reloaded in the same browser.
+    ==================================================
+    */
+
+    const channelName =
+        `finova-control-center-audit-log-${Date.now()}`;
+
+
+    /*
+    ==================================================
+    CREATE CHANNEL
+    ==================================================
+    */
+
+    const channel =
+        supabase
+            .channel(
+                channelName
+            )
+
+
+            /*
+            ==============================================
+            AUDIT LOG DATABASE CHANGES
+            ==============================================
+            */
+
+            .on(
+                "postgres_changes",
+                {
+
+                    event:
+                        "*",
+
+                    schema:
+                        "public",
+
+                    table:
+                        "finova_audit_log"
+
+                },
+                payload => {
+
+                    /*
+                    ======================================
+                    DEBUG EVENT
+                    ======================================
+                    */
+
+                    console.log(
+                        "CONTROL CENTER AUDIT REALTIME EVENT:",
+                        {
+
+                            eventType:
+                                payload?.eventType
+                                || null,
+
+                            schema:
+                                payload?.schema
+                                || null,
+
+                            table:
+                                payload?.table
+                                || null,
+
+                            new:
+                                payload?.new
+                                || null,
+
+                            old:
+                                payload?.old
+                                || null
+
+                        }
+                    );
+
+
+                    /*
+                    ======================================
+                    REFRESH CALLBACK
+                    ======================================
+                    */
+
+                    callback(
+                        payload
+                    );
+
+                }
+            )
+
+
+            /*
+            ==============================================
+            SUBSCRIBE
+            ==============================================
+            */
+
+            .subscribe(
+                (
+                    status,
+                    error
+                ) => {
+
+                    /*
+                    ======================================
+                    CONNECTION STATUS
+                    ======================================
+                    */
+
+                    console.log(
+                        "Control Center Audit Realtime:",
+                        status
+                    );
+
+
+                    /*
+                    ======================================
+                    SUBSCRIBED
+                    ======================================
+                    */
+
+                    if (
+                        status ===
+                        "SUBSCRIBED"
+                    ) {
+
+                        console.log(
+                            "CONTROL CENTER AUDIT REALTIME READY"
+                        );
+
+                        return;
+
+                    }
+
+
+                    /*
+                    ======================================
+                    CHANNEL ERROR
+                    ======================================
+                    */
+
+                    if (
+                        status ===
+                        "CHANNEL_ERROR"
+                    ) {
+
+                        console.error(
+                            "CONTROL CENTER AUDIT REALTIME CHANNEL ERROR:",
+                            error
+                            || null
+                        );
+
+                        return;
+
+                    }
+
+
+                    /*
+                    ======================================
+                    TIMED OUT
+                    ======================================
+                    */
+
+                    if (
+                        status ===
+                        "TIMED_OUT"
+                    ) {
+
+                        console.error(
+                            "CONTROL CENTER AUDIT REALTIME TIMED OUT:",
+                            error
+                            || null
+                        );
+
+                        return;
+
+                    }
+
+
+                    /*
+                    ======================================
+                    CLOSED
+                    ======================================
+                    */
+
+                    if (
+                        status ===
+                        "CLOSED"
+                    ) {
+
+                        console.warn(
+                            "CONTROL CENTER AUDIT REALTIME CLOSED"
+                        );
+
+                    }
+
+                }
+            );
+
+
+    /*
+    ==================================================
+    RETURN CHANNEL
+
+    Required by unsubscribeAuditLogs().
+    ==================================================
+    */
+
+    return channel;
+
+}
+
+
+    /*
+    ======================================================
+    UNSUBSCRIBE AUDIT LOG REALTIME
+    ======================================================
+    */
+
+    static async unsubscribeAuditLogs(
+        channel
+    ) {
+
+        if (
+            !channel
+        ) {
+
+            return;
+
+        }
+
+
+        await supabase
+            .removeChannel(
+                channel
+            );
+
+    }
+
+
+    /*
+======================================================
 GET AUDIT LOGS
 ======================================================
 */
@@ -1688,37 +1958,27 @@ static async getAuditLogs(
     } =
         await supabase
 
-            .from(
-                "finova_audit_log"
-            )
+            /*
+            ==================================================
+            CONTROL CENTER AUDIT RPC
 
-            .select(`
-                id,
-                company_id,
-                user_uid,
-                module,
-                table_name,
-                record_id,
-                document_no,
-                action,
-                old_data,
-                new_data,
-                source_module,
-                source_id,
-                source_no,
-                created_at
-            `)
+            IMPORTANT:
+            finova_audit_log RLS is intentionally scoped to
+            finova_effective_company_id(). Control Center is a
+            Super Admin workspace and may have no tenant Company
+            Context selected, therefore a direct table SELECT can
+            legitimately return zero rows.
 
-            .order(
-                "created_at",
+            Use the dedicated Super Admin RPC instead.
+            ==================================================
+            */
+
+            .rpc(
+                "finova_admin_list_audit_logs",
                 {
-                    ascending:
-                        false
+                    p_limit:
+                        safeLimit
                 }
-            )
-
-            .limit(
-                safeLimit
             );
 
 

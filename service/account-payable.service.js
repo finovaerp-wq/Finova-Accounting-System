@@ -939,171 +939,79 @@ async getById(id) {
 }
    /*
 ======================================================
-COMPLETE ACCOUNT PAYABLE
-Draft → Complete
-WITH ACCOUNTING PERIOD LOCK
+ATOMIC COMPLETE ACCOUNT PAYABLE
+Draft → Complete + GL Journal in one DB transaction
+Migration 034
 ======================================================
 */
 
-async completeInvoice(id) {
+async completeInvoiceAtomic(id, journalLines = []) {
 
     try {
 
-        /*
-        ==================================================
-        VALIDATE ID
-        ==================================================
-        */
-
         if (!id) {
-
             throw new Error(
                 "Account Payable ID is required."
             );
-
         }
-
-
-        /*
-        ==================================================
-        GET EXISTING ACCOUNT PAYABLE
-        ==================================================
-        */
-
-        const result =
-            await this.getById(
-                id
-            );
-
-
-        const invoice =
-            result?.header
-            || null;
-
-
-        if (!invoice) {
-
-            throw new Error(
-                "Account Payable not found."
-            );
-
-        }
-
-
-        /*
-        ==================================================
-        VALIDATE STATUS
-        ==================================================
-        */
 
         if (
-            invoice.status !==
-            this.STATUS.DRAFT
+            !Array.isArray(journalLines)
+            || journalLines.length === 0
         ) {
-
             throw new Error(
-                "Only Draft Account Payable can be completed."
+                "GL Journal detail cannot be empty."
             );
-
         }
 
+        const payload =
+            journalLines.map(line => ({
 
-        /*
-        ==================================================
-        ACCOUNTING PERIOD LOCK
-        DATE RECEIVED = ACCOUNTING DATE
-        ==================================================
-        */
+                debit_account_id:
+                    Number(line.debit_account_id),
 
-        await this.validateAccountingPeriod(
-            invoice.date_received
-        );
+                credit_account_id:
+                    Number(line.credit_account_id),
 
+                business_partner_id:
+                    line.business_partner_id
+                        ? Number(line.business_partner_id)
+                        : null,
 
-        /*
-        ==================================================
-        UPDATE STATUS
-        Draft → Complete
-        ==================================================
-        */
+                description:
+                    line.description || "",
 
-        const {
+                amount:
+                    Number(line.amount || 0)
 
-            data,
-            error
+            }));
 
-        } = await supabase
-
-            .from(
-                this.table
-            )
-
-            .update({
-
-                status:
-                    this.STATUS.COMPLETE
-
-            })
-
-            .eq(
-                "id",
-                id
-            )
-
-            .eq(
-                "status",
-                this.STATUS.DRAFT
-            )
-
-            .select();
-
-
-        /*
-        ==================================================
-        DATABASE ERROR
-        ==================================================
-        */
+        const { data, error } =
+            await supabase.rpc(
+                "finova_complete_account_payable",
+                {
+                    p_account_payable_id: id,
+                    p_journal_lines: payload
+                }
+            );
 
         if (error) {
-
             throw error;
-
         }
 
-
-        /*
-        ==================================================
-        VALIDATE RESULT
-        ==================================================
-        */
-
-        if (
-            !Array.isArray(data)
-            ||
-            data.length === 0
-        ) {
-
+        if (!data?.gl_journal_id) {
             throw new Error(
-                "Account Payable could not be completed. The document is no longer in Draft status."
+                "Atomic AP completion did not return a GL Journal ID."
             );
-
         }
 
-
-        /*
-        ==================================================
-        RETURN
-        ==================================================
-        */
-
-        return data[0];
+        return data;
 
     }
-
     catch (error) {
 
         console.error(
-            "AccountPayableService.completeInvoice:",
+            "AccountPayableService.completeInvoiceAtomic:",
             error
         );
 
@@ -1112,6 +1020,67 @@ async completeInvoice(id) {
     }
 
 }
+
+
+/*
+======================================================
+REPAIR LEGACY COMPLETE AP WITHOUT GL
+Migration 036
+======================================================
+*/
+
+async repairCompleteWithoutGL(id) {
+
+    try {
+
+        if (!id) {
+            throw new Error(
+                "Account Payable ID is required."
+            );
+        }
+
+        const { data, error } =
+            await supabase.rpc(
+                "finova_repair_ap_complete_without_gl",
+                {
+                    p_account_payable_id: id
+                }
+            );
+
+        if (error) {
+            throw error;
+        }
+
+        return data || null;
+
+    }
+    catch (error) {
+
+        console.error(
+            "AccountPayableService.repairCompleteWithoutGL:",
+            error
+        );
+
+        throw error;
+    }
+}
+
+
+/*
+======================================================
+LEGACY COMPLETE ACCOUNT PAYABLE
+Kept temporarily for compatibility. New UI uses
+completeInvoiceAtomic().
+======================================================
+*/
+
+async completeInvoice(id) {
+
+    throw new Error(
+        "Legacy AP completion is disabled. Use completeInvoiceAtomic()."
+    );
+}
+
 /*
 ======================================================
 LINK GL JOURNAL
@@ -5965,6 +5934,81 @@ async getOutstandingInvoicesByVendor(
 ======================================================
 CREATE AP PAYMENT BATCH
 BULK PAYMENT HEADER
+======================================================
+*/
+
+async savePaymentBatchAtomic(payment, allocations = []) {
+
+    try {
+
+        if (!payment) {
+            throw new Error("AP Payment header is required.");
+        }
+
+        if (!Array.isArray(allocations) || allocations.length === 0) {
+            throw new Error("At least one AP Payment allocation is required.");
+        }
+
+        await this.validatePaymentAccountingPeriod(payment.payment_date);
+
+        const normalizedAllocations = allocations.map(allocation => ({
+            account_payable_id: String(allocation?.account_payable_id || "").trim(),
+            payment_amount: Number(allocation?.payment_amount || 0)
+        }));
+
+        for (const allocation of normalizedAllocations) {
+            if (!allocation.account_payable_id) {
+                throw new Error("Account Payable ID is required in allocation.");
+            }
+            if (!Number.isFinite(allocation.payment_amount) || allocation.payment_amount <= 0) {
+                throw new Error("Payment Amount must be greater than 0.");
+            }
+        }
+
+        const { data, error } = await supabase.rpc(
+            "finova_save_ap_payment_atomic",
+            {
+                p_payment: {
+                    payment_no: String(payment.payment_no || "").trim(),
+                    payment_date: String(payment.payment_date || "").trim(),
+                    vendor_id: Number(payment.vendor_id || 0),
+                    bank_account_id: Number(payment.bank_account_id || 0),
+                    reference_no: payment.reference_no || null,
+                    description: payment.description || null
+                },
+                p_allocations: normalizedAllocations
+            }
+        );
+
+        if (error) {
+            console.error("AccountPayableService.savePaymentBatchAtomic:", {
+                message: error?.message,
+                details: error?.details,
+                hint: error?.hint,
+                code: error?.code,
+                raw: error
+            });
+            throw error;
+        }
+
+        if (!data?.batch?.id || !data?.journal?.id) {
+            throw new Error("Atomic AP Payment did not return Batch and GL Journal IDs.");
+        }
+
+        return data;
+
+    }
+    catch (error) {
+        console.error("AccountPayableService.savePaymentBatchAtomic:", error);
+        throw error;
+    }
+}
+
+/*
+======================================================
+LEGACY PAYMENT METHODS BELOW
+Kept for existing View/Void/trace compatibility.
+New Save Payment flow uses savePaymentBatchAtomic().
 ======================================================
 */
 

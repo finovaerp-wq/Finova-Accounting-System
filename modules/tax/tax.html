@@ -619,16 +619,21 @@ Version : 2.1.0
 
                             </label>
 
-                            <select
-                                id="tax-form-account"
-                                class="form-select"
-                                required>
-
-                                <option value="">
-                                    Select Tax Account
-                                </option>
-
-                            </select>
+                            <div class="position-relative">
+                                <input
+                                    type="text"
+                                    id="tax-form-account-search"
+                                    class="form-control"
+                                    placeholder="Type account code or name..."
+                                    autocomplete="off"
+                                    required>
+                                <input type="hidden" id="tax-form-account">
+                                <div
+                                    id="tax-form-account-results"
+                                    class="list-group position-absolute w-100 shadow-sm d-none"
+                                    style="z-index: 1060; max-height: 220px; overflow-y: auto;">
+                                </div>
+                            </div>
 
                         </div>
 
@@ -646,15 +651,20 @@ Version : 2.1.0
 
 </label>
 
-<select
-    id="tax-form-offset-account"
-    class="form-select finova-control">
-
-    <option value="">
-        Select Offset Account
-    </option>
-
-</select>
+<div class="position-relative">
+    <input
+        type="text"
+        id="tax-form-offset-account-search"
+        class="form-control finova-control"
+        placeholder="Type account code or name..."
+        autocomplete="off">
+    <input type="hidden" id="tax-form-offset-account">
+    <div
+        id="tax-form-offset-account-results"
+        class="list-group position-absolute w-100 shadow-sm d-none"
+        style="z-index: 1060; max-height: 220px; overflow-y: auto;">
+    </div>
+</div>
                                
 
                         </div>

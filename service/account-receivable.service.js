@@ -3057,6 +3057,28 @@ async update(
 
         /*
         ==================================================
+        STATUS GUARD
+
+        ACCOUNT RECEIVABLE MAY ONLY BE EDITED WHILE DRAFT.
+        THIS RULE IS ENFORCED IN THE SERVICE LAYER SO IT
+        CANNOT BE BYPASSED BY CALLING update() DIRECTLY.
+        ==================================================
+        */
+
+        const currentStatus =
+            String(currentHeader.status || "Draft")
+                .trim()
+                .toLowerCase();
+
+        if (currentStatus !== "draft") {
+            throw new Error(
+                "Only Draft Account Receivable can be edited."
+            );
+        }
+
+
+        /*
+        ==================================================
         OLD INVOICE DATE
         ==================================================
         */
@@ -4290,7 +4312,9 @@ async delete(id) {
         /*
         ==================================================
         STATUS
-        DRAFT / VOID ONLY
+        DRAFT ONLY
+
+        VOID MUST REMAIN AS AUDIT TRAIL
         ==================================================
         */
 
@@ -4306,13 +4330,11 @@ async delete(id) {
 
         if (
             status !== "DRAFT"
-            &&
-            status !== "VOID"
         ) {
 
             const validationError =
                 new Error(
-                    "Only Draft or Void Account Receivable can be deleted."
+                    "Only Draft Account Receivable can be deleted."
                 );
 
 
@@ -6084,12 +6106,35 @@ async recalculateActivePaymentStatus(id) {
                     .trim()
                     .toLowerCase();
 
+                const sourceModule =
+                    String(journal?.source_module || "")
+                        .trim()
+                        .toUpperCase();
+
+                const sourceDocumentType =
+                    String(journal?.source_document_type || "")
+                        .trim()
+                        .toUpperCase();
+
+                const sourceDocumentId =
+                    String(journal?.source_document_id || "");
+
                 return (
                     Boolean(payment?.gl_journal_id)
                     &&
                     Boolean(journal?.id)
                     &&
-                    journalStatus !== "void"
+                    (
+                        journalStatus === "draft"
+                        ||
+                        journalStatus === "posted"
+                    )
+                    &&
+                    sourceModule === "AR"
+                    &&
+                    sourceDocumentType === "AR_PAYMENT"
+                    &&
+                    sourceDocumentId === String(id)
                 );
 
             });
@@ -6121,7 +6166,7 @@ async recalculateActivePaymentStatus(id) {
         );
 
     let status =
-        "Posted";
+        "Complete";
 
     if (
         activePaid > 0

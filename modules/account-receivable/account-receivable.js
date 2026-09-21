@@ -3097,10 +3097,161 @@ async saveBulkARPayment() {
         return;
     }
 
+    /*
+    ==================================================
+    SYNCHRONIZE PAYMENT SELECTION BEFORE SAVE
+
+    Rebuild selection from the currently checked rows.
+    This prevents stale Map state from producing a false
+    "Select at least one AR transaction" validation.
+    ==================================================
+    */
+
+    const paymentBody =
+        document.getElementById(
+            "ar-payment-invoice-body"
+        );
+
+
+    const checkedInvoices =
+        paymentBody
+            ?.querySelectorAll(
+                ".ar-payment-invoice-check:checked"
+            )
+        || [];
+
+
+    checkedInvoices.forEach(
+        checkbox => {
+
+            const arId =
+                String(
+                    checkbox?.dataset?.arId
+                    || ""
+                );
+
+            if (
+                !arId
+                ||
+                this.arBulkSelectedPayments.has(
+                    arId
+                )
+            ) {
+
+                return;
+
+            }
+
+            const invoice =
+                this.arBulkPaymentInvoices
+                    .find(
+                        item =>
+                            String(
+                                item?.id
+                                || ""
+                            )
+                            === arId
+                    );
+
+            if (!invoice) {
+                return;
+            }
+
+            const amountInput =
+                paymentBody
+                    ?.querySelector(
+                        `.ar-payment-allocation[data-ar-id="${arId}"]`
+                    );
+
+            const enteredAmount =
+                this.parseNumber(
+                    amountInput?.value
+                    || 0
+                );
+
+            const outstanding =
+                Math.max(
+                    0,
+                    Number(
+                        invoice?.payment_outstanding
+                        || 0
+                    )
+                );
+
+            this.arBulkSelectedPayments.set(
+                arId,
+                {
+                    invoice,
+                    amount:
+                        enteredAmount > 0
+                            ? Math.min(
+                                enteredAmount,
+                                outstanding
+                            )
+                            : outstanding
+                }
+            );
+
+        }
+    );
+
+
+    /*
+    ==================================================
+    CURRENT AR FALLBACK
+
+    When Payment is opened from an AR row, that row must
+    remain selected even if UI re-rendering replaced the
+    original checkbox node.
+    ==================================================
+    */
+
+    if (
+        this.arBulkSelectedPayments.size === 0
+        &&
+        this.currentPaymentARId
+    ) {
+
+        const currentInvoice =
+            this.arBulkPaymentInvoices
+                .find(
+                    item =>
+                        String(
+                            item?.id
+                            || ""
+                        )
+                        ===
+                        String(
+                            this.currentPaymentARId
+                        )
+                );
+
+        if (
+            currentInvoice
+            &&
+            Number(
+                currentInvoice?.payment_outstanding
+                || 0
+            ) > 0
+        ) {
+
+            this.toggleBulkARInvoice(
+                String(
+                    currentInvoice.id
+                ),
+                true
+            );
+
+        }
+
+    }
+
+
     const selected =
         Array.from(
             this.arBulkSelectedPayments.values()
         );
+
 
     if (selected.length === 0) {
         this.showError(
@@ -12739,519 +12890,187 @@ renderActionButtons(
 
     /*
     ==================================================
-    ID
+    ACCOUNT RECEIVABLE ACTION
+    SAME LIFECYCLE AS ACCOUNT PAYABLE
+
+    Draft        : Edit | Delete | Complete
+    Complete     : View | Print | Payment (GL Posted only)
+    Partial Paid : View | Print | Payment (GL Posted only)
+    Paid         : View | Print
+    Posted       : View | Print (legacy)
+    Void         : View | Print | Delete
+
+    IMPORTANT:
+    Action is controlled by AR STATUS, not by existence
+    of gl_journal_id. A Complete AR must never show Delete
+    merely because its GL relation is missing/not loaded.
     ==================================================
     */
 
-    const id =
-        invoice?.id;
+    const id = invoice?.id;
 
-
-    if (
-        !id
-    ) {
-
+    if (!id) {
         return "";
-
     }
 
+    const rawStatus = String(
+        invoice?.status || "Draft"
+    ).trim();
 
-    /*
-    ==================================================
-    STATUS
-    ==================================================
-    */
+    const statusKey = rawStatus.toLowerCase();
 
     const status =
-        String(
-            invoice?.status
-            ||
-            ""
-        )
-        .trim()
-        .toLowerCase();
+        statusKey === "partial paid"
+            ? "Partial Paid"
+            : statusKey === "complete"
+                ? "Complete"
+                : statusKey === "paid"
+                    ? "Paid"
+                    : statusKey === "posted"
+                        ? "Posted"
+                        : statusKey === "void"
+                            ? "Void"
+                            : statusKey === "draft"
+                                ? "Draft"
+                                : rawStatus;
 
+    const glJournal =
+        invoice?.trx_gl_journal || null;
 
-    /*
-    ==================================================
-    GL JOURNAL ID
+    const glJournalStatus = String(
+        glJournal?.status || ""
+    ).trim();
 
-    gl_journal_id EXISTS
-    =
-    ACCOUNT RECEIVABLE ALREADY COMPLETED
-    ==================================================
-    */
+    const isJournalPosted =
+        glJournalStatus === "Posted";
 
-    const glJournalId =
-        invoice?.gl_journal_id
-        ||
+    /* DRAFT */
+    if (status === "Draft") {
+        return `
+            <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-outline-primary"
+                    title="Edit" data-action="edit" data-id="${id}">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
+                <button type="button" class="btn btn-outline-danger"
+                    title="Delete" data-action="delete" data-id="${id}">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+                <button type="button" class="btn btn-outline-success"
+                    title="Complete" data-action="complete" data-id="${id}">
+                    <i class="fa-solid fa-check"></i>
+                </button>
+            </div>
+        `;
+    }
+
+    /* COMPLETE */
+    if (status === "Complete") {
+        return `
+            <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-outline-secondary"
+                    title="View" data-action="view" data-id="${id}">
+                    <i class="fa-regular fa-eye"></i>
+                </button>
+                <button type="button" class="btn btn-outline-dark"
+                    title="Print" data-action="print" data-id="${id}">
+                    <i class="fa-solid fa-print"></i>
+                </button>
+                ${
+                    isJournalPosted
+                        ? `
+                            <button type="button" class="btn btn-outline-success"
+                                title="Receive Payment" data-action="payment" data-id="${id}">
+                                <i class="fa-solid fa-money-bill-transfer"></i>
+                            </button>
+                        `
+                        : ""
+                }
+            </div>
+        `;
+    }
+
+    /* PARTIAL PAID */
+    if (status === "Partial Paid") {
+        return `
+            <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-outline-secondary"
+                    title="View" data-action="view" data-id="${id}">
+                    <i class="fa-regular fa-eye"></i>
+                </button>
+                <button type="button" class="btn btn-outline-dark"
+                    title="Print" data-action="print" data-id="${id}">
+                    <i class="fa-solid fa-print"></i>
+                </button>
+                ${
+                    isJournalPosted
+                        ? `
+                            <button type="button" class="btn btn-outline-success"
+                                title="Receive Payment" data-action="payment" data-id="${id}">
+                                <i class="fa-solid fa-money-bill-transfer"></i>
+                            </button>
+                        `
+                        : ""
+                }
+            </div>
+        `;
+    }
+
+    /* PAID */
+    if (status === "Paid") {
+        return `
+            <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-outline-secondary"
+                    title="View" data-action="view" data-id="${id}">
+                    <i class="fa-regular fa-eye"></i>
+                </button>
+                <button type="button" class="btn btn-outline-dark"
+                    title="Print" data-action="print" data-id="${id}">
+                    <i class="fa-solid fa-print"></i>
+                </button>
+            </div>
+        `;
+    }
+
+    /* LEGACY POSTED */
+    if (status === "Posted") {
+        return `
+            <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-outline-secondary"
+                    title="View" data-action="view" data-id="${id}">
+                    <i class="fa-regular fa-eye"></i>
+                </button>
+                <button type="button" class="btn btn-outline-dark"
+                    title="Print" data-action="print" data-id="${id}">
+                    <i class="fa-solid fa-print"></i>
+                </button>
+            </div>
+        `;
+    }
+
+    /* VOID - SAME AS AP: VIEW / PRINT ONLY */
+    if (status === "Void") {
+        return `
+            <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-outline-secondary"
+                    title="View" data-action="view" data-id="${id}">
+                    <i class="fa-regular fa-eye"></i>
+                </button>
+                <button type="button" class="btn btn-outline-dark"
+                    title="Print" data-action="print" data-id="${id}">
+                    <i class="fa-solid fa-print"></i>
+                </button>
+            </div>
+        `;
+    }
+
+    console.warn(
+        "AR ACTION - UNKNOWN STATUS:",
+        status,
         invoice
-            ?.trx_gl_journal
-            ?.id
-        ||
-        null;
+    );
 
-
-    const hasJournal =
-        Boolean(
-            glJournalId
-        );
-
-
-    /*
-    ==================================================
-    GL JOURNAL STATUS
-    ==================================================
-    */
-
-    const journalStatus =
-        String(
-            invoice
-                ?.trx_gl_journal
-                ?.status
-            ||
-            ""
-        )
-        .trim()
-        .toLowerCase();
-
-
-    /*
-    ==================================================
-    JOURNAL POSTED
-    ==================================================
-    */
-
-    const journalPosted =
-        hasJournal
-        &&
-        journalStatus ===
-        "posted";
-
-
-    /*
-    ==================================================
-    AMOUNT
-    ==================================================
-    */
-
-    const totalAmount =
-        Number(
-            invoice?.total_amount
-            ||
-            0
-        );
-
-
-    const paidAmount =
-        Number(
-            invoice?.paid_amount
-            ||
-            0
-        );
-
-
-    const outstandingAmount =
-        Number(
-            invoice?.outstanding_amount
-            ??
-            (
-                totalAmount
-                -
-                paidAmount
-            )
-        );
-
-
-    /*
-    ==================================================
-    PAYMENT ALLOWED
-
-    PAYMENT ONLY APPEARS WHEN:
-    - JOURNAL EXISTS
-    - JOURNAL POSTED
-    - OUTSTANDING > 0
-    - NOT PAID
-    - NOT VOID
-    ==================================================
-    */
-
-    const canPayment =
-        hasJournal
-        &&
-        journalPosted
-        &&
-        outstandingAmount > 0
-        &&
-        status !== "paid"
-        &&
-        status !== "void";
-
-
-    /*
-    ==================================================
-    PAID
-
-    VIEW
-    PRINT
-    ==================================================
-    */
-
-    if (
-        status ===
-        "paid"
-    ) {
-
-        return `
-
-            <div
-                class="
-                    btn-group
-                    btn-group-sm
-                "
-                role="group"
-            >
-
-                <!-- VIEW -->
-
-                <button
-                    type="button"
-                    class="btn btn-outline-secondary"
-                    title="View"
-                    data-action="view"
-                    data-id="${id}"
-                >
-
-                    <i
-                        class="
-                            fa-regular
-                            fa-eye
-                        "
-                    >
-                    </i>
-
-                </button>
-
-
-                <!-- PRINT -->
-
-                <button
-                    type="button"
-                    class="btn btn-outline-dark"
-                    title="Print"
-                    data-action="print"
-                    data-id="${id}"
-                >
-
-                    <i
-                        class="
-                            fa-solid
-                            fa-print
-                        "
-                    >
-                    </i>
-
-                </button>
-
-
-            </div>
-
-        `;
-
-    }
-
-
-    /*
-==================================================
-VOID
-
-SAME AS ACCOUNT PAYABLE
-
-VIEW
-PRINT
-DELETE
-==================================================
-*/
-
-if (
-    status ===
-    "void"
-) {
-
-    return `
-
-        <div
-            class="
-                btn-group
-                btn-group-sm
-            "
-            role="group"
-        >
-
-            <!-- VIEW -->
-
-            <button
-                type="button"
-                class="btn btn-outline-secondary"
-                title="View"
-                data-action="view"
-                data-id="${id}"
-            >
-
-                <i
-                    class="
-                        fa-regular
-                        fa-eye
-                    "
-                >
-                </i>
-
-            </button>
-
-
-            <!-- PRINT -->
-
-            <button
-                type="button"
-                class="btn btn-outline-dark"
-                title="Print"
-                data-action="print"
-                data-id="${id}"
-            >
-
-                <i
-                    class="
-                        fa-solid
-                        fa-print
-                    "
-                >
-                </i>
-
-            </button>
-
-
-            <!-- DELETE -->
-
-            <button
-                type="button"
-                class="btn btn-outline-danger"
-                title="Delete"
-                data-action="delete"
-                data-id="${id}"
-            >
-
-                <i
-                    class="
-                        fa-solid
-                        fa-trash
-                    "
-                >
-                </i>
-
-            </button>
-
-
-        </div>
-    `;
-
-}
-
-
-    /*
-    ==================================================
-    NOT COMPLETED
-
-    NO GL JOURNAL
-
-    EDIT
-    DELETE
-    COMPLETE
-    ==================================================
-    */
-
-    if (
-        !hasJournal
-    ) {
-
-        return `
-
-            <div
-                class="
-                    btn-group
-                    btn-group-sm
-                "
-                role="group"
-            >
-
-                <!-- EDIT -->
-
-                <button
-                    type="button"
-                    class="btn btn-outline-primary"
-                    title="Edit"
-                    data-action="edit"
-                    data-id="${id}"
-                >
-
-                    <i
-                        class="
-                            fa-solid
-                            fa-pen
-                        "
-                    >
-                    </i>
-
-                </button>
-
-
-                <!-- DELETE -->
-
-                <button
-                    type="button"
-                    class="btn btn-outline-danger"
-                    title="Delete"
-                    data-action="delete"
-                    data-id="${id}"
-                >
-
-                    <i
-                        class="
-                            fa-solid
-                            fa-trash
-                        "
-                    >
-                    </i>
-
-                </button>
-
-
-                <!-- COMPLETE -->
-
-                <button
-                    type="button"
-                    class="btn btn-outline-success"
-                    title="Complete"
-                    data-action="complete"
-                    data-id="${id}"
-                >
-
-                    <i
-                        class="
-                            fa-solid
-                            fa-check
-                        "
-                    >
-                    </i>
-
-                </button>
-
-
-            </div>
-
-        `;
-
-    }
-
-
-    /*
-    ==================================================
-    COMPLETED
-
-    JOURNAL EXISTS
-
-    VIEW
-    PRINT
-    PAYMENT ONLY IF POSTED
-    ==================================================
-    */
-
-    return `
-
-        <div
-            class="
-                btn-group
-                btn-group-sm
-            "
-            role="group"
-        >
-
-            <!-- VIEW -->
-
-            <button
-                type="button"
-                class="btn btn-outline-secondary"
-                title="View"
-                data-action="view"
-                data-id="${id}"
-            >
-
-                <i
-                    class="
-                        fa-regular
-                        fa-eye
-                    "
-                >
-                </i>
-
-            </button>
-
-
-            <!-- PRINT -->
-
-            <button
-                type="button"
-                class="btn btn-outline-dark"
-                title="Print"
-                data-action="print"
-                data-id="${id}"
-            >
-
-                <i
-                    class="
-                        fa-solid
-                        fa-print
-                    "
-                >
-                </i>
-
-            </button>
-
-
-            <!-- RECEIVE PAYMENT -->
-
-            ${
-                canPayment
-
-                    ? `
-
-                        <button
-                            type="button"
-                            class="btn btn-outline-success"
-                            title="Receive Payment"
-                            data-action="payment"
-                            data-id="${id}"
-                        >
-
-                            <i
-                                class="
-                                    fa-solid
-                                    fa-money-bill-transfer
-                                "
-                            >
-                            </i>
-
-                        </button>
-
-                    `
-
-                    : ""
-            }
-
-
-        </div>
-
-    `;
-
+    return "";
 }
 
 /*
@@ -20559,6 +20378,15 @@ RENDER DIRECTLY
 */
 
 if (
+    typeof this.render
+    ===
+    "function"
+) {
+
+    this.render();
+
+}
+else if (
     typeof this.renderTable
     ===
     "function"

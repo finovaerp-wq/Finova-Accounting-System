@@ -18694,27 +18694,65 @@ if (
     currentStatus === "VOID"
 ) {
 
-    const activeAllocationBeforePost =
+    /*
+    ==============================================
+    ATOMIC AP PAYMENT COMPATIBILITY
+
+    Allocation created by the atomic AP Payment
+    flow is already active while its GL Journal
+    is still Draft.
+
+    VALID:
+    allocation.gl_journal_id === current journal
+
+    INVALID / DUPLICATE:
+    allocation.gl_journal_id points to another
+    GL Journal.
+    ==============================================
+    */
+
+    const conflictingAllocationBeforePost =
         apPaymentBatchAllocations
             .find(
-                allocation =>
-                    Boolean(
+                allocation => {
+
+                    const allocationJournalId =
                         allocation?.gl_journal_id
-                    )
+                        || null;
+
+                    if (
+                        !allocationJournalId
+                    ) {
+
+                        return false;
+
+                    }
+
+                    return (
+                        String(
+                            allocationJournalId
+                        )
+                        !==
+                        String(
+                            id
+                        )
+                    );
+
+                }
             );
 
 
     if (
-        activeAllocationBeforePost
+        conflictingAllocationBeforePost
     ) {
 
         throw new Error(
 
             currentStatus === "VOID"
 
-                ? "Void AP Payment Batch still contains an active allocation. Repost was cancelled to prevent duplicate payment."
+                ? "Void AP Payment Batch contains an allocation linked to another GL Journal. Repost was cancelled to prevent duplicate payment."
 
-                : "Draft AP Payment Batch contains an allocation that is already active. Posting was cancelled to prevent duplicate payment."
+                : "AP Payment Batch contains an allocation linked to another GL Journal. Posting was cancelled to prevent duplicate payment."
 
         );
 
