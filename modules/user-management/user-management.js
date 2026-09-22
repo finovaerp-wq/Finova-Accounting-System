@@ -145,6 +145,7 @@ export class UserManagement {
 
 }
 
+
     /*
     ==========================================================
     INITIALIZE
@@ -1596,8 +1597,9 @@ applyAccessUI() {
                     <span
                         class="
                             user-role-badge
-                            ${role.toLowerCase()}
-                        ">
+                            user-role-${role.toLowerCase()}
+                        "
+                    >
 
                         ${role}
 
@@ -1614,14 +1616,15 @@ applyAccessUI() {
                     <span
                         class="
                             user-status-badge
-                            ${
+                            user-status-${
                                 active
                                     ?
                                     "active"
                                     :
                                     "inactive"
                             }
-                        ">
+                        "
+                    >
 
                         ${
                             active
@@ -1708,12 +1711,13 @@ applyAccessUI() {
                     ">
 
                     <button
-                        type="button"
-                        class="
-                            btn
-                            btn-outline-secondary
-                            btn-sm
-                        "
+                    type="button"
+                    class="
+                        btn
+                        btn-outline-secondary
+                        btn-sm
+                        user-action-btn
+                    "
                         title="View"
                         data-action="view"
                         data-uid="${uid}">
@@ -1763,6 +1767,7 @@ applyAccessUI() {
                         btn
                         btn-outline-secondary
                         btn-sm
+                        user-action-btn
                     "
                     title="View"
                     data-action="view"
@@ -1786,6 +1791,7 @@ applyAccessUI() {
                         btn
                         btn-outline-primary
                         btn-sm
+                        user-action-btn
                     "
                     title="Edit"
                     data-action="edit"
@@ -1809,6 +1815,7 @@ applyAccessUI() {
                         btn
                         btn-outline-warning
                         btn-sm
+                        user-action-btn
                     "
                     title="Reset Password"
                     data-action="reset-password"
@@ -1832,6 +1839,7 @@ applyAccessUI() {
                         btn
                         btn-outline-danger
                         btn-sm
+                        user-action-btn
                     "
                     title="${
                         isCurrentUser

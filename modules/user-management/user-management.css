@@ -373,7 +373,7 @@ td .fw-semibold {
 ========================================================== */
 
 .user-management-table-card
-.user-col-no {
+.um-col-no {
 
     width: 64px;
 
@@ -385,7 +385,7 @@ td .fw-semibold {
 
 
 .user-management-table-card
-.user-col-name {
+.um-col-name {
 
     min-width: 260px;
 
@@ -393,7 +393,7 @@ td .fw-semibold {
 
 
 .user-management-table-card
-.user-col-email {
+.um-col-email {
 
     min-width: 300px;
 
@@ -401,7 +401,7 @@ td .fw-semibold {
 
 
 .user-management-table-card
-.user-col-role {
+.um-col-role {
 
     width: 120px;
 
@@ -413,7 +413,7 @@ td .fw-semibold {
 
 
 .user-management-table-card
-.user-col-status {
+.um-col-status {
 
     width: 120px;
 
@@ -425,7 +425,7 @@ td .fw-semibold {
 
 
 .user-management-table-card
-.user-col-updated {
+.um-col-updated {
 
     width: 165px;
 
@@ -437,7 +437,7 @@ td .fw-semibold {
 
 
 .user-management-table-card
-.user-col-action {
+.um-col-action {
 
     width: 150px;
 

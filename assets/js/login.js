@@ -324,6 +324,127 @@ async redirectAuthenticatedUser() {
     );
 
 }
+/*
+==========================================================
+VALIDATE FINOVA ACCOUNT STATUS
+==========================================================
+*/
+
+async validateFinovaAccountStatus() {
+
+    /*
+    ======================================================
+    GET AUTH USER
+    ======================================================
+    */
+
+    const {
+        data: authData,
+        error: authError
+    } = await supabase.auth.getUser();
+
+
+    if (
+        authError
+    ) {
+
+        throw authError;
+
+    }
+
+
+    const authUser =
+        authData?.user;
+
+
+    if (
+        !authUser
+    ) {
+
+        throw new Error(
+            "Authenticated user was not found."
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    CHECK FINOVA PROFILE
+    ======================================================
+    */
+
+    const {
+        data: profile,
+        error: profileError
+    } = await supabase
+
+        .from("mst_users")
+
+        .select(
+            "user_uid, full_name, email, role, status"
+        )
+
+        .eq(
+            "user_uid",
+            authUser.id
+        )
+
+        .maybeSingle();
+
+
+    if (
+        profileError
+    ) {
+
+        await supabase.auth.signOut();
+
+        throw profileError;
+
+    }
+
+
+    /*
+    ======================================================
+    PROFILE NOT FOUND
+    ======================================================
+    */
+
+    if (
+        !profile
+    ) {
+
+        await supabase.auth.signOut();
+
+        throw new Error(
+            "FINOVA user profile was not found."
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    ACTIVE STATUS ONLY
+    ======================================================
+    */
+
+    if (
+        profile.status !== true
+    ) {
+
+        await supabase.auth.signOut();
+
+        throw new Error(
+            "Your FINOVA account is inactive. Please contact the administrator."
+        );
+
+    }
+
+
+    return true;
+
+}
         /*
     ======================================================
     LOGIN
@@ -412,6 +533,8 @@ async redirectAuthenticatedUser() {
 
             );
 
+            await this.validateFinovaAccountStatus();
+
             /*
             ==========================================
             REMEMBER EMAIL
@@ -473,33 +596,42 @@ await this.redirectAuthenticatedUser();
         }
 
     }
-        /*
-    ======================================================
-    CHECK SESSION
-    ======================================================
-    */
+/*
+======================================================
+CHECK SESSION
+======================================================
+*/
 
-    async checkSession() {
+async checkSession() {
+
+    try {
 
         /*
         ==============================================
-        CHECK LOGIN SESSION
+        CHECK AUTH + FINOVA STATUS
         ==============================================
         */
 
         const authenticated =
+            await AuthService.initialize();
 
-            await AuthService.isAuthenticated();
+
+        /*
+        ==============================================
+        AUTHENTICATED
+        ==============================================
+        */
 
         if (
-    authenticated
-) {
+            authenticated
+        ) {
 
-    await this.redirectAuthenticatedUser();
+            await this.redirectAuthenticatedUser();
 
-    return;
+            return;
 
-}
+        }
+
 
         /*
         ==============================================
@@ -508,28 +640,50 @@ await this.redirectAuthenticatedUser();
         */
 
         const remember =
-
             AuthService.getRememberEmail();
 
+
         if (
-
             !remember
-
         ) {
 
             return;
 
         }
 
-        this.email.value =
 
+        this.email.value =
             remember;
 
-        this.rememberMe.checked =
 
+        this.rememberMe.checked =
             true;
 
     }
+
+    catch (
+        error
+    ) {
+
+        console.error(
+            "FINOVA LOGIN SESSION CHECK ERROR :",
+            error
+        );
+
+
+        /*
+        ==============================================
+        INACTIVE / INVALID SESSION
+        ==============================================
+        */
+
+        await supabase.auth.signOut();
+
+        return;
+
+    }
+
+}
 
     /*
     ======================================================

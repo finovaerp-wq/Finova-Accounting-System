@@ -44,6 +44,13 @@ export class AuthService {
     static sessionTimer =
     null;
 
+    static statusCheckTimer =
+    null;
+
+
+static USER_STATUS_CHECK_INTERVAL =
+    60 * 1000;
+
 
 static authSubscription =
     null;
@@ -237,17 +244,15 @@ if (
 
 /*
 ==========================================
-SYNC TENANT PROFILE
+VALIDATE ACTIVE FINOVA USER
 ==========================================
 */
 
-if (
-    isSuperAdmin !== true
-) {
+await this.validateActiveUser(
+    isSuperAdmin === true
+);
 
-    await UserService.syncProfile();
 
-}
 
 
         /*
@@ -275,6 +280,123 @@ if (
 
 
         return data;
+
+    }
+
+
+    /*
+    ======================================================
+    VALIDATE ACTIVE FINOVA USER
+    ======================================================
+    */
+
+    static async validateActiveUser(
+        knownSuperAdmin = null
+    ) {
+
+        let isSuperAdmin =
+            knownSuperAdmin;
+
+
+        /*
+        ==========================================
+        CHECK SUPER ADMIN WHEN NOT KNOWN
+        ==========================================
+        */
+
+        if (
+            isSuperAdmin === null
+            ||
+            isSuperAdmin === undefined
+        ) {
+
+            const {
+                data,
+                error
+            } = await supabase.rpc(
+                "is_finova_super_admin"
+            );
+
+
+            if (
+                error
+            ) {
+
+                throw error;
+
+            }
+
+
+            isSuperAdmin =
+                data === true;
+
+        }
+
+
+        /*
+        ==========================================
+        SUPER ADMIN BYPASS
+        ==========================================
+        */
+
+        if (
+            isSuperAdmin === true
+        ) {
+
+            return true;
+
+        }
+
+
+        /*
+        ==========================================
+        GET FINOVA PROFILE
+        ==========================================
+        */
+
+        const profile =
+            await UserService.getCurrentProfile();
+
+
+        /*
+        ==========================================
+        PROFILE NOT FOUND
+        ==========================================
+        */
+
+        if (
+            !profile
+        ) {
+
+            await supabase.auth.signOut();
+
+            throw new Error(
+                "FINOVA user profile was not found."
+            );
+
+        }
+
+
+        /*
+        ==========================================
+        INACTIVE USER
+        ==========================================
+        */
+
+        if (
+            profile.status !== true
+        ) {
+
+            await supabase.auth.signOut();
+
+            throw new Error(
+                "Your FINOVA account is inactive. Please contact the administrator."
+            );
+
+        }
+
+
+        return true;
 
     }
 
@@ -817,6 +939,15 @@ if (
 
         /*
         ==========================================
+        VALIDATE FINOVA USER STATUS
+        ==========================================
+        */
+
+        await this.validateActiveUser();
+
+
+        /*
+        ==========================================
         RESET LOGOUT LOCK
         ==========================================
         */
@@ -905,6 +1036,8 @@ if (
 
         this.startVisibilityListener();
 
+        this.startStatusMonitor();
+
 
         /*
         ==========================================
@@ -916,7 +1049,130 @@ if (
 
     }
 
+    /*
+======================================================
+START STATUS MONITOR
+======================================================
+*/
 
+static startStatusMonitor() {
+
+    /*
+    ==========================================
+    PREVENT DUPLICATE TIMER
+    ==========================================
+    */
+
+    if (
+        this.statusCheckTimer
+        ||
+        this.isLogoutRunning
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+    ==========================================
+    CREATE STATUS CHECK TIMER
+    ==========================================
+    */
+
+    this.statusCheckTimer =
+        window.setTimeout(
+
+            async () => {
+
+                /*
+                ==================================
+                RESET TIMER REFERENCE
+                ==================================
+                */
+
+                this.statusCheckTimer =
+                    null;
+
+
+                /*
+                ==================================
+                CHECK LOGIN SESSION
+                ==================================
+                */
+
+                const session =
+                    await this.getSession();
+
+
+                if (
+                    !session
+                ) {
+
+                    return;
+
+                }
+
+
+                try {
+
+                    /*
+                    ==================================
+                    VALIDATE ACTIVE USER
+                    ==================================
+                    */
+
+                    await this.validateActiveUser();
+
+
+                    /*
+                    ==================================
+                    SCHEDULE NEXT CHECK
+                    ==================================
+                    */
+
+                    this.startStatusMonitor();
+
+                }
+
+                catch (
+                    error
+                ) {
+
+                    console.error(
+                        "FINOVA USER STATUS CHECK ERROR :",
+                        error
+                    );
+
+
+                    /*
+                    ==================================
+                    STOP ALL SESSION MONITORS
+                    ==================================
+                    */
+
+                    this.stopSessionTimer();
+
+
+                    /*
+                    ==================================
+                    FORCE LOGIN PAGE
+                    ==================================
+                    */
+
+                    window.location.replace(
+                        "login.html"
+                    );
+
+                }
+
+            },
+
+            this.USER_STATUS_CHECK_INTERVAL
+
+        );
+
+}
     /*
     ======================================================
     RESET SESSION TIMER
@@ -1171,6 +1427,25 @@ if (
     */
 
     static stopSessionTimer() {
+
+        /*
+======================================================
+STOP USER STATUS MONITOR
+======================================================
+*/
+
+if (
+    this.statusCheckTimer
+) {
+
+    clearTimeout(
+        this.statusCheckTimer
+    );
+
+    this.statusCheckTimer =
+        null;
+
+}
 
         /*
         ==========================================
@@ -1909,6 +2184,13 @@ if (
 
             }
 
+            /*
+==========================================
+CHECK FINOVA USER STATUS
+==========================================
+*/
+
+await this.validateActiveUser();
 
             /*
             ==========================================
