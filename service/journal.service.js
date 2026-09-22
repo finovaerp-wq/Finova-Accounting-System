@@ -216,15 +216,7 @@ async getAll() {
         );
 
 
-    console.log(
-        "DATA :",
-        data
-    );
-
-    console.log(
-        "ERROR :",
-        error
-    );
+    
 
 
     if (error) {
@@ -322,11 +314,7 @@ async getById(id) {
             throw detailError;
 
         }
-        console.log("HEADER :", header);
-
-        console.log("DETAIL :", details);
-
-        console.log("DETAIL COUNT :", details?.length);
+        
 
         /*
         ======================================================
@@ -516,9 +504,7 @@ CREATE GENERAL JOURNAL
 
 async create(header, details = []) {
 
-    console.log("===== SERVICE CREATE =====");
-    console.log("HEADER :", header);
-    console.table(details);
+    
 
     try {
 
@@ -608,8 +594,7 @@ header.source_po_no ??=
         const journalDetails =
 
             this.buildJournalDetail(details);
-        console.log("===== BUILD JOURNAL DETAIL =====");
-        console.table(journalDetails);
+        
         /*
         ======================================================
         CALCULATE TOTAL
@@ -643,18 +628,13 @@ if (header.id == null) {
 
 }
 
-console.log("HEADER SEND");
 
-console.log(header);
         /*
 ==========================================================
 INSERT HEADER
 ==========================================================
 */
 
-console.log("===== HEADER DATA =====");
-
-console.table(header);
 
 const {
 
@@ -728,17 +708,7 @@ if (
 HEADER INSERT SUCCESS
 ==================================================
 */
-
-console.log(
-    "HEADER RESULT :",
-    journal
-);
-
-console.log(
-    "========== HEADER INSERT SUCCESS =========="
-);
-
-        /*
+/*
         ======================================================
         PREPARE DETAIL
         ======================================================
@@ -779,33 +749,6 @@ INSERT DETAIL
 ==========================================================
 */
 
-console.log(
-    "========== INSERT DETAIL PAYLOAD =========="
-);
-
-console.table(insertDetails);
-
-console.log(
-    "FIRST DETAIL :",
-    JSON.stringify(
-        insertDetails[0],
-        null,
-        2
-    )
-);
-
-console.log(
-    "SECOND DETAIL :",
-    JSON.stringify(
-        insertDetails[1],
-        null,
-        2
-    )
-);
-
-console.log(
-    "==========================================="
-);
 
 if (
     insertDetails.length
@@ -899,24 +842,7 @@ if (
     }
 
 
-    /*
-    ==================================================
-    DETAIL INSERT SUCCESS
-    ==================================================
-    */
-
-    console.log(
-        "DETAIL INSERT RESULT :",
-        insertedDetails
-    );
-
-    console.log(
-        "========== DETAIL INSERT SUCCESS =========="
-    );
-
-    console.table(
-        insertedDetails
-    );
+    
 
 }
 
@@ -1044,23 +970,7 @@ async update(id, header, details = []) {
         );
 
 
-        /*
-        ======================================================
-        BUILD DETAIL
-        ======================================================
-        */
-
-        const journalDetails =
-            this.buildJournalDetail(details);
-
-
-        console.log(
-            "===== BUILD JOURNAL DETAIL ====="
-        );
-
-        console.table(
-            journalDetails
-        );
+        
 
 
         /*
@@ -1152,14 +1062,6 @@ async update(id, header, details = []) {
         PREPARE DETAIL
         ======================================================
         */
-
-        console.log(
-            "JOURNAL DETAIL"
-        );
-
-        console.table(
-            journalDetails
-        );
 
 
         const insertDetail =
@@ -1351,15 +1253,7 @@ async delete(id) {
             throw apError;
 
         }
-
-
-        console.log(
-            "GL DELETE - AP RESET:",
-            resetAP
-        );
-
-
-        /*
+/*
         ======================================================
         DELETE DETAIL
         ======================================================
@@ -1426,22 +1320,7 @@ async delete(id) {
         SUCCESS
         ======================================================
         */
-
-        console.log(
-            "GENERAL JOURNAL DELETED:",
-            {
-
-                journal_id:
-                    id,
-
-                linked_ap_count:
-                    resetAP?.length || 0
-
-            }
-        );
-
-
-        return true;
+return true;
 
     }
 
@@ -1623,15 +1502,6 @@ async generateDocumentNumber() {
 
         if (error) {
 
-    console.log("================================");
-    console.log("GENERATE DOCUMENT NUMBER ERROR");
-    console.log("ERROR OBJECT :", error);
-    console.log("MESSAGE :", error.message);
-    console.log("DETAILS :", error.details);
-    console.log("HINT :", error.hint);
-    console.log("CODE :", error.code);
-    console.log("================================");
-
     throw error;
 
 }
@@ -1724,8 +1594,7 @@ async getCOA() {
                 }
             );
 
-        console.log("COA DATA :", data);
-        console.log("COA ERROR :", error);
+        
 
         if (error) {
 
@@ -1785,8 +1654,7 @@ async getBusinessPartner() {
                 }
             );
 
-        console.log("BP DATA :", data);
-        console.log("BP ERROR :", error);
+        
 
         if (error) {
 
@@ -1855,18 +1723,14 @@ async getCOAById(id) {
 
     catch (error) {
 
-    console.log("========== GET COA ERROR ==========");
-    console.log(error);
-    console.log("message :", error.message);
-    console.log("details :", error.details);
-    console.log("hint :", error.hint);
-    console.log("code :", error.code);
-    console.log("===================================");
+    console.error(
+        "GeneralJournalService.getCOAById",
+        error
+    );
 
     throw error;
 
 }
-
 }
 
 /*
@@ -2291,6 +2155,7 @@ checkBalance(details = []) {
 
 }
 
+
 /*
 ==========================================================
 POST JOURNAL
@@ -2397,6 +2262,120 @@ async post(id) {
     await this.validateAccountingPeriod(
         journal.journal_date
     );
+
+
+    /*
+    ======================================================
+    VALIDATE JOURNAL DETAILS
+    ======================================================
+    */
+
+    const details =
+        Array.isArray(journal.details)
+            ? journal.details
+            : [];
+
+
+    if (
+        details.length === 0
+    ) {
+
+        throw new Error(
+            "Journal Detail cannot be empty."
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    VALIDATE DEBIT / CREDIT VALUES
+    ======================================================
+    */
+
+    const hasInvalidAmount =
+        details.some(item => {
+
+            const debit =
+                Number(item.debit ?? 0);
+
+            const credit =
+                Number(item.credit ?? 0);
+
+            return (
+                !Number.isFinite(debit)
+                ||
+                !Number.isFinite(credit)
+                ||
+                debit < 0
+                ||
+                credit < 0
+            );
+
+        });
+
+
+    if (
+        hasInvalidAmount
+    ) {
+
+        throw new Error(
+            "Journal contains invalid debit or credit amount."
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    VALIDATE JOURNAL BALANCE
+    ======================================================
+    */
+
+    const total =
+        this.calculateTotal(
+            details
+        );
+
+
+    const totalDebit =
+        Number(
+            total.totalDebit
+        );
+
+
+    const totalCredit =
+        Number(
+            total.totalCredit
+        );
+
+
+    if (
+        !Number.isFinite(totalDebit)
+        ||
+        !Number.isFinite(totalCredit)
+    ) {
+
+        throw new Error(
+            "Journal total debit or credit is invalid."
+        );
+
+    }
+
+
+    if (
+        !this.checkBalance(
+            details
+        )
+    ) {
+
+        throw new Error(
+            `Journal is not balanced. ` +
+            `Debit: ${totalDebit}, ` +
+            `Credit: ${totalCredit}.`
+        );
+
+    }
 
 
     /*

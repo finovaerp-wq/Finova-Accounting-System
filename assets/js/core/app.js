@@ -75,6 +75,9 @@ class FinovaApp {
         this.authSubscription =
             null;
 
+        this.lastAuthEventKey =
+    null;
+
 
         /*
         ==========================================
@@ -692,202 +695,276 @@ initializeComponents() {
 
 
     /*
-    ======================================================
-    INITIALIZE APPLICATION
-    ======================================================
+======================================================
+INITIALIZE APPLICATION
+======================================================
+*/
+
+initializeApplication() {
+
+    /*
+    ==========================================
+    PREVENT DUPLICATE AUTH LISTENER
+    ==========================================
     */
 
-    initializeApplication() {
+    if (this.authSubscription) {
 
-        /*
-        ==========================================
-        AUTH LISTENER
-        ==========================================
-        */
-
-        const authListener =
-            AuthService.onAuthStateChange(
-
-                (
-                    event,
-                    session
-                ) => {
-
-                    this.handleAuthStateChange(
-
-                        event,
-
-                        session
-
-                    );
-
-                }
-
-            );
-
-
-        /*
-        ==========================================
-        STORE SUBSCRIPTION
-        ==========================================
-        */
-
-        this.authSubscription =
-            authListener?.data?.subscription
-            ??
-            null;
-
-
-        /*
-        ==========================================
-        READY
-        ==========================================
-        */
-
-        console.log(
-            "Application Initialized."
+        console.warn(
+            "FINOVA Auth Listener already initialized."
         );
+
+        return;
 
     }
 
 
     /*
-    ======================================================
-    HANDLE AUTH STATE CHANGE
-    ======================================================
+    ==========================================
+    AUTH LISTENER
+    ==========================================
     */
 
-    handleAuthStateChange(
+    const authListener =
+        AuthService.onAuthStateChange(
 
-        event,
-
-        session
-
-    ) {
-
-        /*
-        ==========================================
-        DEBUG
-        ==========================================
-        */
-
-        console.log(
-
-            "AUTH EVENT :",
-
-            event
-
-        );
-
-
-        /*
-==========================================
-SIGNED OUT
-==========================================
-*/
-
-if (
-    event ===
-    "SIGNED_OUT"
-) {
-
-    /*
-    ======================================
-    STOP APPLICATION INSTANCE
-    ======================================
-    */
-
-    this.destroy();
-
-
-    /*
-    ======================================
-    REDIRECT LOGIN
-    ======================================
-    */
-
-    window.location.replace(
-        "login.html"
-    );
-
-
-    return;
-
-}
-
-
-        /*
-        ==========================================
-        TOKEN REFRESHED
-        ==========================================
-        */
-
-        if (
-            event ===
-            "TOKEN_REFRESHED"
-        ) {
-
-            console.log(
-                "FINOVA session token refreshed."
-            );
-
-
-            return;
-
-        }
-
-
-        /*
-        ==========================================
-        USER UPDATED
-        ==========================================
-        */
-
-        if (
-            event ===
-            "USER_UPDATED"
-        ) {
-
-            console.log(
-                "FINOVA user session updated."
-            );
-
-
-            return;
-
-        }
-
-
-        /*
-        ==========================================
-        SIGNED IN
-        ==========================================
-        */
-
-        if (
-            event ===
-            "SIGNED_IN"
-        ) {
-
-            /*
-            ======================================
-            SESSION AVAILABLE
-            ======================================
-            */
-
-            if (
+            (
+                event,
                 session
-            ) {
+            ) => {
 
-                console.log(
-                    "FINOVA user authenticated."
+                this.handleAuthStateChange(
+
+                    event,
+
+                    session
+
                 );
 
             }
 
+        );
+
+
+    /*
+    ==========================================
+    STORE SUBSCRIPTION
+    ==========================================
+    */
+
+    this.authSubscription =
+        authListener?.data?.subscription
+        ??
+        null;
+
+
+    /*
+    ==========================================
+    READY
+    ==========================================
+    */
+
+    console.log(
+        "Application Initialized."
+    );
+
+}
+
+
+    /*
+======================================================
+HANDLE AUTH STATE CHANGE
+======================================================
+*/
+
+handleAuthStateChange(
+
+    event,
+
+    session
+
+) {
+
+    /*
+    ==========================================
+    DEBUG
+    ==========================================
+    */
+
+    console.log(
+        "AUTH EVENT :",
+        event
+    );
+
+
+    /*
+    ==========================================
+    BUILD EVENT KEY
+    ==========================================
+    */
+
+    const userId =
+        session?.user?.id
+        ??
+        "NO_USER";
+
+    const accessToken =
+        session?.access_token
+        ??
+        "NO_TOKEN";
+
+    const authEventKey =
+        event
+        +
+        ":"
+        +
+        userId
+        +
+        ":"
+        +
+        accessToken;
+
+
+    /*
+    ==========================================
+    PREVENT DUPLICATE EVENT
+    ==========================================
+    */
+
+    if (
+        event === "SIGNED_IN"
+        &&
+        authEventKey ===
+        this.lastAuthEventKey
+    ) {
+
+        console.warn(
+            "FINOVA duplicate SIGNED_IN event ignored."
+        );
+
+        return;
+
+    }
+
+
+    /*
+    ==========================================
+    STORE LAST EVENT
+    ==========================================
+    */
+
+    this.lastAuthEventKey =
+        authEventKey;
+
+
+    /*
+    ==========================================
+    SIGNED OUT
+    ==========================================
+    */
+
+    if (
+        event ===
+        "SIGNED_OUT"
+    ) {
+
+        /*
+        ======================================
+        STOP APPLICATION INSTANCE
+        ======================================
+        */
+
+        this.destroy();
+
+
+        /*
+        ======================================
+        REDIRECT LOGIN
+        ======================================
+        */
+
+        window.location.replace(
+            "login.html"
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+    ==========================================
+    TOKEN REFRESHED
+    ==========================================
+    */
+
+    if (
+        event ===
+        "TOKEN_REFRESHED"
+    ) {
+
+        console.log(
+            "FINOVA session token refreshed."
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+    ==========================================
+    USER UPDATED
+    ==========================================
+    */
+
+    if (
+        event ===
+        "USER_UPDATED"
+    ) {
+
+        console.log(
+            "FINOVA user session updated."
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+    ==========================================
+    SIGNED IN
+    ==========================================
+    */
+
+    if (
+        event ===
+        "SIGNED_IN"
+    ) {
+
+        /*
+        ======================================
+        SESSION AVAILABLE
+        ======================================
+        */
+
+        if (
+            session
+        ) {
+
+            console.log(
+                "FINOVA user authenticated."
+            );
+
         }
 
     }
+
+}
 
 
     /*
@@ -1064,20 +1141,22 @@ START APPLICATION
 */
 
 document.addEventListener(
-
     "DOMContentLoaded",
-
     () => {
 
-        /*
-        ==========================================
-        CREATE APPLICATION
-        ==========================================
-        */
+        // Prevent duplicate FINOVA application instance
+        if (window.finovaApp) {
+
+            console.warn(
+                "FINOVA App already initialized."
+            );
+
+            return;
+
+        }
 
         window.finovaApp =
             new FinovaApp();
 
     }
-
 );

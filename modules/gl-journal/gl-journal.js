@@ -630,7 +630,7 @@ CACHE DETAIL MODAL DOM
 */
 
 cacheDetailModalDom() {
-    console.log(this.btnSaveLine);
+    
 
     /*
     ======================================================
@@ -2048,6 +2048,7 @@ async loadData(
 
     try {
 
+
         /*
         ======================================================
         RE-CACHE ACTIVE TABLE BODY
@@ -2175,6 +2176,7 @@ async loadData(
                 ? headers
                 : [];
 
+        
 
         /*
         ======================================================
@@ -2523,37 +2525,7 @@ async loadData(
             );
 
 
-        /*
-        ======================================================
-        DEBUG
-        ======================================================
-        */
-
-        console.table(
-
-            this.journals.map(
-
-                journal => ({
-
-                    journal_no:
-                        journal.journal_no,
-
-                    database_rows:
-                        journal.database_details?.length
-                        || 0,
-
-                    ui_transactions:
-                        journal.details?.length
-                        || 0,
-
-                    items:
-                        journal.total_line
-
-                })
-
-            )
-
-        );
+        
 
 
         /*
@@ -8156,10 +8128,15 @@ DETAIL VALIDATION
 ==========================================================
 */
 
-// Draft boleh disimpan tanpa detail
+// Draft boleh disimpan tanpa detail.
+// Posted wajib memiliki minimal 1 detail.
 if (
     this.detailLines.length === 0 &&
-    this.currentSaveStatus !== "Draft"
+    String(
+        status || "Draft"
+    )
+        .trim()
+        .toUpperCase() !== "DRAFT"
 ) {
 
     window.App?.showError?.(
@@ -17156,6 +17133,87 @@ async saveJournal(
 
         }
 
+        /*
+======================================================
+REQUESTED SAVE STATUS
+======================================================
+*/
+
+const requestedStatus =
+    String(
+        status || "Draft"
+    )
+    .trim();
+
+
+const normalizedRequestedStatus =
+    requestedStatus.toUpperCase();
+
+
+/*
+======================================================
+PERSIST STATUS
+======================================================
+
+SAVE DRAFT
+→ Draft
+
+SAVE & POST
+→ Draft terlebih dahulu
+→ kemudian service.post()
+======================================================
+*/
+
+/*
+======================================================
+PERSIST STATUS
+======================================================
+
+NEW JOURNAL
+-> Draft
+
+DRAFT -> POST
+-> Draft
+
+VOID -> POST
+-> Void
+
+NORMAL SAVE
+-> requested status
+======================================================
+*/
+
+const currentJournalStatus =
+    String(
+        this.currentJournal?.status
+        ||
+        ""
+    )
+    .trim();
+
+
+const normalizedCurrentJournalStatus =
+    currentJournalStatus.toUpperCase();
+
+
+const persistStatus =
+    normalizedRequestedStatus ===
+    "POSTED"
+
+        ? (
+            this.currentMode === "edit"
+            &&
+            (
+                normalizedCurrentJournalStatus === "DRAFT"
+                ||
+                normalizedCurrentJournalStatus === "VOID"
+            )
+                ? currentJournalStatus
+                : "Draft"
+        )
+
+        : requestedStatus;
+
 
         /*
         ======================================================
@@ -17501,7 +17559,7 @@ async saveJournal(
             */
 
             status:
-                status
+    persistStatus
 
         };
 
@@ -17673,6 +17731,65 @@ async saveJournal(
                 header.id;
 
         }
+
+/*
+======================================================
+POST AFTER SAVE
+======================================================
+
+SAVE & POST:
+1. Journal disimpan terlebih dahulu
+2. Status tetap Draft / Void sesuai kondisi
+3. Posting dilakukan melalui postJournal()
+4. postJournal() akan menjalankan service.post()
+5. AP / AR synchronization tetap berjalan
+======================================================
+*/
+
+if (
+    normalizedRequestedStatus ===
+    "POSTED"
+) {
+
+    if (
+        !savedJournalId
+    ) {
+
+        throw new Error(
+            "Journal ID is required for posting."
+        );
+
+    }
+
+
+    const postSucceeded =
+        await this.postJournal(
+            savedJournalId,
+            true
+        );
+
+
+    if (
+        !postSucceeded
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+    ==================================================
+    CLOSE MODAL
+    ==================================================
+    */
+
+    this.modal?.hide();
+
+
+    return;
+
+}
 
 
         /*
@@ -18332,7 +18449,10 @@ AR PAYMENT:
 ==========================================================
 */
 
-async postJournal(id) {
+async postJournal(
+    id,
+    skipConfirmation = false
+) {
 
     try {
 
@@ -18344,7 +18464,7 @@ async postJournal(id) {
 
         if (!id) {
 
-            return;
+            return false;
 
         }
 
@@ -18561,56 +18681,58 @@ async postJournal(id) {
                     );
 
                 }
+
+
                 /*
-==============================================
-BULK AP PAYMENT
-STATUS REGRESSION VALIDATION
+                ==============================================
+                BULK AP PAYMENT
+                STATUS REGRESSION VALIDATION
 
-JOURNAL DRAFT
--> BATCH MUST BE DRAFT
+                JOURNAL DRAFT
+                -> BATCH MUST BE DRAFT
 
-JOURNAL VOID
--> BATCH MUST BE VOID
+                JOURNAL VOID
+                -> BATCH MUST BE VOID
 
-JOURNAL POSTED
--> HANDLED BY ALREADY POSTED FLOW
-==============================================
-*/
+                JOURNAL POSTED
+                -> HANDLED BY ALREADY POSTED FLOW
+                ==============================================
+                */
 
-const batchStatus =
-    String(
-        batch.status
-        ||
-        ""
-    )
-    .trim()
-    .toUpperCase();
-
-
-if (
-    currentStatus === "DRAFT"
-    &&
-    batchStatus !== "DRAFT"
-) {
-
-    throw new Error(
-        `AP Payment Batch status "${batch.status || ""}" is not synchronized with Draft GL Journal.`
-    );
-
-}
+                const batchStatus =
+                    String(
+                        batch.status
+                        ||
+                        ""
+                    )
+                    .trim()
+                    .toUpperCase();
 
 
-if (
-    currentStatus === "VOID"
-    &&
-    batchStatus !== "VOID"
-) {
+                if (
+                    currentStatus === "DRAFT"
+                    &&
+                    batchStatus !== "DRAFT"
+                ) {
 
-    throw new Error(
-        `AP Payment Batch status "${batch.status || ""}" is not synchronized with Void GL Journal.`
-    );
+                    throw new Error(
+                        `AP Payment Batch status "${batch.status || ""}" is not synchronized with Draft GL Journal.`
+                    );
 
-}
+                }
+
+
+                if (
+                    currentStatus === "VOID"
+                    &&
+                    batchStatus !== "VOID"
+                ) {
+
+                    throw new Error(
+                        `AP Payment Batch status "${batch.status || ""}" is not synchronized with Void GL Journal.`
+                    );
+
+                }
 
 
                 /*
@@ -18671,94 +18793,98 @@ if (
                     );
 
                 }
+
+
                 /*
-==============================================
-BULK AP PAYMENT
-PRE-POST ALLOCATION VALIDATION
+                ==============================================
+                BULK AP PAYMENT
+                PRE-POST ALLOCATION VALIDATION
 
-DRAFT / VOID:
+                DRAFT / VOID:
 
-ALL ALLOCATIONS MUST BE INACTIVE
+                ALL ALLOCATIONS MUST BE INACTIVE
 
-INACTIVE:
-gl_journal_id = NULL
+                INACTIVE:
+                gl_journal_id = NULL
 
-THIS PREVENTS DUPLICATE PAYMENT
-WHEN POSTING / REPOSTING.
-==============================================
-*/
+                THIS PREVENTS DUPLICATE PAYMENT
+                WHEN POSTING / REPOSTING.
+                ==============================================
+                */
 
-if (
-    currentStatus === "DRAFT"
-    ||
-    currentStatus === "VOID"
-) {
+                if (
+                    currentStatus === "DRAFT"
+                    ||
+                    currentStatus === "VOID"
+                ) {
 
-    /*
-    ==============================================
-    ATOMIC AP PAYMENT COMPATIBILITY
+                    /*
+                    ==============================================
+                    ATOMIC AP PAYMENT COMPATIBILITY
 
-    Allocation created by the atomic AP Payment
-    flow is already active while its GL Journal
-    is still Draft.
+                    Allocation created by the atomic AP Payment
+                    flow is already active while its GL Journal
+                    is still Draft.
 
-    VALID:
-    allocation.gl_journal_id === current journal
+                    VALID:
+                    allocation.gl_journal_id === current journal
 
-    INVALID / DUPLICATE:
-    allocation.gl_journal_id points to another
-    GL Journal.
-    ==============================================
-    */
+                    INVALID / DUPLICATE:
+                    allocation.gl_journal_id points to another
+                    GL Journal.
+                    ==============================================
+                    */
 
-    const conflictingAllocationBeforePost =
-        apPaymentBatchAllocations
-            .find(
-                allocation => {
+                    const conflictingAllocationBeforePost =
+                        apPaymentBatchAllocations
+                            .find(
+                                allocation => {
 
-                    const allocationJournalId =
-                        allocation?.gl_journal_id
-                        || null;
+                                    const allocationJournalId =
+                                        allocation?.gl_journal_id
+                                        || null;
+
+
+                                    if (
+                                        !allocationJournalId
+                                    ) {
+
+                                        return false;
+
+                                    }
+
+
+                                    return (
+                                        String(
+                                            allocationJournalId
+                                        )
+                                        !==
+                                        String(
+                                            id
+                                        )
+                                    );
+
+                                }
+                            );
+
 
                     if (
-                        !allocationJournalId
+                        conflictingAllocationBeforePost
                     ) {
 
-                        return false;
+                        throw new Error(
+
+                            currentStatus === "VOID"
+
+                                ? "Void AP Payment Batch contains an allocation linked to another GL Journal. Repost was cancelled to prevent duplicate payment."
+
+                                : "AP Payment Batch contains an allocation linked to another GL Journal. Posting was cancelled to prevent duplicate payment."
+
+                        );
 
                     }
 
-                    return (
-                        String(
-                            allocationJournalId
-                        )
-                        !==
-                        String(
-                            id
-                        )
-                    );
-
                 }
-            );
-
-
-    if (
-        conflictingAllocationBeforePost
-    ) {
-
-        throw new Error(
-
-            currentStatus === "VOID"
-
-                ? "Void AP Payment Batch contains an allocation linked to another GL Journal. Repost was cancelled to prevent duplicate payment."
-
-                : "AP Payment Batch contains an allocation linked to another GL Journal. Posting was cancelled to prevent duplicate payment."
-
-        );
-
-    }
-
-}
 
 
                 /*
@@ -18811,1261 +18937,157 @@ if (
 
 
         /*
-        ======================================================
-        AR PAYMENT INFORMATION
-        ======================================================
-        */
+======================================================
+AR PAYMENT INFORMATION
+======================================================
+*/
 
-        if (
-            sourceModule === "AR"
-            &&
-            sourceDocumentType === "AR_PAYMENT"
-        ) {
+if (
+    sourceModule === "AR"
+    &&
+    sourceDocumentType === "AR_PAYMENT"
+) {
 
-            const {
+    const {
 
-                data,
+        data,
 
-                error
+        error
 
-            } = await supabase
+    } = await supabase
 
-                .from(
-                    "trx_account_receivable_payment"
-                )
+        .from(
+            "trx_account_receivable_payment"
+        )
 
-                .select(`
-                    id,
-                    account_receivable_id,
-                    payment_date,
-                    payment_account_id,
-                    amount,
-                    reference_no,
-                    description,
-                    gl_journal_id
-                `)
+        .select(`
+            id,
+            account_receivable_id,
+            payment_date,
+            payment_account_id,
+            amount,
+            reference_no,
+            description,
+            gl_journal_id
+        `)
 
-                .eq(
-                    "gl_journal_id",
-                    id
-                )
+        .eq(
+            "gl_journal_id",
+            id
+        )
 
-                .maybeSingle();
-
-
-            if (
-                error
-            ) {
-
-                console.error(
-                    "GET AR PAYMENT BEFORE POST ERROR:",
-                    error
-                );
-
-                throw error;
-
-            }
+        .maybeSingle();
 
 
-            arPayment =
-                data
+    if (
+        error
+    ) {
+
+        console.error(
+            "GET AR PAYMENT BEFORE POST ERROR:",
+            error
+        );
+
+        throw error;
+
+    }
+
+
+    arPayment =
+        data
+        ||
+        null;
+
+
+    accountReceivableId =
+        arPayment?.account_receivable_id
+        ||
+        sourceDocumentId
+        ||
+        null;
+
+
+    console.log(
+        "AR PAYMENT BEFORE JOURNAL POST:",
+        {
+            journal_id:
+                id,
+
+            journal_status:
+                currentStatus,
+
+            payment_id:
+                arPayment?.id
                 ||
-                null;
+                null,
 
-
-            accountReceivableId =
-                arPayment?.account_receivable_id
-                ||
-                sourceDocumentId
-                ||
-                null;
-
-
-            console.log(
-                "AR PAYMENT BEFORE JOURNAL POST:",
-                {
-                    journal_id:
-                        id,
-
-                    journal_status:
-                        currentStatus,
-
-                    payment_id:
-                        arPayment?.id
-                        ||
-                        null,
-
-                    account_receivable_id:
-                        accountReceivableId
-                }
-            );
-
+            account_receivable_id:
+                accountReceivableId
         }
-                /*
-        ======================================================
-        ALREADY POSTED
+    );
 
-        DO NOT POST AGAIN.
+}
 
-        BUT:
-        - BULK AP PAYMENT MUST REMAIN SYNCHRONIZED
-        - AR PAYMENT MUST BE RECALCULATED
-        ======================================================
+
+/*
+======================================================
+ALREADY POSTED
+
+DO NOT POST AGAIN.
+
+BUT:
+- BULK AP PAYMENT MUST REMAIN SYNCHRONIZED
+- AR PAYMENT MUST BE RECALCULATED
+======================================================
+*/
+
+if (
+    currentStatus ===
+    "POSTED"
+) {
+
+    /*
+    ==================================================
+    RECALCULATED AR RESULT
+    ==================================================
+    */
+
+    let updatedAR =
+        null;
+
+
+    /*
+    ==================================================
+    BULK AP PAYMENT
+    ALREADY POSTED
+    ENSURE SOURCE SYNCHRONIZED
+    ==================================================
+    */
+
+    if (
+        apPaymentBatch
+    ) {
+
+        /*
+        ==============================================
+        ENSURE BATCH STATUS POSTED
+        ==============================================
         */
 
         if (
-            currentStatus ===
+            String(
+                apPaymentBatch.status
+                ||
+                ""
+            )
+            .trim()
+            .toUpperCase()
+            !==
             "POSTED"
         ) {
 
-            /*
-            ==================================================
-            RECALCULATED AR RESULT
-            ==================================================
-            */
-
-            let updatedAR =
-                null;
-
-
-            /*
-            ==================================================
-            BULK AP PAYMENT
-            ALREADY POSTED
-            ENSURE SOURCE SYNCHRONIZED
-            ==================================================
-            */
-
-            if (
-                apPaymentBatch
-            ) {
-
-                /*
-                ==============================================
-                ENSURE BATCH STATUS POSTED
-                ==============================================
-                */
-
-                if (
-                    String(
-                        apPaymentBatch.status
-                        ||
-                        ""
-                    )
-                    .trim()
-                    .toUpperCase()
-                    !==
-                    "POSTED"
-                ) {
-
-                    const {
-                        error: batchStatusError
-                    } = await supabase
-
-                        .from(
-                            "trx_ap_payment_batch"
-                        )
-
-                        .update({
-
-                            status:
-                                "Posted",
-
-                            void_reason:
-                                null,
-
-                            void_at:
-                                null,
-
-                            updated_at:
-                                new Date()
-                                    .toISOString()
-
-                        })
-
-                        .eq(
-                            "id",
-                            apPaymentBatch.id
-                        )
-
-                        .eq(
-                            "gl_journal_id",
-                            id
-                        );
-
-
-                    if (
-                        batchStatusError
-                    ) {
-
-                        throw batchStatusError;
-
-                    }
-
-                }
-
-
-                /*
-                ==============================================
-                ACTIVATE ALL ALLOCATIONS
-                ==============================================
-                */
-
-                const {
-                    data: linkedAllocations,
-                    error: allocationLinkError
-                } = await supabase
-
-                    .from(
-                        "trx_ap_payment"
-                    )
-
-                    .update({
-
-                        gl_journal_id:
-                            id
-
-                    })
-
-                    .eq(
-                        "payment_batch_id",
-                        apPaymentBatch.id
-                    )
-
-                    .select(`
-                        id,
-                        payment_batch_id,
-                        account_payable_id,
-                        payment_amount,
-                        gl_journal_id
-                    `);
-
-
-                if (
-                    allocationLinkError
-                ) {
-
-                    throw allocationLinkError;
-
-                }
-
-
-                /*
-                ==============================================
-                SAFETY:
-                ALL ALLOCATIONS MUST BE UPDATED
-                ==============================================
-                */
-
-                if (
-                    !Array.isArray(
-                        linkedAllocations
-                    )
-                    ||
-                    linkedAllocations.length
-                    !==
-                    apPaymentBatchAllocations.length
-                ) {
-
-                    throw new Error(
-                        "Not all AP Payment Batch allocations were synchronized."
-                    );
-
-                }
-
-
-                /*
-                ==============================================
-                RECALCULATE ALL AP INVOICES
-                ==============================================
-                */
-
-                const apService =
-                    window.apService;
-
-
-                for (
-                    const accountPayableId
-                    of apPaymentBatchAPIds
-                ) {
-
-                    /*
-                    ==========================================
-                    PREFERRED:
-                    USE AP SERVICE
-                    ==========================================
-                    */
-
-                    if (
-                        apService
-                        &&
-                        typeof apService.updatePaymentStatus
-                        ===
-                        "function"
-                    ) {
-
-                        await apService
-                            .updatePaymentStatus(
-                                accountPayableId
-                            );
-
-
-                        continue;
-
-                    }
-
-
-                    /*
-                    ==========================================
-                    FALLBACK:
-                    GET AP INVOICE
-                    ==========================================
-                    */
-
-                    const {
-                        data: apInvoice,
-                        error: apInvoiceError
-                    } = await supabase
-
-                        .from(
-                            "trx_account_payable"
-                        )
-
-                        .select(`
-                            id,
-                            total_amount,
-                            status
-                        `)
-
-                        .eq(
-                            "id",
-                            accountPayableId
-                        )
-
-                        .maybeSingle();
-
-
-                    if (
-                        apInvoiceError
-                    ) {
-
-                        throw apInvoiceError;
-
-                    }
-
-
-                    if (
-                        !apInvoice
-                    ) {
-
-                        throw new Error(
-                            "Account Payable invoice was not found during payment synchronization."
-                        );
-
-                    }
-
-
-                    /*
-                    ==========================================
-                    GET ACTIVE AP PAYMENT ROWS
-                    ==========================================
-                    */
-
-                    const {
-                        data: paymentRows,
-                        error: paymentRowsError
-                    } = await supabase
-
-                        .from(
-                            "trx_ap_payment"
-                        )
-
-                        .select(`
-                            payment_amount,
-                            gl_journal_id
-                        `)
-
-                        .eq(
-                            "account_payable_id",
-                            accountPayableId
-                        )
-
-                        .not(
-                            "gl_journal_id",
-                            "is",
-                            null
-                        );
-
-
-                    if (
-                        paymentRowsError
-                    ) {
-
-                        throw paymentRowsError;
-
-                    }
-
-
-                    /*
-                    ==========================================
-                    CALCULATE PAID
-                    ==========================================
-                    */
-
-                    const totalAmount =
-                        Math.round(
-                            Number(
-                                apInvoice.total_amount
-                                ||
-                                0
-                            )
-                        );
-
-
-                    const paidAmount =
-                        Math.round(
-                            (
-                                paymentRows
-                                ||
-                                []
-                            )
-                            .reduce(
-                                (
-                                    total,
-                                    payment
-                                ) => {
-
-                                    return (
-                                        total
-                                        +
-                                        Number(
-                                            payment.payment_amount
-                                            ||
-                                            0
-                                        )
-                                    );
-
-                                },
-                                0
-                            )
-                        );
-
-
-                    const outstandingAmount =
-                        Math.max(
-                            totalAmount
-                            -
-                            paidAmount,
-                            0
-                        );
-
-
-                    /*
-                    ==========================================
-                    DETERMINE AP STATUS
-                    ==========================================
-                    */
-
-                    let apStatus =
-                        "Complete";
-
-
-                    if (
-                        paidAmount > 0
-                        &&
-                        paidAmount < totalAmount
-                    ) {
-
-                        apStatus =
-                            "Partial Paid";
-
-                    }
-
-
-                    if (
-                        totalAmount > 0
-                        &&
-                        paidAmount >= totalAmount
-                    ) {
-
-                        apStatus =
-                            "Paid";
-
-                    }
-
-
-                    /*
-                    ==========================================
-                    UPDATE AP
-                    ==========================================
-                    */
-
-                    const {
-                        error: updateAPError
-                    } = await supabase
-
-                        .from(
-                            "trx_account_payable"
-                        )
-
-                        .update({
-
-                            paid_amount:
-                                paidAmount,
-
-                            outstanding_amount:
-                                outstandingAmount,
-
-                            status:
-                                apStatus
-
-                        })
-
-                        .eq(
-                            "id",
-                            accountPayableId
-                        );
-
-
-                    if (
-                        updateAPError
-                    ) {
-
-                        throw updateAPError;
-
-                    }
-
-                }
-
-
-                console.log(
-                    "BULK AP PAYMENT ALREADY POSTED SYNC:",
-                    {
-                        batch_id:
-                            apPaymentBatch.id,
-
-                        payment_no:
-                            apPaymentBatch.payment_no,
-
-                        allocation_count:
-                            linkedAllocations.length,
-
-                        account_payable_count:
-                            apPaymentBatchAPIds.length,
-
-                        journal_id:
-                            id
-                    }
-                );
-
-            }
-
-
-            /*
-            ==================================================
-            AR PAYMENT
-            ALREADY POSTED
-            RECALCULATE SOURCE
-            ==================================================
-            */
-
-            if (
-                sourceModule === "AR"
-                &&
-                sourceDocumentType === "AR_PAYMENT"
-                &&
-                accountReceivableId
-            ) {
-
-                /*
-                ==============================================
-                GET AR
-                ==============================================
-                */
-
-                const {
-
-                    data:
-                        arInvoice,
-
-                    error:
-                        arInvoiceError
-
-                } = await supabase
-
-                    .from(
-                        "trx_account_receivable"
-                    )
-
-                    .select(`
-                        id,
-                        invoice_no,
-                        total_amount,
-                        paid_amount,
-                        outstanding_amount,
-                        status,
-                        gl_journal_id
-                    `)
-
-                    .eq(
-                        "id",
-                        accountReceivableId
-                    )
-
-                    .maybeSingle();
-
-
-                if (
-                    arInvoiceError
-                ) {
-
-                    throw arInvoiceError;
-
-                }
-
-
-                if (
-                    !arInvoice
-                ) {
-
-                    throw new Error(
-                        "Account Receivable not found."
-                    );
-
-                }
-
-
-                /*
-                ==============================================
-                GET PAYMENT ROWS
-                ==============================================
-                */
-
-                const {
-
-                    data:
-                        paymentRows,
-
-                    error:
-                        paymentRowsError
-
-                } = await supabase
-
-                    .from(
-                        "trx_account_receivable_payment"
-                    )
-
-                    .select(`
-                        id,
-                        amount,
-                        gl_journal_id
-                    `)
-
-                    .eq(
-                        "account_receivable_id",
-                        accountReceivableId
-                    )
-
-                    .not(
-                        "gl_journal_id",
-                        "is",
-                        null
-                    );
-
-
-                if (
-                    paymentRowsError
-                ) {
-
-                    throw paymentRowsError;
-
-                }
-
-
-                /*
-                ==============================================
-                JOURNAL IDS
-                ==============================================
-                */
-
-                const journalIds =
-                    [
-                        ...new Set(
-                            (
-                                paymentRows
-                                ||
-                                []
-                            )
-                            .map(
-                                payment =>
-                                    payment?.gl_journal_id
-                            )
-                            .filter(
-                                Boolean
-                            )
-                        )
-                    ];
-
-
-                /*
-                ==============================================
-                GET JOURNAL STATUS
-                ==============================================
-                */
-
-                let paymentJournals =
-                    [];
-
-
-                if (
-                    journalIds.length > 0
-                ) {
-
-                    const {
-
-                        data:
-                            journalRows,
-
-                        error:
-                            journalRowsError
-
-                    } = await supabase
-
-                        .from(
-                            "trx_gl_journal"
-                        )
-
-                        .select(`
-                            id,
-                            status
-                        `)
-
-                        .in(
-                            "id",
-                            journalIds
-                        );
-
-
-                    if (
-                        journalRowsError
-                    ) {
-
-                        throw journalRowsError;
-
-                    }
-
-
-                    paymentJournals =
-                        journalRows
-                        ||
-                        [];
-
-                }
-
-
-                /*
-                ==============================================
-                JOURNAL STATUS MAP
-                ==============================================
-                */
-
-                const journalStatusMap =
-                    new Map(
-                        paymentJournals.map(
-                            item => [
-
-                                String(
-                                    item.id
-                                ),
-
-                                String(
-                                    item.status
-                                    ||
-                                    ""
-                                )
-                                .trim()
-                                .toUpperCase()
-
-                            ]
-                        )
-                    );
-
-
-                /*
-                ==================================================
-                ACTIVE AR PAYMENTS
-
-                FINAL RULE:
-
-                DRAFT  -> ACTIVE
-                POSTED -> ACTIVE
-                VOID   -> INACTIVE
-
-                MISSING / UNKNOWN JOURNAL
-                -> INACTIVE
-                ==================================================
-                */
-
-                const activePayments =
-                    (
-                        paymentRows
-                        ||
-                        []
-                    )
-                    .filter(
-                        payment => {
-
-                            if (
-                                !payment
-                                ||
-                                !payment.gl_journal_id
-                            ) {
-
-                                return false;
-
-                            }
-
-
-                            const paymentJournalStatus =
-                                journalStatusMap.get(
-                                    String(
-                                        payment.gl_journal_id
-                                    )
-                                )
-                                ||
-                                "";
-
-
-                            return (
-                                paymentJournalStatus ===
-                                    "DRAFT"
-                                ||
-                                paymentJournalStatus ===
-                                    "POSTED"
-                            );
-
-                        }
-                    );
-
-
-                /*
-                ==============================================
-                CALCULATE PAID
-                ==============================================
-                */
-
-                const totalAmount =
-                    Number(
-                        arInvoice.total_amount
-                        ||
-                        0
-                    );
-
-
-                const paidAmount =
-                    Number(
-                        activePayments
-                            .reduce(
-                                (
-                                    total,
-                                    payment
-                                ) => {
-
-                                    return (
-                                        total
-                                        +
-                                        Number(
-                                            payment.amount
-                                            ||
-                                            0
-                                        )
-                                    );
-
-                                },
-                                0
-                            )
-                            .toFixed(
-                                2
-                            )
-                    );
-
-
-                const outstandingAmount =
-                    Number(
-                        Math.max(
-                            totalAmount
-                            -
-                            paidAmount,
-                            0
-                        )
-                        .toFixed(
-                            2
-                        )
-                    );
-
-
-                /*
-                ==============================================
-                STATUS
-                ==============================================
-                */
-
-                let arStatus =
-                    "Complete";
-
-
-                if (
-                    paidAmount > 0
-                    &&
-                    outstandingAmount > 0
-                ) {
-
-                    arStatus =
-                        "Partial Paid";
-
-                }
-
-
-                if (
-                    totalAmount > 0
-                    &&
-                    paidAmount >= totalAmount
-                    &&
-                    outstandingAmount <= 0
-                ) {
-
-                    arStatus =
-                        "Paid";
-
-                }
-
-
-                /*
-                ==============================================
-                UPDATE AR
-                ==============================================
-                */
-
-                const {
-
-                    data:
-                        recalculatedAR,
-
-                    error:
-                        updateARError
-
-                } = await supabase
-
-                    .from(
-                        "trx_account_receivable"
-                    )
-
-                    .update({
-
-                        paid_amount:
-                            paidAmount,
-
-                        outstanding_amount:
-                            outstandingAmount,
-
-                        status:
-                            arStatus
-
-                    })
-
-                    .eq(
-                        "id",
-                        accountReceivableId
-                    )
-
-                    .select(`
-                        id,
-                        invoice_no,
-                        total_amount,
-                        paid_amount,
-                        outstanding_amount,
-                        status,
-                        gl_journal_id
-                    `)
-
-                    .single();
-
-
-                if (
-                    updateARError
-                ) {
-
-                    throw updateARError;
-
-                }
-
-
-                updatedAR =
-                    recalculatedAR;
-
-            }
-                        /*
-            ==================================================
-            NOTIFY SOURCE
-            ALREADY POSTED
-            ==================================================
-            */
-
-            if (
-                (
-                    sourceModule === "AP"
-                    ||
-                    sourceModule === "AR"
-                )
-                &&
-                sourceDocumentId
-            ) {
-
-                window.dispatchEvent(
-
-                    new CustomEvent(
-                        "finova:source-transaction-changed",
-                        {
-                            detail: {
-
-                                sourceModule:
-                                    sourceModule,
-
-                                sourceDocumentType:
-                                    sourceDocumentType,
-
-                                sourceDocumentId:
-                                    sourceDocumentId,
-
-                                journalId:
-                                    id,
-
-                                action:
-                                    "JOURNAL_POSTED",
-
-
-                                /*
-                                ======================================
-                                ACCOUNT PAYABLE ID
-                                ======================================
-                                */
-
-                                accountPayableId:
-
-                                    sourceModule === "AP"
-                                    &&
-                                    sourceDocumentType === "AP_PAYMENT"
-                                    &&
-                                    apPaymentBatch
-
-                                        ? null
-
-                                        :
-                                        sourceModule === "AP"
-                                            ? sourceDocumentId
-                                            : null,
-
-
-                                /*
-                                ======================================
-                                BULK AP PAYMENT BATCH ID
-                                ======================================
-                                */
-
-                                paymentBatchId:
-
-                                    sourceModule === "AP"
-                                    &&
-                                    sourceDocumentType === "AP_PAYMENT"
-                                    &&
-                                    apPaymentBatch
-
-                                        ? apPaymentBatch.id
-
-                                        : null,
-
-
-                                /*
-                                ======================================
-                                BULK AP PAYMENT
-                                ALL ACCOUNT PAYABLE IDS
-                                ======================================
-                                */
-
-                                accountPayableIds:
-
-                                    sourceModule === "AP"
-                                    &&
-                                    sourceDocumentType === "AP_PAYMENT"
-                                    &&
-                                    apPaymentBatch
-
-                                        ? apPaymentBatchAPIds
-
-                                        : [],
-
-
-                                /*
-                                ======================================
-                                ACCOUNT RECEIVABLE ID
-                                ======================================
-                                */
-
-                                accountReceivableId:
-
-                                    sourceModule === "AR"
-
-                                        ? (
-                                            accountReceivableId
-                                            ||
-                                            sourceDocumentId
-                                        )
-
-                                        : null,
-
-
-                                /*
-                                ======================================
-                                AR PAYMENT ID
-                                ======================================
-                                */
-
-                                paymentId:
-
-                                    sourceDocumentType ===
-                                        "AR_PAYMENT"
-
-                                        ? (
-                                            arPayment?.id
-                                            ||
-                                            null
-                                        )
-
-                                        : null,
-
-
-                                /*
-                                ======================================
-                                AR RECALCULATED RESULT
-                                ======================================
-                                */
-
-                                paidAmount:
-                                    updatedAR?.paid_amount
-                                    ??
-                                    null,
-
-                                outstandingAmount:
-                                    updatedAR?.outstanding_amount
-                                    ??
-                                    null,
-
-                                sourceStatus:
-                                    updatedAR?.status
-                                    ||
-                                    null
-
-                            }
-                        }
-                    )
-
-                );
-
-            }
-
-
-            /*
-            ==================================================
-            GL ALREADY POSTED
-            NO DATABASE POST REQUIRED
-            ==================================================
-            */
-
-            await this.loadData(
-                false
-            );
-
-
-            return;
-
-        }
-
-
-        /*
-        ======================================================
-        FINOVA STATUS RULE
-
-        DRAFT -> CAN POST
-        VOID  -> CAN POST
-        ======================================================
-        */
-
-        if (
-            currentStatus !== "DRAFT"
-            &&
-            currentStatus !== "VOID"
-        ) {
-
-            throw new Error(
-                `Journal status "${journal.status || ""}" cannot be posted.`
-            );
-
-        }
-
-
-        /*
-        ======================================================
-        CONFIRM POST
-        ======================================================
-        */
-
-        const confirmed =
-            await this.showPostConfirmation();
-
-
-        if (
-            !confirmed
-        ) {
-
-            return;
-
-        }
-
-
-        /*
-        ======================================================
-        POST THROUGH SERVICE
-
-        AFTER THIS:
-        GL JOURNAL STATUS = POSTED
-        ======================================================
-        */
-
-        await this.service.post(
-            id
-        );
-
-
-        /*
-        ======================================================
-        BULK AP PAYMENT
-        ACTIVATE AFTER GL JOURNAL POST SUCCESS
-        ======================================================
-        */
-
-        if (
-            apPaymentBatch
-        ) {
-
-            /*
-            ==================================================
-            UPDATE PAYMENT BATCH STATUS
-            ==================================================
-            */
-
             const {
-                data: postedBatch,
-                error: batchPostError
+                error: batchStatusError
             } = await supabase
 
                 .from(
@@ -20076,13 +19098,6 @@ if (
 
                     status:
                         "Posted",
-
-                    /*
-                    ==========================================
-                    CLEAR PREVIOUS VOID INFORMATION
-                    IMPORTANT FOR VOID -> POST
-                    ==========================================
-                    */
 
                     void_reason:
                         null,
@@ -20101,697 +19116,17 @@ if (
                     apPaymentBatch.id
                 )
 
-                /*
-                ==============================================
-                SAFETY:
-                BATCH MUST STILL POINT TO THIS JOURNAL
-                ==============================================
-                */
-
                 .eq(
                     "gl_journal_id",
                     id
-                )
-
-                .select(`
-                    id,
-                    payment_no,
-                    status,
-                    total_payment,
-                    gl_journal_id
-                `)
-
-                .single();
-
-
-            if (
-                batchPostError
-            ) {
-
-                throw batchPostError;
-
-            }
-
-
-            /*
-            ==================================================
-            ACTIVATE ALL PAYMENT ALLOCATIONS
-
-            ONE BATCH
-            MANY AP INVOICES
-            ONE GL JOURNAL
-            ==================================================
-            */
-
-            const {
-                data: linkedAllocations,
-                error: allocationLinkError
-            } = await supabase
-
-                .from(
-                    "trx_ap_payment"
-                )
-
-                .update({
-
-                    gl_journal_id:
-                        id
-
-                })
-
-                .eq(
-                    "payment_batch_id",
-                    apPaymentBatch.id
-                )
-
-                .select(`
-                    id,
-                    payment_batch_id,
-                    account_payable_id,
-                    payment_amount,
-                    gl_journal_id
-                `);
-
-
-            if (
-                allocationLinkError
-            ) {
-
-                throw allocationLinkError;
-
-            }
-
-
-            /*
-            ==================================================
-            SAFETY:
-            ALL ALLOCATIONS MUST BE ACTIVATED
-            ==================================================
-            */
-
-            if (
-                !Array.isArray(
-                    linkedAllocations
-                )
-                ||
-                linkedAllocations.length
-                !==
-                apPaymentBatchAllocations.length
-            ) {
-
-                throw new Error(
-                    "Not all AP Payment Batch allocations were activated."
-                );
-
-            }
-
-
-            /*
-            ==================================================
-            RECALCULATE ALL ACCOUNT PAYABLE INVOICES
-            ==================================================
-            */
-
-            const apService =
-                window.apService;
-
-
-            for (
-                const accountPayableId
-                of apPaymentBatchAPIds
-            ) {
-
-                /*
-                ==============================================
-                PREFERRED:
-                USE ACCOUNT PAYABLE SERVICE
-                ==============================================
-                */
-
-                if (
-                    apService
-                    &&
-                    typeof apService.updatePaymentStatus
-                    ===
-                    "function"
-                ) {
-
-                    await apService
-                        .updatePaymentStatus(
-                            accountPayableId
-                        );
-
-
-                    continue;
-
-                }
-
-
-                /*
-                ==============================================
-                FALLBACK:
-                AP WORKSPACE / SERVICE NOT ACTIVE
-                ==============================================
-                */
-
-                const {
-                    data: apInvoice,
-                    error: apInvoiceError
-                } = await supabase
-
-                    .from(
-                        "trx_account_payable"
-                    )
-
-                    .select(`
-                        id,
-                        total_amount,
-                        status
-                    `)
-
-                    .eq(
-                        "id",
-                        accountPayableId
-                    )
-
-                    .maybeSingle();
-
-
-                if (
-                    apInvoiceError
-                ) {
-
-                    throw apInvoiceError;
-
-                }
-
-
-                if (
-                    !apInvoice
-                ) {
-
-                    throw new Error(
-                        "Account Payable invoice was not found during payment recalculation."
-                    );
-
-                }
-
-
-                /*
-                ==============================================
-                GET ACTIVE AP PAYMENT ROWS
-                ==============================================
-                */
-
-                const {
-                    data: paymentRows,
-                    error: paymentRowsError
-                } = await supabase
-
-                    .from(
-                        "trx_ap_payment"
-                    )
-
-                    .select(`
-                        payment_amount,
-                        gl_journal_id
-                    `)
-
-                    .eq(
-                        "account_payable_id",
-                        accountPayableId
-                    )
-
-                    .not(
-                        "gl_journal_id",
-                        "is",
-                        null
-                    );
-
-
-                if (
-                    paymentRowsError
-                ) {
-
-                    throw paymentRowsError;
-
-                }
-
-
-                /*
-                ==============================================
-                CALCULATE TOTAL
-                ==============================================
-                */
-
-                const totalAmount =
-                    Math.round(
-                        Number(
-                            apInvoice.total_amount
-                            ||
-                            0
-                        )
-                    );
-
-
-                const paidAmount =
-                    Math.round(
-                        (
-                            paymentRows
-                            ||
-                            []
-                        )
-                        .reduce(
-                            (
-                                total,
-                                payment
-                            ) => {
-
-                                return (
-                                    total
-                                    +
-                                    Number(
-                                        payment.payment_amount
-                                        ||
-                                        0
-                                    )
-                                );
-
-                            },
-                            0
-                        )
-                    );
-
-
-                const outstandingAmount =
-                    Math.max(
-                        totalAmount
-                        -
-                        paidAmount,
-                        0
-                    );
-
-
-                /*
-                ==============================================
-                AP STATUS
-                ==============================================
-                */
-
-                let apStatus =
-                    "Complete";
-
-
-                if (
-                    paidAmount > 0
-                    &&
-                    paidAmount < totalAmount
-                ) {
-
-                    apStatus =
-                        "Partial Paid";
-
-                }
-
-
-                if (
-                    totalAmount > 0
-                    &&
-                    paidAmount >= totalAmount
-                ) {
-
-                    apStatus =
-                        "Paid";
-
-                }
-
-
-                /*
-                ==============================================
-                UPDATE ACCOUNT PAYABLE
-                ==============================================
-                */
-
-                const {
-                    error: updateAPError
-                } = await supabase
-
-                    .from(
-                        "trx_account_payable"
-                    )
-
-                    .update({
-
-                        paid_amount:
-                            paidAmount,
-
-                        outstanding_amount:
-                            outstandingAmount,
-
-                        status:
-                            apStatus
-
-                    })
-
-                    .eq(
-                        "id",
-                        accountPayableId
-                    );
-
-
-                if (
-                    updateAPError
-                ) {
-
-                    throw updateAPError;
-
-                }
-
-            }
-
-
-            /*
-            ==================================================
-            BULK AP PAYMENT DEBUG
-            ==================================================
-            */
-
-            console.log(
-                "BULK AP PAYMENT POSTED:",
-                {
-                    batch_id:
-                        postedBatch?.id,
-
-                    payment_no:
-                        postedBatch?.payment_no,
-
-                    allocation_count:
-                        linkedAllocations.length,
-
-                    account_payable_count:
-                        apPaymentBatchAPIds.length,
-
-                    journal_id:
-                        id
-                }
-            );
-
-        }
-                /*
-        ======================================================
-        AR INVOICE
-        VOID -> POST RECOVERY
-
-        FINAL RULE:
-
-        AR INVOICE JOURNAL DRAFT -> POST
-        AR REMAINS COMPLETE
-
-        AR INVOICE JOURNAL VOID -> POST
-        AR VOID -> COMPLETE
-
-        IMPORTANT:
-
-        - KEEP SAME AR
-        - KEEP SAME GL JOURNAL
-        - DO NOT DETACH gl_journal_id
-        - PAYMENT MUST BE ZERO
-        ======================================================
-        */
-
-        let updatedARInvoice =
-            null;
-
-
-        if (
-            sourceModule === "AR"
-            &&
-            sourceDocumentType === "AR_INVOICE"
-            &&
-            sourceDocumentId
-        ) {
-
-            /*
-            ==================================================
-            GET ACCOUNT RECEIVABLE
-            ==================================================
-            */
-
-            const {
-
-                data:
-                    arInvoice,
-
-                error:
-                    arInvoiceError
-
-            } = await supabase
-
-                .from(
-                    "trx_account_receivable"
-                )
-
-                .select(`
-                    id,
-                    invoice_no,
-                    status,
-                    total_amount,
-                    paid_amount,
-                    outstanding_amount,
-                    gl_journal_id
-                `)
-
-                .eq(
-                    "id",
-                    sourceDocumentId
-                )
-
-                .maybeSingle();
-
-
-            if (
-                arInvoiceError
-            ) {
-
-                throw arInvoiceError;
-
-            }
-
-
-            if (
-                !arInvoice
-            ) {
-
-                throw new Error(
-                    "Account Receivable linked to this GL Journal was not found."
-                );
-
-            }
-
-
-            /*
-            ==================================================
-            JOURNAL LINK VALIDATION
-            ==================================================
-            */
-
-            if (
-                !arInvoice.gl_journal_id
-            ) {
-
-                throw new Error(
-                    "Account Receivable is not linked to a GL Journal."
-                );
-
-            }
-
-
-            if (
-                String(
-                    arInvoice.gl_journal_id
-                )
-                !==
-                String(
-                    id
-                )
-            ) {
-
-                throw new Error(
-                    "This GL Journal does not match the linked Account Receivable journal."
-                );
-
-            }
-
-
-            /*
-            ==================================================
-            PAYMENT SAFETY
-
-            VOID AR INVOICE SHOULD HAVE NO ACTIVE PAYMENT.
-            ==================================================
-            */
-
-            const paidAmount =
-                Number(
-                    arInvoice.paid_amount
-                    ||
-                    0
                 );
 
 
             if (
-                currentStatus === "VOID"
-                &&
-                paidAmount > 0
+                batchStatusError
             ) {
 
-                throw new Error(
-                    "Void Account Receivable with payment cannot be reposted."
-                );
-
-            }
-
-
-            /*
-            ==================================================
-            TOTAL / OUTSTANDING
-            ==================================================
-            */
-
-            const totalAmount =
-                Number(
-                    arInvoice.total_amount
-                    ||
-                    0
-                );
-
-
-            /*
-            ==================================================
-            RESTORE AR
-
-            ONLY REQUIRED WHEN JOURNAL WAS VOID.
-
-            VOID
-            ->
-            COMPLETE
-            ==================================================
-            */
-
-            if (
-                currentStatus === "VOID"
-            ) {
-
-                const {
-
-                    data:
-                        restoredAR,
-
-                    error:
-                        restoreARError
-
-                } = await supabase
-
-                    .from(
-                        "trx_account_receivable"
-                    )
-
-                    .update({
-
-                        status:
-                            "Complete",
-
-                        paid_amount:
-                            0,
-
-                        outstanding_amount:
-                            totalAmount
-
-                    })
-
-                    .eq(
-                        "id",
-                        sourceDocumentId
-                    )
-
-                    /*
-                    ==========================================
-                    SAFETY:
-                    AR MUST STILL POINT TO THIS JOURNAL
-                    ==========================================
-                    */
-
-                    .eq(
-                        "gl_journal_id",
-                        id
-                    )
-
-                    .select(`
-                        id,
-                        invoice_no,
-                        status,
-                        total_amount,
-                        paid_amount,
-                        outstanding_amount,
-                        gl_journal_id
-                    `)
-
-                    .single();
-
-
-                if (
-                    restoreARError
-                ) {
-
-                    console.error(
-                        "AR INVOICE RESTORE AFTER GL POST ERROR:",
-                        restoreARError
-                    );
-
-
-                    throw restoreARError;
-
-                }
-
-
-                updatedARInvoice =
-                    restoredAR;
-
-
-                console.log(
-                    "AR INVOICE RESTORED FROM VOID:",
-                    {
-                        account_receivable_id:
-                            restoredAR?.id,
-
-                        invoice_no:
-                            restoredAR?.invoice_no,
-
-                        previous_ar_status:
-                            arInvoice.status,
-
-                        current_ar_status:
-                            restoredAR?.status,
-
-                        journal_id:
-                            id,
-
-                        previous_journal_status:
-                            currentStatus,
-
-                        current_journal_status:
-                            "Posted",
-
-                        paid_amount:
-                            restoredAR?.paid_amount,
-
-                        outstanding_amount:
-                            restoredAR?.outstanding_amount,
-
-                        gl_journal_id:
-                            restoredAR?.gl_journal_id
-                    }
-                );
+                throw batchStatusError;
 
             }
 
@@ -20799,161 +19134,188 @@ if (
 
 
         /*
-        ======================================================
-        DEBUG
-        ======================================================
+        ==============================================
+        ACTIVATE ALL ALLOCATIONS
+        ==============================================
         */
 
-        console.log(
-            "GL JOURNAL POSTED:",
-            {
-                journal_id:
-                    id,
+        const {
+            data: linkedAllocations,
+            error: allocationLinkError
+        } = await supabase
 
-                journal_no:
-                    journal.journal_no,
+            .from(
+                "trx_ap_payment"
+            )
 
-                previous_status:
-                    currentStatus,
+            .update({
 
-                source_module:
-                    sourceModule,
+                gl_journal_id:
+                    id
 
-                source_document_type:
-                    sourceDocumentType,
+            })
 
-                source_document_id:
-                    sourceDocumentId
-            }
-        );
-                /*
-        ======================================================
-        AR PAYMENT
-        RECALCULATE AFTER POST
+            .eq(
+                "payment_batch_id",
+                apPaymentBatch.id
+            )
 
-        IMPORTANT:
-        IF PREVIOUS STATUS WAS VOID,
-        THE SAME PAYMENT JOURNAL BECOMES ACTIVE AGAIN.
-        ======================================================
-        */
-
-        let updatedAR =
-            null;
+            .select(`
+                id,
+                payment_batch_id,
+                account_payable_id,
+                payment_amount,
+                gl_journal_id
+            `);
 
 
         if (
-            sourceModule === "AR"
-            &&
-            sourceDocumentType === "AR_PAYMENT"
-            &&
-            accountReceivableId
+            allocationLinkError
+        ) {
+
+            throw allocationLinkError;
+
+        }
+
+
+        /*
+        ==============================================
+        SAFETY:
+        ALL ALLOCATIONS MUST BE UPDATED
+        ==============================================
+        */
+
+        if (
+            !Array.isArray(
+                linkedAllocations
+            )
+            ||
+            linkedAllocations.length
+            !==
+            apPaymentBatchAllocations.length
+        ) {
+
+            throw new Error(
+                "Not all AP Payment Batch allocations were synchronized."
+            );
+
+        }
+
+
+        /*
+        ==============================================
+        RECALCULATE ALL AP INVOICES
+        ==============================================
+        */
+
+        const apService =
+            window.apService;
+
+
+        for (
+            const accountPayableId
+            of apPaymentBatchAPIds
         ) {
 
             /*
-            ==================================================
-            SAFETY:
-            PAYMENT RELATION MUST STILL EXIST
-            ==================================================
+            ==========================================
+            PREFERRED:
+            USE AP SERVICE
+            ==========================================
             */
 
             if (
-                !arPayment
+                apService
+                &&
+                typeof apService.updatePaymentStatus
+                ===
+                "function"
             ) {
 
-                throw new Error(
-                    "AR Payment record linked to this journal was not found. Payment history must remain linked to the GL Journal when the journal is Void."
-                );
+                await apService
+                    .updatePaymentStatus(
+                        accountPayableId
+                    );
+
+
+                continue;
 
             }
 
 
             /*
-            ==================================================
-            GET ACCOUNT RECEIVABLE
-            ==================================================
+            ==========================================
+            FALLBACK:
+            GET AP INVOICE
+            ==========================================
             */
 
             const {
-
-                data:
-                    arInvoice,
-
-                error:
-                    arInvoiceError
-
+                data: apInvoice,
+                error: apInvoiceError
             } = await supabase
 
                 .from(
-                    "trx_account_receivable"
+                    "trx_account_payable"
                 )
 
                 .select(`
                     id,
-                    invoice_no,
                     total_amount,
-                    paid_amount,
-                    outstanding_amount,
-                    status,
-                    gl_journal_id
+                    status
                 `)
 
                 .eq(
                     "id",
-                    accountReceivableId
+                    accountPayableId
                 )
 
                 .maybeSingle();
 
 
             if (
-                arInvoiceError
+                apInvoiceError
             ) {
 
-                throw arInvoiceError;
+                throw apInvoiceError;
 
             }
 
 
             if (
-                !arInvoice
+                !apInvoice
             ) {
 
                 throw new Error(
-                    "Account Receivable not found."
+                    "Account Payable invoice was not found during payment synchronization."
                 );
 
             }
 
 
             /*
-            ==================================================
-            GET ALL LINKED AR PAYMENTS
-            ==================================================
+            ==========================================
+            GET ACTIVE AP PAYMENT ROWS
+            ==========================================
             */
 
             const {
-
-                data:
-                    paymentRows,
-
-                error:
-                    paymentRowsError
-
+                data: paymentRows,
+                error: paymentRowsError
             } = await supabase
 
                 .from(
-                    "trx_account_receivable_payment"
+                    "trx_ap_payment"
                 )
 
                 .select(`
-                    id,
-                    amount,
+                    payment_amount,
                     gl_journal_id
                 `)
 
                 .eq(
-                    "account_receivable_id",
-                    accountReceivableId
+                    "account_payable_id",
+                    accountPayableId
                 )
 
                 .not(
@@ -20973,258 +19335,76 @@ if (
 
 
             /*
-            ==================================================
-            GET PAYMENT JOURNAL IDS
-            ==================================================
-            */
-
-            const journalIds =
-                [
-                    ...new Set(
-                        (
-                            paymentRows
-                            ||
-                            []
-                        )
-                        .map(
-                            payment =>
-                                payment?.gl_journal_id
-                        )
-                        .filter(
-                            Boolean
-                        )
-                    )
-                ];
-
-
-            /*
-            ==================================================
-            GET JOURNAL STATUS
-            ==================================================
-            */
-
-            let paymentJournals =
-                [];
-
-
-            if (
-                journalIds.length > 0
-            ) {
-
-                const {
-
-                    data:
-                        journalRows,
-
-                    error:
-                        journalRowsError
-
-                } = await supabase
-
-                    .from(
-                        "trx_gl_journal"
-                    )
-
-                    .select(`
-                        id,
-                        status
-                    `)
-
-                    .in(
-                        "id",
-                        journalIds
-                    );
-
-
-                if (
-                    journalRowsError
-                ) {
-
-                    throw journalRowsError;
-
-                }
-
-
-                paymentJournals =
-                    journalRows
-                    ||
-                    [];
-
-            }
-
-
-            /*
-            ==================================================
-            JOURNAL STATUS MAP
-            ==================================================
-            */
-
-            const journalStatusMap =
-                new Map(
-                    paymentJournals.map(
-                        item => [
-
-                            String(
-                                item.id
-                            ),
-
-                            String(
-                                item.status
-                                ||
-                                ""
-                            )
-                            .trim()
-                            .toUpperCase()
-
-                        ]
-                    )
-                );
-
-
-            /*
-            ==================================================
-            ACTIVE AR PAYMENTS
-
-            FINAL RULE:
-
-            DRAFT
-            -> ACTIVE
-
-            POSTED
-            -> ACTIVE
-
-            VOID
-            -> INACTIVE
-
-            MISSING JOURNAL
-            -> INACTIVE
-
-            UNKNOWN STATUS
-            -> INACTIVE
-            ==================================================
-            */
-
-            const activePayments =
-                (
-                    paymentRows
-                    ||
-                    []
-                )
-                .filter(
-                    payment => {
-
-                        if (
-                            !payment
-                            ||
-                            !payment.gl_journal_id
-                        ) {
-
-                            return false;
-
-                        }
-
-
-                        const paymentJournalStatus =
-                            journalStatusMap.get(
-                                String(
-                                    payment.gl_journal_id
-                                )
-                            )
-                            ||
-                            "";
-
-
-                        return (
-                            paymentJournalStatus ===
-                                "DRAFT"
-                            ||
-                            paymentJournalStatus ===
-                                "POSTED"
-                        );
-
-                    }
-                );
-
-
-            /*
-            ==================================================
+            ==========================================
             CALCULATE PAID
-            ==================================================
+            ==========================================
             */
 
             const totalAmount =
-                Number(
-                    arInvoice.total_amount
-                    ||
-                    0
+                Math.round(
+                    Number(
+                        apInvoice.total_amount
+                        ||
+                        0
+                    )
                 );
 
 
             const paidAmount =
-                Number(
-                    activePayments
-                        .reduce(
-                            (
-                                total,
-                                payment
-                            ) => {
+                Math.round(
+                    (
+                        paymentRows
+                        ||
+                        []
+                    )
+                    .reduce(
+                        (
+                            total,
+                            payment
+                        ) => {
 
-                                return (
-                                    total
-                                    +
-                                    Number(
-                                        payment.amount
-                                        ||
-                                        0
-                                    )
-                                );
+                            return (
+                                total
+                                +
+                                Number(
+                                    payment.payment_amount
+                                    ||
+                                    0
+                                )
+                            );
 
-                            },
-                            0
-                        )
-                        .toFixed(
-                            2
-                        )
-                );
-
-
-            /*
-            ==================================================
-            OUTSTANDING
-            ==================================================
-            */
-
-            const outstandingAmount =
-                Number(
-                    Math.max(
-                        totalAmount
-                        -
-                        paidAmount,
+                        },
                         0
                     )
-                    .toFixed(
-                        2
-                    )
+                );
+
+
+            const outstandingAmount =
+                Math.max(
+                    totalAmount
+                    -
+                    paidAmount,
+                    0
                 );
 
 
             /*
-            ==================================================
-            STATUS
-            ==================================================
+            ==========================================
+            DETERMINE AP STATUS
+            ==========================================
             */
 
-            let arStatus =
+            let apStatus =
                 "Complete";
 
 
             if (
                 paidAmount > 0
                 &&
-                outstandingAmount > 0
+                paidAmount < totalAmount
             ) {
 
-                arStatus =
+                apStatus =
                     "Partial Paid";
 
             }
@@ -21234,34 +19414,26 @@ if (
                 totalAmount > 0
                 &&
                 paidAmount >= totalAmount
-                &&
-                outstandingAmount <= 0
             ) {
 
-                arStatus =
+                apStatus =
                     "Paid";
 
             }
 
 
             /*
-            ==================================================
-            UPDATE ACCOUNT RECEIVABLE
-            ==================================================
+            ==========================================
+            UPDATE AP
+            ==========================================
             */
 
             const {
-
-                data:
-                    recalculatedAR,
-
-                error:
-                    updateARError
-
+                error: updateAPError
             } = await supabase
 
                 .from(
-                    "trx_account_receivable"
+                    "trx_account_payable"
                 )
 
                 .update({
@@ -21273,339 +19445,2150 @@ if (
                         outstandingAmount,
 
                     status:
-                        arStatus
+                        apStatus
 
                 })
 
                 .eq(
                     "id",
-                    accountReceivableId
+                    accountPayableId
+                );
+
+
+            if (
+                updateAPError
+            ) {
+
+                throw updateAPError;
+
+            }
+
+        }
+
+
+        console.log(
+            "BULK AP PAYMENT ALREADY POSTED SYNC:",
+            {
+                batch_id:
+                    apPaymentBatch.id,
+
+                payment_no:
+                    apPaymentBatch.payment_no,
+
+                allocation_count:
+                    linkedAllocations.length,
+
+                account_payable_count:
+                    apPaymentBatchAPIds.length,
+
+                journal_id:
+                    id
+            }
+        );
+
+    }
+
+
+    /*
+    ==================================================
+    AR PAYMENT
+    ALREADY POSTED
+    RECALCULATE SOURCE
+    ==================================================
+    */
+
+    if (
+        sourceModule === "AR"
+        &&
+        sourceDocumentType === "AR_PAYMENT"
+        &&
+        accountReceivableId
+    ) {
+
+        /*
+        ==============================================
+        GET AR
+        ==============================================
+        */
+
+        const {
+
+            data:
+                arInvoice,
+
+            error:
+                arInvoiceError
+
+        } = await supabase
+
+            .from(
+                "trx_account_receivable"
+            )
+
+            .select(`
+                id,
+                invoice_no,
+                total_amount,
+                paid_amount,
+                outstanding_amount,
+                status,
+                gl_journal_id
+            `)
+
+            .eq(
+                "id",
+                accountReceivableId
+            )
+
+            .maybeSingle();
+
+
+        if (
+            arInvoiceError
+        ) {
+
+            throw arInvoiceError;
+
+        }
+
+
+        if (
+            !arInvoice
+        ) {
+
+            throw new Error(
+                "Account Receivable not found."
+            );
+
+        }
+
+
+        /*
+        ==============================================
+        GET PAYMENT ROWS
+        ==============================================
+        */
+
+        const {
+
+            data:
+                paymentRows,
+
+            error:
+                paymentRowsError
+
+        } = await supabase
+
+            .from(
+                "trx_account_receivable_payment"
+            )
+
+            .select(`
+                id,
+                amount,
+                gl_journal_id
+            `)
+
+            .eq(
+                "account_receivable_id",
+                accountReceivableId
+            )
+
+            .not(
+                "gl_journal_id",
+                "is",
+                null
+            );
+
+
+        if (
+            paymentRowsError
+        ) {
+
+            throw paymentRowsError;
+
+        }
+
+
+        /*
+        ==============================================
+        JOURNAL IDS
+        ==============================================
+        */
+
+        const journalIds =
+            [
+                ...new Set(
+                    (
+                        paymentRows
+                        ||
+                        []
+                    )
+                    .map(
+                        payment =>
+                            payment?.gl_journal_id
+                    )
+                    .filter(
+                        Boolean
+                    )
+                )
+            ];
+
+
+        /*
+        ==============================================
+        GET JOURNAL STATUS
+        ==============================================
+        */
+
+        let paymentJournals =
+            [];
+
+
+        if (
+            journalIds.length > 0
+        ) {
+
+            const {
+
+                data:
+                    journalRows,
+
+                error:
+                    journalRowsError
+
+            } = await supabase
+
+                .from(
+                    "trx_gl_journal"
                 )
 
                 .select(`
                     id,
-                    invoice_no,
-                    total_amount,
-                    paid_amount,
-                    outstanding_amount,
-                    status,
-                    gl_journal_id
+                    status
                 `)
 
-                .single();
+                .in(
+                    "id",
+                    journalIds
+                );
 
 
             if (
-                updateARError
+                journalRowsError
             ) {
 
-                throw updateARError;
+                throw journalRowsError;
 
             }
 
 
-            updatedAR =
-                recalculatedAR;
+            paymentJournals =
+                journalRows
+                ||
+                [];
+
+        }
 
 
-            /*
-            ==================================================
-            DEBUG
-            ==================================================
-            */
+        /*
+        ==============================================
+        JOURNAL STATUS MAP
+        ==============================================
+        */
 
-            console.log(
-                "AR PAYMENT POST RECALCULATE:",
-                {
-                    account_receivable_id:
-                        accountReceivableId,
+        const journalStatusMap =
+            new Map(
+                paymentJournals.map(
+                    item => [
 
-                    payment_id:
-                        arPayment.id,
+                        String(
+                            item.id
+                        ),
 
-                    journal_id:
-                        id,
+                        String(
+                            item.status
+                            ||
+                            ""
+                        )
+                        .trim()
+                        .toUpperCase()
 
-                    previous_journal_status:
-                        currentStatus,
+                    ]
+                )
+            );
 
-                    current_journal_status:
-                        "Posted",
 
-                    total_amount:
-                        updatedAR.total_amount,
+        /*
+        ==============================================
+        ACTIVE AR PAYMENTS
 
-                    paid_amount:
-                        updatedAR.paid_amount,
+        FINAL RULE:
 
-                    outstanding_amount:
-                        updatedAR.outstanding_amount,
+        DRAFT
+        -> ACTIVE
 
-                    status:
-                        updatedAR.status,
+        POSTED
+        -> ACTIVE
 
-                    active_payment_count:
-                        activePayments.length
+        VOID
+        -> INACTIVE
+
+        MISSING / UNKNOWN JOURNAL
+        -> INACTIVE
+        ==============================================
+        */
+
+        const activePayments =
+            (
+                paymentRows
+                ||
+                []
+            )
+            .filter(
+                payment => {
+
+                    if (
+                        !payment
+                        ||
+                        !payment.gl_journal_id
+                    ) {
+
+                        return false;
+
+                    }
+
+
+                    const paymentJournalStatus =
+                        journalStatusMap.get(
+                            String(
+                                payment.gl_journal_id
+                            )
+                        )
+                        ||
+                        "";
+
+
+                    return (
+                        paymentJournalStatus ===
+                            "DRAFT"
+                        ||
+                        paymentJournalStatus ===
+                            "POSTED"
+                    );
+
                 }
             );
 
-        }
-                /*
-        ======================================================
-        REALTIME GL -> AP / AR
-        ======================================================
+
+        /*
+        ==============================================
+        CALCULATE PAID
+        ==============================================
         */
 
-        if (
-            (
-                sourceModule === "AP"
+        const totalAmount =
+            Number(
+                arInvoice.total_amount
                 ||
-                sourceModule === "AR"
-            )
-            &&
-            sourceDocumentId
-        ) {
-
-            window.dispatchEvent(
-
-                new CustomEvent(
-                    "finova:source-transaction-changed",
-                    {
-                        detail: {
-
-                            /*
-                            ==========================================
-                            SOURCE
-                            ==========================================
-                            */
-
-                            sourceModule:
-                                sourceModule,
-
-                            sourceDocumentType:
-                                sourceDocumentType,
-
-                            sourceDocumentId:
-                                sourceDocumentId,
-
-                            journalId:
-                                id,
-
-                            action:
-                                "JOURNAL_POSTED",
-
-
-                            /*
-                            ==========================================
-                            ACCOUNT PAYABLE ID
-
-                            BULK AP PAYMENT:
-                            sourceDocumentId = BATCH ID
-                            SO DO NOT USE IT AS AP ID.
-                            ==========================================
-                            */
-
-                            accountPayableId:
-
-                                sourceModule === "AP"
-                                &&
-                                sourceDocumentType === "AP_PAYMENT"
-                                &&
-                                apPaymentBatch
-
-                                    ? null
-
-                                    :
-                                    sourceModule === "AP"
-                                        ? sourceDocumentId
-                                        : null,
-
-
-                            /*
-                            ==========================================
-                            BULK AP PAYMENT BATCH
-                            ==========================================
-                            */
-
-                            paymentBatchId:
-
-                                sourceModule === "AP"
-                                &&
-                                sourceDocumentType === "AP_PAYMENT"
-                                &&
-                                apPaymentBatch
-
-                                    ? apPaymentBatch.id
-
-                                    : null,
-
-
-                            /*
-                            ==========================================
-                            ALL AP INVOICES IN BULK PAYMENT
-                            ==========================================
-                            */
-
-                            accountPayableIds:
-
-                                sourceModule === "AP"
-                                &&
-                                sourceDocumentType === "AP_PAYMENT"
-                                &&
-                                apPaymentBatch
-
-                                    ? apPaymentBatchAPIds
-
-                                    : [],
-
-
-                            /*
-                            ==========================================
-                            ACCOUNT RECEIVABLE
-                            ==========================================
-                            */
-
-                            accountReceivableId:
-
-                                sourceModule === "AR"
-
-                                    ? (
-                                        accountReceivableId
-                                        ||
-                                        sourceDocumentId
-                                    )
-
-                                    : null,
-
-
-                            /*
-                            ==========================================
-                            AR PAYMENT
-                            ==========================================
-                            */
-
-                            paymentId:
-
-                                sourceDocumentType ===
-                                    "AR_PAYMENT"
-
-                                    ? (
-                                        arPayment?.id
-                                        ||
-                                        null
-                                    )
-
-                                    : null,
-
-
-                            /*
-                            ==========================================
-                            AR PAYMENT RESULT
-                            ==========================================
-                            */
-
-                            paidAmount:
-
-                                sourceDocumentType ===
-                                    "AR_PAYMENT"
-
-                                    ? (
-                                        updatedAR?.paid_amount
-                                        ??
-                                        null
-                                    )
-
-                                    : null,
-
-
-                            outstandingAmount:
-
-                                sourceDocumentType ===
-                                    "AR_PAYMENT"
-
-                                    ? (
-                                        updatedAR?.outstanding_amount
-                                        ??
-                                        null
-                                    )
-
-                                    : null,
-
-
-                            /*
-                            ==========================================
-                            SOURCE STATUS
-                            ==========================================
-                            */
-
-                            sourceStatus:
-
-                                sourceDocumentType ===
-                                    "AR_PAYMENT"
-
-                                    ? (
-                                        updatedAR?.status
-                                        ||
-                                        null
-                                    )
-
-                                    :
-                                    sourceDocumentType ===
-                                        "AR_INVOICE"
-
-                                        ? (
-                                            updatedARInvoice?.status
-                                            ||
-                                            null
-                                        )
-
-                                        :
-                                        sourceModule === "AP"
-                                        &&
-                                        sourceDocumentType === "AP_PAYMENT"
-                                        &&
-                                        apPaymentBatch
-
-                                            ? "Posted"
-
-                                            : null
-
-                        }
-                    }
-                )
-
+                0
             );
 
 
+        const paidAmount =
+            Number(
+                activePayments
+                    .reduce(
+                        (
+                            total,
+                            payment
+                        ) => {
+
+                            return (
+                                total
+                                +
+                                Number(
+                                    payment.amount
+                                    ||
+                                    0
+                                )
+                            );
+
+                        },
+                        0
+                    )
+                    .toFixed(
+                        2
+                    )
+            );
+
+
+        const outstandingAmount =
+            Number(
+                Math.max(
+                    totalAmount
+                    -
+                    paidAmount,
+                    0
+                )
+                .toFixed(
+                    2
+                )
+            );
+
+
+        /*
+        ==============================================
+        STATUS
+        ==============================================
+        */
+
+        let arStatus =
+            "Complete";
+
+
+        if (
+            paidAmount > 0
+            &&
+            outstandingAmount > 0
+        ) {
+
+            arStatus =
+                "Partial Paid";
+
+        }
+
+
+        if (
+            totalAmount > 0
+            &&
+            paidAmount >= totalAmount
+            &&
+            outstandingAmount <= 0
+        ) {
+
+            arStatus =
+                "Paid";
+
+        }
+
+
+        /*
+        ==============================================
+        UPDATE AR
+        ==============================================
+        */
+
+        const {
+
+            data:
+                recalculatedAR,
+
+            error:
+                updateARError
+
+        } = await supabase
+
+            .from(
+                "trx_account_receivable"
+            )
+
+            .update({
+
+                paid_amount:
+                    paidAmount,
+
+                outstanding_amount:
+                    outstandingAmount,
+
+                status:
+                    arStatus
+
+            })
+
+            .eq(
+                "id",
+                accountReceivableId
+            )
+
+            .select(`
+                id,
+                invoice_no,
+                total_amount,
+                paid_amount,
+                outstanding_amount,
+                status,
+                gl_journal_id
+            `)
+
+            .single();
+
+
+        if (
+            updateARError
+        ) {
+
+            throw updateARError;
+
+        }
+
+
+        updatedAR =
+            recalculatedAR;
+
+    }
+
+
+    /*
+    ==================================================
+    NOTIFY SOURCE
+    ALREADY POSTED
+    ==================================================
+    */
+
+    if (
+        (
+            sourceModule === "AP"
+            ||
+            sourceModule === "AR"
+        )
+        &&
+        sourceDocumentId
+    ) {
+
+        window.dispatchEvent(
+
+            new CustomEvent(
+                "finova:source-transaction-changed",
+                {
+                    detail: {
+
+                        sourceModule:
+                            sourceModule,
+
+                        sourceDocumentType:
+                            sourceDocumentType,
+
+                        sourceDocumentId:
+                            sourceDocumentId,
+
+                        journalId:
+                            id,
+
+                        action:
+                            "JOURNAL_POSTED",
+
+
+                        /*
+                        ======================================
+                        ACCOUNT PAYABLE ID
+                        ======================================
+                        */
+
+                        accountPayableId:
+
+                            sourceModule === "AP"
+                            &&
+                            sourceDocumentType === "AP_PAYMENT"
+                            &&
+                            apPaymentBatch
+
+                                ? null
+
+                                :
+
+                                sourceModule === "AP"
+
+                                    ? sourceDocumentId
+
+                                    : null,
+
+
+                        /*
+                        ======================================
+                        BULK AP PAYMENT BATCH ID
+                        ======================================
+                        */
+
+                        paymentBatchId:
+
+                            sourceModule === "AP"
+                            &&
+                            sourceDocumentType === "AP_PAYMENT"
+                            &&
+                            apPaymentBatch
+
+                                ? apPaymentBatch.id
+
+                                : null,
+
+
+                        /*
+                        ======================================
+                        BULK AP PAYMENT
+                        ALL ACCOUNT PAYABLE IDS
+                        ======================================
+                        */
+
+                        accountPayableIds:
+
+                            sourceModule === "AP"
+                            &&
+                            sourceDocumentType === "AP_PAYMENT"
+                            &&
+                            apPaymentBatch
+
+                                ? apPaymentBatchAPIds
+
+                                : [],
+
+
+                        /*
+                        ======================================
+                        ACCOUNT RECEIVABLE ID
+                        ======================================
+                        */
+
+                        accountReceivableId:
+
+                            sourceModule === "AR"
+
+                                ? (
+                                    accountReceivableId
+                                    ||
+                                    sourceDocumentId
+                                )
+
+                                : null,
+
+
+                        /*
+                        ======================================
+                        AR PAYMENT ID
+                        ======================================
+                        */
+
+                        paymentId:
+
+                            sourceDocumentType ===
+                                "AR_PAYMENT"
+
+                                ? (
+                                    arPayment?.id
+                                    ||
+                                    null
+                                )
+
+                                : null,
+
+
+                        /*
+                        ======================================
+                        AR RECALCULATED RESULT
+                        ======================================
+                        */
+
+                        paidAmount:
+                            updatedAR?.paid_amount
+                            ??
+                            null,
+
+                        outstandingAmount:
+                            updatedAR?.outstanding_amount
+                            ??
+                            null,
+
+                        sourceStatus:
+                            updatedAR?.status
+                            ||
+                            null
+
+                    }
+                }
+            )
+
+        );
+
+    }
+
+
+    /*
+    ==================================================
+    GL ALREADY POSTED
+    NO DATABASE POST REQUIRED
+    ==================================================
+    */
+
+    await this.loadData(
+        false
+    );
+
+
+    return true;
+
+}
+
+
+/*
+======================================================
+FINOVA STATUS RULE
+
+DRAFT -> CAN POST
+VOID  -> CAN POST
+======================================================
+*/
+
+if (
+    currentStatus !== "DRAFT"
+    &&
+    currentStatus !== "VOID"
+) {
+
+    throw new Error(
+        `Journal status "${journal.status || ""}" cannot be posted.`
+    );
+
+}
+
+
+/*
+======================================================
+CONFIRM POST
+======================================================
+
+SAVE & POST DARI saveJournal():
+confirmation SUDAH dilakukan oleh button.
+
+DIRECT POST:
+confirmation tetap dilakukan di sini.
+======================================================
+*/
+
+if (
+    !skipConfirmation
+) {
+
+    const confirmed =
+        await this.showPostConfirmation();
+
+
+    if (
+        !confirmed
+    ) {
+
+        return false;
+
+    }
+
+}
+
+
+/*
+======================================================
+POST THROUGH SERVICE
+
+AFTER THIS:
+GL JOURNAL STATUS = POSTED
+======================================================
+*/
+
+await this.service.post(
+    id
+);
+
+
+/*
+======================================================
+BULK AP PAYMENT
+ACTIVATE AFTER GL JOURNAL POST SUCCESS
+======================================================
+*/
+
+if (
+    apPaymentBatch
+) {
+
+    /*
+    ==================================================
+    UPDATE PAYMENT BATCH STATUS
+    ==================================================
+    */
+
+    const {
+        data: postedBatch,
+        error: batchPostError
+    } = await supabase
+
+        .from(
+            "trx_ap_payment_batch"
+        )
+
+        .update({
+
+            status:
+                "Posted",
+
             /*
-            ==================================================
-            DEBUG REALTIME
-            ==================================================
+            ==========================================
+            CLEAR PREVIOUS VOID INFORMATION
+            IMPORTANT FOR VOID -> POST
+            ==========================================
             */
 
-            console.log(
-                "GL -> SOURCE REALTIME EVENT:",
-                {
-                    source_module:
+            void_reason:
+                null,
+
+            void_at:
+                null,
+
+            updated_at:
+                new Date()
+                    .toISOString()
+
+        })
+
+        .eq(
+            "id",
+            apPaymentBatch.id
+        )
+
+        /*
+        ==============================================
+        SAFETY:
+        BATCH MUST STILL POINT TO THIS JOURNAL
+        ==============================================
+        */
+
+        .eq(
+            "gl_journal_id",
+            id
+        )
+
+        .select(`
+            id,
+            payment_no,
+            status,
+            total_payment,
+            gl_journal_id
+        `)
+
+        .single();
+
+
+    if (
+        batchPostError
+    ) {
+
+        throw batchPostError;
+
+    }
+
+
+    /*
+    ==================================================
+    ACTIVATE ALL PAYMENT ALLOCATIONS
+
+    ONE BATCH
+    MANY AP INVOICES
+    ONE GL JOURNAL
+    ==================================================
+    */
+
+    const {
+        data: linkedAllocations,
+        error: allocationLinkError
+    } = await supabase
+
+        .from(
+            "trx_ap_payment"
+        )
+
+        .update({
+
+            gl_journal_id:
+                id
+
+        })
+
+        .eq(
+            "payment_batch_id",
+            apPaymentBatch.id
+        )
+
+        .select(`
+            id,
+            payment_batch_id,
+            account_payable_id,
+            payment_amount,
+            gl_journal_id
+        `);
+
+
+    if (
+        allocationLinkError
+    ) {
+
+        throw allocationLinkError;
+
+    }
+
+
+    /*
+    ==================================================
+    SAFETY:
+    ALL ALLOCATIONS MUST BE ACTIVATED
+    ==================================================
+    */
+
+    if (
+        !Array.isArray(
+            linkedAllocations
+        )
+        ||
+        linkedAllocations.length
+        !==
+        apPaymentBatchAllocations.length
+    ) {
+
+        throw new Error(
+            "Not all AP Payment Batch allocations were activated."
+        );
+
+    }
+
+
+    /*
+    ==================================================
+    RECALCULATE ALL ACCOUNT PAYABLE INVOICES
+    ==================================================
+    */
+
+    const apService =
+        window.apService;
+
+
+    for (
+        const accountPayableId
+        of apPaymentBatchAPIds
+    ) {
+
+        /*
+        ==============================================
+        PREFERRED:
+        USE ACCOUNT PAYABLE SERVICE
+        ==============================================
+        */
+
+        if (
+            apService
+            &&
+            typeof apService.updatePaymentStatus
+            ===
+            "function"
+        ) {
+
+            await apService
+                .updatePaymentStatus(
+                    accountPayableId
+                );
+
+
+            continue;
+
+        }
+
+
+        /*
+        ==============================================
+        FALLBACK:
+        AP WORKSPACE / SERVICE NOT ACTIVE
+        ==============================================
+        */
+
+        const {
+            data: apInvoice,
+            error: apInvoiceError
+        } = await supabase
+
+            .from(
+                "trx_account_payable"
+            )
+
+            .select(`
+                id,
+                total_amount,
+                status
+            `)
+
+            .eq(
+                "id",
+                accountPayableId
+            )
+
+            .maybeSingle();
+
+
+        if (
+            apInvoiceError
+        ) {
+
+            throw apInvoiceError;
+
+        }
+
+
+        if (
+            !apInvoice
+        ) {
+
+            throw new Error(
+                "Account Payable invoice was not found during payment recalculation."
+            );
+
+        }
+
+
+        /*
+        ==============================================
+        GET ACTIVE AP PAYMENT ROWS
+        ==============================================
+        */
+
+        const {
+            data: paymentRows,
+            error: paymentRowsError
+        } = await supabase
+
+            .from(
+                "trx_ap_payment"
+            )
+
+            .select(`
+                payment_amount,
+                gl_journal_id
+            `)
+
+            .eq(
+                "account_payable_id",
+                accountPayableId
+            )
+
+            .not(
+                "gl_journal_id",
+                "is",
+                null
+            );
+
+
+        if (
+            paymentRowsError
+        ) {
+
+            throw paymentRowsError;
+
+        }
+
+
+        /*
+        ==============================================
+        CALCULATE TOTAL
+        ==============================================
+        */
+
+        const totalAmount =
+            Math.round(
+                Number(
+                    apInvoice.total_amount
+                    ||
+                    0
+                )
+            );
+
+
+        const paidAmount =
+            Math.round(
+                (
+                    paymentRows
+                    ||
+                    []
+                )
+                .reduce(
+                    (
+                        total,
+                        payment
+                    ) => {
+
+                        return (
+                            total
+                            +
+                            Number(
+                                payment.payment_amount
+                                ||
+                                0
+                            )
+                        );
+
+                    },
+                    0
+                )
+            );
+
+
+        const outstandingAmount =
+            Math.max(
+                totalAmount
+                -
+                paidAmount,
+                0
+            );
+
+
+        /*
+        ==============================================
+        AP STATUS
+        ==============================================
+        */
+
+        let apStatus =
+            "Complete";
+
+
+        if (
+            paidAmount > 0
+            &&
+            paidAmount < totalAmount
+        ) {
+
+            apStatus =
+                "Partial Paid";
+
+        }
+
+
+        if (
+            totalAmount > 0
+            &&
+            paidAmount >= totalAmount
+        ) {
+
+            apStatus =
+                "Paid";
+
+        }
+
+
+        /*
+        ==============================================
+        UPDATE ACCOUNT PAYABLE
+        ==============================================
+        */
+
+        const {
+            error: updateAPError
+        } = await supabase
+
+            .from(
+                "trx_account_payable"
+            )
+
+            .update({
+
+                paid_amount:
+                    paidAmount,
+
+                outstanding_amount:
+                    outstandingAmount,
+
+                status:
+                    apStatus
+
+            })
+
+            .eq(
+                "id",
+                accountPayableId
+            );
+
+
+        if (
+            updateAPError
+        ) {
+
+            throw updateAPError;
+
+        }
+
+    }
+
+
+    /*
+    ==================================================
+    BULK AP PAYMENT DEBUG
+    ==================================================
+    */
+
+    console.log(
+        "BULK AP PAYMENT POSTED:",
+        {
+            batch_id:
+                postedBatch?.id,
+
+            payment_no:
+                postedBatch?.payment_no,
+
+            allocation_count:
+                linkedAllocations.length,
+
+            account_payable_count:
+                apPaymentBatchAPIds.length,
+
+            journal_id:
+                id
+        }
+    );
+
+}
+/*
+======================================================
+AR INVOICE
+VOID -> POST RECOVERY
+
+FINAL RULE:
+
+AR INVOICE JOURNAL DRAFT -> POST
+AR REMAINS COMPLETE
+
+AR INVOICE JOURNAL VOID -> POST
+AR VOID -> COMPLETE
+
+IMPORTANT:
+
+- KEEP SAME AR
+- KEEP SAME GL JOURNAL
+- DO NOT DETACH gl_journal_id
+- PAYMENT MUST BE ZERO
+======================================================
+*/
+
+let updatedARInvoice =
+    null;
+
+
+if (
+    sourceModule === "AR"
+    &&
+    sourceDocumentType === "AR_INVOICE"
+    &&
+    sourceDocumentId
+) {
+
+    /*
+    ==================================================
+    GET ACCOUNT RECEIVABLE
+    ==================================================
+    */
+
+    const {
+
+        data:
+            arInvoice,
+
+        error:
+            arInvoiceError
+
+    } = await supabase
+
+        .from(
+            "trx_account_receivable"
+        )
+
+        .select(`
+            id,
+            invoice_no,
+            status,
+            total_amount,
+            paid_amount,
+            outstanding_amount,
+            gl_journal_id
+        `)
+
+        .eq(
+            "id",
+            sourceDocumentId
+        )
+
+        .maybeSingle();
+
+
+    if (
+        arInvoiceError
+    ) {
+
+        throw arInvoiceError;
+
+    }
+
+
+    if (
+        !arInvoice
+    ) {
+
+        throw new Error(
+            "Account Receivable linked to this GL Journal was not found."
+        );
+
+    }
+
+
+    /*
+    ==================================================
+    JOURNAL LINK VALIDATION
+    ==================================================
+    */
+
+    if (
+        !arInvoice.gl_journal_id
+    ) {
+
+        throw new Error(
+            "Account Receivable is not linked to a GL Journal."
+        );
+
+    }
+
+
+    if (
+        String(
+            arInvoice.gl_journal_id
+        )
+        !==
+        String(
+            id
+        )
+    ) {
+
+        throw new Error(
+            "This GL Journal does not match the linked Account Receivable journal."
+        );
+
+    }
+
+
+    /*
+    ==================================================
+    PAYMENT SAFETY
+
+    VOID AR INVOICE SHOULD HAVE NO ACTIVE PAYMENT.
+    ==================================================
+    */
+
+    const paidAmount =
+        Number(
+            arInvoice.paid_amount
+            ||
+            0
+        );
+
+
+    if (
+        currentStatus === "VOID"
+        &&
+        paidAmount > 0
+    ) {
+
+        throw new Error(
+            "Void Account Receivable with payment cannot be reposted."
+        );
+
+    }
+
+
+    /*
+    ==================================================
+    TOTAL / OUTSTANDING
+    ==================================================
+    */
+
+    const totalAmount =
+        Number(
+            arInvoice.total_amount
+            ||
+            0
+        );
+
+
+    /*
+    ==================================================
+    RESTORE AR
+
+    ONLY REQUIRED WHEN JOURNAL WAS VOID.
+
+    VOID
+    ->
+    COMPLETE
+    ==================================================
+    */
+
+    if (
+        currentStatus === "VOID"
+    ) {
+
+        const {
+
+            data:
+                restoredAR,
+
+            error:
+                restoreARError
+
+        } = await supabase
+
+            .from(
+                "trx_account_receivable"
+            )
+
+            .update({
+
+                status:
+                    "Complete",
+
+                paid_amount:
+                    0,
+
+                outstanding_amount:
+                    totalAmount
+
+            })
+
+            .eq(
+                "id",
+                sourceDocumentId
+            )
+
+            /*
+            ==========================================
+            SAFETY:
+            AR MUST STILL POINT TO THIS JOURNAL
+            ==========================================
+            */
+
+            .eq(
+                "gl_journal_id",
+                id
+            )
+
+            .select(`
+                id,
+                invoice_no,
+                status,
+                total_amount,
+                paid_amount,
+                outstanding_amount,
+                gl_journal_id
+            `)
+
+            .single();
+
+
+        if (
+            restoreARError
+        ) {
+
+            console.error(
+                "AR INVOICE RESTORE AFTER GL POST ERROR:",
+                restoreARError
+            );
+
+
+            throw restoreARError;
+
+        }
+
+
+        updatedARInvoice =
+            restoredAR;
+
+
+        console.log(
+            "AR INVOICE RESTORED FROM VOID:",
+            {
+                account_receivable_id:
+                    restoredAR?.id,
+
+                invoice_no:
+                    restoredAR?.invoice_no,
+
+                previous_ar_status:
+                    arInvoice.status,
+
+                current_ar_status:
+                    restoredAR?.status,
+
+                journal_id:
+                    id,
+
+                previous_journal_status:
+                    currentStatus,
+
+                current_journal_status:
+                    "Posted",
+
+                paid_amount:
+                    restoredAR?.paid_amount,
+
+                outstanding_amount:
+                    restoredAR?.outstanding_amount,
+
+                gl_journal_id:
+                    restoredAR?.gl_journal_id
+            }
+        );
+
+    }
+
+}
+/*
+======================================================
+AR PAYMENT
+RECALCULATE AFTER POST
+
+IMPORTANT:
+IF PREVIOUS STATUS WAS VOID,
+THE SAME PAYMENT JOURNAL BECOMES ACTIVE AGAIN.
+======================================================
+*/
+
+let updatedAR =
+    null;
+
+
+if (
+    sourceModule === "AR"
+    &&
+    sourceDocumentType === "AR_PAYMENT"
+    &&
+    accountReceivableId
+) {
+
+    /*
+    ==================================================
+    SAFETY:
+    PAYMENT RELATION MUST STILL EXIST
+    ==================================================
+    */
+
+    if (
+        !arPayment
+    ) {
+
+        throw new Error(
+            "AR Payment record linked to this journal was not found. Payment history must remain linked to the GL Journal when the journal is Void."
+        );
+
+    }
+
+
+    /*
+    ==================================================
+    GET ACCOUNT RECEIVABLE
+    ==================================================
+    */
+
+    const {
+
+        data:
+            arInvoice,
+
+        error:
+            arInvoiceError
+
+    } = await supabase
+
+        .from(
+            "trx_account_receivable"
+        )
+
+        .select(`
+            id,
+            invoice_no,
+            total_amount,
+            paid_amount,
+            outstanding_amount,
+            status,
+            gl_journal_id
+        `)
+
+        .eq(
+            "id",
+            accountReceivableId
+        )
+
+        .maybeSingle();
+
+
+    if (
+        arInvoiceError
+    ) {
+
+        throw arInvoiceError;
+
+    }
+
+
+    if (
+        !arInvoice
+    ) {
+
+        throw new Error(
+            "Account Receivable not found."
+        );
+
+    }
+
+
+    /*
+    ==================================================
+    GET ALL LINKED AR PAYMENTS
+    ==================================================
+    */
+
+    const {
+
+        data:
+            paymentRows,
+
+        error:
+            paymentRowsError
+
+    } = await supabase
+
+        .from(
+            "trx_account_receivable_payment"
+        )
+
+        .select(`
+            id,
+            amount,
+            gl_journal_id
+        `)
+
+        .eq(
+            "account_receivable_id",
+            accountReceivableId
+        )
+
+        .not(
+            "gl_journal_id",
+            "is",
+            null
+        );
+
+
+    if (
+        paymentRowsError
+    ) {
+
+        throw paymentRowsError;
+
+    }
+
+
+    /*
+    ==================================================
+    GET PAYMENT JOURNAL IDS
+    ==================================================
+    */
+
+    const journalIds =
+        [
+            ...new Set(
+                (
+                    paymentRows
+                    ||
+                    []
+                )
+                .map(
+                    payment =>
+                        payment?.gl_journal_id
+                )
+                .filter(
+                    Boolean
+                )
+            )
+        ];
+
+
+    /*
+    ==================================================
+    GET JOURNAL STATUS
+    ==================================================
+    */
+
+    let paymentJournals =
+        [];
+
+
+    if (
+        journalIds.length > 0
+    ) {
+
+        const {
+
+            data:
+                journalRows,
+
+            error:
+                journalRowsError
+
+        } = await supabase
+
+            .from(
+                "trx_gl_journal"
+            )
+
+            .select(`
+                id,
+                status
+            `)
+
+            .in(
+                "id",
+                journalIds
+            );
+
+
+        if (
+            journalRowsError
+        ) {
+
+            throw journalRowsError;
+
+        }
+
+
+        paymentJournals =
+            journalRows
+            ||
+            [];
+
+    }
+
+
+    /*
+    ==================================================
+    JOURNAL STATUS MAP
+    ==================================================
+    */
+
+    const journalStatusMap =
+        new Map(
+            paymentJournals.map(
+                item => [
+
+                    String(
+                        item.id
+                    ),
+
+                    String(
+                        item.status
+                        ||
+                        ""
+                    )
+                    .trim()
+                    .toUpperCase()
+
+                ]
+            )
+        );
+
+
+    /*
+    ==================================================
+    ACTIVE AR PAYMENTS
+
+    FINAL RULE:
+
+    DRAFT
+    -> ACTIVE
+
+    POSTED
+    -> ACTIVE
+
+    VOID
+    -> INACTIVE
+
+    MISSING JOURNAL
+    -> INACTIVE
+
+    UNKNOWN STATUS
+    -> INACTIVE
+    ==================================================
+    */
+
+    const activePayments =
+        (
+            paymentRows
+            ||
+            []
+        )
+        .filter(
+            payment => {
+
+                if (
+                    !payment
+                    ||
+                    !payment.gl_journal_id
+                ) {
+
+                    return false;
+
+                }
+
+
+                const paymentJournalStatus =
+                    journalStatusMap.get(
+                        String(
+                            payment.gl_journal_id
+                        )
+                    )
+                    ||
+                    "";
+
+
+                return (
+                    paymentJournalStatus ===
+                        "DRAFT"
+                    ||
+                    paymentJournalStatus ===
+                        "POSTED"
+                );
+
+            }
+        );
+
+
+    /*
+    ==================================================
+    CALCULATE PAID
+    ==================================================
+    */
+
+    const totalAmount =
+        Number(
+            arInvoice.total_amount
+            ||
+            0
+        );
+
+
+    const paidAmount =
+        Number(
+            activePayments
+                .reduce(
+                    (
+                        total,
+                        payment
+                    ) => {
+
+                        return (
+                            total
+                            +
+                            Number(
+                                payment.amount
+                                ||
+                                0
+                            )
+                        );
+
+                    },
+                    0
+                )
+                .toFixed(
+                    2
+                )
+        );
+
+
+    /*
+    ==================================================
+    OUTSTANDING
+    ==================================================
+    */
+
+    const outstandingAmount =
+        Number(
+            Math.max(
+                totalAmount
+                -
+                paidAmount,
+                0
+            )
+            .toFixed(
+                2
+            )
+        );
+
+
+    /*
+    ==================================================
+    STATUS
+    ==================================================
+    */
+
+    let arStatus =
+        "Complete";
+
+
+    if (
+        paidAmount > 0
+        &&
+        outstandingAmount > 0
+    ) {
+
+        arStatus =
+            "Partial Paid";
+
+    }
+
+
+    if (
+        totalAmount > 0
+        &&
+        paidAmount >= totalAmount
+        &&
+        outstandingAmount <= 0
+    ) {
+
+        arStatus =
+            "Paid";
+
+    }
+
+
+    /*
+    ==================================================
+    UPDATE ACCOUNT RECEIVABLE
+    ==================================================
+    */
+
+    const {
+
+        data:
+            recalculatedAR,
+
+        error:
+            updateARError
+
+    } = await supabase
+
+        .from(
+            "trx_account_receivable"
+        )
+
+        .update({
+
+            paid_amount:
+                paidAmount,
+
+            outstanding_amount:
+                outstandingAmount,
+
+            status:
+                arStatus
+
+        })
+
+        .eq(
+            "id",
+            accountReceivableId
+        )
+
+        .select(`
+            id,
+            invoice_no,
+            total_amount,
+            paid_amount,
+            outstanding_amount,
+            status,
+            gl_journal_id
+        `)
+
+        .single();
+
+
+    if (
+        updateARError
+    ) {
+
+        throw updateARError;
+
+    }
+
+
+    updatedAR =
+        recalculatedAR;
+
+
+    /*
+    ==================================================
+    DEBUG
+    ==================================================
+    */
+
+    console.log(
+        "AR PAYMENT POST RECALCULATE:",
+        {
+            account_receivable_id:
+                accountReceivableId,
+
+            payment_id:
+                arPayment.id,
+
+            journal_id:
+                id,
+
+            previous_journal_status:
+                currentStatus,
+
+            current_journal_status:
+                "Posted",
+
+            total_amount:
+                updatedAR.total_amount,
+
+            paid_amount:
+                updatedAR.paid_amount,
+
+            outstanding_amount:
+                updatedAR.outstanding_amount,
+
+            status:
+                updatedAR.status,
+
+            active_payment_count:
+                activePayments.length
+        }
+    );
+
+}
+
+
+/*
+======================================================
+REALTIME GL -> AP / AR
+======================================================
+*/
+
+if (
+    (
+        sourceModule === "AP"
+        ||
+        sourceModule === "AR"
+    )
+    &&
+    sourceDocumentId
+) {
+
+    window.dispatchEvent(
+
+        new CustomEvent(
+            "finova:source-transaction-changed",
+            {
+                detail: {
+
+                    /*
+                    ==========================================
+                    SOURCE
+                    ==========================================
+                    */
+
+                    sourceModule:
                         sourceModule,
 
-                    source_document_type:
+                    sourceDocumentType:
                         sourceDocumentType,
 
-                    source_document_id:
+                    sourceDocumentId:
                         sourceDocumentId,
 
-                    payment_batch_id:
-                        apPaymentBatch?.id
-                        ||
-                        null,
+                    journalId:
+                        id,
 
-                    account_payable_ids:
+                    action:
+                        "JOURNAL_POSTED",
+
+
+                    /*
+                    ==========================================
+                    ACCOUNT PAYABLE ID
+
+                    BULK AP PAYMENT:
+                    sourceDocumentId = BATCH ID
+                    SO DO NOT USE IT AS AP ID.
+                    ==========================================
+                    */
+
+                    accountPayableId:
+
+                        sourceModule === "AP"
+                        &&
+                        sourceDocumentType === "AP_PAYMENT"
+                        &&
                         apPaymentBatch
+
+                            ? null
+
+                            :
+                            sourceModule === "AP"
+                                ? sourceDocumentId
+                                : null,
+
+
+                    /*
+                    ==========================================
+                    BULK AP PAYMENT BATCH
+                    ==========================================
+                    */
+
+                    paymentBatchId:
+
+                        sourceModule === "AP"
+                        &&
+                        sourceDocumentType === "AP_PAYMENT"
+                        &&
+                        apPaymentBatch
+
+                            ? apPaymentBatch.id
+
+                            : null,
+
+
+                    /*
+                    ==========================================
+                    ALL AP INVOICES IN BULK PAYMENT
+                    ==========================================
+                    */
+
+                    accountPayableIds:
+
+                        sourceModule === "AP"
+                        &&
+                        sourceDocumentType === "AP_PAYMENT"
+                        &&
+                        apPaymentBatch
+
                             ? apPaymentBatchAPIds
+
                             : [],
 
-                    account_receivable_id:
+
+                    /*
+                    ==========================================
+                    ACCOUNT RECEIVABLE
+                    ==========================================
+                    */
+
+                    accountReceivableId:
 
                         sourceModule === "AR"
 
@@ -21617,162 +21600,325 @@ if (
 
                             : null,
 
-                    payment_id:
-                        arPayment?.id
-                        ||
-                        null,
 
-                    journal_id:
-                        id,
+                    /*
+                    ==========================================
+                    AR PAYMENT
+                    ==========================================
+                    */
 
-                    previous_status:
-                        currentStatus,
+                    paymentId:
 
-                    action:
-                        "JOURNAL_POSTED"
+                        sourceDocumentType ===
+                            "AR_PAYMENT"
+
+                            ? (
+                                arPayment?.id
+                                ||
+                                null
+                            )
+
+                            : null,
+
+
+                    /*
+                    ==========================================
+                    AR PAYMENT RESULT
+                    ==========================================
+                    */
+
+                    paidAmount:
+
+                        sourceDocumentType ===
+                            "AR_PAYMENT"
+
+                            ? (
+                                updatedAR?.paid_amount
+                                ??
+                                null
+                            )
+
+                            : null,
+
+
+                    outstandingAmount:
+
+                        sourceDocumentType ===
+                            "AR_PAYMENT"
+
+                            ? (
+                                updatedAR?.outstanding_amount
+                                ??
+                                null
+                            )
+
+                            : null,
+
+
+                    /*
+                    ==========================================
+                    SOURCE STATUS
+                    ==========================================
+                    */
+
+                    sourceStatus:
+
+                        sourceDocumentType ===
+                            "AR_PAYMENT"
+
+                            ? (
+                                updatedAR?.status
+                                ||
+                                null
+                            )
+
+                            :
+
+                            sourceDocumentType ===
+                                "AR_INVOICE"
+
+                                ? (
+                                    updatedARInvoice?.status
+                                    ||
+                                    null
+                                )
+
+                                :
+
+                                sourceModule === "AP"
+                                &&
+                                sourceDocumentType === "AP_PAYMENT"
+                                &&
+                                apPaymentBatch
+
+                                    ? "Posted"
+
+                                    : null
+
                 }
-            );
+            }
+        )
 
+    );
+
+
+    /*
+    ==================================================
+    DEBUG REALTIME
+    ==================================================
+    */
+
+    console.log(
+        "GL -> SOURCE REALTIME EVENT:",
+        {
+            source_module:
+                sourceModule,
+
+            source_document_type:
+                sourceDocumentType,
+
+            source_document_id:
+                sourceDocumentId,
+
+            payment_batch_id:
+                apPaymentBatch?.id
+                ||
+                null,
+
+            account_payable_ids:
+                apPaymentBatch
+                    ? apPaymentBatchAPIds
+                    : [],
+
+            account_receivable_id:
+
+                sourceModule === "AR"
+
+                    ? (
+                        accountReceivableId
+                        ||
+                        sourceDocumentId
+                    )
+
+                    : null,
+
+            payment_id:
+                arPayment?.id
+                ||
+                null,
+
+            journal_id:
+                id,
+
+            previous_status:
+                currentStatus,
+
+            action:
+                "JOURNAL_POSTED"
         }
+    );
+
+}
 
 
-        /*
-        ======================================================
-        REFRESH GL
+/*
+======================================================
+REFRESH GL
 
-        SAME CURRENT BEHAVIOR
-        ======================================================
-        */
+SAME CURRENT BEHAVIOR
+======================================================
+*/
 
-        await this.loadData(
-            false
-        );
-                /*
-        ======================================================
-        SUCCESS
-        FINAL
-        ======================================================
-        */
-
-        if (
-            sourceModule === "AP"
-            &&
-            sourceDocumentType === "AP_PAYMENT"
-            &&
-            apPaymentBatch
-        ) {
-
-            /*
-            ==================================================
-            BULK AP PAYMENT
-            ==================================================
-            */
-
-            this.showSuccess(
-
-                currentStatus === "VOID"
-
-                    ? "AP Payment Batch Journal reposted successfully. All invoice allocations were restored."
-
-                    : "AP Payment Batch Journal posted successfully."
-
-            );
-
-        }
-
-        else if (
-            sourceModule === "AR"
-            &&
-            sourceDocumentType === "AR_PAYMENT"
-        ) {
-
-            /*
-            ==================================================
-            AR PAYMENT
-            ==================================================
-            */
-
-            this.showSuccess(
-
-                currentStatus === "VOID"
-
-                    ? "AR Payment Journal reposted successfully. Account Receivable payment restored."
-
-                    : "AR Payment Journal posted successfully."
-
-            );
-
-        }
-
-        else if (
-            sourceModule === "AR"
-            &&
-            sourceDocumentType === "AR_INVOICE"
-        ) {
-
-            /*
-            ==================================================
-            AR INVOICE
-            ==================================================
-            */
-
-            this.showSuccess(
-
-                currentStatus === "VOID"
-
-                    ? "AR Invoice Journal reposted successfully. Account Receivable restored to Complete."
-
-                    : "AR Invoice Journal posted successfully."
-
-            );
-
-        }
-
-        else {
-
-            /*
-            ==================================================
-            AP INVOICE / MANUAL GL / OTHER JOURNAL
-            ==================================================
-            */
-
-            this.showSuccess(
-                "Journal posted successfully."
-            );
-
-        }
-
-    }
-
-    catch (error) {
-
-        /*
-        ======================================================
-        ERROR LOG
-        ======================================================
-        */
-
-        console.error(
-            "GeneralJournal.postJournal:",
-            error
-        );
+await this.loadData(
+    false
+);
 
 
-        /*
-        ======================================================
-        ERROR MESSAGE
-        ======================================================
-        */
+/*
+======================================================
+SUCCESS
+FINAL
+======================================================
+*/
 
-        this.showError(
-            error?.message
-            ||
-            error?.details
-            ||
-            "Failed to post Journal."
-        );
+if (
+    sourceModule === "AP"
+    &&
+    sourceDocumentType === "AP_PAYMENT"
+    &&
+    apPaymentBatch
+) {
 
-    }
+    /*
+    ==================================================
+    BULK AP PAYMENT
+    ==================================================
+    */
+
+    this.showSuccess(
+
+        currentStatus === "VOID"
+
+            ? "AP Payment Batch Journal reposted successfully. All invoice allocations were restored."
+
+            : "AP Payment Batch Journal posted successfully."
+
+    );
+
+}
+
+else if (
+    sourceModule === "AR"
+    &&
+    sourceDocumentType === "AR_PAYMENT"
+) {
+
+    /*
+    ==================================================
+    AR PAYMENT
+    ==================================================
+    */
+
+    this.showSuccess(
+
+        currentStatus === "VOID"
+
+            ? "AR Payment Journal reposted successfully. Account Receivable payment restored."
+
+            : "AR Payment Journal posted successfully."
+
+    );
+
+}
+
+else if (
+    sourceModule === "AR"
+    &&
+    sourceDocumentType === "AR_INVOICE"
+) {
+
+    /*
+    ==================================================
+    AR INVOICE
+    ==================================================
+    */
+
+    this.showSuccess(
+
+        currentStatus === "VOID"
+
+            ? "AR Invoice Journal reposted successfully. Account Receivable restored to Complete."
+
+            : "AR Invoice Journal posted successfully."
+
+    );
+
+}
+
+else {
+
+    /*
+    ==================================================
+    AP INVOICE / MANUAL GL / OTHER JOURNAL
+    ==================================================
+    */
+
+    this.showSuccess(
+        "Journal posted successfully."
+    );
+
+}
+
+
+return true;
+
+}
+
+
+/*
+======================================================
+ERROR HANDLING
+======================================================
+*/
+
+catch (error) {
+
+    /*
+    ==================================================
+    ERROR LOG
+    ==================================================
+    */
+
+    console.error(
+        "GeneralJournal.postJournal:",
+        error
+    );
+
+
+    /*
+    ==================================================
+    ERROR MESSAGE
+    ==================================================
+    */
+
+    this.showError(
+        error?.message
+        ||
+        error?.details
+        ||
+        "Failed to post Journal."
+    );
+
+
+    /*
+    ==================================================
+    POST FAILED
+    ==================================================
+    */
+
+    return false;
+
+}
 
 }
 /*

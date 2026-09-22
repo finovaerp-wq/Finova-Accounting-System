@@ -42,11 +42,15 @@ export class AuthService {
 
 
     static sessionTimer =
-        null;
+    null;
 
 
-    static isLogoutRunning =
-        false;
+static authSubscription =
+    null;
+
+
+static isLogoutRunning =
+    false;
 
 
     /*
@@ -1982,25 +1986,62 @@ if (
     }
 
 
+/*
+======================================================
+AUTH STATE CHANGE
+======================================================
+*/
+
+static onAuthStateChange(
+
+    callback
+
+) {
+
     /*
-    ======================================================
-    AUTH STATE CHANGE
-    ======================================================
+    ==========================================
+    VALIDATE CALLBACK
+    ==========================================
     */
 
-    static onAuthStateChange(
-
-        callback
-
+    if (
+        typeof callback !==
+        "function"
     ) {
 
-        return supabase.auth.onAuthStateChange(
-
-            callback
-
+        throw new Error(
+            "Auth state callback must be a function."
         );
 
     }
+
+
+    /*
+    ==========================================
+    CREATE SUPABASE AUTH LISTENER
+    ==========================================
+    */
+
+    return supabase.auth.onAuthStateChange(
+
+        (
+            event,
+            session
+        ) => {
+
+            callback(
+
+                event,
+
+                session
+
+            );
+
+        }
+
+    );
+
+}
 
 
     /*
