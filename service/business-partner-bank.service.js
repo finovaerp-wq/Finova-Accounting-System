@@ -79,29 +79,7 @@ export class BusinessPartnerBankService {
         
 
     }
-    /*
-==========================================================
-INSERT
-==========================================================
-*/
 
-static async insert(data) {
-
-    const { error } = await supabase
-
-        .from(TABLE.CHART_OF_ACCOUNTS)
-
-        .insert([data]);
-
-    if (error) {
-
-        throw error;
-
-    }
-
-    return true;
-
-}
 
     /*
     ==========================================================

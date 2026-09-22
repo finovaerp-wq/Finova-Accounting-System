@@ -47,84 +47,87 @@ export class BusinessPartner {
 
 }
 
-    /*
-==========================================================
-INITIALIZE
-==========================================================
-*/
-
-async initialize() {
-
-    console.log("Business Partner Initialized");
-
-    try {
-
-        /* ==========================================
-           LOAD MODAL
-        ========================================== */
-
-        await this.loadModal();
-
-        /* ==========================================
-           CACHE DOM
-        ========================================== */
-
-        this.cacheElement();
-
-        /* ==========================================
-           BOOTSTRAP MODAL
-        ========================================== */
-
-        this.modal = new bootstrap.Modal(
-            this.modalElement
-        );
-
-        /* ==========================================
-           COMPONENT
-        ========================================== */
-
-        this.bankGrid = new BankGrid();
-
-        /* ==========================================
-           EVENTS
-        ========================================== */
-
-        this.bindEvents();
-
-        this.bindTableEvents();
-
-        /* ==========================================
-           MASTER DATA
-        ========================================== */
-
-        await this.loadTermOfPayment();
-
-        /* ==========================================
-           TABLE
-        ========================================== */
-
-        await this.loadData();
-
-        console.log(
-            "Business Partner Ready"
-        );
-        console.log("Initialize Finished");
-
-    }
-
-    catch (error) {
-
-        console.error(
-            "Business Partner Initialization Failed",
-            error
-        );
-
-        this.showError(
-            "Failed to initialize Business Partner Module."
-        );
-
-    }
-
+    /* 
+========================================================== 
+INITIALIZE 
+========================================================== 
+*/ 
+ 
+async initialize() { 
+ 
+    console.log("Business Partner Initialized"); 
+ 
+    try { 
+ 
+        /* ========================================== 
+           LOAD MODAL 
+        ========================================== */ 
+ 
+        await this.loadModal(); 
+ 
+        /* ========================================== 
+           CACHE DOM 
+        ========================================== */ 
+ 
+        this.cacheElement(); 
+ 
+        /* ========================================== 
+           BOOTSTRAP MODAL 
+        ========================================== */ 
+ 
+        this.modal = new bootstrap.Modal( 
+            this.modalElement 
+        ); 
+ 
+        /* ========================================== 
+           COMPONENT 
+        ========================================== */ 
+ 
+        this.bankGrid = new BankGrid(); 
+ 
+        /* ========================================== 
+           EVENTS 
+        ========================================== */ 
+ 
+        this.bindEvents(); 
+ 
+        this.bindTableEvents(); 
+ 
+        /* ========================================== 
+           MASTER DATA 
+        ========================================== */ 
+ 
+        await this.loadTermOfPayment(); 
+ 
+        /* ========================================== 
+           TABLE 
+        ========================================== */ 
+ 
+        await this.loadData(); 
+ 
+        console.log( 
+            "Business Partner Ready" 
+        ); 
+ 
+        console.log( 
+            "Initialize Finished" 
+        ); 
+ 
+    } 
+ 
+    catch (error) { 
+ 
+        console.error( 
+            "Business Partner Initialization Failed", 
+            error 
+        ); 
+ 
+        this.showError( 
+            "Failed to initialize Business Partner Module." 
+        ); 
+ 
+    } 
+ 
 }
     /*
     ==========================================================
@@ -476,28 +479,32 @@ BUSINESS PARTNER NAME CLICK
 ==========================================================
 */
 
-document
-    .querySelector("#bp-table-body")
-    ?.addEventListener(
-        "click",
-        (event) => {
+this.tableBody?.addEventListener(
+    "click",
+    async (event) => {
 
-            const cell =
-                event.target.closest(
-                    ".bp-name-link"
-                );
+        const cell =
+            event.target.closest(
+                ".bp-name-link"
+            );
 
-            if (!cell) return;
-
-            const id =
-                cell.dataset.id;
-
-            if (!id) return;
-
-            this.editBusinessPartner(id);
-
+        if (!cell) {
+            return;
         }
-    );
+
+        const id =
+            cell.dataset.id;
+
+        if (!id) {
+            return;
+        }
+
+        await this.openEditModal(
+            id
+        );
+
+    }
+);
 /*
 ==========================================================
 NPWP AUTO FORMAT
@@ -3041,92 +3048,97 @@ renderRow(item, index) {
 
         <tr>
 
-           <td>${index + 1}</td>
+           <td class="finova-table-index">
+    ${index + 1}
+</td>
 
-<td>
+<td class="finova-table-code">
     ${item.bp_code}
 </td>
 
 <td
-    class="bp-name-link"
+    class="finova-table-name bp-name-link"
     data-id="${item.id}"
-    style="cursor: pointer;"
 >
     ${item.bp_name}
 </td>
 
-<td>${item.bp_type}</td>
+<td class="finova-table-type">
+    ${item.bp_type}
+</td>
 
-            <td>${item.phone || "-"}</td>
+<td class="finova-table-phone">
+    ${item.phone || "-"}
+</td>
 
-            <td>
+            <td class="finova-table-email">
+
     ${
         item.email
             ? `
                 <a
                     href="mailto:${item.email}"
-                    class="text-primary text-decoration-none">
+                    class="bp-email-link">
                     ${item.email}
                 </a>
               `
             : "-"
     }
+
 </td>
-<td>
+
+<td class="finova-table-tax">
+
     ${item.tax_number || "-"}
+
 </td>
 
+<td class="finova-table-status">
 
-            <td>
+    ${
+        item.status
+            ? `
+                <span class="bp-status-badge bp-status-active">
+                    <i class="fa-solid fa-circle-check"></i>
+                    Active
+                </span>
+            `
+            : `
+                <span class="bp-status-badge bp-status-inactive">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                    Inactive
+                </span>
+            `
+    }
 
-                ${
-                    item.status
-                        ? `
-                            <span class="badge badge-success">
-                                <i class="fa-solid fa-circle-check"></i>
-                                Active
-                            </span>
-                        `
-                        : `
-                            <span class="badge badge-danger">
-                                <i class="fa-solid fa-circle-xmark"></i>
-                                Inactive
-                            </span>
-                        `
-                }
+<td class="finova-table-action">
 
-            </td>
+    <div class="bp-action-group">
 
-            <td>
+        <button
+            type="button"
+            class="btn-action bp-action-btn btn-action-edit"
+            data-id="${item.id}"
+            title="Edit">
 
-                <div class="finova-action">
+            <i class="fa-solid fa-pen"></i>
 
-                    <button
+        </button>
 
-                        class="btn-action btn-action-edit"
 
-                        data-id="${item.id}"
+        <button
+            type="button"
+            class="btn-action bp-action-btn btn-action-delete"
+            data-id="${item.id}"
+            title="Delete">
 
-                        title="Edit">
+            <i class="fa-solid fa-trash"></i>
 
-                        <i class="fa-solid fa-pen"></i>
+        </button>
 
-                    </button>
+    </div>
 
-                    <button
-
-                        class="btn-action btn-action-delete"
-
-                        data-id="${item.id}"
-
-                        title="Delete">
-
-                        <i class="fa-solid fa-trash"></i>
-
-                    </button>
-
-                </div>
-            </td>
+</td>
 
         </tr>
 

@@ -246,8 +246,6 @@ NOTE :
 
     width: 100%;
 
-    height: 100%;
-
     overflow: hidden;
 
 }
@@ -275,7 +273,8 @@ NOTE :
 
 
 /* ==========================================================
-   TABLE
+   BUSINESS PARTNER TABLE
+   FINOVA / TAX MASTER STANDARD
 ========================================================== */
 
 .business-partner-table-card
@@ -283,7 +282,15 @@ NOTE :
 
     width: 100%;
 
+    max-width: 100%;
+
     margin-bottom: 0;
+
+    border-collapse: collapse;
+
+    border-spacing: 0;
+
+    table-layout: fixed;
 
     vertical-align: middle;
 
@@ -299,9 +306,23 @@ NOTE :
 thead
 th {
 
-    font-weight: 700 !important;
+    background: #F8F9FA;
 
-    color: #111827 !important;
+    color: #212529;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    line-height: 1.5;
+
+    white-space: nowrap;
+
+    vertical-align: middle;
+
+    padding: 12px 16px;
+
+    border: 1px solid #DEE2E6;
 
 }
 
@@ -312,18 +333,56 @@ th {
 
 .business-partner-table-card
 .finova-table
+tbody {
+
+    background: #FFFFFF;
+
+}
+
+
+.business-partner-table-card
+.finova-table
+tbody
+tr {
+
+    background: #FFFFFF;
+
+    transition:
+        background-color .15s ease-in-out;
+
+}
+
+
+.business-partner-table-card
+.finova-table
 tbody
 td {
 
+    padding: 12px 16px;
+
+    min-height: 52px;
+
+    height: auto;
+
+    font-size: 13px;
+
     font-weight: 400 !important;
 
-    color: #1F2937 !important;
+    line-height: 1.5;
+
+    color: #495057 !important;
+
+    vertical-align: middle;
+
+    border: 1px solid #DEE2E6;
+
+    background: #FFFFFF;
 
 }
 
 
 /* ==========================================================
-   REMOVE UNWANTED BOLD IN BODY
+   REMOVE UNWANTED BOLD
 ========================================================== */
 
 .business-partner-table-card
@@ -350,6 +409,59 @@ td .fw-semibold {
 
 }
 
+
+/* ==========================================================
+   TABLE ROW HOVER
+========================================================== */
+
+.business-partner-table-card
+.finova-table.table-hover
+tbody
+tr:hover {
+
+    background-color: rgba(0, 0, 0, .075);
+
+}
+
+
+.business-partner-table-card
+.finova-table.table-hover
+tbody
+tr:hover > td {
+
+    background-color: rgba(0, 0, 0, .075);
+
+}
+
+
+/* ==========================================================
+   TABLE ALIGNMENT
+========================================================== */
+
+.business-partner-table-card
+.finova-table
+th.text-center,
+
+.business-partner-table-card
+.finova-table
+td.text-center {
+
+    text-align: center;
+
+}
+
+
+.business-partner-table-card
+.finova-table
+th.text-start,
+
+.business-partner-table-card
+.finova-table
+td.text-start {
+
+    text-align: left;
+
+}
 
 /* ==========================================================
    PAGINATION
@@ -452,7 +564,377 @@ td .fw-semibold {
 
 }
 
+/* ==========================================================
+   BUSINESS PARTNER STATUS BADGE
+========================================================== */
+
+.bp-status-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 5px;
+
+    min-width: 76px;
+
+    height: 22px;
+
+    padding: 0 10px;
+
+    border-radius: 999px;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    line-height: 1;
+
+    white-space: nowrap;
+
+}
+
 
 /* ==========================================================
-   END BUSINESS PARTNER CSS
+   ACTIVE
 ========================================================== */
+
+.bp-status-active {
+
+    background: #DCFCE7;
+
+    color: #15803D;
+
+}
+
+
+/* ==========================================================
+   INACTIVE
+========================================================== */
+
+.bp-status-inactive {
+
+    background: #FEE2E2;
+
+    color: #B91C1C;
+
+}
+/* ==========================================================
+   BUSINESS PARTNER TABLE COLUMN STANDARD
+========================================================== */
+
+.business-partner-table-card
+.bp-col-no,
+.business-partner-table-card
+.bp-col-code,
+.business-partner-table-card
+.bp-col-name,
+.business-partner-table-card
+.bp-col-type,
+.business-partner-table-card
+.bp-col-phone,
+.business-partner-table-card
+.bp-col-email,
+.business-partner-table-card
+.bp-col-tax,
+.business-partner-table-card
+.bp-col-status,
+.business-partner-table-card
+.bp-col-action {
+
+    vertical-align: middle;
+
+}
+
+
+/* ==========================================================
+   COLUMN WIDTH
+========================================================== */
+
+.business-partner-table-card
+.bp-col-no {
+
+    width: 64px;
+
+    min-width: 64px;
+
+    text-align: center;
+
+}
+
+
+.business-partner-table-card
+.bp-col-code {
+
+    width: 120px;
+
+    min-width: 120px;
+
+}
+
+
+.business-partner-table-card
+.bp-col-name {
+
+    min-width: 240px;
+
+}
+
+
+.business-partner-table-card
+.bp-col-type {
+
+    width: 120px;
+
+    min-width: 120px;
+
+}
+
+
+.business-partner-table-card
+.bp-col-phone {
+
+    width: 150px;
+
+    min-width: 150px;
+
+}
+
+
+.business-partner-table-card
+.bp-col-email {
+
+    min-width: 220px;
+
+}
+
+
+.business-partner-table-card
+.bp-col-tax {
+
+    width: 180px;
+
+    min-width: 180px;
+
+}
+
+
+.business-partner-table-card
+.bp-col-status {
+
+    width: 110px;
+
+    min-width: 110px;
+
+    text-align: center;
+
+}
+
+
+.business-partner-table-card
+.bp-col-action {
+
+    width: 110px;
+
+    min-width: 110px;
+
+    text-align: center;
+
+}
+
+
+/* ==========================================================
+   BUSINESS PARTNER NAME
+========================================================== */
+
+.business-partner-table-card
+.bp-name-link {
+
+    cursor: pointer;
+
+    font-weight: 500;
+
+    color: #1D4ED8;
+
+    transition:
+        color 0.15s ease,
+        text-decoration 0.15s ease;
+
+}
+
+
+.business-partner-table-card
+.bp-name-link:hover {
+
+    color: #1E40AF;
+
+    text-decoration: underline;
+
+}
+
+/* ==========================================================
+   EMAIL
+========================================================== */
+
+.business-partner-table-card
+.finova-table-email {
+
+    min-width: 220px;
+
+    white-space: nowrap;
+
+}
+
+
+.business-partner-table-card
+.bp-email-link {
+
+    color: #2563EB;
+
+    text-decoration: none;
+
+    transition:
+        color 0.15s ease,
+        text-decoration 0.15s ease;
+
+}
+
+
+.business-partner-table-card
+.bp-email-link:hover {
+
+    color: #1D4ED8;
+
+    text-decoration: underline;
+
+}
+
+
+/* ==========================================================
+   TAX / NPWP
+========================================================== */
+
+.business-partner-table-card
+.finova-table-tax {
+
+    width: 180px;
+
+    min-width: 180px;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   STATUS
+========================================================== */
+
+.business-partner-table-card
+.finova-table-status {
+
+    text-align: center;
+
+    vertical-align: middle;
+
+}
+
+
+/* ==========================================================
+   ACTION
+========================================================== */
+
+.business-partner-table-card
+.finova-table-action {
+
+    text-align: center;
+
+    vertical-align: middle;
+
+}
+/* ==========================================================
+   BUSINESS PARTNER ACTION
+========================================================== */
+
+.business-partner-table-card
+.finova-table-action {
+
+    text-align: center;
+
+    vertical-align: middle;
+
+}
+
+
+/* ==========================================================
+   ACTION GROUP
+========================================================== */
+
+.business-partner-table-card
+.bp-action-group {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 5px;
+
+}
+
+
+/* ==========================================================
+   ACTION BUTTON
+========================================================== */
+
+.business-partner-table-card
+.bp-action-btn {
+
+    width: 32px;
+
+    height: 32px;
+
+    min-width: 32px;
+
+    padding: 0;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 5px;
+
+    font-size: 13px;
+
+    line-height: 1;
+
+}
+
+
+/* ==========================================================
+   EDIT
+========================================================== */
+
+.business-partner-table-card
+.btn-action-edit {
+
+    color: #2563EB;
+
+}
+
+
+/* ==========================================================
+   DELETE
+========================================================== */
+
+.business-partner-table-card
+.btn-action-delete {
+
+    color: #DC2626;
+
+}

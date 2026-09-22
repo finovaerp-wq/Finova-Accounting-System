@@ -226,6 +226,42 @@ const {
 } = await supabase.rpc(
     "is_finova_super_admin"
 );
+console.log(
+    "=========================================="
+);
+
+console.log(
+    "FINOVA LOGIN DEBUG"
+);
+
+console.log(
+    "AUTH USER :",
+    data?.user
+);
+
+console.log(
+    "AUTH USER ID :",
+    data?.user?.id
+);
+
+console.log(
+    "AUTH EMAIL :",
+    data?.user?.email
+);
+
+console.log(
+    "IS SUPER ADMIN :",
+    isSuperAdmin
+);
+
+console.log(
+    "SUPER ADMIN ERROR :",
+    superAdminError
+);
+
+console.log(
+    "=========================================="
+);
 
 
 if (

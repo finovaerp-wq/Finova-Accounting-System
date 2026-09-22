@@ -16,44 +16,165 @@ export class BankGrid {
             document.getElementById("bp-bank-table");
 
         this.button =
-            document.getElementById("btn-add-bank-row");
+    document.getElementById("btn-add-bank-row");
 
-        this.initialize();
+this.deleteModal =
+    document.getElementById("bpBankDeleteModal");
+
+this.confirmDeleteButton =
+    document.getElementById("btn-confirm-bank-delete");
+
+this.pendingDeleteRow =
+    null;
+
+this.initialize();
 
     }
 
     /*
-    ==========================================================
-    INITIALIZE
-    ==========================================================
+==========================================================
+INITIALIZE
+==========================================================
+*/
+
+initialize() {
+
+    /*
+    ======================================================
+    ADD BANK ROW
+    ======================================================
     */
 
-    initialize() {
-
-        if (!this.button) return;
+    if (this.button) {
 
         this.button.addEventListener(
 
-    "click",
+            "click",
 
-    () => {
+            () => {
 
-        if (!this.canAddNewRow()) {
+                if (!this.canAddNewRow()) {
 
-            alert(
-                "Please complete the current bank account first."
-            );
+                    alert(
+                        "Please complete the current bank account first."
+                    );
 
-            return;
+                    return;
 
-        }
+                }
 
-        this.addRow();
+                this.addRow();
+
+            }
+
+        );
 
     }
 
-);
+
+    /*
+    ======================================================
+    CONFIRM DELETE BANK
+    ======================================================
+    */
+
+    if (
+        this.confirmDeleteButton &&
+        this.deleteModal
+    ) {
+
+        this.confirmDeleteButton.addEventListener(
+
+            "click",
+
+            () => {
+
+                /*
+                ==========================================
+                VALIDATE PENDING ROW
+                ==========================================
+                */
+
+                if (
+                    !this.pendingDeleteRow
+                ) {
+
+                    return;
+
+                }
+
+
+                /*
+                ==========================================
+                CHECK DEFAULT
+                ==========================================
+                */
+
+                const wasDefault =
+                    this.pendingDeleteRow
+                        .querySelector(".is-default")
+                        ?.checked
+                    || false;
+
+
+                /*
+                ==========================================
+                REMOVE ROW
+                ==========================================
+                */
+
+                this.pendingDeleteRow.remove();
+
+
+                /*
+                ==========================================
+                RESTORE DEFAULT
+                ==========================================
+                */
+
+                if (
+                    wasDefault
+                ) {
+
+                    this.ensureDefaultBank();
+
+                }
+
+
+                /*
+                ==========================================
+                CLEAR PENDING ROW
+                ==========================================
+                */
+
+                this.pendingDeleteRow =
+                    null;
+
+
+                /*
+                ==========================================
+                CLOSE BOOTSTRAP MODAL
+                ==========================================
+                */
+
+                const modal =
+                    bootstrap.Modal.getInstance(
+                        this.deleteModal
+                    );
+
+                if (modal) {
+
+                    modal.hide();
+
+                }
+
+            }
+
+        );
+
     }
+
+}
 
     /*
     ==========================================================
@@ -291,43 +412,35 @@ row.querySelector(".is-default")
         ==========================================
         */
 
-       row.querySelector(".remove-bank")
+row.querySelector(".remove-bank")
 
-.addEventListener(
+    .addEventListener(
 
-    "click",
+        "click",
 
-    () => {
+        () => {
 
-        if (
+            this.pendingDeleteRow =
+                row;
 
-            !confirm(
+            if (
+                !this.deleteModal
+            ) {
 
-                "Delete this bank account?"
+                return;
 
-            )
+            }
 
-        ) {
+            const modal =
+                new bootstrap.Modal(
+                    this.deleteModal
+                );
 
-            return;
-
-        }
-
-        const wasDefault =
-            row.querySelector(".is-default")
-                .checked;
-
-        row.remove();
-
-        if (wasDefault) {
-
-            this.ensureDefaultBank();
+            modal.show();
 
         }
 
-    }
-
-);
+    );
     }
 
     /*
@@ -346,9 +459,7 @@ getData() {
     rows.forEach(row => {
 
         const bankId =
-            Number(
-                row.querySelector(".bank-id").value || 0
-            );
+    row.querySelector(".bank-id").value || "";
 
         const accountName =
             row.querySelector(".account-holder")
@@ -368,15 +479,17 @@ getData() {
 
         if (
 
-            bankId === 0 &&
-            accountName === "" &&
-            accountNumber === ""
+    bankId === "" &&
 
-        ) {
+    accountName === "" &&
 
-            return;
+    accountNumber === ""
 
-        }
+) {
+
+    return;
+
+}
 
         banks.push({
 

@@ -533,7 +533,7 @@ async validateFinovaAccountStatus() {
 
             );
 
-            await this.validateFinovaAccountStatus();
+            
 
             /*
             ==========================================
