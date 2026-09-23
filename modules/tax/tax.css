@@ -246,7 +246,7 @@ NOTE :
 
     width: 100%;
 
-    height: 100%;
+    
 
     overflow: hidden;
 
@@ -442,20 +442,190 @@ td:nth-child(9) {
 
 
 /* ==========================================================
-   ACTION BUTTON GROUP
+   TAX STATUS BADGE
+   SAME VISUAL AS BUSINESS PARTNER
 ========================================================== */
 
-.tax-table-card
-.finova-table
-tbody
-td:nth-child(9)
-.btn-group {
+.tax-status-badge {
 
     display: inline-flex;
 
     align-items: center;
 
     justify-content: center;
+
+    gap: 5px;
+
+    min-width: 76px;
+
+    height: 22px;
+
+    padding: 0 10px;
+
+    border-radius: 999px;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    line-height: 1;
+
+    white-space: nowrap;
+
+}
+
+
+/* ==========================================================
+   ACTIVE
+========================================================== */
+
+.tax-status-active {
+
+    background: #DCFCE7;
+
+    color: #15803D;
+
+}
+
+
+/* ==========================================================
+   INACTIVE
+========================================================== */
+
+.tax-status-inactive {
+
+    background: #FEE2E2;
+
+    color: #B91C1C;
+
+}
+
+
+/* ==========================================================
+   TAX ACTION
+   SAME SIZE AS BUSINESS PARTNER
+========================================================== */
+
+.tax-action-group {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 5px;
+
+}
+
+
+.tax-action-btn {
+
+    width: 32px;
+
+    height: 32px;
+
+    min-width: 32px;
+
+    padding: 0;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border: 0;
+
+    border-radius: 5px;
+
+    font-size: 13px;
+
+    line-height: 1;
+
+}
+
+
+/* ==========================================================
+   EDIT
+========================================================== */
+
+.tax-action-edit {
+
+    background: #DBEAFE;
+
+    color: #2563EB;
+
+}
+
+.tax-action-edit:hover {
+
+    background: #BFDBFE;
+
+    color: #1D4ED8;
+
+}
+
+
+/* ==========================================================
+   SET ACTIVE
+========================================================== */
+
+.tax-action-active {
+
+    background: #DCFCE7;
+
+    color: #15803D;
+
+}
+
+.tax-action-active:hover {
+
+    background: #BBF7D0;
+
+    color: #166534;
+
+}
+
+
+/* ==========================================================
+   SET INACTIVE
+========================================================== */
+
+.tax-action-inactive {
+
+    background: #FEF3C7;
+
+    color: #D97706;
+
+}
+
+.tax-action-inactive:hover {
+
+    background: #FDE68A;
+
+    color: #B45309;
+
+}
+
+
+/* ==========================================================
+   DELETE
+========================================================== */
+
+.tax-action-delete {
+
+    background: #FEE2E2;
+
+    color: #DC2626;
+
+}
+
+.tax-action-delete:hover {
+
+    background: #FECACA;
+
+    color: #B91C1C;
 
 }
 

@@ -756,3 +756,111 @@ Version : 2.1.0
     </div>
 
 </div>
+
+<!-- ==========================================================
+     TAX ACTION CONFIRMATION MODAL
+========================================================== -->
+
+<div
+    class="modal fade"
+    id="taxActionConfirmModal"
+    tabindex="-1"
+    aria-labelledby="taxActionConfirmModalLabel"
+    aria-hidden="true">
+
+    <div
+        class="modal-dialog modal-dialog-centered modal-sm">
+
+        <div class="modal-content">
+
+            <!-- HEADER -->
+            <div class="modal-header">
+
+                <h5
+                    class="modal-title fw-semibold"
+                    id="taxActionConfirmModalLabel">
+
+                    <i
+                        id="tax-action-confirm-icon"
+                        class="fa-solid fa-circle-question text-primary me-2">
+                    </i>
+
+                    Confirm Action
+
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close">
+                </button>
+
+            </div>
+
+
+            <!-- BODY -->
+            <div class="modal-body text-center">
+
+                <div class="mb-3">
+
+                    <i
+                        id="tax-action-confirm-large-icon"
+                        class="fa-solid fa-circle-question text-primary"
+                        style="font-size: 42px;">
+                    </i>
+
+                </div>
+
+                <div
+                    id="tax-action-confirm-message"
+                    class="fw-semibold">
+
+                    Are you sure?
+
+                </div>
+
+                <div
+                    id="tax-action-confirm-detail"
+                    class="text-muted small mt-2">
+                </div>
+
+            </div>
+
+
+            <!-- FOOTER -->
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+
+                    <i
+                        class="fa-solid fa-xmark me-1">
+                    </i>
+
+                    Cancel
+
+                </button>
+
+                <button
+                    type="button"
+                    id="btn-confirm-tax-action"
+                    class="btn btn-primary">
+
+                    <i
+                        class="fa-solid fa-check me-1">
+                    </i>
+
+                    Confirm
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

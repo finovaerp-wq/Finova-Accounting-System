@@ -263,8 +263,6 @@ NOTE :
 
     width: 100%;
 
-    height: 100%;
-
     overflow: hidden;
 
 }
@@ -507,6 +505,8 @@ td .fw-semibold {
 
     justify-content: center;
 
+    gap: 5px;
+
     min-width: 76px;
 
     height: 22px;
@@ -571,6 +571,8 @@ td .fw-semibold {
 
     height: 32px;
 
+    min-width: 32px;
+
     padding: 0;
 
     display: inline-flex;
@@ -579,7 +581,143 @@ td .fw-semibold {
 
     justify-content: center;
 
+    border: 0;
+
     border-radius: 5px;
+
+    font-size: 13px;
+
+    line-height: 1;
+
+}
+
+
+/* ==========================================================
+   VIEW
+========================================================== */
+
+.user-management-table-card
+.user-action-view {
+
+    background: #F1F5F9;
+
+    color: #475569;
+
+}
+
+
+/* ==========================================================
+   VIEW HOVER
+========================================================== */
+
+.user-management-table-card
+.user-action-view:hover {
+
+    background: #E2E8F0;
+
+    color: #334155;
+
+}
+
+
+/* ==========================================================
+   EDIT
+========================================================== */
+
+.user-management-table-card
+.user-action-edit {
+
+    background: #DBEAFE;
+
+    color: #2563EB;
+
+}
+
+
+/* ==========================================================
+   EDIT HOVER
+========================================================== */
+
+.user-management-table-card
+.user-action-edit:hover {
+
+    background: #BFDBFE;
+
+    color: #1D4ED8;
+
+}
+
+
+/* ==========================================================
+   RESET PASSWORD
+========================================================== */
+
+.user-management-table-card
+.user-action-reset {
+
+    background: #FEF3C7;
+
+    color: #D97706;
+
+}
+
+
+/* ==========================================================
+   RESET PASSWORD HOVER
+========================================================== */
+
+.user-management-table-card
+.user-action-reset:hover {
+
+    background: #FDE68A;
+
+    color: #B45309;
+
+}
+
+
+/* ==========================================================
+   DELETE
+========================================================== */
+
+.user-management-table-card
+.user-action-delete {
+
+    background: #FEE2E2;
+
+    color: #DC2626;
+
+}
+
+
+/* ==========================================================
+   DELETE HOVER
+========================================================== */
+
+.user-management-table-card
+.user-action-delete:hover {
+
+    background: #FECACA;
+
+    color: #B91C1C;
+
+}
+
+
+/* ==========================================================
+   DISABLED
+========================================================== */
+
+.user-management-table-card
+.user-action-delete:disabled {
+
+    background: #F1F5F9;
+
+    color: #94A3B8;
+
+    cursor: not-allowed;
+
+    opacity: 1;
 
 }
 

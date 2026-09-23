@@ -289,6 +289,46 @@ cacheDOM() {
             "taxModalLabel"
         );
 
+    /* ==================================================
+   ACTION CONFIRMATION MODAL
+================================================== */
+
+this.taxActionConfirmModal =
+    document.getElementById(
+        "taxActionConfirmModal"
+    );
+
+this.taxActionConfirmIcon =
+    document.getElementById(
+        "tax-action-confirm-icon"
+    );
+
+this.taxActionConfirmLargeIcon =
+    document.getElementById(
+        "tax-action-confirm-large-icon"
+    );
+
+this.taxActionConfirmMessage =
+    document.getElementById(
+        "tax-action-confirm-message"
+    );
+
+this.taxActionConfirmDetail =
+    document.getElementById(
+        "tax-action-confirm-detail"
+    );
+
+this.btnConfirmTaxAction =
+    document.getElementById(
+        "btn-confirm-tax-action"
+    );
+
+this.pendingTaxAction =
+    null;
+
+this.pendingTaxId =
+    null;
+
 }
     /*
 ======================================================
@@ -542,7 +582,98 @@ this.btnRefresh?.addEventListener(
         }
     );
 
+        /* ==================================================
+   CONFIRM TAX ACTION
+================================================== */
 
+this.btnConfirmTaxAction?.addEventListener(
+    "click",
+    async () => {
+
+        if (
+            !this.pendingTaxAction
+            ||
+            !this.pendingTaxId
+        ) {
+
+            return;
+
+        }
+
+        const action =
+            this.pendingTaxAction;
+
+        const id =
+            this.pendingTaxId;
+
+
+        /*
+        ==========================================
+        CLOSE CONFIRMATION MODAL
+        ==========================================
+        */
+
+        const modal =
+            bootstrap.Modal.getInstance(
+                this.taxActionConfirmModal
+            );
+
+        modal?.hide();
+
+
+        /*
+        ==========================================
+        CLEAR STATE
+        ==========================================
+        */
+
+        this.pendingTaxAction =
+            null;
+
+        this.pendingTaxId =
+            null;
+
+
+        /*
+        ==========================================
+        EXECUTE ACTION
+        ==========================================
+        */
+
+        if (
+            action === "active"
+        ) {
+
+            await this.changeTaxStatus(
+                id,
+                true
+            );
+
+        }
+
+        else if (
+            action === "inactive"
+        ) {
+
+            await this.changeTaxStatus(
+                id,
+                false
+            );
+
+        }
+
+        else if (
+            action === "delete"
+        ) {
+
+            await this.deleteTax(
+                id
+            );
+
+        }
+
+    }
+);
     /*
     ==================================================
     PAGINATION FIRST
@@ -1232,20 +1363,21 @@ render() {
                 */
 
                 const statusBadge =
-                    tax.status
+    tax.status
 
-                        ? `
-                            <span class="badge bg-success">
-                                Active
-                            </span>
-                          `
+        ? `
+            <span class="tax-status-badge tax-status-active">
+                <i class="fa-solid fa-circle-check"></i>
+                Active
+            </span>
+          `
 
-                        : `
-                            <span class="badge bg-secondary">
-                                Inactive
-                            </span>
-                          `;
-
+        : `
+            <span class="tax-status-badge tax-status-inactive">
+                <i class="fa-solid fa-circle-xmark"></i>
+                Inactive
+            </span>
+          `;
                 /*
 ==========================================
 STATUS ACTION
@@ -1258,7 +1390,7 @@ const statusAction =
         ? `
             <button
                 type="button"
-                class="btn btn-outline-warning"
+                class="tax-action-btn tax-action-inactive"
                 title="Set Inactive"
                 data-tax-action="inactive"
                 data-tax-id="${tax.id}">
@@ -1271,7 +1403,7 @@ const statusAction =
         : `
             <button
                 type="button"
-                class="btn btn-outline-success"
+                class="tax-action-btn tax-action-active"
                 title="Set Active"
                 data-tax-action="active"
                 data-tax-id="${tax.id}">
@@ -1380,37 +1512,43 @@ const statusAction =
 
                         <td class="text-center">
 
-                            <div class="btn-group btn-group-sm">
+    <div class="tax-action-group">
 
-                        <button
-                            type="button"
-                            class="btn btn-outline-primary"
-                            title="Edit"
-                            data-tax-action="edit"
-                            data-tax-id="${tax.id}">
+        <!-- EDIT -->
 
-                            <i class="fa-solid fa-pen"></i>
+        <button
+            type="button"
+            class="tax-action-btn tax-action-edit"
+            title="Edit"
+            data-tax-action="edit"
+            data-tax-id="${tax.id}">
 
-                        </button>
+            <i class="fa-solid fa-pen"></i>
+
+        </button>
 
 
-                        ${statusAction}
+        <!-- ACTIVE / INACTIVE -->
+
+        ${statusAction}
 
 
-                        <button
-                            type="button"
-                            class="btn btn-outline-danger"
-                            title="Delete"
-                            data-tax-action="delete"
-                            data-tax-id="${tax.id}">
+        <!-- DELETE -->
 
-                            <i class="fa-solid fa-trash"></i>
+        <button
+            type="button"
+            class="tax-action-btn tax-action-delete"
+            title="Delete"
+            data-tax-action="delete"
+            data-tax-id="${tax.id}">
 
-                        </button>
+            <i class="fa-solid fa-trash"></i>
 
-                    </div>
+        </button>
 
-                        </td>
+    </div>
+
+</td>
 
                     </tr>
 
@@ -3917,11 +4055,9 @@ handleAction(
         action
     ) {
 
-        /*
-        ==================================================
-        EDIT
-        ==================================================
-        */
+        /* ==========================================
+           EDIT
+        ========================================== */
 
         case "edit":
 
@@ -3932,53 +4068,345 @@ handleAction(
             break;
 
 
-        /*
-        ==================================================
-        ACTIVE
-        ==================================================
-        */
+        /* ==========================================
+           ACTIVE
+        ========================================== */
 
         case "active":
 
-            this.changeTaxStatus(
-                id,
-                true
+            this.showTaxActionConfirmation(
+                "active",
+                id
             );
 
             break;
 
 
-        /*
-        ==================================================
-        INACTIVE
-        ==================================================
-        */
+        /* ==========================================
+           INACTIVE
+        ========================================== */
 
         case "inactive":
 
-            this.changeTaxStatus(
-                id,
-                false
+            this.showTaxActionConfirmation(
+                "inactive",
+                id
             );
 
             break;
 
 
-        /*
-        ==================================================
-        DELETE
-        ==================================================
-        */
+        /* ==========================================
+           DELETE
+        ========================================== */
 
         case "delete":
 
-            this.deleteTax(
+            this.showTaxActionConfirmation(
+                "delete",
                 id
             );
 
             break;
 
     }
+
+}
+/*
+======================================================
+SHOW TAX ACTION CONFIRMATION
+======================================================
+*/
+
+showTaxActionConfirmation(
+    action,
+    id
+) {
+
+    const tax =
+        this.taxes.find(
+            item =>
+                String(item.id)
+                ===
+                String(id)
+        );
+
+
+    if (
+        !tax
+    ) {
+
+        this.showError(
+            "Tax not found."
+        );
+
+        return;
+
+    }
+
+
+    this.pendingTaxAction =
+        action;
+
+    this.pendingTaxId =
+        id;
+
+
+    /*
+    ==================================================
+    DEFAULT
+    ==================================================
+    */
+
+    let title =
+        "Confirm Action";
+
+    let message =
+        "Are you sure?";
+
+    let detail =
+        "";
+
+    let buttonText =
+        "Confirm";
+
+    let headerIcon =
+        "fa-solid fa-circle-question";
+
+    let largeIcon =
+        "fa-solid fa-circle-question";
+
+    let theme =
+        "text-primary";
+
+    let buttonClass =
+        "btn-primary";
+
+
+    /*
+    ==================================================
+    ACTIVE
+    ==================================================
+    */
+
+    if (
+        action === "active"
+    ) {
+
+        title =
+            "Activate Tax";
+
+        message =
+            "Activate this Tax?";
+
+        detail =
+            `${tax.tax_code || "-"} - ${tax.tax_name || "-"}`;
+
+        buttonText =
+            "Activate";
+
+        headerIcon =
+            "fa-solid fa-circle-check";
+
+        largeIcon =
+            "fa-solid fa-circle-check";
+
+        theme =
+            "text-success";
+
+        buttonClass =
+            "btn-success";
+
+    }
+
+
+    /*
+    ==================================================
+    INACTIVE
+    ==================================================
+    */
+
+    else if (
+        action === "inactive"
+    ) {
+
+        title =
+            "Set Tax Inactive";
+
+        message =
+            "Set this Tax to Inactive?";
+
+        detail =
+            `${tax.tax_code || "-"} - ${tax.tax_name || "-"}`;
+
+        buttonText =
+            "Set Inactive";
+
+        headerIcon =
+            "fa-solid fa-circle-xmark";
+
+        largeIcon =
+            "fa-solid fa-circle-xmark";
+
+        theme =
+            "text-warning";
+
+        buttonClass =
+            "btn-warning";
+
+    }
+
+
+    /*
+    ==================================================
+    DELETE
+    ==================================================
+    */
+
+    else if (
+        action === "delete"
+    ) {
+
+        title =
+            "Delete Tax";
+
+        message =
+            "Delete this Tax?";
+
+        detail =
+            `${tax.tax_code || "-"} - ${tax.tax_name || "-"}`;
+
+        buttonText =
+            "Delete";
+
+        headerIcon =
+            "fa-solid fa-trash";
+
+        largeIcon =
+            "fa-solid fa-trash";
+
+        theme =
+            "text-danger";
+
+        buttonClass =
+            "btn-danger";
+
+    }
+
+
+    /*
+    ==================================================
+    TITLE
+    ==================================================
+    */
+
+    document.getElementById(
+        "taxActionConfirmModalLabel"
+    ).textContent =
+        title;
+
+
+    /*
+    ==================================================
+    MESSAGE
+    ==================================================
+    */
+
+    if (
+        this.taxActionConfirmMessage
+    ) {
+
+        this.taxActionConfirmMessage
+            .textContent =
+            message;
+
+    }
+
+
+    /*
+    ==================================================
+    DETAIL
+    ==================================================
+    */
+
+    if (
+        this.taxActionConfirmDetail
+    ) {
+
+        this.taxActionConfirmDetail
+            .textContent =
+            detail;
+
+    }
+
+
+    /*
+    ==================================================
+    ICON
+    ==================================================
+    */
+
+    if (
+        this.taxActionConfirmIcon
+    ) {
+
+        this.taxActionConfirmIcon.className =
+            `${headerIcon} ${theme} me-2`;
+
+    }
+
+
+    if (
+        this.taxActionConfirmLargeIcon
+    ) {
+
+        this.taxActionConfirmLargeIcon.className =
+            `${largeIcon} ${theme}`;
+
+    }
+
+
+    /*
+    ==================================================
+    BUTTON
+    ==================================================
+    */
+
+    if (
+        this.btnConfirmTaxAction
+    ) {
+
+        this.btnConfirmTaxAction
+            .className =
+            `btn ${buttonClass}`;
+
+        this.btnConfirmTaxAction
+            .innerHTML = `
+
+                <i
+                    class="${largeIcon} me-1">
+                </i>
+
+                ${buttonText}
+
+            `;
+
+    }
+
+
+    /*
+    ==================================================
+    SHOW MODAL
+    ==================================================
+    */
+
+    const modal =
+        bootstrap.Modal.getOrCreateInstance(
+            this.taxActionConfirmModal
+        );
+
+
+    modal.show();
 
 }
 /*
@@ -4143,17 +4571,7 @@ async changeTaxStatus(
             }
 
 
-            const confirmed =
-                window.confirm(
-                    `Delete Tax "${tax.tax_name}"?`
-                );
-
-
-            if (!confirmed) {
-
-                return;
-
-            }
+            
 
 
             await this.service.delete(

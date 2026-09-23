@@ -1614,27 +1614,33 @@ applyAccessUI() {
                     ">
 
                     <span
-                        class="
-                            user-status-badge
-                            user-status-${
-                                active
-                                    ?
-                                    "active"
-                                    :
-                                    "inactive"
-                            }
-                        "
-                    >
+    class="
+        user-status-badge
+        user-status-${
+            active
+                ?
+                "active"
+                :
+                "inactive"
+        }
+    "
+>
 
-                        ${
-                            active
-                                ?
-                                "Active"
-                                :
-                                "Inactive"
-                        }
+    ${
+        active
+            ?
+            `
+                <i class="fa-solid fa-circle-check"></i>
+                Active
+            `
+            :
+            `
+                <i class="fa-solid fa-circle-xmark"></i>
+                Inactive
+            `
+    }
 
-                    </span>
+</span>
 
                 </td>
 
@@ -1676,80 +1682,32 @@ applyAccessUI() {
 
 
     /*
-    ==========================================================
-    CREATE ACTION BUTTONS
-    ==========================================================
+==========================================================
+CREATE ACTION BUTTONS
+==========================================================
+*/
+
+createActionButtons(
+    user
+) {
+
+    const uid =
+        this.escapeAttribute(
+            user.user_uid
+            ||
+            ""
+        );
+
+
+    /*
+    ======================================================
+    STAFF = VIEW ONLY
+    ======================================================
     */
 
-    createActionButtons(
-        user
+    if (
+        !this.isManager
     ) {
-
-        const uid =
-            this.escapeAttribute(
-                user.user_uid
-                ||
-                ""
-            );
-
-
-        /*
-        ======================================================
-        STAFF = VIEW ONLY
-        ======================================================
-        */
-
-        if (
-            !this.isManager
-        ) {
-
-            return `
-
-                <div
-                    class="
-                        user-action-group
-                    ">
-
-                    <button
-                    type="button"
-                    class="
-                        btn
-                        btn-outline-secondary
-                        btn-sm
-                        user-action-btn
-                    "
-                        title="View"
-                        data-action="view"
-                        data-uid="${uid}">
-
-                        <i
-                            class="
-                                fa-solid
-                                fa-eye
-                            ">
-                        </i>
-
-                    </button>
-
-                </div>
-
-            `;
-
-        }
-
-
-        const isCurrentUser =
-            user.user_uid
-            ===
-            this.currentAuthUser
-                ?.id;
-
-
-        /*
-        ======================================================
-        MANAGER
-        ======================================================
-        */
 
         return `
 
@@ -1758,16 +1716,12 @@ applyAccessUI() {
                     user-action-group
                 ">
 
-
-                <!-- VIEW -->
-
                 <button
                     type="button"
                     class="
-                        btn
-                        btn-outline-secondary
-                        btn-sm
+                        btn-action
                         user-action-btn
+                        user-action-view
                     "
                     title="View"
                     data-action="view"
@@ -1782,96 +1736,143 @@ applyAccessUI() {
 
                 </button>
 
-
-                <!-- EDIT -->
-
-                <button
-                    type="button"
-                    class="
-                        btn
-                        btn-outline-primary
-                        btn-sm
-                        user-action-btn
-                    "
-                    title="Edit"
-                    data-action="edit"
-                    data-uid="${uid}">
-
-                    <i
-                        class="
-                            fa-solid
-                            fa-pen
-                        ">
-                    </i>
-
-                </button>
-
-
-                <!-- RESET PASSWORD -->
-
-                <button
-                    type="button"
-                    class="
-                        btn
-                        btn-outline-warning
-                        btn-sm
-                        user-action-btn
-                    "
-                    title="Reset Password"
-                    data-action="reset-password"
-                    data-uid="${uid}">
-
-                    <i
-                        class="
-                            fa-solid
-                            fa-key
-                        ">
-                    </i>
-
-                </button>
-
-
-                <!-- DELETE -->
-
-                <button
-                    type="button"
-                    class="
-                        btn
-                        btn-outline-danger
-                        btn-sm
-                        user-action-btn
-                    "
-                    title="${
-                        isCurrentUser
-                            ?
-                            "Current user cannot be deleted"
-                            :
-                            "Delete"
-                    }"
-                    data-action="delete"
-                    data-uid="${uid}"
-                    ${
-                        isCurrentUser
-                            ?
-                            "disabled"
-                            :
-                            ""
-                    }>
-
-                    <i
-                        class="
-                            fa-solid
-                            fa-trash
-                        ">
-                    </i>
-
-                </button>
-
             </div>
 
         `;
 
     }
+
+
+    const isCurrentUser =
+        user.user_uid
+        ===
+        this.currentAuthUser
+            ?.id;
+
+
+    /*
+    ======================================================
+    MANAGER
+    ======================================================
+    */
+
+    return `
+
+        <div
+            class="
+                user-action-group
+            ">
+
+
+            <!-- VIEW -->
+
+            <button
+                type="button"
+                class="
+                    btn-action
+                    user-action-btn
+                    user-action-view
+                "
+                title="View"
+                data-action="view"
+                data-uid="${uid}">
+
+                <i
+                    class="
+                        fa-solid
+                        fa-eye
+                    ">
+                </i>
+
+            </button>
+
+
+            <!-- EDIT -->
+
+            <button
+                type="button"
+                class="
+                    btn-action
+                    user-action-btn
+                    user-action-edit
+                "
+                title="Edit"
+                data-action="edit"
+                data-uid="${uid}">
+
+                <i
+                    class="
+                        fa-solid
+                        fa-pen
+                    ">
+                </i>
+
+            </button>
+
+
+            <!-- RESET PASSWORD -->
+
+            <button
+                type="button"
+                class="
+                    btn-action
+                    user-action-btn
+                    user-action-reset
+                "
+                title="Reset Password"
+                data-action="reset-password"
+                data-uid="${uid}">
+
+                <i
+                    class="
+                        fa-solid
+                        fa-key
+                    ">
+                </i>
+
+            </button>
+
+
+            <!-- DELETE -->
+
+            <button
+                type="button"
+                class="
+                    btn-action
+                    user-action-btn
+                    user-action-delete
+                "
+                title="${
+                    isCurrentUser
+                        ?
+                        "Current user cannot be deleted"
+                        :
+                        "Delete"
+                }"
+                data-action="delete"
+                data-uid="${uid}"
+                ${
+                    isCurrentUser
+                        ?
+                        "disabled"
+                        :
+                        ""
+                }>
+
+                <i
+                    class="
+                        fa-solid
+                        fa-trash
+                    ">
+                </i>
+
+            </button>
+
+        </div>
+
+    `;
+
+}
 
 
     /*

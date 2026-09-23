@@ -225,6 +225,7 @@ NOTE :
 
 /* ==========================================================
    TABLE CONTAINER
+   STANDARD BUSINESS PARTNER / TAX MASTER
 ========================================================== */
 
 .coa-table-card
@@ -440,4 +441,214 @@ td .fw-semibold {
 
     margin-left: 2px;
 
+}
+/* ==========================================================
+   COA STATUS BADGE
+========================================================== */
+
+.coa-status-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 5px;
+
+    padding: 5px 10px;
+
+    border-radius: 999px;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    line-height: 1;
+
+    white-space: nowrap;
+
+}
+
+
+.coa-status-active {
+
+    color: #15803d;
+
+    background: #dcfce7;
+
+}
+
+
+.coa-status-inactive {
+
+    color: #b91c1c;
+
+    background: #fee2e2;
+
+}
+
+
+/* ==========================================================
+   COA ACTION GROUP
+========================================================== */
+
+.coa-action-group {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 6px;
+
+}
+
+
+/* ==========================================================
+   COA ACTION BUTTON
+========================================================== */
+
+.coa-action-btn {
+
+    width: 32px;
+
+    height: 32px;
+
+    min-width: 32px;
+
+    min-height: 32px;
+
+    padding: 0;
+
+    border: 1px solid transparent;
+
+    border-radius: 6px;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    cursor: pointer;
+
+    transition:
+        all 0.15s ease;
+
+}
+
+
+.coa-action-btn i {
+
+    font-size: 13px;
+
+}
+
+
+/* ==========================================================
+   EDIT
+========================================================== */
+
+.coa-action-edit {
+
+    color: #2563eb;
+
+    background: #eff6ff;
+
+    border-color: #bfdbfe;
+
+}
+
+
+.coa-action-edit:hover {
+
+    background: #dbeafe;
+
+}
+
+
+/* ==========================================================
+   ACTIVE
+========================================================== */
+
+.coa-action-active {
+
+    color: #16a34a;
+
+    background: #f0fdf4;
+
+    border-color: #bbf7d0;
+
+}
+
+
+.coa-action-active:hover {
+
+    background: #dcfce7;
+
+}
+
+
+/* ==========================================================
+   INACTIVE
+========================================================== */
+
+.coa-action-inactive {
+
+    color: #d97706;
+
+    background: #fffbeb;
+
+    border-color: #fde68a;
+
+}
+
+
+.coa-action-inactive:hover {
+
+    background: #fef3c7;
+
+}
+
+
+/* ==========================================================
+   DELETE
+========================================================== */
+
+.coa-action-delete {
+
+    color: #dc2626;
+
+    background: #fef2f2;
+
+    border-color: #fecaca;
+
+}
+
+
+.coa-action-delete:hover {
+
+    background: #fee2e2;
+
+}
+
+/* ==========================================================
+   COA MODAL DRAG
+   ========================================================== */
+
+#coa-modal .modal-content {
+    cursor: move;
+    user-select: none;
+}
+
+#coa-modal input,
+#coa-modal select,
+#coa-modal textarea,
+#coa-modal button,
+#coa-modal option,
+#coa-modal label {
+    cursor: default;
+    user-select: text;
 }

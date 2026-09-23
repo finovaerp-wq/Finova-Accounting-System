@@ -229,9 +229,23 @@ async loadModal() {
 
 
         this.modal =
-            bootstrap.Modal.getOrCreateInstance(
-                modalElement
-            );
+    bootstrap.Modal.getOrCreateInstance(
+        modalElement,
+        {
+            backdrop: "static",
+            keyboard: false
+        }
+    );
+
+    /*
+==========================================================
+ENABLE COA MODAL DRAG
+==========================================================
+*/
+
+this.enableCoaModalDrag(
+    modalElement
+);
 
 
         /*
@@ -279,6 +293,580 @@ async loadModal() {
         throw error;
 
     }
+
+}
+
+/*
+==========================================================
+ENABLE COA MODAL DRAG
+==========================================================
+*/
+
+enableCoaModalDrag(modalElement) {
+
+    if (!modalElement) {
+        return;
+    }
+
+
+    /*
+    ======================================================
+    ELEMENT
+    ======================================================
+    */
+
+    const dialog =
+        modalElement.querySelector(
+            ".modal-dialog"
+        );
+
+    const modalContent =
+        modalElement.querySelector(
+            ".modal-content"
+        );
+
+
+    if (
+        !dialog ||
+        !modalContent
+    ) {
+        return;
+    }
+
+
+    /*
+    ======================================================
+    AVOID DUPLICATE BINDING
+    ======================================================
+    */
+
+    if (
+        modalContent.dataset.dragBound ===
+        "true"
+    ) {
+        return;
+    }
+
+
+    modalContent.dataset.dragBound =
+        "true";
+
+
+    /*
+    ======================================================
+    INTERACTIVE ELEMENT
+    Yang tidak boleh membuat modal bergerak
+    ======================================================
+    */
+
+    const interactiveSelector = [
+        "input",
+        "select",
+        "textarea",
+        "button",
+        "option",
+        "a",
+        "[contenteditable='true']",
+        "[role='button']"
+    ].join(",");
+
+
+    /*
+    ======================================================
+    DRAG STATE
+    ======================================================
+    */
+
+    let dragging =
+        false;
+
+    let startX =
+        0;
+
+    let startY =
+        0;
+
+    let startLeft =
+        0;
+
+    let startTop =
+        0;
+
+
+    /*
+    ======================================================
+    RESET POSITION
+    Setelah modal ditutup
+    ======================================================
+    */
+
+    const resetModalPosition =
+        () => {
+
+            dragging =
+                false;
+
+
+            dialog.style.position =
+                "";
+
+            dialog.style.left =
+                "";
+
+            dialog.style.top =
+                "";
+
+            dialog.style.right =
+                "";
+
+            dialog.style.bottom =
+                "";
+
+            dialog.style.margin =
+                "";
+
+            dialog.style.transform =
+                "";
+
+
+            modalContent.style.cursor =
+                "move";
+
+
+            document.body.style.userSelect =
+                "";
+
+        };
+
+
+    /*
+    ======================================================
+    DRAG START
+    Bisa dari seluruh area modal
+    kecuali control input
+    ======================================================
+    */
+
+    modalContent.addEventListener(
+        "pointerdown",
+        (event) => {
+
+            /*
+            ----------------------------------------------
+            HANYA KLIK KIRI
+            ----------------------------------------------
+            */
+
+            if (
+                event.button !== 0
+            ) {
+                return;
+            }
+
+
+            /*
+            ----------------------------------------------
+            JANGAN DRAG FORM CONTROL
+            ----------------------------------------------
+            */
+
+            if (
+                event.target.closest(
+                    interactiveSelector
+                )
+            ) {
+                return;
+            }
+
+
+            /*
+            ----------------------------------------------
+            CURRENT POSITION
+            ----------------------------------------------
+            */
+
+            const rect =
+                dialog.getBoundingClientRect();
+
+
+            /*
+            ----------------------------------------------
+            CHANGE TO FIXED
+            ----------------------------------------------
+            */
+
+            dialog.style.position =
+                "fixed";
+
+            dialog.style.margin =
+                "0";
+
+            dialog.style.transform =
+                "none";
+
+            dialog.style.left =
+                `${rect.left}px`;
+
+            dialog.style.top =
+                `${rect.top}px`;
+
+            dialog.style.right =
+                "auto";
+
+            dialog.style.bottom =
+                "auto";
+
+
+            /*
+            ----------------------------------------------
+            SAVE START POSITION
+            ----------------------------------------------
+            */
+
+            startX =
+                event.clientX;
+
+            startY =
+                event.clientY;
+
+            startLeft =
+                rect.left;
+
+            startTop =
+                rect.top;
+
+
+            /*
+            ----------------------------------------------
+            START DRAGGING
+            ----------------------------------------------
+            */
+
+            dragging =
+                true;
+
+
+            /*
+            ----------------------------------------------
+            POINTER CAPTURE
+            ----------------------------------------------
+            */
+
+            try {
+
+                modalContent.setPointerCapture(
+                    event.pointerId
+                );
+
+            }
+
+            catch (error) {
+
+                // Ignore pointer capture error.
+
+            }
+
+
+            /*
+            ----------------------------------------------
+            UI
+            ----------------------------------------------
+            */
+
+            modalContent.style.cursor =
+                "grabbing";
+
+            document.body.style.userSelect =
+                "none";
+
+
+            /*
+            ----------------------------------------------
+            PREVENT DEFAULT
+            ----------------------------------------------
+            */
+
+            event.preventDefault();
+
+        }
+    );
+
+
+    /*
+======================================================
+DRAG MOVE
+MODAL TIDAK BOLEH MELEWATI BATAS LAYAR
+======================================================
+*/
+
+modalContent.addEventListener(
+    "pointermove",
+    (event) => {
+
+        if (!dragging) {
+            return;
+        }
+
+
+        /*
+        ----------------------------------------------
+        HITUNG PERGERAKAN
+        ----------------------------------------------
+        */
+
+        const deltaX =
+            event.clientX - startX;
+
+        const deltaY =
+            event.clientY - startY;
+
+
+        let newLeft =
+            startLeft + deltaX;
+
+        let newTop =
+            startTop + deltaY;
+
+
+        /*
+        ----------------------------------------------
+        UKURAN MODAL
+        ----------------------------------------------
+        */
+
+        const rect =
+            dialog.getBoundingClientRect();
+
+
+        /*
+        ----------------------------------------------
+        BATAS LAYAR
+        ----------------------------------------------
+        */
+
+        const screenWidth =
+            window.innerWidth;
+
+        const screenHeight =
+            window.innerHeight;
+
+
+        const padding = 10;
+
+
+        /*
+        ----------------------------------------------
+        BATAS KIRI
+        ----------------------------------------------
+        */
+
+        const minLeft =
+            padding;
+
+
+        /*
+        ----------------------------------------------
+        BATAS ATAS
+        ----------------------------------------------
+        */
+
+        const minTop =
+            padding;
+
+
+        /*
+        ----------------------------------------------
+        BATAS KANAN
+        ----------------------------------------------
+        */
+
+        const maxLeft =
+            screenWidth -
+            rect.width -
+            padding;
+
+
+        /*
+        ----------------------------------------------
+        BATAS BAWAH
+        ----------------------------------------------
+        */
+
+        const maxTop =
+            screenHeight -
+            rect.height -
+            padding;
+
+
+        /*
+        ----------------------------------------------
+        KUNCI POSISI HORIZONTAL
+        ----------------------------------------------
+        */
+
+        newLeft =
+            Math.max(
+                minLeft,
+                Math.min(
+                    newLeft,
+                    Math.max(
+                        minLeft,
+                        maxLeft
+                    )
+                )
+            );
+
+
+        /*
+        ----------------------------------------------
+        KUNCI POSISI VERTICAL
+        ----------------------------------------------
+        */
+
+        newTop =
+            Math.max(
+                minTop,
+                Math.min(
+                    newTop,
+                    Math.max(
+                        minTop,
+                        maxTop
+                    )
+                )
+            );
+
+
+        /*
+        ----------------------------------------------
+        TERAPKAN POSISI
+        ----------------------------------------------
+        */
+
+        dialog.style.left =
+            `${newLeft}px`;
+
+        dialog.style.top =
+            `${newTop}px`;
+
+    }
+);
+
+
+    /*
+    ======================================================
+    STOP DRAG
+    ======================================================
+    */
+
+    const stopDragging =
+        (event) => {
+
+            if (
+                !dragging
+            ) {
+                return;
+            }
+
+
+            dragging =
+                false;
+
+
+            /*
+            ----------------------------------------------
+            RELEASE POINTER
+            ----------------------------------------------
+            */
+
+            try {
+
+                modalContent.releasePointerCapture(
+                    event.pointerId
+                );
+
+            }
+
+            catch (error) {
+
+                // Ignore pointer release error.
+
+            }
+
+
+            /*
+            ----------------------------------------------
+            RESTORE UI
+            ----------------------------------------------
+            */
+
+            modalContent.style.cursor =
+                "move";
+
+            document.body.style.userSelect =
+                "";
+
+        };
+
+
+    /*
+    ======================================================
+    POINTER END
+    ======================================================
+    */
+
+    modalContent.addEventListener(
+        "pointerup",
+        stopDragging
+    );
+
+
+    modalContent.addEventListener(
+        "pointercancel",
+        stopDragging
+    );
+
+
+    /*
+    ======================================================
+    RESET SAAT MODAL DITUTUP
+    Cancel / X
+    ======================================================
+    */
+
+    modalElement.addEventListener(
+        "hidden.bs.modal",
+        () => {
+
+            resetModalPosition();
+
+        }
+    );
+
+
+    /*
+    ======================================================
+    RESET SEBELUM MODAL DIBUKA
+    ======================================================
+    */
+
+    modalElement.addEventListener(
+        "show.bs.modal",
+        () => {
+
+            resetModalPosition();
+
+        }
+    );
+
+
+    /*
+    ======================================================
+    CURSOR
+    ======================================================
+    */
+
+    modalContent.style.cursor =
+        "move";
 
 }
 /*
@@ -734,29 +1322,60 @@ async parentChanged() {
 
     try {
 
+        /*
+        ======================================================
+        CHECK PARENT
+        ======================================================
+        */
+
         if (!this.parentId?.value) {
 
             this.parentName.textContent = "-";
             this.parentLevel.textContent = "-";
             this.parentChildCount.textContent = "-";
 
+            /*
+            ==================================================
+            AUTO ACCOUNT CODE
+            HANYA SAAT ADD
+            ==================================================
+            */
+
+            if (!this.coaId?.value && this.accountCode) {
+
+                this.accountCode.value = "";
+
+            }
+
             return;
 
         }
 
+
+        /*
+        ======================================================
+        GET PARENT INFORMATION
+        ======================================================
+        */
+
         const parent =
-
             await ChartOfAccountsService.getParentInformation(
-
                 this.parentId.value
-
             );
+
 
         if (!parent) {
 
             return;
 
         }
+
+
+        /*
+        ======================================================
+        PARENT INFORMATION
+        ======================================================
+        */
 
         this.parentName.textContent =
             parent.account_name ?? "-";
@@ -767,6 +1386,26 @@ async parentChanged() {
         this.parentChildCount.textContent =
             parent.child_count ?? "0";
 
+
+        /*
+        ======================================================
+        AUTO ACCOUNT CODE
+        HANYA SAAT ADD
+        ======================================================
+        */
+
+        if (
+            !this.coaId?.value &&
+            this.accountCode &&
+            parent.next_account_code &&
+            parent.next_account_code !== "-"
+        ) {
+
+            this.accountCode.value =
+                parent.next_account_code;
+
+        }
+
     }
 
     catch (error) {
@@ -774,9 +1413,7 @@ async parentChanged() {
         console.error(error);
 
         this.showError(
-
             "Failed to load parent account."
-
         );
 
     }
@@ -3451,73 +4088,199 @@ RENDER ROW
 
 renderRow(item) {
 
+    /*
+    ======================================================
+    STATUS BADGE
+    ======================================================
+    */
+
+    const statusBadge =
+
+        item.status
+
+            ? `
+                <span class="coa-status-badge coa-status-active">
+
+                    <i class="fa-solid fa-circle-check"></i>
+
+                    Active
+
+                </span>
+              `
+
+            : `
+                <span class="coa-status-badge coa-status-inactive">
+
+                    <i class="fa-solid fa-circle-xmark"></i>
+
+                    Inactive
+
+                </span>
+              `;
+
+
+    /*
+    ======================================================
+    STATUS ACTION
+    ======================================================
+    */
+
+    const statusAction =
+
+        item.status
+
+            ? `
+                <button
+                    type="button"
+                    class="coa-action-btn coa-action-inactive"
+                    title="Set Inactive"
+                    data-action="inactive"
+                    data-id="${item.id}">
+
+                    <i class="fa-solid fa-ban"></i>
+
+                </button>
+              `
+
+            : `
+                <button
+                    type="button"
+                    class="coa-action-btn coa-action-active"
+                    title="Set Active"
+                    data-action="active"
+                    data-id="${item.id}">
+
+                    <i class="fa-solid fa-check"></i>
+
+                </button>
+              `;
+
+
+    /*
+    ======================================================
+    RETURN ROW
+    ======================================================
+    */
+
     return `
 
 <tr>
 
-    <td>
-        <strong style="color: #000000;">
-            ${item.account_code ?? "-"}
-        </strong>
-    </td>
+    <!-- ACCOUNT CODE -->
 
     <td>
-        <strong style="color: #000000;">
-            ${item.account_name ?? "-"}
-        </strong>
+
+        ${item.account_code ?? "-"}
+
     </td>
 
-    <td>${item.parent_name ?? "-"}</td>
 
-    <td>${item.currency ?? "-"}</td>
+    <!-- ACCOUNT NAME -->
 
-    <td>${item.normal_balance ?? "-"}</td>
+    <td>
 
-    <td>${item.posting_type ?? "-"}</td>
+        ${item.account_name ?? "-"}
+
+    </td>
+
+
+    <!-- PARENT -->
+
+    <td>
+
+        ${item.parent_name ?? "-"}
+
+    </td>
+
+
+    <!-- CURRENCY -->
+
+    <td>
+
+        ${item.currency ?? "-"}
+
+    </td>
+
+
+    <!-- NORMAL BALANCE -->
+
+    <td>
+
+        ${item.normal_balance ?? "-"}
+
+    </td>
+
+
+    <!-- POSTING TYPE -->
+
+    <td>
+
+        ${item.posting_type ?? "-"}
+
+    </td>
+
+
+    <!-- HEADER -->
 
     <td class="text-center">
 
-        ${item.is_header
-            ? `<span class="badge badge-primary">Yes</span>`
-            : `<span class="badge bg-secondary">No</span>`}
+        ${
+            item.is_header
+
+                ? `<span class="badge bg-primary">
+                        Yes
+                   </span>`
+
+                : `<span class="badge bg-secondary">
+                        No
+                   </span>`
+        }
 
     </td>
+
+
+    <!-- STATUS -->
 
     <td class="text-center">
 
-        ${item.status
-            ? `
-            <span class="badge badge-success">
-                <i class="fa-solid fa-circle-check me-1"></i>
-                Active
-            </span>`
-            : `
-            <span class="badge badge-danger">
-                <i class="fa-solid fa-circle-xmark me-1"></i>
-                Inactive
-            </span>`}
+        ${statusBadge}
 
     </td>
 
-    <td>
 
-        <div class="finova-action">
+    <!-- ACTION -->
+
+    <td class="text-center">
+
+        <div class="coa-action-group">
+
+            <!-- EDIT -->
 
             <button
-                class="btn-action btn-action-edit"
+                type="button"
+                class="coa-action-btn coa-action-edit"
+                title="Edit"
                 data-action="edit"
-                data-id="${item.id}"
-                title="Edit">
+                data-id="${item.id}">
 
                 <i class="fa-solid fa-pen"></i>
 
             </button>
 
+
+            <!-- ACTIVE / INACTIVE -->
+
+            ${statusAction}
+
+
+            <!-- DELETE -->
+
             <button
-                class="btn-action btn-action-delete"
+                type="button"
+                class="coa-action-btn coa-action-delete"
+                title="Delete"
                 data-action="delete"
-                data-id="${item.id}"
-                title="Delete">
+                data-id="${item.id}">
 
                 <i class="fa-solid fa-trash"></i>
 
@@ -3693,18 +4456,39 @@ async openEditModal(id) {
 
         if (this.accountName) {
 
-            this.accountName.value =
-                item.account_name ?? "";
+    this.accountName.value =
+        item.account_name ?? "";
 
-        }
+}
 
 
-        if (this.currency) {
+/*
+======================================================
+ACCOUNT CLASS
+======================================================
+*/
 
-            this.currency.value =
-                item.currency ?? "IDR";
+const accountClass =
+    document.getElementById(
+        "coa-type"
+    );
 
-        }
+if (accountClass) {
+
+    accountClass.value =
+        item.account_class ?? "";
+
+}
+
+
+if (this.currency) {
+
+    this.currency.value =
+        item.currency ?? "IDR";
+
+}
+
+
 
 
         if (this.postingType) {
@@ -4054,6 +4838,8 @@ collectFormData() {
 
 }
 
+
+
 /*
 ==========================================================
 VALIDATE
@@ -4061,6 +4847,12 @@ VALIDATE
 */
 
 validate() {
+
+    /*
+    ======================================================
+    ACCOUNT CODE
+    ======================================================
+    */
 
     if (!this.accountCode.value.trim()) {
 
@@ -4074,6 +4866,13 @@ validate() {
 
     }
 
+
+    /*
+    ======================================================
+    ACCOUNT NAME
+    ======================================================
+    */
+
     if (!this.accountName.value.trim()) {
 
         this.showError(
@@ -4086,6 +4885,41 @@ validate() {
 
     }
 
+
+    /*
+    ======================================================
+    ACCOUNT CLASS
+    ======================================================
+    */
+
+    const accountClass =
+        document.getElementById(
+            "coa-type"
+        );
+
+
+    if (
+        !accountClass ||
+        !accountClass.value
+    ) {
+
+        this.showError(
+            "Account Class is required."
+        );
+
+        accountClass?.focus();
+
+        return false;
+
+    }
+
+
+    /*
+    ======================================================
+    POSTING TYPE
+    ======================================================
+    */
+
     if (!this.postingType.value) {
 
         this.showError(
@@ -4097,6 +4931,7 @@ validate() {
         return false;
 
     }
+
 
     return true;
 
@@ -4235,6 +5070,456 @@ async update(id) {
             "Failed to update Chart Of Account."
 
         );
+
+    }
+
+}
+/*
+==========================================================
+REQUEST STATUS CHANGE
+==========================================================
+*/
+
+async requestStatusChange(
+    id,
+    newStatus
+) {
+
+    try {
+
+        const account =
+            this.data.find(
+                item =>
+                    String(item.id) ===
+                    String(id)
+            );
+
+
+        if (!account) {
+
+            this.showError(
+                "Chart Of Account not found."
+            );
+
+            return;
+
+        }
+
+
+        /*
+        ======================================================
+        CREATE MODAL
+        ======================================================
+        */
+
+        let modalElement =
+            document.getElementById(
+                "coaStatusConfirmModal"
+            );
+
+
+        if (!modalElement) {
+
+            modalElement =
+                document.createElement(
+                    "div"
+                );
+
+            modalElement.id =
+                "coaStatusConfirmModal";
+
+            modalElement.className =
+                "modal fade";
+
+            modalElement.tabIndex = -1;
+
+            modalElement.setAttribute(
+                "aria-hidden",
+                "true"
+            );
+
+
+            modalElement.innerHTML = `
+
+                <div
+                    class="modal-dialog modal-dialog-centered">
+
+                    <div class="modal-content">
+
+                        <div
+                            class="modal-header">
+
+                            <h5
+                                class="modal-title"
+                                id="coa-status-confirm-title">
+
+                                Confirm Status Change
+
+                            </h5>
+
+                            <button
+                                type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Close">
+                            </button>
+
+                        </div>
+
+
+                        <div
+                            class="modal-body">
+
+                            <div
+                                class="text-center mb-3">
+
+                                <i
+                                    id="coa-status-confirm-icon">
+                                </i>
+
+                            </div>
+
+
+                            <div
+                                class="text-center mb-3">
+
+                                <div
+                                    class="fw-semibold"
+                                    id="coa-status-confirm-account">
+
+                                    -
+
+                                </div>
+
+                            </div>
+
+
+                            <div
+                                class="text-center">
+
+                                <span
+                                    id="coa-status-confirm-message">
+
+                                    -
+
+                                </span>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            class="modal-footer">
+
+                            <button
+                                type="button"
+                                class="btn btn-secondary"
+                                data-bs-dismiss="modal">
+
+                                Cancel
+
+                            </button>
+
+
+                            <button
+                                type="button"
+                                class="btn"
+                                id="btn-confirm-coa-status">
+
+                                Confirm
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            `;
+
+
+            document.body.appendChild(
+                modalElement
+            );
+
+        }
+
+
+        /*
+        ======================================================
+        ELEMENTS
+        ======================================================
+        */
+
+        const title =
+            modalElement.querySelector(
+                "#coa-status-confirm-title"
+            );
+
+        const icon =
+            modalElement.querySelector(
+                "#coa-status-confirm-icon"
+            );
+
+        const accountText =
+            modalElement.querySelector(
+                "#coa-status-confirm-account"
+            );
+
+        const message =
+            modalElement.querySelector(
+                "#coa-status-confirm-message"
+            );
+
+        const confirmButton =
+            modalElement.querySelector(
+                "#btn-confirm-coa-status"
+            );
+
+
+        /*
+        ======================================================
+        STATUS
+        ======================================================
+        */
+
+        const actionText =
+            newStatus
+                ? "Activate"
+                : "Deactivate";
+
+        const statusText =
+            newStatus
+                ? "Active"
+                : "Inactive";
+
+
+        title.textContent =
+            `${actionText} Account`;
+
+
+        icon.className =
+            newStatus
+
+                ? "fa-solid fa-circle-check text-success fa-3x"
+
+                : "fa-solid fa-circle-xmark text-warning fa-3x";
+
+
+        accountText.textContent =
+            `${account.account_code} - ${account.account_name}`;
+
+
+        message.textContent =
+            `Are you sure you want to set this account as ${statusText}?`;
+
+
+        /*
+        ======================================================
+        CONFIRM BUTTON
+        ======================================================
+        */
+
+        confirmButton.className =
+            newStatus
+                ? "btn btn-success"
+                : "btn btn-warning";
+
+
+        confirmButton.innerHTML =
+            newStatus
+
+                ? `
+                    <i class="fa-solid fa-check me-2"></i>
+                    Activate
+                  `
+
+                : `
+                    <i class="fa-solid fa-ban me-2"></i>
+                    Deactivate
+                  `;
+
+
+        confirmButton.onclick =
+            async () => {
+
+                await this.confirmStatusChange(
+                    id,
+                    newStatus,
+                    modalElement
+                );
+
+            };
+
+
+        /*
+        ======================================================
+        SHOW MODAL
+        ======================================================
+        */
+
+        const modal =
+            bootstrap.Modal.getOrCreateInstance(
+                modalElement
+            );
+
+
+        modal.show();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "ChartOfAccounts.requestStatusChange:",
+            error
+        );
+
+        this.showError(
+            error.message ??
+            "Failed to change Chart Of Account status."
+        );
+
+    }
+
+}
+
+/*
+==========================================================
+CONFIRM STATUS CHANGE
+==========================================================
+*/
+
+async confirmStatusChange(
+    id,
+    newStatus,
+    modalElement
+) {
+
+    const confirmButton =
+        modalElement?.querySelector(
+            "#btn-confirm-coa-status"
+        );
+
+
+    try {
+
+        if (confirmButton) {
+
+            confirmButton.disabled = true;
+
+            confirmButton.innerHTML = `
+                <span
+                    class="spinner-border spinner-border-sm me-2"
+                    role="status"
+                    aria-hidden="true">
+                </span>
+
+                Processing...
+            `;
+
+        }
+
+
+        /*
+        ======================================================
+        UPDATE STATUS
+        ======================================================
+        */
+
+        await ChartOfAccountsService.setStatus(
+            id,
+            newStatus
+        );
+
+
+        /*
+        ======================================================
+        HIDE MODAL
+        ======================================================
+        */
+
+        if (modalElement) {
+
+            const modal =
+                bootstrap.Modal.getOrCreateInstance(
+                    modalElement
+                );
+
+            modal.hide();
+
+        }
+
+
+        /*
+        ======================================================
+        RELOAD
+        ======================================================
+        */
+
+        await this.loadData();
+
+        await this.loadParentAccounts();
+
+
+        /*
+        ======================================================
+        SUCCESS
+        ======================================================
+        */
+
+        this.showSuccess(
+
+            newStatus
+
+                ? "Chart Of Account successfully activated."
+
+                : "Chart Of Account successfully deactivated."
+
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "ChartOfAccounts.confirmStatusChange:",
+            error
+        );
+
+        this.showError(
+
+            error.message ??
+
+            "Failed to change Chart Of Account status."
+
+        );
+
+    }
+
+    finally {
+
+        if (confirmButton) {
+
+            confirmButton.disabled = false;
+
+            confirmButton.innerHTML =
+
+                newStatus
+
+                    ? `
+                        <i class="fa-solid fa-check me-2"></i>
+                        Activate
+                      `
+
+                    : `
+                        <i class="fa-solid fa-ban me-2"></i>
+                        Deactivate
+                      `;
+
+        }
 
     }
 
@@ -4672,6 +5957,7 @@ closeModal() {
     }
 
 }
+
 /*
 ==========================================================
 BIND TABLE EVENTS
@@ -4686,7 +5972,10 @@ bindTableEvents() {
 
     }
 
-    this.tableBody.onclick = async (event) => {
+
+    this.tableBody.onclick =
+        async (event) => {
+
 
         /*
         ==============================================
@@ -4694,11 +5983,11 @@ bindTableEvents() {
         ==============================================
         */
 
-        const editButton = event.target.closest(
+        const editButton =
+            event.target.closest(
+                "[data-action='edit']"
+            );
 
-            "[data-action='edit']"
-
-        );
 
         if (editButton) {
 
@@ -4717,17 +6006,84 @@ bindTableEvents() {
 
         }
 
+
+        /*
+        ==============================================
+        ACTIVE
+        ==============================================
+        */
+
+        const activeButton =
+            event.target.closest(
+                "[data-action='active']"
+            );
+
+
+        if (activeButton) {
+
+            event.preventDefault();
+
+            const id =
+                activeButton.dataset.id;
+
+            if (id) {
+
+                await this.requestStatusChange(
+                    id,
+                    true
+                );
+
+            }
+
+            return;
+
+        }
+
+
+        /*
+        ==============================================
+        INACTIVE
+        ==============================================
+        */
+
+        const inactiveButton =
+            event.target.closest(
+                "[data-action='inactive']"
+            );
+
+
+        if (inactiveButton) {
+
+            event.preventDefault();
+
+            const id =
+                inactiveButton.dataset.id;
+
+            if (id) {
+
+                await this.requestStatusChange(
+                    id,
+                    false
+                );
+
+            }
+
+            return;
+
+        }
+
+
         /*
         ==============================================
         DELETE
         ==============================================
         */
 
-        const deleteButton = event.target.closest(
+        const deleteButton =
+            event.target.closest(
+                "[data-action='delete']"
+            );
 
-            "[data-action='delete']"
-
-        );
 
         if (deleteButton) {
 

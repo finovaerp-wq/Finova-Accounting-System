@@ -399,13 +399,16 @@ export class TaxService {
 
 
             const taxAccountId =
-                payload.tax_account_id
-                || null;
+    Number(
+        payload.tax_account_id
+        || 0
+    );
 
-
-            const offsetAccountId =
-                payload.offset_account_id
-                || null;
+const offsetAccountId =
+    Number(
+        payload.offset_account_id
+        || 0
+    );
 
 
             /*
@@ -459,13 +462,19 @@ export class TaxService {
             }
 
 
-            if (!taxAccountId) {
+            if (
+    !Number.isInteger(
+        taxAccountId
+    )
+    ||
+    taxAccountId <= 0
+) {
 
-                throw new Error(
-                    "Tax Account is required."
-                );
+    throw new Error(
+        "Tax Account is required."
+    );
 
-            }
+}
 
 
            
@@ -502,7 +511,9 @@ export class TaxService {
                         taxAccountId,
 
                     offset_account_id:
-                        offsetAccountId,
+    offsetAccountId > 0
+        ? offsetAccountId
+        : null,
 
                     description:
                         payload.description
