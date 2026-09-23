@@ -542,198 +542,145 @@ td .fw-semibold {
 }
 
 
+
 /* ==========================================================
-   ACTION BUTTON GROUP
+   USER MANAGEMENT ACTION GROUP - SAME AS COA
 ========================================================== */
 
-.user-management-table-card
-.user-action-group {
-
+.user-management-table-card .user-action-group {
     display: inline-flex;
-
     align-items: center;
-
     justify-content: center;
-
-    gap: 5px;
-
+    gap: 6px;
 }
-
 
 /* ==========================================================
    ACTION BUTTON
 ========================================================== */
 
-.user-management-table-card
-.user-action-btn {
-
+.user-management-table-card .user-action-btn {
     width: 32px;
-
     height: 32px;
-
     min-width: 32px;
+    min-height: 32px;
 
     padding: 0;
 
+    border: 1px solid transparent;
+    border-radius: 6px;
+
     display: inline-flex;
-
     align-items: center;
-
     justify-content: center;
 
-    border: 0;
-
-    border-radius: 5px;
-
-    font-size: 13px;
-
-    line-height: 1;
-
+    cursor: pointer;
+    transition: all 0.15s ease;
 }
 
+.user-management-table-card .user-action-btn i {
+    font-size: 13px;
+}
 
 /* ==========================================================
    VIEW
 ========================================================== */
 
-.user-management-table-card
-.user-action-view {
-
-    background: #F1F5F9;
-
+.user-management-table-card .user-action-view {
     color: #475569;
-
+    background: #f1f5f9;
+    border-color: #cbd5e1;
 }
 
-
-/* ==========================================================
-   VIEW HOVER
-========================================================== */
-
-.user-management-table-card
-.user-action-view:hover {
-
-    background: #E2E8F0;
-
-    color: #334155;
-
+.user-management-table-card .user-action-view:hover {
+    background: #e2e8f0;
 }
-
 
 /* ==========================================================
    EDIT
 ========================================================== */
 
-.user-management-table-card
-.user-action-edit {
-
-    background: #DBEAFE;
-
-    color: #2563EB;
-
+.user-management-table-card .user-action-edit {
+    color: #2563eb;
+    background: #eff6ff;
+    border-color: #bfdbfe;
 }
 
-
-/* ==========================================================
-   EDIT HOVER
-========================================================== */
-
-.user-management-table-card
-.user-action-edit:hover {
-
-    background: #BFDBFE;
-
-    color: #1D4ED8;
-
+.user-management-table-card .user-action-edit:hover {
+    background: #dbeafe;
 }
-
 
 /* ==========================================================
    RESET PASSWORD
 ========================================================== */
 
-.user-management-table-card
-.user-action-reset {
-
-    background: #FEF3C7;
-
-    color: #D97706;
-
+.user-management-table-card .user-action-reset {
+    color: #d97706;
+    background: #fffbeb;
+    border-color: #fde68a;
 }
 
-
-/* ==========================================================
-   RESET PASSWORD HOVER
-========================================================== */
-
-.user-management-table-card
-.user-action-reset:hover {
-
-    background: #FDE68A;
-
-    color: #B45309;
-
+.user-management-table-card .user-action-reset:hover {
+    background: #fef3c7;
 }
-
 
 /* ==========================================================
    DELETE
 ========================================================== */
 
-.user-management-table-card
-.user-action-delete {
-
-    background: #FEE2E2;
-
-    color: #DC2626;
-
+.user-management-table-card .user-action-delete {
+    color: #dc2626;
+    background: #fef2f2;
+    border-color: #fecaca;
 }
 
-
-/* ==========================================================
-   DELETE HOVER
-========================================================== */
-
-.user-management-table-card
-.user-action-delete:hover {
-
-    background: #FECACA;
-
-    color: #B91C1C;
-
+.user-management-table-card .user-action-delete:hover {
+    background: #fee2e2;
 }
-
 
 /* ==========================================================
    DISABLED
 ========================================================== */
 
-.user-management-table-card
-.user-action-delete:disabled {
-
-    background: #F1F5F9;
-
-    color: #94A3B8;
-
+.user-management-table-card .user-action-delete:disabled {
+    background: #f1f5f9;
+    color: #94a3b8;
+    border-color: #cbd5e1;
     cursor: not-allowed;
-
     opacity: 1;
-
 }
 
-
 /* ==========================================================
-   USER MODAL
+   USER MODAL DRAG
 ========================================================== */
 
 #user-management-modal
 .modal-content {
 
-    border: 0;
+    cursor: move;
 
-    border-radius: 12px;
+    user-select: none;
 
-    overflow: hidden;
+}
+
+
+/* ==========================================================
+   USER MODAL INTERACTIVE ELEMENT
+   Tidak ikut drag
+========================================================== */
+
+#user-management-modal input,
+#user-management-modal select,
+#user-management-modal textarea,
+#user-management-modal button,
+#user-management-modal option,
+#user-management-modal a,
+#user-management-modal label,
+#user-management-modal [contenteditable="true"],
+#user-management-modal [role="button"] {
+
+    cursor: default;
+
+    user-select: text;
 
 }
 

@@ -22,6 +22,26 @@ export class BusinessPartner {
 
     this.modal = null;
 
+    /* ==========================================================
+   BUSINESS PARTNER STATUS CONFIRMATION
+========================================================== */
+
+this.bpStatusConfirmModal = null;
+
+this.bpStatusConfirmIcon = null;
+
+this.bpStatusConfirmLargeIcon = null;
+
+this.bpStatusConfirmMessage = null;
+
+this.bpStatusConfirmDetail = null;
+
+this.btnConfirmBpStatus = null;
+
+this.pendingBpStatusAction = null;
+
+this.pendingBpStatusId = null;
+
     /* DOM */
 
     this.tableBody = null;
@@ -71,13 +91,27 @@ async initialize() {
  
         this.cacheElement(); 
  
-        /* ========================================== 
-           BOOTSTRAP MODAL 
-        ========================================== */ 
- 
-        this.modal = new bootstrap.Modal( 
-            this.modalElement 
-        ); 
+        /* ==========================================
+   BOOTSTRAP MODAL
+========================================== */
+
+this.modal =
+    bootstrap.Modal.getOrCreateInstance(
+        this.modalElement,
+        {
+            backdrop: "static",
+            keyboard: false
+        }
+    );
+
+
+/* ==========================================
+   ENABLE BUSINESS PARTNER MODAL DRAG
+========================================== */
+
+this.enableBusinessPartnerModalDrag(
+    this.modalElement
+);
  
         /* ========================================== 
            COMPONENT 
@@ -154,6 +188,565 @@ async initialize() {
         "beforeend",
         html
     );
+
+}
+
+/*
+==========================================================
+ENABLE BUSINESS PARTNER MODAL DRAG
+==========================================================
+*/
+
+enableBusinessPartnerModalDrag(
+    modalElement
+) {
+
+    if (
+        !modalElement
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    ELEMENT
+    ======================================================
+    */
+
+    const dialog =
+        modalElement.querySelector(
+            ".modal-dialog"
+        );
+
+    const modalContent =
+        modalElement.querySelector(
+            ".modal-content"
+        );
+
+
+    if (
+        !dialog ||
+        !modalContent
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    AVOID DUPLICATE BINDING
+    ======================================================
+    */
+
+    if (
+        modalContent.dataset.dragBound ===
+        "true"
+    ) {
+
+        return;
+
+    }
+
+
+    modalContent.dataset.dragBound =
+        "true";
+
+
+    /*
+    ======================================================
+    INTERACTIVE ELEMENT
+    Tidak boleh membuat modal bergerak
+    ======================================================
+    */
+
+    const interactiveSelector = [
+
+        "input",
+        "select",
+        "textarea",
+        "button",
+        "option",
+        "a",
+        "[contenteditable='true']",
+        "[role='button']"
+
+    ].join(",");
+
+
+    /*
+    ======================================================
+    DRAG STATE
+    ======================================================
+    */
+
+    let dragging =
+        false;
+
+    let startX =
+        0;
+
+    let startY =
+        0;
+
+    let startLeft =
+        0;
+
+    let startTop =
+        0;
+
+
+    /*
+    ======================================================
+    RESET POSITION
+    ======================================================
+    */
+
+    const resetModalPosition =
+        () => {
+
+            dragging =
+                false;
+
+
+            dialog.style.position =
+                "";
+
+            dialog.style.left =
+                "";
+
+            dialog.style.top =
+                "";
+
+            dialog.style.right =
+                "";
+
+            dialog.style.bottom =
+                "";
+
+            dialog.style.margin =
+                "";
+
+            dialog.style.transform =
+                "";
+
+
+            modalContent.style.cursor =
+                "move";
+
+
+            document.body.style.userSelect =
+                "";
+
+        };
+
+
+    /*
+    ======================================================
+    DRAG START
+    Seluruh area modal
+    kecuali elemen interaktif
+    ======================================================
+    */
+
+    modalContent.addEventListener(
+        "pointerdown",
+        (event) => {
+
+            /*
+            ----------------------------------------------
+            HANYA KLIK KIRI
+            ----------------------------------------------
+            */
+
+            if (
+                event.button !== 0
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+            ----------------------------------------------
+            JANGAN DRAG FORM CONTROL
+            ----------------------------------------------
+            */
+
+            if (
+                event.target.closest(
+                    interactiveSelector
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+            ----------------------------------------------
+            CURRENT POSITION
+            ----------------------------------------------
+            */
+
+            const rect =
+                dialog.getBoundingClientRect();
+
+
+            /*
+            ----------------------------------------------
+            CHANGE TO FIXED
+            ----------------------------------------------
+            */
+
+            dialog.style.position =
+                "fixed";
+
+            dialog.style.margin =
+                "0";
+
+            dialog.style.transform =
+                "none";
+
+            dialog.style.left =
+                `${rect.left}px`;
+
+            dialog.style.top =
+                `${rect.top}px`;
+
+            dialog.style.right =
+                "auto";
+
+            dialog.style.bottom =
+                "auto";
+
+
+            /*
+            ----------------------------------------------
+            SAVE START POSITION
+            ----------------------------------------------
+            */
+
+            startX =
+                event.clientX;
+
+            startY =
+                event.clientY;
+
+            startLeft =
+                rect.left;
+
+            startTop =
+                rect.top;
+
+
+            /*
+            ----------------------------------------------
+            START DRAG
+            ----------------------------------------------
+            */
+
+            dragging =
+                true;
+
+
+            /*
+            ----------------------------------------------
+            POINTER CAPTURE
+            ----------------------------------------------
+            */
+
+            try {
+
+                modalContent.setPointerCapture(
+                    event.pointerId
+                );
+
+            }
+
+            catch (error) {
+
+                // Ignore pointer capture error.
+
+            }
+
+
+            /*
+            ----------------------------------------------
+            UI
+            ----------------------------------------------
+            */
+
+            modalContent.style.cursor =
+                "grabbing";
+
+            document.body.style.userSelect =
+                "none";
+
+
+            event.preventDefault();
+
+        }
+    );
+
+
+    /*
+    ======================================================
+    DRAG MOVE
+    BOUNDARY VIEWPORT
+    ======================================================
+    */
+
+    modalContent.addEventListener(
+        "pointermove",
+        (event) => {
+
+            if (
+                !dragging
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+            ----------------------------------------------
+            DELTA
+            ----------------------------------------------
+            */
+
+            const deltaX =
+                event.clientX -
+                startX;
+
+            const deltaY =
+                event.clientY -
+                startY;
+
+
+            let newLeft =
+                startLeft +
+                deltaX;
+
+            let newTop =
+                startTop +
+                deltaY;
+
+
+            /*
+            ----------------------------------------------
+            MODAL SIZE
+            ----------------------------------------------
+            */
+
+            const rect =
+                dialog.getBoundingClientRect();
+
+
+            /*
+            ----------------------------------------------
+            VIEWPORT
+            ----------------------------------------------
+            */
+
+            const screenWidth =
+                window.innerWidth;
+
+            const screenHeight =
+                window.innerHeight;
+
+            const padding =
+                10;
+
+
+            /*
+            ----------------------------------------------
+            BOUNDARY
+            ----------------------------------------------
+            */
+
+            const minLeft =
+                padding;
+
+            const minTop =
+                padding;
+
+            const maxLeft =
+                screenWidth -
+                rect.width -
+                padding;
+
+            const maxTop =
+                screenHeight -
+                rect.height -
+                padding;
+
+
+            /*
+            ----------------------------------------------
+            CLAMP HORIZONTAL
+            ----------------------------------------------
+            */
+
+            newLeft =
+                Math.max(
+                    minLeft,
+                    Math.min(
+                        newLeft,
+                        Math.max(
+                            minLeft,
+                            maxLeft
+                        )
+                    )
+                );
+
+
+            /*
+            ----------------------------------------------
+            CLAMP VERTICAL
+            ----------------------------------------------
+            */
+
+            newTop =
+                Math.max(
+                    minTop,
+                    Math.min(
+                        newTop,
+                        Math.max(
+                            minTop,
+                            maxTop
+                        )
+                    )
+                );
+
+
+            /*
+            ----------------------------------------------
+            APPLY POSITION
+            ----------------------------------------------
+            */
+
+            dialog.style.left =
+                `${newLeft}px`;
+
+            dialog.style.top =
+                `${newTop}px`;
+
+        }
+    );
+
+
+    /*
+    ======================================================
+    STOP DRAG
+    ======================================================
+    */
+
+    const stopDragging =
+        (event) => {
+
+            if (
+                !dragging
+            ) {
+
+                return;
+
+            }
+
+
+            dragging =
+                false;
+
+
+            try {
+
+                modalContent.releasePointerCapture(
+                    event.pointerId
+                );
+
+            }
+
+            catch (error) {
+
+                // Ignore pointer release error.
+
+            }
+
+
+            modalContent.style.cursor =
+                "move";
+
+            document.body.style.userSelect =
+                "";
+
+        };
+
+
+    /*
+    ======================================================
+    POINTER END
+    ======================================================
+    */
+
+    modalContent.addEventListener(
+        "pointerup",
+        stopDragging
+    );
+
+    modalContent.addEventListener(
+        "pointercancel",
+        stopDragging
+    );
+
+
+    /*
+    ======================================================
+    RESET AFTER CLOSE
+    Cancel / X
+    ======================================================
+    */
+
+    modalElement.addEventListener(
+        "hidden.bs.modal",
+        () => {
+
+            resetModalPosition();
+
+        }
+    );
+
+
+    /*
+    ======================================================
+    RESET BEFORE OPEN
+    ======================================================
+    */
+
+    modalElement.addEventListener(
+        "show.bs.modal",
+        () => {
+
+            resetModalPosition();
+
+        }
+    );
+
+
+    /*
+    ======================================================
+    DEFAULT CURSOR
+    ======================================================
+    */
+
+    modalContent.style.cursor =
+        "move";
 
 }
 /*
@@ -239,7 +832,39 @@ cacheElement() {
 
     this.modalTitle =
         document.getElementById("businessPartnerModalTitle");
+    /* ==========================================================
+   STATUS CONFIRMATION MODAL
+========================================================== */
 
+this.bpStatusConfirmModal =
+    document.getElementById(
+        "bpStatusConfirmModal"
+    );
+
+this.bpStatusConfirmIcon =
+    document.getElementById(
+        "bp-status-confirm-icon"
+    );
+
+this.bpStatusConfirmLargeIcon =
+    document.getElementById(
+        "bp-status-confirm-large-icon"
+    );
+
+this.bpStatusConfirmMessage =
+    document.getElementById(
+        "bp-status-confirm-message"
+    );
+
+this.bpStatusConfirmDetail =
+    document.getElementById(
+        "bp-status-confirm-detail"
+    );
+
+this.btnConfirmBpStatus =
+    document.getElementById(
+        "btn-confirm-bp-status"
+    );
     /* ==========================================
        FORM CONTROLS
     ========================================== */
@@ -792,6 +1417,77 @@ this.txtPage?.addEventListener(
         this.renderTable();
 
     }
+);
+/* ==========================================================
+   CONFIRM BUSINESS PARTNER STATUS
+========================================================== */
+
+this.btnConfirmBpStatus?.addEventListener(
+
+    "click",
+
+    async () => {
+
+        if (
+
+            !this.pendingBpStatusAction
+
+            ||
+
+            !this.pendingBpStatusId
+
+        ) {
+
+            return;
+
+        }
+
+
+        const action =
+            this.pendingBpStatusAction;
+
+        const id =
+            this.pendingBpStatusId;
+
+
+        /* CLOSE */
+
+        const modal =
+            bootstrap.Modal.getInstance(
+
+                this.bpStatusConfirmModal
+
+            );
+
+
+        modal?.hide();
+
+
+        /* CLEAR */
+
+        this.pendingBpStatusAction =
+            null;
+
+        this.pendingBpStatusId =
+            null;
+
+
+        /* EXECUTE */
+
+        await this.changeStatus(
+
+            id,
+
+            action === "active"
+
+                ? true
+
+                : false
+
+        );
+
+    }
+
 );
 
     
@@ -3099,21 +3795,32 @@ renderRow(item, index) {
         item.status
             ? `
                 <span class="bp-status-badge bp-status-active">
+
                     <i class="fa-solid fa-circle-check"></i>
+
                     Active
+
                 </span>
-            `
+              `
             : `
                 <span class="bp-status-badge bp-status-inactive">
+
                     <i class="fa-solid fa-circle-xmark"></i>
+
                     Inactive
+
                 </span>
-            `
+              `
     }
+
+</td>
+
 
 <td class="finova-table-action">
 
     <div class="bp-action-group">
+
+        <!-- EDIT -->
 
         <button
             type="button"
@@ -3125,6 +3832,39 @@ renderRow(item, index) {
 
         </button>
 
+
+        <!-- ACTIVE / INACTIVE -->
+
+        ${
+            item.status
+                ? `
+                    <button
+                        type="button"
+                        class="btn-action bp-action-btn bp-action-inactive"
+                        data-id="${item.id}"
+                        data-action="inactive"
+                        title="Set Inactive">
+
+                        <i class="fa-solid fa-ban"></i>
+
+                    </button>
+                  `
+                : `
+                    <button
+                        type="button"
+                        class="btn-action bp-action-btn bp-action-active"
+                        data-id="${item.id}"
+                        data-action="active"
+                        title="Set Active">
+
+                        <i class="fa-solid fa-check"></i>
+
+                    </button>
+                  `
+        }
+
+
+        <!-- DELETE -->
 
         <button
             type="button"
@@ -3703,6 +4443,370 @@ async update(id) {
 
         this.showError(
             error.message
+        );
+
+    }
+
+}
+
+/*
+==========================================================
+SHOW BUSINESS PARTNER STATUS CONFIRMATION
+==========================================================
+*/
+
+showStatusConfirmation(
+
+    action,
+
+    id
+
+) {
+
+    const businessPartner =
+
+        this.data.find(
+
+            item =>
+
+                String(item.id)
+
+                ===
+
+                String(id)
+
+        );
+
+
+    if (!businessPartner) {
+
+        this.showError(
+
+            "Business Partner not found."
+
+        );
+
+        return;
+
+    }
+
+
+    this.pendingBpStatusAction =
+        action;
+
+    this.pendingBpStatusId =
+        id;
+
+
+    /* ==================================================
+       DEFAULT
+    ================================================== */
+
+    let title =
+        "Confirm Action";
+
+    let message =
+        "Are you sure?";
+
+    let detail =
+        "";
+
+    let buttonText =
+        "Confirm";
+
+    let headerIcon =
+        "fa-solid fa-circle-question";
+
+    let largeIcon =
+        "fa-solid fa-circle-question";
+
+    let theme =
+        "text-primary";
+
+    let buttonClass =
+        "btn-primary";
+
+
+    /* ==================================================
+       ACTIVE
+    ================================================== */
+
+    if (action === "active") {
+
+        title =
+            "Activate Business Partner";
+
+        message =
+            "Activate this Business Partner?";
+
+        detail =
+            `${businessPartner.bp_code || "-"} - ${businessPartner.bp_name || "-"}`;
+
+        buttonText =
+            "Activate";
+
+        headerIcon =
+            "fa-solid fa-circle-check";
+
+        largeIcon =
+            "fa-solid fa-circle-check";
+
+        theme =
+            "text-success";
+
+        buttonClass =
+            "btn-success";
+
+    }
+
+
+    /* ==================================================
+       INACTIVE
+    ================================================== */
+
+    else if (action === "inactive") {
+
+        title =
+            "Set Business Partner Inactive";
+
+        message =
+            "Set this Business Partner to Inactive?";
+
+        detail =
+            `${businessPartner.bp_code || "-"} - ${businessPartner.bp_name || "-"}`;
+
+        buttonText =
+            "Set Inactive";
+
+        headerIcon =
+            "fa-solid fa-circle-xmark";
+
+        largeIcon =
+            "fa-solid fa-circle-xmark";
+
+        theme =
+            "text-warning";
+
+        buttonClass =
+            "btn-warning";
+
+    }
+
+
+    /* ==================================================
+       TITLE
+    ================================================== */
+
+    const titleElement =
+        document.getElementById(
+            "bpStatusConfirmModalLabel"
+        );
+
+
+    if (titleElement) {
+
+        titleElement.textContent =
+            title;
+
+    }
+
+
+    /* ==================================================
+       MESSAGE
+    ================================================== */
+
+    if (this.bpStatusConfirmMessage) {
+
+        this.bpStatusConfirmMessage.textContent =
+            message;
+
+    }
+
+
+    /* ==================================================
+       DETAIL
+    ================================================== */
+
+    if (this.bpStatusConfirmDetail) {
+
+        this.bpStatusConfirmDetail.textContent =
+            detail;
+
+    }
+
+
+    /* ==================================================
+       HEADER ICON
+    ================================================== */
+
+    if (this.bpStatusConfirmIcon) {
+
+        this.bpStatusConfirmIcon.className =
+            `${headerIcon} ${theme} me-2`;
+
+    }
+
+
+    /* ==================================================
+       LARGE ICON
+    ================================================== */
+
+    if (this.bpStatusConfirmLargeIcon) {
+
+        this.bpStatusConfirmLargeIcon.className =
+            `${largeIcon} ${theme}`;
+
+    }
+
+
+    /* ==================================================
+       CONFIRM BUTTON
+    ================================================== */
+
+    if (this.btnConfirmBpStatus) {
+
+        this.btnConfirmBpStatus.className =
+            `btn ${buttonClass}`;
+
+        this.btnConfirmBpStatus.innerHTML = `
+
+            <i
+                class="${largeIcon} me-1">
+            </i>
+
+            ${buttonText}
+
+        `;
+
+    }
+
+
+    /* ==================================================
+       SHOW BOOTSTRAP MODAL
+    ================================================== */
+
+    const modal =
+
+        bootstrap.Modal.getOrCreateInstance(
+
+            this.bpStatusConfirmModal
+
+        );
+
+
+    modal.show();
+
+}
+
+/*
+==========================================================
+CHANGE BUSINESS PARTNER STATUS
+==========================================================
+*/
+
+async changeStatus(
+    id,
+    newStatus
+) {
+
+    try {
+
+        /* ==============================================
+           FIND BUSINESS PARTNER
+        ============================================== */
+
+        const businessPartner =
+            this.data.find(
+                item =>
+                    String(item.id)
+                    ===
+                    String(id)
+            );
+
+
+        if (!businessPartner) {
+
+            throw new Error(
+                "Business Partner not found."
+            );
+
+        }
+
+
+        /* ==============================================
+           CHECK CURRENT STATUS
+        ============================================== */
+
+        if (
+            Boolean(
+                businessPartner.status
+            )
+            ===
+            Boolean(
+                newStatus
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        /* ==============================================
+           UPDATE STATUS
+        ============================================== */
+
+        await BusinessPartnerService.update(
+
+            id,
+
+            {
+                status:
+                    Boolean(
+                        newStatus
+                    )
+            }
+
+        );
+
+
+        /* ==============================================
+           RELOAD DATA
+        ============================================== */
+
+        await this.loadData();
+
+
+        /* ==============================================
+           SUCCESS
+        ============================================== */
+
+        this.showSuccess(
+
+            newStatus
+
+                ? "Business Partner activated successfully."
+
+                : "Business Partner deactivated successfully."
+
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "BusinessPartner.changeStatus:",
+            error
+        );
+
+
+        this.showError(
+
+            error?.message
+            ||
+            "Failed to change Business Partner status."
+
         );
 
     }
@@ -4565,13 +5669,9 @@ showError(
 
 }
 
-    /*
-    ==========================================================
-    EVENT DELEGATION
-    ==========================================================
-    */
+   
 
-    /*
+   /*
 ==========================================================
 TABLE EVENTS
 ==========================================================
@@ -4580,46 +5680,109 @@ TABLE EVENTS
 bindTableEvents() {
 
     if (!this.tableBody) {
+
         return;
+
     }
 
+
     this.tableBody.addEventListener(
+
         "click",
+
         async (event) => {
+
 
             /* ==========================================
                EDIT
             ========================================== */
 
             const editButton =
-                event.target.closest(".btn-action-edit");
+                event.target.closest(
+                    ".btn-action-edit"
+                );
+
 
             if (editButton) {
 
                 await this.openEditModal(
+
                     editButton.dataset.id
+
                 );
 
                 return;
 
             }
 
+
+            /* ==========================================
+               ACTIVE / INACTIVE
+            ========================================== */
+
+            const statusButton =
+                event.target.closest(
+                    "[data-action]"
+                );
+
+
+            if (
+                statusButton
+                &&
+                (
+                    statusButton.dataset.action
+                    ===
+                    "active"
+                    ||
+                    statusButton.dataset.action
+                    ===
+                    "inactive"
+                )
+            ) {
+
+                const action =
+                    statusButton.dataset.action;
+
+
+                const id =
+                    statusButton.dataset.id;
+
+
+                this.showStatusConfirmation(
+
+    action,
+
+    id
+
+);
+
+return;
+
+            }
+
+
             /* ==========================================
                DELETE
             ========================================== */
 
             const deleteButton =
-                event.target.closest(".btn-action-delete");
+                event.target.closest(
+                    ".btn-action-delete"
+                );
+
 
             if (deleteButton) {
 
                 await this.delete(
+
                     deleteButton.dataset.id
+
                 );
 
             }
 
         }
+
     );
 
 }

@@ -440,48 +440,673 @@ export class UserManagement {
 
 
     /*
-    ==========================================================
-    BOOTSTRAP
-    ==========================================================
+==========================================================
+BOOTSTRAP
+==========================================================
+*/
+
+initializeBootstrap() {
+
+    /*
+    ======================================================
+    MAIN USER MODAL
+    ======================================================
     */
 
-    initializeBootstrap() {
+    if (
+        this.modalElement
+    ) {
 
-        if (
-            this.modalElement
-        ) {
-
-            this.userModal =
-                bootstrap.Modal
-                    .getOrCreateInstance(
-                        this.modalElement
-                    );
-
-        }
-
-
-        if (
-            this.deleteModalElement
-        ) {
-
-            this.deleteModal =
-                bootstrap.Modal
-                    .getOrCreateInstance(
-                        this.deleteModalElement
-                    );
-
-        }
+        this.userModal =
+            bootstrap.Modal
+                .getOrCreateInstance(
+                    this.modalElement,
+                    {
+                        backdrop: "static",
+                        keyboard: false
+                    }
+                );
 
 
         /*
-        ======================================================
-        RESET PASSWORD MODAL
-        ======================================================
+        ==================================================
+        ENABLE USER MODAL DRAG
+        ==================================================
         */
 
-        this.initializeResetPasswordModal();
+        this.enableUserModalDrag(
+            this.modalElement
+        );
 
     }
+
+
+    /*
+    ======================================================
+    DELETE MODAL
+    ======================================================
+    */
+
+    if (
+        this.deleteModalElement
+    ) {
+
+        this.deleteModal =
+            bootstrap.Modal
+                .getOrCreateInstance(
+                    this.deleteModalElement
+                );
+
+    }
+
+
+    /*
+    ======================================================
+    RESET PASSWORD MODAL
+    ======================================================
+    */
+
+    this.initializeResetPasswordModal();
+
+}
+
+/*
+==========================================================
+ENABLE USER MODAL DRAG
+==========================================================
+*/
+
+enableUserModalDrag(
+    modalElement
+) {
+
+    if (
+        !modalElement
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    ELEMENT
+    ======================================================
+    */
+
+    const dialog =
+        modalElement.querySelector(
+            ".modal-dialog"
+        );
+
+    const modalContent =
+        modalElement.querySelector(
+            ".modal-content"
+        );
+
+
+    if (
+        !dialog ||
+        !modalContent
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    AVOID DUPLICATE BINDING
+    ======================================================
+    */
+
+    if (
+        modalContent.dataset.dragBound ===
+        "true"
+    ) {
+
+        return;
+
+    }
+
+
+    modalContent.dataset.dragBound =
+        "true";
+
+
+    /*
+    ======================================================
+    INTERACTIVE ELEMENT
+    Yang tidak boleh membuat modal bergerak
+    ======================================================
+    */
+
+    const interactiveSelector = [
+        "input",
+        "select",
+        "textarea",
+        "button",
+        "option",
+        "a",
+        "[contenteditable='true']",
+        "[role='button']"
+    ].join(",");
+
+
+    /*
+    ======================================================
+    DRAG STATE
+    ======================================================
+    */
+
+    let dragging =
+        false;
+
+    let startX =
+        0;
+
+    let startY =
+        0;
+
+    let startLeft =
+        0;
+
+    let startTop =
+        0;
+
+
+    /*
+    ======================================================
+    RESET POSITION
+    Setelah modal ditutup
+    ======================================================
+    */
+
+    const resetModalPosition =
+        () => {
+
+            dragging =
+                false;
+
+
+            dialog.style.position =
+                "";
+
+            dialog.style.left =
+                "";
+
+            dialog.style.top =
+                "";
+
+            dialog.style.right =
+                "";
+
+            dialog.style.bottom =
+                "";
+
+            dialog.style.margin =
+                "";
+
+            dialog.style.transform =
+                "";
+
+
+            modalContent.style.cursor =
+                "move";
+
+
+            document.body.style.userSelect =
+                "";
+
+        };
+
+
+    /*
+    ======================================================
+    DRAG START
+    Bisa dari seluruh area modal
+    kecuali control input
+    ======================================================
+    */
+
+    modalContent.addEventListener(
+        "pointerdown",
+        (event) => {
+
+            /*
+            ----------------------------------------------
+            HANYA KLIK KIRI
+            ----------------------------------------------
+            */
+
+            if (
+                event.button !== 0
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+            ----------------------------------------------
+            JANGAN DRAG FORM CONTROL
+            ----------------------------------------------
+            */
+
+            if (
+                event.target.closest(
+                    interactiveSelector
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+            ----------------------------------------------
+            CURRENT POSITION
+            ----------------------------------------------
+            */
+
+            const rect =
+                dialog.getBoundingClientRect();
+
+
+            /*
+            ----------------------------------------------
+            CHANGE TO FIXED
+            ----------------------------------------------
+            */
+
+            dialog.style.position =
+                "fixed";
+
+            dialog.style.margin =
+                "0";
+
+            dialog.style.transform =
+                "none";
+
+            dialog.style.left =
+                `${rect.left}px`;
+
+            dialog.style.top =
+                `${rect.top}px`;
+
+            dialog.style.right =
+                "auto";
+
+            dialog.style.bottom =
+                "auto";
+
+
+            /*
+            ----------------------------------------------
+            SAVE START POSITION
+            ----------------------------------------------
+            */
+
+            startX =
+                event.clientX;
+
+            startY =
+                event.clientY;
+
+            startLeft =
+                rect.left;
+
+            startTop =
+                rect.top;
+
+
+            /*
+            ----------------------------------------------
+            START DRAGGING
+            ----------------------------------------------
+            */
+
+            dragging =
+                true;
+
+
+            /*
+            ----------------------------------------------
+            POINTER CAPTURE
+            ----------------------------------------------
+            */
+
+            try {
+
+                modalContent.setPointerCapture(
+                    event.pointerId
+                );
+
+            }
+
+            catch (error) {
+
+                // Ignore pointer capture error.
+
+            }
+
+
+            /*
+            ----------------------------------------------
+            UI
+            ----------------------------------------------
+            */
+
+            modalContent.style.cursor =
+                "grabbing";
+
+            document.body.style.userSelect =
+                "none";
+
+
+            /*
+            ----------------------------------------------
+            PREVENT DEFAULT
+            ----------------------------------------------
+            */
+
+            event.preventDefault();
+
+        }
+    );
+
+
+    /*
+    ======================================================
+    DRAG MOVE
+    MODAL TIDAK BOLEH MELEWATI BATAS LAYAR
+    ======================================================
+    */
+
+    modalContent.addEventListener(
+        "pointermove",
+        (event) => {
+
+            if (
+                !dragging
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+            ----------------------------------------------
+            HITUNG PERGERAKAN
+            ----------------------------------------------
+            */
+
+            const deltaX =
+                event.clientX -
+                startX;
+
+            const deltaY =
+                event.clientY -
+                startY;
+
+
+            let newLeft =
+                startLeft +
+                deltaX;
+
+            let newTop =
+                startTop +
+                deltaY;
+
+
+            /*
+            ----------------------------------------------
+            UKURAN MODAL
+            ----------------------------------------------
+            */
+
+            const rect =
+                dialog.getBoundingClientRect();
+
+
+            /*
+            ----------------------------------------------
+            BATAS LAYAR
+            ----------------------------------------------
+            */
+
+            const screenWidth =
+                window.innerWidth;
+
+            const screenHeight =
+                window.innerHeight;
+
+            const padding =
+                10;
+
+
+            /*
+            ----------------------------------------------
+            BATAS KIRI
+            ----------------------------------------------
+            */
+
+            const minLeft =
+                padding;
+
+
+            /*
+            ----------------------------------------------
+            BATAS ATAS
+            ----------------------------------------------
+            */
+
+            const minTop =
+                padding;
+
+
+            /*
+            ----------------------------------------------
+            BATAS KANAN
+            ----------------------------------------------
+            */
+
+            const maxLeft =
+                screenWidth -
+                rect.width -
+                padding;
+
+
+            /*
+            ----------------------------------------------
+            BATAS BAWAH
+            ----------------------------------------------
+            */
+
+            const maxTop =
+                screenHeight -
+                rect.height -
+                padding;
+
+
+            /*
+            ----------------------------------------------
+            KUNCI POSISI HORIZONTAL
+            ----------------------------------------------
+            */
+
+            newLeft =
+                Math.max(
+                    minLeft,
+                    Math.min(
+                        newLeft,
+                        Math.max(
+                            minLeft,
+                            maxLeft
+                        )
+                    )
+                );
+
+
+            /*
+            ----------------------------------------------
+            KUNCI POSISI VERTICAL
+            ----------------------------------------------
+            */
+
+            newTop =
+                Math.max(
+                    minTop,
+                    Math.min(
+                        newTop,
+                        Math.max(
+                            minTop,
+                            maxTop
+                        )
+                    )
+                );
+
+
+            /*
+            ----------------------------------------------
+            TERAPKAN POSISI
+            ----------------------------------------------
+            */
+
+            dialog.style.left =
+                `${newLeft}px`;
+
+            dialog.style.top =
+                `${newTop}px`;
+
+        }
+    );
+
+
+    /*
+    ======================================================
+    STOP DRAG
+    ======================================================
+    */
+
+    const stopDragging =
+        (event) => {
+
+            if (
+                !dragging
+            ) {
+
+                return;
+
+            }
+
+
+            dragging =
+                false;
+
+
+            /*
+            ----------------------------------------------
+            RELEASE POINTER
+            ----------------------------------------------
+            */
+
+            try {
+
+                modalContent.releasePointerCapture(
+                    event.pointerId
+                );
+
+            }
+
+            catch (error) {
+
+                // Ignore pointer release error.
+
+            }
+
+
+            /*
+            ----------------------------------------------
+            RESTORE UI
+            ----------------------------------------------
+            */
+
+            modalContent.style.cursor =
+                "move";
+
+            document.body.style.userSelect =
+                "";
+
+        };
+
+
+    /*
+    ======================================================
+    POINTER END
+    ======================================================
+    */
+
+    modalContent.addEventListener(
+        "pointerup",
+        stopDragging
+    );
+
+
+    modalContent.addEventListener(
+        "pointercancel",
+        stopDragging
+    );
+
+
+    /*
+    ======================================================
+    RESET SAAT MODAL DITUTUP
+    Cancel / X
+    ======================================================
+    */
+
+    modalElement.addEventListener(
+        "hidden.bs.modal",
+        () => {
+
+            resetModalPosition();
+
+        }
+    );
+
+
+    /*
+    ======================================================
+    RESET SEBELUM MODAL DIBUKA
+    ======================================================
+    */
+
+    modalElement.addEventListener(
+        "show.bs.modal",
+        () => {
+
+            resetModalPosition();
+
+        }
+    );
+
+
+    /*
+    ======================================================
+    CURSOR
+    ======================================================
+    */
+
+    modalContent.style.cursor =
+        "move";
+
+}
 
 
     /*
@@ -4459,85 +5084,213 @@ createActionButtons(
 
 
     /*
-    ==========================================================
-    SUCCESS
-    ==========================================================
+==========================================================
+SUCCESS
+BOOTSTRAP ALERT
+USER MANAGEMENT
+==========================================================
+*/
+
+showSuccess(
+    message
+) {
+
+    /*
+    ======================================================
+    NORMALIZE MESSAGE
+    ======================================================
     */
 
-    showSuccess(
+    const successMessage =
         message
+        ||
+        "Operation completed successfully.";
+
+
+    /*
+    ======================================================
+    REMOVE EXISTING SUCCESS ALERT
+    ======================================================
+    */
+
+    const existingAlert =
+        document.getElementById(
+            "user-management-success-alert"
+        );
+
+
+    if (
+        existingAlert
     ) {
 
-        /*
-        ======================================================
-        GLOBAL APP SUCCESS
-        ======================================================
-        */
+        existingAlert.remove();
 
-        if (
-            window.App
-                ?.showSuccess
-        ) {
-
-            window.App.showSuccess(
-                message
-            );
-
-            return;
-
-        }
+    }
 
 
-        /*
-        ======================================================
-        GLOBAL FINOVA SUCCESS MODAL
-        ======================================================
-        */
+    /*
+    ======================================================
+    CREATE ALERT
+    ======================================================
+    */
 
-        const modalElement =
-            document.getElementById(
-                "finovaSuccessModal"
-            );
+    const alertElement =
+        document.createElement(
+            "div"
+        );
 
 
-        if (
-            modalElement
-        ) {
+    alertElement.id =
+        "user-management-success-alert";
 
-            const messageElement =
-                modalElement.querySelector(
-                    ".finova-success-message"
+
+    alertElement.className = `
+        alert
+        alert-success
+        alert-dismissible
+        fade
+        show
+        d-flex
+        align-items-center
+        shadow-sm
+    `;
+
+
+    alertElement.setAttribute(
+        "role",
+        "alert"
+    );
+
+
+    /*
+    ======================================================
+    CONTENT
+    ======================================================
+    */
+
+    alertElement.innerHTML = `
+
+        <i
+            class="
+                fa-solid
+                fa-circle-check
+                me-2
+            ">
+        </i>
+
+
+        <div class="flex-grow-1">
+
+            ${this.escapeHTML(
+                successMessage
+            )}
+
+        </div>
+
+
+        <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close">
+        </button>
+
+    `;
+
+
+    /*
+    ======================================================
+    PAGE LEVEL ALERT
+    ======================================================
+    */
+
+    alertElement.style.position =
+        "fixed";
+
+    alertElement.style.top =
+        "20px";
+
+    alertElement.style.left =
+        "50%";
+
+    alertElement.style.transform =
+        "translateX(-50%)";
+
+    alertElement.style.zIndex =
+        "99999";
+
+    alertElement.style.width =
+        "auto";
+
+    alertElement.style.minWidth =
+        "380px";
+
+    alertElement.style.maxWidth =
+        "90vw";
+
+
+    /*
+    ======================================================
+    APPEND
+    ======================================================
+    */
+
+    document.body.appendChild(
+        alertElement
+    );
+
+
+    /*
+    ======================================================
+    AUTO CLOSE
+    ======================================================
+    */
+
+    setTimeout(
+        () => {
+
+            const currentAlert =
+                document.getElementById(
+                    "user-management-success-alert"
                 );
 
 
             if (
-                messageElement
+                !currentAlert
             ) {
 
-                messageElement.textContent =
-                    message;
+                return;
 
             }
 
 
-            bootstrap.Modal
-                .getOrCreateInstance(
-                    modalElement
-                )
-                .show();
+            if (
+                window.bootstrap
+                &&
+                bootstrap.Alert
+            ) {
 
+                bootstrap.Alert
+                    .getOrCreateInstance(
+                        currentAlert
+                    )
+                    .close();
 
-            return;
+            }
 
-        }
+            else {
 
+                currentAlert.remove();
 
-        console.log(
-            "SUCCESS:",
-            message
-        );
+            }
 
-    }
+        },
+
+        5000
+
+    );
+
+}
 
 
     /*

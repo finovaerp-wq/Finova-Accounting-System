@@ -13,7 +13,7 @@ Version : 4.0.0
     data-bs-backdrop="static"
     data-bs-keyboard="false">
 
-    <div class="modal-dialog modal-xl">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
 
         <div class="modal-content">
 
@@ -697,6 +697,122 @@ Version : 4.0.0
                     <i class="fa-solid fa-trash me-1"></i>
 
                     Delete
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ==========================================================
+     BUSINESS PARTNER STATUS CONFIRMATION
+========================================================== -->
+
+<div
+    class="modal fade"
+    id="bpStatusConfirmModal"
+    tabindex="-1"
+    aria-labelledby="bpStatusConfirmModalLabel"
+    aria-hidden="true">
+
+    <div
+        class="modal-dialog modal-dialog-centered modal-sm">
+
+        <div class="modal-content">
+
+            <!-- HEADER -->
+
+            <div class="modal-header">
+
+                <h5
+                    class="modal-title fw-semibold"
+                    id="bpStatusConfirmModalLabel">
+
+                    <i
+                        id="bp-status-confirm-icon"
+                        class="fa-solid fa-circle-question text-primary me-2">
+                    </i>
+
+                    Confirm Action
+
+                </h5>
+
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close">
+                </button>
+
+            </div>
+
+
+            <!-- BODY -->
+
+            <div class="modal-body text-center">
+
+                <div class="mb-3">
+
+                    <i
+                        id="bp-status-confirm-large-icon"
+                        class="fa-solid fa-circle-question text-primary"
+                        style="font-size:42px;">
+                    </i>
+
+                </div>
+
+
+                <div
+                    id="bp-status-confirm-message"
+                    class="fw-semibold">
+
+                    Are you sure?
+
+                </div>
+
+
+                <div
+                    id="bp-status-confirm-detail"
+                    class="text-muted small mt-2">
+
+                </div>
+
+            </div>
+
+
+            <!-- FOOTER -->
+
+            <div class="modal-footer">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    data-bs-dismiss="modal">
+
+                    <i
+                        class="fa-solid fa-xmark me-1">
+                    </i>
+
+                    Cancel
+
+                </button>
+
+
+                <button
+                    type="button"
+                    id="btn-confirm-bp-status"
+                    class="btn btn-primary">
+
+                    <i
+                        class="fa-solid fa-check me-1">
+                    </i>
+
+                    Confirm
 
                 </button>
 
