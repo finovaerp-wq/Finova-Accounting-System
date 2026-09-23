@@ -1534,6 +1534,18 @@ async loadCurrentUserAccess() {
             normalizedStatus ===
             "open";
 
+        const openDisabled = isOpen
+    ? "disabled"
+    : "";
+
+const closeDisabled = isOpen
+    ? ""
+    : "disabled";
+
+const reopenDisabled = isOpen
+    ? "disabled"
+    : "";
+
 
         /*
         ==================================================
@@ -1559,49 +1571,13 @@ async loadCurrentUserAccess() {
                 `;
 
 
-        /*
-        ==================================================
-        ACTION
-        ==================================================
-        */
+        let actionButton = "";
 
-        const periodAction =
-            String(
-                item._periodAction
-                ||
-                (
-                    isOpen
-                        ?
-                        "close"
-                        :
-                        "open"
-                )
-            )
-            .toLowerCase();
-
-
-        let actionButton =
-    "";
-
-
-/*
-==================================================
-NON MANAGER
-VIEW ONLY
-==================================================
-*/
-
-if (
-    !this.isManager
-) {
+if (!this.isManager) {
 
     actionButton = `
 
-        <span
-            class="
-                text-muted
-                small
-            ">
+        <span class="text-muted small">
 
             <i class="fa-solid fa-eye me-1"></i>
 
@@ -1611,95 +1587,67 @@ if (
 
     `;
 
-}
-
-
-/*
-==================================================
-MANAGER
-==================================================
-*/
-
-else if (
-    periodAction ===
-    "close"
-) {
+} else {
 
     actionButton = `
 
-        <button
-            type="button"
-            class="
-                btn
-                btn-sm
-                btn-outline-danger
-            "
-            data-period-action="close"
-            data-id="${item.id}">
+        <div class="accounting-period-actions">
 
-            <i class="fa-solid fa-lock me-1"></i>
+            <!-- OPEN -->
 
-            Close
+            <button
+                type="button"
+                class="accounting-period-action-btn accounting-period-action-open"
+                data-period-action="open"
+                data-id="${item.id}"
+                ${openDisabled}
+                title="Open Period"
+                aria-label="Open Period">
 
-        </button>
+                <i class="fa-solid fa-lock-open"></i>
+                <span>Open</span>
+
+            </button>
+
+
+            <!-- CLOSE -->
+
+            <button
+                type="button"
+                class="accounting-period-action-btn accounting-period-action-close"
+                data-period-action="close"
+                data-id="${item.id}"
+                ${closeDisabled}
+                title="Close Period"
+                aria-label="Close Period">
+
+                <i class="fa-solid fa-lock"></i>
+<span>Close</span>
+
+            </button>
+
+
+            <!-- REOPEN -->
+
+            <button
+                type="button"
+                class="accounting-period-action-btn accounting-period-action-reopen"
+                data-period-action="reopen"
+                data-id="${item.id}"
+                ${reopenDisabled}
+                title="Reopen Period"
+                aria-label="Reopen Period">
+
+                <i class="fa-solid fa-rotate-left"></i>
+<span>Reopen</span>
+
+            </button>
+
+        </div>
 
     `;
 
 }
-
-
-else if (
-    periodAction ===
-    "reopen"
-) {
-
-    actionButton = `
-
-        <button
-            type="button"
-            class="
-                btn
-                btn-sm
-                btn-outline-warning
-            "
-            data-period-action="reopen"
-            data-id="${item.id}">
-
-            <i class="fa-solid fa-rotate-left me-1"></i>
-
-            Reopen
-
-        </button>
-
-    `;
-
-}
-
-
-else {
-
-    actionButton = `
-
-        <button
-            type="button"
-            class="
-                btn
-                btn-sm
-                btn-outline-success
-            "
-            data-period-action="open"
-            data-id="${item.id}">
-
-            <i class="fa-solid fa-lock-open me-1"></i>
-
-            Open
-
-        </button>
-
-    `;
-
-}
-
 
         /*
         ==================================================
@@ -2365,24 +2313,30 @@ else {
         }
 
 
-        if (
-            this.confirmIcon
-        ) {
+       if (this.btnConfirmAction) {
 
-            this.confirmIcon.className =
-                "fa-solid fa-lock me-1";
+    this.btnConfirmAction.innerHTML = `
+        <i
+            id="accounting-period-confirm-icon"
+            class="fa-solid fa-lock me-1">
+        </i>
 
-        }
+        <span id="accounting-period-confirm-text">
+            Close Period
+        </span>
+    `;
 
+    this.confirmIcon =
+        document.getElementById(
+            "accounting-period-confirm-icon"
+        );
 
-        if (
-            this.confirmText
-        ) {
+    this.confirmText =
+        document.getElementById(
+            "accounting-period-confirm-text"
+        );
 
-            this.confirmText.textContent =
-                "Close Period";
-
-        }
+}
 
     }
 

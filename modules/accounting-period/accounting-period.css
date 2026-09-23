@@ -69,3 +69,105 @@ td {
     vertical-align: middle;
 
 }
+
+/* ==========================================================
+   ACCOUNTING PERIOD ACTION
+   SAME STYLE AS COA
+========================================================== */
+
+.accounting-period-action-btn {
+    min-width: auto;
+    min-height: 44px;
+    height: 44px;
+
+    padding: 0 16px;
+
+    border: 1px solid transparent;
+    border-radius: 10px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    cursor: pointer;
+
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
+
+    transition: all 0.15s ease;
+}
+
+.accounting-period-action-btn i {
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.accounting-period-action-btn span {
+    display: inline-block;
+    line-height: 1;
+}
+
+/* CLOSE */
+
+.accounting-period-action-close {
+    color: #dc2626;
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+
+.accounting-period-action-close:hover {
+    background: #fee2e2;
+}
+
+/* REOPEN */
+
+.accounting-period-action-reopen {
+    color: #d97706;
+    background: #fffbeb;
+    border-color: #fde68a;
+}
+
+.accounting-period-action-reopen:hover {
+    background: #fef3c7;
+}
+
+/* OPEN */
+
+.accounting-period-action-open {
+    color: #16a34a;
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+}
+
+.accounting-period-action-open:hover {
+    background: #dcfce7;
+}
+
+/* ==========================================================
+   ACCOUNTING PERIOD ACTIONS WRAPPER
+   THREE BUTTONS IN ONE ROW
+========================================================== */
+
+.accounting-period-actions {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+}
+
+/* Ensure buttons remain aligned */
+.accounting-period-actions
+.accounting-period-action-btn {
+    flex-shrink: 0;
+}
+
+.accounting-period-action-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    filter: grayscale(0.5);
+    pointer-events: none;
+}
