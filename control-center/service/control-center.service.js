@@ -1913,358 +1913,190 @@ static subscribeAuditLogs(
     }
 
 
-    /*
-======================================================
-GET AUDIT LOGS
-======================================================
+   /*
+==========================================================
+GET AUDIT LOG PAGE
+SERVER-SIDE PAGINATION
+==========================================================
 */
 
-static async getAuditLogs(
+static async getAuditLogsPage(
 
-    limit = 200
+    page = 1,
+
+    pageSize = 100,
+
+    search = "",
+
+    action = "",
+
+    module = "ALL"
 
 ) {
 
-
     /*
-    ==================================================
-    SAFE LIMIT
-    ==================================================
+    ======================================================
+    SAFE PAGINATION
+    ======================================================
     */
 
-    const safeLimit =
+    const safePage =
+        Math.max(
+            Number(page) || 1,
+            1
+        );
+
+
+    const safePageSize =
         Math.min(
             Math.max(
-                Number(
-                    limit
-                )
-                ||
-                200,
+                Number(pageSize) || 100,
                 1
             ),
-            500
+            100
         );
 
 
-    /*
-    ==================================================
-    QUERY AUDIT LOG
-    ==================================================
-    */
-
-    const {
-        data: auditLogs,
-        error: auditError
-    } =
-        await supabase
-
-            /*
-            ==================================================
-            CONTROL CENTER AUDIT RPC
-
-            IMPORTANT:
-            finova_audit_log RLS is intentionally scoped to
-            finova_effective_company_id(). Control Center is a
-            Super Admin workspace and may have no tenant Company
-            Context selected, therefore a direct table SELECT can
-            legitimately return zero rows.
-
-            Use the dedicated Super Admin RPC instead.
-            ==================================================
-            */
-
-            .rpc(
-                "finova_admin_list_audit_logs",
-                {
-                    p_limit:
-                        safeLimit
-                }
-            );
+    const normalizedSearch =
+        String(
+            search || ""
+        ).trim();
 
 
-    /*
-    ==================================================
-    AUDIT ERROR
-    ==================================================
-    */
-
-    if (
-        auditError
-    ) {
-
-        console.error(
-            "ControlCenterService.getAuditLogs:",
-            auditError
-        );
-
-
-        throw auditError;
-
-    }
-
-
-    /*
-    ==================================================
-    EMPTY AUDIT RESULT
-    ==================================================
-    */
-
-    if (
-        !auditLogs
-        ||
-        auditLogs.length === 0
-    ) {
-
-        return [];
-
-    }
-
-
-    /*
-    ==================================================
-    COLLECT UNIQUE USER UID
-    ==================================================
-    */
-
-    const userUids =
-        [
-            ...new Set(
-
-                auditLogs
-
-                    .map(
-                        (
-                            log
-                        ) =>
-                            log?.user_uid
-                    )
-
-                    .filter(
-                        Boolean
-                    )
-
-            )
-        ];
-
-
-    /*
-    ==================================================
-    NO USER UID
-    ==================================================
-    */
-
-    if (
-        userUids.length === 0
-    ) {
-
-        return auditLogs.map(
-            (
-                log
-            ) => ({
-
-                ...log,
-
-                user_name:
-                    "System",
-
-                user_role:
-                    null
-
-            })
-        );
-
-    }
-
-
-    /*
-    ==================================================
-    QUERY USER MASTER
-    ==================================================
-    */
-
-    const {
-        data: users,
-        error: userError
-    } =
-        await supabase
-
-            .from(
-                "mst_users"
-            )
-
-            .select(`
-                user_uid,
-                full_name,
-                role
-            `)
-
-            .in(
-                "user_uid",
-                userUids
-            );
-
-
-    /*
-    ==================================================
-    USER ERROR
-    ==================================================
-
-    Audit Log tetap harus bisa ditampilkan walaupun
-    lookup user gagal.
-
-    Karena itu kita tidak throw error di sini.
-    ==================================================
-    */
-
-    if (
-        userError
-    ) {
-
-        console.error(
-            "ControlCenterService.getAuditLogs user lookup:",
-            userError
-        );
-
-
-        return auditLogs.map(
-            (
-                log
-            ) => ({
-
-                ...log,
-
-                user_name:
-                    log?.user_uid
-                    ||
-                    "System",
-
-                user_role:
-                    null
-
-            })
-        );
-
-    }
-
-
-    /*
-    ==================================================
-    CREATE USER MAP
-    ==================================================
-    */
-
-    const userMap =
-        new Map();
-
-
-    for (
-        const user
-        of (
-            users
-            ??
-            []
+    const normalizedAction =
+        String(
+            action || ""
         )
-    ) {
-
-        if (
-            !user?.user_uid
-        ) {
-
-            continue;
-
-        }
+            .trim()
+            .toUpperCase();
 
 
-        userMap.set(
-            String(
-                user.user_uid
-            ),
-            user
-        );
-
-    }
+    const normalizedModule =
+        String(
+            module || "ALL"
+        )
+            .trim()
+            .toUpperCase();
 
 
     /*
-    ==================================================
-    MERGE AUDIT LOG + USER
-    ==================================================
+    ======================================================
+    QUERY SERVER
+    ======================================================
     */
 
-    const result =
-        auditLogs.map(
-            (
-                log
-            ) => {
+    const {
+        data,
+        error
+    } =
+        await supabase.rpc(
+            "finova_admin_list_audit_logs_page",
+            {
 
-                const user =
-                    log?.user_uid
-                        ? userMap.get(
-                            String(
-                                log.user_uid
-                            )
-                        )
-                        : null;
+                p_page:
+                    safePage,
 
+                p_page_size:
+                    safePageSize,
 
-                /*
-                ==========================================
-                SYSTEM GENERATED EVENT
-                ==========================================
-                */
+                p_search:
+                    normalizedSearch
+                    || null,
 
-                if (
-                    !log?.user_uid
-                ) {
+                p_action:
+                    normalizedAction
+                    || null,
 
-                    return {
-
-                        ...log,
-
-                        user_name:
-                            "System",
-
-                        user_role:
-                            null
-
-                    };
-
-                }
-
-
-                /*
-                ==========================================
-                USER EVENT
-                ==========================================
-                */
-
-                return {
-
-                    ...log,
-
-                    user_name:
-                        user?.full_name
-                        ||
-                        log.user_uid,
-
-                    user_role:
-                        user?.role
-                        ||
-                        null
-
-                };
+                p_module:
+                    normalizedModule
 
             }
         );
 
 
     /*
-    ==================================================
-    RESULT
-    ==================================================
+    ======================================================
+    ERROR
+    ======================================================
     */
 
-    return result;
+    if (
+        error
+    ) {
+
+        console.error(
+            "ControlCenterService.getAuditLogsPage:",
+            error
+        );
+
+        throw error;
+
+    }
+
+
+    /*
+    ======================================================
+    RESULT
+    ======================================================
+    */
+
+    const rows =
+        Array.isArray(data)
+            ? data
+            : [];
+
+
+    /*
+    ======================================================
+    TOTAL COUNT
+    Use total_count returned by the same paginated RPC.
+    count(*) over() is calculated before LIMIT/OFFSET, so
+    it represents the complete filtered result set.
+    ======================================================
+    */
+
+    let totalCount =
+        rows.length > 0
+            ? Number(
+                rows[0]?.total_count
+                ?? 0
+            )
+            : 0;
+
+    if (
+        !Number.isFinite(totalCount)
+        ||
+        totalCount < 0
+    ) {
+        totalCount = 0;
+    }
+
+    const totalPages =
+        Math.max(
+            1,
+            Math.ceil(
+                totalCount /
+                safePageSize
+            )
+        );
+
+
+    return {
+
+        data:
+            rows,
+
+        page:
+            safePage,
+
+        pageSize:
+            safePageSize,
+
+        totalCount,
+
+        totalPages
+
+    };
 
 }
 }

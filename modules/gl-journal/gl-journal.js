@@ -9869,22 +9869,7 @@ async deleteJournal(id) {
         }
 
 
-        /*
-        ======================================================
-        DELETE GL JOURNAL
-        ======================================================
-
-        BULK AP:
-        BATCH + ALLOCATIONS ALREADY REMOVED
-
-        LEGACY AP / AR:
-        EXISTING FLOW CONTINUES BELOW
-        ======================================================
-        */
-
-        await this.service.delete(
-            id
-        );
+        
 
 
         /*
@@ -10019,68 +10004,68 @@ async deleteJournal(id) {
 
 
         /*
-        ======================================================
-        AP INVOICE
-        RETURN TO DRAFT
-        ======================================================
-        */
+======================================================
+AP INVOICE
+RESTORE PAYMENT BALANCE AFTER GL DELETE
+======================================================
+*/
 
-        if (
-            sourceModule === "AP"
-            &&
-            sourceDocumentType === "AP_INVOICE"
-            &&
+if (
+    sourceModule === "AP"
+    &&
+    sourceDocumentType === "AP_INVOICE"
+    &&
+    sourceDocumentId
+) {
+
+    const totalAmount =
+        Number(
+            apInvoiceBeforeDelete?.total_amount
+            ||
+            0
+        );
+
+
+    const {
+        error:
+            resetAPBalanceError
+    } = await supabase
+
+        .from(
+            "trx_account_payable"
+        )
+
+        .update({
+
+            paid_amount:
+                0,
+
+            outstanding_amount:
+                totalAmount
+
+        })
+
+        .eq(
+            "id",
             sourceDocumentId
-        ) {
-
-            const totalAmount =
-                Number(
-                    apInvoiceBeforeDelete?.total_amount
-                    ||
-                    0
-                );
+        );
 
 
-            const {
-                error:
-                    resetAPError
-            } = await supabase
+    if (
+        resetAPBalanceError
+    ) {
 
-                .from(
-                    "trx_account_payable"
-                )
-
-                .update({
-
-                    status:
-                        "Draft",
-
-                    gl_journal_id:
-                        null,
-
-                    paid_amount:
-                        0,
-
-                    outstanding_amount:
-                        totalAmount
-
-                })
-
-                .eq(
-                    "id",
-                    sourceDocumentId
-                );
+        console.error(
+            "RESET AP PAYMENT BALANCE ERROR:",
+            resetAPBalanceError
+        );
 
 
-            if (
-                resetAPError
-            ) {
+        throw resetAPBalanceError;
 
-                throw resetAPError;
+    }
 
-            }
-
-        }
+}
                 /*
         ======================================================
         BULK AP PAYMENT
@@ -11559,6 +11544,13 @@ async deleteJournal(id) {
             );
 
         }
+        /*
+======================================================
+DELETE GL JOURNAL
+======================================================
+*/
+
+await this.service.delete(id);
                 /*
         ======================================================
         CLOSE DELETE MODAL
@@ -11837,14 +11829,8 @@ async deleteJournal(id) {
         );
 
 
-        /*
-        ======================================================
-        RELOAD GL JOURNAL
-        ======================================================
-        */
 
-        await this.loadData();
-            }
+    }
 
     catch (
         error
@@ -11875,6 +11861,7 @@ async deleteJournal(id) {
     }
 
 }
+
 /*
 ==========================================================
 SHOW SUCCESS

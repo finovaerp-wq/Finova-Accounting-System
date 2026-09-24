@@ -1158,7 +1158,14 @@ async update(id, header, details = []) {
 /*
 ==========================================================
 DELETE GENERAL JOURNAL
-WITH ACCOUNTING PERIOD LOCK
+DIAGNOSTIC VERSION
+==========================================================
+*/
+
+/*
+==========================================================
+DELETE GENERAL JOURNAL
+ATOMIC DATABASE RPC
 ==========================================================
 */
 
@@ -1183,134 +1190,191 @@ async delete(id) {
 
         /*
         ======================================================
-        GET JOURNAL
+        LOG
         ======================================================
         */
 
-        const journal =
-            await this.getById(id);
+        console.log(
+            "=========================================="
+        );
 
+        console.log(
+            "FINOVA DELETE JOURNAL - START"
+        );
 
-        if (!journal) {
-
-            throw new Error(
-                "General Journal not found."
-            );
-
-        }
-
-
-        /*
-        ======================================================
-        ACCOUNTING PERIOD LOCK
-        ======================================================
-        */
-
-        await this.validateAccountingPeriod(
-            journal.journal_date
+        console.log(
+            "DELETE JOURNAL ID:",
+            id
         );
 
 
         /*
         ======================================================
-        RESET LINKED ACCOUNT PAYABLE
+        AUTH CHECK
         ======================================================
         */
 
         const {
 
-            data: resetAP,
-            error: apError
+            data: authData,
 
-        } = await supabase
+            error: authError
 
-            .from(
-                TABLE.ACCOUNT_PAYABLE
-            )
-
-            .update({
-
-                status:
-                    "Draft",
-
-                gl_journal_id:
-                    null
-
-            })
-
-            .eq(
-                "gl_journal_id",
-                id
-            )
-
-            .select(
-                "id, invoice_no, status, gl_journal_id"
-            );
+        } = await supabase.auth.getUser();
 
 
-        if (apError) {
+        console.log(
+            "DELETE AUTH USER:",
+            authData?.user?.id || null
+        );
 
-            throw apError;
+        console.log(
+            "DELETE AUTH ERROR:",
+            authError || null
+        );
+
+
+        if (authError) {
+
+            throw authError;
 
         }
-/*
-        ======================================================
-        DELETE DETAIL
-        ======================================================
-        */
 
-        const {
 
-            error: detailError
+        if (!authData?.user) {
 
-        } = await supabase
-
-            .from(
-                TABLE.GL_JOURNAL_DETAIL
-            )
-
-            .delete()
-
-            .eq(
-                "journal_id",
-                id
+            throw new Error(
+                "User is not authenticated."
             );
-
-
-        if (detailError) {
-
-            throw detailError;
 
         }
 
 
         /*
         ======================================================
-        DELETE HEADER
+        DELETE VIA ATOMIC RPC
+        ======================================================
+
+        IMPORTANT:
+
+        Jangan melakukan direct DELETE ke
+        trx_gl_journal di frontend.
+
+        RPC menangani:
+
+        1. Validate company
+        2. Validate journal
+        3. Validate Draft
+        4. Validate accounting period
+        5. Reset linked AP
+        6. Delete GL header
+        7. GL detail CASCADE
+        8. Commit / rollback
         ======================================================
         */
 
+        console.log(
+            "DELETE JOURNAL - CALLING RPC..."
+        );
+
+
         const {
 
-            error: headerError
+            data: deleteResult,
 
-        } = await supabase
+            error: deleteError
 
-            .from(
-                TABLE.GL_JOURNAL
-            )
+        } = await supabase.rpc(
 
-            .delete()
+            "finova_delete_gl_journal",
 
-            .eq(
-                "id",
-                id
+            {
+                p_journal_id: id
+            }
+
+        );
+
+
+        /*
+        ======================================================
+        RPC ERROR
+        ======================================================
+        */
+
+        if (deleteError) {
+
+            console.error(
+                "=========================================="
+            );
+
+            console.error(
+                "GENERAL JOURNAL DELETE RPC ERROR"
+            );
+
+            console.error(
+                "CODE:",
+                deleteError.code
+            );
+
+            console.error(
+                "MESSAGE:",
+                deleteError.message
+            );
+
+            console.error(
+                "DETAILS:",
+                deleteError.details
+            );
+
+            console.error(
+                "HINT:",
+                deleteError.hint
+            );
+
+            console.error(
+                "FULL ERROR:",
+                JSON.stringify(
+                    deleteError,
+                    null,
+                    2
+                )
+            );
+
+            console.error(
+                "=========================================="
             );
 
 
-        if (headerError) {
+            throw deleteError;
 
-            throw headerError;
+        }
+
+
+        /*
+        ======================================================
+        RPC RESULT
+        ======================================================
+        */
+
+        console.log(
+            "DELETE JOURNAL - RPC RESULT:",
+            deleteResult
+        );
+
+
+        /*
+        ======================================================
+        SUCCESS VALIDATION
+        ======================================================
+        */
+
+        if (
+            deleteResult !== true
+        ) {
+
+            throw new Error(
+                `General Journal ${id} was not deleted.`
+            );
 
         }
 
@@ -1320,7 +1384,22 @@ async delete(id) {
         SUCCESS
         ======================================================
         */
-return true;
+
+        console.log(
+            "=========================================="
+        );
+
+        console.log(
+            "GENERAL JOURNAL DELETED SUCCESSFULLY:",
+            id
+        );
+
+        console.log(
+            "=========================================="
+        );
+
+
+        return true;
 
     }
 

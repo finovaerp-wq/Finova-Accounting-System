@@ -61,6 +61,10 @@
 
     <link
         rel="stylesheet"
+        href="../assets/css/components/pagination.css">
+
+    <link
+        rel="stylesheet"
         href="assets/control-center.css">
 
 </head>
@@ -126,109 +130,46 @@
 
 
         <!-- ==================================================
-             NAVIGATION
+             NAVIGATION — MIRROR ACCOUNTING SYSTEM
         =================================================== -->
 
         <nav class="cc-nav">
 
+            <div class="cc-nav-label">CONTROL CENTER</div>
 
-            <!-- CONTROL CENTER -->
-
-            <div class="cc-nav-label">
-                CONTROL CENTER
-            </div>
-
-
-            <button
-                class="cc-nav-item active"
-                type="button"
-                data-page="overview">
-
-                <i class="fa-solid fa-chart-pie"></i>
-
-                <span>
-                    Overview
-                </span>
-
+            <button class="cc-nav-item" type="button" data-page="overview">
+                <i class="fa-solid fa-gauge-high"></i>
+                <span>Overview</span>
             </button>
 
+            <div class="cc-nav-label mt-3">MANAGEMENT</div>
 
-            <button
-                class="cc-nav-item"
-                type="button"
-                data-page="companies">
-
+            <button class="cc-nav-item" type="button" data-page="companies">
                 <i class="fa-solid fa-building"></i>
-
-                <span>
-                    Companies
-                </span>
-
+                <span>Companies</span>
             </button>
 
-
-            <button
-                class="cc-nav-item"
-                type="button"
-                data-page="subscriptions">
-
+            <button class="cc-nav-item" type="button" data-page="subscriptions">
                 <i class="fa-solid fa-credit-card"></i>
-
-                <span>
-                    Subscriptions
-                </span>
-
+                <span>Subscriptions</span>
             </button>
 
-
-            <button
-                class="cc-nav-item"
-                type="button"
-                data-page="users">
-
+            <button class="cc-nav-item" type="button" data-page="users">
                 <i class="fa-solid fa-users"></i>
-
-                <span>
-                    Users
-                </span>
-
+                <span>Users</span>
             </button>
 
+            <div class="cc-nav-label mt-3">SYSTEM</div>
 
-            <!-- SYSTEM -->
-
-            <div class="cc-nav-label mt-3">
-                SYSTEM
-            </div>
-
-
-            <button
-                class="cc-nav-item"
-                type="button"
-                data-page="backup-monitor">
-
+            <button class="cc-nav-item" type="button" data-page="backup-monitor">
                 <i class="fa-solid fa-database"></i>
-
-                <span>
-                    Backup Monitor
-                </span>
-
+                <span>Backup Monitor</span>
             </button>
 
-
-            <button
-                class="cc-nav-item"
-                type="button"
-                data-page="audit-log">
-
+            <button class="cc-nav-item" type="button" data-page="audit-log">
                 <i class="fa-solid fa-clipboard-list"></i>
-
-                <span>
-                    Audit Log
-                </span>
-
+                <span>Audit Log</span>
             </button>
-
 
         </nav>
 
@@ -371,27 +312,7 @@
             </div>
 
 
-            <!-- ==================================================
-                 SYSTEM STATUS BANNER
-            =================================================== -->
-
-            <div class="cc-phase-banner">
-
-                <div>
-
-                    <i class="fa-solid fa-circle-check"></i>
-
-                    <strong>
-                        Control Center aktif.
-                    </strong>
-
-                    Company, Subscription, User-Company,
-                    Super Admin Gate, Tenant Isolation,
-                    Logout, dan Audit Trail tersedia.
-
-                </div>
-
-            </div>
+            
 
 
             <!-- ==================================================
@@ -1286,41 +1207,55 @@
 
                 <div class="cc-page-toolbar">
 
-                    <div>
+    <div></div>
 
-                        <h2>
-                            Audit Log
-                        </h2>
+    <div class="cc-page-toolbar-actions">
 
-                        <p>
-                            Riwayat aktivitas dan perubahan data
-                            lintas company yang tercatat di database.
-                        </p>
+        <button
+            class="cc-btn secondary"
+            id="btn-refresh-audit"
+            type="button">
 
-                    </div>
+            <i class="fa-solid fa-rotate"></i>
 
+            <span>
+                Refresh
+            </span>
 
-                    <div>
+        </button>
 
-                        <button
-                            class="cc-btn secondary"
-                            id="btn-refresh-audit"
-                            type="button">
+    </div>
 
-                            <i class="fa-solid fa-rotate"></i>
-
-                            <span>
-                                Refresh
-                            </span>
-
-                        </button>
-
-                    </div>
-
-                </div>
+</div>
 
 
                 <!-- ==============================================
+                     AUDIT MODULE WORKSPACE
+                =============================================== -->
+
+                <div class="cc-audit-module-header">
+
+                    <div>
+                        <span class="cc-audit-eyebrow">
+                            MODULE AUDIT
+                        </span>
+
+                        <h3 id="audit-module-title">
+                            Audit Log
+                        </h3>
+
+                        <p id="audit-module-subtitle">
+                            Riwayat aktivitas dan perubahan data lintas seluruh module accounting FINOVA.
+                        </p>
+                    </div>
+
+                    <div class="cc-audit-scope">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>Super Admin Audit Scope</span>
+                    </div>
+
+                </div>
+<!-- ==============================================
                      AUDIT TABLE CARD
                 =============================================== -->
 
@@ -1351,7 +1286,7 @@
                                     class="cc-input"
                                     type="search"
                                     autocomplete="off"
-                                    placeholder="Cari company, module, document, action, user...">
+                                    placeholder="Cari company, module, document, action, user, status...">
 
                             </div>
 
@@ -1453,6 +1388,14 @@
                                             User
                                         </th>
 
+                                        <th>
+                                            User Status
+                                        </th>
+
+                                        <th>
+                                            Remarks
+                                        </th>
+
                                         <th class="text-center">
                                             View
                                         </th>
@@ -1475,6 +1418,20 @@
 
                             </table>
 
+                        </div>
+
+                        <div class="finova-pagination-wrapper">
+                            <div class="finova-pagination-left">
+                                <button type="button" id="audit-pagination-first" class="finova-pagination-btn" title="First Page"><i class="fa-solid fa-backward-step"></i></button>
+                                <button type="button" id="audit-pagination-prev" class="finova-pagination-btn" title="Previous Page"><i class="fa-solid fa-chevron-left"></i></button>
+                                <span class="finova-pagination-label">Page</span>
+                                <input type="number" id="audit-pagination-page-input" value="1" min="1" class="form-control finova-pagination-input" aria-label="Current Page" autocomplete="off">
+                                <span class="finova-pagination-label">of</span>
+                                <span id="audit-pagination-total-pages" class="finova-pagination-total">1</span>
+                                <button type="button" id="audit-pagination-next" class="finova-pagination-btn" title="Next Page"><i class="fa-solid fa-chevron-right"></i></button>
+                                <button type="button" id="audit-pagination-last" class="finova-pagination-btn" title="Last Page"><i class="fa-solid fa-forward-step"></i></button>
+                            </div>
+                            <div id="audit-pagination-info" class="finova-pagination-info">Displaying Record 0 - 0 of 0</div>
                         </div>
 
                     </div>
@@ -2149,6 +2106,11 @@
                         </div>
 
                         <div class="cc-audit-info-item">
+                            <span class="cc-audit-info-label">User Status</span>
+                            <strong class="cc-audit-info-value" id="audit-detail-user-status">-</strong>
+                        </div>
+
+                        <div class="cc-audit-info-item">
                             <span class="cc-audit-info-label">Table</span>
                             <span class="cc-audit-info-value cc-mono" id="audit-detail-table">-</span>
                         </div>
@@ -2156,6 +2118,11 @@
                         <div class="cc-audit-info-item cc-audit-info-record">
                             <span class="cc-audit-info-label">Record ID</span>
                             <span class="cc-audit-info-value cc-mono" id="audit-detail-record-id">-</span>
+                        </div>
+
+                        <div class="cc-audit-info-item cc-audit-info-record">
+                            <span class="cc-audit-info-label">Remarks</span>
+                            <strong class="cc-audit-info-value" id="audit-detail-remarks">-</strong>
                         </div>
 
                     </div>

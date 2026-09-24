@@ -36,7 +36,19 @@ const state = {
 
     dashboard: null,
 
-    auditLogs: []
+    auditLogs: [],
+
+    auditModule: "ALL",
+
+    auditPage: 1,
+
+    auditPageSize: 100,
+
+    auditTotalRecords: 0,
+
+    auditTotalPages: 1,
+
+    auditLoading: false
 
 };
 
@@ -122,6 +134,134 @@ const pages = {
     ]
 
 };
+
+
+/*
+==========================================================
+ACCOUNTING MODULE AUDIT MAP
+==========================================================
+
+Satu audit engine, tetapi setiap module memiliki view audit
+tersendiri. Nilai source_module/module menjadi prioritas,
+kemudian table_name digunakan sebagai fallback.
+==========================================================
+*/
+
+const auditModules = [
+
+    { key: "ALL", label: "All Modules", icon: "fa-layer-group", aliases: [] },
+
+    { key: "USER_MANAGEMENT", label: "User Management", icon: "fa-users-gear", aliases: ["USER", "USERS", "USER MANAGEMENT"] },
+    { key: "BUSINESS_PARTNER", label: "Business Partner", icon: "fa-handshake", aliases: ["BP", "BUSINESS PARTNER", "BUSINESS_PARTNER"] },
+    { key: "CHART_OF_ACCOUNTS", label: "Chart of Accounts", icon: "fa-sitemap", aliases: ["COA", "CHART OF ACCOUNTS", "CHART_OF_ACCOUNTS"] },
+    { key: "TAX", label: "Tax Master", icon: "fa-percent", aliases: ["TAX", "TAX MASTER", "TAX_MASTER"] },
+    { key: "ACCOUNTING_PERIOD", label: "Accounting Period", icon: "fa-calendar-days", aliases: ["PERIOD", "ACCOUNTING PERIOD", "ACCOUNTING_PERIOD"] },
+    { key: "ACCOUNT_PAYABLE", label: "Account Payable", icon: "fa-file-invoice-dollar", aliases: ["AP", "ACCOUNT PAYABLE", "ACCOUNT_PAYABLE"] },
+    { key: "ACCOUNT_RECEIVABLE", label: "Account Receivable", icon: "fa-file-invoice", aliases: ["AR", "ACCOUNT RECEIVABLE", "ACCOUNT_RECEIVABLE"] },
+    { key: "AGING_PAYABLE", label: "Aging Payable", icon: "fa-clock-rotate-left", aliases: ["AGING AP", "AGING PAYABLE", "AGING_PAYABLE"] },
+    { key: "AGING_RECEIVABLE", label: "Aging Receivable", icon: "fa-hourglass-half", aliases: ["AGING AR", "AGING RECEIVABLE", "AGING_RECEIVABLE"] },
+    { key: "GL_JOURNAL", label: "GL Journal", icon: "fa-book", aliases: ["GL", "GJ", "GL JOURNAL", "GL_JOURNAL", "GENERAL JOURNAL"] },
+    { key: "FIXED_ASSET", label: "Fixed Asset", icon: "fa-building-columns", aliases: ["FA", "FIXED ASSET", "FIXED_ASSET"] },
+    { key: "GENERAL_LEDGER", label: "General Ledger", icon: "fa-list-check", aliases: ["GENERAL LEDGER", "GENERAL_LEDGER"] },
+    { key: "TRIAL_BALANCE", label: "Trial Balance", icon: "fa-scale-balanced", aliases: ["TB", "TRIAL BALANCE", "TRIAL_BALANCE", "TRIAL BALANCE YEAR"] },
+    { key: "BALANCE_SHEET", label: "Balance Sheet", icon: "fa-table-columns", aliases: ["BS", "BALANCE SHEET", "BALANCE_SHEET"] },
+    { key: "PROFIT_LOSS", label: "Profit & Loss", icon: "fa-chart-line", aliases: ["P&L", "PL", "PROFIT LOSS", "PROFIT & LOSS", "PROFIT_LOSS"] },
+    { key: "FINANCIAL_STATEMENT", label: "Financial Statement", icon: "fa-file-lines", aliases: ["FINANCIAL STATEMENT", "FINANCIAL_STATEMENT"] },
+    { key: "CASH_FLOW_FORECAST", label: "Cash Flow Forecast", icon: "fa-money-bill-trend-up", aliases: ["CASH FLOW", "CASH FLOW FORECAST", "CASH_FLOW_FORECAST"] },
+    { key: "SETTINGS", label: "Settings", icon: "fa-gear", aliases: ["SETTING", "SETTINGS"] }
+
+];
+
+
+const auditTableModuleMap = {
+
+    mst_users: "USER_MANAGEMENT",
+    mst_business_partner: "BUSINESS_PARTNER",
+    mst_business_partner_bank: "BUSINESS_PARTNER",
+    mst_term_of_payment: "BUSINESS_PARTNER",
+    mst_chart_of_accounts: "CHART_OF_ACCOUNTS",
+    mst_accounting_period: "ACCOUNTING_PERIOD",
+    trx_accounting_period_history: "ACCOUNTING_PERIOD",
+    trx_account_payable: "ACCOUNT_PAYABLE",
+    trx_ap_payment: "ACCOUNT_PAYABLE",
+    trx_ap_payment_batch: "ACCOUNT_PAYABLE",
+    trx_account_receivable: "ACCOUNT_RECEIVABLE",
+    trx_account_receivable_payment: "ACCOUNT_RECEIVABLE",
+    trx_gl_journal: "GL_JOURNAL",
+    trx_gl_journal_detail: "GL_JOURNAL",
+    mst_fixed_asset_category: "FIXED_ASSET",
+    mst_fixed_asset: "FIXED_ASSET",
+    trx_fixed_asset_depreciation: "FIXED_ASSET",
+    trx_cash_flow_forecast_manual: "CASH_FLOW_FORECAST",
+    finova_company_settings: "SETTINGS"
+
+};
+
+
+function normalizeAuditModule(value) {
+
+    return String(value || "")
+        .trim()
+        .toUpperCase()
+        .replace(/-/g, "_");
+
+}
+
+
+function getAuditModuleKey(item) {
+
+    if (!item) {
+        return "OTHER";
+    }
+
+    /*
+       IMPORTANT: table_name identifies the module that actually owns
+       the audited record. source_module is only the origin/trace of a
+       cross-module transaction (e.g. AP -> GL) and must NOT override
+       the owning module.
+    */
+    const candidates = [
+        item.table_name,
+        item.module,
+        item.source_module
+    ];
+
+    for (const candidate of candidates) {
+
+        const normalized = normalizeAuditModule(candidate);
+
+        if (!normalized) {
+            continue;
+        }
+
+        const byTable = auditTableModuleMap[String(candidate).trim().toLowerCase()];
+        if (byTable) {
+            return byTable;
+        }
+
+        for (const module of auditModules) {
+            if (module.key === normalized || module.aliases.includes(normalized) || module.aliases.includes(String(candidate || "").trim().toUpperCase())) {
+                return module.key;
+            }
+        }
+
+        /* Common source values used by FINOVA transaction flows. */
+        if (normalized === "AR_INVOICE" || normalized === "AR_PAYMENT") return "ACCOUNT_RECEIVABLE";
+        if (normalized === "AP_INVOICE" || normalized === "AP_PAYMENT") return "ACCOUNT_PAYABLE";
+        if (normalized === "GJ" || normalized === "JOURNAL") return "GL_JOURNAL";
+    }
+
+    return "OTHER";
+
+}
+
+
+function getAuditModuleMeta(key) {
+
+    return auditModules.find((module) => module.key === key)
+        || { key, label: key === "OTHER" ? "Other / Unmapped" : key, icon: "fa-circle-question", aliases: [] };
+
+}
 
 
 /*
@@ -335,6 +475,26 @@ function badge(
 AUDIT ACTION BADGE
 ==========================================================
 */
+
+function getAuditRemarks(item) {
+
+    const direct =
+        item?.remarks
+        ||
+        item?.void_reason
+        ||
+        item?.new_data?.void_reason
+        ||
+        item?.new_data?.remarks
+        ||
+        item?.new_data?.void_remarks
+        ||
+        "";
+
+    return String(direct || "").trim();
+
+}
+
 
 function auditBadge(
     value
@@ -1005,7 +1165,6 @@ function showInfo(
             "cc-alert"
         );
 
-
     if (
         !alertElement
     ) {
@@ -1014,24 +1173,26 @@ function showInfo(
 
     }
 
-
     alertElement.className =
         "cc-alert success";
-
 
     alertElement.textContent =
         message;
 
-
     alertElement.hidden =
         false;
 
+    alertElement.style.display =
+        "";
 
     window.setTimeout(
         () => {
 
             alertElement.hidden =
                 true;
+
+            alertElement.style.display =
+                "none";
 
         },
         3500
@@ -1120,7 +1281,8 @@ NAVIGATION
 */
 
 function navigate(
-    name
+    name,
+    auditModule = null
 ) {
 
     const targetName =
@@ -1129,6 +1291,11 @@ function navigate(
         name
             :
         "overview";
+
+
+    if (targetName === "audit-log" && auditModule) {
+        state.auditModule = String(auditModule).toUpperCase();
+    }
 
 
     /*
@@ -1162,7 +1329,7 @@ function navigate(
 
     document
         .querySelectorAll(
-            ".cc-nav-item"
+            ".cc-nav-item, .cc-nav-audit"
         )
         .forEach(
             (
@@ -1206,6 +1373,14 @@ function navigate(
             "active"
         );
 
+    if (targetName === "audit-log") {
+        document
+            .querySelector(
+                `.cc-nav-audit[data-audit-module="${state.auditModule}"]`
+            )
+            ?.classList.add("active");
+    }
+
 
     /*
     ======================================================
@@ -1248,6 +1423,18 @@ function navigate(
         pageSubtitle.textContent =
             pageMeta[1];
 
+    }
+
+
+    if (targetName === "audit-log") {
+        if (pageTitle) {
+            pageTitle.textContent = "Audit Log";
+        }
+        if (pageSubtitle) {
+            pageSubtitle.textContent = "Riwayat CREATE, UPDATE, POST, COMPLETE, PAID, VOID, DELETE dan perubahan data lintas seluruh module accounting FINOVA.";
+        }
+        renderAuditModuleTabs();
+        renderAuditLogs();
     }
 
 
@@ -1385,65 +1572,33 @@ async function loadAll() {
 
     /*
     ======================================================
-    LOAD DASHBOARD + PLANS + AUDIT
+    LOAD DATA INDEPENDENTLY
     ======================================================
     */
 
-    const [
-        dashboard,
-        plans,
-        auditLogs
-    ] =
-        await Promise.all(
-            [
+    const results = await Promise.allSettled([
+        ControlCenterService.getDashboardData(),
+        ControlCenterService.getPlans()
+    ]);
 
-                ControlCenterService
-                    .getDashboardData(),
+    const dashboard = results[0].status === "fulfilled" ? results[0].value : null;
+    const plans = results[1].status === "fulfilled" ? results[1].value : [];
 
-                ControlCenterService
-                    .getPlans(),
+    await loadAuditLogPage(1, false);
 
-                ControlCenterService
-                    .getAuditLogs()
+    const auditLogs = Array.isArray(state.auditLogs) ? state.auditLogs : [];
 
-            ]
-        );
-
-
-    /*
-    ======================================================
-    UPDATE STATE
-    ======================================================
-    */
-
-    Object.assign(
-        state,
-        dashboard,
-        {
-
-            dashboard,
-
-            plans:
-                Array.isArray(
-                    plans
-                )
-                    ?
-                plans
-                    :
-                [],
-
-            auditLogs:
-                Array.isArray(
-                    auditLogs
-                )
-                    ?
-                auditLogs
-                    :
-                []
-
+    results.forEach((result, index) => {
+        if (result.status === "rejected") {
+            console.error("Control Center load failed:", index, result.reason);
         }
-    );
+    });
 
+    Object.assign(state, dashboard || {}, {
+        dashboard: dashboard || state.dashboard || null,
+        plans: Array.isArray(plans) ? plans : [],
+        auditLogs: Array.isArray(auditLogs) ? auditLogs : []
+    });
 
     /*
     ======================================================
@@ -1463,175 +1618,13 @@ REFRESH AUDIT LOG ONLY
 */
 
 async function refreshAuditLogsRealtime() {
-
-    /*
-    ==================================================
-    PREVENT PARALLEL REFRESH
-    ==================================================
-    */
-
-    if (
-        auditRealtimeRefreshing
-    ) {
-
-        auditRealtimeRefreshPending =
-            true;
-
-        return;
-
-    }
-
-
-    auditRealtimeRefreshing =
-        true;
-
-
     try {
-
-        console.log(
-            "CONTROL CENTER AUDIT: REALTIME REFRESH START"
-        );
-
-
-        /*
-        ==================================================
-        LOAD LATEST AUDIT LOG
-
-        Uses:
-        finova_admin_list_audit_logs()
-        ==================================================
-        */
-
-        const auditLogs =
-            await ControlCenterService
-                .getAuditLogs();
-
-
-        /*
-        ==================================================
-        UPDATE STATE
-        ==================================================
-        */
-
-        state.auditLogs =
-            Array.isArray(
-                auditLogs
-            )
-                ?
-            auditLogs
-                :
-            [];
-
-
-        console.log(
-            "CONTROL CENTER AUDIT: REALTIME DATA LOADED",
-            {
-                total:
-                    state.auditLogs.length,
-
-                latest:
-                    state.auditLogs[0]
-                    || null
-            }
-        );
-
-
-        /*
-        ==================================================
-        RENDER CURRENT AUDIT PAGE
-        ==================================================
-        */
-
-        renderAuditLogs();
-
-
-        console.log(
-            "CONTROL CENTER AUDIT: REALTIME RENDER COMPLETE"
-        );
-
+        await loadAuditLogPage(state.auditPage || 1, false);
+    } catch (error) {
+        console.error("Control Center audit refresh failed:", error);
+        showError(error);
     }
-    catch (
-        error
-    ) {
-
-        console.error(
-            "CONTROL CENTER AUDIT: REALTIME REFRESH ERROR",
-            error
-        );
-
-    }
-    finally {
-
-        auditRealtimeRefreshing =
-            false;
-
-
-        /*
-        ==================================================
-        EVENT ARRIVED WHILE REFRESHING
-        ==================================================
-        */
-
-        if (
-            auditRealtimeRefreshPending
-        ) {
-
-            auditRealtimeRefreshPending =
-                false;
-
-            queueAuditRealtimeRefresh();
-
-        }
-
-    }
-
 }
-
-
-/*
-==========================================================
-QUEUE AUDIT REALTIME REFRESH
-==========================================================
-*/
-
-function queueAuditRealtimeRefresh() {
-
-    /*
-    ==================================================
-    DEBOUNCE
-
-    One business transaction can generate multiple
-    Audit Log INSERT events.
-    ==================================================
-    */
-
-    if (
-        auditRealtimeRefreshTimer
-    ) {
-
-        window.clearTimeout(
-            auditRealtimeRefreshTimer
-        );
-
-    }
-
-
-    auditRealtimeRefreshTimer =
-        window.setTimeout(
-            async () => {
-
-                auditRealtimeRefreshTimer =
-                    null;
-
-
-                await refreshAuditLogsRealtime();
-
-            },
-            250
-        );
-
-}
-
 
 /*
 ==========================================================
@@ -1642,9 +1635,9 @@ START AUDIT LOG REALTIME
 function startAuditLogRealtime() {
 
     /*
-    ==================================================
+    ======================================================
     PREVENT DUPLICATE SUBSCRIPTION
-    ==================================================
+    ======================================================
     */
 
     if (
@@ -1652,7 +1645,7 @@ function startAuditLogRealtime() {
     ) {
 
         console.log(
-            "CONTROL CENTER AUDIT: REALTIME ALREADY ACTIVE"
+            "CONTROL CENTER AUDIT REALTIME ALREADY ACTIVE"
         );
 
         return;
@@ -1660,92 +1653,192 @@ function startAuditLogRealtime() {
     }
 
 
+    /*
+    ======================================================
+    SUBSCRIBE
+    ======================================================
+    */
+
     try {
 
-        console.log(
-            "CONTROL CENTER AUDIT: START REALTIME"
-        );
-
-
-        /*
-        ==================================================
-        SUBSCRIBE
-
-        Callback runs every time finova_audit_log
-        receives a visible realtime database event.
-        ==================================================
-        */
-
         auditRealtimeChannel =
-            ControlCenterService
-                .subscribeAuditLogs(
-                    payload => {
+            ControlCenterService.subscribeAuditLogs(
+                () => {
 
-                        console.log(
-                            "CONTROL CENTER AUDIT: EVENT RECEIVED",
-                            {
-                                eventType:
-                                    payload?.eventType
-                                    || null,
+                    /*
+                    ==========================================
+                    PREVENT MULTIPLE REFRESH AT ONCE
+                    ==========================================
+                    */
 
-                                table:
-                                    payload?.table
-                                    || null,
+                    if (
+                        auditRealtimeRefreshTimer
+                    ) {
 
-                                id:
-                                    payload?.new?.id
-                                    ||
-                                    payload?.old?.id
-                                    ||
-                                    null
-                            }
+                        window.clearTimeout(
+                            auditRealtimeRefreshTimer
                         );
 
-
-                        /*
-                        ==========================================
-                        GET FRESH DATA FROM RPC
-
-                        Do not insert payload directly into state.
-                        RPC remains the source of truth.
-                        ==========================================
-                        */
-
-                        queueAuditRealtimeRefresh();
-
                     }
-                );
 
 
-        /*
-        ==================================================
-        VALIDATE CHANNEL OBJECT
-        ==================================================
-        */
+                    /*
+                    ==========================================
+                    DEBOUNCE REFRESH
+                    ==========================================
+                    */
 
-        if (
-            !auditRealtimeChannel
-        ) {
+                    auditRealtimeRefreshTimer =
+                        window.setTimeout(
+                            async () => {
 
-            throw new Error(
-                "Audit Realtime channel was not created."
+                                /*
+                                ==================================
+                                PREVENT CONCURRENT REFRESH
+                                ==================================
+                                */
+
+                                if (
+                                    auditRealtimeRefreshing
+                                ) {
+
+                                    auditRealtimeRefreshPending =
+                                        true;
+
+                                    return;
+
+                                }
+
+
+                                auditRealtimeRefreshing =
+                                    true;
+
+
+                                try {
+
+                                    await refreshAuditLogsRealtime();
+
+                                }
+                                catch (
+                                    error
+                                ) {
+
+                                    console.error(
+                                        "CONTROL CENTER AUDIT REALTIME REFRESH FAILED:",
+                                        error
+                                    );
+
+                                }
+                                finally {
+
+                                    auditRealtimeRefreshing =
+                                        false;
+
+
+                                    /*
+                                    ==================================
+                                    PENDING EVENT
+                                    ==================================
+                                    */
+
+                                    if (
+                                        auditRealtimeRefreshPending
+                                    ) {
+
+                                        auditRealtimeRefreshPending =
+                                            false;
+
+
+                                        /*
+                                        ==============================
+                                        RUN ONE MORE REFRESH
+                                        ==============================
+                                        */
+
+                                        if (
+                                            auditRealtimeRefreshTimer
+                                        ) {
+
+                                            window.clearTimeout(
+                                                auditRealtimeRefreshTimer
+                                            );
+
+                                        }
+
+
+                                        auditRealtimeRefreshTimer =
+                                            window.setTimeout(
+                                                async () => {
+
+                                                    if (
+                                                        auditRealtimeRefreshing
+                                                    ) {
+
+                                                        return;
+
+                                                    }
+
+
+                                                    auditRealtimeRefreshing =
+                                                        true;
+
+
+                                                    try {
+
+                                                        await refreshAuditLogsRealtime();
+
+                                                    }
+                                                    catch (
+                                                        error
+                                                    ) {
+
+                                                        console.error(
+                                                            "CONTROL CENTER AUDIT REALTIME PENDING REFRESH FAILED:",
+                                                            error
+                                                        );
+
+                                                    }
+                                                    finally {
+
+                                                        auditRealtimeRefreshing =
+                                                            false;
+
+                                                    }
+
+                                                },
+                                                300
+                                            );
+
+                                    }
+
+                                }
+
+                            },
+                            300
+                        );
+
+                }
             );
 
-        }
+
+        console.log(
+            "CONTROL CENTER AUDIT REALTIME STARTED"
+        );
+
 
     }
     catch (
         error
     ) {
 
-        auditRealtimeChannel =
-            null;
-
-
         console.error(
-            "CONTROL CENTER AUDIT: START REALTIME ERROR",
+            "CONTROL CENTER AUDIT REALTIME START FAILED:",
             error
         );
+
+
+        auditRealtimeChannel =
+            null;
 
     }
 
@@ -1761,9 +1854,9 @@ STOP AUDIT LOG REALTIME
 async function stopAuditLogRealtime() {
 
     /*
-    ==================================================
-    CLEAR PENDING REFRESH
-    ==================================================
+    ======================================================
+    CLEAR REFRESH TIMER
+    ======================================================
     */
 
     if (
@@ -1781,61 +1874,60 @@ async function stopAuditLogRealtime() {
 
 
     /*
-    ==================================================
-    NO ACTIVE CHANNEL
-    ==================================================
+    ======================================================
+    RESET FLAGS
+    ======================================================
     */
 
-    if (
-        !auditRealtimeChannel
-    ) {
+    auditRealtimeRefreshing =
+        false;
 
-        return;
-
-    }
+    auditRealtimeRefreshPending =
+        false;
 
 
     /*
-    ==================================================
-    STORE CHANNEL BEFORE CLEARING STATE
-    ==================================================
+    ======================================================
+    REMOVE CHANNEL
+    ======================================================
     */
 
-    const channel =
-        auditRealtimeChannel;
+    if (
+        auditRealtimeChannel
+    ) {
 
+        try {
 
-    auditRealtimeChannel =
-        null;
-
-
-    try {
-
-        await ControlCenterService
-            .unsubscribeAuditLogs(
-                channel
+            await ControlCenterService.unsubscribeAuditLogs(
+                auditRealtimeChannel
             );
 
 
-        console.log(
-            "CONTROL CENTER AUDIT: REALTIME STOPPED"
-        );
+            console.log(
+                "CONTROL CENTER AUDIT REALTIME STOPPED"
+            );
 
-    }
-    catch (
-        error
-    ) {
-
-        console.error(
-            "CONTROL CENTER AUDIT: REALTIME STOP ERROR",
+        }
+        catch (
             error
-        );
+        ) {
+
+            console.error(
+                "CONTROL CENTER AUDIT REALTIME STOP FAILED:",
+                error
+            );
+
+        }
+        finally {
+
+            auditRealtimeChannel =
+                null;
+
+        }
 
     }
 
 }
-
-
 /*
 ==========================================================
 REFRESH DATA
@@ -1844,45 +1936,26 @@ REFRESH DATA
 
 async function refresh() {
 
-    const [
-        dashboard,
-        auditLogs
-    ] =
-        await Promise.all(
-            [
+    const results = await Promise.allSettled([
+        ControlCenterService.getDashboardData()
+    ]);
 
-                ControlCenterService
-                    .getDashboardData(),
+    const dashboard = results[0].status === "fulfilled" ? results[0].value : null;
 
-                ControlCenterService
-                    .getAuditLogs()
+    await loadAuditLogPage(state.auditPage || 1, false);
 
-            ]
-        );
+    const auditLogs = Array.isArray(state.auditLogs) ? state.auditLogs : [];
 
+    Object.assign(state, dashboard || {}, {
+        dashboard: dashboard || state.dashboard || null,
+        auditLogs: Array.isArray(auditLogs) ? auditLogs : []
+    });
 
-    Object.assign(
-        state,
-        dashboard,
-        {
-
-            dashboard,
-
-            auditLogs:
-                Array.isArray(
-                    auditLogs
-                )
-                    ?
-                auditLogs
-                    :
-                []
-
-        }
-    );
-
+    if (results[1].status === "rejected") {
+        showError(results[1].reason);
+    }
 
     renderAll();
-
 }
 
 
@@ -1901,6 +1974,8 @@ function renderAll() {
     renderSubscriptions();
 
     renderUsers();
+
+    renderAuditModuleTabs();
 
     renderAuditLogs();
 
@@ -2853,7 +2928,7 @@ function renderSubscriptions() {
 
             <tr class="cc-empty">
 
-                <td colspan="7">
+                <td colspan="9">
 
                     <i class="fa-regular fa-folder-open"></i>
 
@@ -3118,9 +3193,264 @@ function renderUsers() {
 
 }
 
+
+
 /*
 ==========================================================
 RENDER AUDIT LOG
+==========================================================
+*/
+
+function renderAuditModuleTabs() {
+
+    /*
+    Audit Log FINOVA menggunakan satu combined audit log.
+    Tidak ada pemisahan halaman/module audit.
+    */
+
+    state.auditModule = "ALL";
+
+}
+
+/*
+==========================================================
+AUDIT LOG LOADING
+==========================================================
+*/
+
+function showAuditLoading() {
+
+    const tbody =
+        document.querySelector(
+            "#audit-table-body"
+        );
+
+    if (!tbody) {
+
+        return;
+
+    }
+
+    tbody.innerHTML = `
+
+        <tr>
+
+            <td
+                colspan="9"
+                class="cc-table-loading">
+
+                <i
+                    class="fa-solid fa-spinner fa-spin">
+                </i>
+
+                Loading Audit Log...
+
+            </td>
+
+        </tr>
+
+    `;
+
+}
+
+/*
+==========================================================
+AUDIT LOG LOADING
+==========================================================
+*/
+
+function showAuditLogLoading() {
+
+    const tableBody =
+        document.getElementById(
+            "audit-log-body"
+        );
+
+
+    if (!tableBody) {
+
+        return;
+
+    }
+
+
+    tableBody.innerHTML = `
+
+        <tr>
+
+            <td
+                colspan="9"
+                class="cc-table-loading"
+            >
+
+                <i
+                    class="fa-solid fa-spinner fa-spin"
+                ></i>
+
+                <span>
+                    Loading Audit Log...
+                </span>
+
+            </td>
+
+        </tr>
+
+    `;
+
+}
+
+/*
+==========================================================
+LOAD AUDIT LOG PAGE
+==========================================================
+*/
+
+async function loadAuditLogPage(
+    page = 1,
+    showLoading = true
+) {
+
+    if (
+        state.auditLoading
+    ) {
+
+        return;
+
+    }
+
+
+    state.auditLoading =
+        true;
+
+
+    if (
+        showLoading
+    ) {
+
+        showAuditLogLoading();
+
+    }
+
+
+    try {
+
+        const searchValue =
+            String(
+                document
+                    .getElementById(
+                        "audit-search"
+                    )
+                    ?.value
+                ||
+                ""
+            )
+                .trim();
+
+
+        const actionValue =
+            String(
+                document
+                    .getElementById(
+                        "audit-action"
+                    )
+                    ?.value
+                ||
+                ""
+            )
+                .trim()
+                .toUpperCase();
+
+
+        const result =
+            await ControlCenterService
+                .getAuditLogsPage(
+
+                    page,
+
+                    state.auditPageSize,
+
+                    searchValue,
+
+                    actionValue,
+
+                    "ALL"
+
+                );
+
+
+        state.auditLogs =
+            Array.isArray(
+                result?.data
+            )
+                ?
+                result.data
+                :
+                [];
+
+
+        state.auditPage =
+            Number(
+                result?.page
+                ||
+                page
+            );
+
+
+        state.auditPageSize =
+            Number(
+                result?.pageSize
+                ||
+                100
+            );
+
+
+        state.auditTotalRecords =
+            Number(
+                result?.totalCount
+                ||
+                0
+            );
+
+
+        state.auditTotalPages =
+            Number(
+                result?.totalPages
+                ||
+                1
+            );
+
+
+        renderAuditLogs();
+
+    }
+    catch (
+        error
+    ) {
+
+        console.error(
+            "FINOVA Audit Log Page Load Error:",
+            error
+        );
+
+
+        showError(
+            error
+        );
+
+    }
+    finally {
+
+        state.auditLoading =
+            false;
+
+    }
+
+}
+/*
+==========================================================
+AUDIT LOG
+COMBINED
+SERVER-SIDE PAGINATION
 ==========================================================
 */
 
@@ -3132,465 +3462,387 @@ function renderAuditLogs() {
         );
 
 
-    if (
-        !tableBody
-    ) {
+    if (!tableBody) {
 
         return;
 
     }
 
 
-    /*
-    ======================================================
-    FILTER VALUE
-    ======================================================
-    */
-
-    const searchValue =
-        String(
-            document
-                .getElementById(
-                    "audit-search"
-                )
-                ?.value
-            ||
-            ""
-        )
-            .trim()
-            .toLowerCase();
-
-
-    const actionValue =
-        String(
-            document
-                .getElementById(
-                    "audit-action"
-                )
-                ?.value
-            ||
-            ""
-        )
-            .trim()
-            .toUpperCase();
-
-
-    /*
-    ======================================================
-    AUDIT DATA
-    ======================================================
-    */
-
     const auditLogs =
-
         Array.isArray(
             state.auditLogs
         )
-
-            ?
-
-        state.auditLogs
-
-            :
-
-        [];
+            ? state.auditLogs
+            : [];
 
 
     /*
     ======================================================
-    FILTER + BUILD ROW
+    TOTAL DATA
     ======================================================
     */
 
-    const rows =
-        auditLogs
-
-            .filter(
-                (
-                    item
-                ) => {
-
-                    const action =
-                        String(
-                            item.action
-                            ||
-                            ""
-                        ).toUpperCase();
+    state.auditTotalRecords =
+        Number(
+            state.auditTotalRecords
+            || 0
+        );
 
 
-                    /*
-                    ==============================================
-                    ACTION FILTER
-                    ==============================================
-                    */
-
-                    if (
-                        actionValue
-                        &&
-                        action
-                        !==
-                        actionValue
-                    ) {
-
-                        return false;
-
-                    }
+    state.auditTotalPages =
+        Math.max(
+            1,
+            Number(
+                state.auditTotalPages
+            )
+            || 1
+        );
 
 
-                    /*
-                    ==============================================
-                    NO SEARCH FILTER
-                    ==============================================
-                    */
+    /*
+    ======================================================
+    BUILD AUDIT TABLE
+    ======================================================
+    */
 
-                    if (
-                        !searchValue
-                    ) {
+    const auditRows =
+        auditLogs.map(
+            (
+                item
+            ) => {
 
-                        return true;
+                /*
+                ==========================================
+                DATE / TIME
+                ==========================================
+                */
 
-                    }
-
-
-                    /*
-                    ==============================================
-                    SEARCHABLE DATA
-                    ==============================================
-
-                    Search tetap mendukung:
-                    - Company
-                    - Module
-                    - Document
-                    - Action
-                    - User Name
-                    - User Role
-                    - User UID
-                    - Record
-                    - Source
-                    ==============================================
-                    */
-
-                    const haystack =
-                        [
-
-                            getCompanyDisplay(
-                                item.company_id
-                            ),
-
-                            item.company_id,
-
-                            item.module,
-
-                            item.table_name,
-
-                            item.document_no,
-
-                            item.action,
-
-                            item.user_name,
-
-                            item.user_role,
-
-                            item.user_uid,
-
-                            item.record_id,
-
-                            item.source_module,
-
-                            item.source_id,
-
-                            item.source_no
-
-                        ]
-                            .filter(
-                                (
-                                    value
-                                ) => {
-
-                                    return (
-                                        value !== null
-                                        &&
-                                        value !== undefined
-                                    );
-
-                                }
-                            )
-                            .join(
-                                " "
-                            )
-                            .toLowerCase();
-
-
-                    return haystack.includes(
-                        searchValue
+                const createdAt =
+                    fmtAuditDateTime(
+                        item?.created_at
                     );
 
-                }
-            )
 
-            .map(
-                (
-                    item
-                ) => {
+                /*
+                ==========================================
+                COMPANY
+                ==========================================
+                */
 
-                    /*
-                    ==============================================
-                    DISPLAY VALUE
-                    ==============================================
-                    */
+                const companyName =
 
-                    const createdAt =
-                        fmtAuditDateTime(
-                            item.created_at
-                        );
+                    item?.company_code
+                        ?
 
+                    `${item.company_code} — ${item.company_name || ""}`
 
-                    const companyName =
-                        getCompanyDisplay(
-                            item.company_id
-                        );
+                        :
+
+                    getCompanyDisplay(
+                        item?.company_id
+                    );
 
 
-                    const documentNo =
-                        getAuditDocument(
+                /*
+                ==========================================
+                MODULE
+                ==========================================
+                */
+
+                const moduleMeta =
+                    getAuditModuleMeta(
+                        getAuditModuleKey(
                             item
-                        );
+                        )
+                    );
 
 
-                    /*
-                    ==============================================
-                    USER DISPLAY
-                    ==============================================
+                /*
+                ==========================================
+                DOCUMENT
+                ==========================================
+                */
 
-                    Priority:
-                    1. user_name dari service
-                    2. user_uid jika profile tidak ditemukan
-                    3. SYSTEM jika tidak ada actor
-                    ==============================================
-                    */
+                const documentNo =
+                    getAuditDocument(
+                        item
+                    );
 
-                    const userName =
-                        item.user_name
+
+                /*
+                ==========================================
+                USER
+                ==========================================
+                */
+
+                const userName =
+                    item?.user_name
+                    ||
+                    item?.user_uid
+                    ||
+                    "SYSTEM";
+
+
+                /*
+                ==========================================
+                USER STATUS
+                ==========================================
+
+                User Status =
+                ROLE / JABATAN
+                ==========================================
+                */
+
+                const userStatus =
+                    String(
+                        item?.user_role
                         ||
-                        item.user_uid
-                        ||
-                        "SYSTEM";
+                        ""
+                    )
+                        .trim()
+                        .toUpperCase();
 
 
-                    const userRole =
-                        item.user_role
-                        ||
-                        "";
+                const userStatusHtml =
+
+                    userStatus
+
+                        ?
+
+                    `
+                        <span class="cc-user-status role">
+                            ${esc(
+                                userStatus
+                            )}
+                        </span>
+                    `
+
+                        :
+
+                    `
+                        <span class="cc-user-status unknown">
+                            -
+                        </span>
+                    `;
 
 
-                    const userUid =
-                        item.user_uid
-                        ||
-                        "SYSTEM";
+                /*
+                ==========================================
+                REMARKS
+                ==========================================
+                */
+
+                const remarks =
+                    getAuditRemarks(
+                        item
+                    )
+                    ||
+                    "-";
 
 
-                    /*
-                    ==============================================
-                    USER ROLE HTML
-                    ==============================================
-                    */
+                /*
+                ==========================================
+                RETURN ROW
+                ==========================================
+                */
 
-                    const userRoleHtml =
+                return `
 
-                        userRole
+                    <tr>
 
-                            ?
+                        <!-- DATE / TIME -->
 
-                        `
+                        <td>
 
-                            <small class="cc-table-secondary">
+                            <span
+                                class="cc-audit-date"
+                            >
 
                                 ${esc(
-                                    userRole
+                                    createdAt
+                                )}
+
+                            </span>
+
+                        </td>
+
+
+                        <!-- COMPANY -->
+
+                        <td>
+
+                            <div
+                                class="cc-table-primary"
+                            >
+
+                                ${esc(
+                                    companyName
+                                )}
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- MODULE -->
+
+                        <td>
+
+                            <div
+                                class="cc-table-primary"
+                            >
+
+                                ${esc(
+                                    moduleMeta.label
+                                )}
+
+                            </div>
+
+                            <small
+                                class="cc-table-secondary"
+                            >
+
+                                ${esc(
+                                    item?.module
+                                    ||
+                                    item?.table_name
+                                    ||
+                                    "-"
                                 )}
 
                             </small>
 
-                        `
-
-                            :
-
-                        "";
+                        </td>
 
 
-                    /*
-                    ==============================================
-                    ROW
-                    ==============================================
-                    */
+                        <!-- DOCUMENT -->
 
-                    return `
+                        <td>
 
-                        <tr>
+                            <span
+                                class="cc-mono"
+                                title="${esc(
+                                    documentNo
+                                )}"
+                            >
 
-
-                            <!-- DATE / TIME -->
-
-                            <td>
-
-                                <span class="cc-audit-date">
-
-                                    ${esc(
-                                        createdAt
-                                    )}
-
-                                </span>
-
-                            </td>
-
-
-                            <!-- COMPANY -->
-
-                            <td>
-
-                                <div class="cc-table-primary">
-
-                                    ${esc(
-                                        companyName
-                                    )}
-
-                                </div>
-
-                            </td>
-
-
-                            <!-- MODULE -->
-
-                            <td>
-
-                                <div class="cc-table-primary">
-
-                                    ${esc(
-                                        item.module
-                                        ||
-                                        "-"
-                                    )}
-
-                                </div>
-
-                                <small class="cc-table-secondary">
-
-                                    ${esc(
-                                        item.table_name
-                                        ||
-                                        "-"
-                                    )}
-
-                                </small>
-
-                            </td>
-
-
-                            <!-- DOCUMENT -->
-
-                            <td>
-
-                                <span class="cc-mono">
-
-                                    ${esc(
-                                        documentNo
-                                    )}
-
-                                </span>
-
-                            </td>
-
-
-                            <!-- ACTION -->
-
-                            <td>
-
-                                ${auditBadge(
-                                    item.action
+                                ${esc(
+                                    documentNo
                                 )}
 
-                            </td>
+                            </span>
+
+                        </td>
 
 
-                            <!-- USER -->
+                        <!-- ACTION -->
 
-                            <td>
+                        <td>
 
-                                <div
-                                    class="cc-audit-user"
-                                    title="${esc(
-                                        userUid
-                                    )}">
+                            ${auditBadge(
+                                item?.action
+                            )}
 
-                                    <div class="cc-table-primary">
-
-                                        ${esc(
-                                            userName
-                                        )}
-
-                                    </div>
-
-                                    ${userRoleHtml}
-
-                                </div>
-
-                            </td>
+                        </td>
 
 
-                            <!-- VIEW -->
+                        <!-- USER -->
 
-                            <td class="text-center">
+                        <td>
 
-                                <button
-                                    type="button"
-                                    class="cc-btn icon small"
-                                    data-audit-view="${esc(
-                                        item.id
-                                    )}"
-                                    title="View Audit Detail"
-                                    aria-label="View Audit Detail">
+                            <div
+                                class="cc-table-primary"
+                            >
 
-                                    <i class="fa-solid fa-eye"></i>
+                                ${esc(
+                                    userName
+                                )}
 
-                                </button>
+                            </div>
 
-                            </td>
+                        </td>
 
 
-                        </tr>
+                        <!-- USER STATUS -->
 
-                    `;
+                        <td>
 
-                }
-            )
-            .join(
-                ""
-            );
+                            ${userStatusHtml}
+
+                        </td>
+
+
+                        <!-- REMARKS -->
+
+                        <td>
+
+                            <div
+                                class="cc-audit-remarks"
+                                title="${esc(
+                                    remarks
+                                )}"
+                            >
+
+                                ${esc(
+                                    remarks
+                                )}
+
+                            </div>
+
+                        </td>
+
+
+                        <!-- VIEW -->
+
+                        <td>
+
+                            <button
+                                type="button"
+                                class="cc-icon-btn"
+                                title="View Audit Detail"
+                                data-audit-view="${esc(
+                                    item?.id
+                                )}"
+                            >
+
+                                <i
+                                    class="fa-solid fa-eye"
+                                ></i>
+
+                            </button>
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+        )
+        .join("");
 
 
     /*
     ======================================================
-    RENDER TABLE
+    EMPTY
     ======================================================
     */
 
-    tableBody.innerHTML =
+    if (
+        !auditRows
+    ) {
 
-        rows
+        tableBody.innerHTML = `
 
-        ||
+            <tr>
 
-        `
+                <td
+                    colspan="9"
+                    class="cc-empty-state"
+                >
 
-            <tr class="cc-empty">
-
-                <td colspan="7">
-
-                    <i class="fa-regular fa-folder-open"></i>
-
-                    <span>
-                        Belum ada audit log yang sesuai.
-                    </span>
+                    No Audit Log found.
 
                 </td>
 
@@ -3598,39 +3850,190 @@ function renderAuditLogs() {
 
         `;
 
+    }
+    else {
+
+        tableBody.innerHTML =
+            auditRows;
+
+    }
+
 
     /*
     ======================================================
-    VIEW DETAIL EVENT
+    PAGINATION UI
     ======================================================
     */
 
-    tableBody
-        .querySelectorAll(
-            "[data-audit-view]"
-        )
-        .forEach(
-            (
-                button
-            ) => {
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        const auditId =
-                            button.dataset.auditView;
-
-
-                        openAuditDetail(
-                            auditId
-                        );
-
-                    }
-                );
-
-            }
+    const pageInput =
+        document.getElementById(
+            "audit-page"
         );
+
+
+    const pageInfo =
+        document.getElementById(
+            "audit-page-info"
+        );
+
+
+    const pageFirst =
+        document.getElementById(
+            "audit-page-first"
+        );
+
+
+    const pagePrev =
+        document.getElementById(
+            "audit-page-prev"
+        );
+
+
+    const pageNext =
+        document.getElementById(
+            "audit-page-next"
+        );
+
+
+    const pageLast =
+        document.getElementById(
+            "audit-page-last"
+        );
+
+
+    if (
+        pageInput
+    ) {
+
+        pageInput.value =
+            state.auditPage;
+
+        pageInput.min =
+            1;
+
+        pageInput.max =
+            state.auditTotalPages;
+
+    }
+
+
+    if (
+        pageInfo
+    ) {
+
+        const from =
+            state.auditTotalRecords === 0
+                ? 0
+                :
+                (
+                    (
+                        state.auditPage
+                        -
+                        1
+                    )
+                    *
+                    state.auditPageSize
+                )
+                + 1;
+
+
+        const to =
+            Math.min(
+                state.auditPage
+                *
+                state.auditPageSize,
+                state.auditTotalRecords
+            );
+
+
+        pageInfo.textContent =
+            `Displaying ${from}–${to} of ${state.auditTotalRecords}`;
+
+    }
+
+
+    if (
+        pageFirst
+    ) {
+
+        pageFirst.disabled =
+            state.auditPage <= 1;
+
+    }
+
+
+    if (
+        pagePrev
+    ) {
+
+        pagePrev.disabled =
+            state.auditPage <= 1;
+
+    }
+
+
+    if (
+        pageNext
+    ) {
+
+        pageNext.disabled =
+            state.auditPage >=
+            state.auditTotalPages;
+
+    }
+
+
+    if (
+        pageLast
+    ) {
+
+        pageLast.disabled =
+            state.auditPage >=
+            state.auditTotalPages;
+
+    }
+
+}
+/*
+==========================================================
+HIDE CONTROL CENTER INFO BANNER
+==========================================================
+*/
+
+function hideControlCenterInfoBanner() {
+
+    const alertElement =
+        document.getElementById(
+            "cc-alert"
+        );
+
+
+    if (!alertElement) {
+
+        return;
+
+    }
+
+
+    /*
+    Hanya sembunyikan banner SUCCESS/INFO.
+    
+    Error tetap boleh tampil.
+    */
+
+    if (
+        alertElement.classList.contains(
+            "success"
+        )
+    ) {
+
+        alertElement.hidden =
+            true;
+
+        alertElement.style.display =
+            "none";
+
+    }
 
 }
 /*
@@ -3756,16 +4159,7 @@ function openAuditDetail(
         "";
 
 
-    const userDisplay =
-        userRole
-
-            ?
-
-        `${userName} (${userRole})`
-
-            :
-
-        userName;
+    const userDisplay = userName;
 
 
     /*
@@ -3829,6 +4223,18 @@ function openAuditDetail(
         userDisplay
     );
 
+    const detailUserStatus =
+        String(item.user_status || '').trim().toUpperCase();
+
+    const detailUserStatusEl =
+        document.getElementById('audit-detail-user-status');
+
+    if (detailUserStatusEl) {
+        detailUserStatusEl.textContent = detailUserStatus || '-';
+        detailUserStatusEl.className =
+            "cc-audit-info-value cc-user-status-text role";
+    }
+
 
     /*
     ======================================================
@@ -3853,6 +4259,20 @@ function openAuditDetail(
     setText(
         "audit-detail-record-id",
         item.record_id
+        ||
+        "-"
+    );
+
+
+    /*
+    ======================================================
+    REMARKS
+    ======================================================
+    */
+
+    setText(
+        "audit-detail-remarks",
+        getAuditRemarks(item)
         ||
         "-"
     );
@@ -4862,7 +5282,8 @@ function bind() {
             "input",
             () => {
 
-                renderAuditLogs();
+                state.auditPage = 1;
+                loadAuditLogPage(1, true);
 
             }
         );
@@ -4882,7 +5303,8 @@ function bind() {
             "change",
             () => {
 
-                renderAuditLogs();
+                state.auditPage = 1;
+                loadAuditLogPage(1, true);
 
             }
         );
@@ -4890,76 +5312,202 @@ function bind() {
 
     /*
     ======================================================
-    AUDIT REFRESH
+    AUDIT PAGINATION
     ======================================================
     */
 
-    document
-        .getElementById(
-            "btn-refresh-audit"
-        )
-        ?.addEventListener(
-            "click",
-            async (
-                event
-            ) => {
+    const auditPageInput =
+        document.getElementById("audit-page");
 
-                const button =
-                    event.currentTarget;
+    auditPageInput?.addEventListener("change", async () => {
+        const totalPages = Math.max(1, Number(state.auditTotalPages) || 1);
+        let page = Number.parseInt(auditPageInput.value, 10);
+        if (!Number.isFinite(page)) page = state.auditPage || 1;
+        page = Math.min(Math.max(page, 1), totalPages);
+        auditPageInput.value = page;
+        await loadAuditLogPage(page, true);
+    });
+
+    auditPageInput?.addEventListener("keydown", async (event) => {
+        if (event.key !== "Enter") return;
+        event.preventDefault();
+        auditPageInput.dispatchEvent(new Event("change"));
+    });
+
+    document.getElementById("audit-page-first")?.addEventListener("click", () => {
+        if (state.auditPage > 1) loadAuditLogPage(1, true);
+    });
+
+    document.getElementById("audit-page-prev")?.addEventListener("click", () => {
+        if (state.auditPage > 1) loadAuditLogPage(state.auditPage - 1, true);
+    });
+
+    document.getElementById("audit-page-next")?.addEventListener("click", () => {
+        if (state.auditPage < state.auditTotalPages) loadAuditLogPage(state.auditPage + 1, true);
+    });
+
+    document.getElementById("audit-page-last")?.addEventListener("click", () => {
+        if (state.auditPage < state.auditTotalPages) loadAuditLogPage(state.auditTotalPages, true);
+    });
+
+    /*
+======================================================
+AUDIT REFRESH
+======================================================
+*/
+
+document
+    .getElementById(
+        "btn-refresh-audit"
+    )
+    ?.addEventListener(
+        "click",
+        async (
+            event
+        ) => {
+
+            const button =
+                event.currentTarget;
 
 
-                try {
+            try {
 
-                    button.disabled =
-                        true;
+                /*
+                ==========================================
+                BUTTON LOADING
+                ==========================================
+                */
 
-
-                    const auditLogs =
-                        await ControlCenterService
-                            .getAuditLogs();
-
-
-                    state.auditLogs =
-
-                        Array.isArray(
-                            auditLogs
-                        )
-
-                            ?
-
-                        auditLogs
-
-                            :
-
-                        [];
+                button.disabled =
+                    true;
 
 
-                    renderAuditLogs();
+                /*
+                ==========================================
+                CHANGE ICON
+                ==========================================
+                */
 
-
-                    showInfo(
-                        "Audit Log diperbarui."
+                const icon =
+                    button.querySelector(
+                        "i"
                     );
 
+                const label =
+                    button.querySelector(
+                        "span"
+                    );
+
+
+                if (icon) {
+
+                    icon.className =
+                        "fa-solid fa-spinner fa-spin";
+
                 }
-                catch (
+
+
+                if (label) {
+
+                    label.textContent =
+                        "Loading...";
+
+                }
+
+
+                /*
+                ==========================================
+                SHOW TABLE LOADING
+                ==========================================
+                */
+
+                showAuditLoading();
+
+
+                /*
+                ==========================================
+                LOAD DATA FROM SUPABASE
+                ==========================================
+                */
+
+                state.auditPage = 1;
+                state.auditModule = "ALL";
+
+                await loadAuditLogPage(1, true);
+
+
+                /*
+                ==========================================
+                SUCCESS
+                ==========================================
+                */
+
+                showInfo(
+                    "Audit Log berhasil diperbarui."
+                );
+
+            }
+
+            catch (
+                error
+            ) {
+
+                console.error(
+                    "Audit Log refresh failed:",
                     error
-                ) {
+                );
 
-                    showError(
-                        error
+
+                showError(
+                    error
+                );
+
+                renderAuditLogs();
+
+            }
+
+            finally {
+
+                /*
+                ==========================================
+                RESTORE BUTTON
+                ==========================================
+                */
+
+                button.disabled =
+                    false;
+
+
+                const icon =
+                    button.querySelector(
+                        "i"
                     );
 
-                }
-                finally {
+                const label =
+                    button.querySelector(
+                        "span"
+                    );
 
-                    button.disabled =
-                        false;
+
+                if (icon) {
+
+                    icon.className =
+                        "fa-solid fa-rotate";
+
+                }
+
+
+                if (label) {
+
+                    label.textContent =
+                        "Refresh";
 
                 }
 
             }
-        );
+
+        }
+    );
 
 
     /*
@@ -4980,16 +5528,64 @@ function bind() {
                 button.addEventListener(
                     "click",
                     () => {
-
-                        navigate(
-                            button.dataset.page
-                        );
-
+                        navigate(button.dataset.page);
                     }
                 );
 
             }
         );
+
+
+    /*
+    ======================================================
+    MODULE AUDIT NAVIGATION
+    ======================================================
+    */
+
+    document
+        .querySelectorAll(".cc-nav-audit")
+        .forEach((button) => {
+
+            button.addEventListener("click", async () => {
+
+                const module =
+                    button.dataset.auditModule || "ALL";
+
+                state.auditModule = module;
+
+                navigate("audit-log", module);
+
+                try {
+
+                    const auditLogs =
+                        await ControlCenterService.getAuditLogs(
+                            500,
+                            "ALL"
+                        );
+
+                    state.auditLogs = Array.isArray(auditLogs)
+                        ? auditLogs
+                        : [];
+
+                    state.auditModule = "ALL";
+                    state.auditPage = 1;
+                    renderAuditModuleTabs();
+                    renderAuditLogs();
+
+                } catch (error) {
+
+                    console.error(
+                        "Control Center module audit navigation failed:",
+                        error
+                    );
+
+                    showError(error);
+                    renderAuditLogs();
+                }
+
+            });
+
+        });
 
 
     /*
@@ -5941,7 +6537,40 @@ function bind() {
         );
 
 }
+/*
+==========================================================
+HIDE INITIAL CONTROL CENTER INFO
+==========================================================
+*/
 
+function hideInitialControlCenterInfo() {
+
+    const alertElement =
+        document.getElementById(
+            "cc-alert"
+        );
+
+    if (
+        !alertElement
+    ) {
+
+        return;
+
+    }
+
+    /*
+    Sembunyikan hanya tampilan awal.
+    showInfo() tetap bisa menampilkan
+    pesan sukses setelah user melakukan action.
+    */
+
+    alertElement.hidden =
+        true;
+
+    alertElement.style.display =
+        "none";
+
+}
 /*
 ==========================================================
 INITIALIZE CONTROL CENTER
@@ -5957,6 +6586,15 @@ async function initialize() {
     */
 
     bind();
+
+
+    /*
+    ======================================================
+    HIDE INITIAL INFO BANNER
+    ======================================================
+    */
+
+    hideInitialControlCenterInfo();
 
 
     /*
