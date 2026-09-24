@@ -3,7 +3,7 @@
 FINOVA ACCOUNTING SYSTEM
 SERVICE : USER MANAGEMENT
 FILE    : user-management.service.js
-VERSION : 3.0.0 FINAL
+VERSION : 4.0.0 MULTI COMPANY
 ==========================================================
 */
 
@@ -43,6 +43,12 @@ export class UserManagementService {
     /*
     ======================================================
     GET CURRENT PROFILE
+
+    NOTE
+    ----
+    Super Admin intentionally does not need a mst_users
+    tenant profile. Returning null here is valid for a
+    Super Admin and must not be treated as an error by UI.
     ======================================================
     */
 
@@ -61,16 +67,19 @@ export class UserManagementService {
             data,
             error
         } = await supabase
-
             .from(this.TABLE)
-
-            .select("*")
-
+            .select(`
+                user_uid,
+                email,
+                full_name,
+                role,
+                status,
+                company_id
+            `)
             .eq(
                 "user_uid",
                 authUser.id
             )
-
             .maybeSingle();
 
 
@@ -85,32 +94,23 @@ export class UserManagementService {
 
     /*
     ======================================================
-    GET ALL USERS
+    INVOKE ADMIN USER MANAGEMENT EDGE FUNCTION
     ======================================================
     */
 
-    static async getAll() {
+    static async invokeAdmin(
+        body
+    ) {
 
         const {
             data,
             error
         } = await supabase
-
-            .from(this.TABLE)
-
-            .select("*")
-
-            .order(
-                "full_name",
+            .functions
+            .invoke(
+                "admin-user-management",
                 {
-                    ascending: true
-                }
-            )
-
-            .order(
-                "email",
-                {
-                    ascending: true
+                    body
                 }
             );
 
@@ -120,7 +120,44 @@ export class UserManagementService {
         }
 
 
-        return data ?? [];
+        if (!data?.success) {
+            throw new Error(
+                data?.message
+                ||
+                "User Management request failed."
+            );
+        }
+
+
+        return data;
+    }
+
+
+    /*
+    ======================================================
+    GET ALL USERS
+
+    SECURITY
+    --------
+    User list is loaded through the Edge Function so the
+    browser never decides which company can be queried.
+    ======================================================
+    */
+
+    static async getAll() {
+
+        const data =
+            await this.invokeAdmin({
+                action:
+                    "list_users"
+            });
+
+
+        return Array.isArray(
+            data?.users
+        )
+            ? data.users
+            : [];
     }
 
 
@@ -142,56 +179,59 @@ export class UserManagementService {
         }
 
 
-        const allowed = {
-
-            full_name:
-                String(
-                    values?.full_name
-                    ??
-                    ""
-                )
-                    .trim(),
-
-            role:
-                values?.role === "Manager"
-                    ? "Manager"
-                    : "Staff",
-
-            status:
-                Boolean(
-                    values?.status
-                )
-
-        };
-
-
-        const {
-            data,
-            error
-        } = await supabase
-
-            .from(this.TABLE)
-
-            .update(
-                allowed
+        const fullName =
+            String(
+                values?.full_name
+                ??
+                ""
             )
-
-            .eq(
-                "user_uid",
-                userUid
-            )
-
-            .select()
-
-            .single();
+                .trim();
 
 
-        if (error) {
-            throw error;
+        if (!fullName) {
+            throw new Error(
+                "Full Name is required."
+            );
         }
 
 
-        return data;
+        const role =
+            values?.role === "Manager"
+                ? "Manager"
+                : "Staff";
+
+
+        if (
+            typeof values?.status !==
+            "boolean"
+        ) {
+            throw new Error(
+                "User status must be boolean."
+            );
+        }
+
+
+        const data =
+            await this.invokeAdmin({
+
+                action:
+                    "update_profile",
+
+                user_uid:
+                    userUid,
+
+                full_name:
+                    fullName,
+
+                role,
+
+                status:
+                    values.status
+
+            });
+
+
+        return data?.user ?? null;
     }
 
 
@@ -238,10 +278,18 @@ export class UserManagementService {
                 : "Staff";
 
 
-        const status =
-            Boolean(
-                payload?.status
+        if (
+            typeof payload?.status !==
+            "boolean"
+        ) {
+            throw new Error(
+                "User status must be boolean."
             );
+        }
+
+
+        const status =
+            payload.status;
 
 
         /*
@@ -275,61 +323,27 @@ export class UserManagementService {
         }
 
 
-        /*
-        ==================================================
-        CALL EDGE FUNCTION
-        ==================================================
-        */
+        const data =
+            await this.invokeAdmin({
 
-        const {
-            data,
-            error
-        } =
-            await supabase
-                .functions
-                .invoke(
-                    "admin-user-management",
-                    {
-                        body: {
+                action:
+                    "create",
 
-                            action:
-                                "create",
+                full_name:
+                    fullName,
 
-                            full_name:
-                                fullName,
+                email,
 
-                            email,
+                password,
 
-                            password,
+                role,
 
-                            role,
+                status
 
-                            status
-
-                        }
-                    }
-                );
+            });
 
 
-        if (error) {
-            throw error;
-        }
-
-
-        if (
-            !data?.success
-        ) {
-
-            throw new Error(
-                data?.message
-                ||
-                "Failed to create user."
-            );
-
-        }
-
-
-        return data.user;
+        return data?.user ?? null;
     }
 
 
@@ -345,11 +359,9 @@ export class UserManagementService {
     ) {
 
         if (!userUid) {
-
             throw new Error(
                 "User UID is required."
             );
-
         }
 
 
@@ -366,63 +378,23 @@ export class UserManagementService {
             <
             8
         ) {
-
             throw new Error(
                 "New Password must contain at least 8 characters."
             );
-
         }
 
 
-        /*
-        ==================================================
-        CALL EDGE FUNCTION
-        ==================================================
-        */
+        return await this.invokeAdmin({
 
-        const {
-            data,
-            error
-        } =
-            await supabase
-                .functions
-                .invoke(
-                    "admin-user-management",
-                    {
-                        body: {
+            action:
+                "reset_password",
 
-                            action:
-                                "reset_password",
+            user_uid:
+                userUid,
 
-                            user_uid:
-                                userUid,
+            password
 
-                            password
-
-                        }
-                    }
-                );
-
-
-        if (error) {
-            throw error;
-        }
-
-
-        if (
-            !data?.success
-        ) {
-
-            throw new Error(
-                data?.message
-                ||
-                "Failed to reset user password."
-            );
-
-        }
-
-
-        return data;
+        });
     }
 
 
@@ -437,58 +409,21 @@ export class UserManagementService {
     ) {
 
         if (!userUid) {
-
             throw new Error(
                 "User UID is required."
             );
-
         }
 
 
-        /*
-        ==================================================
-        CALL EDGE FUNCTION
-        ==================================================
-        */
+        await this.invokeAdmin({
 
-        const {
-            data,
-            error
-        } =
-            await supabase
-                .functions
-                .invoke(
-                    "admin-user-management",
-                    {
-                        body: {
+            action:
+                "delete",
 
-                            action:
-                                "delete",
+            user_uid:
+                userUid
 
-                            user_uid:
-                                userUid
-
-                        }
-                    }
-                );
-
-
-        if (error) {
-            throw error;
-        }
-
-
-        if (
-            !data?.success
-        ) {
-
-            throw new Error(
-                data?.message
-                ||
-                "Failed to delete user."
-            );
-
-        }
+        });
 
 
         return true;

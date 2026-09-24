@@ -351,60 +351,54 @@ async request => {
 
         /*
         ==================================================
-        SERVER SIDE MANAGER AUTHORIZATION
+        SERVER SIDE USER MANAGEMENT AUTHORIZATION
+        ==================================================
+
+        ACCESS MODEL
+        ------------
+        SUPER ADMIN
+        - Full User Management access.
+        - Uses server-side effective company context.
+
+        TENANT MANAGER
+        - Active Manager profile + ACTIVE Manager membership.
+        - Full User Management access.
+        - May edit own profile and other users.
+
+        TENANT STAFF
+        - Active Staff profile + ACTIVE company membership.
+        - User Management is VIEW ONLY.
+        - Cannot create, edit, reset password, or delete users.
+
+        IMPORTANT
+        ----------
+        Never trust company_id from the browser payload.
+        The effective company is resolved server-side.
         ==================================================
         */
 
         const {
-
-            data:
-                currentProfile,
-
-            error:
-                profileError
-
-        } =
-            await admin
-
-                .from(
-                    "mst_users"
-                )
-
-                .select(
-    `
-        user_uid,
-        email,
-        full_name,
-        role,
-        status,
-        company_id
-    `
-)
-
-                .eq(
-                    "user_uid",
-                    currentUser.id
-                )
-
-                .maybeSingle();
+            data: isSuperAdminData,
+            error: isSuperAdminError
+        } = await authClient.rpc(
+            "is_finova_super_admin"
+        );
 
 
         if (
-            profileError
+            isSuperAdminError
         ) {
 
             console.error(
-                "admin-user-management current profile:",
-                profileError
+                "admin-user-management super admin check:",
+                isSuperAdminError
             );
-
 
             return jsonResponse(
                 {
                     success: false,
-
                     message:
-                        "Failed to validate Manager access."
+                        "Failed to validate FINOVA administrative access."
                 },
                 500
             );
@@ -412,182 +406,360 @@ async request => {
         }
 
 
-        const isManager =
-            String(
-                currentProfile?.role
-                ??
-                ""
-            )
-                .trim()
-                .toLowerCase()
-            ===
-            "manager";
+        const isSuperAdmin =
+            isSuperAdminData === true;
 
 
-        const isActive =
-            currentProfile?.status
-            ===
-            true;
+        /*
+        ==================================================
+        RESOLVE EFFECTIVE COMPANY SERVER-SIDE
+        ==================================================
+        */
+
+        const {
+            data: effectiveCompanyData,
+            error: effectiveCompanyError
+        } = await authClient.rpc(
+            "finova_effective_company_id"
+        );
 
 
         if (
-            !currentProfile
-            ||
-            !isManager
-            ||
-            !isActive
+            effectiveCompanyError
+        ) {
+
+            console.error(
+                "admin-user-management effective company:",
+                effectiveCompanyError
+            );
+
+            return jsonResponse(
+                {
+                    success: false,
+                    message:
+                        "Failed to resolve FINOVA company context."
+                },
+                500
+            );
+
+        }
+
+
+        const effectiveCompanyId =
+            String(
+                effectiveCompanyData
+                ??
+                ""
+            )
+                .trim();
+
+
+        if (
+            !effectiveCompanyId
         ) {
 
             return jsonResponse(
                 {
                     success: false,
-
                     message:
-                        "Only an active Manager can modify User Management."
+                        isSuperAdmin
+                            ? "Select a FINOVA company before using User Management."
+                            : "FINOVA company context was not found."
                 },
                 403
             );
 
         }
+
+
         /*
-==================================================
-CURRENT COMPANY
-==================================================
-*/
+        ==================================================
+        CURRENT USER ACCESS STATE
+        ==================================================
+        */
 
-const currentCompanyId =
-    String(
-        currentProfile.company_id
-        ??
-        ""
-    )
-        .trim();
+        let currentProfile = null;
+        let currentMembership = null;
 
+        let canViewUserManagement =
+            isSuperAdmin;
 
-if (
-    !currentCompanyId
-) {
+        let canManageUserManagement =
+            isSuperAdmin;
 
-    return jsonResponse(
-        {
-            success: false,
-
-            message:
-                "Manager is not assigned to a company."
-        },
-        403
-    );
-
-}
-/*
-==================================================
-VALIDATE CURRENT COMPANY MEMBERSHIP
-==================================================
-*/
-
-const {
-    data:
-        currentMembership,
-
-    error:
-        currentMembershipError
-
-} =
-    await admin
-
-        .from(
-            "finova_company_users"
-        )
-
-        .select(
-            `
-            company_id,
-            user_uid,
-            role,
-            status
-            `
-        )
-
-        .eq(
-            "company_id",
-            currentCompanyId
-        )
-
-        .eq(
-            "user_uid",
-            currentUser.id
-        )
-
-        .maybeSingle();
+        let isManager =
+            isSuperAdmin;
 
 
-if (
-    currentMembershipError
-) {
+        /*
+        ==================================================
+        TENANT USER VALIDATION
+        ==================================================
+        */
 
-    console.error(
-        "admin-user-management current membership:",
-        currentMembershipError
-    );
+        if (
+            !isSuperAdmin
+        ) {
 
+            /*
+            ==================================================
+            GET CURRENT TENANT PROFILE
+            ==================================================
+            */
 
-    return jsonResponse(
-        {
-            success: false,
-
-            message:
-                "Failed to validate company membership."
-        },
-        500
-    );
-
-}
-
-
-const membershipIsManager =
-    String(
-        currentMembership?.role
-        ??
-        ""
-    )
-        .trim()
-        .toUpperCase()
-    ===
-    "MANAGER";
-
-
-const membershipIsActive =
-    String(
-        currentMembership?.status
-        ??
-        ""
-    )
-        .trim()
-        .toUpperCase()
-    ===
-    "ACTIVE";
+            const {
+                data: profile,
+                error: profileError
+            } = await admin
+                .from("mst_users")
+                .select(`
+                    user_uid,
+                    email,
+                    full_name,
+                    role,
+                    status,
+                    company_id
+                `)
+                .eq(
+                    "user_uid",
+                    currentUser.id
+                )
+                .maybeSingle();
 
 
-if (
-    !currentMembership
-    ||
-    !membershipIsManager
-    ||
-    !membershipIsActive
-) {
+            if (
+                profileError
+            ) {
 
-    return jsonResponse(
-        {
-            success: false,
+                console.error(
+                    "admin-user-management current profile:",
+                    profileError
+                );
 
-            message:
-                "Active Manager company membership is required."
-        },
-        403
-    );
+                return jsonResponse(
+                    {
+                        success: false,
+                        message:
+                            "Failed to validate User Management access."
+                    },
+                    500
+                );
 
-}
+            }
 
+
+            currentProfile =
+                profile;
+
+
+            /*
+            ==================================================
+            PROFILE VALIDATION
+            ==================================================
+            */
+
+            const profileRole =
+                String(
+                    currentProfile?.role
+                    ??
+                    ""
+                )
+                    .trim()
+                    .toLowerCase();
+
+            const profileIsActive =
+                currentProfile?.status === true;
+
+            const profileCompanyId =
+                String(
+                    currentProfile?.company_id
+                    ??
+                    ""
+                )
+                    .trim();
+
+
+            if (
+                !currentProfile
+                ||
+                !profileIsActive
+            ) {
+
+                return jsonResponse(
+                    {
+                        success: false,
+                        message:
+                            "Only an active FINOVA user can open User Management."
+                    },
+                    403
+                );
+
+            }
+
+
+            if (
+                profileCompanyId !==
+                effectiveCompanyId
+            ) {
+
+                return jsonResponse(
+                    {
+                        success: false,
+                        message:
+                            "FINOVA company context is invalid."
+                    },
+                    403
+                );
+
+            }
+
+
+            if (
+                profileRole !== "manager"
+                &&
+                profileRole !== "staff"
+            ) {
+
+                return jsonResponse(
+                    {
+                        success: false,
+                        message:
+                            "User role is not permitted to access User Management."
+                    },
+                    403
+                );
+
+            }
+
+
+            /*
+            ==================================================
+            GET CURRENT COMPANY MEMBERSHIP
+            ==================================================
+            */
+
+            const {
+                data: membership,
+                error: membershipError
+            } = await admin
+                .from("finova_company_users")
+                .select(`
+                    company_id,
+                    user_uid,
+                    role,
+                    status
+                `)
+                .eq(
+                    "company_id",
+                    effectiveCompanyId
+                )
+                .eq(
+                    "user_uid",
+                    currentUser.id
+                )
+                .maybeSingle();
+
+
+            if (
+                membershipError
+            ) {
+
+                console.error(
+                    "admin-user-management current membership:",
+                    membershipError
+                );
+
+                return jsonResponse(
+                    {
+                        success: false,
+                        message:
+                            "Failed to validate company membership."
+                    },
+                    500
+                );
+
+            }
+
+
+            currentMembership =
+                membership;
+
+
+            const membershipRole =
+                String(
+                    currentMembership?.role
+                    ??
+                    ""
+                )
+                    .trim()
+                    .toUpperCase();
+
+            const membershipIsActive =
+                String(
+                    currentMembership?.status
+                    ??
+                    ""
+                )
+                    .trim()
+                    .toUpperCase()
+                ===
+                "ACTIVE";
+
+
+            const membershipRoleAllowed =
+                membershipRole === "MANAGER"
+                ||
+                membershipRole === "STAFF";
+
+
+            if (
+                !currentMembership
+                ||
+                !membershipIsActive
+                ||
+                !membershipRoleAllowed
+            ) {
+
+                return jsonResponse(
+                    {
+                        success: false,
+                        message:
+                            "An active company membership is required to open User Management."
+                    },
+                    403
+                );
+
+            }
+
+
+            /*
+            ==================================================
+            FINAL TENANT ACCESS
+            ==================================================
+            */
+
+            canViewUserManagement =
+                true;
+
+            isManager =
+                profileRole === "manager"
+                &&
+                membershipRole === "MANAGER";
+
+            canManageUserManagement =
+                isManager;
+
+        }
+
+
+        /*
+        ==================================================
+        CURRENT COMPANY
+        ==================================================
+        */
+
+        const currentCompanyId =
+            effectiveCompanyId;
 
         /*
         ==================================================
@@ -642,6 +814,100 @@ if (
 
         /*
         ==================================================
+        STAFF ACCESS
+        ==================================================
+        Staff may open User Management and view users,
+        but all mutation actions require Manager access.
+        ==================================================
+        */
+
+        if (
+            action !== "list_users"
+            &&
+            !canManageUserManagement
+        ) {
+
+            return jsonResponse(
+                {
+                    success: false,
+                    message:
+                        "Staff has view-only access to User Management."
+                },
+                403
+            );
+
+        }
+
+
+        /*
+        ==================================================
+        LIST USERS
+        ==================================================
+        */
+
+        if (
+            action === "list_users"
+        ) {
+
+            const {
+                data: users,
+                error: usersError
+            } = await admin
+                .from("mst_users")
+                .select(`
+                    user_uid,
+                    email,
+                    full_name,
+                    role,
+                    status,
+                    company_id
+                `)
+                .eq(
+                    "company_id",
+                    currentCompanyId
+                )
+                .order(
+                    "full_name",
+                    { ascending: true }
+                )
+                .order(
+                    "email",
+                    { ascending: true }
+                );
+
+
+            if (
+                usersError
+            ) {
+
+                console.error(
+                    "admin-user-management list users:",
+                    usersError
+                );
+
+                return jsonResponse(
+                    {
+                        success: false,
+                        message:
+                            "Failed to load User Management."
+                    },
+                    500
+                );
+
+            }
+
+
+            return jsonResponse(
+                {
+                    success: true,
+                    users: users ?? []
+                }
+            );
+
+        }
+
+        /*
+        ==================================================
         CREATE USER
         ==================================================
         */
@@ -690,10 +956,29 @@ if (
                 );
 
 
-            const status =
-                Boolean(
-                    payload?.status
+            const statusValue =
+                payload?.status;
+
+
+            if (
+                typeof statusValue !==
+                "boolean"
+            ) {
+
+                return jsonResponse(
+                    {
+                        success: false,
+                        message:
+                            "User status must be boolean."
+                    },
+                    400
                 );
+
+            }
+
+
+            const status =
+                statusValue;
 
 
             /*
@@ -1042,7 +1327,7 @@ const {
 
         }
 
-        /*
+/*
 ==========================================================
 UPDATE USER PROFILE
 ==========================================================
@@ -1060,8 +1345,7 @@ if (
 
     const userUid =
         String(
-            payload?.user_uid
-            ??
+            payload?.user_uid ??
             ""
         )
             .trim();
@@ -1069,8 +1353,7 @@ if (
 
     const fullName =
         String(
-            payload?.full_name
-            ??
+            payload?.full_name ??
             ""
         )
             .trim();
@@ -1082,10 +1365,8 @@ if (
         );
 
 
-    const status =
-        Boolean(
-            payload?.status
-        );
+    const statusValue =
+        payload?.status;
 
 
     /*
@@ -1128,6 +1409,37 @@ if (
     }
 
 
+    if (
+        typeof statusValue !==
+        "boolean"
+    ) {
+
+        return jsonResponse(
+            {
+                success: false,
+
+                message:
+                    "User status must be boolean."
+            },
+            400
+        );
+
+    }
+
+
+    const status =
+        statusValue;
+
+
+    /*
+    ======================================================
+    SELF UPDATE
+    ======================================================
+
+    Manager is allowed to edit their own profile.
+    ======================================================
+    */
+
     /*
     ======================================================
     GET TARGET PROFILE
@@ -1162,6 +1474,11 @@ if (
             .eq(
                 "user_uid",
                 userUid
+            )
+
+            .eq(
+                "company_id",
+                currentCompanyId
             )
 
             .maybeSingle();
@@ -1199,42 +1516,9 @@ if (
                 success: false,
 
                 message:
-                    "FINOVA user profile was not found."
+                    "FINOVA user profile was not found in your company."
             },
             404
-        );
-
-    }
-
-
-    /*
-    ======================================================
-    TENANT VALIDATION
-    ======================================================
-    */
-
-    const updateTargetCompanyId =
-        String(
-            updateTargetProfile.company_id
-            ??
-            ""
-        )
-            .trim();
-
-
-    if (
-        updateTargetCompanyId !==
-        currentCompanyId
-    ) {
-
-        return jsonResponse(
-            {
-                success: false,
-
-                message:
-                    "You cannot update a user from another company."
-            },
-            403
         );
 
     }
@@ -1282,7 +1566,6 @@ if (
             )
 
             .select()
-
             .single();
 
 
@@ -1356,81 +1639,81 @@ if (
 
 
     if (
-    membershipUpdateError
-) {
-
-    console.error(
-        "admin-user-management update membership:",
         membershipUpdateError
-    );
-
-
-    /*
-    ======================================================
-    ROLLBACK MST_USERS
-    ======================================================
-    */
-
-    const {
-        error:
-            profileRollbackError
-
-    } =
-        await admin
-
-            .from(
-                "mst_users"
-            )
-
-            .update(
-                {
-                    full_name:
-                        updateTargetProfile.full_name,
-
-                    role:
-                        updateTargetProfile.role,
-
-                    status:
-                        updateTargetProfile.status
-                }
-            )
-
-            .eq(
-                "user_uid",
-                userUid
-            )
-
-            .eq(
-                "company_id",
-                currentCompanyId
-            );
-
-
-    if (
-        profileRollbackError
     ) {
 
         console.error(
-            "admin-user-management update profile rollback:",
+            "admin-user-management update membership:",
+            membershipUpdateError
+        );
+
+
+        /*
+        ==================================================
+        ROLLBACK MST_USERS
+        ==================================================
+        */
+
+        const {
+            error:
+                profileRollbackError
+
+        } =
+            await admin
+
+                .from(
+                    "mst_users"
+                )
+
+                .update(
+                    {
+                        full_name:
+                            updateTargetProfile.full_name,
+
+                        role:
+                            updateTargetProfile.role,
+
+                        status:
+                            updateTargetProfile.status
+                    }
+                )
+
+                .eq(
+                    "user_uid",
+                    userUid
+                )
+
+                .eq(
+                    "company_id",
+                    currentCompanyId
+                );
+
+
+        if (
             profileRollbackError
+        ) {
+
+            console.error(
+                "admin-user-management profile rollback:",
+                profileRollbackError
+            );
+
+        }
+
+
+        return jsonResponse(
+            {
+                success: false,
+
+                message:
+                    membershipUpdateError.message
+                    ||
+                    "Failed to update company membership."
+            },
+            500
         );
 
     }
-
-
-    return jsonResponse(
-        {
-            success: false,
-
-            message:
-                membershipUpdateError.message
-                ||
-                "Failed to update company membership."
-        },
-        500
-    );
-
-}
 
 
     /*
@@ -1564,6 +1847,10 @@ if (
                     .eq(
                         "user_uid",
                         userUid
+                    )
+                    .eq(
+                        "company_id",
+                        currentCompanyId
                     )
 
                     .maybeSingle();
@@ -1833,6 +2120,10 @@ if (
                         "user_uid",
                         userUid
                     )
+                    .eq(
+                        "company_id",
+                        currentCompanyId
+                    )
 
                     .maybeSingle();
 
@@ -2049,6 +2340,10 @@ if (
                         .eq(
                             "user_uid",
                             userUid
+                        )
+                        .eq(
+                            "company_id",
+                            currentCompanyId
                         );
 
 
@@ -2294,7 +2589,7 @@ return jsonResponse(
                     false,
 
                 message:
-                    "Unsupported User Management action."
+                    `Unsupported User Management action: ${action || "(empty)"}.`
 
             },
             400

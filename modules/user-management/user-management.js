@@ -2306,13 +2306,7 @@ applyAccessUI() {
     }
 
 
-    /*
-==========================================================
-CREATE ACTION BUTTONS
-==========================================================
-*/
-
-createActionButtons(
+   createActionButtons(
     user
 ) {
 
@@ -2344,7 +2338,9 @@ createActionButtons(
                 <button
                     type="button"
                     class="
-                        btn-action
+                        btn
+                        btn-outline-secondary
+                        btn-sm
                         user-action-btn
                         user-action-view
                     "
@@ -2368,6 +2364,12 @@ createActionButtons(
     }
 
 
+    /*
+    ======================================================
+    CURRENT AUTH USER
+    ======================================================
+    */
+
     const isCurrentUser =
         user.user_uid
         ===
@@ -2377,7 +2379,7 @@ createActionButtons(
 
     /*
     ======================================================
-    MANAGER
+    MANAGER ACTIONS
     ======================================================
     */
 
@@ -2394,7 +2396,9 @@ createActionButtons(
             <button
                 type="button"
                 class="
-                    btn-action
+                    btn
+                    btn-outline-secondary
+                    btn-sm
                     user-action-btn
                     user-action-view
                 "
@@ -2417,7 +2421,9 @@ createActionButtons(
             <button
                 type="button"
                 class="
-                    btn-action
+                    btn
+                    btn-outline-primary
+                    btn-sm
                     user-action-btn
                     user-action-edit
                 "
@@ -2440,7 +2446,9 @@ createActionButtons(
             <button
                 type="button"
                 class="
-                    btn-action
+                    btn
+                    btn-outline-warning
+                    btn-sm
                     user-action-btn
                     user-action-reset
                 "
@@ -2463,7 +2471,9 @@ createActionButtons(
             <button
                 type="button"
                 class="
-                    btn-action
+                    btn
+                    btn-outline-danger
+                    btn-sm
                     user-action-btn
                     user-action-delete
                 "
@@ -2936,62 +2946,132 @@ createActionButtons(
     ==========================================================
     */
 
-    openEditUser(
-        user
+   openEditUser(
+    user
+) {
+
+    /*
+    ======================================================
+    MANAGER ACCESS
+    ======================================================
+    */
+
+    if (
+        !this.ensureManager()
     ) {
 
-        this.currentMode =
-            "edit";
+        return;
+
+    }
 
 
-        this.fillForm(
-            user
+    /*
+    ======================================================
+    VALID TARGET
+    ======================================================
+    */
+
+    if (
+        !user?.user_uid
+    ) {
+
+        this.showError(
+            "User UID was not found."
+        );
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    EDIT MODE
+    ======================================================
+    */
+
+    this.currentMode =
+        "edit";
+
+
+    this.fillForm(
+        user
+    );
+
+
+    this.modalTitle.textContent =
+        "Edit User";
+
+
+    /*
+    ======================================================
+    PASSWORD NOT USED IN EDIT
+    ======================================================
+    */
+
+    this.passwordColumn
+        ?.classList
+        .add(
+            "d-none"
         );
 
 
-        this.modalTitle.textContent =
-            "Edit User";
-
-
-        this.passwordColumn
-            ?.classList
-            .add(
-                "d-none"
-            );
-
-
-        this.inputPassword
-            ?.removeAttribute(
-                "required"
-            );
-
-
-        this.setFormReadOnly(
-            false
+    this.inputPassword
+        ?.removeAttribute(
+            "required"
         );
 
 
-        /*
-        ======================================================
-        EMAIL BELONGS TO SUPABASE AUTH
-        ======================================================
-        */
+    /*
+    ======================================================
+    ENABLE EDITABLE FIELDS
+    ======================================================
+    */
+
+    this.setFormReadOnly(
+        false
+    );
+
+
+    /*
+    ======================================================
+    EMAIL BELONGS TO SUPABASE AUTH
+    ======================================================
+    */
+
+    if (
+        this.inputEmail
+    ) {
 
         this.inputEmail.disabled =
             true;
 
-
-        this.btnSave
-            ?.classList
-            .remove(
-                "d-none"
-            );
-
-
-        this.userModal
-            ?.show();
-
     }
+
+
+    /*
+    ======================================================
+    SHOW SAVE
+    ======================================================
+    */
+
+    this.btnSave
+        ?.classList
+        .remove(
+            "d-none"
+        );
+
+
+    /*
+    ======================================================
+    SHOW MODAL
+    ======================================================
+    */
+
+    this.userModal
+        ?.show();
+
+}
 
 
     /*
@@ -3936,119 +4016,131 @@ createActionButtons(
     */
 
     openResetPasswordModal(
-        user
+    user
+) {
+
+    /*
+    ======================================================
+    MANAGER ACCESS
+    ======================================================
+    */
+
+    if (
+        !this.ensureManager()
     ) {
 
-        if (
-            !this.ensureManager()
-        ) {
-
-            return;
-
-        }
-
-
-        if (
-            !user?.user_uid
-        ) {
-
-            this.showError(
-                "User UID was not found."
-            );
-
-            return;
-
-        }
-
-
-        /*
-        ======================================================
-        STORE TARGET USER
-        ======================================================
-        */
-
-        this.pendingResetPasswordUserUid =
-            user.user_uid;
-
-
-        /*
-        ======================================================
-        RESET INPUTS
-        ======================================================
-        */
-
-        this.clearResetPasswordForm(
-            false
-        );
-
-
-        /*
-        ======================================================
-        USER INFORMATION
-        ======================================================
-        */
-
-        if (
-            this.resetPasswordUserName
-        ) {
-
-            this.resetPasswordUserName
-                .textContent =
-                    user.full_name
-                    ||
-                    "-";
-
-        }
-
-
-        if (
-            this.resetPasswordUserEmail
-        ) {
-
-            this.resetPasswordUserEmail
-                .textContent =
-                    user.email
-                    ||
-                    "-";
-
-        }
-
-
-        /*
-        ======================================================
-        SHOW
-        ======================================================
-        */
-
-        this.resetPasswordModal
-            ?.show();
-
-
-        /*
-        ======================================================
-        FOCUS
-        ======================================================
-        */
-
-        this.resetPasswordModalElement
-            ?.addEventListener(
-
-                "shown.bs.modal",
-
-                () => {
-
-                    this.resetPasswordInput
-                        ?.focus();
-
-                },
-
-                {
-                    once: true
-                }
-
-            );
+        return;
 
     }
+
+
+    /*
+    ======================================================
+    VALID TARGET
+    ======================================================
+    */
+
+    if (
+        !user?.user_uid
+    ) {
+
+        this.showError(
+            "User UID was not found."
+        );
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    STORE TARGET USER
+    ======================================================
+    */
+
+    this.pendingResetPasswordUserUid =
+        user.user_uid;
+
+
+    /*
+    ======================================================
+    RESET INPUTS
+    ======================================================
+    */
+
+    this.clearResetPasswordForm(
+        false
+    );
+
+
+    /*
+    ======================================================
+    USER INFORMATION
+    ======================================================
+    */
+
+    if (
+        this.resetPasswordUserName
+    ) {
+
+        this.resetPasswordUserName
+            .textContent =
+                user.full_name
+                ||
+                "-";
+
+    }
+
+
+    if (
+        this.resetPasswordUserEmail
+    ) {
+
+        this.resetPasswordUserEmail
+            .textContent =
+                user.email
+                ||
+                "-";
+
+    }
+
+
+    /*
+    ======================================================
+    SHOW MODAL
+    ======================================================
+    */
+
+    this.resetPasswordModal
+        ?.show();
+
+
+    /*
+    ======================================================
+    FOCUS PASSWORD
+    ======================================================
+    */
+
+    this.resetPasswordModalElement
+        ?.addEventListener(
+
+            "shown.bs.modal",
+
+            () => {
+
+                this.resetPasswordInput
+                    ?.focus();
+
+            },
+
+            {
+                once: true
+            }
+
+        );
+
+}
 
 
     /*
@@ -4325,9 +4417,7 @@ createActionButtons(
             return;
 
         }
-
-
-        try {
+                try {
 
             const password =
                 String(
