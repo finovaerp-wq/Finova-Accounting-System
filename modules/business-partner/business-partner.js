@@ -1657,7 +1657,7 @@ preview() {
                         */
 
                         const status =
-                            item?.status
+                            item?.is_active
                                 ? "Active"
                                 : "Inactive";
 
@@ -3182,7 +3182,7 @@ exportExcel() {
 
             "Tax Number": item.tax_number ?? "",
 
-            "Status": item.status ? "Active" : "Inactive"
+            "Status": item.is_active ? "Active" : "Inactive"
             
 
         }));
@@ -3734,151 +3734,187 @@ hideLoading() {
 }
 /*
 ==========================================================
+WHATSAPP NUMBER
+==========================================================
+*/
+
+getWhatsAppNumber(phone) {
+
+    if (!phone) {
+        return "";
+    }
+
+    let number = String(phone)
+        .trim()
+        .replace(/\D/g, "");
+
+    if (!number) {
+        return "";
+    }
+
+    if (number.startsWith("62")) {
+        return number;
+    }
+
+    if (number.startsWith("0")) {
+        return "62" + number.substring(1);
+    }
+
+    if (number.startsWith("8")) {
+        return "62" + number;
+    }
+
+    return number;
+
+}
+
+/*
+==========================================================
 RENDER ROW
 ==========================================================
 */
 
 renderRow(item, index) {
 
+    const phone =
+        String(item.phone || "").trim();
+
+    const whatsappNumber =
+        this.getWhatsAppNumber(phone);
+
+    const type =
+        String(item.bp_type || "")
+            .trim()
+            .toUpperCase();
+
     return `
 
         <tr>
 
-           <td class="finova-table-index">
-    ${index + 1}
-</td>
+            <td class="finova-table-index">
+                ${index + 1}
+            </td>
 
-<td class="finova-table-code">
-    ${item.bp_code}
-</td>
+            <td class="finova-table-code">
+                ${item.bp_code || "-"}
+            </td>
 
-<td
-    class="finova-table-name bp-name-link"
-    data-id="${item.id}"
->
-    ${item.bp_name}
-</td>
+            <td
+                class="finova-table-name bp-name-link"
+                data-id="${item.id}"
+            >
+                ${item.bp_name || "-"}
+            </td>
 
-<td class="finova-table-type">
-    ${item.bp_type}
-</td>
+            <td class="finova-table-type">
+                ${type || "-"}
+            </td>
 
-<td class="finova-table-phone">
-    ${item.phone || "-"}
-</td>
+            <td class="finova-table-phone">
+                ${
+                    whatsappNumber
+                        ? `
+                            <a
+                                href="https://wa.me/${whatsappNumber}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="bp-whatsapp-link"
+                                title="Chat WhatsApp"
+                            >
+                                <i class="fa-brands fa-whatsapp"></i>
+                                ${phone}
+                            </a>
+                          `
+                        : "-"
+                }
+            </td>
 
             <td class="finova-table-email">
+                ${
+                    item.email
+                        ? `
+                            <a
+                                href="mailto:${item.email}"
+                                class="bp-email-link"
+                            >
+                                ${item.email}
+                            </a>
+                          `
+                        : "-"
+                }
+            </td>
 
-    ${
-        item.email
-            ? `
-                <a
-                    href="mailto:${item.email}"
-                    class="bp-email-link">
-                    ${item.email}
-                </a>
-              `
-            : "-"
-    }
+            <td class="finova-table-tax">
+                ${item.tax_number || "-"}
+            </td>
 
-</td>
+            <td class="finova-table-status">
+                ${
+                    item.is_active
+                        ? `
+                            <span class="bp-status-badge bp-status-active">
+                                <i class="fa-solid fa-circle-check"></i>
+                                Active
+                            </span>
+                          `
+                        : `
+                            <span class="bp-status-badge bp-status-inactive">
+                                <i class="fa-solid fa-circle-xmark"></i>
+                                Inactive
+                            </span>
+                          `
+                }
+            </td>
 
-<td class="finova-table-tax">
+            <td class="finova-table-action">
+                <div class="bp-action-group">
 
-    ${item.tax_number || "-"}
-
-</td>
-
-<td class="finova-table-status">
-
-    ${
-        item.status
-            ? `
-                <span class="bp-status-badge bp-status-active">
-
-                    <i class="fa-solid fa-circle-check"></i>
-
-                    Active
-
-                </span>
-              `
-            : `
-                <span class="bp-status-badge bp-status-inactive">
-
-                    <i class="fa-solid fa-circle-xmark"></i>
-
-                    Inactive
-
-                </span>
-              `
-    }
-
-</td>
-
-
-<td class="finova-table-action">
-
-    <div class="bp-action-group">
-
-        <!-- EDIT -->
-
-        <button
-            type="button"
-            class="btn-action bp-action-btn btn-action-edit"
-            data-id="${item.id}"
-            title="Edit">
-
-            <i class="fa-solid fa-pen"></i>
-
-        </button>
-
-
-        <!-- ACTIVE / INACTIVE -->
-
-        ${
-            item.status
-                ? `
                     <button
                         type="button"
-                        class="btn-action bp-action-btn bp-action-inactive"
+                        class="btn-action bp-action-btn btn-action-edit"
                         data-id="${item.id}"
-                        data-action="inactive"
-                        title="Set Inactive">
-
-                        <i class="fa-solid fa-ban"></i>
-
+                        title="Edit"
+                    >
+                        <i class="fa-solid fa-pen"></i>
                     </button>
-                  `
-                : `
+
+                    ${
+                        item.is_active
+                            ? `
+                                <button
+                                    type="button"
+                                    class="btn-action bp-action-btn bp-action-inactive"
+                                    data-id="${item.id}"
+                                    data-action="inactive"
+                                    title="Set Inactive"
+                                >
+                                    <i class="fa-solid fa-ban"></i>
+                                </button>
+                              `
+                            : `
+                                <button
+                                    type="button"
+                                    class="btn-action bp-action-btn bp-action-active"
+                                    data-id="${item.id}"
+                                    data-action="active"
+                                    title="Set Active"
+                                >
+                                    <i class="fa-solid fa-check"></i>
+                                </button>
+                              `
+                    }
+
                     <button
                         type="button"
-                        class="btn-action bp-action-btn bp-action-active"
+                        class="btn-action bp-action-btn btn-action-delete"
                         data-id="${item.id}"
-                        data-action="active"
-                        title="Set Active">
-
-                        <i class="fa-solid fa-check"></i>
-
+                        title="Delete"
+                    >
+                        <i class="fa-solid fa-trash"></i>
                     </button>
-                  `
-        }
 
-
-        <!-- DELETE -->
-
-        <button
-            type="button"
-            class="btn-action bp-action-btn btn-action-delete"
-            data-id="${item.id}"
-            title="Delete">
-
-            <i class="fa-solid fa-trash"></i>
-
-        </button>
-
-    </div>
-
-</td>
+                </div>
+            </td>
 
         </tr>
 
@@ -3973,7 +4009,7 @@ openAddModal() {
     item.tax_number ?? "";
 
         this.bpStatus.value =
-    item.status ? "true" : "false";
+    item.is_active ? "true" : "false";
 
         /*
         ==========================================
@@ -4125,7 +4161,7 @@ async refresh() {
             this.bpTaxNumber.value
                 .trim(),
 
-        status:
+        is_active:
             this.bpStatus.value === "true"
 
     };
@@ -4739,7 +4775,7 @@ async changeStatus(
 
         if (
             Boolean(
-                businessPartner.status
+                businessPartner.is_active
             )
             ===
             Boolean(
@@ -4761,7 +4797,7 @@ async changeStatus(
             id,
 
             {
-                status:
+                is_active:
                     Boolean(
                         newStatus
                     )

@@ -48,37 +48,38 @@ async getAccountingPeriod(accountingDate) {
     }
 
 
-    const {
+    // Schema FINOVA yang digunakan saat ini menyimpan periode sebagai
+    // period_year, period_month, dan period_code; bukan period/month/year
+    // atau start_date/end_date.
+    const dateText = String(accountingDate).slice(0, 10);
+    const year = Number(dateText.slice(0, 4));
+    const month = Number(dateText.slice(5, 7));
 
+    if (
+        !/^\d{4}-\d{2}-\d{2}$/.test(dateText) ||
+        !Number.isInteger(year) ||
+        !Number.isInteger(month) ||
+        month < 1 ||
+        month > 12
+    ) {
+        throw new Error(`Invalid Accounting Date: ${accountingDate}`);
+    }
+
+    const {
         data,
         error
-
     } = await supabase
-
-        .from(
-            "mst_accounting_period"
-        )
-
+        .from("mst_accounting_period")
         .select(`
             id,
-            period,
-            month,
-            year,
-            start_date,
-            end_date,
+            company_id,
+            period_year,
+            period_month,
+            period_code,
             status
         `)
-
-        .lte(
-            "start_date",
-            accountingDate
-        )
-
-        .gte(
-            "end_date",
-            accountingDate
-        )
-
+        .eq("period_year", year)
+        .eq("period_month", month)
         .maybeSingle();
 
 
@@ -109,7 +110,15 @@ async getAccountingPeriod(accountingDate) {
     }
 
 
-    return data;
+    const periodLabel =
+        data.period_code ||
+        `${data.period_year}-${String(data.period_month).padStart(2, "0")}`;
+
+    // Keep period property for existing UI/error-message compatibility.
+    return {
+        ...data,
+        period: periodLabel
+    };
 
 }
 

@@ -46,9 +46,9 @@ export class UserManagementService {
 
     NOTE
     ----
-    Super Admin intentionally does not need a mst_users
-    tenant profile. Returning null here is valid for a
-    Super Admin and must not be treated as an error by UI.
+    Every FINOVA user is a tenant user and has a company
+    profile. The active profile is the source of role/company
+    information for the UI.
     ======================================================
     */
 
@@ -195,10 +195,21 @@ export class UserManagementService {
         }
 
 
+        const allowedRoles = [
+            "Admin",
+            "Manager",
+            "Staff"
+        ];
+
+        if (!allowedRoles.includes(values?.role)) {
+            throw new Error(
+                "Role must be Admin, Manager, or Staff."
+            );
+        }
+
+
         const role =
-            values?.role === "Manager"
-                ? "Manager"
-                : "Staff";
+            values.role;
 
 
         if (
@@ -272,10 +283,21 @@ export class UserManagementService {
             );
 
 
+        const allowedRoles = [
+            "Admin",
+            "Manager",
+            "Staff"
+        ];
+
+        if (!allowedRoles.includes(payload?.role)) {
+            throw new Error(
+                "Role must be Admin, Manager, or Staff."
+            );
+        }
+
+
         const role =
-            payload?.role === "Manager"
-                ? "Manager"
-                : "Staff";
+            payload.role;
 
 
         if (

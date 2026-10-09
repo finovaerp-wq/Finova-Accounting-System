@@ -93,9 +93,9 @@ Version : 4.0.0
                                 id="bp-type-form"
                                 class="form-select">
 
-                                <option value="Customer">Customer</option>
-                                <option value="Vendor">Vendor</option>
-                                <option value="Employee">Employee</option>
+                                <option value="Customer">CUSTOMER</option>
+                                <option value="Vendor">VENDOR</option>
+                                <option value="Employee">EMPLOYEE</option>
 
                             </select>
 
@@ -208,8 +208,10 @@ Version : 4.0.0
                                 type="text"
                                 id="bp-tax-number"
                                 class="form-control"
-                                maxlength="30"
-                                placeholder="Exp: XXXX XXXX XXXX XXXX">
+                                maxlength="16"
+                                inputmode="numeric"
+                                autocomplete="off"
+                                placeholder="16 digit NPWP / NIK (angka saja)">
 
                         </div>
 

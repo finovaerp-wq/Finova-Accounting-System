@@ -8,9 +8,7 @@ VERSION  : 4.0.0 MULTI COMPANY
 ==========================================================
 */
 
-import {
-    createClient
-} from "npm:@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 
 /*
@@ -72,15 +70,76 @@ function normalizeRole(
     value: unknown
 ) {
 
-    return String(
+    const role = String(
         value ?? ""
     )
         .trim()
-        .toLowerCase()
-        === "manager"
+        .toLowerCase();
 
-        ? "Manager"
-        : "Staff";
+    if (role === "admin") {
+        return "Admin";
+    }
+
+    if (role === "manager") {
+        return "Manager";
+    }
+
+    if (role === "staff") {
+        return "Staff";
+    }
+
+    return "";
+
+}
+
+function canAssignRole(
+    actorRole: string,
+    targetRole: string
+) {
+
+    const actor = String(actorRole ?? "")
+        .trim()
+        .toLowerCase();
+
+    const target = String(targetRole ?? "")
+        .trim()
+        .toLowerCase();
+
+    if (actor === "admin") {
+        return ["admin", "manager", "staff"].includes(target);
+    }
+
+    if (actor === "manager") {
+        return ["manager", "staff"].includes(target);
+    }
+
+    return false;
+
+}
+
+
+function canManageTargetRole(
+    actorRole: string,
+    targetRole: string
+) {
+
+    const actor = String(actorRole ?? "")
+        .trim()
+        .toLowerCase();
+
+    const target = String(targetRole ?? "")
+        .trim()
+        .toLowerCase();
+
+    if (actor === "admin") {
+        return ["admin", "manager", "staff"].includes(target);
+    }
+
+    if (actor === "manager") {
+        return ["manager", "staff"].includes(target);
+    }
+
+    return false;
 
 }
 
@@ -356,63 +415,25 @@ async request => {
 
         ACCESS MODEL
         ------------
-        SUPER ADMIN
-        - Full User Management access.
-        - Uses server-side effective company context.
+        ADMIN
+        - Full User Management access in own company.
+        - May create/update/reset/delete users in own company.
+        - May manage Admin, Manager and Staff.
+        - May assign Admin, Manager and Staff.
 
-        TENANT MANAGER
-        - Active Manager profile + ACTIVE Manager membership.
-        - Full User Management access.
-        - May edit own profile and other users.
+        MANAGER
+        - Full User Management access in own company.
+        - May create/update/reset/delete Manager and Staff users.
+        - Cannot manage Admin users.
 
-        TENANT STAFF
-        - Active Staff profile + ACTIVE company membership.
+        STAFF
         - User Management is VIEW ONLY.
-        - Cannot create, edit, reset password, or delete users.
 
         IMPORTANT
         ----------
-        Never trust company_id from the browser payload.
-        The effective company is resolved server-side.
-        ==================================================
-        */
-
-        const {
-            data: isSuperAdminData,
-            error: isSuperAdminError
-        } = await authClient.rpc(
-            "is_finova_super_admin"
-        );
-
-
-        if (
-            isSuperAdminError
-        ) {
-
-            console.error(
-                "admin-user-management super admin check:",
-                isSuperAdminError
-            );
-
-            return jsonResponse(
-                {
-                    success: false,
-                    message:
-                        "Failed to validate FINOVA administrative access."
-                },
-                500
-            );
-
-        }
-
-
-        const isSuperAdmin =
-            isSuperAdminData === true;
-
-
-        /*
-        ==================================================
-        RESOLVE EFFECTIVE COMPANY SERVER-SIDE
+        Company is always resolved server-side from the
+        authenticated user's active company membership.
+        Never trust company_id from browser payloads.
         ==================================================
         */
 
@@ -423,11 +444,7 @@ async request => {
             "finova_effective_company_id"
         );
 
-
-        if (
-            effectiveCompanyError
-        ) {
-
+        if (effectiveCompanyError) {
             console.error(
                 "admin-user-management effective company:",
                 effectiveCompanyError
@@ -441,325 +458,141 @@ async request => {
                 },
                 500
             );
-
         }
 
-
         const effectiveCompanyId =
-            String(
-                effectiveCompanyData
-                ??
-                ""
-            )
-                .trim();
+            String(effectiveCompanyData ?? "").trim();
 
+        if (!effectiveCompanyId) {
+            return jsonResponse(
+                {
+                    success: false,
+                    message:
+                        "FINOVA company context was not found. Create or join a company first."
+                },
+                403
+            );
+        }
 
-        if (
-            !effectiveCompanyId
-        ) {
+        const {
+            data: currentProfile,
+            error: profileError
+        } = await admin
+            .from("mst_users")
+            .select(`
+                user_uid,
+                email,
+                full_name,
+                role,
+                status,
+                company_id
+            `)
+            .eq("user_uid", currentUser.id)
+            .eq("company_id", effectiveCompanyId)
+            .maybeSingle();
+
+        if (profileError) {
+            console.error(
+                "admin-user-management current profile:",
+                profileError
+            );
 
             return jsonResponse(
                 {
                     success: false,
                     message:
-                        isSuperAdmin
-                            ? "Select a FINOVA company before using User Management."
-                            : "FINOVA company context was not found."
+                        "Failed to validate User Management access."
+                },
+                500
+            );
+        }
+
+        if (!currentProfile || currentProfile.status !== true) {
+            return jsonResponse(
+                {
+                    success: false,
+                    message:
+                        "Only an active FINOVA user can open User Management."
                 },
                 403
             );
-
         }
 
+        const profileRole = String(
+            currentProfile.role ?? ""
+        ).trim().toLowerCase();
 
-        /*
-        ==================================================
-        CURRENT USER ACCESS STATE
-        ==================================================
-        */
+        if (!["admin", "manager", "staff"].includes(profileRole)) {
+            return jsonResponse(
+                {
+                    success: false,
+                    message:
+                        "User role is not permitted to access User Management."
+                },
+                403
+            );
+        }
 
-        let currentProfile = null;
-        let currentMembership = null;
+        const {
+            data: currentMembership,
+            error: membershipError
+        } = await admin
+            .from("finova_company_users")
+            .select(`
+                company_id,
+                user_uid,
+                role,
+                status
+            `)
+            .eq("company_id", effectiveCompanyId)
+            .eq("user_uid", currentUser.id)
+            .maybeSingle();
 
-        let canViewUserManagement =
-            isSuperAdmin;
+        if (membershipError) {
+            console.error(
+                "admin-user-management current membership:",
+                membershipError
+            );
 
-        let canManageUserManagement =
-            isSuperAdmin;
+            return jsonResponse(
+                {
+                    success: false,
+                    message:
+                        "Failed to validate company membership."
+                },
+                500
+            );
+        }
 
-        let isManager =
-            isSuperAdmin;
+        const membershipRole = String(
+            currentMembership?.role ?? ""
+        ).trim().toLowerCase();
 
-
-        /*
-        ==================================================
-        TENANT USER VALIDATION
-        ==================================================
-        */
+        const membershipIsActive =
+            String(currentMembership?.status ?? "")
+                .trim()
+                .toUpperCase() === "ACTIVE";
 
         if (
-            !isSuperAdmin
+            !currentMembership
+            || !membershipIsActive
+            || !["admin", "manager", "staff"].includes(membershipRole)
+            || membershipRole !== profileRole
         ) {
-
-            /*
-            ==================================================
-            GET CURRENT TENANT PROFILE
-            ==================================================
-            */
-
-            const {
-                data: profile,
-                error: profileError
-            } = await admin
-                .from("mst_users")
-                .select(`
-                    user_uid,
-                    email,
-                    full_name,
-                    role,
-                    status,
-                    company_id
-                `)
-                .eq(
-                    "user_uid",
-                    currentUser.id
-                )
-                .maybeSingle();
-
-
-            if (
-                profileError
-            ) {
-
-                console.error(
-                    "admin-user-management current profile:",
-                    profileError
-                );
-
-                return jsonResponse(
-                    {
-                        success: false,
-                        message:
-                            "Failed to validate User Management access."
-                    },
-                    500
-                );
-
-            }
-
-
-            currentProfile =
-                profile;
-
-
-            /*
-            ==================================================
-            PROFILE VALIDATION
-            ==================================================
-            */
-
-            const profileRole =
-                String(
-                    currentProfile?.role
-                    ??
-                    ""
-                )
-                    .trim()
-                    .toLowerCase();
-
-            const profileIsActive =
-                currentProfile?.status === true;
-
-            const profileCompanyId =
-                String(
-                    currentProfile?.company_id
-                    ??
-                    ""
-                )
-                    .trim();
-
-
-            if (
-                !currentProfile
-                ||
-                !profileIsActive
-            ) {
-
-                return jsonResponse(
-                    {
-                        success: false,
-                        message:
-                            "Only an active FINOVA user can open User Management."
-                    },
-                    403
-                );
-
-            }
-
-
-            if (
-                profileCompanyId !==
-                effectiveCompanyId
-            ) {
-
-                return jsonResponse(
-                    {
-                        success: false,
-                        message:
-                            "FINOVA company context is invalid."
-                    },
-                    403
-                );
-
-            }
-
-
-            if (
-                profileRole !== "manager"
-                &&
-                profileRole !== "staff"
-            ) {
-
-                return jsonResponse(
-                    {
-                        success: false,
-                        message:
-                            "User role is not permitted to access User Management."
-                    },
-                    403
-                );
-
-            }
-
-
-            /*
-            ==================================================
-            GET CURRENT COMPANY MEMBERSHIP
-            ==================================================
-            */
-
-            const {
-                data: membership,
-                error: membershipError
-            } = await admin
-                .from("finova_company_users")
-                .select(`
-                    company_id,
-                    user_uid,
-                    role,
-                    status
-                `)
-                .eq(
-                    "company_id",
-                    effectiveCompanyId
-                )
-                .eq(
-                    "user_uid",
-                    currentUser.id
-                )
-                .maybeSingle();
-
-
-            if (
-                membershipError
-            ) {
-
-                console.error(
-                    "admin-user-management current membership:",
-                    membershipError
-                );
-
-                return jsonResponse(
-                    {
-                        success: false,
-                        message:
-                            "Failed to validate company membership."
-                    },
-                    500
-                );
-
-            }
-
-
-            currentMembership =
-                membership;
-
-
-            const membershipRole =
-                String(
-                    currentMembership?.role
-                    ??
-                    ""
-                )
-                    .trim()
-                    .toUpperCase();
-
-            const membershipIsActive =
-                String(
-                    currentMembership?.status
-                    ??
-                    ""
-                )
-                    .trim()
-                    .toUpperCase()
-                ===
-                "ACTIVE";
-
-
-            const membershipRoleAllowed =
-                membershipRole === "MANAGER"
-                ||
-                membershipRole === "STAFF";
-
-
-            if (
-                !currentMembership
-                ||
-                !membershipIsActive
-                ||
-                !membershipRoleAllowed
-            ) {
-
-                return jsonResponse(
-                    {
-                        success: false,
-                        message:
-                            "An active company membership is required to open User Management."
-                    },
-                    403
-                );
-
-            }
-
-
-            /*
-            ==================================================
-            FINAL TENANT ACCESS
-            ==================================================
-            */
-
-            canViewUserManagement =
-                true;
-
-            isManager =
-                profileRole === "manager"
-                &&
-                membershipRole === "MANAGER";
-
-            canManageUserManagement =
-                isManager;
-
+            return jsonResponse(
+                {
+                    success: false,
+                    message:
+                        "An active company membership matching the FINOVA user role is required."
+                },
+                403
+            );
         }
 
-
-        /*
-        ==================================================
-        CURRENT COMPANY
-        ==================================================
-        */
-
-        const currentCompanyId =
-            effectiveCompanyId;
+        const currentCompanyId = effectiveCompanyId;
+        const isAdmin = profileRole === "admin";
+        const isManager = profileRole === "manager";
+        const canManageUserManagement = isAdmin || isManager;
 
         /*
         ==================================================
@@ -954,6 +787,30 @@ async request => {
                 normalizeRole(
                     payload?.role
                 );
+
+            if (!role) {
+                return jsonResponse(
+                    {
+                        success: false,
+                        message:
+                            "Role must be Admin, Manager, or Staff."
+                    },
+                    400
+                );
+            }
+
+            if (!canAssignRole(profileRole, role)) {
+                return jsonResponse(
+                    {
+                        success: false,
+                        message:
+                            isAdmin
+                                ? "Admin may assign Admin, Manager, or Staff only."
+                                : "Manager may assign Manager or Staff only."
+                    },
+                    403
+                );
+            }
 
 
             const statusValue =
@@ -1364,6 +1221,30 @@ if (
             payload?.role
         );
 
+    if (!role) {
+        return jsonResponse(
+            {
+                success: false,
+                message:
+                    "Role must be Admin, Manager, or Staff."
+            },
+            400
+        );
+    }
+
+    if (!canAssignRole(profileRole, role)) {
+        return jsonResponse(
+            {
+                success: false,
+                message:
+                    isAdmin
+                        ? "Admin may assign Admin, Manager, or Staff only."
+                        : "Manager may assign Manager or Staff only."
+            },
+            403
+        );
+    }
+
 
     const statusValue =
         payload?.status;
@@ -1523,6 +1404,65 @@ if (
 
     }
 
+
+    /*
+    ======================================================
+    TARGET AUTHORITY
+    ======================================================
+
+    The actor must be allowed to manage the target's
+    EXISTING role, not only the new role being submitted.
+    This prevents a Manager from editing/demoting an Admin.
+    ======================================================
+    */
+
+    if (
+        !canManageTargetRole(
+            profileRole,
+            updateTargetProfile.role
+        )
+    ) {
+        return jsonResponse(
+            {
+                success: false,
+                message:
+                    isAdmin
+                        ? "Admin cannot manage this user role."
+                        : "Manager cannot manage an Admin user."
+            },
+            403
+        );
+    }
+
+
+    if (
+        userUid === currentUser.id
+        && role !== profileRole
+    ) {
+        return jsonResponse(
+            {
+                success: false,
+                message:
+                    "You cannot change your own FINOVA role."
+            },
+            400
+        );
+    }
+
+
+    if (
+        userUid === currentUser.id
+        && status === false
+    ) {
+        return jsonResponse(
+            {
+                success: false,
+                message:
+                    "You cannot deactivate your own FINOVA account."
+            },
+            400
+        );
+    }
 
     /*
     ======================================================
@@ -1894,6 +1834,31 @@ if (
                 );
 
             }
+
+
+            /*
+            ==============================================
+            TARGET AUTHORITY
+            ==============================================
+            */
+
+            if (
+                !canManageTargetRole(
+                    profileRole,
+                    resetTargetProfile.role
+                )
+            ) {
+                return jsonResponse(
+                    {
+                        success: false,
+                        message:
+                            isAdmin
+                                ? "Admin cannot reset this user's password."
+                                : "Manager cannot reset the password of an Admin user."
+                    },
+                    403
+                );
+            }
             
             /*
 ==============================================
@@ -2022,559 +1987,251 @@ if (
         }
 
 
+        
         /*
-        ==================================================
-        DELETE USER
-        ==================================================
-        */
+         * ==================================================
+         * DELETE USER
+         * GLOBAL ACCOUNT DELETION
+         * ==================================================
+         *
+         * Deletes the target Auth account globally.
+         *
+         * Database relationships:
+         * - finova_company_users.user_uid -> auth.users.id
+         *   ON DELETE CASCADE
+         * - mst_users.user_uid -> auth.users.id
+         *   ON DELETE CASCADE
+         *
+         * The database will automatically remove the
+         * linked profile and all company memberships.
+         * ==================================================
+         */
 
-        if (
-            action ===
-            "delete"
-        ) {
-
+        if (action === "delete") {
 
             /*
-            ==============================================
-            USER UID
-            ==============================================
-            */
+             * ==============================================
+             * INPUT
+             * ==============================================
+             */
 
-            const userUid =
-                String(
-                    payload?.user_uid
-                    ??
-                    ""
-                )
-                    .trim();
+            const userUid = String(
+                payload?.user_uid ?? ""
+            ).trim();
 
+            /*
+             * ==============================================
+             * VALIDATION
+             * ==============================================
+             */
 
-            if (
-                !userUid
-            ) {
-
+            if (!userUid) {
                 return jsonResponse(
                     {
                         success: false,
-
-                        message:
-                            "User UID is required."
+                        message: "User UID is required."
                     },
                     400
                 );
-
             }
 
-
             /*
-            ==============================================
-            CURRENT USER CANNOT DELETE SELF
-            ==============================================
-            */
+             * ==============================================
+             * PREVENT SELF DELETION
+             * ==============================================
+             */
 
-            if (
-                userUid
-                ===
-                currentUser.id
-            ) {
-
+            if (userUid === currentUser.id) {
                 return jsonResponse(
                     {
                         success: false,
-
                         message:
                             "You cannot delete your own login account."
                     },
                     400
                 );
-
             }
 
-
             /*
-            ==============================================
-            GET TARGET PROFILE
-            ==============================================
-            */
+             * ==============================================
+             * GET TARGET PROFILE
+             * ==============================================
+             *
+             * The target must belong to the current company
+             * before a tenant Manager can delete the account.
+             *
+             * The target must belong to the current company.
+             * ==============================================
+             */
 
             const {
+                data: targetProfile,
+                error: targetProfileError
+            } = await admin
+                .from("mst_users")
+                .select(`
+                    user_uid,
+                    email,
+                    full_name,
+                    role,
+                    status,
+                    company_id
+                `)
+                .eq("user_uid", userUid)
+                .eq("company_id", currentCompanyId)
+                .maybeSingle();
 
-                data:
-                    targetProfile,
-
-                error:
-                    targetProfileError
-
-            } =
-                await admin
-
-                    .from(
-                        "mst_users"
-                    )
-
-                    .select(
-                        "*"
-                    )
-
-                    .eq(
-                        "user_uid",
-                        userUid
-                    )
-                    .eq(
-                        "company_id",
-                        currentCompanyId
-                    )
-
-                    .maybeSingle();
-
-
-            if (
-                targetProfileError
-            ) {
-
+            if (targetProfileError) {
                 console.error(
                     "admin-user-management target profile:",
                     targetProfileError
                 );
 
+                return jsonResponse(
+                    {
+                        success: false,
+                        message: "Failed to read target user."
+                    },
+                    500
+                );
+            }
+
+            /*
+             * ==============================================
+             * TARGET USER EXISTS
+             * ==============================================
+             */
+
+            if (!targetProfile) {
+                return jsonResponse(
+                    {
+                        success: false,
+                        message:
+                            "FINOVA user profile was not found in your company."
+                    },
+                    404
+                );
+            }
+
+            /*
+             * ==============================================
+             * TARGET AUTHORITY
+             * ==============================================
+             */
+
+            if (
+                !canManageTargetRole(
+                    profileRole,
+                    targetProfile.role
+                )
+            ) {
+                return jsonResponse(
+                    {
+                        success: false,
+                        message:
+                            isAdmin
+                                ? "Admin cannot delete this user role."
+                                : "Manager cannot delete an Admin user."
+                    },
+                    403
+                );
+            }
+
+            /*
+             * ==============================================
+             * PROTECT MULTI-COMPANY AUTH ACCOUNTS
+             * ==============================================
+             *
+             * auth.users is global. Do not hard-delete an
+             * account that has memberships in other companies.
+             * ==============================================
+             */
+
+            const {
+                data: targetMemberships,
+                error: targetMembershipsError
+            } = await admin
+                .from("finova_company_users")
+                .select("company_id")
+                .eq("user_uid", userUid);
+
+            if (targetMembershipsError) {
+                console.error(
+                    "admin-user-management target memberships:",
+                    targetMembershipsError
+                );
 
                 return jsonResponse(
                     {
                         success: false,
-
                         message:
-                            "Failed to read target user."
+                            "Failed to validate target company memberships."
                     },
                     500
                 );
-
             }
-            /*
-==============================================
-TARGET USER EXISTS
-==============================================
-*/
 
-if (
-    !targetProfile
-) {
-
-    return jsonResponse(
-        {
-            success: false,
-
-            message:
-                "FINOVA user profile was not found."
-        },
-        404
-    );
-
-}
-
-
-/*
-==============================================
-TENANT VALIDATION
-DELETE USER
-==============================================
-*/
-
-const targetCompanyId =
-    String(
-        targetProfile.company_id
-        ??
-        ""
-    )
-        .trim();
-
-
-if (
-    targetCompanyId !==
-    currentCompanyId
-) {
-
-    return jsonResponse(
-        {
-            success: false,
-
-            message:
-                "You cannot delete a user from another company."
-        },
-        403
-    );
-
-}
-            /*
-==============================================
-GET COMPANY MEMBERSHIP
-FOR ROLLBACK
-==============================================
-*/
-
-const {
-    data:
-        targetMembership,
-
-    error:
-        membershipReadError
-
-} =
-    await admin
-
-        .from(
-            "finova_company_users"
-        )
-
-        .select(
-            "*"
-        )
-
-        .eq(
-            "company_id",
-            currentCompanyId
-        )
-
-        .eq(
-            "user_uid",
-            userUid
-        )
-
-        .maybeSingle();
-
-
-if (
-    membershipReadError
-) {
-
-    return jsonResponse(
-        {
-            success: false,
-
-            message:
-                "Failed to read company membership."
-        },
-        500
-    );
-
-}
-/*
-==============================================
-DELETE COMPANY MEMBERSHIP
-==============================================
-*/
-
-const {
-    error:
-        membershipDeleteError
-
-} =
-    await admin
-
-        .from(
-            "finova_company_users"
-        )
-
-        .delete()
-
-        .eq(
-            "company_id",
-            currentCompanyId
-        )
-
-        .eq(
-            "user_uid",
-            userUid
-        );
-
-
-if (
-    membershipDeleteError
-) {
-
-    console.error(
-        "admin-user-management delete membership:",
-        membershipDeleteError
-    );
-
-
-    return jsonResponse(
-        {
-            success: false,
-
-            message:
-                membershipDeleteError.message
-                ||
-                "Failed to delete company membership."
-        },
-        500
-    );
-
-}
-            /*
-            ==============================================
-            DELETE APPLICATION PROFILE FIRST
-
-            If Auth deletion fails we attempt
-            to restore mst_users profile.
-            ==============================================
-            */
-
-            if (
-                targetProfile
-            ) {
-
-                const {
-
-                    error:
-                        profileDeleteError
-
-                } =
-                    await admin
-
-                        .from(
-                            "mst_users"
-                        )
-
-                        .delete()
-
-                        .eq(
-                            "user_uid",
-                            userUid
-                        )
-                        .eq(
-                            "company_id",
-                            currentCompanyId
-                        );
-
-
-                if (
-    profileDeleteError
-) {
-
-    console.error(
-        "admin-user-management delete profile:",
-        profileDeleteError
-    );
-
-
-    /*
-    ======================================================
-    RESTORE COMPANY MEMBERSHIP
-    ======================================================
-    */
-
-    if (
-        targetMembership
-    ) {
-
-        const {
-            error:
-                membershipRollbackError
-
-        } =
-            await admin
-
-                .from(
-                    "finova_company_users"
-                )
-
-                .upsert(
-                    targetMembership,
+            if ((targetMemberships ?? []).length > 1) {
+                return jsonResponse(
                     {
-                        onConflict:
-                            "company_id,user_uid"
-                    }
+                        success: false,
+                        message:
+                            "This user belongs to multiple companies and cannot be permanently deleted from User Management."
+                    },
+                    409
                 );
-
-
-        if (
-            membershipRollbackError
-        ) {
-
-            console.error(
-                "admin-user-management profile delete membership rollback:",
-                membershipRollbackError
-            );
-
-        }
-
-    }
-
-
-    return jsonResponse(
-        {
-            success: false,
-
-            message:
-                profileDeleteError.message
-                ||
-                "Failed to delete FINOVA user profile."
-        },
-        500
-    );
-
-}
-
+            }
 
             /*
-            ==============================================
-            DELETE SUPABASE AUTH USER
-            ==============================================
-            */
+             * ==============================================
+             * DELETE AUTH ACCOUNT
+             * ==============================================
+             *
+             * Safe only when this is the user's sole company
+             * membership. ON DELETE CASCADE removes the linked
+             * FINOVA profile and membership.
+             * ==============================================
+             */
 
             const {
+                error: deleteAuthError
+            } = await admin
+                .auth
+                .admin
+                .deleteUser(userUid);
 
-                error:
-                    deleteAuthError
-
-            } =
-                await admin
-                    .auth
-                    .admin
-                    .deleteUser(
-                        userUid
-                    );
-
-
-            /*
-            ==============================================
-            AUTH DELETE FAILED
-            RESTORE PROFILE
-            ==============================================
-            */
-
-            if (
-                deleteAuthError
-            ) {
-
+            if (deleteAuthError) {
                 console.error(
                     "admin-user-management delete auth:",
                     deleteAuthError
                 );
 
-
-                if (
-                    targetProfile
-                ) {
-
-                    const {
-
-                        error:
-                            restoreError
-
-                    } =
-                        await admin
-
-                            .from(
-                                "mst_users"
-                            )
-
-                            .upsert(
-
-                                targetProfile,
-
-                                {
-
-                                    onConflict:
-                                        "user_uid"
-
-                                }
-
-                            );
-
-
-                    if (
-                        restoreError
-                    ) {
-
-                        console.error(
-                            "admin-user-management delete rollback:",
-                            restoreError
-                        );
-
-                    }
-
-                }
-
-                    /*
-==============================================
-RESTORE COMPANY MEMBERSHIP
-==============================================
-*/
-
-if (
-    targetMembership
-) {
-
-    const {
-        error:
-            membershipRestoreError
-
-    } =
-        await admin
-
-            .from(
-                "finova_company_users"
-            )
-
-            .upsert(
-                targetMembership,
-                {
-                    onConflict:
-                        "company_id,user_uid"
-                }
-            );
-
-
-    if (
-        membershipRestoreError
-    ) {
-
-        console.error(
-            "admin-user-management membership rollback:",
-            membershipRestoreError
-        );
-
-    }
-
-}
-
-
-return jsonResponse(
-    {
-        success: false,
-
-        message:
-            deleteAuthError.message
-            ||
-            "Failed to delete authentication user."
-    },
-    500
-);
-
-}
+                return jsonResponse(
+                    {
+                        success: false,
+                        message:
+                            deleteAuthError.message ||
+                            "Failed to delete authentication user."
+                    },
+                    500
+                );
+            }
 
             /*
-            ==============================================
-            SUCCESS
-            ==============================================
-            */
+             * ==============================================
+             * SUCCESS
+             * ==============================================
+             */
 
             return jsonResponse(
                 {
-
-                    success:
-                        true,
-
+                    success: true,
                     message:
-                        "User deleted successfully."
-
+                        "User account and company memberships deleted successfully."
                 }
             );
-
         }
-    }
-
+    
 
         /*
         ==================================================

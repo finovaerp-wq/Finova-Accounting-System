@@ -271,11 +271,70 @@ static async getById(id) {
 }
 /*
 ==========================================================
+ACCESS CONTROL
+==========================================================
+*/
+
+static async ensureCanManage() {
+
+    const { data: authData, error: authError } =
+        await supabase.auth.getUser();
+
+    if (authError) {
+        throw authError;
+    }
+
+    const userUid = authData?.user?.id;
+
+    if (!userUid) {
+        throw new Error("Authentication session was not found.");
+    }
+
+    const { data: profile, error } =
+        await supabase
+            .from("mst_users")
+            .select("role, status")
+            .eq("user_uid", userUid)
+            .maybeSingle();
+
+    if (error) {
+        throw error;
+    }
+
+    const role = String(profile?.role || "").trim().toLowerCase();
+    const active = profile?.status !== false;
+
+    if (!active || !["admin", "manager"].includes(role)) {
+        throw new Error("You have view-only access to Chart Of Accounts.");
+    }
+
+    return true;
+
+}
+
+/*
+==========================================================
 INSERT
 ==========================================================
 */
 
+static getAccountTypeFromClass(accountClass) {
+
+    const mapping = {
+        Asset: "Balance Sheet",
+        Liability: "Balance Sheet",
+        Equity: "Balance Sheet",
+        Revenue: "Income Statement",
+        Expense: "Income Statement"
+    };
+
+    return mapping[String(accountClass ?? "").trim()] ?? "";
+
+}
+
 static async insert(payload) {
+
+        await this.ensureCanManage();
 
     try {
 
@@ -294,11 +353,28 @@ static async insert(payload) {
         }
 
 
-        const accountCode =
-            String(
-                payload.account_code ?? ""
-            ).trim();
+        /*
+        ======================================================
+        SERVER-SIDE AUTO ACCOUNT CODE - DEFAULT ONLY
+        ADD CHILD ACCOUNT
+        User may override the automatically generated code.
+        If code is blank, generate the next available code.
+        ======================================================
+        */
 
+        let resolvedAccountCode =
+            String(payload.account_code ?? "").trim();
+
+        if (payload.parent_id && !resolvedAccountCode) {
+            const parentInfo =
+                await this.getParentInformation(payload.parent_id);
+
+            resolvedAccountCode =
+                parentInfo.next_account_code;
+        }
+
+        const accountCode =
+            resolvedAccountCode;
 
         if (!accountCode) {
 
@@ -379,6 +455,9 @@ static async insert(payload) {
 
             account_class:
                 payload.account_class ?? "",
+
+            account_type:
+                this.getAccountTypeFromClass(payload.account_class),
 
             parent_id:
                 payload.parent_id || null,
@@ -469,15 +548,14 @@ static async insert(payload) {
 
 }
     /*
-==========================================================
-UPDATE
-==========================================================
-*/
+    ==========================================================
+    UPDATE
+    ==========================================================
+    */
 
-static async update(
-    id,
-    payload
-) {
+    static async update(id, payload) {
+
+        await this.ensureCanManage();
 
     try {
 
@@ -504,12 +582,6 @@ static async update(
 
         }
 
-
-        /*
-        ======================================================
-        ACCOUNT CODE
-        ======================================================
-        */
 
         const accountCode =
             String(
@@ -551,84 +623,6 @@ static async update(
 
         /*
         ======================================================
-        VALIDATE PARENT ACCOUNT
-        ======================================================
-        */
-
-        await this.validateParentAccount(
-            payload.parent_id
-        );
-
-
-        /*
-        ======================================================
-        VALIDATE PARENT HIERARCHY
-        ======================================================
-        */
-
-        await this.validateParentHierarchy(
-            id,
-            payload.parent_id
-        );
-
-
-        /*
-        ======================================================
-        VALIDATE HEADER ACCOUNT
-        Header Account yang masih memiliki child
-        tidak boleh diubah menjadi non-header.
-        ======================================================
-        */
-
-        if (
-            payload.is_header === false
-        ) {
-
-            const {
-                count: childCount,
-                error: childError
-            } = await supabase
-
-                .from(
-                    TABLE.CHART_OF_ACCOUNTS
-                )
-
-                .select(
-                    "id",
-                    {
-                        count: "exact",
-                        head: true
-                    }
-                )
-
-                .eq(
-                    "parent_id",
-                    id
-                );
-
-
-            if (childError) {
-
-                throw childError;
-
-            }
-
-
-            if (
-                (childCount ?? 0) > 0
-            ) {
-
-                throw new Error(
-                    "Header Account cannot be disabled because it still has child accounts."
-                );
-
-            }
-
-        }
-
-
-        /*
-        ======================================================
         CURRENT DATE
         ======================================================
         */
@@ -662,6 +656,12 @@ static async update(
             account_code:
                 accountCode,
 
+            account_class:
+                payload.account_class ?? "",
+
+            account_type:
+                this.getAccountTypeFromClass(payload.account_class),
+
             parent_id:
                 payload.parent_id || null,
 
@@ -689,9 +689,7 @@ static async update(
                 TABLE.CHART_OF_ACCOUNTS
             )
 
-            .update(
-                dataUpdate
-            )
+            .update(dataUpdate)
 
             .eq(
                 "id",
@@ -1038,6 +1036,8 @@ static async isAccountCodeExists(
 
     static async delete(id) {
 
+        await this.ensureCanManage();
+
     try {
 
         /*
@@ -1215,18 +1215,11 @@ SET STATUS
 ==========================================================
 */
 
-static async setStatus(
-    id,
-    status
-) {
+static async setStatus(id, status) {
+
+        await this.ensureCanManage();
 
     try {
-
-        /*
-        ======================================================
-        VALIDATION
-        ======================================================
-        */
 
         if (!id) {
 
@@ -1236,89 +1229,9 @@ static async setStatus(
 
         }
 
-
-        /*
-        ======================================================
-        NEW STATUS
-        ======================================================
-        */
-
         const newStatus =
             Boolean(status);
 
-
-        /*
-        ======================================================
-        BLOCK INACTIVE HEADER ACCOUNT
-        HEADER ACCOUNT YANG MASIH MEMILIKI CHILD
-        TIDAK BOLEH MENJADI INACTIVE
-        ======================================================
-        */
-
-        if (
-            newStatus === false
-        ) {
-
-            /*
-            ----------------------------------------------
-            CHECK CHILD ACCOUNT
-            ----------------------------------------------
-            */
-
-            const {
-                count: childCount,
-                error: childError
-            } = await supabase
-
-                .from(
-                    TABLE.CHART_OF_ACCOUNTS
-                )
-
-                .select(
-                    "id",
-                    {
-                        count: "exact",
-                        head: true
-                    }
-                )
-
-                .eq(
-                    "parent_id",
-                    id
-                );
-
-
-            if (childError) {
-
-                throw childError;
-
-            }
-
-
-            /*
-            ----------------------------------------------
-            BLOCK
-            ----------------------------------------------
-            */
-
-            if (
-                (childCount ?? 0) > 0
-            ) {
-
-                throw new Error(
-                    "Header Account cannot be set to Inactive because it still has child accounts."
-                );
-
-            }
-
-        }
-
-
-        /*
-        ======================================================
-        UPDATE STATUS
-        ======================================================
-        */
 
         const {
             data,
@@ -1355,12 +1268,6 @@ static async setStatus(
 
         }
 
-
-        /*
-        ======================================================
-        RETURN
-        ======================================================
-        */
 
         return data;
 
@@ -1544,19 +1451,13 @@ static async getParentInformation(parentId) {
     if (!parentId) {
 
         return {
-
             account_name: "-",
-
             level: 0,
-
             child_count: 0,
-
             next_account_code: "-"
-
         };
 
     }
-
 
     /*
     ======================================================
@@ -1567,10 +1468,13 @@ static async getParentInformation(parentId) {
     const parent =
         await this.getById(parentId);
 
+    if (!parent) {
+        throw new Error("Parent account was not found.");
+    }
 
     /*
     ======================================================
-    GET CHILDREN
+    GET ALL CHILDREN
     ======================================================
     */
 
@@ -1578,139 +1482,144 @@ static async getParentInformation(parentId) {
         data: children,
         error
     } = await supabase
-
         .from(TABLE.CHART_OF_ACCOUNTS)
-
         .select("account_code")
-
-        .eq(
-            "parent_id",
-            parentId
-        )
-
-        .order(
-            "account_code",
-            {
-                ascending: false
-            }
-        );
-
+        .eq("parent_id", parentId);
 
     if (error) {
-
         throw error;
-
     }
 
+    const childRows = children ?? [];
 
     /*
     ======================================================
-    NEXT ACCOUNT CODE
+    AUTO ACCOUNT CODE
+
+    RULE:
+    - Child code follows the numeric sequence after parent.
+    - Start from parent numeric code + 1.
+    - Use the FIRST AVAILABLE number.
+    - Do NOT use MAX + 1 when a lower number is missing.
+
+    Example:
+        Parent : 1-11020
+        Child  : 1-11021
+                  1-11022
+                  1-11023
+                  1-11031
+
+        Next   : 1-11024
     ======================================================
     */
 
-    let nextCode;
+    const parentCode =
+        String(parent.account_code ?? "").trim();
 
+    const parentMatch =
+        parentCode.match(/^(.*-)(\d+)$/);
 
-    /*
-    ======================================================
-    NO CHILD
-    ======================================================
-    */
+    let nextCode = "";
 
-    if (!children.length) {
+    if (parentMatch) {
+
+        const codePrefix = parentMatch[1];
+        const parentNumberText = parentMatch[2];
+        const parentNumber = Number(parentNumberText);
+        const width = Math.max(parentNumberText.length, 2);
+
+        const usedNumbers = new Set();
+
+        for (const child of childRows) {
+
+            const childCode =
+                String(child.account_code ?? "").trim();
+
+            const childMatch =
+                childCode.match(/^(.+?-)\d+$/);
+
+            if (!childMatch || childMatch[1] !== codePrefix) {
+                continue;
+            }
+
+            const childNumberMatch =
+                childCode.match(/^(.*-)(\d+)$/);
+
+            if (!childNumberMatch || childNumberMatch[1] !== codePrefix) {
+                continue;
+            }
+
+            const childNumber =
+                Number(childNumberMatch[2]);
+
+            if (Number.isFinite(childNumber)) {
+                usedNumbers.add(childNumber);
+            }
+
+        }
+
+        let candidateNumber =
+            parentNumber + 1;
+
+        while (usedNumbers.has(candidateNumber)) {
+            candidateNumber += 1;
+        }
 
         nextCode =
-            `${parent.account_code}01`;
+            codePrefix +
+            String(candidateNumber).padStart(width, "0");
 
     }
-
-
-    /*
-    ======================================================
-    HAS CHILD
-    ======================================================
-    */
 
     else {
 
-        const lastCode =
-            String(
-                children[0]?.account_code ?? ""
-            ).trim();
-
-
         /*
         ==================================================
-        EXTRACT LAST NUMERIC PART
+        FALLBACK FOR NON-STANDARD ROOT CODE
         ==================================================
         */
 
-        const match =
-            lastCode.match(/(\d+)$/);
+        const numericMatch =
+            parentCode.match(/^(.*?)(\d+)$/);
 
-
-        if (match) {
-
-            const numericPart =
-                match[1];
-
-            const prefix =
-                lastCode.substring(
-                    0,
-                    lastCode.length -
-                    numericPart.length
-                );
-
-            const nextNumber =
-                String(
-                    Number(numericPart) + 1
-                ).padStart(
-                    numericPart.length,
-                    "0"
-                );
-
-            nextCode =
-                prefix + nextNumber;
-
+        if (!numericMatch) {
+            throw new Error(
+                `Cannot generate Account Code from parent "${parentCode}".`
+            );
         }
 
-        else {
+        const prefix = numericMatch[1];
+        const parentNumberText = numericMatch[2];
+        const parentNumber = Number(parentNumberText);
+        const width = Math.max(parentNumberText.length, 2);
 
-            /*
-            ==============================================
-            FALLBACK
-            ==============================================
-            */
+        const usedNumbers = new Set();
 
-            nextCode =
-                `${parent.account_code}01`;
-
+        for (const child of childRows) {
+            const childCode = String(child.account_code ?? "").trim();
+            const m = childCode.match(/^(.*?)(\d+)$/);
+            if (m && m[1] === prefix) {
+                const n = Number(m[2]);
+                if (Number.isFinite(n)) usedNumbers.add(n);
+            }
         }
+
+        let candidateNumber = parentNumber + 1;
+        while (usedNumbers.has(candidateNumber)) {
+            candidateNumber += 1;
+        }
+
+        nextCode =
+            prefix +
+            String(candidateNumber).padStart(width, "0");
 
     }
 
-
-    /*
-    ======================================================
-    RETURN
-    ======================================================
-    */
-
     return {
-
-        account_name:
-            parent.account_name,
-
-        level:
-            parent.level,
-
-        child_count:
-            children.length,
-
-        next_account_code:
-            nextCode
-
+        account_name: parent.account_name,
+        level: parent.level,
+        child_count: childRows.length,
+        next_account_code: nextCode
     };
 
 }
@@ -1812,19 +1721,15 @@ static async search(
 
         /*
         ======================================================
-        QUERY ACCOUNT
+        QUERY
         ======================================================
         */
 
-        let query =
-            supabase
+        let query = supabase
 
-                .from(
-                    TABLE.CHART_OF_ACCOUNTS
-                )
+            .from(TABLE.CHART_OF_ACCOUNTS)
 
-                .select("*");
-
+            .select("*");
 
         /*
         ======================================================
@@ -1833,24 +1738,17 @@ static async search(
         */
 
         const keywordValue =
-            String(
-                keyword ?? ""
-            ).trim();
+            keyword.trim();
 
+        if (keywordValue !== "") {
 
-        if (
-            keywordValue !== ""
-        ) {
+            query = query.or(
 
-            query =
-                query.or(
+                `account_code.ilike.%${keywordValue}%,account_name.ilike.%${keywordValue}%`
 
-                    `account_code.ilike.%${keywordValue}%,account_name.ilike.%${keywordValue}%`
-
-                );
+            );
 
         }
-
 
         /*
         ======================================================
@@ -1858,37 +1756,37 @@ static async search(
         ======================================================
         */
 
-        if (
-            status !== ""
-        ) {
+        if (status !== "") {
 
-            query =
-                query.eq(
-                    "status",
-                    status === "true"
-                );
+            query = query.eq(
+
+                "status",
+
+                status === "true"
+
+            );
 
         }
 
-
         /*
         ======================================================
-        LOAD ACCOUNT
+        LOAD DATA
         ======================================================
         */
 
-        const {
-            data,
-            error
-        } = await query
+        const { data, error } = await query
 
             .order(
-                "account_code",
-                {
-                    ascending: true
-                }
-            );
 
+                "account_code",
+
+                {
+
+                    ascending: true
+
+                }
+
+            );
 
         if (error) {
 
@@ -1896,116 +1794,32 @@ static async search(
 
         }
 
-
         /*
         ======================================================
-        PREPARE ACCOUNT DATA
+        PREPARE DATA
         ======================================================
         */
 
         const accounts =
             data ?? [];
 
-
         /*
         ======================================================
-        COLLECT PARENT IDS
+        PARENT MAP
         ======================================================
         */
 
-        const parentIds =
-            [
-                ...new Set(
+        const parentMap = new Map(
 
-                    accounts
+            accounts.map(account => [
 
-                        .map(
-                            account =>
-                                account.parent_id
-                        )
+                account.id,
 
-                        .filter(
-                            id =>
-                                id !== null
-                                &&
-                                id !== undefined
-                                &&
-                                id !== ""
-                        )
+                account.account_name
 
-                )
-            ];
+            ])
 
-
-        /*
-        ======================================================
-        LOAD PARENTS
-        Tidak ikut terkena keyword search.
-        ======================================================
-        */
-
-        let parentMap =
-            new Map();
-
-
-        if (
-            parentIds.length > 0
-        ) {
-
-            const {
-                data: parents,
-                error: parentError
-            } = await supabase
-
-                .from(
-                    TABLE.CHART_OF_ACCOUNTS
-                )
-
-                .select(`
-                    id,
-                    account_name
-                `)
-
-                .in(
-                    "id",
-                    parentIds
-                );
-
-
-            if (parentError) {
-
-                throw parentError;
-
-            }
-
-
-            /*
-            ----------------------------------------------
-            BUILD PARENT MAP
-            ----------------------------------------------
-            */
-
-            parentMap =
-                new Map(
-
-                    (
-                        parents ?? []
-                    ).map(
-                        parent => [
-
-                            String(
-                                parent.id
-                            ),
-
-                            parent.account_name
-
-                        ]
-                    )
-
-                );
-
-        }
-
+        );
 
         /*
         ======================================================
@@ -2013,22 +1827,19 @@ static async search(
         ======================================================
         */
 
-        return accounts.map(
-            account => ({
+        return accounts.map(account => ({
 
-                ...account,
+            ...account,
 
-                parent_name:
+            parent_name:
 
-                    parentMap.get(
-                        String(
-                            account.parent_id
-                        )
-                    )
-                    ?? "-"
+                parentMap.get(
 
-            })
-        );
+                    account.parent_id
+
+                ) ?? "-"
+
+        }));
 
     }
 
@@ -2037,7 +1848,9 @@ static async search(
         console.error(error);
 
         throw new Error(
+
             "Failed to search Chart Of Accounts."
+
         );
 
     }

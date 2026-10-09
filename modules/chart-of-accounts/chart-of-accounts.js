@@ -1008,6 +1008,9 @@ this.accountCode =
 this.accountName =
     document.getElementById("coa-name");
 
+this.accountType =
+    document.getElementById("coa-account-type");
+
 this.currency =
     document.getElementById("currency");
 
@@ -1093,6 +1096,23 @@ bindEvents() {
 
     /*
 ==========================================================
+ACCOUNT NAME - AUTO UPPERCASE
+==========================================================
+*/
+
+this.accountName?.addEventListener(
+    "input",
+    () => {
+
+        this.accountName.value =
+            this.accountName.value.toUpperCase();
+
+    }
+);
+
+
+    /*
+==========================================================
 REAL-TIME SEARCH
 ==========================================================
 */
@@ -1155,6 +1175,13 @@ this.searchInput?.addEventListener(
 
         () => this.parentChanged()
 
+    );
+
+    /* ACCOUNT TYPE AUTO MAPPING */
+    const accountClassElement = document.getElementById("coa-type");
+    accountClassElement?.addEventListener(
+        "change",
+        () => this.updateAccountType()
     );
 
     /*
@@ -1318,6 +1345,30 @@ PARENT ACCOUNT CHANGED
 ==========================================================
 */
 
+updateAccountType() {
+
+    const accountClass =
+        document.getElementById("coa-type")?.value ?? "";
+
+    const accountTypeMap = {
+        Asset: "Balance Sheet",
+        Liability: "Balance Sheet",
+        Equity: "Balance Sheet",
+        Revenue: "Income Statement",
+        Expense: "Income Statement"
+    };
+
+    const accountType =
+        accountTypeMap[accountClass] ?? "";
+
+    if (this.accountType) {
+        this.accountType.value = accountType;
+    }
+
+    return accountType;
+
+}
+
 async parentChanged() {
 
     try {
@@ -1480,6 +1531,12 @@ bindModalEvents() {
         "click",
         () => this.save()
     );
+
+    /* ACCOUNT CODE: AUTO-GENERATED BUT USER EDITABLE */
+    if (this.accountCode) {
+        this.accountCode.readOnly = false;
+        this.accountCode.removeAttribute("readonly");
+    }
 
 
     /*
@@ -4325,6 +4382,10 @@ async openAddModal() {
             this.accountName.value = "";
         }
 
+        if (this.accountType) {
+            this.accountType.value = "";
+        }
+
         if (this.accountCategory) {
             this.accountCategory.value = "";
         }
@@ -4478,6 +4539,13 @@ if (accountClass) {
     accountClass.value =
         item.account_class ?? "";
 
+}
+
+this.updateAccountType();
+
+if (this.accountType) {
+    this.accountType.value =
+        item.account_type || this.accountType.value || "";
 }
 
 
@@ -4811,6 +4879,9 @@ collectFormData() {
                 "coa-type"
             ).value,
 
+        account_type:
+            this.updateAccountType(),
+
         normal_balance:
             document.querySelector(
                 'input[name="normal-balance"]:checked'
@@ -4990,6 +5061,37 @@ async insert() {
 
         const payload =
             this.collectFormData();
+
+        /*
+        ======================================================
+        AUTO ACCOUNT CODE - DEFAULT ONLY
+        Account Code otomatis terisi saat Parent dipilih,
+        tetapi user tetap boleh mengubahnya secara manual.
+        Jika user mengosongkan kode, sistem akan generate ulang.
+        ======================================================
+        */
+        if (payload.parent_id && !String(payload.account_code ?? "").trim()) {
+
+            const parentInfo =
+                await ChartOfAccountsService.getParentInformation(
+                    payload.parent_id
+                );
+
+            if (!parentInfo?.next_account_code ||
+                parentInfo.next_account_code === "-") {
+                throw new Error(
+                    "System failed to generate the next Account Code."
+                );
+            }
+
+            payload.account_code =
+                parentInfo.next_account_code;
+
+            if (this.accountCode) {
+                this.accountCode.value =
+                    parentInfo.next_account_code;
+            }
+        }
 
         await ChartOfAccountsService.insert(
             payload

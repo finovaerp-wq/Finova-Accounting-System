@@ -22069,6 +22069,48 @@ async voidJournal(id) {
 
         /*
         ======================================================
+        CANCEL DRAFT AP PAYMENT BATCH
+        A Draft payment batch is cancelled/deleted, NOT voided.
+        The database RPC atomically removes draft allocations,
+        restores AP balances, and removes the linked Draft GL.
+        ======================================================
+        */
+
+        if (
+            currentJournalStatus === "DRAFT"
+            && sourceModule === "AP"
+            && sourceDocumentType === "AP_PAYMENT"
+            && sourceDocumentId
+        ) {
+
+            const confirmed = window.confirm(
+                "AP Payment Batch ini masih Draft. Batalkan batch Draft beserta alokasinya dan jurnal Draft terkait? Saldo AP akan dihitung ulang."
+            );
+
+            if (!confirmed) {
+                return;
+            }
+
+            const { data: cancelResult, error: cancelError } = await supabase.rpc(
+                "finova_cancel_ap_payment_batch_draft",
+                { p_batch_id: sourceDocumentId }
+            );
+
+            if (cancelError) {
+                throw cancelError;
+            }
+
+            this.showSuccess(
+                "AP Payment Batch Draft berhasil dibatalkan. Saldo AP telah dihitung ulang."
+            );
+
+            await this.loadData(false);
+            return cancelResult || true;
+        }
+
+
+        /*
+        ======================================================
         ONLY POSTED JOURNAL CAN BE VOIDED
         ======================================================
         */

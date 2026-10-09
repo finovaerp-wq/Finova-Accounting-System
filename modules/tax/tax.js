@@ -1185,7 +1185,7 @@ await new Promise(
                     this.status !== ""
                     &&
                     String(
-                        tax.status
+                        tax.is_active
                     )
                     !==
                     this.status
@@ -1363,7 +1363,7 @@ render() {
                 */
 
                 const statusBadge =
-    tax.status
+    tax.is_active
 
         ? `
             <span class="tax-status-badge tax-status-active">
@@ -1385,7 +1385,7 @@ STATUS ACTION
 */
 
 const statusAction =
-    tax.status
+    tax.is_active
 
         ? `
             <button
@@ -1483,7 +1483,7 @@ const statusAction =
                         <td class="text-end">
 
                             ${this.formatRate(
-                                tax.tax_rate
+                                tax.rate
                             )}
 
                         </td>
@@ -1911,7 +1911,7 @@ preview() {
                         */
 
                         const status =
-                            tax.status
+                            tax.is_active
                                 ? "Active"
                                 : "Inactive";
 
@@ -1977,7 +1977,7 @@ preview() {
                                     ${
                                         escapeHTML(
                                             this.formatRate(
-                                                tax.tax_rate
+                                                tax.rate
                                             )
                                         )
                                     }
@@ -3356,7 +3356,7 @@ exportExcel() {
 
                     "Tax Rate (%)":
                         Number(
-                            tax.tax_rate || 0
+                            tax.rate || 0
                         ),
 
                     "Tax Account":
@@ -3373,7 +3373,7 @@ exportExcel() {
                         tax.description || "",
 
                     "Status":
-                        tax.status
+                        tax.is_active
                             ? "Active"
                             : "Inactive"
 
@@ -3577,7 +3577,7 @@ exportExcel() {
         if (this.taxRate) {
 
             this.taxRate.value =
-                tax.tax_rate
+                tax.rate
                 ?? "";
 
         }
@@ -3616,7 +3616,7 @@ exportExcel() {
 
             this.statusInput.checked =
                 Boolean(
-                    tax.status
+                    tax.is_active
                 );
 
         }
@@ -3901,7 +3901,7 @@ async save() {
             tax_type:
                 taxType,
 
-            tax_rate:
+            rate:
                 taxRate,
 
             tax_account_id:
@@ -3915,7 +3915,7 @@ async save() {
                 description
                     || null,
 
-            status:
+            is_active:
                 this.statusInput
                     ? this.statusInput.checked
                     : true
@@ -4460,7 +4460,7 @@ async changeTaxStatus(
 
         if (
             Boolean(
-                tax.status
+                tax.is_active
             )
             ===
             Boolean(
@@ -4482,7 +4482,7 @@ async changeTaxStatus(
         await this.service.update(
             id,
             {
-                status:
+                is_active:
                     Boolean(
                         newStatus
                     )
