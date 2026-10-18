@@ -128,17 +128,11 @@ initialize() {
 
                 /*
                 ==========================================
-                RESTORE DEFAULT
+                SINGLE BANK AUTO-DEFAULT ONLY
                 ==========================================
                 */
 
-                if (
-                    wasDefault
-                ) {
-
-                    this.ensureDefaultBank();
-
-                }
+                this.applySingleBankDefault();
 
 
                 /*
@@ -199,7 +193,7 @@ initialize() {
 
                 select.innerHTML += `
                     <option value="${bank.id}">
-                        ${bank.bank_name}
+                        ${String(bank.bank_name ?? "").toUpperCase()}
                     </option>
                 `;
 
@@ -366,10 +360,6 @@ canAddNewRow() {
         `;
 
         this.table.appendChild(row);
-        
-
-this.ensureDefaultBank();
-    this.table.querySelectorAll(".is-default");
     
 
 row.querySelector(".is-default")
@@ -406,13 +396,25 @@ row.querySelector(".is-default")
         row.querySelector(".is-default").checked =
             bank.is_default ?? false;
 
+        // Run after synchronous row population: auto-default only when exactly one bank exists.
+        queueMicrotask(() => this.applySingleBankDefault());
+
         /*
         ==========================================
         DELETE ROW
         ==========================================
         */
 
-row.querySelector(".remove-bank")
+// Staff must not be able to remove bank rows from the BP edit modal.
+        // Show the bank-row Action for both Manager and Staff in Business Partner.
+        const removeBankButton = row.querySelector(".remove-bank");
+        removeBankButton?.removeAttribute("hidden");
+        if (removeBankButton) {
+            removeBankButton.style.removeProperty("display");
+            removeBankButton.removeAttribute("aria-hidden");
+        }
+
+        row.querySelector(".remove-bank")
 
     .addEventListener(
 
@@ -561,17 +563,28 @@ ensureDefaultBank() {
     const radios = this.table.querySelectorAll(".is-default");
 
     if (radios.length === 0) {
-
         return;
-
     }
 
     const checked = [...radios].filter(r => r.checked);
 
     if (checked.length === 0) {
-
         radios[0].checked = true;
+    }
 
+}
+
+/*
+==========================================================
+AUTO-DEFAULT ONLY WHEN EXACTLY ONE BANK EXISTS
+==========================================================
+*/
+applySingleBankDefault() {
+
+    const radios = [...this.table.querySelectorAll(".is-default")];
+
+    if (radios.length === 1) {
+        radios[0].checked = true;
     }
 
 }

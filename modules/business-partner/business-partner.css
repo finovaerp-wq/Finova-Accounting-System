@@ -706,7 +706,7 @@ td.text-start {
 .business-partner-table-card
 .bp-col-email {
 
-    min-width: 220px;
+    min-width: 200px;
 
 }
 
@@ -781,7 +781,7 @@ td.text-start {
 .business-partner-table-card
 .finova-table-email {
 
-    min-width: 220px;
+    min-width: 200px;
 
     white-space: nowrap;
 
@@ -983,17 +983,71 @@ td.text-start {
 ========================================================== */
 
 #businessPartnerModal input,
-#businessPartnerModal select,
 #businessPartnerModal textarea,
-#businessPartnerModal button,
-#businessPartnerModal option,
-#businessPartnerModal a,
-#businessPartnerModal label,
-#businessPartnerModal [contenteditable="true"],
-#businessPartnerModal [role="button"] {
-
-    cursor: default;
-
+#businessPartnerModal [contenteditable="true"] {
+    cursor: text;
     user-select: text;
+}
 
+#businessPartnerModal select,
+#businessPartnerModal button,
+#businessPartnerModal a,
+#businessPartnerModal [role="button"] {
+    cursor: pointer;
+}
+
+#businessPartnerModal option,
+#businessPartnerModal label {
+    cursor: default;
+    user-select: text;
+}
+
+/*
+==========================================================
+WHATSAPP LINK
+==========================================================
+*/
+
+.bp-whatsapp-link {
+    color: inherit;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.bp-whatsapp-link:hover {
+    text-decoration: underline;
+    opacity: 0.85;
+}
+
+.bp-whatsapp-link i {
+    font-size: 16px;
+}
+
+
+/* Business Partner Email: preserve the casing entered by the user.
+   Never visually force uppercase or lowercase in Add/Edit. */
+#businessPartnerModal #bp-email {
+    text-transform: none !important;
+}
+
+
+/* BUSINESS PARTNER PHONE / EMAIL WIDTH ADJUSTMENT */
+.business-partner-table-card .bp-col-phone,
+.business-partner-table-card .finova-table-phone {
+    width: 190px !important;
+    min-width: 190px !important;
+}
+
+.business-partner-table-card .bp-col-email,
+.business-partner-table-card .finova-table-email {
+    width: 280px !important;
+    min-width: 280px !important;
+    max-width: 280px !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }

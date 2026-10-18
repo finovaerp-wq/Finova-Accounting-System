@@ -2,7 +2,7 @@
 ==========================================================
 FINOVA ACCOUNTING SYSTEM
 Bank Service
-Version : 1.0.0
+Version : 1.1.0
 ==========================================================
 */
 
@@ -13,18 +13,12 @@ import {
 
 export class BankService {
 
-    /*
-    ==========================================================
-    GET ALL ACTIVE BANK
-    ==========================================================
-    */
-
     static async getAll() {
 
         const { data, error } = await supabase
             .from(TABLE.BANK)
             .select("*")
-            .eq("status", true)
+            .eq("is_active", true)
             .order("bank_name", {
                 ascending: true
             });
@@ -33,7 +27,7 @@ export class BankService {
             throw error;
         }
 
-        return data;
+        return data || [];
 
     }
 

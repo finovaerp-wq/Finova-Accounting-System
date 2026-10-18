@@ -4753,6 +4753,39 @@ async generateARPaymentJournal(
 
 
         /*
+        ==================================================
+        RESOLVE ACTIVE TENANT COMPANY
+        ==================================================
+        */
+
+        const {
+            data: effectiveCompanyId,
+            error: effectiveCompanyError
+        } = await supabase.rpc("finova_effective_company_id");
+
+        if (effectiveCompanyError) {
+            console.error(
+                "AR PAYMENT EFFECTIVE COMPANY ERROR:",
+                effectiveCompanyError
+            );
+            throw effectiveCompanyError;
+        }
+
+        const invoiceCompanyId = invoice.company_id || payment.company_id || null;
+
+        if (!effectiveCompanyId) {
+            throw new Error(
+                "AR Payment tidak dapat membuat GL Journal: company context aktif tidak ditemukan. Silakan pilih company yang benar dan login ulang jika perlu."
+            );
+        }
+
+        if (invoiceCompanyId && invoiceCompanyId !== effectiveCompanyId) {
+            throw new Error(
+                `AR Payment company (${invoiceCompanyId}) tidak sama dengan company aktif (${effectiveCompanyId}).`
+            );
+        }
+
+        /*
 ==================================================
 PIUTANG USAHA
 MULTI COMPANY SAFE
@@ -4776,6 +4809,10 @@ const {
         .eq(
             "account_code",
             "1-11041"
+        )
+        .eq(
+            "company_id",
+            effectiveCompanyId
         )
         .eq(
             "status",
@@ -4998,6 +5035,9 @@ console.log(
 
         const journalHeader = {
 
+            // Required by FINOVA tenant RLS policy.
+            company_id:
+                effectiveCompanyId,
 
             /*
             ==============================================
@@ -6591,26 +6631,20 @@ renderCustomerOptions() {
                 );
 
 
-            option.value =
-                customer.id;
+            
+option.value =
+    customer.id;
 
 
-            option.textContent =
-                `${
-                    customer.bp_code
-                    ||
-                    ""
-                } :: ${
-                    customer.bp_name
-                    ||
-                    ""
-                }`;
+option.textContent =
+    customer.bp_name || "";
 
 
-            this.arFormCustomer
-                .appendChild(
-                    option
-                );
+this.arFormCustomer
+    .appendChild(
+        option
+    );
+
 
         }
     );
@@ -7484,7 +7518,7 @@ async calculateARDueDate() {
                         === "PLUS"
                         &&
                         Boolean(
-                            tax.status
+                            tax.is_active ?? tax.status
                         )
                 );
 
@@ -7502,7 +7536,7 @@ async calculateARDueDate() {
                         === "MINUS"
                         &&
                         Boolean(
-                            tax.status
+                            tax.is_active ?? tax.status
                         )
                 );
 
@@ -7568,8 +7602,7 @@ async calculateARDueDate() {
 
                     option.dataset.rate =
                         Number(
-                            tax.tax_rate
-                            || 0
+                            tax.rate ?? tax.tax_rate ?? 0
                         );
 
 
@@ -7638,8 +7671,7 @@ async calculateARDueDate() {
 
                     option.dataset.rate =
                         Number(
-                            tax.tax_rate
-                            || 0
+                            tax.rate ?? tax.tax_rate ?? 0
                         );
 
 
@@ -9922,17 +9954,11 @@ async openCustomerPaymentTrace() {
         const customerOptions =
             this.customerData
                 .map(customer => {
-                    const code =
-                        String(customer?.bp_code || "").trim();
                     const name =
                         String(customer?.bp_name || "").trim();
 
                     return customer?.id
-                        ? `<option value="${customer.id}">${
-                            code
-                                ? `${code} :: ${name}`
-                                : name
-                          }</option>`
+                        ? `<option value="${customer.id}">${name}</option>`
                         : "";
                 })
                 .join("");
@@ -9946,6 +9972,38 @@ async openCustomerPaymentTrace() {
                  aria-hidden="true">
                 <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
                     <div class="modal-content">
+                        <style>
+                            #arCustomerPaymentTraceModal .ar-customer-trace-table {
+                                width: 100%;
+                                table-layout: fixed;
+                            }
+                            #arCustomerPaymentTraceModal .ar-customer-trace-table th,
+                            #arCustomerPaymentTraceModal .ar-customer-trace-table td {
+                                overflow-wrap: anywhere;
+                                vertical-align: middle;
+                            }
+                            #arCustomerPaymentTraceModal .ar-customer-trace-table th:nth-child(1),
+                            #arCustomerPaymentTraceModal .ar-customer-trace-table td:nth-child(1) {
+                                width: 2.5%; padding-left: 2px; padding-right: 2px;
+                                text-align: center; white-space: nowrap;
+                            }
+                            #arCustomerPaymentTraceModal .ar-customer-trace-table th:nth-child(2),
+                            #arCustomerPaymentTraceModal .ar-customer-trace-table td:nth-child(2) { width: 17%; }
+                            #arCustomerPaymentTraceModal .ar-customer-trace-table th:nth-child(3),
+                            #arCustomerPaymentTraceModal .ar-customer-trace-table td:nth-child(3) { width: 19.5%; }
+                            #arCustomerPaymentTraceModal .ar-customer-trace-table th:nth-child(4),
+                            #arCustomerPaymentTraceModal .ar-customer-trace-table td:nth-child(4) { width: 16%; }
+                            #arCustomerPaymentTraceModal .ar-customer-trace-table th:nth-child(5),
+                            #arCustomerPaymentTraceModal .ar-customer-trace-table td:nth-child(5) {
+                                width: 17%; text-align: right; white-space: nowrap;
+                            }
+                            #arCustomerPaymentTraceModal .ar-customer-trace-table th:nth-child(6),
+                            #arCustomerPaymentTraceModal .ar-customer-trace-table td:nth-child(6) { width: 17%; }
+                            #arCustomerPaymentTraceModal .ar-customer-trace-table th:nth-child(7),
+                            #arCustomerPaymentTraceModal .ar-customer-trace-table td:nth-child(7) {
+                                width: 11%; text-align: center; white-space: nowrap;
+                            }
+                        </style>
 
                         <div class="modal-header">
                             <div>
@@ -10006,26 +10064,20 @@ async openCustomerPaymentTrace() {
                                  class="row g-3 mb-3"></div>
 
                             <div class="table-responsive">
-                                <table class="table table-bordered table-hover align-middle mb-0">
+                                <table class="table table-bordered table-hover align-middle mb-0 ar-customer-trace-table">
                                     <thead>
                                         <tr>
                                             <th class="text-center">No</th>
                                             <th class="text-center">Payment Date</th>
                                             <th>Invoice No</th>
                                             <th class="text-center">Invoice Date</th>
-                                            <th>Reference No</th>
                                             <th class="text-end">Received Amount</th>
                                             <th>GL Journal</th>
                                             <th class="text-center">GL Status</th>
                                         </tr>
                                     </thead>
                                     <tbody id="ar-trace-body">
-                                        <tr>
-                                            <td colspan="8"
-                                                class="text-center text-muted py-4">
-                                                Select Customer and click Trace Payment.
-                                            </td>
-                                        </tr>
+                                        <!-- Keep the trace table header visible before a customer is searched. -->
                                     </tbody>
                                 </table>
                             </div>
@@ -10122,7 +10174,7 @@ async loadCustomerPaymentTrace() {
         if (body) {
             body.innerHTML = `
                 <tr>
-                    <td colspan="8"
+                    <td colspan="7"
                         class="text-center py-4">
                         <span class="spinner-border spinner-border-sm me-2"></span>
                         Loading payment trace...
@@ -10147,28 +10199,18 @@ async loadCustomerPaymentTrace() {
             )
             || null;
 
-        const activeRows =
-            rows.filter(
-                row =>
-                    String(
-                        row?.trx_gl_journal?.status || ""
-                    )
-                    .trim()
-                    .toLowerCase()
-                    !== "void"
-            );
-
+        // Match AP trace behavior: display all payment history rows,
+        // including Void rows for audit traceability.
         const totalReceived =
-            activeRows.reduce(
+            rows.reduce(
                 (total, row) =>
-                    total
-                    + Number(row?.amount || 0),
+                    total + Number(row?.payment_amount || 0),
                 0
             );
 
         const invoiceIds =
             new Set(
-                activeRows
+                rows
                     .map(row => row?.account_receivable_id)
                     .filter(Boolean)
             );
@@ -10179,11 +10221,7 @@ async loadCustomerPaymentTrace() {
                     <div class="border rounded p-3 h-100">
                         <div class="text-muted small">Customer</div>
                         <div class="fw-semibold mt-1">
-                            ${
-                                customer?.bp_code
-                                    ? `${customer.bp_code} :: ${customer.bp_name}`
-                                    : (customer?.bp_name || "-")
-                            }
+                            ${customer?.bp_name || "-"}
                         </div>
                     </div>
                 </div>
@@ -10201,7 +10239,7 @@ async loadCustomerPaymentTrace() {
                     <div class="border rounded p-3 h-100">
                         <div class="text-muted small">Payments</div>
                         <div class="fw-bold fs-5 mt-1">
-                            ${activeRows.length}
+                            ${rows.length}
                         </div>
                     </div>
                 </div>
@@ -10224,7 +10262,7 @@ async loadCustomerPaymentTrace() {
         if (rows.length === 0) {
             body.innerHTML = `
                 <tr>
-                    <td colspan="8"
+                    <td colspan="7"
                         class="text-center text-muted py-4">
                         No payment history found for this Customer.
                     </td>
@@ -10269,11 +10307,10 @@ async loadCustomerPaymentTrace() {
                             <td class="text-center">
                                 ${invoice?.invoice_date || "-"}
                             </td>
-                            <td>${row?.reference_no || "-"}</td>
                             <td class="text-end fw-semibold">
                                 ${
                                     this.formatCurrency(
-                                        Number(row?.amount || 0)
+                                        Number(row?.payment_amount || 0)
                                     )
                                 }
                             </td>
@@ -10379,32 +10416,21 @@ async viewPayment(
             )
 
             .select(`
-
                 id,
-
                 account_receivable_id,
-
+                ar_payment_id,
                 payment_date,
-
-                payment_account_id,
-
-                amount,
-
+                payment_amount,
                 reference_no,
-
-                description,
-
                 gl_journal_id,
-
                 created_at,
-
                 trx_gl_journal (
                     id,
                     journal_no,
                     journal_date,
-                    status
+                    status,
+                    description
                 )
-
             `)
 
             .eq(
@@ -10528,30 +10554,104 @@ async viewPayment(
         ==================================================
         */
 
+        const arPaymentIds =
+            [...new Set(
+                validPayments
+                    .map(payment => payment?.ar_payment_id)
+                    .filter(Boolean)
+            )];
+
+        let paymentHeaders = [];
+
+        if (arPaymentIds.length > 0) {
+            // The canonical AR payment table is trx_account_receivable_payment.
+            // A payment can have multiple invoice allocations, so resolve its
+            // header-level values through ar_payment_id rather than querying
+            // the retired/non-canonical trx_ar_payment table.
+            const {
+                data: headerData,
+                error: headerError
+            } = await supabase
+                .from("trx_account_receivable_payment")
+                .select("ar_payment_id, bank_account_id, payment_amount, reference_no, payment_date")
+                .in("ar_payment_id", arPaymentIds);
+
+            if (headerError) {
+                console.error("AR PAYMENT HEADER ERROR:", headerError);
+                throw headerError;
+            }
+
+            // Normalize one lookup entry per payment ID. All allocation rows
+            // belonging to the same payment should carry the same account.
+            const headerByPaymentId = new Map();
+            (Array.isArray(headerData) ? headerData : []).forEach(row => {
+                const paymentId = row?.ar_payment_id;
+                if (paymentId && !headerByPaymentId.has(String(paymentId))) {
+                    headerByPaymentId.set(String(paymentId), {
+                        id: paymentId,
+                        bank_account_id: row?.bank_account_id ?? null,
+                        total_payment: null,
+                        description: null,
+                        reference_no: row?.reference_no ?? null,
+                        payment_date: row?.payment_date ?? null
+                    });
+                }
+            });
+            paymentHeaders = [...headerByPaymentId.values()];
+        }
+
+        // Prefer the bank account stored on the canonical AR payment record.
+        // Older/orphaned allocations may have ar_payment_id = NULL, so
+        // recover the account from the debit line of the linked GL journal.
         const paymentAccountIds =
-            [
-                ...new Set(
+            [...new Set(
+                paymentHeaders
+                    .map(header => Number(header?.bank_account_id || 0))
+                    .filter(accountId => accountId > 0)
+            )];
 
-                    validPayments
+        const journalIds = [...new Set(
+            validPayments.map(payment => payment?.gl_journal_id).filter(Boolean)
+        )];
 
-                        .map(
-                            payment =>
-                                Number(
-                                    payment
-                                        ?.payment_account_id
-                                    ||
-                                    0
-                                )
-                        )
+        let journalDetails = [];
+        if (journalIds.length > 0) {
+            const { data: detailData, error: detailError } = await supabase
+                .from("trx_gl_journal_detail")
+                .select("journal_id, account_id, debit, credit")
+                .in("journal_id", journalIds);
+            if (detailError) {
+                console.error("AR PAYMENT JOURNAL DETAIL ERROR:", detailError);
+                throw detailError;
+            }
+            journalDetails = Array.isArray(detailData) ? detailData : [];
+        }
 
-                        .filter(
-                            accountId =>
-                                accountId > 0
-                        )
+        // AR payment allocations can exist without a payment header. In that case,
+        // resolve the bank/COA from the debit line in the linked payment journal.
+        const fallbackAccountIds = journalDetails
+            .filter(detail => Number(detail?.debit || 0) > 0 && detail?.account_id != null)
+            .map(detail => Number(detail.account_id))
+            .filter(accountId => accountId > 0);
+        const allPaymentAccountIds = [...new Set([...paymentAccountIds, ...fallbackAccountIds])];
 
-                )
-            ];
-
+        // The Description in AR View Payment must come from the invoice detail,
+        // not from the GL journal description. Load invoice detail descriptions once.
+        let invoiceDetailDescriptions = [];
+        const { data: invoiceDetailRows, error: invoiceDetailError } = await supabase
+            .from("trx_account_receivable_detail")
+            .select("description")
+            .eq("account_receivable_id", id);
+        if (invoiceDetailError) {
+            console.error("AR INVOICE DETAIL DESCRIPTION ERROR:", invoiceDetailError);
+            throw invoiceDetailError;
+        }
+        invoiceDetailDescriptions = [...new Set(
+            (Array.isArray(invoiceDetailRows) ? invoiceDetailRows : [])
+                .map(row => String(row?.description || "").trim())
+                .filter(Boolean)
+        )];
+        const invoiceDetailDescription = invoiceDetailDescriptions.join("; ");
 
         /*
         ==================================================
@@ -10559,12 +10659,11 @@ async viewPayment(
         ==================================================
         */
 
-        let paymentAccounts =
-            [];
+        let paymentAccounts = [];
 
 
         if (
-            paymentAccountIds.length > 0
+            allPaymentAccountIds.length > 0
         ) {
 
             const {
@@ -10589,7 +10688,7 @@ async viewPayment(
 
                 .in(
                     "id",
-                    paymentAccountIds
+                    allPaymentAccountIds
                 );
 
 
@@ -10628,34 +10727,30 @@ async viewPayment(
             validPayments.map(
                 payment => {
 
-                    const paymentAccount =
-                        paymentAccounts.find(
-                            account => {
+                    const paymentHeader =
+                        paymentHeaders.find(header =>
+                            String(header.id) === String(payment?.ar_payment_id)
+                        ) || null;
 
-                                return (
-                                    String(
-                                        account.id
-                                    )
-                                    ===
-                                    String(
-                                        payment
-                                            .payment_account_id
-                                    )
-                                );
-
-                            }
-                        )
-                        ||
-                        null;
-
+                    const journal = payment?.trx_gl_journal || null;
+                    const debitDetail = journalDetails.find(detail =>
+                        String(detail?.journal_id) === String(payment?.gl_journal_id)
+                        && Number(detail?.debit || 0) > 0
+                        && detail?.account_id != null
+                    ) || null;
+                    const accountId = paymentHeader?.bank_account_id ?? debitDetail?.account_id ?? null;
+                    const paymentAccount = paymentAccounts.find(account =>
+                        String(account.id) === String(accountId)
+                    ) || null;
 
                     return {
-
                         ...payment,
-
-                        payment_account:
-                            paymentAccount
-
+                        payment_amount: Number(payment?.payment_amount || 0),
+                        payment_header: paymentHeader,
+                        payment_account: paymentAccount,
+                        // Required source: AR invoice detail description.
+                        // Do not fall back to GL journal description.
+                        description: invoiceDetailDescription || ""
                     };
 
                 }
@@ -10957,7 +11052,7 @@ openPaymentHistoryModal(
 
                     const amount =
                         Number(
-                            payment?.amount
+                            payment?.payment_amount
                             ||
                             0
                         );
@@ -11005,7 +11100,7 @@ openPaymentHistoryModal(
 
                     const amount =
                         Number(
-                            payment?.amount
+                            payment?.payment_amount
                             ||
                             0
                         );
@@ -11040,10 +11135,6 @@ openPaymentHistoryModal(
     ACTIVE PAYMENT COUNT
     ==================================================
     */
-
-    const activePaymentCount =
-        activePayments.length;
-
 
     /*
     ==================================================
@@ -11083,7 +11174,7 @@ openPaymentHistoryModal(
 
                     const paymentAmount =
                         Number(
-                            payment?.amount
+                            payment?.payment_amount
                             ||
                             0
                         );
@@ -11188,11 +11279,13 @@ openPaymentHistoryModal(
                     ======================================
                     */
 
+                    // View Payment description must mirror the AR invoice detail/header.
+                    // If the invoice has no description, keep this field empty.
                     const paymentDescription =
                         String(
-                            payment?.description
-                            ||
-                            "-"
+                            invoice?.description
+                            || invoice?.header_description
+                            || ""
                         )
                         .trim();
 
@@ -11355,44 +11448,6 @@ openPaymentHistoryModal(
 
                     /*
                     ======================================
-                    PAYMENT ACTIVITY BADGE
-                    ======================================
-                    */
-
-                    const activityBadge =
-                        isActive
-
-                            ? `
-
-                                <span
-                                    class="
-                                        badge
-                                        bg-success
-                                        ms-1
-                                    "
-                                >
-                                    Active
-                                </span>
-
-                            `
-
-                            : `
-
-                                <span
-                                    class="
-                                        badge
-                                        bg-secondary
-                                        ms-1
-                                    "
-                                >
-                                    Inactive
-                                </span>
-
-                            `;
-
-
-                    /*
-                    ======================================
                     ROW CLASS
 
                     VOID PAYMENT:
@@ -11400,16 +11455,8 @@ openPaymentHistoryModal(
                     ======================================
                     */
 
-                    const rowClass =
-                        isActive
-                            ? "ar-payment-main-row"
-                            : "ar-payment-main-row opacity-50";
-
-
-                    const descriptionRowClass =
-                        isActive
-                            ? "ar-payment-description-row"
-                            : "ar-payment-description-row opacity-50";
+                    const rowClass = "ar-payment-main-row";
+                    const descriptionRowClass = "ar-payment-description-row";
 
 
                     /*
@@ -11426,21 +11473,6 @@ openPaymentHistoryModal(
 
                         <tr
                             class="${rowClass}"
-                            data-payment-id="${
-                                payment?.id
-                                ||
-                                ""
-                            }"
-                            data-journal-id="${
-                                payment?.gl_journal_id
-                                ||
-                                ""
-                            }"
-                            data-active="${
-                                isActive
-                                    ? "true"
-                                    : "false"
-                            }"
                         >
 
                             <!-- NO -->
@@ -11484,25 +11516,6 @@ openPaymentHistoryModal(
                                     ${accountDisplay}
                                 </div>
 
-
-                                ${
-                                    referenceNo !== "-"
-                                        ? `
-
-                                            <div
-                                                class="
-                                                    small
-                                                    text-muted
-                                                    mt-1
-                                                "
-                                            >
-                                                Ref:
-                                                ${referenceNo}
-                                            </div>
-
-                                        `
-                                        : ""
-                                }
 
                             </td>
 
@@ -11551,17 +11564,7 @@ openPaymentHistoryModal(
                                     </div>
 
 
-                                    <div
-                                        class="
-                                            mt-1
-                                        "
-                                    >
-
-                                        ${journalStatusBadge}
-
-                                        ${activityBadge}
-
-                                    </div>
+                                    ${journalStatusBadge}
 
                                 </div>
 
@@ -11762,7 +11765,6 @@ openPaymentHistoryModal(
                                 row
                                 g-3
                                 mb-4
-                                ar-payment-history-info
                             "
                         >
 
@@ -11869,176 +11871,6 @@ openPaymentHistoryModal(
 
 
                         <!-- ==========================
-                             PAYMENT SUMMARY
-                        =========================== -->
-
-                        <div
-                            class="
-                                row
-                                g-2
-                                mb-3
-                            "
-                        >
-
-                            <div
-                                class="
-                                    col-md-4
-                                "
-                            >
-
-                                <div
-                                    class="
-                                        border
-                                        rounded
-                                        p-2
-                                        h-100
-                                    "
-                                >
-
-                                    <div
-                                        class="
-                                            small
-                                            text-muted
-                                        "
-                                    >
-                                        Payment History
-                                    </div>
-
-                                    <div
-                                        class="
-                                            fw-semibold
-                                        "
-                                    >
-                                        ${historyPaymentCount}
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-
-                            <div
-                                class="
-                                    col-md-4
-                                "
-                            >
-
-                                <div
-                                    class="
-                                        border
-                                        rounded
-                                        p-2
-                                        h-100
-                                    "
-                                >
-
-                                    <div
-                                        class="
-                                            small
-                                            text-muted
-                                        "
-                                    >
-                                        Active Payment
-                                    </div>
-
-                                    <div
-                                        class="
-                                            fw-semibold
-                                        "
-                                    >
-                                        ${activePaymentCount}
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-
-                            <div
-                                class="
-                                    col-md-4
-                                "
-                            >
-
-                                <div
-                                    class="
-                                        border
-                                        rounded
-                                        p-2
-                                        h-100
-                                    "
-                                >
-
-                                    <div
-                                        class="
-                                            small
-                                            text-muted
-                                        "
-                                    >
-                                        Historical Amount
-                                    </div>
-
-                                    <div
-                                        class="
-                                            fw-semibold
-                                            text-end
-                                        "
-                                    >
-
-                                        ${
-                                            this.formatCurrency(
-                                                totalHistoryAmount
-                                            )
-                                        }
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-
-                        <!-- ==========================
-                             INFO
-                        =========================== -->
-
-                        <div
-                            class="
-                                alert
-                                alert-light
-                                border
-                                py-2
-                                small
-                                mb-3
-                            "
-                        >
-
-                            <i
-                                class="
-                                    fa-solid
-                                    fa-circle-info
-                                    me-1
-                                "
-                            >
-                            </i>
-
-                            Total Paid hanya menghitung payment
-                            dengan GL Journal berstatus
-                            <strong>Draft</strong>
-                            atau
-                            <strong>Posted</strong>.
-
-                            Payment dengan status
-                            <strong>Void</strong>
-                            tetap ditampilkan sebagai audit history
-                            tetapi tidak dihitung sebagai pembayaran aktif.
-
-                        </div>
-
-
-                        <!-- ==========================
                              PAYMENT TABLE
                         =========================== -->
 
@@ -12056,7 +11888,6 @@ openPaymentHistoryModal(
                                     table-hover
                                     align-middle
                                     mb-0
-                                    ar-payment-history-table
                                 "
                             >
 
@@ -12239,11 +12070,6 @@ openPaymentHistoryModal(
                                     ? "s"
                                     : ""
                             }
-
-                            ·
-
-                            ${activePaymentCount}
-                            active
 
                         </div>
 
@@ -15562,8 +15388,7 @@ renderTaxPlus() {
                 this.taxPlusData.find(
                     tax =>
                         Number(
-                            tax.tax_rate
-                            || 0
+                            tax.rate ?? tax.tax_rate ?? 0
                         )
                         ===
                         firstTaxRate
@@ -16104,8 +15929,7 @@ renderTaxMinus() {
                 this.taxMinusData.find(
                     tax =>
                         Number(
-                            tax.tax_rate
-                            || 0
+                            tax.rate ?? tax.tax_rate ?? 0
                         )
                         ===
                         firstTaxRate
@@ -16382,7 +16206,9 @@ checkARAccountingPreviewReadiness(
             const lineAmount =
                 Number(
                     detail.line_amount
-                    || 0
+                    ?? detail.amount
+                    ?? detail.dpp_amount
+                    ?? 0
                 );
 
 
@@ -16395,7 +16221,9 @@ checkARAccountingPreviewReadiness(
             const revenueAccountId =
                 Number(
                     detail.revenue_account_id
-                    || 0
+                    ?? detail.account_id
+                    ?? detail.revenue_coa_id
+                    ?? 0
                 );
 
 
@@ -16421,15 +16249,37 @@ checkARAccountingPreviewReadiness(
             const taxPlusAmount =
                 Number(
                     detail.tax_output_amount
-                    || 0
+                    ?? detail.tax_plus_amount
+                    ?? detail.tax_amount
+                    ?? 0
                 );
 
-
-            const taxPlusAccountId =
-                Number(
-                    detail.tax_plus_account_id
-                    || 0
-                );
+            let readinessTaxPlusMaster = null;
+            if (
+                detail.tax_plus_id != null
+                && Array.isArray(this.taxPlusData)
+            ) {
+                readinessTaxPlusMaster = this.taxPlusData.find(
+                    tax => String(tax.id) === String(detail.tax_plus_id)
+                ) || null;
+            }
+            const readinessTaxPlusRate = Number(
+                detail.tax_output_rate ?? detail.tax_plus_rate ?? detail.tax_rate ?? 0
+            );
+            if (
+                !readinessTaxPlusMaster
+                && readinessTaxPlusRate > 0
+                && Array.isArray(this.taxPlusData)
+            ) {
+                readinessTaxPlusMaster = this.taxPlusData.find(tax =>
+                    Math.abs(Number(tax.rate ?? tax.tax_rate ?? 0) - readinessTaxPlusRate) < 0.000001
+                ) || null;
+            }
+            const taxPlusAccountId = Number(
+                detail.tax_plus_account_id
+                || readinessTaxPlusMaster?.tax_account_id
+                || 0
+            );
 
 
             if (
@@ -16453,28 +16303,60 @@ checkARAccountingPreviewReadiness(
 
             const taxMinusAmount =
                 Number(
-                    detail.withholding_tax_amount
-                    || 0
+                    detail.tax_minus_amount
+                    ?? detail.withholding_tax_amount
+                    ?? detail.pph_amount
+                    ?? 0
                 );
 
+            // Keep preview readiness consistent with buildARJournalLines:
+            // resolve Tax (-) account from the detail, then Tax Master by ID,
+            // and finally by rate when the detail does not contain a usable ID.
+            let readinessTaxMinusMaster = null;
+            if (
+                detail.tax_minus_id != null
+                && Array.isArray(this.taxMinusData)
+            ) {
+                readinessTaxMinusMaster = this.taxMinusData.find(
+                    tax => String(tax.id) === String(detail.tax_minus_id)
+                ) || null;
+            }
 
-            const taxMinusAccountId =
-                Number(
-                    detail.tax_minus_account_id
-                    || 0
-                );
+            const readinessTaxMinusRate = Number(
+                detail.tax_minus_rate
+                ?? detail.withholding_tax_rate
+                ?? detail.pph_rate
+                ?? 0
+            );
 
+            if (
+                !readinessTaxMinusMaster
+                && readinessTaxMinusRate > 0
+                && Array.isArray(this.taxMinusData)
+            ) {
+                readinessTaxMinusMaster = this.taxMinusData.find(tax =>
+                    Math.abs(
+                        Number(tax.rate ?? tax.tax_rate ?? 0)
+                        - readinessTaxMinusRate
+                    ) < 0.000001
+                ) || null;
+            }
+
+            const taxMinusAccountId = Number(
+                detail.tax_minus_account_id
+                || readinessTaxMinusMaster?.tax_minus_account_id
+                || readinessTaxMinusMaster?.tax_account_id
+                || 0
+            );
 
             if (
                 taxMinusAmount > 0
                 &&
                 !taxMinusAccountId
             ) {
-
                 issues.push(
                     `Invoice Detail ${lineNumber}: Tax (-) Account is not mapped.`
                 );
-
             }
 
 
@@ -18607,6 +18489,7 @@ async editInvoice(id) {
 
             this.arFormPoNo.value =
                 header.po_no
+                || header.source_po_no
                 || "";
 
         }
@@ -18777,10 +18660,15 @@ async editInvoice(id) {
                     ==========================================
                     */
 
+                    // Database detail schema stores the COA FK in account_id.
+                    // Older UI logic only read revenue_account_id, so editing an
+                    // existing invoice silently converted the account to 0.
                     const revenueAccountId =
                         Number(
                             item.revenue_account_id
-                            || 0
+                            ?? item.account_id
+                            ?? item.revenue_account?.id
+                            ?? 0
                         );
 
 
@@ -18939,10 +18827,14 @@ async editInvoice(id) {
                         ======================================
                         */
 
+                        // Database stores the detail value in `amount`;
+                        // `line_amount` is only the UI alias. Read both so
+                        // opening an existing AR invoice does not show zero.
                         line_amount:
                             Number(
                                 item.line_amount
-                                || 0
+                                ?? item.amount
+                                ?? 0
                             ),
 
 
@@ -18954,7 +18846,23 @@ async editInvoice(id) {
 
                         tax_plus_id:
                             item.tax_plus_id
-                            || null,
+                            ?? null,
+
+
+                        tax_plus_rate:
+                            Number(
+                                item.tax_plus_rate
+                                ?? item.tax_output_rate
+                                ?? 0
+                            ),
+
+
+                        tax_plus_amount:
+                            Number(
+                                item.tax_plus_amount
+                                ?? item.tax_output_amount
+                                ?? 0
+                            ),
 
 
                         tax_plus_account_id:
@@ -18979,14 +18887,16 @@ async editInvoice(id) {
                         tax_output_rate:
                             Number(
                                 item.tax_output_rate
-                                || 0
+                                ?? item.tax_plus_rate
+                                ?? 0
                             ),
 
 
                         tax_output_amount:
                             Number(
                                 item.tax_output_amount
-                                || 0
+                                ?? item.tax_plus_amount
+                                ?? 0
                             ),
 
 
@@ -18998,7 +18908,23 @@ async editInvoice(id) {
 
                         tax_minus_id:
                             item.tax_minus_id
-                            || null,
+                            ?? null,
+
+
+                        tax_minus_rate:
+                            Number(
+                                item.tax_minus_rate
+                                ?? item.withholding_tax_rate
+                                ?? 0
+                            ),
+
+
+                        tax_minus_amount:
+                            Number(
+                                item.tax_minus_amount
+                                ?? item.withholding_tax_amount
+                                ?? 0
+                            ),
 
 
                         tax_minus_account_id:
@@ -19023,14 +18949,16 @@ async editInvoice(id) {
                         withholding_tax_rate:
                             Number(
                                 item.withholding_tax_rate
-                                || 0
+                                ?? item.tax_minus_rate
+                                ?? 0
                             ),
 
 
                         withholding_tax_amount:
                             Number(
                                 item.withholding_tax_amount
-                                || 0
+                                ?? item.tax_minus_amount
+                                ?? 0
                             ),
 
 
@@ -19040,10 +18968,17 @@ async editInvoice(id) {
                         ======================================
                         */
 
+                        // The AR detail table stores the base line in `amount`;
+                        // `total_amount` is a calculated/UI field and may not exist
+                        // in the row returned by Supabase. Rebuild it on edit.
                         total_amount:
                             Number(
                                 item.total_amount
-                                || 0
+                                ?? (
+                                    Number(item.line_amount ?? item.amount ?? 0)
+                                    + Number(item.tax_plus_amount ?? item.tax_output_amount ?? 0)
+                                    - Number(item.tax_minus_amount ?? item.withholding_tax_amount ?? 0)
+                                )
                             )
 
                     };
@@ -21975,6 +21910,7 @@ exportExcel() {
 
                     "PO No":
                         item.po_no
+                        || item.source_po_no
                         || "",
 
                     "Due Date":
@@ -25941,17 +25877,23 @@ console.log(
         ==================================================
         */
 
+        // Database AR detail may use account_id / amount;
+        // older UI-normalized objects may use revenue_account_id / line_amount.
         const revenueAccountId =
             Number(
                 detail.revenue_account_id
-                || 0
+                ?? detail.account_id
+                ?? detail.revenue_coa_id
+                ?? 0
             );
 
 
         const lineAmount =
             Number(
                 detail.line_amount
-                || 0
+                ?? detail.amount
+                ?? detail.dpp_amount
+                ?? 0
             );
 
 
@@ -26045,15 +25987,48 @@ console.log(
         const taxPlusAmount =
             Number(
                 detail.tax_output_amount
-                || 0
+                ?? detail.tax_plus_amount
+                ?? detail.tax_amount
+                ?? 0
             );
 
 
-        const taxPlusAccountId =
-            Number(
-                detail.tax_plus_account_id
-                || 0
-            );
+        // Resolve Tax (+) COA from the saved detail first, then Tax Master.
+        // trx_account_receivable_detail stores tax_plus_id; mst_taxes stores
+        // tax_account_id. Older UI rows may not persist tax_plus_account_id.
+        let taxPlusMaster = null;
+
+        if (
+            detail.tax_plus_id != null
+            && Array.isArray(this.taxPlusData)
+        ) {
+            taxPlusMaster = this.taxPlusData.find(
+                tax => String(tax.id) === String(detail.tax_plus_id)
+            ) || null;
+        }
+
+        const taxPlusRate = Number(
+            detail.tax_output_rate
+            ?? detail.tax_plus_rate
+            ?? detail.tax_rate
+            ?? 0
+        );
+
+        if (
+            !taxPlusMaster
+            && taxPlusRate > 0
+            && Array.isArray(this.taxPlusData)
+        ) {
+            taxPlusMaster = this.taxPlusData.find(tax =>
+                Math.abs(Number(tax.rate ?? tax.tax_rate ?? 0) - taxPlusRate) < 0.000001
+            ) || null;
+        }
+
+        const taxPlusAccountId = Number(
+            detail.tax_plus_account_id
+            || taxPlusMaster?.tax_account_id
+            || 0
+        );
 
 
         if (
@@ -26129,16 +26104,50 @@ console.log(
 
         const taxMinusAmount =
             Number(
-                detail.withholding_tax_amount
-                || 0
+                detail.tax_minus_amount
+                ?? detail.withholding_tax_amount
+                ?? detail.pph_amount
+                ?? 0
             );
 
 
-        const taxMinusAccountId =
-            Number(
-                detail.tax_minus_account_id
-                || 0
-            );
+        // Resolve Tax (-) COA from the saved AR detail first, then Tax Master.
+        // AR detail stores tax_minus_id / tax_minus_rate / tax_minus_amount;
+        // the linked Tax Master supplies tax_account_id when no account was
+        // persisted directly on the detail row.
+        let taxMinusMaster = null;
+
+        if (
+            detail.tax_minus_id != null
+            && Array.isArray(this.taxMinusData)
+        ) {
+            taxMinusMaster = this.taxMinusData.find(
+                tax => String(tax.id) === String(detail.tax_minus_id)
+            ) || null;
+        }
+
+        const taxMinusRate = Number(
+            detail.tax_minus_rate
+            ?? detail.withholding_tax_rate
+            ?? detail.pph_rate
+            ?? 0
+        );
+
+        if (
+            !taxMinusMaster
+            && taxMinusRate > 0
+            && Array.isArray(this.taxMinusData)
+        ) {
+            taxMinusMaster = this.taxMinusData.find(tax =>
+                Math.abs(Number(tax.rate ?? tax.tax_rate ?? 0) - taxMinusRate) < 0.000001
+            ) || null;
+        }
+
+        const taxMinusAccountId = Number(
+            detail.tax_minus_account_id
+            || taxMinusMaster?.tax_account_id
+            || 0
+        );
 
 
         if (
@@ -26217,8 +26226,23 @@ console.log(
         !journalDetails.length
     ) {
 
+        console.error(
+            "AR JOURNAL BUILDER: no journal lines generated. Detail field diagnostics:",
+            details.map((detail, index) => ({
+                index,
+                id: detail.id ?? detail.detail_id ?? null,
+                account_id: detail.account_id ?? null,
+                revenue_account_id: detail.revenue_account_id ?? null,
+                line_amount: detail.line_amount ?? null,
+                amount: detail.amount ?? null,
+                dpp_amount: detail.dpp_amount ?? null,
+                tax_output_amount: detail.tax_output_amount ?? null,
+                withholding_tax_amount: detail.withholding_tax_amount ?? null
+            }))
+        );
+
         throw new Error(
-            "No valid AR detail available for GL Journal."
+            "No valid AR detail available for GL Journal. Check AR detail amount and revenue account mapping in the console diagnostics."
         );
 
     }
@@ -26775,6 +26799,11 @@ async generateARJournal(
 
         const journalHeader = {
 
+            // Carry the AR invoice tenant explicitly into the GL insert.
+            // RLS must still validate this against finova_effective_company_id().
+            company_id:
+                invoice.company_id || null,
+
             journal_no:
                 "",
 
@@ -26812,6 +26841,12 @@ async generateARJournal(
 
         };
 
+
+        if (!journalHeader.company_id) {
+            throw new Error(
+                "AR invoice company_id is missing; cannot create GL Journal safely under tenant RLS."
+            );
+        }
 
         /*
         ==================================================
