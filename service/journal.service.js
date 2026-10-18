@@ -729,6 +729,10 @@ HEADER INSERT SUCCESS
         journal_id:
             journal.id,
 
+        // Detail must inherit the same tenant company as its header.
+        company_id:
+            journal.company_id,
+
         line_no:
             item.line_no,
 
