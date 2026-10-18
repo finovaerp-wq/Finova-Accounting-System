@@ -2450,3 +2450,153 @@ and
     }
 
 }
+
+
+/* Premium ERP login styling based on approved mockup; current desktop size retained. */
+.login-wrapper { width:min(1040px,calc(100vw - 56px)); height:min(620px,calc(100vh - 56px)); min-height:540px; grid-template-columns:50% 50%; border-radius:22px; }
+.login-left { background:radial-gradient(circle at 78% 8%,rgba(71,181,255,.52),transparent 35%),linear-gradient(145deg,#07388f 0%,#075bd2 55%,#0877eb 100%); }
+.login-brand { padding:28px 28px 0; }
+.brand-header { margin-bottom:15px; }
+.brand-line { width:34px; margin-top:12px; }
+.brand-content h1 { font-size:clamp(22px,2vw,27px); line-height:1.2; letter-spacing:-.45px; }
+.brand-content p { max-width:330px; font-size:11px; line-height:1.55; }
+.finance-visual { transform:scale(.79); transform-origin:top center; margin-top:-5px; }
+.login-feature-strip { position:absolute; z-index:8; left:16px; right:16px; bottom:15px; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; padding:9px 8px; border:1px solid rgba(255,255,255,.16); border-radius:12px; background:rgba(3,45,125,.5); backdrop-filter:blur(7px); }
+.login-feature-item { display:flex; align-items:center; gap:6px; min-width:0; color:#fff; }
+.login-feature-icon { display:inline-flex; align-items:center; justify-content:center; flex:0 0 26px; width:26px; height:26px; border-radius:8px; color:#fff; background:linear-gradient(145deg,#38bdf8,#2563eb); font-size:11px; }
+.login-feature-item strong,.login-feature-item small { display:block; line-height:1.2; }
+.login-feature-item strong { font-size:7.5px; font-weight:700; }
+.login-feature-item small { margin-top:2px; color:rgba(255,255,255,.82); font-size:6.5px; }
+.login-right { padding:28px 34px; }
+.login-card { max-width:390px; }
+.login-form-brand { display:flex; align-items:center; gap:9px; margin:0 0 16px; }
+.login-form-brand-logo { display:block; width:38px; height:38px; object-fit:contain; }
+.login-form-brand-copy strong,.login-form-brand-copy span { display:block; }
+.login-form-brand-copy strong { color:#102d60; font-size:19px; font-weight:800; line-height:1.05; letter-spacing:-.35px; }
+.login-form-brand-copy span { margin-top:3px; color:#7487a5; font-size:9px; }
+.login-header { margin-bottom:17px; }
+.login-title { font-size:29px; }
+.login-header p { font-size:10.5px; }
+.login-form-group { margin-bottom:13px; }
+.login-input-group,.login-input { min-height:43px; }
+.login-input-group { border-radius:9px; }
+.login-input { font-size:11.5px; }
+.login-button { min-height:46px; border-radius:9px; background:linear-gradient(100deg,#1764ff,#2f5cf6); box-shadow:0 8px 18px rgba(37,99,235,.18); }
+.login-divider { margin-top:17px; }
+.login-footer { margin-top:10px; }
+@media (max-width:1100px) and (min-width:901px) {
+ .login-wrapper { width:min(1000px,calc(100vw - 40px)); }
+ .login-brand { padding-left:23px; padding-right:23px; }
+ .login-right { padding-left:26px; padding-right:26px; }
+ .finance-visual { transform:scale(.72); }
+ .login-feature-strip { left:12px; right:12px; gap:4px; }
+ .login-feature-icon { flex-basis:23px; width:23px; height:23px; font-size:10px; }
+ .login-feature-item strong { font-size:7px; } .login-feature-item small { font-size:6px; }
+}
+@media (max-width:900px) {
+ .login-page { padding:20px; }
+ .login-wrapper { width:min(560px,calc(100vw - 40px)); height:auto; min-height:0; max-height:none; grid-template-columns:1fr; overflow:hidden; }
+ .login-left { min-height:0; }
+ .login-brand { padding:23px 24px 0; }
+ .brand-content h1 { font-size:24px; } .brand-content p { max-width:440px; }
+ .finance-visual { display:none; }
+ .login-feature-strip { position:relative; left:auto; right:auto; bottom:auto; margin:16px; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; padding:10px; }
+ .login-feature-icon { flex-basis:28px; width:28px; height:28px; font-size:12px; }
+ .login-feature-item strong { font-size:8px; } .login-feature-item small { font-size:7px; }
+ .login-right { padding:25px 28px 28px; } .login-card { max-width:100%; }
+}
+@media (max-width:576px) {
+ .login-page { padding:12px; } .login-wrapper { width:100%; border-radius:16px; }
+ .login-brand { padding:20px 18px 0; } .brand-content h1 { font-size:21px; } .brand-content p { font-size:10px; }
+ .login-feature-strip { margin:13px; padding:9px; gap:8px 5px; }
+ .login-feature-icon { flex-basis:26px; width:26px; height:26px; }
+ .login-right { padding:22px 18px 24px; } .login-form-brand { margin-bottom:15px; } .login-title { font-size:26px; }
+}
+
+
+/* ==========================================================
+   LOGIN BRAND WORDMARK — MATCH FINOVA SIDEBAR
+   Typography follows assets/css/layout/sidebar.css.
+========================================================== */
+.brand-name-main {
+    font-family: 'Montserrat', 'Arial', sans-serif !important;
+    font-size: 29px !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.045em !important;
+    line-height: 1.05 !important;
+}
+
+.brand-name-sub {
+    font-family: 'Montserrat', 'Arial', sans-serif !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.14em !important;
+    line-height: 1.35 !important;
+    text-transform: uppercase;
+}
+
+.login-form-brand-copy strong {
+    font-family: 'Montserrat', 'Arial', sans-serif !important;
+    font-size: 22px !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.045em !important;
+    line-height: 1.05 !important;
+    background: linear-gradient(100deg, #07143F 0%, #0B2F91 36%, #0868F5 68%, #00B8F0 100%);
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    color: transparent !important;
+}
+
+.login-form-brand-copy span {
+    font-family: 'Montserrat', 'Arial', sans-serif !important;
+    font-size: 8px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.14em !important;
+    text-transform: uppercase;
+    color: #526b9a !important;
+}
+
+.login-form-brand-logo {
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
+}
+
+
+/* FINOVA LOGIN BRAND — MATCH SIDEBAR BLUE GRADIENT */
+.login-form-brand-copy strong {
+    font-family: 'Montserrat', Arial, sans-serif !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.045em !important;
+    line-height: 1.05 !important;
+    background: linear-gradient(100deg, #07143F 0%, #0B2F91 36%, #0868F5 68%, #00B8F0 100%);
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    color: transparent !important;
+    display: inline-block;
+}
+
+.login-form-brand-copy span {
+    font-family: 'Montserrat', Arial, sans-serif !important;
+    color: #5F83B5 !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.14em !important;
+    text-transform: uppercase;
+}
+
+.login-right {
+    background:
+        radial-gradient(ellipse at 82% 12%, rgba(96, 165, 250, 0.10) 0%, rgba(219, 234, 254, 0.045) 28%, transparent 58%),
+        linear-gradient(135deg, #FFFFFF 0%, #FCFDFF 52%, #F7FAFF 100%) !important;
+}
+
+/* Preserve legibility on the white login panel */
+.login-card,
+.login-header,
+.login-form-group,
+.login-footer {
+    position: relative;
+    z-index: 1;
+}

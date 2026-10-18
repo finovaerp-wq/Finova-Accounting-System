@@ -502,6 +502,39 @@ export class FixedAsset {
                 }
 
 
+                const recreateDepButton =
+                    event.target.closest(
+                        "[data-fad-recreate]"
+                    );
+
+
+                if (
+                    recreateDepButton
+                ) {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    const depreciationDate =
+                        recreateDepButton.dataset.fadRecreate;
+
+                    const dateInput =
+                        document.getElementById("fad-date");
+
+                    if (dateInput && depreciationDate) {
+                        dateInput.value = depreciationDate;
+                    }
+
+                    this.btnFadCreate =
+                        document.getElementById("btn-fad-create");
+
+                    await this.createDep();
+
+                    return;
+
+                }
+
+
                 const createJournalButton =
                     event.target.closest(
                         "[data-fad-post]"
@@ -4208,12 +4241,24 @@ async refresh() {
                                                         class="btn btn-sm btn-success"
                                                         data-fad-post="${depreciation.id}"
                                                     >
-                                                        <i class="fa-solid fa-file-circle-plus me-1"></i>
-                                                        Create Draft GL Journal
+                                                        Create Draft
                                                     </button>
                                                 `
                                         )
-                                        : "-"
+                                        : depreciation.status === "Void"
+                                            && !depreciation.gl_journal_id
+                                            ? `
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-sm btn-outline-primary"
+                                                    data-fad-recreate="${this.esc(depreciation.depreciation_date)}"
+                                                    title="Create a replacement draft for this period"
+                                                >
+                                                    <i class="fa-solid fa-rotate-right me-1"></i>
+                                                    Create New Draft
+                                                </button>
+                                            `
+                                            : "-"
                                 }
 
                             

@@ -281,6 +281,21 @@ export class CashFlowForecastService {
 
         if (error) {
 
+            // The manual-forecast table is not installed in every FINOVA
+            // database yet. Do not let this optional source block the main
+            // forecast built from AP/AR and cash/bank data.
+            if (
+                error.code === "PGRST205" ||
+                /could not find the table.*trx_cash_flow_forecast_manual/i.test(
+                    String(error.message || "")
+                )
+            ) {
+                console.warn(
+                    "CASH FLOW FORECAST: table trx_cash_flow_forecast_manual is missing; continuing without manual forecast rows. Install the table migration to enable manual entries."
+                );
+                return [];
+            }
+
             console.error(
                 "CASH FLOW FORECAST MANUAL GET ALL ERROR:",
                 error

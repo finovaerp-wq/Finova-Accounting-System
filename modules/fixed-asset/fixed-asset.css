@@ -831,3 +831,108 @@ i {
     }
 
 }
+
+/* ==========================================================
+   DEPRECIATION MODAL ACTIONS
+   Keep the GL action compact and prevent label wrapping/clipping.
+========================================================== */
+
+#faDepModal .finova-table td:last-child {
+    width: 130px;
+    min-width: 130px;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+#faDepModal [data-fad-post] {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: auto !important;
+    min-width: 94px;
+    max-width: none !important;
+    padding: 7px 10px !important;
+    margin: 0 0 5px 0 !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    line-height: 1.2;
+    font-size: 12px;
+}
+
+#faDepModal [data-fad-delete] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 32px;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+#faDepModal .table-responsive {
+    overflow-x: auto;
+}
+
+
+/* ==========================================================
+   FIXED ASSET LOADING OVERLAY
+========================================================== */
+
+.fa-module-loading {
+    position: fixed;
+    inset: 0;
+    z-index: 20000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(15, 23, 42, 0.28);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .15s ease, visibility .15s ease;
+}
+
+.fa-module-loading.is-visible {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: all;
+}
+
+.fa-module-loading-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 220px;
+    max-width: min(92vw, 360px);
+    padding: 18px 22px;
+    border: 1px solid rgba(148, 163, 184, .28);
+    border-radius: 12px;
+    background: #fff;
+    color: #1f2937;
+    box-shadow: 0 14px 40px rgba(15, 23, 42, .18);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.fa-module-loading-spinner {
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+    border: 3px solid #dbeafe;
+    border-top-color: #2563eb;
+    border-radius: 50%;
+    animation: fa-module-spin .75s linear infinite;
+}
+
+@keyframes fa-module-spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fa-module-loading, .fa-module-loading-spinner {
+        transition: none;
+        animation-duration: 1.5s;
+    }
+}
