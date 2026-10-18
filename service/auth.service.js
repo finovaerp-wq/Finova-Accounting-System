@@ -215,12 +215,78 @@ static isLogoutRunning =
 
 
         /*
-        ==========================================
-        VALIDATE ACTIVE FINOVA USER
-        ==========================================
-        */
+==========================================
+CHECK FINOVA SUPER ADMIN
+==========================================
+*/
 
-        await this.validateActiveUser();
+const {
+    data: isSuperAdmin,
+    error: superAdminError
+} = await supabase.rpc(
+    "is_finova_super_admin"
+);
+console.log(
+    "=========================================="
+);
+
+console.log(
+    "FINOVA LOGIN DEBUG"
+);
+
+console.log(
+    "AUTH USER :",
+    data?.user
+);
+
+console.log(
+    "AUTH USER ID :",
+    data?.user?.id
+);
+
+console.log(
+    "AUTH EMAIL :",
+    data?.user?.email
+);
+
+console.log(
+    "IS SUPER ADMIN :",
+    isSuperAdmin
+);
+
+console.log(
+    "SUPER ADMIN ERROR :",
+    superAdminError
+);
+
+console.log(
+    "=========================================="
+);
+
+
+if (
+    superAdminError
+) {
+
+    console.error(
+        "FINOVA SUPER ADMIN CHECK ERROR :",
+        superAdminError
+    );
+
+    throw superAdminError;
+
+}
+
+
+/*
+==========================================
+VALIDATE ACTIVE FINOVA USER
+==========================================
+*/
+
+await this.validateActiveUser(
+    isSuperAdmin === true
+);
 
 
 
@@ -260,7 +326,63 @@ static isLogoutRunning =
     ======================================================
     */
 
-    static async validateActiveUser() {
+    static async validateActiveUser(
+        knownSuperAdmin = null
+    ) {
+
+        let isSuperAdmin =
+            knownSuperAdmin;
+
+
+        /*
+        ==========================================
+        CHECK SUPER ADMIN WHEN NOT KNOWN
+        ==========================================
+        */
+
+        if (
+            isSuperAdmin === null
+            ||
+            isSuperAdmin === undefined
+        ) {
+
+            const {
+                data,
+                error
+            } = await supabase.rpc(
+                "is_finova_super_admin"
+            );
+
+
+            if (
+                error
+            ) {
+
+                throw error;
+
+            }
+
+
+            isSuperAdmin =
+                data === true;
+
+        }
+
+
+        /*
+        ==========================================
+        SUPER ADMIN BYPASS
+        ==========================================
+        */
+
+        if (
+            isSuperAdmin === true
+        ) {
+
+            return true;
+
+        }
+
 
         /*
         ==========================================
@@ -271,7 +393,16 @@ static isLogoutRunning =
         const profile =
             await UserService.getCurrentProfile();
 
-        if (!profile) {
+
+        /*
+        ==========================================
+        PROFILE NOT FOUND
+        ==========================================
+        */
+
+        if (
+            !profile
+        ) {
 
             await supabase.auth.signOut();
 
@@ -281,13 +412,16 @@ static isLogoutRunning =
 
         }
 
+
         /*
         ==========================================
-        ACTIVE USER ONLY
+        INACTIVE USER
         ==========================================
         */
 
-        if (profile.status !== true) {
+        if (
+            profile.status !== true
+        ) {
 
             await supabase.auth.signOut();
 
@@ -297,27 +431,6 @@ static isLogoutRunning =
 
         }
 
-        /*
-        ==========================================
-        VALID FINOVA ROLES
-        ==========================================
-        */
-
-        const validRoles = [
-            "Admin",
-            "Manager",
-            "Staff"
-        ];
-
-        if (!validRoles.includes(profile.role)) {
-
-            await supabase.auth.signOut();
-
-            throw new Error(
-                `Invalid FINOVA role: ${profile.role ?? "not assigned"}.`
-            );
-
-        }
 
         return true;
 

@@ -270,7 +270,52 @@ async redirectAuthenticatedUser() {
 
     /*
     ==========================================
-    FINOVA USER
+    CHECK SUPER ADMIN
+    ==========================================
+    */
+
+    const {
+        data: isSuperAdmin,
+        error: superAdminError
+    } = await supabase.rpc(
+        "is_finova_super_admin"
+    );
+
+
+    if (
+        superAdminError
+    ) {
+
+        console.error(
+            "FINOVA SUPER ADMIN CHECK ERROR :",
+            superAdminError
+        );
+
+        throw superAdminError;
+    }
+
+
+    /*
+    ==========================================
+    SUPER ADMIN
+    ==========================================
+    */
+
+    if (
+        isSuperAdmin === true
+    ) {
+
+        window.location.replace(
+            "index.html"
+        );
+
+        return;
+    }
+
+
+    /*
+    ==========================================
+    CUSTOMER USER
     ==========================================
     */
 
@@ -280,6 +325,127 @@ async redirectAuthenticatedUser() {
 
 }
 /*
+==========================================================
+VALIDATE FINOVA ACCOUNT STATUS
+==========================================================
+*/
+
+async validateFinovaAccountStatus() {
+
+    /*
+    ======================================================
+    GET AUTH USER
+    ======================================================
+    */
+
+    const {
+        data: authData,
+        error: authError
+    } = await supabase.auth.getUser();
+
+
+    if (
+        authError
+    ) {
+
+        throw authError;
+
+    }
+
+
+    const authUser =
+        authData?.user;
+
+
+    if (
+        !authUser
+    ) {
+
+        throw new Error(
+            "Authenticated user was not found."
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    CHECK FINOVA PROFILE
+    ======================================================
+    */
+
+    const {
+        data: profile,
+        error: profileError
+    } = await supabase
+
+        .from("mst_users")
+
+        .select(
+            "user_uid, full_name, email, role, status"
+        )
+
+        .eq(
+            "user_uid",
+            authUser.id
+        )
+
+        .maybeSingle();
+
+
+    if (
+        profileError
+    ) {
+
+        await supabase.auth.signOut();
+
+        throw profileError;
+
+    }
+
+
+    /*
+    ======================================================
+    PROFILE NOT FOUND
+    ======================================================
+    */
+
+    if (
+        !profile
+    ) {
+
+        await supabase.auth.signOut();
+
+        throw new Error(
+            "FINOVA user profile was not found."
+        );
+
+    }
+
+
+    /*
+    ======================================================
+    ACTIVE STATUS ONLY
+    ======================================================
+    */
+
+    if (
+        profile.status !== true
+    ) {
+
+        await supabase.auth.signOut();
+
+        throw new Error(
+            "Your FINOVA account is inactive. Please contact the administrator."
+        );
+
+    }
+
+
+    return true;
+
+}
+        /*
     ======================================================
     LOGIN
     ======================================================
@@ -287,50 +453,149 @@ async redirectAuthenticatedUser() {
 
     async login() {
 
+        /*
+        ==============================================
+        PREVENT MULTIPLE REQUEST
+        ==============================================
+        */
+
         if (this.isLoading) {
+
             return;
+
         }
 
-        const email = this.email.value.trim();
-        const password = this.password.value;
+        /*
+        ==============================================
+        GET VALUE
+        ==============================================
+        */
+
+        const email =
+
+            this.email.value.trim();
+
+        const password =
+
+            this.password.value;
+
+        /*
+        ==============================================
+        VALIDATION
+        ==============================================
+        */
 
         if (!email) {
-            this.showError("Email is required.");
+
+            this.showError(
+
+                "Email is required."
+
+            );
+
             this.email.focus();
+
             return;
+
         }
 
         if (!password) {
-            this.showError("Password is required.");
+
+            this.showError(
+
+                "Password is required."
+
+            );
+
             this.password.focus();
+
             return;
+
         }
 
         this.isLoading = true;
+
         this.showLoading();
 
         try {
-            await AuthService.login(email, password);
 
-            if (this.rememberMe?.checked) {
-                AuthService.saveRememberEmail(email);
-            } else {
-                AuthService.clearRememberEmail();
+            /*
+            ==========================================
+            LOGIN
+            ==========================================
+            */
+
+            await AuthService.login(
+
+                email,
+
+                password
+
+            );
+
+            
+
+            /*
+            ==========================================
+            REMEMBER EMAIL
+            ==========================================
+            */
+
+            if (
+
+                this.rememberMe.checked
+
+            ) {
+
+                AuthService.saveRememberEmail(
+
+                    email
+
+                );
+
             }
 
-            await this.redirectAuthenticatedUser();
+            else {
 
-        } catch (error) {
-            console.error("FINOVA LOGIN ERROR:", error);
-            this.showError(error?.message ?? "Login failed.");
+                AuthService.clearRememberEmail();
 
-        } finally {
+            }
+
+           
+
+            /*
+==========================================
+REDIRECT BY USER TYPE
+==========================================
+*/
+
+await this.redirectAuthenticatedUser();
+
+        }
+
+        catch (error) {
+
+            console.error(error);
+
+            this.showError(
+
+                error.message ??
+
+                "Login failed."
+
+            );
+
+        }
+
+        finally {
+
             this.hideLoading();
+
             this.isLoading = false;
+
         }
 
     }
-
 /*
 ======================================================
 CHECK SESSION

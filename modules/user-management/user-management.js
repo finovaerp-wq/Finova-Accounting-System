@@ -42,7 +42,7 @@ export class UserManagement {
 
     this.currentAuthUser = null;
 
-    this.isAdmin = false;
+    this.isSuperAdmin = false;
 
     this.isManager = false;
 
@@ -212,10 +212,16 @@ export class UserManagement {
         */
 
         const accessRole =
-            this.currentProfile
-                ?.role
-            ||
-            "UNKNOWN";
+            this.isSuperAdmin
+                ?
+                "SUPER ADMIN"
+                :
+                (
+                    this.currentProfile
+                        ?.role
+                    ||
+                    "UNKNOWN"
+                );
 
 
         console.log(
@@ -1379,7 +1385,96 @@ async loadAccess() {
 
     /*
     ======================================================
-    TENANT AUTHORITY
+    SUPER ADMIN AUTHORITY
+    ======================================================
+    */
+
+    const {
+        data: isSuperAdmin,
+        error: superAdminError
+    } =
+        await supabase.rpc(
+            "is_finova_super_admin"
+        );
+
+
+    if (
+        superAdminError
+    ) {
+
+        console.error(
+            "FINOVA SUPER ADMIN ACCESS CHECK:",
+            superAdminError
+        );
+
+
+        throw new Error(
+            "Failed to verify FINOVA Super Admin access."
+        );
+
+    }
+
+
+    this.isSuperAdmin =
+        isSuperAdmin
+        ===
+        true;
+
+
+    /*
+    ======================================================
+    SUPER ADMIN
+    ======================================================
+    */
+
+    if (
+        this.isSuperAdmin
+    ) {
+
+        /*
+        ==================================================
+        SUPER ADMIN IS NOT A TENANT MST_USERS PROFILE
+        ==================================================
+        */
+
+        this.currentProfile = null;
+
+
+        /*
+        ==================================================
+        USER MANAGEMENT ADMINISTRATIVE ACCESS
+        ==================================================
+        */
+
+        this.isManager = true;
+
+
+        console.log(
+            "FINOVA USER MANAGEMENT ACCESS:",
+            {
+                accessMode:
+                    "SUPER ADMIN",
+
+                isSuperAdmin:
+                    true,
+
+                isManager:
+                    true,
+
+                authUserId:
+                    this.currentAuthUser.id
+            }
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+    ======================================================
+    TENANT PROFILE
     ======================================================
     */
 
@@ -1387,44 +1482,59 @@ async loadAccess() {
         await UserManagementService
             .getCurrentProfile();
 
-    if (!this.currentProfile) {
+
+    if (
+        !this.currentProfile
+    ) {
+
         throw new Error(
             "FINOVA user profile was not found."
         );
+
     }
 
-    const role = String(
-        this.currentProfile.role || ""
-    ).trim().toLowerCase();
 
-    this.isAdmin = role === "admin";
-    this.isManager = role === "manager" || this.isAdmin;
+    /*
+    ======================================================
+    TENANT ROLE
+    ======================================================
+    */
 
-    if (!["admin", "manager", "staff"].includes(role)) {
-        throw new Error(
-            "FINOVA user role is not valid."
-        );
-    }
+    this.isManager =
+        String(
+            this.currentProfile.role
+            ||
+            ""
+        )
+            .trim()
+            .toLowerCase()
+        ===
+        "manager";
 
-    const adminRoleOption =
-        this.inputRole?.querySelector(
-            'option[value="Admin"]'
-        );
 
-    if (adminRoleOption) {
-        adminRoleOption.disabled = !this.isAdmin;
-        adminRoleOption.hidden = !this.isAdmin;
-    }
+    /*
+    ======================================================
+    DEBUG
+    ======================================================
+    */
 
     console.log(
         "FINOVA USER MANAGEMENT ACCESS:",
         {
-            accessMode: "COMPANY USER",
-            isAdmin: this.isAdmin,
-            isManager: this.isManager,
-            role: this.currentProfile.role,
-            companyId: this.currentProfile.company_id,
-            authUserId: this.currentAuthUser.id
+            accessMode:
+                "TENANT USER",
+
+            isSuperAdmin:
+                false,
+
+            isManager:
+                this.isManager,
+
+            role:
+                this.currentProfile.role,
+
+            authUserId:
+                this.currentAuthUser.id
         }
     );
 
@@ -1485,19 +1595,21 @@ applyAccessUI() {
 
     /*
     ======================================================
-    ADMIN
+    SUPER ADMIN
     ======================================================
     */
 
     if (
-        this.isAdmin
+        this.isSuperAdmin
     ) {
 
         this.accessInfo
             .classList
             .add(
-                "manager"
+                "manager",
+                "super-admin"
             );
+
 
         this.accessInfo.innerHTML = `
             <i
@@ -1509,11 +1621,12 @@ applyAccessUI() {
             </i>
 
             Logged in as
-            <strong>Admin</strong>.
+            <strong>Super Admin</strong>.
 
-            You have full User Management access
-            for your company.
+            You have FINOVA administrative access
+            for the selected Company Context.
         `;
+
 
         return;
 
@@ -1606,47 +1719,11 @@ applyAccessUI() {
 
 
         this.showError(
-            "Only Admin or Manager can modify User Management."
+            "Only Manager can modify User Management."
         );
 
 
         return false;
-
-    }
-
-
-    /*
-    ==========================================================
-    TARGET USER AUTHORITY
-    ==========================================================
-    */
-
-    canManageTarget(
-        user
-    ) {
-
-        const targetRole = String(
-            user?.role || ""
-        )
-            .trim()
-            .toLowerCase();
-
-        if (!this.isManager) {
-            return false;
-        }
-
-        if (this.isAdmin) {
-            return [
-                "admin",
-                "manager",
-                "staff"
-            ].includes(targetRole);
-        }
-
-        return [
-            "manager",
-            "staff"
-        ].includes(targetRole);
 
     }
 
@@ -2074,9 +2151,15 @@ applyAccessUI() {
     ) {
 
         const role =
-            ["Admin", "Manager", "Staff"].includes(user.role)
-                ? user.role
-                : "Staff";
+            user.role
+            ===
+            "Manager"
+
+                ?
+                "Manager"
+
+                :
+                "Staff";
 
 
         const active =
@@ -2243,60 +2326,6 @@ applyAccessUI() {
 
     if (
         !this.isManager
-    ) {
-
-        return `
-
-            <div
-                class="
-                    user-action-group
-                ">
-
-                <button
-                    type="button"
-                    class="
-                        btn
-                        btn-outline-secondary
-                        btn-sm
-                        user-action-btn
-                        user-action-view
-                    "
-                    title="View"
-                    data-action="view"
-                    data-uid="${uid}">
-
-                    <i
-                        class="
-                            fa-solid
-                            fa-eye
-                        ">
-                    </i>
-
-                </button>
-
-            </div>
-
-        `;
-
-    }
-
-
-    /*
-    ======================================================
-    MANAGER CANNOT MUTATE ADMIN
-    ======================================================
-    */
-
-    if (
-        this.isManager
-        &&
-        !this.isAdmin
-        &&
-        String(user?.role || "")
-            .trim()
-            .toLowerCase()
-        ===
-        "admin"
     ) {
 
         return `
@@ -2957,27 +2986,6 @@ applyAccessUI() {
 
     /*
     ======================================================
-    TARGET AUTHORITY
-    ======================================================
-    */
-
-    if (
-        !this.canManageTarget(user)
-    ) {
-
-        this.showError(
-            this.isAdmin
-                ? "This user role cannot be edited."
-                : "Manager cannot edit an Admin user."
-        );
-
-        return;
-
-    }
-
-
-    /*
-    ======================================================
     EDIT MODE
     ======================================================
     */
@@ -3108,9 +3116,15 @@ applyAccessUI() {
 
 
         this.inputRole.value =
-            ["Admin", "Manager", "Staff"].includes(user.role)
-                ? user.role
-                : "Staff";
+            user.role
+            ===
+            "Manager"
+
+                ?
+                "Manager"
+
+                :
+                "Staff";
 
 
         this.inputStatus.checked =
@@ -3171,11 +3185,16 @@ applyAccessUI() {
 
 
             const role =
-                ["Admin", "Manager", "Staff"].includes(
-                    this.inputRole?.value
-                )
-                    ? this.inputRole.value
-                    : "Staff";
+                this.inputRole
+                    ?.value
+                ===
+                "Manager"
+
+                    ?
+                    "Manager"
+
+                    :
+                    "Staff";
 
 
             const status =
@@ -3183,25 +3202,6 @@ applyAccessUI() {
                     this.inputStatus
                         ?.checked
                 );
-
-
-            /*
-            ==================================================
-            PREVENT SELF DEACTIVATION
-            ==================================================
-            */
-
-            if (
-                this.currentMode === "edit"
-                &&
-                this.currentUserUid === this.currentAuthUser?.id
-                &&
-                !status
-            ) {
-                throw new Error(
-                    "You cannot deactivate your own FINOVA account."
-                );
-            }
 
 
             /*
@@ -4055,25 +4055,6 @@ applyAccessUI() {
 
     /*
     ======================================================
-    TARGET AUTHORITY
-    ======================================================
-    */
-
-    if (
-        !this.canManageTarget(user)
-    ) {
-
-        this.showError(
-            "Manager cannot reset the password of an Admin user."
-        );
-
-        return;
-
-    }
-
-
-    /*
-    ======================================================
     STORE TARGET USER
     ======================================================
     */
@@ -4697,19 +4678,6 @@ applyAccessUI() {
 
             this.showError(
                 "You cannot delete your own login account."
-            );
-
-            return;
-
-        }
-
-
-        if (
-            !this.canManageTarget(user)
-        ) {
-
-            this.showError(
-                "Manager cannot delete an Admin user."
             );
 
             return;

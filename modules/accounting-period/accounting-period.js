@@ -241,12 +241,12 @@ async loadCurrentUserAccess() {
             )
 
             .select(`
+                id,
                 user_uid,
                 full_name,
                 email,
                 role,
-                status,
-                company_id
+                status
             `)
 
             .eq(
@@ -375,28 +375,6 @@ async loadCurrentUserAccess() {
             document.getElementById(
                 "btn-refresh-accounting-period"
             );
-
-
-        this.btnAdd =
-            document.getElementById(
-                "btn-add-accounting-period"
-            );
-
-        this.addModalElement =
-            document.getElementById(
-                "accountingPeriodAddModal"
-            );
-
-        this.addYear = document.getElementById("accounting-period-add-year");
-        this.addMonth = document.getElementById("accounting-period-add-month");
-        this.addStatus = document.getElementById("accounting-period-add-status");
-        this.addError = document.getElementById("accounting-period-add-error");
-        this.btnConfirmAdd = document.getElementById("btn-confirm-add-accounting-period");
-
-        this.addModal =
-            this.addModalElement && window.bootstrap
-                ? bootstrap.Modal.getOrCreateInstance(this.addModalElement)
-                : null;
 
 
         /*
@@ -540,15 +518,16 @@ async loadCurrentUserAccess() {
         */
 
         this.btnRefresh?.addEventListener(
+
             "click",
-            async () => { await this.loadData(); }
+
+            async () => {
+
+                await this.loadData();
+
+            }
+
         );
-
-        this.btnAdd?.addEventListener("click", () => this.openAddPeriodModal());
-
-        this.btnConfirmAdd?.addEventListener("click", async () => {
-            await this.confirmAddPeriod();
-        });
 
 
         /*
@@ -691,14 +670,14 @@ async loadCurrentUserAccess() {
 
 
                 const id =
-                    String(
+                    Number(
                         button.dataset.id
-                        ||
-                        ""
-                    ).trim();
+                    );
 
 
-                if (!id) {
+                if (
+                    !id
+                ) {
 
                     return;
 
@@ -841,35 +820,6 @@ async loadCurrentUserAccess() {
 
             /*
             ==================================================
-            DERIVE UI DATES FROM YEAR / MONTH
-            DATABASE DOES NOT STORE START_DATE / END_DATE
-            ==================================================
-            */
-
-            this.data = (this.data || []).map(item => {
-
-                const year = Number(item.period_year);
-                const month = Number(item.period_month);
-                let startDate = null;
-                let endDate = null;
-
-                if (Number.isInteger(year) && Number.isInteger(month) && month >= 1 && month <= 12) {
-                    startDate = `${year}-${String(month).padStart(2, "0")}-01`;
-                    const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
-                    endDate = `${year}-${String(month).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
-                }
-
-                return {
-                    ...item,
-                    _start_date: startDate,
-                    _end_date: endDate,
-                    _reopened_at: null
-                };
-            });
-
-
-            /*
-            ==================================================
             CLEAR OLD HISTORY CACHE
             ==================================================
             */
@@ -980,21 +930,196 @@ async loadCurrentUserAccess() {
 
     async preparePeriodActions() {
 
-        if (!Array.isArray(this.data)) return;
+        if (
+            !Array.isArray(
+                this.data
+            )
+            ||
+            !this.data.length
+        ) {
 
-        const today = this.getJakartaToday();
+            return;
 
-        this.data.forEach(item => {
-            const status = String(item.status || "").trim().toUpperCase();
+        }
 
-            if (status === "OPEN") {
-                item._periodAction = "close";
-                return;
+
+        const today =
+            this.getJakartaToday();
+
+
+        const closedPeriods =
+            this.data.filter(
+
+                item =>
+
+                    String(
+                        item.status
+                        ||
+                        ""
+                    )
+                    .trim()
+                    .toLowerCase()
+                    ===
+                    "closed"
+
+            );
+
+
+        await Promise.all(
+
+            closedPeriods.map(
+
+                async item => {
+
+                    let hasCloseHistory =
+                        false;
+
+
+                    try {
+
+                        const history =
+                            await this.getPeriodHistory(
+                                item.id
+                            );
+
+
+                        hasCloseHistory =
+                            history.some(
+
+                                historyItem =>
+
+                                    String(
+                                        historyItem.action
+                                        ||
+                                        ""
+                                    )
+                                    .trim()
+                                    .toUpperCase()
+                                    ===
+                                    "CLOSE"
+
+                            );
+
+                    }
+
+                    catch (
+                        error
+                    ) {
+
+                        /*
+                        ======================================
+                        HISTORY FAILURE MUST NOT BLOCK PAGE
+                        ======================================
+                        */
+
+                        console.warn(
+                            "Accounting Period history unavailable:",
+                            item.period,
+                            error
+                        );
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    PERIOD ALREADY CLOSED BY NEW SYSTEM
+                    ==========================================
+                    */
+
+                    if (
+                        hasCloseHistory
+                    ) {
+
+                        item._periodAction =
+                            "reopen";
+
+                        return;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    LEGACY CLOSED PERIOD
+
+                    Example:
+                    Jan-Aug 2026 were already Closed before
+                    history feature existed.
+                    ==========================================
+                    */
+
+                    if (
+                        item.start_date
+                        &&
+                        String(
+                            item.start_date
+                        )
+                        <=
+                        today
+                    ) {
+
+                        item._periodAction =
+                            "reopen";
+
+                        return;
+
+                    }
+
+
+                    /*
+                    ==========================================
+                    FUTURE PERIOD
+
+                    Example:
+                    Oct 2026 - Dec 2030
+                    ==========================================
+                    */
+
+                    item._periodAction =
+                        "open";
+
+                }
+
+            )
+
+        );
+
+
+        /*
+        ==================================================
+        OPEN PERIOD ALWAYS CLOSE
+        ==================================================
+        */
+
+        this.data.forEach(
+
+            item => {
+
+                const status =
+                    String(
+                        item.status
+                        ||
+                        ""
+                    )
+                    .trim()
+                    .toLowerCase();
+
+
+                if (
+                    status ===
+                    "open"
+                ) {
+
+                    item._periodAction =
+                        "close";
+
+                }
+
             }
 
-            const endDate = String(item._end_date || "");
-            item._periodAction = endDate && endDate <= today ? "reopen" : "open";
-        });
+        );
+
     }
 
 
@@ -1125,7 +1250,7 @@ async loadCurrentUserAccess() {
 
                         item =>
                             Number(
-                                item.period_year
+                                item.year
                             )
 
                     )
@@ -1236,7 +1361,7 @@ async loadCurrentUserAccess() {
                         year
                         &&
                         String(
-                            item.period_year
+                            item.year
                         )
                         !==
                         year
@@ -1280,9 +1405,9 @@ async loadCurrentUserAccess() {
 
                         const searchable =
                             [
-                                item.period_code,
-                                item.period_year,
-                                item.period_month,
+                                item.period,
+                                item.year,
+                                item.month,
                                 item.status
                             ]
                             .join(
@@ -1409,6 +1534,18 @@ async loadCurrentUserAccess() {
             normalizedStatus ===
             "open";
 
+        const openDisabled = isOpen
+    ? "disabled"
+    : "";
+
+const closeDisabled = isOpen
+    ? ""
+    : "disabled";
+
+const reopenDisabled = isOpen
+    ? "disabled"
+    : "";
+
 
         /*
         ==================================================
@@ -1434,49 +1571,13 @@ async loadCurrentUserAccess() {
                 `;
 
 
-        /*
-        ==================================================
-        ACTION
-        ==================================================
-        */
+        let actionButton = "";
 
-        const periodAction =
-            String(
-                item._periodAction
-                ||
-                (
-                    isOpen
-                        ?
-                        "close"
-                        :
-                        "open"
-                )
-            )
-            .toLowerCase();
-
-
-        let actionButton =
-    "";
-
-
-/*
-==================================================
-NON MANAGER
-VIEW ONLY
-==================================================
-*/
-
-if (
-    !this.isManager
-) {
+if (!this.isManager) {
 
     actionButton = `
 
-        <span
-            class="
-                text-muted
-                small
-            ">
+        <span class="text-muted small">
 
             <i class="fa-solid fa-eye me-1"></i>
 
@@ -1486,95 +1587,67 @@ if (
 
     `;
 
-}
-
-
-/*
-==================================================
-MANAGER
-==================================================
-*/
-
-else if (
-    periodAction ===
-    "close"
-) {
+} else {
 
     actionButton = `
 
-        <button
-            type="button"
-            class="
-                btn
-                btn-sm
-                btn-outline-danger
-            "
-            data-period-action="close"
-            data-id="${item.id}">
+        <div class="accounting-period-actions">
 
-            <i class="fa-solid fa-lock me-1"></i>
+            <!-- OPEN -->
 
-            Close
+            <button
+                type="button"
+                class="accounting-period-action-btn accounting-period-action-open"
+                data-period-action="open"
+                data-id="${item.id}"
+                ${openDisabled}
+                title="Open Period"
+                aria-label="Open Period">
 
-        </button>
+                <i class="fa-solid fa-lock-open"></i>
+                <span>Open</span>
+
+            </button>
+
+
+            <!-- CLOSE -->
+
+            <button
+                type="button"
+                class="accounting-period-action-btn accounting-period-action-close"
+                data-period-action="close"
+                data-id="${item.id}"
+                ${closeDisabled}
+                title="Close Period"
+                aria-label="Close Period">
+
+                <i class="fa-solid fa-lock"></i>
+<span>Close</span>
+
+            </button>
+
+
+            <!-- REOPEN -->
+
+            <button
+                type="button"
+                class="accounting-period-action-btn accounting-period-action-reopen"
+                data-period-action="reopen"
+                data-id="${item.id}"
+                ${reopenDisabled}
+                title="Reopen Period"
+                aria-label="Reopen Period">
+
+                <i class="fa-solid fa-rotate-left"></i>
+<span>Reopen</span>
+
+            </button>
+
+        </div>
 
     `;
 
 }
-
-
-else if (
-    periodAction ===
-    "reopen"
-) {
-
-    actionButton = `
-
-        <button
-            type="button"
-            class="
-                btn
-                btn-sm
-                btn-outline-warning
-            "
-            data-period-action="reopen"
-            data-id="${item.id}">
-
-            <i class="fa-solid fa-rotate-left me-1"></i>
-
-            Reopen
-
-        </button>
-
-    `;
-
-}
-
-
-else {
-
-    actionButton = `
-
-        <button
-            type="button"
-            class="
-                btn
-                btn-sm
-                btn-outline-success
-            "
-            data-period-action="open"
-            data-id="${item.id}">
-
-            <i class="fa-solid fa-lock-open me-1"></i>
-
-            Open
-
-        </button>
-
-    `;
-
-}
-
 
         /*
         ==================================================
@@ -1603,7 +1676,7 @@ else {
                     <strong>
 
                         ${this.escapeHTML(
-                            item.period_code
+                            item.period
                         )}
 
                     </strong>
@@ -1616,7 +1689,7 @@ else {
                 <td class="finova-table-date">
 
                     ${this.formatDate(
-                        item._start_date
+                        item.start_date
                     )}
 
                 </td>
@@ -1627,7 +1700,7 @@ else {
                 <td class="finova-table-date">
 
                     ${this.formatDate(
-                        item._end_date
+                        item.end_date
                     )}
 
                 </td>
@@ -1658,7 +1731,7 @@ else {
                 <td class="finova-table-date">
 
                     ${this.formatDateTime(
-                        item._reopened_at
+                        item.reopened_at
                     )}
 
                 </td>
@@ -1694,9 +1767,13 @@ else {
 
                 item =>
 
-                    String(item.id)
+                    Number(
+                        item.id
+                    )
                     ===
-                    String(id)
+                    Number(
+                        id
+                    )
 
             )
             ||
@@ -1718,7 +1795,9 @@ else {
     ) {
 
         const key =
-            String(periodId);
+            Number(
+                periodId
+            );
 
 
         if (
@@ -1761,58 +1840,6 @@ else {
             []
         );
 
-    }
-
-
-    openAddPeriodModal() {
-        if (!this.isManager) {
-            this.showError("Access denied. Only Manager can add Accounting Period.");
-            return;
-        }
-
-        const now = new Date();
-        const jakarta = new Intl.DateTimeFormat("en-US", { timeZone: "Asia/Jakarta", year: "numeric", month: "numeric" }).formatToParts(now);
-        const year = Number(jakarta.find(x => x.type === "year")?.value) || new Date().getFullYear();
-        const month = Number(jakarta.find(x => x.type === "month")?.value) || 1;
-
-        if (this.addYear) this.addYear.value = year;
-        if (this.addMonth) this.addMonth.value = String(month);
-        if (this.addStatus) this.addStatus.value = "OPEN";
-        this.hideAddError();
-        this.addModal?.show();
-    }
-
-    hideAddError() {
-        if (this.addError) { this.addError.textContent = ""; this.addError.classList.add("d-none"); }
-    }
-
-    showAddError(message) {
-        if (this.addError) { this.addError.textContent = message; this.addError.classList.remove("d-none"); }
-    }
-
-    async confirmAddPeriod() {
-        if (!this.isManager) {
-            this.showAddError("Access denied. Only Manager can add Accounting Period.");
-            return;
-        }
-
-        const year = Number(this.addYear?.value);
-        const month = Number(this.addMonth?.value);
-        const status = String(this.addStatus?.value || "OPEN").toUpperCase();
-
-        this.hideAddError();
-
-        try {
-            if (this.btnConfirmAdd) this.btnConfirmAdd.disabled = true;
-            await this.service.addPeriod(year, month, status);
-            this.addModal?.hide();
-            await this.loadData();
-        } catch (error) {
-            console.error("AccountingPeriod.confirmAddPeriod:", error);
-            this.showAddError(error?.message || "Failed to add Accounting Period.");
-        } finally {
-            if (this.btnConfirmAdd) this.btnConfirmAdd.disabled = false;
-        }
     }
 
 
@@ -1999,7 +2026,7 @@ else {
         ) {
 
             this.modalPeriod.textContent =
-                period.period_code
+                period.period
                 ||
                 "-";
 
@@ -2012,7 +2039,7 @@ else {
 
             this.modalStartDate.textContent =
                 this.formatDate(
-                    period._start_date
+                    period.start_date
                 );
 
         }
@@ -2024,7 +2051,7 @@ else {
 
             this.modalEndDate.textContent =
                 this.formatDate(
-                    period._end_date
+                    period.end_date
                 );
 
         }
@@ -2286,24 +2313,30 @@ else {
         }
 
 
-        if (
-            this.confirmIcon
-        ) {
+       if (this.btnConfirmAction) {
 
-            this.confirmIcon.className =
-                "fa-solid fa-lock me-1";
+    this.btnConfirmAction.innerHTML = `
+        <i
+            id="accounting-period-confirm-icon"
+            class="fa-solid fa-lock me-1">
+        </i>
 
-        }
+        <span id="accounting-period-confirm-text">
+            Close Period
+        </span>
+    `;
 
+    this.confirmIcon =
+        document.getElementById(
+            "accounting-period-confirm-icon"
+        );
 
-        if (
-            this.confirmText
-        ) {
+    this.confirmText =
+        document.getElementById(
+            "accounting-period-confirm-text"
+        );
 
-            this.confirmText.textContent =
-                "Close Period";
-
-        }
+}
 
     }
 
@@ -2667,7 +2700,7 @@ else {
             ) {
 
                 this.showSuccess(
-                    `Accounting Period ${period.period_code} closed successfully.`
+                    `Accounting Period ${period.period} closed successfully.`
                 );
 
             }
@@ -2679,7 +2712,7 @@ else {
             ) {
 
                 this.showSuccess(
-                    `Accounting Period ${period.period_code} reopened successfully.`
+                    `Accounting Period ${period.period} reopened successfully.`
                 );
 
             }
@@ -2688,7 +2721,7 @@ else {
             else {
 
                 this.showSuccess(
-                    `Accounting Period ${period.period_code} opened successfully.`
+                    `Accounting Period ${period.period} opened successfully.`
                 );
 
             }

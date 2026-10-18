@@ -4753,39 +4753,6 @@ async generateARPaymentJournal(
 
 
         /*
-        ==================================================
-        RESOLVE ACTIVE TENANT COMPANY
-        ==================================================
-        */
-
-        const {
-            data: effectiveCompanyId,
-            error: effectiveCompanyError
-        } = await supabase.rpc("finova_effective_company_id");
-
-        if (effectiveCompanyError) {
-            console.error(
-                "AR PAYMENT EFFECTIVE COMPANY ERROR:",
-                effectiveCompanyError
-            );
-            throw effectiveCompanyError;
-        }
-
-        const invoiceCompanyId = invoice.company_id || payment.company_id || null;
-
-        if (!effectiveCompanyId) {
-            throw new Error(
-                "AR Payment tidak dapat membuat GL Journal: company context aktif tidak ditemukan. Silakan pilih company yang benar dan login ulang jika perlu."
-            );
-        }
-
-        if (invoiceCompanyId && invoiceCompanyId !== effectiveCompanyId) {
-            throw new Error(
-                `AR Payment company (${invoiceCompanyId}) tidak sama dengan company aktif (${effectiveCompanyId}).`
-            );
-        }
-
-        /*
 ==================================================
 PIUTANG USAHA
 MULTI COMPANY SAFE
@@ -4809,10 +4776,6 @@ const {
         .eq(
             "account_code",
             "1-11041"
-        )
-        .eq(
-            "company_id",
-            effectiveCompanyId
         )
         .eq(
             "status",
@@ -5035,9 +4998,6 @@ console.log(
 
         const journalHeader = {
 
-            // Required by FINOVA tenant RLS policy.
-            company_id:
-                effectiveCompanyId,
 
             /*
             ==============================================
@@ -6631,20 +6591,26 @@ renderCustomerOptions() {
                 );
 
 
-            
-option.value =
-    customer.id;
+            option.value =
+                customer.id;
 
 
-option.textContent =
-    customer.bp_name || "";
+            option.textContent =
+                `${
+                    customer.bp_code
+                    ||
+                    ""
+                } :: ${
+                    customer.bp_name
+                    ||
+                    ""
+                }`;
 
 
-this.arFormCustomer
-    .appendChild(
-        option
-    );
-
+            this.arFormCustomer
+                .appendChild(
+                    option
+                );
 
         }
     );
@@ -7518,7 +7484,7 @@ async calculateARDueDate() {
                         === "PLUS"
                         &&
                         Boolean(
-                            tax.is_active ?? tax.status
+                            tax.status
                         )
                 );
 
@@ -7536,7 +7502,7 @@ async calculateARDueDate() {
                         === "MINUS"
                         &&
                         Boolean(
-                            tax.is_active ?? tax.status
+                            tax.status
                         )
                 );
 
@@ -7602,7 +7568,8 @@ async calculateARDueDate() {
 
                     option.dataset.rate =
                         Number(
-                            tax.rate ?? tax.tax_rate ?? 0
+                            tax.tax_rate
+                            || 0
                         );
 
 
@@ -7671,7 +7638,8 @@ async calculateARDueDate() {
 
                     option.dataset.rate =
                         Number(
-                            tax.rate ?? tax.tax_rate ?? 0
+                            tax.tax_rate
+                            || 0
                         );
 
 
@@ -15594,7 +15562,8 @@ renderTaxPlus() {
                 this.taxPlusData.find(
                     tax =>
                         Number(
-                            tax.rate ?? tax.tax_rate ?? 0
+                            tax.tax_rate
+                            || 0
                         )
                         ===
                         firstTaxRate
@@ -16135,7 +16104,8 @@ renderTaxMinus() {
                 this.taxMinusData.find(
                     tax =>
                         Number(
-                            tax.rate ?? tax.tax_rate ?? 0
+                            tax.tax_rate
+                            || 0
                         )
                         ===
                         firstTaxRate
@@ -16412,9 +16382,7 @@ checkARAccountingPreviewReadiness(
             const lineAmount =
                 Number(
                     detail.line_amount
-                    ?? detail.amount
-                    ?? detail.dpp_amount
-                    ?? 0
+                    || 0
                 );
 
 
@@ -16427,9 +16395,7 @@ checkARAccountingPreviewReadiness(
             const revenueAccountId =
                 Number(
                     detail.revenue_account_id
-                    ?? detail.account_id
-                    ?? detail.revenue_coa_id
-                    ?? 0
+                    || 0
                 );
 
 
@@ -16455,37 +16421,15 @@ checkARAccountingPreviewReadiness(
             const taxPlusAmount =
                 Number(
                     detail.tax_output_amount
-                    ?? detail.tax_plus_amount
-                    ?? detail.tax_amount
-                    ?? 0
+                    || 0
                 );
 
-            let readinessTaxPlusMaster = null;
-            if (
-                detail.tax_plus_id != null
-                && Array.isArray(this.taxPlusData)
-            ) {
-                readinessTaxPlusMaster = this.taxPlusData.find(
-                    tax => String(tax.id) === String(detail.tax_plus_id)
-                ) || null;
-            }
-            const readinessTaxPlusRate = Number(
-                detail.tax_output_rate ?? detail.tax_plus_rate ?? detail.tax_rate ?? 0
-            );
-            if (
-                !readinessTaxPlusMaster
-                && readinessTaxPlusRate > 0
-                && Array.isArray(this.taxPlusData)
-            ) {
-                readinessTaxPlusMaster = this.taxPlusData.find(tax =>
-                    Math.abs(Number(tax.rate ?? tax.tax_rate ?? 0) - readinessTaxPlusRate) < 0.000001
-                ) || null;
-            }
-            const taxPlusAccountId = Number(
-                detail.tax_plus_account_id
-                || readinessTaxPlusMaster?.tax_account_id
-                || 0
-            );
+
+            const taxPlusAccountId =
+                Number(
+                    detail.tax_plus_account_id
+                    || 0
+                );
 
 
             if (
@@ -16509,60 +16453,28 @@ checkARAccountingPreviewReadiness(
 
             const taxMinusAmount =
                 Number(
-                    detail.tax_minus_amount
-                    ?? detail.withholding_tax_amount
-                    ?? detail.pph_amount
-                    ?? 0
+                    detail.withholding_tax_amount
+                    || 0
                 );
 
-            // Keep preview readiness consistent with buildARJournalLines:
-            // resolve Tax (-) account from the detail, then Tax Master by ID,
-            // and finally by rate when the detail does not contain a usable ID.
-            let readinessTaxMinusMaster = null;
-            if (
-                detail.tax_minus_id != null
-                && Array.isArray(this.taxMinusData)
-            ) {
-                readinessTaxMinusMaster = this.taxMinusData.find(
-                    tax => String(tax.id) === String(detail.tax_minus_id)
-                ) || null;
-            }
 
-            const readinessTaxMinusRate = Number(
-                detail.tax_minus_rate
-                ?? detail.withholding_tax_rate
-                ?? detail.pph_rate
-                ?? 0
-            );
+            const taxMinusAccountId =
+                Number(
+                    detail.tax_minus_account_id
+                    || 0
+                );
 
-            if (
-                !readinessTaxMinusMaster
-                && readinessTaxMinusRate > 0
-                && Array.isArray(this.taxMinusData)
-            ) {
-                readinessTaxMinusMaster = this.taxMinusData.find(tax =>
-                    Math.abs(
-                        Number(tax.rate ?? tax.tax_rate ?? 0)
-                        - readinessTaxMinusRate
-                    ) < 0.000001
-                ) || null;
-            }
-
-            const taxMinusAccountId = Number(
-                detail.tax_minus_account_id
-                || readinessTaxMinusMaster?.tax_minus_account_id
-                || readinessTaxMinusMaster?.tax_account_id
-                || 0
-            );
 
             if (
                 taxMinusAmount > 0
                 &&
                 !taxMinusAccountId
             ) {
+
                 issues.push(
                     `Invoice Detail ${lineNumber}: Tax (-) Account is not mapped.`
                 );
+
             }
 
 
@@ -18695,7 +18607,6 @@ async editInvoice(id) {
 
             this.arFormPoNo.value =
                 header.po_no
-                || header.source_po_no
                 || "";
 
         }
@@ -18866,15 +18777,10 @@ async editInvoice(id) {
                     ==========================================
                     */
 
-                    // Database detail schema stores the COA FK in account_id.
-                    // Older UI logic only read revenue_account_id, so editing an
-                    // existing invoice silently converted the account to 0.
                     const revenueAccountId =
                         Number(
                             item.revenue_account_id
-                            ?? item.account_id
-                            ?? item.revenue_account?.id
-                            ?? 0
+                            || 0
                         );
 
 
@@ -19033,14 +18939,10 @@ async editInvoice(id) {
                         ======================================
                         */
 
-                        // Database stores the detail value in `amount`;
-                        // `line_amount` is only the UI alias. Read both so
-                        // opening an existing AR invoice does not show zero.
                         line_amount:
                             Number(
                                 item.line_amount
-                                ?? item.amount
-                                ?? 0
+                                || 0
                             ),
 
 
@@ -19052,23 +18954,7 @@ async editInvoice(id) {
 
                         tax_plus_id:
                             item.tax_plus_id
-                            ?? null,
-
-
-                        tax_plus_rate:
-                            Number(
-                                item.tax_plus_rate
-                                ?? item.tax_output_rate
-                                ?? 0
-                            ),
-
-
-                        tax_plus_amount:
-                            Number(
-                                item.tax_plus_amount
-                                ?? item.tax_output_amount
-                                ?? 0
-                            ),
+                            || null,
 
 
                         tax_plus_account_id:
@@ -19093,16 +18979,14 @@ async editInvoice(id) {
                         tax_output_rate:
                             Number(
                                 item.tax_output_rate
-                                ?? item.tax_plus_rate
-                                ?? 0
+                                || 0
                             ),
 
 
                         tax_output_amount:
                             Number(
                                 item.tax_output_amount
-                                ?? item.tax_plus_amount
-                                ?? 0
+                                || 0
                             ),
 
 
@@ -19114,23 +18998,7 @@ async editInvoice(id) {
 
                         tax_minus_id:
                             item.tax_minus_id
-                            ?? null,
-
-
-                        tax_minus_rate:
-                            Number(
-                                item.tax_minus_rate
-                                ?? item.withholding_tax_rate
-                                ?? 0
-                            ),
-
-
-                        tax_minus_amount:
-                            Number(
-                                item.tax_minus_amount
-                                ?? item.withholding_tax_amount
-                                ?? 0
-                            ),
+                            || null,
 
 
                         tax_minus_account_id:
@@ -19155,16 +19023,14 @@ async editInvoice(id) {
                         withholding_tax_rate:
                             Number(
                                 item.withholding_tax_rate
-                                ?? item.tax_minus_rate
-                                ?? 0
+                                || 0
                             ),
 
 
                         withholding_tax_amount:
                             Number(
                                 item.withholding_tax_amount
-                                ?? item.tax_minus_amount
-                                ?? 0
+                                || 0
                             ),
 
 
@@ -19174,17 +19040,10 @@ async editInvoice(id) {
                         ======================================
                         */
 
-                        // The AR detail table stores the base line in `amount`;
-                        // `total_amount` is a calculated/UI field and may not exist
-                        // in the row returned by Supabase. Rebuild it on edit.
                         total_amount:
                             Number(
                                 item.total_amount
-                                ?? (
-                                    Number(item.line_amount ?? item.amount ?? 0)
-                                    + Number(item.tax_plus_amount ?? item.tax_output_amount ?? 0)
-                                    - Number(item.tax_minus_amount ?? item.withholding_tax_amount ?? 0)
-                                )
+                                || 0
                             )
 
                     };
@@ -22116,7 +21975,6 @@ exportExcel() {
 
                     "PO No":
                         item.po_no
-                        || item.source_po_no
                         || "",
 
                     "Due Date":
@@ -26083,23 +25941,17 @@ console.log(
         ==================================================
         */
 
-        // Database AR detail may use account_id / amount;
-        // older UI-normalized objects may use revenue_account_id / line_amount.
         const revenueAccountId =
             Number(
                 detail.revenue_account_id
-                ?? detail.account_id
-                ?? detail.revenue_coa_id
-                ?? 0
+                || 0
             );
 
 
         const lineAmount =
             Number(
                 detail.line_amount
-                ?? detail.amount
-                ?? detail.dpp_amount
-                ?? 0
+                || 0
             );
 
 
@@ -26193,48 +26045,15 @@ console.log(
         const taxPlusAmount =
             Number(
                 detail.tax_output_amount
-                ?? detail.tax_plus_amount
-                ?? detail.tax_amount
-                ?? 0
+                || 0
             );
 
 
-        // Resolve Tax (+) COA from the saved detail first, then Tax Master.
-        // trx_account_receivable_detail stores tax_plus_id; mst_taxes stores
-        // tax_account_id. Older UI rows may not persist tax_plus_account_id.
-        let taxPlusMaster = null;
-
-        if (
-            detail.tax_plus_id != null
-            && Array.isArray(this.taxPlusData)
-        ) {
-            taxPlusMaster = this.taxPlusData.find(
-                tax => String(tax.id) === String(detail.tax_plus_id)
-            ) || null;
-        }
-
-        const taxPlusRate = Number(
-            detail.tax_output_rate
-            ?? detail.tax_plus_rate
-            ?? detail.tax_rate
-            ?? 0
-        );
-
-        if (
-            !taxPlusMaster
-            && taxPlusRate > 0
-            && Array.isArray(this.taxPlusData)
-        ) {
-            taxPlusMaster = this.taxPlusData.find(tax =>
-                Math.abs(Number(tax.rate ?? tax.tax_rate ?? 0) - taxPlusRate) < 0.000001
-            ) || null;
-        }
-
-        const taxPlusAccountId = Number(
-            detail.tax_plus_account_id
-            || taxPlusMaster?.tax_account_id
-            || 0
-        );
+        const taxPlusAccountId =
+            Number(
+                detail.tax_plus_account_id
+                || 0
+            );
 
 
         if (
@@ -26310,50 +26129,16 @@ console.log(
 
         const taxMinusAmount =
             Number(
-                detail.tax_minus_amount
-                ?? detail.withholding_tax_amount
-                ?? detail.pph_amount
-                ?? 0
+                detail.withholding_tax_amount
+                || 0
             );
 
 
-        // Resolve Tax (-) COA from the saved AR detail first, then Tax Master.
-        // AR detail stores tax_minus_id / tax_minus_rate / tax_minus_amount;
-        // the linked Tax Master supplies tax_account_id when no account was
-        // persisted directly on the detail row.
-        let taxMinusMaster = null;
-
-        if (
-            detail.tax_minus_id != null
-            && Array.isArray(this.taxMinusData)
-        ) {
-            taxMinusMaster = this.taxMinusData.find(
-                tax => String(tax.id) === String(detail.tax_minus_id)
-            ) || null;
-        }
-
-        const taxMinusRate = Number(
-            detail.tax_minus_rate
-            ?? detail.withholding_tax_rate
-            ?? detail.pph_rate
-            ?? 0
-        );
-
-        if (
-            !taxMinusMaster
-            && taxMinusRate > 0
-            && Array.isArray(this.taxMinusData)
-        ) {
-            taxMinusMaster = this.taxMinusData.find(tax =>
-                Math.abs(Number(tax.rate ?? tax.tax_rate ?? 0) - taxMinusRate) < 0.000001
-            ) || null;
-        }
-
-        const taxMinusAccountId = Number(
-            detail.tax_minus_account_id
-            || taxMinusMaster?.tax_account_id
-            || 0
-        );
+        const taxMinusAccountId =
+            Number(
+                detail.tax_minus_account_id
+                || 0
+            );
 
 
         if (
@@ -26432,23 +26217,8 @@ console.log(
         !journalDetails.length
     ) {
 
-        console.error(
-            "AR JOURNAL BUILDER: no journal lines generated. Detail field diagnostics:",
-            details.map((detail, index) => ({
-                index,
-                id: detail.id ?? detail.detail_id ?? null,
-                account_id: detail.account_id ?? null,
-                revenue_account_id: detail.revenue_account_id ?? null,
-                line_amount: detail.line_amount ?? null,
-                amount: detail.amount ?? null,
-                dpp_amount: detail.dpp_amount ?? null,
-                tax_output_amount: detail.tax_output_amount ?? null,
-                withholding_tax_amount: detail.withholding_tax_amount ?? null
-            }))
-        );
-
         throw new Error(
-            "No valid AR detail available for GL Journal. Check AR detail amount and revenue account mapping in the console diagnostics."
+            "No valid AR detail available for GL Journal."
         );
 
     }
@@ -27005,11 +26775,6 @@ async generateARJournal(
 
         const journalHeader = {
 
-            // Carry the AR invoice tenant explicitly into the GL insert.
-            // RLS must still validate this against finova_effective_company_id().
-            company_id:
-                invoice.company_id || null,
-
             journal_no:
                 "",
 
@@ -27047,12 +26812,6 @@ async generateARJournal(
 
         };
 
-
-        if (!journalHeader.company_id) {
-            throw new Error(
-                "AR invoice company_id is missing; cannot create GL Journal safely under tenant RLS."
-            );
-        }
 
         /*
         ==================================================

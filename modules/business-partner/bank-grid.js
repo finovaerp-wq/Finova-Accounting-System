@@ -199,7 +199,7 @@ initialize() {
 
                 select.innerHTML += `
                     <option value="${bank.id}">
-                        ${String(bank.bank_name ?? "").toUpperCase()}
+                        ${bank.bank_name}
                     </option>
                 `;
 

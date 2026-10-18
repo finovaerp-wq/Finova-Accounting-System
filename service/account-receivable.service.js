@@ -58,78 +58,135 @@ BASIS : INVOICE DATE
 ======================================================
 */
 
+async getAccountingPeriod(
+    invoiceDate
+) {
 
-async getAccountingPeriod(invoiceDate) {
     try {
-        if (!invoiceDate) {
-            throw new Error("Invoice Date is required.");
-        }
 
-        // Ambil tahun dan bulan dari Invoice Date
-        const date = new Date(`${invoiceDate}T00:00:00`);
-        const year = date.getFullYear();
-        const month = date.getMonth() + 1;
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
 
         if (
-            Number.isNaN(date.getTime()) ||
-            !year ||
-            month < 1 ||
-            month > 12
+            !invoiceDate
         ) {
+
             throw new Error(
-                `Invalid Invoice Date: ${invoiceDate}`
+                "Invoice Date is required."
             );
+
         }
 
+
+        /*
+        ==================================================
+        GET ACCOUNTING PERIOD
+        ==================================================
+        */
+
         const {
+
             data,
+
             error
+
         } = await supabase
-            .from("mst_accounting_period")
+
+            .from(
+                "mst_accounting_period"
+            )
+
             .select(`
                 id,
-                period_year,
-                period_month,
-                period_code,
-                status,
-                company_id
+                period,
+                month,
+                year,
+                start_date,
+                end_date,
+                status
             `)
-            .eq("period_year", year)
-            .eq("period_month", month)
+
+            .lte(
+                "start_date",
+                invoiceDate
+            )
+
+            .gte(
+                "end_date",
+                invoiceDate
+            )
+
+            .limit(
+                1
+            )
+
             .maybeSingle();
 
-        if (error) {
+
+        /*
+        ==================================================
+        DATABASE ERROR
+        ==================================================
+        */
+
+        if (
+            error
+        ) {
+
             console.error(
                 "AR GET ACCOUNTING PERIOD ERROR:",
-                {
-                    message: error.message,
-                    details: error.details,
-                    hint: error.hint,
-                    code: error.code
-                }
+                error
             );
 
             throw error;
+
         }
 
-        if (!data) {
+
+        /*
+        ==================================================
+        PERIOD NOT CONFIGURED
+        ==================================================
+        */
+
+        if (
+            !data
+        ) {
+
             throw new Error(
-                `Accounting Period ${year}-${String(month).padStart(2, "0")} is not configured.`
+                `Accounting Period for Invoice Date ${invoiceDate} is not configured.`
             );
+
         }
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
 
         return data;
 
-    } catch (error) {
+    }
+
+    catch (
+        error
+    ) {
+
         console.error(
             "AccountReceivableService.getAccountingPeriod:",
             error
         );
 
         throw error;
-    }
-}
 
+    }
+
+}
 
 
 /*
@@ -140,41 +197,81 @@ BASIS : INVOICE DATE
 ======================================================
 */
 
+async validateAccountingPeriod(
+    invoiceDate
+) {
 
-async validateAccountingPeriod(invoiceDate) {
     try {
-        const period = await this.getAccountingPeriod(
-            invoiceDate
-        );
 
-        const status = String(
-            period?.status || ""
-        ).trim().toLowerCase();
+        /*
+        ==================================================
+        GET PERIOD
+        ==================================================
+        */
 
-        if (status !== "open") {
-            const periodCode =
-                period?.period_code ||
-                `${period?.period_year}-${String(
-                    period?.period_month || ""
-                ).padStart(2, "0")}`;
+        const period =
+            await this.getAccountingPeriod(
+                invoiceDate
+            );
+
+
+        /*
+        ==================================================
+        VALIDATE STATUS
+        ==================================================
+        */
+
+        const status =
+            String(
+                period?.status
+                ||
+                ""
+            )
+            .trim()
+            .toLowerCase();
+
+
+        /*
+        ==================================================
+        PERIOD MUST BE OPEN
+        ==================================================
+        */
+
+        if (
+            status !== "open"
+        ) {
 
             throw new Error(
-                `Accounting Period ${periodCode} is Closed. Invoice Date ${invoiceDate} cannot be processed.`
+                `Accounting Period ${period.period} is Closed. Invoice Date ${invoiceDate} cannot be processed.`
             );
+
         }
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
 
         return period;
 
-    } catch (error) {
+    }
+
+    catch (
+        error
+    ) {
+
         console.error(
             "AccountReceivableService.validateAccountingPeriod:",
             error
         );
 
         throw error;
-    }
-}
 
+    }
+
+}
 /*
 ======================================================
 GET PAYMENT ACCOUNTING PERIOD
@@ -183,77 +280,137 @@ BASIS : PAYMENT DATE
 ======================================================
 */
 
+async getPaymentAccountingPeriod(
+    paymentDate
+) {
 
-async getPaymentAccountingPeriod(paymentDate) {
     try {
-        if (!paymentDate) {
-            throw new Error("Payment Date is required.");
-        }
 
-        const date = new Date(`${paymentDate}T00:00:00`);
-        const year = date.getFullYear();
-        const month = date.getMonth() + 1;
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
 
         if (
-            Number.isNaN(date.getTime()) ||
-            !year ||
-            month < 1 ||
-            month > 12
+            !paymentDate
         ) {
+
             throw new Error(
-                `Invalid Payment Date: ${paymentDate}`
+                "Payment Date is required."
             );
+
         }
+
+
+        /*
+        ==================================================
+        GET ACCOUNTING PERIOD
+        ==================================================
+        */
 
         const {
+
             data,
+
             error
+
         } = await supabase
-            .from("mst_accounting_period")
+
+            .from(
+                "mst_accounting_period"
+            )
+
             .select(`
                 id,
-                period_year,
-                period_month,
-                period_code,
-                status,
-                company_id
+                period,
+                month,
+                year,
+                start_date,
+                end_date,
+                status
             `)
-            .eq("period_year", year)
-            .eq("period_month", month)
+
+            .lte(
+                "start_date",
+                paymentDate
+            )
+
+            .gte(
+                "end_date",
+                paymentDate
+            )
+
+            .limit(
+                1
+            )
+
             .maybeSingle();
 
-        if (error) {
+
+        /*
+        ==================================================
+        DATABASE ERROR
+        ==================================================
+        */
+
+        if (
+            error
+        ) {
+
             console.error(
                 "AR PAYMENT GET ACCOUNTING PERIOD ERROR:",
-                {
-                    message: error.message,
-                    details: error.details,
-                    hint: error.hint,
-                    code: error.code
-                }
+                error
             );
+
 
             throw error;
+
         }
 
-        if (!data) {
+
+        /*
+        ==================================================
+        PERIOD NOT CONFIGURED
+        ==================================================
+        */
+
+        if (
+            !data
+        ) {
+
             throw new Error(
-                `Accounting Period ${year}-${String(month).padStart(2, "0")} is not configured for Payment Date ${paymentDate}.`
+                `Accounting Period for Payment Date ${paymentDate} is not configured.`
             );
+
         }
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
 
         return data;
 
-    } catch (error) {
+    }
+
+    catch (
+        error
+    ) {
+
         console.error(
             "AccountReceivableService.getPaymentAccountingPeriod:",
             error
         );
 
-        throw error;
-    }
-}
 
+        throw error;
+
+    }
+
+}
 
 
 /*
@@ -1816,8 +1973,7 @@ async getCustomers() {
 
 }
 
-
-/*
+    /*
 ======================================================
 GET CUSTOMER BY ID
 WITH TERM OF PAYMENT
@@ -1825,114 +1981,136 @@ WITH TERM OF PAYMENT
 */
 
 async getCustomerById(id) {
+
     try {
+
+        /*
+        ==================================================
+        VALIDATION
+        ==================================================
+        */
+
         if (!id) {
-            throw new Error("Customer ID is required.");
+
+            throw new Error(
+                "Customer ID is required."
+            );
+
         }
 
-        // GET CUSTOMER
+
+        /*
+        ==================================================
+        GET CUSTOMER
+        ==================================================
+        */
+
         const {
-            data: customer,
-            error: customerError
+
+            data,
+
+            error
+
         } = await supabase
-            .from(TABLE.BUSINESS_PARTNER)
+
+            .from(
+                TABLE.BUSINESS_PARTNER
+            )
+
             .select(`
                 id,
                 bp_code,
                 bp_name,
                 bp_type,
                 top_id,
-                is_active
+                is_active,
+
+                mst_term_of_payment!fk_bp_top (
+                    id,
+                    top_code,
+                    top_name,
+                    days,
+                    status
+                )
             `)
-            .eq("id", id)
-            .eq("bp_type", "Customer")
-            .eq("is_active", true)
+
+            .eq(
+                "id",
+                id
+            )
+
+            .eq(
+                "bp_type",
+                "Customer"
+            )
+
+            .eq(
+                "is_active",
+                true
+            )
+
             .single();
 
-        if (customerError) {
+
+        /*
+        ==================================================
+        DATABASE ERROR
+        ==================================================
+        */
+
+        if (error) {
+
             console.error(
-                "AR GET CUSTOMER ERROR:",
-                customerError
+                "AR GET CUSTOMER BY ID ERROR:",
+                error
             );
 
-            throw customerError;
+            throw error;
+
         }
 
-        // CUSTOMER TANPA TOP
-        if (!customer.top_id) {
-            console.warn(
-                "AR CUSTOMER HAS NO TOP:",
-                {
-                    customerId: customer.id,
-                    customerName: customer.bp_name
-                }
-            );
 
-            return {
-                ...customer,
-                mst_term_of_payment: null
-            };
-        }
+        /*
+        ==================================================
+        DEBUG
+        ==================================================
+        */
 
-        // GET TOP BERDASARKAN top_id
-        const {
-            data: top,
-            error: topError
-        } = await supabase
-            .from("mst_term_of_payment")
-            .select(`
-                id,
-                top_code,
-                top_name,
-                days
-            `)
-            .eq("id", customer.top_id)
-            .maybeSingle();
-
-        if (topError) {
-            console.error(
-                "AR GET TOP ERROR:",
-                {
-                    message: topError.message,
-                    details: topError.details,
-                    hint: topError.hint,
-                    code: topError.code
-                }
-            );
-
-            throw topError;
-        }
-
-        // DEBUG CUSTOMER DAN TOP
-        console.log("AR CUSTOMER TOP DEBUG", {
-            customerId: customer.id,
-            customerName: customer.bp_name,
-            topId: customer.top_id,
-            topData: top,
-            topDays: top?.days
-        });
-
-        return {
-            ...customer,
-            mst_term_of_payment: top || null
-        };
-
-    } catch (error) {
-        console.error(
-            "AccountReceivableService.getCustomerById:",
-            {
-                message: error?.message,
-                details: error?.details,
-                hint: error?.hint,
-                code: error?.code,
-                raw: error
-            }
+        console.log(
+            "AR CUSTOMER:",
+            data
         );
 
-        throw error;
-    }
-}
 
+        console.log(
+            "AR CUSTOMER TOP:",
+            data?.mst_term_of_payment
+        );
+
+
+        /*
+        ==================================================
+        RETURN
+        ==================================================
+        */
+
+        return data;
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "AccountReceivableService.getCustomerById:",
+            error
+        );
+
+
+        throw error;
+
+    }
+
+}
 
 
     /*
@@ -2050,21 +2228,16 @@ calculateDueDate(
     ==================================================
     */
 
-    const topRelation =
-        customer?.mst_term_of_payment;
-
-    // PostgREST relations can be returned as an object or a one-item array.
     const top =
-        Array.isArray(topRelation)
-            ? topRelation[0]
-            : topRelation;
+        customer
+            ?.mst_term_of_payment;
 
-    const rawDays = top?.days;
-    const days = Number(rawDays ?? 0);
 
-    if (!Number.isFinite(days) || days < 0) {
-        return "";
-    }
+    const days =
+        Number(
+            top?.days
+            || 0
+        );
 
 
     /*
@@ -2073,25 +2246,20 @@ calculateDueDate(
     ==================================================
     */
 
-    // Use UTC components so YYYY-MM-DD does not shift to the previous day
-    // when the browser timezone is ahead of UTC (e.g. Indonesia).
-    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(invoiceDate);
-    if (!match) {
-        return "";
-    }
+    const date =
+        new Date(
+            `${invoiceDate}T00:00:00`
+        );
 
-    const year = Number(match[1]);
-    const monthIndex = Number(match[2]) - 1;
-    const dayOfMonth = Number(match[3]);
-    const date = new Date(Date.UTC(year, monthIndex, dayOfMonth));
 
     if (
-        Number.isNaN(date.getTime()) ||
-        date.getUTCFullYear() !== year ||
-        date.getUTCMonth() !== monthIndex ||
-        date.getUTCDate() !== dayOfMonth
+        Number.isNaN(
+            date.getTime()
+        )
     ) {
+
         return "";
+
     }
 
 
@@ -2101,8 +2269,10 @@ calculateDueDate(
     ==================================================
     */
 
-    date.setUTCDate(
-        date.getUTCDate() + days
+    date.setDate(
+        date.getDate()
+        +
+        days
     );
 
 
@@ -2112,7 +2282,11 @@ calculateDueDate(
     ==================================================
     */
 
-    return date.toISOString().slice(0, 10);
+    return date
+        .toISOString()
+        .split(
+            "T"
+        )[0];
 
 }
 
@@ -2230,51 +2404,88 @@ calculateDueDate(
         details = []
     ) {
 
-        let subtotal = 0;
-        let taxOutputAmount = 0;
-        let withholdingTaxAmount = 0;
+        let subtotal =
+            0;
 
-        details.forEach(detail => {
+        let taxOutputAmount =
+            0;
 
-            const calculated = this.calculateDetailAmount(detail);
+        let withholdingTaxAmount =
+            0;
 
-            // Existing AR rows use database columns `amount` and `tax_id`;
-            // some legacy rows do not have quantity/unit_price populated.
-            // Preserve stored amounts when recalculation would otherwise zero them.
-            const storedLineAmount = Number(
-                detail?.line_amount ?? detail?.amount ?? 0
-            );
-            const storedTaxOutput = Number(
-                detail?.tax_output_amount ?? detail?.tax_plus_amount ?? 0
-            );
-            const storedWithholding = Number(
-                detail?.withholding_tax_amount ?? detail?.tax_minus_amount ?? 0
-            );
 
-            const lineAmount = calculated.line_amount > 0
-                ? calculated.line_amount
-                : storedLineAmount;
-            const lineTaxOutput = calculated.tax_output_amount > 0
-                ? calculated.tax_output_amount
-                : storedTaxOutput;
-            const lineWithholding = calculated.withholding_tax_amount > 0
-                ? calculated.withholding_tax_amount
-                : storedWithholding;
+        details.forEach(
+            detail => {
 
-            subtotal += lineAmount;
-            taxOutputAmount += lineTaxOutput;
-            withholdingTaxAmount += lineWithholding;
-        });
+                const calculated =
+                    this.calculateDetailAmount(
+                        detail
+                    );
 
-        const totalAmount = subtotal + taxOutputAmount - withholdingTaxAmount;
+
+                subtotal +=
+                    calculated.line_amount;
+
+
+                taxOutputAmount +=
+                    calculated.tax_output_amount;
+
+
+                withholdingTaxAmount +=
+                    calculated.withholding_tax_amount;
+
+            }
+        );
+
+
+        const totalAmount =
+            subtotal
+            +
+            taxOutputAmount
+            -
+            withholdingTaxAmount;
+
 
         return {
-            subtotal: Number(subtotal.toFixed(2)),
-            tax_output_amount: Number(taxOutputAmount.toFixed(2)),
-            withholding_tax_amount: Number(withholdingTaxAmount.toFixed(2)),
-            total_amount: Number(totalAmount.toFixed(2)),
-            paid_amount: 0,
-            outstanding_amount: Number(totalAmount.toFixed(2))
+
+            subtotal:
+                Number(
+                    subtotal.toFixed(
+                        2
+                    )
+                ),
+
+            tax_output_amount:
+                Number(
+                    taxOutputAmount.toFixed(
+                        2
+                    )
+                ),
+
+            withholding_tax_amount:
+                Number(
+                    withholdingTaxAmount.toFixed(
+                        2
+                    )
+                ),
+
+            total_amount:
+                Number(
+                    totalAmount.toFixed(
+                        2
+                    )
+                ),
+
+            paid_amount:
+                0,
+
+            outstanding_amount:
+                Number(
+                    totalAmount.toFixed(
+                        2
+                    )
+                )
+
         };
 
     }
@@ -2490,7 +2701,10 @@ async create(
 
         }
 
-        if (!header.customer_id) {
+
+        if (
+            !header.customer_id
+        ) {
 
             throw new Error(
                 "Customer is required."
@@ -2498,7 +2712,10 @@ async create(
 
         }
 
-        if (!header.invoice_no) {
+
+        if (
+            !header.invoice_no
+        ) {
 
             throw new Error(
                 "Document No. is required."
@@ -2506,7 +2723,10 @@ async create(
 
         }
 
-        if (!header.invoice_date) {
+
+        if (
+            !header.invoice_date
+        ) {
 
             throw new Error(
                 "Invoice Date is required."
@@ -2514,7 +2734,10 @@ async create(
 
         }
 
-        if (!header.due_date) {
+
+        if (
+            !header.due_date
+        ) {
 
             throw new Error(
                 "Due Date is required."
@@ -2522,13 +2745,17 @@ async create(
 
         }
 
-        if (!details.length) {
+
+        if (
+            !details.length
+        ) {
 
             throw new Error(
                 "At least one invoice detail is required."
             );
 
         }
+
 
         /*
         ==================================================
@@ -2540,6 +2767,7 @@ async create(
         await this.validateAccountingPeriod(
             header.invoice_date
         );
+
 
         /*
         ==================================================
@@ -2556,6 +2784,7 @@ async create(
                             detail
                         );
 
+
                     return {
 
                         ...detail,
@@ -2566,6 +2795,7 @@ async create(
 
                 }
             );
+
 
         /*
         ==================================================
@@ -2578,63 +2808,6 @@ async create(
                 calculatedDetails
             );
 
-        /*
-        ==================================================
-        RESOLVE ACTIVE COMPANY CONTEXT
-        ==================================================
-        */
-
-        const {
-            data: effectiveCompanyId,
-            error: companyContextError
-        } = await supabase.rpc(
-            "finova_effective_company_id"
-        );
-
-        if (companyContextError) {
-            console.error(
-                "AR EFFECTIVE COMPANY CONTEXT ERROR:",
-                companyContextError
-            );
-            throw companyContextError;
-        }
-
-        if (!effectiveCompanyId) {
-            throw new Error(
-                "FINOVA: active company context is required before saving Account Receivable."
-            );
-        }
-
-        /*
-        ==================================================
-        PREPARE HEADER USING ACTUAL DATABASE COLUMNS
-        trx_account_receivable has dpp_amount, not subtotal.
-        It has no po_no or withholding_tax_amount column.
-        ==================================================
-        */
-
-        const paidAmount = Number(header.paid_amount || 0);
-        const totalAmount = Number(totals.total_amount || 0);
-
-        const headerPayload = {
-            company_id: effectiveCompanyId,
-            customer_id: header.customer_id,
-            invoice_no: header.invoice_no,
-            invoice_date: header.invoice_date || null,
-            due_date: header.due_date || null,
-            source_po_no: header.po_no ?? header.source_po_no ?? null,
-            reference_no: header.reference_no || null,
-            description: header.description || null,
-            currency: header.currency || "IDR",
-            dpp_amount: Number(totals.subtotal || 0),
-            tax_output_amount: Number(totals.tax_output_amount || 0),
-            total_amount: totalAmount,
-            paid_amount: paidAmount,
-            outstanding_amount: Math.max(0, totalAmount - paidAmount),
-            status: header.status || this.STATUS.DRAFT,
-            gl_journal_id: header.gl_journal_id || null,
-            created_by: header.created_by || null
-        };
 
         /*
         ==================================================
@@ -2643,13 +2816,39 @@ async create(
         */
 
         const {
+
             data: invoice,
+
             error: invoiceError
+
         } = await supabase
-            .from(this.table)
-            .insert(headerPayload)
+
+            .from(
+                this.table
+            )
+
+            .insert({
+
+                ...header,
+
+                ...totals,
+
+                status:
+                    header.status
+                    ||
+                    this.STATUS.DRAFT,
+
+                gl_journal_id:
+                    header.gl_journal_id
+                    ||
+                    null
+
+            })
+
             .select()
+
             .single();
+
 
         /*
         ==================================================
@@ -2657,11 +2856,14 @@ async create(
         ==================================================
         */
 
-        if (invoiceError) {
+        if (
+            invoiceError
+        ) {
 
             throw invoiceError;
 
         }
+
 
         /*
         ==================================================
@@ -2671,29 +2873,16 @@ async create(
 
         const detailRows =
             calculatedDetails.map(
-                (detail, index) => ({
-                    // Explicitly map to the real columns in
-                    // trx_account_receivable_detail.
-                    company_id: effectiveCompanyId,
-                    account_receivable_id: invoice.id,
-                    line_no: Number(detail.line_no || index + 1),
-                    description: detail.description || null,
-                    account_id: detail.revenue_account_id ?? detail.account_id ?? null,
-                    quantity: Number(detail.quantity || 0),
-                    unit_price: Number(detail.unit_price || 0),
-                    amount: Number(
-                        (detail.line_amount ?? detail.amount ?? 0)
-                    ),
-                    // Persist Tax (+) and Tax (-) independently.
-                    tax_id: detail.tax_id ?? detail.tax_plus_id ?? detail.tax_minus_id ?? null,
-                    tax_plus_id: detail.tax_plus_id ?? null,
-                    tax_minus_id: detail.tax_minus_id ?? null,
-                    tax_plus_rate: Number(detail.tax_plus_rate ?? detail.tax_output_rate ?? 0),
-                    tax_minus_rate: Number(detail.tax_minus_rate ?? detail.withholding_tax_rate ?? 0),
-                    tax_plus_amount: Number(detail.tax_plus_amount ?? detail.tax_output_amount ?? 0),
-                    tax_minus_amount: Number(detail.tax_minus_amount ?? detail.withholding_tax_amount ?? 0)
+                detail => ({
+
+                    ...detail,
+
+                    account_receivable_id:
+                        invoice.id
+
                 })
             );
+
 
         /*
         ==================================================
@@ -2719,6 +2908,7 @@ async create(
 
             .select();
 
+
         /*
         ==================================================
         DETAIL ERROR
@@ -2726,7 +2916,9 @@ async create(
         ==================================================
         */
 
-        if (detailError) {
+        if (
+            detailError
+        ) {
 
             await supabase
 
@@ -2741,9 +2933,11 @@ async create(
                     invoice.id
                 );
 
+
             throw detailError;
 
         }
+
 
         /*
         ==================================================
@@ -2764,12 +2958,15 @@ async create(
 
     }
 
-    catch (error) {
+    catch (
+        error
+    ) {
 
         console.error(
             "AccountReceivableService.create:",
             error
         );
+
 
         throw error;
 
@@ -2976,43 +3173,6 @@ async update(
 
         /*
         ==================================================
-        VALIDATE DETAIL COA IDS BEFORE WRITING
-        Database stores the revenue COA FK as account_id.
-        Do this before updating the header or deleting old details.
-        ==================================================
-        */
-
-        const detailAccountIds = calculatedDetails.map((detail) =>
-            Number(detail.revenue_account_id ?? detail.account_id ?? detail.revenue_account?.id ?? 0)
-        );
-
-        if (detailAccountIds.some((accountId) => !Number.isInteger(accountId) || accountId <= 0)) {
-            throw new Error(
-                "Revenue Account tidak valid pada detail AR. Pilih kembali akun pendapatan sebelum Save Edit."
-            );
-        }
-
-        const uniqueDetailAccountIds = [...new Set(detailAccountIds)];
-        const { data: validAccounts, error: accountValidationError } = await supabase
-            .from("mst_chart_of_accounts")
-            .select("id")
-            .in("id", uniqueDetailAccountIds);
-
-        if (accountValidationError) {
-            throw accountValidationError;
-        }
-
-        const validAccountIds = new Set((validAccounts || []).map((account) => Number(account.id)));
-        const invalidAccountId = uniqueDetailAccountIds.find((accountId) => !validAccountIds.has(accountId));
-
-        if (invalidAccountId) {
-            throw new Error(
-                `Revenue Account ID ${invalidAccountId} tidak ditemukan di mst_chart_of_accounts. Pilih kembali akun pendapatan sebelum Save Edit.`
-            );
-        }
-
-        /*
-        ==================================================
         CALCULATE TOTALS
         ==================================================
         */
@@ -3060,39 +3220,52 @@ async update(
         ==================================================
         */
 
-        /*
-        ==================================================
-        PREPARE UPDATE HEADER USING DATABASE COLUMNS
-        Do not spread `header`: it can contain UI-only
-        fields such as po_no and subtotal that are not
-        columns in trx_account_receivable.
-        ==================================================
-        */
-
-        const updateHeaderPayload = {
-            customer_id: header.customer_id ?? currentHeader.customer_id,
-            invoice_no: header.invoice_no ?? currentHeader.invoice_no,
-            invoice_date: newInvoiceDate,
-            due_date: header.due_date ?? currentHeader.due_date,
-            source_po_no: header.po_no ?? header.source_po_no ?? currentHeader.source_po_no ?? null,
-            reference_no: header.reference_no ?? currentHeader.reference_no ?? null,
-            description: header.description ?? currentHeader.description ?? null,
-            currency: header.currency ?? currentHeader.currency ?? "IDR",
-            dpp_amount: Number(totals.subtotal || 0),
-            tax_output_amount: Number(totals.tax_output_amount || 0),
-            total_amount: Number(totals.total_amount || 0),
-            paid_amount: currentPaid,
-            outstanding_amount: outstanding
-        };
-
         const {
+
             data: invoice,
+
             error: invoiceError
+
         } = await supabase
-            .from(this.table)
-            .update(updateHeaderPayload)
-            .eq("id", id)
+
+            .from(
+                this.table
+            )
+
+            .update({
+
+                ...header,
+
+                invoice_date:
+                    newInvoiceDate,
+
+                subtotal:
+                    totals.subtotal,
+
+                tax_output_amount:
+                    totals.tax_output_amount,
+
+                withholding_tax_amount:
+                    totals.withholding_tax_amount,
+
+                total_amount:
+                    totals.total_amount,
+
+                paid_amount:
+                    currentPaid,
+
+                outstanding_amount:
+                    outstanding
+
+            })
+
+            .eq(
+                "id",
+                id
+            )
+
             .select()
+
             .single();
 
 
@@ -3156,27 +3329,13 @@ async update(
 
             const detailRows =
                 calculatedDetails.map(
-                    (detail, index) => ({
-                        // Match the actual detail table schema; do not send
-                        // calculated UI-only fields such as line_amount.
-                        company_id: currentHeader.company_id,
-                        account_receivable_id: id,
-                        line_no: Number(detail.line_no || index + 1),
-                        description: detail.description || null,
-                        account_id: Number(detail.revenue_account_id ?? detail.account_id ?? detail.revenue_account?.id),
-                        quantity: Number(detail.quantity || 0),
-                        unit_price: Number(detail.unit_price || 0),
-                        amount: Number(
-                            (detail.line_amount ?? detail.amount ?? 0)
-                        ),
-                        // Persist Tax (+) and Tax (-) independently.
-                        tax_id: detail.tax_id ?? detail.tax_plus_id ?? detail.tax_minus_id ?? null,
-                        tax_plus_id: detail.tax_plus_id ?? null,
-                        tax_minus_id: detail.tax_minus_id ?? null,
-                        tax_plus_rate: Number(detail.tax_plus_rate ?? detail.tax_output_rate ?? 0),
-                        tax_minus_rate: Number(detail.tax_minus_rate ?? detail.withholding_tax_rate ?? 0),
-                        tax_plus_amount: Number(detail.tax_plus_amount ?? detail.tax_output_amount ?? 0),
-                        tax_minus_amount: Number(detail.tax_minus_amount ?? detail.withholding_tax_amount ?? 0)
+                    detail => ({
+
+                        ...detail,
+
+                        account_receivable_id:
+                            id
+
                     })
                 );
 
@@ -4781,7 +4940,7 @@ async getPaymentTotal(
             .select(`
                 id,
                 account_receivable_id,
-                payment_amount,
+                amount,
                 gl_journal_id
             `)
 
@@ -5336,10 +5495,8 @@ async getPaymentTotal(
                         sum
                         +
                         Number(
-                            payment.payment_amount
-                            ??
                             payment.amount
-                            ??
+                            ||
                             0
                         )
                     );
@@ -5412,10 +5569,8 @@ async getPaymentTotal(
 
                                 amount:
                                     Number(
-                                        payment.payment_amount
-                                        ??
                                         payment.amount
-                                        ??
+                                        ||
                                         0
                                     ),
 
@@ -5990,10 +6145,8 @@ async recalculateActivePaymentStatus(id) {
                 total
                 +
                 Number(
-                    payment?.payment_amount
-                    ??
                     payment?.amount
-                    ??
+                    ||
                     0
                 ),
             0
@@ -6331,10 +6484,8 @@ async getPaymentHistory(id) {
 
                             amount:
                                 Number(
-                                    payment.payment_amount
-                                    ??
                                     payment.amount
-                                    ??
+                                    ||
                                     0
                                 ),
 
@@ -6465,48 +6616,24 @@ async createPayment(
         /*
         ==================================================
         VALIDATE PAYMENT AMOUNT
-        Database column is payment_amount, not amount.
-        Accept amount as an input alias for compatibility.
         ==================================================
         */
 
-        const paymentAmount = Number(
-            payment.payment_amount ?? payment.amount ?? 0
-        );
+        if (
+            Number(
+                payment.amount
+                || 0
+            )
+            <=
+            0
+        ) {
 
-        if (!Number.isFinite(paymentAmount) || paymentAmount <= 0) {
             throw new Error(
                 "Payment Amount must be greater than 0."
             );
+
         }
 
-        /*
-        ==================================================
-        RESOLVE COMPANY CONTEXT
-        trx_account_receivable_payment is company-scoped.
-        ==================================================
-        */
-
-        const {
-            data: effectiveCompanyId,
-            error: companyContextError
-        } = await supabase.rpc(
-            "finova_effective_company_id"
-        );
-
-        if (companyContextError) {
-            console.error(
-                "AR PAYMENT EFFECTIVE COMPANY CONTEXT ERROR:",
-                companyContextError
-            );
-            throw companyContextError;
-        }
-
-        if (!effectiveCompanyId) {
-            throw new Error(
-                "FINOVA: active company context is required before saving AR payment."
-            );
-        }
 
         /*
         ==================================================
@@ -6542,26 +6669,35 @@ async createPayment(
             )
 
             .insert({
-                company_id:
-                    effectiveCompanyId,
 
                 account_receivable_id:
                     payment.account_receivable_id,
 
-                ar_payment_id:
-                    payment.ar_payment_id || null,
-
                 payment_date:
                     payment.payment_date,
 
-                payment_amount:
-                    paymentAmount,
+                payment_account_id:
+                    Number(
+                        payment.payment_account_id
+                    ),
+
+                amount:
+                    Number(
+                        payment.amount
+                    ),
 
                 reference_no:
-                    payment.reference_no || null,
+                    payment.reference_no
+                    || null,
+
+                description:
+                    payment.description
+                    || null,
 
                 gl_journal_id:
-                    payment.gl_journal_id || null
+                    payment.gl_journal_id
+                    || null
+
             })
 
             .select()

@@ -16,10 +16,10 @@ SUPABASE CONFIGURATION
 */
 
 const SUPABASE_URL =
-"https://bqcupgoylxvxbyymomjw.supabase.co";
+"https://rzirphjklgvhntewiixx.supabase.co";
 
 const SUPABASE_ANON_KEY =
-"sb_publishable_xTpK998Tvm0JmMo9ciLT8Q_otdrwVYc";
+"sb_publishable_NHd4larL4DVPq37D1K8H_Q_cLrhP8Op";
 
 /*
 ===========================================

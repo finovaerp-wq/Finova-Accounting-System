@@ -2,7 +2,7 @@
 ==========================================================
 FINOVA ACCOUNTING SYSTEM
 Business Partner Bank Service
-Version : 1.1.0
+Version : 1.0.0
 ==========================================================
 */
 
@@ -10,7 +10,6 @@ import {
     supabase,
     TABLE
 } from "../assets/js/core/supabase.js";
-
 
 export class BusinessPartnerBankService {
 
@@ -27,43 +26,30 @@ export class BusinessPartnerBankService {
             .from(TABLE.BUSINESS_PARTNER_BANK)
 
             .select(`
-                *,
-                mst_bank (
-                    id,
-                    bank_code,
-                    bank_name
-                )
-            `)
+    *,
+    mst_bank (
+        id,
+        bank_name
+    )
+`)
 
             .eq("bp_id", bpId)
 
-            .eq("is_active", true)
+            .eq("status", true)
 
-            .order("is_primary", {
-                ascending: false
-            })
-
-            .order("id", {
-                ascending: true
-            });
-
+            .order("is_default", {
+    ascending: false
+});
 
         if (error) {
-
-            console.error(
-                "BusinessPartnerBankService.getByBusinessPartner:",
-                error
-            );
 
             throw error;
 
         }
 
-
-        return data || [];
+        return data;
 
     }
-
 
     /*
     ==========================================================
@@ -77,33 +63,20 @@ export class BusinessPartnerBankService {
 
             .from(TABLE.BUSINESS_PARTNER_BANK)
 
-            .select(`
-                *,
-                mst_bank (
-                    id,
-                    bank_code,
-                    bank_name
-                )
-            `)
+            .select("*")
 
             .eq("id", id)
 
             .single();
 
-
         if (error) {
-
-            console.error(
-                "BusinessPartnerBankService.getById:",
-                error
-            );
 
             throw error;
 
         }
 
-
         return data;
+        
 
     }
 
@@ -116,65 +89,25 @@ export class BusinessPartnerBankService {
 
     static async insert(payload) {
 
-        const insertPayload = {
-
-            bp_id:
-                payload.bp_id,
-
-            bank_id:
-                payload.bank_id,
-
-            account_name:
-                payload.account_name,
-
-            account_number:
-                payload.account_number,
-
-            branch_name:
-                payload.branch_name ?? null,
-
-            currency:
-                payload.currency ?? "IDR",
-
-            is_primary:
-                payload.is_primary ?? false,
-
-            is_active:
-                payload.is_active ?? true,
-
-            remarks:
-                payload.remarks ?? null
-
-        };
-
-
         const { data, error } = await supabase
 
             .from(TABLE.BUSINESS_PARTNER_BANK)
 
-            .insert([insertPayload])
+            .insert([payload])
 
             .select()
 
             .single();
 
-
         if (error) {
-
-            console.error(
-                "BusinessPartnerBankService.insert:",
-                error
-            );
 
             throw error;
 
         }
 
-
         return data;
 
     }
-
 
     /*
     ==========================================================
@@ -184,43 +117,14 @@ export class BusinessPartnerBankService {
 
     static async update(id, payload) {
 
-        const updatePayload = {
-
-            bank_id:
-                payload.bank_id,
-
-            account_name:
-                payload.account_name,
-
-            account_number:
-                payload.account_number,
-
-            branch_name:
-                payload.branch_name ?? null,
-
-            currency:
-                payload.currency ?? "IDR",
-
-            is_primary:
-                payload.is_primary ?? false,
-
-            is_active:
-                payload.is_active ?? true,
-
-            remarks:
-                payload.remarks ?? null,
-
-            updated_at:
-                new Date().toISOString()
-
-        };
-
+        payload.updated_at =
+            new Date().toISOString();
 
         const { data, error } = await supabase
 
             .from(TABLE.BUSINESS_PARTNER_BANK)
 
-            .update(updatePayload)
+            .update(payload)
 
             .eq("id", id)
 
@@ -228,23 +132,15 @@ export class BusinessPartnerBankService {
 
             .single();
 
-
         if (error) {
-
-            console.error(
-                "BusinessPartnerBankService.update:",
-                error
-            );
 
             throw error;
 
         }
 
-
         return data;
 
     }
-
 
     /*
     ==========================================================
@@ -262,23 +158,15 @@ export class BusinessPartnerBankService {
 
             .eq("id", id);
 
-
         if (error) {
-
-            console.error(
-                "BusinessPartnerBankService.delete:",
-                error
-            );
 
             throw error;
 
         }
 
-
         return true;
 
     }
-
 
     /*
     ==========================================================
@@ -296,23 +184,15 @@ export class BusinessPartnerBankService {
 
             .eq("bp_id", bpId);
 
-
         if (error) {
-
-            console.error(
-                "BusinessPartnerBankService.deleteByBusinessPartner:",
-                error
-            );
 
             throw error;
 
         }
 
-
         return true;
 
     }
-
 
     /*
     ==========================================================
@@ -322,85 +202,33 @@ export class BusinessPartnerBankService {
 
     static async saveBanks(bpId, banks) {
 
-        /*
-        ------------------------------------------------------
-        DELETE EXISTING BANK ACCOUNT
-        ------------------------------------------------------
-        */
-
         await this.deleteByBusinessPartner(bpId);
 
-
-        /*
-        ------------------------------------------------------
-        NO BANK ACCOUNT
-        ------------------------------------------------------
-        */
-
-        if (
-            !Array.isArray(banks) ||
-            banks.length === 0
-        ) {
+        if (!banks || banks.length === 0) {
 
             return true;
 
         }
 
-
-        /*
-        ------------------------------------------------------
-        PREPARE PAYLOAD
-        ------------------------------------------------------
-
-        Frontend field       -> Database field
-
-        bank_id              -> bank_id
-        account_name         -> account_name
-        account_number       -> account_number
-        branch               -> branch_name
-        purpose              -> remarks
-        is_default           -> is_primary
-        status               -> is_active
-        ------------------------------------------------------
-        */
-
         const payload = banks.map(bank => ({
 
-            bp_id:
-                bpId,
+    bp_id: bpId,
 
-            bank_id:
-                bank.bank_id,
+    bank_id: bank.bank_id,
 
-            account_name:
-                bank.account_name,
+    account_name: bank.account_name,
 
-            account_number:
-                bank.account_number,
+    account_number: bank.account_number,
 
-            branch_name:
-                bank.branch ?? null,
+    branch: bank.branch ?? "",
 
-            currency:
-                bank.currency ?? "IDR",
+    purpose: bank.purpose ?? "Both",
 
-            is_primary:
-                bank.is_default === true,
+    is_default: bank.is_default ?? false,
 
-            is_active:
-                bank.status !== false,
+    status: true
 
-            remarks:
-                bank.purpose ?? null
-
-        }));
-
-
-        /*
-        ------------------------------------------------------
-        INSERT ALL BANK ACCOUNT
-        ------------------------------------------------------
-        */
+}));
 
         const { error } = await supabase
 
@@ -408,18 +236,11 @@ export class BusinessPartnerBankService {
 
             .insert(payload);
 
-
         if (error) {
-
-            console.error(
-                "BusinessPartnerBankService.saveBanks:",
-                error
-            );
 
             throw error;
 
         }
-
 
         return true;
 

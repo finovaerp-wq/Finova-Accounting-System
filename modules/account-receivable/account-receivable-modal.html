@@ -314,7 +314,7 @@
                                                 id="ar-form-journal-no"
                                                 name="journal_no"
                                                 class="form-control"
-                                                placeholder="Auto Generated"
+                                                placeholder="AUTO"
                                                 readonly>
 
                                         </div>
@@ -340,7 +340,33 @@
 
                                         </div>
 
-<!-- DUE DATE -->
+
+                                        
+
+
+                                        <!-- TERM OF PAYMENT -->
+
+                                        <div class="col-md-6">
+
+                                            <label
+                                                for="ar-form-top"
+                                                class="form-label">
+
+                                                Term of Payment
+
+                                            </label>
+
+                                            <input
+                                                type="text"
+                                                id="ar-form-top"
+                                                class="form-control"
+                                                readonly
+                                                placeholder="Auto from Customer">
+
+                                        </div>
+
+
+                                        <!-- DUE DATE -->
 
                                         <div class="col-md-6">
 
@@ -556,9 +582,9 @@
                     </div>
 
 
-                   <!-- ==============================================
+                   <!-- ==================================================
      TAB 3 : TAX PLUS
-=============================================== -->
+=================================================== -->
 
 <div
     class="tab-pane fade"
@@ -573,6 +599,11 @@
 
             <div class="finova-card-body">
 
+
+                <!-- ==================================================
+                     TAX PLUS HEADER
+                =================================================== -->
+
                 <div class="mb-3">
 
                     <div class="fw-semibold">
@@ -586,6 +617,10 @@
                 </div>
 
 
+                <!-- ==================================================
+                     TAX PLUS TABLE
+                =================================================== -->
+
                 <div class="table-responsive">
 
                     <table
@@ -597,44 +632,105 @@
                             mb-0
                         ">
 
+
+                        <!-- ==========================================
+                             COLUMN WIDTH
+                        =========================================== -->
+
                         <colgroup>
 
+                            <!-- NO -->
                             <col style="width: 6%;">
+
+                            <!-- TAX NAME -->
                             <col style="width: 34%;">
+
+                            <!-- TAX ACCOUNT -->
                             <col style="width: 26%;">
+
+                            <!-- TAX BASE -->
                             <col style="width: 14%;">
+
+                            <!-- RATE -->
                             <col style="width: 8%;">
+
+                            <!-- TAX AMOUNT -->
                             <col style="width: 12%;">
 
                         </colgroup>
 
 
+                        <!-- ==========================================
+                             HEADER
+                        =========================================== -->
+
                         <thead>
 
                             <tr>
 
-                                <th class="text-start text-nowrap">
+                                <th
+                                    class="
+                                        text-start
+                                        text-nowrap
+                                    ">
+
                                     No
+
                                 </th>
 
-                                <th class="text-start text-nowrap">
+
+                                <th
+                                    class="
+                                        text-start
+                                        text-nowrap
+                                    ">
+
                                     Tax Name
+
                                 </th>
 
-                                <th class="text-start text-nowrap">
+
+                                <th
+                                    class="
+                                        text-start
+                                        text-nowrap
+                                    ">
+
                                     Tax Account
+
                                 </th>
 
-                                <th class="text-end text-nowrap">
+
+                                <th
+                                    class="
+                                        text-end
+                                        text-nowrap
+                                    ">
+
                                     Tax Base
+
                                 </th>
 
-                                <th class="text-end text-nowrap">
+
+                                <th
+                                    class="
+                                        text-end
+                                        text-nowrap
+                                    ">
+
                                     Rate
+
                                 </th>
 
-                                <th class="text-end text-nowrap">
+
+                                <th
+                                    class="
+                                        text-end
+                                        text-nowrap
+                                    ">
+
                                     Tax Amount
+
                                 </th>
 
                             </tr>
@@ -642,13 +738,21 @@
                         </thead>
 
 
+                        <!-- ==========================================
+                             BODY
+                        =========================================== -->
+
                         <tbody id="ar-tax-plus-body">
 
                             <tr id="ar-tax-plus-empty">
 
                                 <td
                                     colspan="6"
-                                    class="text-center text-muted py-4">
+                                    class="
+                                        text-center
+                                        text-muted
+                                        py-4
+                                    ">
 
                                     No Tax (+) found from Invoice Details.
 
@@ -663,6 +767,10 @@
                 </div>
 
 
+                <!-- ==================================================
+                     JOURNAL PREVIEW
+                =================================================== -->
+
                 <div
                     class="
                         alert
@@ -672,41 +780,53 @@
                         mb-0
                     ">
 
+
                     <div class="ar-tax-journal-preview"></div>
 
+
                     <div class="fw-semibold mb-1">
+
                         Journal Preview
+
                     </div>
+
 
                     <div class="small text-muted">
 
+
                         Debit:
+
 
                         <strong
                             id="ar-tax-plus-preview-debit">
+
+                            PIUTANG USAHA
+
+                        </strong>
+
+
+                        <span class="mx-2">
+
+                            |
+
+                        </span>
+
+
+                        Credit:
+
+
+                        <strong
+                            id="ar-tax-plus-preview-credit">
 
                             -
 
                         </strong>
 
 
-                        <span class="mx-2">
-                            |
-                        </span>
-
-
-                        Credit:
-
-                        <strong
-                            id="ar-tax-plus-preview-credit">
-
-                            PIUTANG USAHA
-
-                        </strong>
-
                     </div>
 
                 </div>
+
 
             </div>
 
@@ -718,9 +838,9 @@
 
 
 
-<!-- ==============================================
+<!-- ==================================================
      TAB 4 : TAX MINUS
-=============================================== -->
+=================================================== -->
 
 <div
     class="tab-pane fade"
@@ -735,18 +855,32 @@
 
             <div class="finova-card-body">
 
+
+                <!-- ==================================================
+                     TAX MINUS HEADER
+                =================================================== -->
+
                 <div class="mb-3">
 
                     <div class="fw-semibold">
+
                         Tax (-)
+
                     </div>
 
+
                     <div class="text-muted small">
+
                         Automatically generated from Invoice Details
+
                     </div>
 
                 </div>
 
+
+                <!-- ==================================================
+                     TAX MINUS TABLE
+                =================================================== -->
 
                 <div class="table-responsive">
 
@@ -759,44 +893,105 @@
                             mb-0
                         ">
 
+
+                        <!-- ==========================================
+                             COLUMN WIDTH
+                        =========================================== -->
+
                         <colgroup>
 
+                            <!-- NO -->
                             <col style="width: 6%;">
+
+                            <!-- TAX NAME -->
                             <col style="width: 34%;">
+
+                            <!-- TAX ACCOUNT -->
                             <col style="width: 26%;">
+
+                            <!-- TAX BASE -->
                             <col style="width: 14%;">
+
+                            <!-- RATE -->
                             <col style="width: 8%;">
+
+                            <!-- TAX AMOUNT -->
                             <col style="width: 12%;">
 
                         </colgroup>
 
 
+                        <!-- ==========================================
+                             HEADER
+                        =========================================== -->
+
                         <thead>
 
                             <tr>
 
-                                <th class="text-start text-nowrap">
+                                <th
+                                    class="
+                                        text-start
+                                        text-nowrap
+                                    ">
+
                                     No
+
                                 </th>
 
-                                <th class="text-start text-nowrap">
+
+                                <th
+                                    class="
+                                        text-start
+                                        text-nowrap
+                                    ">
+
                                     Tax Name
+
                                 </th>
 
-                                <th class="text-start text-nowrap">
+
+                                <th
+                                    class="
+                                        text-start
+                                        text-nowrap
+                                    ">
+
                                     Tax Account
+
                                 </th>
 
-                                <th class="text-end text-nowrap">
+
+                                <th
+                                    class="
+                                        text-end
+                                        text-nowrap
+                                    ">
+
                                     Tax Base
+
                                 </th>
 
-                                <th class="text-end text-nowrap">
+
+                                <th
+                                    class="
+                                        text-end
+                                        text-nowrap
+                                    ">
+
                                     Rate
+
                                 </th>
 
-                                <th class="text-end text-nowrap">
+
+                                <th
+                                    class="
+                                        text-end
+                                        text-nowrap
+                                    ">
+
                                     Tax Amount
+
                                 </th>
 
                             </tr>
@@ -804,13 +999,21 @@
                         </thead>
 
 
+                        <!-- ==========================================
+                             BODY
+                        =========================================== -->
+
                         <tbody id="ar-tax-minus-body">
 
                             <tr id="ar-tax-minus-empty">
 
                                 <td
                                     colspan="6"
-                                    class="text-center text-muted py-4">
+                                    class="
+                                        text-center
+                                        text-muted
+                                        py-4
+                                    ">
 
                                     No Tax (-) found from Invoice Details.
 
@@ -825,6 +1028,10 @@
                 </div>
 
 
+                <!-- ==================================================
+                     JOURNAL PREVIEW
+                =================================================== -->
+
                 <div
                     class="
                         alert
@@ -834,35 +1041,405 @@
                         mb-0
                     ">
 
+
                     <div class="fw-semibold mb-1">
+
                         Journal Preview
+
                     </div>
+
 
                     <div class="small text-muted">
 
+
                         Debit:
+
 
                         <strong
                             id="ar-tax-minus-preview-debit">
+
+                            -
+
+                        </strong>
+
+
+                        <span class="mx-2">
+
+                            |
+
+                        </span>
+
+
+                        Credit:
+
+
+                        <strong
+                            id="ar-tax-minus-preview-credit">
 
                             PIUTANG USAHA
 
                         </strong>
 
 
-                        <span class="mx-2">
-                            |
-                        </span>
+                    </div>
+
+                </div>
 
 
-                        Credit:
+            </div>
 
-                        <strong
-                            id="ar-tax-minus-preview-credit">
+        </div>
 
-                            -
+    </div>
 
-                        </strong>
+</div>
+
+
+                    <!-- ==============================================
+     TAB 5 : ACCOUNTING PREVIEW
+=============================================== -->
+
+<div
+    class="tab-pane fade"
+    id="ar-accounting-preview-pane"
+    role="tabpanel"
+    aria-labelledby="ar-accounting-preview-tab"
+    tabindex="0"
+>
+
+    <div class="p-4">
+
+        <div class="finova-card">
+
+            <div class="finova-card-body">
+
+
+                <!-- ==========================================
+                     HEADER
+                =========================================== -->
+
+                <div class="mb-3">
+
+                    <div class="fw-semibold">
+
+                        Accounting Preview
+
+                    </div>
+
+
+                    <div class="text-muted small">
+
+                        Preview journal entries based on
+                        Invoice Details, Tax (+), and Tax (-)
+
+                    </div>
+
+                </div>
+
+
+                <!-- ==========================================
+                     JOURNAL TABLE
+                =========================================== -->
+
+                <div
+                    class="
+                        table-responsive
+                        ar-accounting-preview-scroll
+                    ">
+
+                    <table
+                        class="
+                            table
+                            table-sm
+                            table-hover
+                            align-middle
+                            mb-0
+                        ">
+
+                        <colgroup>
+
+                            <!-- NO -->
+                            <col style="width: 6%;">
+
+                            <!-- ACCOUNT -->
+                            <col style="width: 24%;">
+
+                            <!-- ACCOUNT NAME -->
+                            <col style="width: 38%;">
+
+                            <!-- DEBIT -->
+                            <col style="width: 16%;">
+
+                            <!-- CREDIT -->
+                            <col style="width: 16%;">
+
+                        </colgroup>
+
+
+                        <thead>
+
+                            <tr>
+
+                                <th class="text-center">
+
+                                    No
+
+                                </th>
+
+
+                                <th class="text-start">
+
+                                    Account
+
+                                </th>
+
+
+                                <th class="text-start">
+
+                                    Account Name
+
+                                </th>
+
+
+                                <th class="text-end">
+
+                                    Debit
+
+                                </th>
+
+
+                                <th class="text-end">
+
+                                    Credit
+
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody
+                            id="ar-accounting-preview-body"
+                        >
+
+                            <tr
+                                id="ar-accounting-preview-empty"
+                            >
+
+                                <td
+                                    colspan="5"
+                                    class="
+                                        text-center
+                                        text-muted
+                                        py-4
+                                    "
+                                >
+
+                                    No accounting preview available.
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+
+                        <tfoot>
+
+                            <tr class="fw-semibold">
+
+                                <td
+                                    colspan="3"
+                                    class="text-end"
+                                >
+
+                                    TOTAL
+
+                                </td>
+
+
+                                <td
+                                    class="text-end"
+                                    id="ar-accounting-preview-total-debit"
+                                >
+
+                                    0
+
+                                </td>
+
+
+                                <td
+                                    class="text-end"
+                                    id="ar-accounting-preview-total-credit"
+                                >
+
+                                    0
+
+                                </td>
+
+                            </tr>
+
+                        </tfoot>
+
+                    </table>
+
+                </div>
+
+
+                <!-- ==========================================
+                     ACCOUNTING SUMMARY
+                =========================================== -->
+
+                <div class="row g-3 mt-3">
+
+
+                    <!-- TOTAL -->
+
+                    <div class="col-lg-6">
+
+                        <div
+                            class="
+                                border
+                                rounded
+                                p-3
+                                h-100
+                            "
+                        >
+
+
+                            <div
+                                class="
+                                    d-flex
+                                    justify-content-between
+                                    align-items-center
+                                    mb-2
+                                "
+                            >
+
+                                <span>
+
+                                    Total Debit
+
+                                </span>
+
+
+                                <strong
+                                    id="ar-accounting-preview-summary-debit"
+                                >
+
+                                    0
+
+                                </strong>
+
+                            </div>
+
+
+                            <div
+                                class="
+                                    d-flex
+                                    justify-content-between
+                                    align-items-center
+                                    mb-2
+                                "
+                            >
+
+                                <span>
+
+                                    Total Credit
+
+                                </span>
+
+
+                                <strong
+                                    id="ar-accounting-preview-summary-credit"
+                                >
+
+                                    0
+
+                                </strong>
+
+                            </div>
+
+
+                            <hr>
+
+
+                            <div
+                                class="
+                                    d-flex
+                                    justify-content-between
+                                    align-items-center
+                                "
+                            >
+
+                                <span class="fw-semibold">
+
+                                    Difference
+
+                                </span>
+
+
+                                <strong
+                                    id="ar-accounting-preview-difference"
+                                >
+
+                                    0
+
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- STATUS -->
+
+                    <div class="col-lg-6">
+
+                        <div
+                            id="ar-accounting-preview-status"
+                            class="
+                                alert
+                                alert-secondary
+                                border
+                                h-100
+                                mb-0
+                                d-flex
+                                align-items-center
+                            "
+                        >
+
+                            <div>
+
+                                <div
+                                    class="
+                                        fw-semibold
+                                        mb-1
+                                    "
+                                    id="ar-accounting-preview-status-title"
+                                >
+
+                                    Waiting for Transaction
+
+                                </div>
+
+
+                                <div
+                                    class="small"
+                                    id="ar-accounting-preview-status-message"
+                                >
+
+                                    Add Invoice Detail to generate
+                                    the accounting preview.
+
+                                </div>
+
+                            </div>
+
+                        </div>
 
                     </div>
 
@@ -875,360 +1452,6 @@
     </div>
 
 </div>
-
-
-                    <!-- ==============================================
-                         TAB 5 : ACCOUNTING PREVIEW
-                    =============================================== -->
-
-                    <div
-                        class="tab-pane fade"
-                        id="ar-accounting-preview-pane"
-                        role="tabpanel"
-                        aria-labelledby="ar-accounting-preview-tab"
-                        tabindex="0"
-                    >
-
-                        <div class="p-4">
-
-                            <div class="finova-card">
-
-                                <div class="finova-card-body">
-
-
-                                    <!-- ==========================================
-                                         HEADER
-                                    =========================================== -->
-
-                                    <div class="mb-3">
-
-                                        <div class="fw-semibold">
-
-                                            Accounting Preview
-
-                                        </div>
-
-
-                                        <div class="text-muted small">
-
-                                            Preview journal entries based on
-                                            Invoice Details, Tax (+), and Tax (-)
-
-                                        </div>
-
-                                    </div>
-
-
-                                    <!-- ==========================================
-                                         JOURNAL TABLE
-                                    =========================================== -->
-
-                                    <div
-                                        class="
-                                            table-responsive
-                                            ar-accounting-preview-scroll
-                                        ">
-
-                                        <table
-                                            class="
-                                                table
-                                                table-sm
-                                                table-hover
-                                                align-middle
-                                                mb-0
-                                            ">
-
-                                            <colgroup>
-
-                                                <col style="width: 6%;">
-                                                <col style="width: 24%;">
-                                                <col style="width: 38%;">
-                                                <col style="width: 16%;">
-                                                <col style="width: 16%;">
-
-                                            </colgroup>
-
-
-                                            <thead>
-
-                                                <tr>
-
-                                                    <th class="text-center">
-
-                                                        No
-
-                                                    </th>
-
-
-                                                    <th class="text-start">
-
-                                                        Account
-
-                                                    </th>
-
-
-                                                    <th class="text-start">
-
-                                                        Account Name
-
-                                                    </th>
-
-
-                                                    <th class="text-end">
-
-                                                        Debit
-
-                                                    </th>
-
-
-                                                    <th class="text-end">
-
-                                                        Credit
-
-                                                    </th>
-
-                                                </tr>
-
-                                            </thead>
-
-
-                                            <tbody
-                                                id="ar-accounting-preview-body"
-                                            >
-
-                                                <tr
-                                                    id="ar-accounting-preview-empty"
-                                                >
-
-                                                    <td
-                                                        colspan="5"
-                                                        class="
-                                                            text-center
-                                                            text-muted
-                                                            py-4
-                                                        "
-                                                    >
-
-                                                        No accounting preview available.
-
-                                                    </td>
-
-                                                </tr>
-
-                                            </tbody>
-
-
-                                            <tfoot>
-
-                                                <tr class="fw-semibold">
-
-                                                    <td
-                                                        colspan="3"
-                                                        class="text-end"
-                                                    >
-
-                                                        TOTAL
-
-                                                    </td>
-
-
-                                                    <td
-                                                        class="text-end"
-                                                        id="ar-accounting-preview-total-debit"
-                                                    >
-
-                                                        0
-
-                                                    </td>
-
-
-                                                    <td
-                                                        class="text-end"
-                                                        id="ar-accounting-preview-total-credit"
-                                                    >
-
-                                                        0
-
-                                                    </td>
-
-                                                </tr>
-
-                                            </tfoot>
-
-                                        </table>
-
-                                    </div>
-
-
-                                    <!-- ==========================================
-                                         ACCOUNTING SUMMARY
-                                    =========================================== -->
-
-                                    <div class="row g-3 mt-3">
-
-
-                                        <!-- TOTAL -->
-
-                                        <div class="col-lg-6">
-
-                                            <div
-                                                class="
-                                                    border
-                                                    rounded
-                                                    p-3
-                                                    h-100
-                                                "
-                                            >
-
-
-                                                <div
-                                                    class="
-                                                        d-flex
-                                                        justify-content-between
-                                                        align-items-center
-                                                        mb-2
-                                                    "
-                                                >
-
-                                                    <span>
-
-                                                        Total Debit
-
-                                                    </span>
-
-
-                                                    <strong
-                                                        id="ar-accounting-preview-summary-debit"
-                                                    >
-
-                                                        0
-
-                                                    </strong>
-
-                                                </div>
-
-
-                                                <div
-                                                    class="
-                                                        d-flex
-                                                        justify-content-between
-                                                        align-items-center
-                                                        mb-2
-                                                    "
-                                                >
-
-                                                    <span>
-
-                                                        Total Credit
-
-                                                    </span>
-
-
-                                                    <strong
-                                                        id="ar-accounting-preview-summary-credit"
-                                                    >
-
-                                                        0
-
-                                                    </strong>
-
-                                                </div>
-
-
-                                                <hr>
-
-
-                                                <div
-                                                    class="
-                                                        d-flex
-                                                        justify-content-between
-                                                        align-items-center
-                                                    "
-                                                >
-
-                                                    <span class="fw-semibold">
-
-                                                        Difference
-
-                                                    </span>
-
-
-                                                    <strong
-                                                        id="ar-accounting-preview-difference"
-                                                    >
-
-                                                        0
-
-                                                    </strong>
-
-                                                </div>
-
-                                            </div>
-
-                                        </div>
-
-
-                                        <!-- STATUS -->
-
-                                        <div class="col-lg-6">
-
-                                            <div
-                                                id="ar-accounting-preview-status"
-                                                class="
-                                                    alert
-                                                    alert-secondary
-                                                    border
-                                                    h-100
-                                                    mb-0
-                                                    d-flex
-                                                    align-items-center
-                                                "
-                                            >
-
-                                                <div>
-
-                                                    <div
-                                                        class="
-                                                            fw-semibold
-                                                            mb-1
-                                                        "
-                                                        id="ar-accounting-preview-status-title"
-                                                    >
-
-                                                        Waiting for Transaction
-
-                                                    </div>
-
-
-                                                    <div
-                                                        class="small"
-                                                        id="ar-accounting-preview-status-message"
-                                                    >
-
-                                                        Add Invoice Detail to generate
-                                                        the accounting preview.
-
-                                                    </div>
-
-                                                </div>
-
-                                            </div>
-
-                                        </div>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-                </div>
-
 
                 <!-- ==================================================
                      TOTAL SUMMARY
@@ -1243,8 +1466,7 @@
                             style="
                                 width: 420px;
                                 max-width: 100%;
-                            "
-                        >
+                            ">
 
                             <div class="finova-card-body">
 
@@ -1257,18 +1479,14 @@
                                         justify-content-between
                                         align-items-center
                                         mb-2
-                                    "
-                                >
+                                    ">
 
                                     <span>
                                         Subtotal
                                     </span>
 
-                                    <strong
-                                        id="ar-form-subtotal">
-
+                                    <strong id="ar-form-subtotal">
                                         0
-
                                     </strong>
 
                                 </div>
@@ -1282,18 +1500,14 @@
                                         justify-content-between
                                         align-items-center
                                         mb-2
-                                    "
-                                >
+                                    ">
 
                                     <span>
                                         Tax (+)
                                     </span>
 
-                                    <strong
-                                        id="ar-form-tax">
-
+                                    <strong id="ar-form-tax">
                                         0
-
                                     </strong>
 
                                 </div>
@@ -1307,18 +1521,14 @@
                                         justify-content-between
                                         align-items-center
                                         mb-2
-                                    "
-                                >
+                                    ">
 
                                     <span>
                                         Tax (-)
                                     </span>
 
-                                    <strong
-                                        id="ar-form-wht">
-
+                                    <strong id="ar-form-wht">
                                         0
-
                                     </strong>
 
                                 </div>
@@ -1327,22 +1537,18 @@
                                 <hr>
 
 
-                                <!-- TOTAL PAYABLE -->
+                                <!-- TOTAL RECEIVABLE -->
 
                                 <div
                                     class="
                                         d-flex
                                         justify-content-between
                                         align-items-center
-                                    "
-                                >
+                                    ">
 
                                     <span class="fw-semibold">
-
                                         Total Receivable
-
                                     </span>
-
 
                                     <strong
                                         id="ar-form-total"
