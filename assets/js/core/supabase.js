@@ -15,11 +15,19 @@ SUPABASE CONFIGURATION
 ===========================================
 */
 
-const SUPABASE_URL =
-"https://bqcupgoylxvxbyymomjw.supabase.co";
+// Keep the two Vercel deployments connected to their own Supabase projects.
+// The old Accounting System domain stays on its original database; all other
+// hosts (including finova-accounting-erp.vercel.app) use Manufacturing ERP.
+const IS_LEGACY_ACCOUNTING_DOMAIN =
+    window.location.hostname === "finova-accounting-system.vercel.app";
 
-const SUPABASE_ANON_KEY =
-"sb_publishable_xTpK998Tvm0JmMo9ciLT8Q_otdrwVYc";
+const SUPABASE_URL = IS_LEGACY_ACCOUNTING_DOMAIN
+    ? "https://rzirphjklgvhntewiixx.supabase.co"
+    : "https://bqcupgoylxvxbyymomjw.supabase.co";
+
+const SUPABASE_ANON_KEY = IS_LEGACY_ACCOUNTING_DOMAIN
+    ? "sb_publishable_NHd4larL4DVPq37D1K8H_Q_cLrhP8Op"
+    : "sb_publishable_xTpK998Tvm0JmMo9ciLT8Q_otdrwVYc";
 
 /*
 ===========================================
