@@ -46,9 +46,9 @@ export class UserManagementService {
 
     NOTE
     ----
-    Every FINOVA user is a tenant user and has a company
-    profile. The active profile is the source of role/company
-    information for the UI.
+    Super Admin intentionally does not need a mst_users
+    tenant profile. Returning null here is valid for a
+    Super Admin and must not be treated as an error by UI.
     ======================================================
     */
 
@@ -62,37 +62,6 @@ export class UserManagementService {
             return null;
         }
 
-
-        /*
-        ==================================================
-        RESOLVE ACTIVE COMPANY CONTEXT
-        ==================================================
-        A user can have membership/profile rows in more than
-        one company. Never use user_uid alone with maybeSingle.
-        The Edge Function independently validates this context.
-        ==================================================
-        */
-
-        const {
-            data: effectiveCompanyId,
-            error: companyContextError
-        } = await supabase.rpc(
-            "finova_effective_company_id"
-        );
-
-        if (companyContextError) {
-            throw new Error(
-                `Failed to resolve active company context: ${companyContextError.message}`
-            );
-        }
-
-        const companyId = String(
-            effectiveCompanyId ?? ""
-        ).trim();
-
-        if (!companyId) {
-            return null;
-        }
 
         const {
             data,
@@ -110,10 +79,6 @@ export class UserManagementService {
             .eq(
                 "user_uid",
                 authUser.id
-            )
-            .eq(
-                "company_id",
-                companyId
             )
             .maybeSingle();
 
@@ -230,20 +195,10 @@ export class UserManagementService {
         }
 
 
-        const allowedRoles = [
-            "Manager",
-            "Staff"
-        ];
-
-        if (!allowedRoles.includes(values?.role)) {
-            throw new Error(
-                "Role must be Manager or Staff."
-            );
-        }
-
-
         const role =
-            values.role;
+            values?.role === "Manager"
+                ? "Manager"
+                : "Staff";
 
 
         if (
@@ -317,20 +272,10 @@ export class UserManagementService {
             );
 
 
-        const allowedRoles = [
-            "Manager",
-            "Staff"
-        ];
-
-        if (!allowedRoles.includes(payload?.role)) {
-            throw new Error(
-                "Role must be Manager or Staff."
-            );
-        }
-
-
         const role =
-            payload.role;
+            payload?.role === "Manager"
+                ? "Manager"
+                : "Staff";
 
 
         if (

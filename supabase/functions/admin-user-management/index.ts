@@ -68,55 +68,61 @@ NORMALIZE ROLE
 
 function normalizeRole(
     value: unknown
-): "Manager" | "Staff" | "" {
-    // Reject unknown/legacy roles; never silently convert them to Staff.
-    if (value === "Manager") return "Manager";
-    if (value === "Staff") return "Staff";
-    return "";
+) {
+
+    return String(
+        value ?? ""
+    )
+        .trim()
+        .toLowerCase()
+        === "manager"
+
+        ? "Manager"
+        : "Staff";
+
 }
 
-function canAssignRole(
-    actorRole: string,
-    targetRole: string
-): boolean {
-    const actor = String(actorRole ?? "").trim().toLowerCase();
-    const target = String(targetRole ?? "").trim().toLowerCase();
-    return actor === "manager" && ["manager", "staff"].includes(target);
-}
-
-function canManageTargetRole(
-    actorRole: string,
-    targetRole: string
-): boolean {
-    const actor = String(actorRole ?? "").trim().toLowerCase();
-    const target = String(targetRole ?? "").trim().toLowerCase();
-    return actor === "manager" && ["manager", "staff"].includes(target);
-}
 
 /*
 ==========================================================
-ACTIVE MANAGER SAFEGUARD
+USER MANAGEMENT AUDIT TRAIL
 ==========================================================
-Prevent a company from losing its last active Manager through
-role changes, deactivation, or deletion.
 */
-async function countActiveCompanyManagers(
-    adminClient: any,
-    companyId: string
-): Promise<{ count: number; error: unknown }> {
-    const { data, error } = await adminClient
-        .from("mst_users")
-        .select("user_uid, role, status")
-        .eq("company_id", companyId)
-        .eq("status", true);
 
-    if (error) return { count: 0, error };
+async function writeUserAuditLog(
+    admin: any,
+    input: {
+        companyId: string;
+        actorUid: string;
+        targetUid: string;
+        action: string;
+        oldData?: Record<string, unknown> | null;
+        newData?: Record<string, unknown> | null;
+        remarks?: string;
+    }
+) {
+    const { error } = await admin
+        .from("finova_audit_log")
+        .insert({
+            company_id: input.companyId,
+            user_uid: input.actorUid,
+            module: "USER MANAGEMENT",
+            table_name: "mst_users",
+            record_id: input.targetUid,
+            document_no: null,
+            action: input.action,
+            old_data: input.oldData ?? null,
+            new_data: input.newData ?? null,
+            source_module: "USER MANAGEMENT",
+            source_id: input.targetUid,
+            source_no: null,
+            remarks: input.remarks ?? null
+        });
 
-    const count = (data ?? []).filter((row: { role?: unknown }) =>
-        String(row.role ?? "").trim().toLowerCase() === "manager"
-    ).length;
-
-    return { count, error: null };
+    if (error) {
+        // Audit failure must not silently change the result of a successful user operation.
+        console.error("admin-user-management audit log:", error);
+    }
 }
 
 
@@ -391,23 +397,63 @@ async request => {
 
         ACCESS MODEL
         ------------
-        MANAGER
-        - Full User Management access in own company.
-        - May create/update/reset/delete Manager and Staff users.
+        SUPER ADMIN
+        - Full User Management access.
+        - Uses server-side effective company context.
 
-        STAFF
+        TENANT MANAGER
+        - Active Manager profile + ACTIVE Manager membership.
+        - Full User Management access.
+        - May edit own profile and other users.
+
+        TENANT STAFF
+        - Active Staff profile + ACTIVE company membership.
         - User Management is VIEW ONLY.
-
-        LEGACY ROLES
-        ------------
-        Only Manager and Staff are valid tenant roles.
-        Existing legacy role values must be migrated before deployment.
+        - Cannot create, edit, reset password, or delete users.
 
         IMPORTANT
         ----------
-        Company is always resolved server-side from the
-        authenticated user's active company membership.
-        Never trust company_id from browser payloads.
+        Never trust company_id from the browser payload.
+        The effective company is resolved server-side.
+        ==================================================
+        */
+
+        const {
+            data: isSuperAdminData,
+            error: isSuperAdminError
+        } = await authClient.rpc(
+            "is_finova_super_admin"
+        );
+
+
+        if (
+            isSuperAdminError
+        ) {
+
+            console.error(
+                "admin-user-management super admin check:",
+                isSuperAdminError
+            );
+
+            return jsonResponse(
+                {
+                    success: false,
+                    message:
+                        "Failed to validate FINOVA administrative access."
+                },
+                500
+            );
+
+        }
+
+
+        const isSuperAdmin =
+            isSuperAdminData === true;
+
+
+        /*
+        ==================================================
+        RESOLVE EFFECTIVE COMPANY SERVER-SIDE
         ==================================================
         */
 
@@ -418,7 +464,11 @@ async request => {
             "finova_effective_company_id"
         );
 
-        if (effectiveCompanyError) {
+
+        if (
+            effectiveCompanyError
+        ) {
+
             console.error(
                 "admin-user-management effective company:",
                 effectiveCompanyError
@@ -432,140 +482,319 @@ async request => {
                 },
                 500
             );
+
         }
+
 
         const effectiveCompanyId =
-            String(effectiveCompanyData ?? "").trim();
+            String(
+                effectiveCompanyData
+                ??
+                ""
+            )
+                .trim();
 
-        if (!effectiveCompanyId) {
-            return jsonResponse(
-                {
-                    success: false,
-                    message:
-                        "FINOVA company context was not found. Create or join a company first."
-                },
-                403
-            );
-        }
-
-        const {
-            data: currentProfile,
-            error: profileError
-        } = await admin
-            .from("mst_users")
-            .select(`
-                user_uid,
-                email,
-                full_name,
-                role,
-                status,
-                company_id
-            `)
-            .eq("user_uid", currentUser.id)
-            .eq("company_id", effectiveCompanyId)
-            .maybeSingle();
-
-        if (profileError) {
-            console.error(
-                "admin-user-management current profile:",
-                profileError
-            );
-
-            return jsonResponse(
-                {
-                    success: false,
-                    message:
-                        "Failed to validate User Management access."
-                },
-                500
-            );
-        }
-
-        if (!currentProfile || currentProfile.status !== true) {
-            return jsonResponse(
-                {
-                    success: false,
-                    message:
-                        "Only an active FINOVA user can open User Management."
-                },
-                403
-            );
-        }
-
-        const profileRole = String(
-            currentProfile.role ?? ""
-        ).trim().toLowerCase();
-
-        if (!["manager", "staff"].includes(profileRole)) {
-            return jsonResponse(
-                {
-                    success: false,
-                    message:
-                        "User role is not permitted to access User Management."
-                },
-                403
-            );
-        }
-
-        const {
-            data: currentMembership,
-            error: membershipError
-        } = await admin
-            .from("finova_company_users")
-            .select(`
-                company_id,
-                user_uid,
-                role,
-                status
-            `)
-            .eq("company_id", effectiveCompanyId)
-            .eq("user_uid", currentUser.id)
-            .maybeSingle();
-
-        if (membershipError) {
-            console.error(
-                "admin-user-management current membership:",
-                membershipError
-            );
-
-            return jsonResponse(
-                {
-                    success: false,
-                    message:
-                        "Failed to validate company membership."
-                },
-                500
-            );
-        }
-
-        const membershipRole = String(
-            currentMembership?.role ?? ""
-        ).trim().toLowerCase();
-
-        const membershipIsActive =
-            String(currentMembership?.status ?? "")
-                .trim()
-                .toUpperCase() === "ACTIVE";
 
         if (
-            !currentMembership
-            || !membershipIsActive
-            || !["manager", "staff"].includes(membershipRole)
-            || membershipRole !== profileRole
+            !effectiveCompanyId
         ) {
+
             return jsonResponse(
                 {
                     success: false,
                     message:
-                        "An active company membership matching the FINOVA user role is required."
+                        isSuperAdmin
+                            ? "Select a FINOVA company before using User Management."
+                            : "FINOVA company context was not found."
                 },
                 403
             );
+
         }
 
-        const currentCompanyId = effectiveCompanyId;
-        const isManager = profileRole === "manager";
-        const canManageUserManagement = isManager;
+
+        /*
+        ==================================================
+        CURRENT USER ACCESS STATE
+        ==================================================
+        */
+
+        let currentProfile = null;
+        let currentMembership = null;
+
+        let canManageUserManagement =
+            isSuperAdmin;
+
+        let isManager =
+            isSuperAdmin;
+
+
+        /*
+        ==================================================
+        TENANT USER VALIDATION
+        ==================================================
+        */
+
+        if (
+            !isSuperAdmin
+        ) {
+
+            /*
+            ==================================================
+            GET CURRENT TENANT PROFILE
+            ==================================================
+            */
+
+            const {
+                data: profile,
+                error: profileError
+            } = await admin
+                .from("mst_users")
+                .select(`
+                    user_uid,
+                    email,
+                    full_name,
+                    role,
+                    status,
+                    company_id
+                `)
+                .eq(
+                    "user_uid",
+                    currentUser.id
+                )
+                .maybeSingle();
+
+
+            if (
+                profileError
+            ) {
+
+                console.error(
+                    "admin-user-management current profile:",
+                    profileError
+                );
+
+                return jsonResponse(
+                    {
+                        success: false,
+                        message:
+                            "Failed to validate User Management access."
+                    },
+                    500
+                );
+
+            }
+
+
+            currentProfile =
+                profile;
+
+
+            /*
+            ==================================================
+            PROFILE VALIDATION
+            ==================================================
+            */
+
+            const profileRole =
+                String(
+                    currentProfile?.role
+                    ??
+                    ""
+                )
+                    .trim()
+                    .toLowerCase();
+
+            const profileIsActive =
+                currentProfile?.status === true;
+
+            const profileCompanyId =
+                String(
+                    currentProfile?.company_id
+                    ??
+                    ""
+                )
+                    .trim();
+
+
+            if (
+                !currentProfile
+                ||
+                !profileIsActive
+            ) {
+
+                return jsonResponse(
+                    {
+                        success: false,
+                        message:
+                            "Only an active FINOVA user can open User Management."
+                    },
+                    403
+                );
+
+            }
+
+
+            if (
+                profileCompanyId !==
+                effectiveCompanyId
+            ) {
+
+                return jsonResponse(
+                    {
+                        success: false,
+                        message:
+                            "FINOVA company context is invalid."
+                    },
+                    403
+                );
+
+            }
+
+
+            if (
+                profileRole !== "manager"
+                &&
+                profileRole !== "staff"
+            ) {
+
+                return jsonResponse(
+                    {
+                        success: false,
+                        message:
+                            "User role is not permitted to access User Management."
+                    },
+                    403
+                );
+
+            }
+
+
+            /*
+            ==================================================
+            GET CURRENT COMPANY MEMBERSHIP
+            ==================================================
+            */
+
+            const {
+                data: membership,
+                error: membershipError
+            } = await admin
+                .from("finova_company_users")
+                .select(`
+                    company_id,
+                    user_uid,
+                    role,
+                    status
+                `)
+                .eq(
+                    "company_id",
+                    effectiveCompanyId
+                )
+                .eq(
+                    "user_uid",
+                    currentUser.id
+                )
+                .maybeSingle();
+
+
+            if (
+                membershipError
+            ) {
+
+                console.error(
+                    "admin-user-management current membership:",
+                    membershipError
+                );
+
+                return jsonResponse(
+                    {
+                        success: false,
+                        message:
+                            "Failed to validate company membership."
+                    },
+                    500
+                );
+
+            }
+
+
+            currentMembership =
+                membership;
+
+
+            const membershipRole =
+                String(
+                    currentMembership?.role
+                    ??
+                    ""
+                )
+                    .trim()
+                    .toUpperCase();
+
+            const membershipIsActive =
+                String(
+                    currentMembership?.status
+                    ??
+                    ""
+                )
+                    .trim()
+                    .toUpperCase()
+                ===
+                "ACTIVE";
+
+
+            const membershipRoleAllowed =
+                membershipRole === "MANAGER"
+                ||
+                membershipRole === "STAFF";
+
+
+            if (
+                !currentMembership
+                ||
+                !membershipIsActive
+                ||
+                !membershipRoleAllowed
+            ) {
+
+                return jsonResponse(
+                    {
+                        success: false,
+                        message:
+                            "An active company membership is required to open User Management."
+                    },
+                    403
+                );
+
+            }
+
+
+            /*
+            ==================================================
+            FINAL TENANT ACCESS
+            ==================================================
+            */
+
+            isManager =
+                profileRole === "manager"
+                &&
+                membershipRole === "MANAGER";
+
+            canManageUserManagement =
+                isManager;
+
+        }
+
+
+        /*
+        ==================================================
+        CURRENT COMPANY
+        ==================================================
+        */
+
+        const currentCompanyId =
+            effectiveCompanyId;
 
         /*
         ==================================================
@@ -760,28 +989,6 @@ async request => {
                 normalizeRole(
                     payload?.role
                 );
-
-            if (!role) {
-                return jsonResponse(
-                    {
-                        success: false,
-                        message:
-                            "Role must be Manager or Staff."
-                    },
-                    400
-                );
-            }
-
-            if (!canAssignRole(profileRole, role)) {
-                return jsonResponse(
-                    {
-                        success: false,
-                        message:
-                            "Only Manager may assign Manager or Staff."
-                    },
-                    403
-                );
-            }
 
 
             const statusValue =
@@ -1077,7 +1284,11 @@ const {
                     createdUser.id,
 
                 role:
-                    role,
+                    String(
+                        role
+                    )
+                        .trim()
+                        .toUpperCase(),
 
                 status:
                     status
@@ -1129,6 +1340,21 @@ const {
     );
 
 }
+            /*
+            ==============================================
+            AUDIT TRAIL
+            ==============================================
+            */
+            await writeUserAuditLog(admin, {
+                companyId: currentCompanyId,
+                actorUid: currentUser.id,
+                targetUid: createdUser.id,
+                action: "INSERT",
+                oldData: null,
+                newData: profile,
+                remarks: "User created from User Management."
+            });
+
             /*
             ==============================================
             SUCCESS
@@ -1187,28 +1413,6 @@ if (
         normalizeRole(
             payload?.role
         );
-
-    if (!role) {
-        return jsonResponse(
-            {
-                success: false,
-                message:
-                    "Role must be Manager or Staff."
-            },
-            400
-        );
-    }
-
-    if (!canAssignRole(profileRole, role)) {
-        return jsonResponse(
-            {
-                success: false,
-                message:
-                    "Only Manager may assign Manager or Staff."
-            },
-            403
-        );
-    }
 
 
     const statusValue =
@@ -1372,102 +1576,6 @@ if (
 
     /*
     ======================================================
-    TARGET AUTHORITY
-    ======================================================
-
-    The actor must be allowed to manage the target's
-    EXISTING role, not only the new role being submitted.
-    This prevents a Manager from editing/demoting an Admin.
-    ======================================================
-    */
-
-    if (
-        !canManageTargetRole(
-            profileRole,
-            updateTargetProfile.role
-        )
-    ) {
-        return jsonResponse(
-            {
-                success: false,
-                message:
-                    "Only Manager may manage users with Manager or Staff roles."
-            },
-            403
-        );
-    }
-
-
-    if (
-        userUid === currentUser.id
-        && role !== profileRole
-    ) {
-        return jsonResponse(
-            {
-                success: false,
-                message:
-                    "You cannot change your own FINOVA role."
-            },
-            400
-        );
-    }
-
-
-    if (
-        userUid === currentUser.id
-        && status === false
-    ) {
-        return jsonResponse(
-            {
-                success: false,
-                message:
-                    "You cannot deactivate your own FINOVA account."
-            },
-            400
-        );
-    }
-
-    const targetIsActiveManager =
-        String(updateTargetProfile.role ?? "").trim().toLowerCase() === "manager"
-        && updateTargetProfile.status === true;
-
-    const targetWouldStopBeingActiveManager =
-        targetIsActiveManager
-        && (role.toLowerCase() !== "manager" || status === false);
-
-    if (targetWouldStopBeingActiveManager) {
-        const managerCountResult = await countActiveCompanyManagers(
-            admin,
-            currentCompanyId
-        );
-
-        if (managerCountResult.error) {
-            console.error(
-                "admin-user-management active Manager count:",
-                managerCountResult.error
-            );
-            return jsonResponse(
-                {
-                    success: false,
-                    message: "Failed to validate active Manager safeguards."
-                },
-                500
-            );
-        }
-
-        if (managerCountResult.count <= 1) {
-            return jsonResponse(
-                {
-                    success: false,
-                    message: "The last active Manager cannot be demoted or deactivated. Assign another active Manager first."
-                },
-                409
-            );
-        }
-    }
-
-    /*
-    ======================================================
     UPDATE MST_USERS
     ======================================================
     */
@@ -1562,7 +1670,11 @@ if (
                         userUid,
 
                     role:
-                        role,
+                        String(
+                            role
+                        )
+                            .trim()
+                            .toUpperCase(),
 
                     status:
                         status
@@ -1653,6 +1765,21 @@ if (
 
     }
 
+
+    /*
+    ======================================================
+    AUDIT TRAIL
+    ======================================================
+    */
+    await writeUserAuditLog(admin, {
+        companyId: currentCompanyId,
+        actorUid: currentUser.id,
+        targetUid: userUid,
+        action: "UPDATE",
+        oldData: updateTargetProfile,
+        newData: updatedProfile,
+        remarks: "User profile updated from User Management."
+    });
 
     /*
     ======================================================
@@ -1832,29 +1959,6 @@ if (
                 );
 
             }
-
-
-            /*
-            ==============================================
-            TARGET AUTHORITY
-            ==============================================
-            */
-
-            if (
-                !canManageTargetRole(
-                    profileRole,
-                    resetTargetProfile.role
-                )
-            ) {
-                return jsonResponse(
-                    {
-                        success: false,
-                        message:
-                            "Only Manager may reset passwords for Manager or Staff users."
-                    },
-                    403
-                );
-            }
             
             /*
 ==============================================
@@ -1948,6 +2052,25 @@ if (
 
             }
 
+
+            /*
+            ==============================================
+            AUDIT TRAIL
+            ==============================================
+            */
+            await writeUserAuditLog(admin, {
+                companyId: currentCompanyId,
+                actorUid: currentUser.id,
+                targetUid: userUid,
+                action: "RESET_PASSWORD",
+                oldData: {
+                    user_uid: resetTargetProfile.user_uid,
+                    email: resetTargetProfile.email,
+                    full_name: resetTargetProfile.full_name
+                },
+                newData: null,
+                remarks: "User password reset. Password value is intentionally not logged."
+            });
 
             /*
             ==============================================
@@ -2056,7 +2179,7 @@ if (
              * The target must belong to the current company
              * before a tenant Manager can delete the account.
              *
-             * The target must belong to the current company.
+             * Super Admin must also select a company context.
              * ==============================================
              */
 
@@ -2111,113 +2234,13 @@ if (
 
             /*
              * ==============================================
-             * TARGET AUTHORITY
-             * ==============================================
-             */
-
-            if (
-                !canManageTargetRole(
-                    profileRole,
-                    targetProfile.role
-                )
-            ) {
-                return jsonResponse(
-                    {
-                        success: false,
-                        message:
-                            "Only Manager may delete users with Manager or Staff roles."
-                    },
-                    403
-                );
-            }
-
-            if (
-                String(targetProfile.role ?? "").trim().toLowerCase() === "manager"
-                && targetProfile.status === true
-            ) {
-                const managerCountResult = await countActiveCompanyManagers(
-                    admin,
-                    currentCompanyId
-                );
-
-                if (managerCountResult.error) {
-                    console.error(
-                        "admin-user-management active Manager count before delete:",
-                        managerCountResult.error
-                    );
-                    return jsonResponse(
-                        {
-                            success: false,
-                            message: "Failed to validate active Manager safeguards."
-                        },
-                        500
-                    );
-                }
-
-                if (managerCountResult.count <= 1) {
-                    return jsonResponse(
-                        {
-                            success: false,
-                            message: "The last active Manager cannot be deleted. Assign another active Manager first."
-                        },
-                        409
-                    );
-                }
-            }
-
-            /*
-             * ==============================================
-             * PROTECT MULTI-COMPANY AUTH ACCOUNTS
+             * DELETE AUTH ACCOUNT GLOBALLY
              * ==============================================
              *
-             * auth.users is global. Do not hard-delete an
-             * account that has memberships in other companies.
-             * ==============================================
-             */
-
-            const {
-                data: targetMemberships,
-                error: targetMembershipsError
-            } = await admin
-                .from("finova_company_users")
-                .select("company_id")
-                .eq("user_uid", userUid);
-
-            if (targetMembershipsError) {
-                console.error(
-                    "admin-user-management target memberships:",
-                    targetMembershipsError
-                );
-
-                return jsonResponse(
-                    {
-                        success: false,
-                        message:
-                            "Failed to validate target company memberships."
-                    },
-                    500
-                );
-            }
-
-            if ((targetMemberships ?? []).length > 1) {
-                return jsonResponse(
-                    {
-                        success: false,
-                        message:
-                            "This user belongs to multiple companies and cannot be permanently deleted from User Management."
-                    },
-                    409
-                );
-            }
-
-            /*
-             * ==============================================
-             * DELETE AUTH ACCOUNT
-             * ==============================================
+             * Do not manually delete mst_users or
+             * finova_company_users first.
              *
-             * Safe only when this is the user's sole company
-             * membership. ON DELETE CASCADE removes the linked
-             * FINOVA profile and membership.
+             * ON DELETE CASCADE handles those records.
              * ==============================================
              */
 
@@ -2244,6 +2267,23 @@ if (
                     500
                 );
             }
+
+            /*
+             * ==============================================
+             * AUDIT TRAIL
+             * ==============================================
+             * Store the event after successful deletion. The actor UID is
+             * recorded, while target data is preserved from targetProfile.
+             */
+            await writeUserAuditLog(admin, {
+                companyId: currentCompanyId,
+                actorUid: currentUser.id,
+                targetUid: userUid,
+                action: "DELETE",
+                oldData: targetProfile,
+                newData: null,
+                remarks: "User Auth account deleted globally; linked profiles and memberships cascade-delete."
+            });
 
             /*
              * ==============================================

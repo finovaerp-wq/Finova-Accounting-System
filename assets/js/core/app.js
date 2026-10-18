@@ -115,15 +115,40 @@ class FinovaApp {
 
         /*
         ==========================================
-        ACCESS MODE
+        CHECK FINOVA SUPER ADMIN
         ==========================================
-
-        FINOVA no longer has a Super Admin role.
-        Every authenticated user operates through
-        their own company membership/context.
         */
 
-        this.isSuperAdmin = false;
+        const {
+            data: isSuperAdmin,
+            error: superAdminError
+        } = await supabase.rpc(
+            "is_finova_super_admin"
+        );
+
+
+        if (
+            superAdminError
+        ) {
+
+            console.error(
+                "FINOVA SUPER ADMIN CHECK ERROR :",
+                superAdminError
+            );
+
+            throw superAdminError;
+
+        }
+
+
+        /*
+        ==========================================
+        APPLICATION ACCESS MODE
+        ==========================================
+        */
+
+        this.isSuperAdmin =
+            isSuperAdmin === true;
 
 
         /*
