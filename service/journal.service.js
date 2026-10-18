@@ -14,8 +14,6 @@ import {
 
 } from "../assets/js/core/supabase.js";
 
-import { TenantContext } from "../assets/js/core/tenant-context.js";
-
 /*
 ==========================================================
 GENERAL JOURNAL SERVICE
@@ -50,38 +48,37 @@ async getAccountingPeriod(accountingDate) {
     }
 
 
-    // Schema FINOVA yang digunakan saat ini menyimpan periode sebagai
-    // period_year, period_month, dan period_code; bukan period/month/year
-    // atau start_date/end_date.
-    const dateText = String(accountingDate).slice(0, 10);
-    const year = Number(dateText.slice(0, 4));
-    const month = Number(dateText.slice(5, 7));
-
-    if (
-        !/^\d{4}-\d{2}-\d{2}$/.test(dateText) ||
-        !Number.isInteger(year) ||
-        !Number.isInteger(month) ||
-        month < 1 ||
-        month > 12
-    ) {
-        throw new Error(`Invalid Accounting Date: ${accountingDate}`);
-    }
-
     const {
+
         data,
         error
+
     } = await supabase
-        .from("mst_accounting_period")
+
+        .from(
+            "mst_accounting_period"
+        )
+
         .select(`
             id,
-            company_id,
-            period_year,
-            period_month,
-            period_code,
+            period,
+            month,
+            year,
+            start_date,
+            end_date,
             status
         `)
-        .eq("period_year", year)
-        .eq("period_month", month)
+
+        .lte(
+            "start_date",
+            accountingDate
+        )
+
+        .gte(
+            "end_date",
+            accountingDate
+        )
+
         .maybeSingle();
 
 
@@ -112,15 +109,7 @@ async getAccountingPeriod(accountingDate) {
     }
 
 
-    const periodLabel =
-        data.period_code ||
-        `${data.period_year}-${String(data.period_month).padStart(2, "0")}`;
-
-    // Keep period property for existing UI/error-message compatibility.
-    return {
-        ...data,
-        period: periodLabel
-    };
+    return data;
 
 }
 
@@ -521,33 +510,6 @@ async create(header, details = []) {
 
         /*
         ======================================================
-        RESOLVE TENANT COMPANY BEFORE INSERT
-        RLS requires company_id = finova_effective_company_id().
-        Never insert a GL journal without a verified tenant ID.
-        ======================================================
-        */
-
-        const effectiveCompanyId = await TenantContext.getCompanyId({ refresh: true });
-
-        if (!effectiveCompanyId) {
-            throw new Error(
-                "Perusahaan aktif tidak ditemukan. Silakan login ulang atau pilih perusahaan aktif sebelum menyimpan GL Journal."
-            );
-        }
-
-        if (
-            header.company_id &&
-            String(header.company_id) !== String(effectiveCompanyId)
-        ) {
-            throw new Error(
-                "Company ID pada jurnal tidak sesuai dengan perusahaan aktif. Jurnal tidak disimpan."
-            );
-        }
-
-        header.company_id = effectiveCompanyId;
-
-        /*
-        ======================================================
         GENERATE JOURNAL NUMBER
         ======================================================
         */
@@ -758,10 +720,6 @@ HEADER INSERT SUCCESS
         journal_id:
             journal.id,
 
-        // Detail must inherit the same tenant company as its header.
-        company_id:
-            journal.company_id,
-
         line_no:
             item.line_no,
 
@@ -950,9 +908,6 @@ async update(id, header, details = []) {
 
         this.validateDetail(details);
 
-        // Build the normalized database detail rows before calculating totals.
-        // This declaration was missing and caused ReferenceError: journalDetails is not defined.
-        const journalDetails = this.buildJournalDetail(details);
 
         /*
         ======================================================
@@ -1116,10 +1071,6 @@ async update(id, header, details = []) {
 
                     journal_id:
                         id,
-
-                    // Keep detail rows in the same tenant as the journal header.
-                    company_id:
-                        existingJournal.company_id,
 
                     line_no:
                         item.line_no,
@@ -1393,16 +1344,6 @@ async delete(id) {
                 "=========================================="
             );
 
-
-            // Convert foreign-key failures into a clear, actionable message.
-            if (deleteError.code === "23503") {
-                const friendlyError = new Error(
-                    "Jurnal tidak dapat dihapus karena masih digunakan oleh transaksi lain, termasuk kemungkinan transaksi penyusutan Fixed Asset. Periksa dan selesaikan relasi transaksi terkait terlebih dahulu."
-                );
-                friendlyError.code = deleteError.code;
-                friendlyError.details = deleteError.details;
-                throw friendlyError;
-            }
 
             throw deleteError;
 
@@ -2296,48 +2237,6 @@ checkBalance(details = []) {
 
 /*
 ==========================================================
-FIXED ASSET DEPRECIATION STATUS SYNC
-==========================================================
-
-The depreciation register is marked Posted only after its linked
-GL journal is Posted. If that GL journal is voided, the linked
-fixed-asset depreciation row is marked Void so the period can be
-re-created without counting the voided amount in accumulated
-commercial depreciation.
-*/
-
-async syncFixedAssetDepreciationStatus(journal, targetStatus) {
-
-    if (
-        !journal?.id ||
-        String(journal.source_module || "").trim().toUpperCase() !== "FA" ||
-        String(journal.source_document_type || "").trim().toUpperCase() !== "FA_DEPRECIATION"
-    ) {
-        return false;
-    }
-
-    const { data, error } = await supabase
-        .from("trx_fixed_asset_depreciation")
-        .update({
-            status: targetStatus,
-            updated_at: new Date().toISOString()
-        })
-        .eq("gl_journal_id", journal.id)
-        .eq("status", targetStatus === this.STATUS.POSTED ? "Draft" : "Posted")
-        .select("id");
-
-    if (error) {
-        throw new Error(
-            `GL journal status is ${targetStatus}, but Fixed Asset depreciation status sync failed: ${error.message || error.details || "Unknown database error"}`
-        );
-    }
-
-    return Array.isArray(data) && data.length > 0;
-
-}
-
-/*
-==========================================================
 POST JOURNAL
 WITH ACCOUNTING PERIOD LOCK
 DRAFT / VOID -> POSTED
@@ -2405,11 +2304,6 @@ async post(id) {
         currentStatus ===
         "POSTED"
     ) {
-
-        await this.syncFixedAssetDepreciationStatus(
-            journal,
-            this.STATUS.POSTED
-        );
 
         return true;
 
@@ -2599,10 +2493,6 @@ async post(id) {
 
     }
 
-    await this.syncFixedAssetDepreciationStatus(
-        journal,
-        this.STATUS.POSTED
-    );
 
     return true;
 
@@ -2705,10 +2595,6 @@ async voidJournal(id, reason = "") {
 
         }
 
-        await this.syncFixedAssetDepreciationStatus(
-            journal,
-            this.STATUS.VOID
-        );
 
         return true;
 

@@ -50,11 +50,11 @@ export class TaxService {
                     tax_code,
                     tax_name,
                     tax_type,
-                    rate,
+                    tax_rate,
                     tax_account_id,
                     offset_account_id,
                     description,
-                    is_active,
+                    status,
                     created_at,
                     updated_at,
 
@@ -135,11 +135,11 @@ export class TaxService {
                     tax_code,
                     tax_name,
                     tax_type,
-                    rate,
+                    tax_rate,
                     tax_account_id,
                     offset_account_id,
                     description,
-                    is_active,
+                    status,
 
                     tax_account:mst_chart_of_accounts!fk_mst_taxes_tax_account (
                         id,
@@ -209,15 +209,15 @@ export class TaxService {
                     tax_code,
                     tax_name,
                     tax_type,
-                    rate,
+                    tax_rate,
                     tax_account_id,
                     offset_account_id,
                     description,
-                    is_active
+                    status
                 `)
 
                 .eq(
-                    "is_active",
+                    "status",
                     true
                 )
 
@@ -300,11 +300,11 @@ export class TaxService {
                     tax_code,
                     tax_name,
                     tax_type,
-                    rate,
+                    tax_rate,
                     tax_account_id,
                     offset_account_id,
                     description,
-                    is_active
+                    status
                 `)
 
                 .eq(
@@ -313,7 +313,7 @@ export class TaxService {
                 )
 
                 .eq(
-                    "is_active",
+                    "status",
                     true
                 )
 
@@ -394,18 +394,21 @@ export class TaxService {
 
             const taxRate =
                 Number(
-                    payload.rate || 0
+                    payload.tax_rate || 0
                 );
 
 
             const taxAccountId =
-                payload.tax_account_id
-                || null;
+    Number(
+        payload.tax_account_id
+        || 0
+    );
 
-
-            const offsetAccountId =
-                payload.offset_account_id
-                || null;
+const offsetAccountId =
+    Number(
+        payload.offset_account_id
+        || 0
+    );
 
 
             /*
@@ -459,13 +462,19 @@ export class TaxService {
             }
 
 
-            if (!taxAccountId) {
+            if (
+    !Number.isInteger(
+        taxAccountId
+    )
+    ||
+    taxAccountId <= 0
+) {
 
-                throw new Error(
-                    "Tax Account is required."
-                );
+    throw new Error(
+        "Tax Account is required."
+    );
 
-            }
+}
 
 
            
@@ -495,24 +504,26 @@ export class TaxService {
                     tax_type:
                         taxType,
 
-                    rate:
+                    tax_rate:
                         taxRate,
 
                     tax_account_id:
                         taxAccountId,
 
                     offset_account_id:
-                        offsetAccountId,
+    offsetAccountId > 0
+        ? offsetAccountId
+        : null,
 
                     description:
                         payload.description
                         || null,
 
-                    is_active:
-                        payload.is_active
+                    status:
+                        payload.status
                         !== undefined
                             ? Boolean(
-                                payload.is_active
+                                payload.status
                             )
                             : true
 
@@ -716,13 +727,13 @@ async update(
         */
 
         if (
-            payload.rate
+            payload.tax_rate
             !== undefined
         ) {
 
             const rate =
                 Number(
-                    payload.rate
+                    payload.tax_rate
                 );
 
 
@@ -741,7 +752,7 @@ async update(
             }
 
 
-            updateData.rate =
+            updateData.tax_rate =
                 rate;
 
         }
@@ -847,13 +858,13 @@ async update(
         */
 
         if (
-            payload.is_active
+            payload.status
             !== undefined
         ) {
 
-            updateData.is_active =
+            updateData.status =
                 Boolean(
-                    payload.is_active
+                    payload.status
                 );
 
         }
