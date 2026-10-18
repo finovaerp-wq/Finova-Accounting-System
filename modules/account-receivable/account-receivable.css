@@ -6021,3 +6021,147 @@ td {
     }
 
 }
+
+
+/* ==========================================================
+   FINOVA AR — INVOICE DETAIL INNER SCROLL (MATCH AP)
+   Keep modal header, tabs, detail heading and totals fixed.
+   The transaction list becomes scrollable when it exceeds
+   the available space (approximately five rows visible).
+========================================================== */
+@supports selector(#accountReceivableModal:has(#ar-invoice-details-pane.active)) {
+  #accountReceivableModal:has(#ar-invoice-details-pane.active) {
+    overflow: hidden !important;
+  }
+
+  #accountReceivableModal:has(#ar-invoice-details-pane.active) > .modal-dialog {
+    height: calc(100dvh - 2rem) !important;
+    max-height: calc(100dvh - 2rem) !important;
+    margin: 1rem auto !important;
+  }
+
+  #accountReceivableModal:has(#ar-invoice-details-pane.active) > .modal-dialog > .modal-content {
+    height: 100% !important;
+    max-height: 100% !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  #accountReceivableModal:has(#ar-invoice-details-pane.active) > .modal-dialog > .modal-content > .modal-header {
+    flex: 0 0 auto !important;
+  }
+
+  #accountReceivableModal:has(#ar-invoice-details-pane.active) > .modal-dialog > .modal-content > .modal-body {
+    flex: 1 1 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  #accountReceivableModal:has(#ar-invoice-details-pane.active) .ap-modern-tabs-wrapper,
+  #accountReceivableModal:has(#ar-invoice-details-pane.active) #ar-modal-tabs {
+    flex: 0 0 auto !important;
+  }
+
+  #accountReceivableModal:has(#ar-invoice-details-pane.active) #ar-modal-tab-content {
+    display: flex !important;
+    flex: 1 1 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  #accountReceivableModal:has(#ar-invoice-details-pane.active) #ar-invoice-details-pane.active,
+  #accountReceivableModal:has(#ar-invoice-details-pane.active) #ar-invoice-details-pane.active.show {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  #accountReceivableModal:has(#ar-invoice-details-pane.active) #ar-invoice-details-pane.active > .p-4,
+  #accountReceivableModal:has(#ar-invoice-details-pane.active) #ar-invoice-details-pane.active.show > .p-4 {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    padding: 1rem !important;
+    overflow: hidden !important;
+  }
+
+  #accountReceivableModal:has(#ar-invoice-details-pane.active) #ar-invoice-details-pane .finova-card {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  #accountReceivableModal:has(#ar-invoice-details-pane.active) #ar-invoice-details-pane .finova-card-body {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  #accountReceivableModal:has(#ar-invoice-details-pane.active) #ar-invoice-details-pane .finova-card-body > .d-flex.justify-content-between {
+    flex: 0 0 auto !important;
+  }
+
+  #accountReceivableModal:has(#ar-invoice-details-pane.active) #ar-invoice-details-pane .ar-invoice-detail-table-wrapper {
+    display: block !important;
+    flex: 1 1 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+  }
+
+  #accountReceivableModal:has(#ar-invoice-details-pane.active) #ar-invoice-details-pane .ar-invoice-detail-table {
+    height: auto !important;
+    margin-bottom: 0 !important;
+  }
+
+  #accountReceivableModal:has(#ar-invoice-details-pane.active) #ar-invoice-details-pane .ar-invoice-detail-table > thead th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 5 !important;
+    background: #f8fafc !important;
+  }
+
+  #accountReceivableModal:has(#ar-invoice-details-pane.active) #ar-invoice-details-pane .ar-invoice-detail-table > tfoot td {
+    position: sticky;
+    bottom: 0;
+    z-index: 4;
+    background: #fff;
+  }
+}
+
+
+
+
+/* PHASE III(10): Invoice Detail shows a compact initial view and scrolls long detail lists. */
+#ar-invoice-details-pane .table-responsive {
+    max-height: 290px;
+    overflow: auto;
+}
+
+#ar-invoice-details-pane .table-responsive thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--bs-body-bg, #fff);
+}

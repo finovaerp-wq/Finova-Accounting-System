@@ -16,10 +16,10 @@ SUPABASE CONFIGURATION
 */
 
 const SUPABASE_URL =
-"https://rzirphjklgvhntewiixx.supabase.co";
+"https://bqcupgoylxvxbyymomjw.supabase.co";
 
 const SUPABASE_ANON_KEY =
-"sb_publishable_NHd4larL4DVPq37D1K8H_Q_cLrhP8Op";
+"sb_publishable_xTpK998Tvm0JmMo9ciLT8Q_otdrwVYc";
 
 /*
 ===========================================
@@ -27,26 +27,61 @@ CREATE CLIENT
 ===========================================
 */
 
-export const supabase = createClient(
+const FINOVA_REMEMBER_SESSION_KEY = "finova_remember_session";
 
-    SUPABASE_URL,
+// Legacy accounts default to persistent sessions to avoid unexpectedly
+// signing existing users out during the first release of this change.
+const shouldPersistAuthSession = () => {
+    const setting = localStorage.getItem(FINOVA_REMEMBER_SESSION_KEY);
+    return setting === null ? true : setting === "true";
+};
 
-    SUPABASE_ANON_KEY,
-
-    {
-
-        auth: {
-
-            persistSession: true,
-
-            autoRefreshToken: true,
-
-            detectSessionInUrl: true
-
-        }
-
+// Supabase calls this adapter for auth-token persistence. The selected storage
+// is read dynamically, allowing the login checkbox to choose localStorage
+// (remembered session) or sessionStorage (current browser session only).
+const finovaAuthStorage = {
+    getItem(key) {
+        const store = shouldPersistAuthSession() ? localStorage : sessionStorage;
+        return store.getItem(key);
+    },
+    setItem(key, value) {
+        const persist = shouldPersistAuthSession();
+        const target = persist ? localStorage : sessionStorage;
+        const other = persist ? sessionStorage : localStorage;
+        other.removeItem(key);
+        target.setItem(key, value);
+    },
+    removeItem(key) {
+        localStorage.removeItem(key);
+        sessionStorage.removeItem(key);
     }
+};
 
+export function setAuthPersistence(remember) {
+    localStorage.setItem(FINOVA_REMEMBER_SESSION_KEY, remember ? "true" : "false");
+
+    // Clear the token from the opposite store before the next login writes it.
+    // Supabase's in-memory auth state remains managed by the existing client.
+    const projectRef = new URL(SUPABASE_URL).hostname.split(".")[0];
+    const authStorageKey = `sb-${projectRef}-auth-token`;
+    if (remember) {
+        sessionStorage.removeItem(authStorageKey);
+    } else {
+        localStorage.removeItem(authStorageKey);
+    }
+}
+
+export const supabase = createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY,
+    {
+        auth: {
+            storage: finovaAuthStorage,
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true
+        }
+    }
 );
 
 /*
