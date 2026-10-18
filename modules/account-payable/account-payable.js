@@ -865,7 +865,8 @@ renderTaxMasterOptions() {
 
                 option.dataset.rate =
                     Number(
-                        tax.rate ?? tax.tax_rate ?? 0
+                        tax.tax_rate
+                        || 0
                     );
 
 
@@ -981,7 +982,8 @@ renderTaxMasterOptions() {
 
                 option.dataset.rate =
                     Number(
-                        tax.rate ?? tax.tax_rate ?? 0
+                        tax.tax_rate
+                        || 0
                     );
 
 
@@ -4348,21 +4350,17 @@ console.log(
         ==================================================
         */
 
-        // Database schema uses account_id and amount.
-        // UI models may use charge_account_id and line_amount.
         const chargeAccountId =
             Number(
                 detail.charge_account_id
-                ?? detail.account_id
-                ?? 0
+                || 0
             );
 
 
         const lineAmount =
             Number(
                 detail.line_amount
-                ?? detail.amount
-                ?? (Number(detail.quantity || 0) * Number(detail.unit_price || 0))
+                || 0
             );
 
 
@@ -4547,7 +4545,8 @@ console.log(
                 this.taxPlusData.find(
                     tax =>
                         Number(
-                            tax.rate ?? tax.tax_rate ?? 0
+                            tax.tax_rate
+                            || 0
                         )
                         ===
                         taxPlusRate
@@ -4863,7 +4862,8 @@ console.log(
                 this.taxMinusData.find(
                     tax =>
                         Number(
-                            tax.rate ?? tax.tax_rate ?? 0
+                            tax.tax_rate
+                            || 0
                         )
                         ===
                         taxMinusRate
@@ -10933,6 +10933,10 @@ renderVendorOptions() {
                     value="${id}">
 
                     ${this.escapeHtml(
+                        code
+                    )}
+                    ::
+                    ${this.escapeHtml(
                         name
                     )}
 
@@ -11462,17 +11466,11 @@ btnConfirmDelete?.addEventListener(
     this.apDetailUnitPrice?.addEventListener(
         "input",
         () => {
-            // Do not insert thousands separators while the user is typing.
-            this.calculateDetail();
-        }
-    );
 
-    this.apDetailUnitPrice?.addEventListener(
-        "blur",
-        () => {
-            // Format only after leaving the Unit Price field.
             this.formatUnitPrice();
+
             this.calculateDetail();
+
         }
     );
 
@@ -11487,28 +11485,8 @@ btnConfirmDelete?.addEventListener(
     );
 
 
-    this.apDetailTaxInputRate?.addEventListener(
-        "change",
-        () => {
-
-            this.calculateDetail();
-
-        }
-    );
-
-
     this.apDetailWithholdingTaxRate?.addEventListener(
         "input",
-        () => {
-
-            this.calculateDetail();
-
-        }
-    );
-
-
-    this.apDetailWithholdingTaxRate?.addEventListener(
-        "change",
         () => {
 
             this.calculateDetail();
@@ -12225,8 +12203,12 @@ loadBulkAPPaymentVendors() {
 
 
             option.textContent =
-                name
-                    || "-";
+                code
+                    ? `${code} :: ${name}`
+                    : (
+                        name
+                        || "-"
+                    );
 
 
             this.apPaymentBulkVendor
@@ -12596,13 +12578,6 @@ async saveAPPayment() {
             )
                 ? result.details
                 : [];
-
-        console.info("AP EDIT LOAD DIAGNOSTIC:", {
-            invoiceId: id,
-            detailRowsReturned: details.length,
-            headerDppAmount: Number(result.header?.dpp_amount ?? result.header?.subtotal ?? 0),
-            companyId: result.header?.company_id ?? null
-        });
 
 
         /*
@@ -14116,7 +14091,8 @@ async editInvoiceDetail(id) {
 
                         return (
                             Number(
-                                tax.rate ?? tax.tax_rate ?? 0
+                                tax.tax_rate
+                                || 0
                             )
                             ===
                             Number(
@@ -14235,7 +14211,8 @@ async editInvoiceDetail(id) {
 
                         return (
                             Number(
-                                tax.rate ?? tax.tax_rate ?? 0
+                                tax.tax_rate
+                                || 0
                             )
                             ===
                             Number(
@@ -15640,104 +15617,312 @@ RENDER INVOICE DETAILS
 */
 
 renderInvoiceDetails() {
-    const tableBody = document.getElementById("ap-detail-body");
 
-    if (!tableBody) {
-        console.warn("AP detail body not found.");
-        return;
-    }
-
-    const details = Array.isArray(this.invoiceDetails)
-        ? this.invoiceDetails
-        : [];
-
-    if (details.length === 0) {
-        tableBody.innerHTML = `
-            <tr id="ap-detail-empty">
-                <td colspan="7" class="text-center text-muted py-4">
-                    No detail added.
-                </td>
-            </tr>
-        `;
-
-        this.updateInvoiceSummary();
-        return;
-    }
-
-    // Tabel memiliki 7 kolom:
-    // No, Account, Description, Qty, Unit Price, Amount, Action.
-    tableBody.innerHTML = details.map((detail, index) => {
-        const quantity = Number(detail.quantity ?? 0);
-        const unitPrice = Number(detail.unit_price ?? 0);
-
-        const lineAmount = Number(
-            detail.line_amount ?? (quantity * unitPrice)
+    const tableBody =
+        document.getElementById(
+            "ap-detail-body"
         );
 
-        const accountCode = detail.account_code || "-";
-        const accountName = detail.account_name || "";
-        const description = detail.description || "-";
-        const detailId = detail.id ?? "";
 
-        return `
-            <tr>
-                <td class="text-center align-middle">
-                    ${index + 1}
+    if (!tableBody) {
+
+        console.warn(
+            "AP detail body not found."
+        );
+
+        return;
+
+    }
+
+
+    /*
+    ==================================================
+    EMPTY DETAIL
+    ==================================================
+    */
+
+    if (
+        !Array.isArray(
+            this.invoiceDetails
+        )
+        ||
+        !this.invoiceDetails.length
+    ) {
+
+        tableBody.innerHTML = `
+
+            <tr
+                id="ap-detail-empty">
+
+                <td
+                    colspan="7"
+                    class="
+                        text-center
+                        text-muted
+                        py-4
+                    ">
+
+                    No detail added.
+
                 </td>
 
-                <td class="ap-detail-account-cell align-middle">
-                    <div class="fw-semibold">
-                        ${accountCode}
-                    </div>
-                    <div class="small text-muted mt-1">
-                        ${accountName}
-                    </div>
-                </td>
-
-                <td class="ap-detail-description-cell align-middle">
-                    ${description}
-                </td>
-
-                <td class="text-end align-middle">
-                    ${quantity.toLocaleString("id-ID")}
-                </td>
-
-                <td class="text-end align-middle text-nowrap">
-                    ${this.formatCurrency(unitPrice)}
-                </td>
-
-                <td class="text-end align-middle text-nowrap fw-semibold">
-                    ${this.formatCurrency(lineAmount)}
-                </td>
-
-                <td class="text-center align-middle text-nowrap">
-                    <div class="btn-group btn-group-sm" role="group">
-                        <button
-                            type="button"
-                            class="btn btn-outline-primary"
-                            title="Edit Detail"
-                            aria-label="Edit Detail"
-                            data-detail-action="edit"
-                            data-detail-id="${detailId}">
-                            <i class="fa-solid fa-pen"></i>
-                        </button>
-
-                        <button
-                            type="button"
-                            class="btn btn-outline-danger"
-                            title="Remove Detail"
-                            aria-label="Remove Detail"
-                            data-detail-action="delete"
-                            data-detail-id="${detailId}">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </div>
-                </td>
             </tr>
+
         `;
-    }).join("");
+
+
+        /*
+        ==================================================
+        UPDATE SUMMARY
+        ==================================================
+        */
+
+        this.updateInvoiceSummary();
+
+
+        return;
+
+    }
+
+
+    /*
+    ==================================================
+    RENDER DETAIL
+    ==================================================
+    */
+
+    tableBody.innerHTML =
+        this.invoiceDetails
+            .map(
+                (
+                    detail,
+                    index
+                ) => {
+
+                    return `
+
+                        <tr>
+
+                            <!-- ==================================
+                                 NO
+                            =================================== -->
+
+                            <td
+                                class="
+                                    text-center
+                                    align-top
+                                ">
+
+                                ${index + 1}
+
+                            </td>
+
+
+                            <!-- ==================================
+                                 ACCOUNT
+                            =================================== -->
+
+                            <td
+                                class="
+                                    align-top
+                                    ap-detail-account-cell
+                                ">
+
+                                <div
+                                    class="fw-semibold">
+
+                                    ${
+                                        detail.account_code
+                                        || "-"
+                                    }
+
+                                </div>
+
+
+                                <div
+                                    class="
+                                        small
+                                        text-muted
+                                        mt-1
+                                    ">
+
+                                    ${
+                                        detail.account_name
+                                        || "-"
+                                    }
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- ==================================
+                                 DESCRIPTION
+                            =================================== -->
+
+                            <td
+                                class="
+                                    align-top
+                                    ap-detail-description-cell
+                                ">
+
+                                ${
+                                    detail.description
+                                    || "-"
+                                }
+
+                            </td>
+
+
+                            <!-- ==================================
+                                 QUANTITY
+                            =================================== -->
+
+                            <td
+                                class="
+                                    text-end
+                                    align-top
+                                ">
+
+                                ${
+                                    Number(
+                                        detail.quantity
+                                        || 0
+                                    )
+                                        .toLocaleString(
+                                            "id-ID"
+                                        )
+                                }
+
+                            </td>
+
+
+                            <!-- ==================================
+                                 UNIT PRICE
+                            =================================== -->
+
+                            <td
+                                class="
+                                    text-end
+                                    align-top
+                                ">
+
+                                ${
+                                    this.formatCurrency(
+                                        Number(
+                                            detail.unit_price
+                                            || 0
+                                        )
+                                    )
+                                }
+
+                            </td>
+
+
+                            <!-- ==================================
+                                 AMOUNT
+                            =================================== -->
+
+                            <td
+                                class="
+                                    text-end
+                                    fw-semibold
+                                    align-top
+                                ">
+
+                                ${
+                                    this.formatCurrency(
+                                        Number(
+                                            detail.total_amount
+                                            || 0
+                                        )
+                                    )
+                                }
+
+                            </td>
+
+
+                            <!-- ==================================
+                                 ACTION
+                            =================================== -->
+
+                            <td
+                                class="
+                                    text-center
+                                    align-top
+                                ">
+
+                                <div
+                                    class="
+                                        btn-group
+                                        btn-group-sm
+                                    "
+                                    role="group">
+
+                                    <!-- EDIT -->
+
+                                    <button
+                                        type="button"
+                                        class="
+                                            btn
+                                            btn-outline-primary
+                                        "
+                                        title="Edit Detail"
+                                        data-detail-action="edit"
+                                        data-detail-id="${detail.id}">
+
+                                        <i
+                                            class="
+                                                fa-solid
+                                                fa-pen
+                                            ">
+                                        </i>
+
+                                    </button>
+
+
+                                    <!-- DELETE -->
+
+                                    <button
+                                        type="button"
+                                        class="
+                                            btn
+                                            btn-outline-danger
+                                        "
+                                        title="Remove Detail"
+                                        data-detail-action="delete"
+                                        data-detail-id="${detail.id}">
+
+                                        <i
+                                            class="
+                                                fa-solid
+                                                fa-trash
+                                            ">
+                                        </i>
+
+                                    </button>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+
+    /*
+    ==================================================
+    UPDATE SUMMARY
+    ==================================================
+    */
 
     this.updateInvoiceSummary();
+
 }
 /*
 ======================================================
@@ -15901,7 +16086,8 @@ renderTaxPlus() {
                                 this.taxPlusData.find(
                                     tax =>
                                         Number(
-                                            tax.rate ?? tax.tax_rate ?? 0
+                                            tax.tax_rate
+                                            || 0
                                         )
                                         ===
                                         taxRate
@@ -16061,7 +16247,8 @@ renderTaxPlus() {
                 this.taxPlusData.find(
                     tax =>
                         Number(
-                            tax.rate ?? tax.tax_rate ?? 0
+                            tax.tax_rate
+                            || 0
                         )
                         ===
                         firstTaxRate
@@ -16297,7 +16484,8 @@ renderTaxMinus() {
                                 this.taxMinusData.find(
                                     tax =>
                                         Number(
-                                            tax.rate ?? tax.tax_rate ?? 0
+                                            tax.tax_rate
+                                            || 0
                                         )
                                         ===
                                         taxRate
@@ -16457,7 +16645,8 @@ renderTaxMinus() {
                 this.taxMinusData.find(
                     tax =>
                         Number(
-                            tax.rate ?? tax.tax_rate ?? 0
+                            tax.tax_rate
+                            || 0
                         )
                         ===
                         firstTaxRate
@@ -16597,8 +16786,7 @@ checkAPAccountingPreviewReadiness(
             const lineAmount =
                 Number(
                     detail.line_amount
-                    ?? detail.amount
-                    ?? (Number(detail.quantity || 0) * Number(detail.unit_price || 0))
+                    || 0
                 );
 
 
@@ -16611,8 +16799,7 @@ checkAPAccountingPreviewReadiness(
             const chargeAccountId =
                 Number(
                     detail.charge_account_id
-                    ?? detail.account_id
-                    ?? 0
+                    || 0
                 );
 
 
@@ -18923,17 +19110,13 @@ calculateDetail() {
             ),
         tax_input_rate:
             Number(
-                this.apDetailTaxInputRate
-                    ?.selectedOptions?.[0]
-                    ?.dataset?.rate
+                this.apDetailTaxInputRate?.value
                 || 0
             ),
 
         withholding_tax_rate:
             Number(
-                this.apDetailWithholdingTaxRate
-                    ?.selectedOptions?.[0]
-                    ?.dataset?.rate
+                this.apDetailWithholdingTaxRate?.value
                 || 0
             )
 
@@ -19618,24 +19801,71 @@ RENDER VENDOR TOP
 
 renderVendorTOP(vendor) {
 
+    if (!this.apFormTop) {
+
+        return;
+
+    }
+
+
+    const top =
+        vendor?.mst_term_of_payment;
+
+
     /*
     ==================================================
-    TERM OF PAYMENT IS INTERNAL ONLY
-
-    The TOP column is intentionally not displayed in the
-    AP form. Keep only the selected TOP id internally so
-    Due Date calculation can continue to use the vendor
-    TOP days from the service response.
+    NO TOP
     ==================================================
     */
 
-    const top =
-        vendor?.mst_term_of_payment
-        || null;
+    if (!top) {
+
+        this.apFormTop.value =
+            "No Term of Payment";
+
+        return;
+
+    }
+
+
+    /*
+    ==================================================
+    CHECK TOP STATUS
+    ==================================================
+    */
+
+    if (
+        top.status !== true &&
+        top.status !== "Active"
+    ) {
+
+        this.apFormTop.value =
+            "No Active Term of Payment";
+
+        return;
+
+    }
+
+
+    /*
+    ==================================================
+    DISPLAY TOP
+    ==================================================
+    */
+
+    this.apFormTop.value =
+
+        `${top.top_code} :: ${top.top_name} (${top.days} Days)`;
+
+
+    /*
+    ==================================================
+    STORE TOP ID
+    ==================================================
+    */
 
     this.selectedTopId =
-        top?.id
-        || null;
+        top.id;
 
 }
 /*
@@ -19960,7 +20190,7 @@ async addInvoice() {
                 true;
 
             this.apFormJournalNo.value =
-                "Auto Generated";
+                "AUTO";
 
         }
 
@@ -20098,12 +20328,6 @@ async addInvoice() {
         */
 
         this.resetAPModalTab();
-
-        // Initialize the Add modal with an active zeroed summary and empty tax tabs.
-        this.updateInvoiceSummary();
-        this.renderTaxPlus();
-        this.renderTaxMinus();
-        this.renderAccountingPreview();
 
 
         /*
@@ -20311,7 +20535,7 @@ resetAddForm() {
             true;
 
         this.apFormJournalNo.value =
-            "Auto Generated";
+            "";
 
     }
 
@@ -23405,7 +23629,7 @@ async viewInvoice(id) {
         if (this.apFormJournalNo) {
 
             this.apFormJournalNo.value =
-                "Auto Generated";
+                "";
 
         }
 
@@ -23647,7 +23871,7 @@ async viewInvoice(id) {
         ) {
 
             this.apFormJournalNo.value =
-                "Auto Generated";
+                journalNo;
 
         }
 
@@ -23679,17 +23903,17 @@ async viewInvoice(id) {
                     ==========================================
                     */
 
-                    const persistedAccountId =
-                        detail.charge_account_id
-                        ?? detail.account_id
-                        ?? detail.charge_account?.id
-                        ?? null;
-
                     const masterCOA =
-                        Array.isArray(this.currentCOA)
+                        Array.isArray(
+                            this.currentCOA
+                        )
                             ? this.currentCOA.find(
                                 account =>
-                                    String(account.id) === String(persistedAccountId)
+                                    String(account.id)
+                                    ===
+                                    String(
+                                        detail.charge_account_id
+                                    )
                             )
                             : null;
 
@@ -23704,10 +23928,12 @@ async viewInvoice(id) {
                         charge_account_id:
                             Number(
                                 detail.charge_account_id
-                                ?? detail.account_id
-                                ?? relationCOA.id
-                                ?? masterCOA?.id
-                                ?? 0
+                                ||
+                                relationCOA.id
+                                ||
+                                masterCOA?.id
+                                ||
+                                0
                             ),
 
                         account_code:
@@ -23820,12 +24046,7 @@ async viewInvoice(id) {
                         line_amount:
                             Number(
                                 detail.line_amount
-                                ?? detail.amount
-                                ?? (
-                                    Number(detail.quantity || 0)
-                                    * Number(detail.unit_price || 0)
-                                )
-                                ?? 0
+                                || 0
                             ),
 
                         total_amount:
@@ -24225,25 +24446,6 @@ async viewInvoice(id) {
         */
 
         this.renderInvoiceDetails();
-
-        /*
-        ==================================================
-        WARN WHEN HEADER HAS VALUE BUT DETAIL ROWS ARE MISSING
-        Do not fabricate invoice lines from header totals.
-        ==================================================
-        */
-        if (
-            this.invoiceDetails.length === 0
-            && Number(header?.dpp_amount ?? header?.subtotal ?? 0) > 0
-        ) {
-            console.error(
-                "AP INVOICE DETAIL MISSING IN DATABASE OR HIDDEN BY RLS:",
-                { invoiceId: id, companyId: header?.company_id ?? null }
-            );
-            this.showError(
-                "Invoice Detail tidak ditemukan. Jangan simpan invoice ini dulu. Periksa trx_account_payable_detail di Supabase; detail yang sudah terhapus tidak dapat dibuat kembali hanya dari total header."
-            );
-        }
 
 
         /*
@@ -24978,7 +25180,8 @@ if (
         ) {
 
             this.apFormJournalNo.value =
-                "Auto Generated";
+                journalNo
+                || "";
 
         }
 
@@ -25078,19 +25281,15 @@ if (
                     ==========================================
                     */
 
-                    const persistedAccountId =
-                        detail.charge_account_id
-                        ?? detail.account_id
-                        ?? detail.charge_account?.id
-                        ?? null;
-
                     const masterCOA =
-                        (Array.isArray(this.currentCOA)
-                            ? this.currentCOA.find(
-                                account =>
-                                    String(account.id) === String(persistedAccountId)
-                            )
-                            : null)
+                        this.currentCOA.find(
+                            account =>
+                                String(account.id)
+                                ===
+                                String(
+                                    detail.charge_account_id
+                                )
+                        )
                         || {};
 
 
@@ -25143,10 +25342,12 @@ if (
                         charge_account_id:
                             Number(
                                 detail.charge_account_id
-                                ?? detail.account_id
-                                ?? relationCOA.id
-                                ?? masterCOA.id
-                                ?? 0
+                                ||
+                                relationCOA.id
+                                ||
+                                masterCOA.id
+                                ||
+                                0
                             ),
 
                         account_code:
@@ -25201,8 +25402,10 @@ if (
 
                         tax_plus_id:
                             detail.tax_plus_id
-                                ? Number(detail.tax_plus_id)
-                                : (detail.tax_id ? Number(detail.tax_id) : null),
+                                ? Number(
+                                    detail.tax_plus_id
+                                )
+                                : null,
 
                         tax_plus_code:
                             detail.tax_plus_code
@@ -25282,20 +25485,13 @@ if (
                         line_amount:
                             Number(
                                 detail.line_amount
-                                ?? detail.amount
-                                ?? (
-                                    Number(detail.quantity || 0)
-                                    * Number(detail.unit_price || 0)
-                                )
-                                ?? 0
+                                || 0
                             ),
 
                         total_amount:
                             Number(
                                 detail.total_amount
-                                ?? detail.amount
-                                ?? detail.line_amount
-                                ?? 0
+                                || 0
                             )
 
                     };
@@ -30178,7 +30374,11 @@ async openVendorPaymentTrace() {
 
                         return `
                             <option value="${id}">
-                                ${name}
+                                ${
+                                    code
+                                        ? `${code} :: ${name}`
+                                        : name
+                                }
                             </option>
                         `;
 
@@ -30194,48 +30394,6 @@ async openVendorPaymentTrace() {
                 id="apVendorPaymentTraceModal"
                 tabindex="-1"
                 aria-hidden="true">
-
-                <style>
-                    /* Vendor Payment Trace: align the seven visible columns with Customer Payment Trace. */
-                    #apVendorPaymentTraceModal .ap-trace-table {
-                        width: 100%;
-                        min-width: 0;
-                        table-layout: fixed;
-                    }
-                    #apVendorPaymentTraceModal .ap-trace-table th,
-                    #apVendorPaymentTraceModal .ap-trace-table td {
-                        vertical-align: middle;
-                        overflow-wrap: anywhere;
-                    }
-                    #apVendorPaymentTraceModal .ap-trace-table th:nth-child(1),
-                    #apVendorPaymentTraceModal .ap-trace-table td:nth-child(1) {
-                        width: 2.5%;
-                        text-align: center;
-                        white-space: nowrap;
-                        padding-left: 2px;
-                        padding-right: 2px;
-                    }
-                    #apVendorPaymentTraceModal .ap-trace-table th:nth-child(2),
-                    #apVendorPaymentTraceModal .ap-trace-table td:nth-child(2) { width: 17%; }
-                    #apVendorPaymentTraceModal .ap-trace-table th:nth-child(3),
-                    #apVendorPaymentTraceModal .ap-trace-table td:nth-child(3) { width: 19.5%; }
-                    #apVendorPaymentTraceModal .ap-trace-table th:nth-child(4),
-                    #apVendorPaymentTraceModal .ap-trace-table td:nth-child(4) { width: 16%; }
-                    #apVendorPaymentTraceModal .ap-trace-table th:nth-child(5),
-                    #apVendorPaymentTraceModal .ap-trace-table td:nth-child(5) {
-                        width: 17%;
-                        text-align: right;
-                        white-space: nowrap;
-                    }
-                    #apVendorPaymentTraceModal .ap-trace-table th:nth-child(6),
-                    #apVendorPaymentTraceModal .ap-trace-table td:nth-child(6) { width: 17%; }
-                    #apVendorPaymentTraceModal .ap-trace-table th:nth-child(7),
-                    #apVendorPaymentTraceModal .ap-trace-table td:nth-child(7) {
-                        width: 11%;
-                        text-align: center;
-                        white-space: nowrap;
-                    }
-                </style>
 
                 <div
                     class="
@@ -30354,7 +30512,6 @@ async openVendorPaymentTrace() {
                                         table-hover
                                         align-middle
                                         mb-0
-                                        ap-trace-table
                                     ">
 
                                     <thead>
@@ -30377,6 +30534,10 @@ async openVendorPaymentTrace() {
                                                 Invoice Date
                                             </th>
 
+                                            <th>
+                                                Reference No
+                                            </th>
+
                                             <th class="text-end">
                                                 Paid Amount
                                             </th>
@@ -30394,7 +30555,19 @@ async openVendorPaymentTrace() {
                                     </thead>
 
                                     <tbody id="ap-trace-body">
-                                        <!-- Keep the trace table header visible before a vendor is searched. -->
+
+                                        <tr>
+
+                                            <td
+                                                colspan="8"
+                                                class="text-center text-muted py-4">
+
+                                                Select Vendor and click Trace Payment.
+
+                                            </td>
+
+                                        </tr>
+
                                     </tbody>
 
                                 </table>
@@ -30573,7 +30746,7 @@ async loadVendorPaymentTrace() {
                 <tr>
 
                     <td
-                        colspan="7"
+                        colspan="8"
                         class="text-center py-4">
 
                         <span
@@ -30665,9 +30838,13 @@ async loadVendorPaymentTrace() {
 
                         <div class="fw-semibold mt-1">
                             ${
-                                vendor?.bp_name
-                                ||
-                                "-"
+                                vendor?.bp_code
+                                    ? `${vendor.bp_code} :: ${vendor.bp_name}`
+                                    : (
+                                        vendor?.bp_name
+                                        ||
+                                        "-"
+                                    )
                             }
                         </div>
 
@@ -30750,7 +30927,7 @@ async loadVendorPaymentTrace() {
                 <tr>
 
                     <td
-                        colspan="7"
+                        colspan="8"
                         class="text-center text-muted py-4">
 
                         No active payment history found for this Vendor.
@@ -30856,6 +31033,14 @@ async loadVendorPaymentTrace() {
                                 <td class="text-center">
                                     ${
                                         invoice?.invoice_date
+                                        ||
+                                        "-"
+                                    }
+                                </td>
+
+                                <td>
+                                    ${
+                                        row?.reference_no
                                         ||
                                         "-"
                                     }
@@ -31794,15 +31979,8 @@ openPaymentHistoryModal(
                     ======================================
                     */
 
-                    // View Payment must follow the Description from the AP invoice header.
-                    // Payment-level description is only a fallback for legacy invoices
-                    // whose header description is empty.
                     const paymentDescription =
                         String(
-                            invoice?.description
-                            ||
-                            invoice?.header_description
-                            ||
                             payment?.description
                             ||
                             "-"

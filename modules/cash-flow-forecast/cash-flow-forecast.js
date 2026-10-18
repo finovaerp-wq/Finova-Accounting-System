@@ -38,9 +38,6 @@ export class CashFlowForecast {
         this.destroyed =
             false;
 
-        this.isRefreshing =
-            false;
-
         this.bound =
             [];
 
@@ -1005,35 +1002,6 @@ showSuccess(
 }
 
     /* ======================================================
-       TABLE-BODY LOADING (MATCH FIXED ASSET / GL JOURNAL)
-       Keep filters, controls, and table header visible.
-    ====================================================== */
-
-    renderTableLoading(message = "Loading Cash Flow Forecast...") {
-
-        const body =
-            this.tableBody ||
-            document.getElementById("cff-table-body");
-
-        if (!body) return;
-
-        this.tableBody = body;
-        body.innerHTML = `
-            <tr>
-                <td colspan="14" class="text-center py-5">
-                    <div class="d-flex flex-column align-items-center justify-content-center gap-2">
-                        <div class="spinner-border spinner-border-sm text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <div class="text-muted small">${this.escape(message)}</div>
-                    </div>
-                </td>
-            </tr>
-        `;
-    }
-
-
-    /* ======================================================
        GENERATE
     ====================================================== */
 
@@ -1045,12 +1013,13 @@ showSuccess(
             return;
         }
 
-        const generateButton = this.btnGenerate;
-        const wasGenerateDisabled = Boolean(generateButton?.disabled);
-        if (generateButton) generateButton.disabled = true;
-        this.renderTableLoading("Loading Cash Flow Forecast...");
 
         try {
+
+            window.App
+                ?.showLoading
+                ?.();
+
 
             const start =
                 this.startWeek?.value;
@@ -1148,9 +1117,9 @@ showSuccess(
 
         finally {
 
-            if (generateButton) {
-                generateButton.disabled = wasGenerateDisabled;
-            }
+            window.App
+                ?.hideLoading
+                ?.();
 
         }
 
@@ -1162,14 +1131,10 @@ showSuccess(
 
 async refresh() {
 
-    if (this.destroyed || this.isRefreshing) {
+    if (this.destroyed) {
         return;
     }
 
-    this.isRefreshing = true;
-    const refreshButton = this.btnRefresh;
-    if (refreshButton) refreshButton.disabled = true;
-    this.renderTableLoading("Refreshing Cash Flow Forecast...");
 
     try {
 
@@ -1290,7 +1255,34 @@ async refresh() {
            RESET WEEKLY TABLE
         ================================================== */
 
-        this.renderTableLoading("Refreshing Cash Flow Forecast...");
+        if (this.tableHead) {
+
+            this.tableHead.innerHTML =
+                "";
+
+        }
+
+
+        if (this.tableBody) {
+
+            this.tableBody.innerHTML =
+                `
+                <tr>
+
+                    <td
+                        class="
+                            text-center
+                            text-muted
+                            py-5
+                        "
+                    >
+                        Refreshing forecast...
+                    </td>
+
+                </tr>
+                `;
+
+        }
 
 
         /* ==================================================
@@ -1461,10 +1453,6 @@ async refresh() {
                 "Failed to refresh Cash Flow Forecast."
             );
 
-    }
-    finally {
-        this.isRefreshing = false;
-        if (refreshButton) refreshButton.disabled = false;
     }
 
 }

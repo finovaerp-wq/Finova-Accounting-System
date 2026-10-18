@@ -109,21 +109,22 @@ async getAccountingPeriod(dateReceived) {
 
         .select(`
             id,
-            company_id,
-            period_year,
-            period_month,
-            period_code,
+            period,
+            month,
+            year,
+            start_date,
+            end_date,
             status
         `)
 
-        .eq(
-            "period_year",
-            Number(String(dateReceived).slice(0, 4))
+        .lte(
+            "start_date",
+            dateReceived
         )
 
-        .eq(
-            "period_month",
-            Number(String(dateReceived).slice(5, 7))
+        .gte(
+            "end_date",
+            dateReceived
         )
 
         .maybeSingle();
@@ -168,21 +169,7 @@ async getAccountingPeriod(dateReceived) {
     ======================================================
     */
 
-    return {
-
-        ...data,
-
-        period:
-            data.period_code
-            || `${data.period_year}-${String(data.period_month).padStart(2, "0")}`,
-
-        year:
-            data.period_year,
-
-        month:
-            data.period_month
-
-    };
+    return data;
 
 }
 
@@ -314,21 +301,22 @@ async getPaymentAccountingPeriod(paymentDate) {
 
         .select(`
             id,
-            company_id,
-            period_year,
-            period_month,
-            period_code,
+            period,
+            month,
+            year,
+            start_date,
+            end_date,
             status
         `)
 
-        .eq(
-            "period_year",
-            Number(String(paymentDate).slice(0, 4))
+        .lte(
+            "start_date",
+            paymentDate
         )
 
-        .eq(
-            "period_month",
-            Number(String(paymentDate).slice(5, 7))
+        .gte(
+            "end_date",
+            paymentDate
         )
 
         .maybeSingle();
@@ -373,21 +361,7 @@ async getPaymentAccountingPeriod(paymentDate) {
     ======================================================
     */
 
-    return {
-
-        ...data,
-
-        period:
-            data.period_code
-            || `${data.period_year}-${String(data.period_month).padStart(2, "0")}`,
-
-        year:
-            data.period_year,
-
-        month:
-            data.period_month
-
-    };
+    return data;
 
 }
 
@@ -624,17 +598,9 @@ get STATUS() {
         */
 
         return (
-            (data || []).map(
-                invoice => ({
-                    ...invoice,
-                    subtotal:
-                        Number(
-                            invoice?.dpp_amount
-                            ?? invoice?.subtotal
-                            ?? 0
-                        )
-                })
-            )
+            data
+            ||
+            []
         );
 
     }
@@ -929,14 +895,6 @@ async getById(id) {
             header: {
 
                 ...header,
-
-                /* UI compatibility: database stores DPP as dpp_amount. */
-                subtotal:
-                    Number(
-                        header?.dpp_amount
-                        ?? header?.subtotal
-                        ?? 0
-                    ),
 
                 gl_journal:
                     glJournal
@@ -2053,7 +2011,8 @@ async search(
                         id,
                         top_code,
                         top_name,
-                        days
+                        days,
+                        status
                     )
                 `)
 
@@ -2142,7 +2101,8 @@ async search(
                         id,
                         top_code,
                         top_name,
-                        days
+                        days,
+                        status
                     )
                 `)
 
@@ -2751,80 +2711,15 @@ async create(
 
         /*
         ==================================================
-        RESOLVE EFFECTIVE COMPANY CONTEXT
-        ==================================================
-        */
-
-        const {
-            data: effectiveCompanyId,
-            error: companyContextError
-        } = await supabase.rpc(
-            "finova_effective_company_id"
-        );
-
-        if (companyContextError) {
-            console.error(
-                "AP EFFECTIVE COMPANY CONTEXT ERROR:",
-                companyContextError
-            );
-            throw companyContextError;
-        }
-
-        if (!effectiveCompanyId) {
-            throw new Error(
-                "FINOVA: active company context is required before saving Account Payable."
-            );
-        }
-
-        console.log(
-            "AP EFFECTIVE COMPANY ID:",
-            effectiveCompanyId
-        );
-
-
-        /*
-        ==================================================
         PREPARE HEADER PAYLOAD
         ==================================================
         */
 
         const headerPayload = {
 
-            company_id:
-                effectiveCompanyId,
+            ...header,
 
-            /*
-            ==================================================
-            DATABASE SCHEMA COMPATIBILITY
-
-            Current FINOVA AP header uses dpp_amount,
-            not subtotal. The UI can still use subtotal
-            as its presentation/calculation label.
-            ==================================================
-            */
-
-            vendor_id:
-                header.vendor_id,
-
-            po_no:
-                header.po_no || null,
-
-            invoice_no:
-                header.invoice_no,
-
-            invoice_date:
-                header.invoice_date,
-
-            date_received:
-                header.date_received,
-
-            due_date:
-                header.due_date || null,
-
-            description:
-                header.description || null,
-
-            dpp_amount:
+            subtotal:
                 Number(
                     totals.subtotal
                     || 0
@@ -2860,10 +2755,7 @@ async create(
             status:
                 header.status
                 ||
-                this.STATUS.DRAFT,
-
-            gl_journal_id:
-                header.gl_journal_id || null
+                this.STATUS.DRAFT
 
         };
 
@@ -3048,92 +2940,82 @@ async create(
 
         const detailRows =
             calculatedDetails.map(
-                (detail, index) => ({
+                detail => {
 
-                    company_id:
-                        effectiveCompanyId,
+                    const row = {
 
-                    account_payable_id:
-                        invoice.id,
+                        ...detail,
 
-                    line_no:
-                        index + 1,
+                        account_payable_id:
+                            invoice.id
 
-                    description:
-                        detail.description || null,
+                    };
 
-                    account_id:
-                        Number(
-                            detail.account_id
-                            || detail.charge_account_id
-                            || 0
-                        ),
 
-                    quantity:
-                        Number(detail.quantity || 1),
+                    /*
+                    ==========================================
+                    REMOVE TEMPORARY UI ID
+                    DATABASE GENERATES DETAIL ID
+                    ==========================================
+                    */
 
-                    unit_price:
-                        Number(detail.unit_price || 0),
+                    delete row.id;
 
-                    amount:
-                        Number(
-                            detail.amount
-                            ?? detail.line_amount
-                            ?? (Number(detail.quantity || 1) * Number(detail.unit_price || 0))
-                        ),
 
-                    credit_account_id:
-                        detail.credit_account_id != null && detail.credit_account_id !== ""
-                            ? Number(detail.credit_account_id)
-                            : null,
+                    /*
+                    ==========================================
+                    NORMALIZE OPTIONAL TAX REFERENCES
+                    ==========================================
+                    */
 
-                    tax_id:
-                        detail.tax_id != null && detail.tax_id !== ""
-                            ? Number(detail.tax_id)
-                            : null,
-
-                    tax_plus_id:
-                        detail.tax_plus_id != null && detail.tax_plus_id !== ""
-                            ? Number(detail.tax_plus_id)
-                            : null,
-
-                    tax_plus_account_id:
-                        detail.tax_plus_account_id != null && detail.tax_plus_account_id !== ""
-                            ? Number(detail.tax_plus_account_id)
-                            : null,
-
-                    tax_input_rate:
-                        Number(detail.tax_input_rate ?? 0),
-
-                    tax_input_amount:
-                        Number(detail.tax_input_amount ?? detail.taxInputAmount ?? 0),
-
-                    tax_minus_id:
-                        detail.tax_minus_id != null && detail.tax_minus_id !== ""
-                            ? Number(detail.tax_minus_id)
-                            : null,
-
-                    tax_minus_account_id:
-                        detail.tax_minus_account_id != null && detail.tax_minus_account_id !== ""
-                            ? Number(detail.tax_minus_account_id)
-                            : null,
-
-                    withholding_tax_rate:
-                        Number(detail.withholding_tax_rate ?? 0),
-
-                    withholding_tax_amount:
-                        Number(detail.withholding_tax_amount ?? detail.withholdingTaxAmount ?? 0),
-
-                    total_amount:
-                        Number(
-                            detail.total_amount
-                            ?? detail.totalAmount
-                            ?? (Number(detail.amount ?? detail.line_amount ?? (Number(detail.quantity || 1) * Number(detail.unit_price || 0)))
-                                + Number(detail.tax_input_amount ?? detail.taxInputAmount ?? 0)
-                                - Number(detail.withholding_tax_amount ?? detail.withholdingTaxAmount ?? 0))
+                    row.tax_plus_id =
+                        row.tax_plus_id
+                        ? Number(
+                            row.tax_plus_id
                         )
+                        : null;
 
-                })
+
+                    row.tax_plus_account_id =
+                        row.tax_plus_account_id
+                        ? Number(
+                            row.tax_plus_account_id
+                        )
+                        : null;
+
+
+                    row.tax_minus_id =
+                        row.tax_minus_id
+                        ? Number(
+                            row.tax_minus_id
+                        )
+                        : null;
+
+
+                    row.tax_minus_account_id =
+                        row.tax_minus_account_id
+                        ? Number(
+                            row.tax_minus_account_id
+                        )
+                        : null;
+
+
+                    /*
+                    ==========================================
+                    NORMALIZE CHARGE ACCOUNT
+                    ==========================================
+                    */
+
+                    row.charge_account_id =
+                        Number(
+                            row.charge_account_id
+                            || 0
+                        );
+
+
+                    return row;
+
+                }
             );
 
 
@@ -3149,7 +3031,7 @@ async create(
         ) {
 
             if (
-                !detail.account_id
+                !detail.charge_account_id
             ) {
 
                 /*
@@ -3575,44 +3457,9 @@ async update(
 
             .update({
 
-                vendor_id:
-                    header.vendor_id,
+                ...header,
 
-                po_no:
-                    header.po_no || null,
-
-                invoice_no:
-                    header.invoice_no,
-
-                invoice_date:
-                    header.invoice_date,
-
-                date_received:
-                    header.date_received,
-
-                due_date:
-                    header.due_date || null,
-
-                description:
-                    header.description || null,
-
-                dpp_amount:
-                    Number(totals.subtotal || 0),
-
-                tax_input_amount:
-                    Number(totals.tax_input_amount || 0),
-
-                withholding_tax_amount:
-                    Number(totals.withholding_tax_amount || 0),
-
-                total_amount:
-                    Number(totals.total_amount || 0),
-
-                status:
-                    header.status || this.STATUS.DRAFT,
-
-                gl_journal_id:
-                    header.gl_journal_id || null
+                ...totals
 
             })
 
@@ -3635,137 +3482,34 @@ async update(
 
         /*
         ==================================================
-        PREPARE + VALIDATE NEW DETAILS BEFORE DELETE
-        ==================================================
-        */
-
-        const detailRows =
-            calculatedDetails.map(
-                (detail, index) => ({
-                    company_id:
-                        existingInvoice.company_id,
-                    account_payable_id:
-                        id,
-                    line_no:
-                        index + 1,
-                    description:
-                        detail.description || null,
-                    account_id:
-                        Number(
-                            detail.account_id
-                            ?? detail.charge_account_id
-                            ?? 0
-                        ),
-                    quantity:
-                        Number(detail.quantity ?? 1),
-                    unit_price:
-                        Number(detail.unit_price ?? 0),
-                    amount:
-                        Number(
-                            detail.amount
-                            ?? detail.line_amount
-                            ?? (Number(detail.quantity ?? 1) * Number(detail.unit_price ?? 0))
-                        ),
-                    credit_account_id:
-                        detail.credit_account_id != null && detail.credit_account_id !== ""
-                            ? Number(detail.credit_account_id)
-                            : null,
-                    tax_id:
-                        detail.tax_id != null && detail.tax_id !== ""
-                            ? Number(detail.tax_id)
-                            : null,
-                    tax_plus_id:
-                        detail.tax_plus_id != null && detail.tax_plus_id !== ""
-                            ? Number(detail.tax_plus_id)
-                            : null,
-                    tax_plus_account_id:
-                        detail.tax_plus_account_id != null && detail.tax_plus_account_id !== ""
-                            ? Number(detail.tax_plus_account_id)
-                            : null,
-                    tax_input_rate:
-                        Number(detail.tax_input_rate ?? 0),
-                    tax_input_amount:
-                        Number(detail.tax_input_amount ?? detail.taxInputAmount ?? 0),
-                    tax_minus_id:
-                        detail.tax_minus_id != null && detail.tax_minus_id !== ""
-                            ? Number(detail.tax_minus_id)
-                            : null,
-                    tax_minus_account_id:
-                        detail.tax_minus_account_id != null && detail.tax_minus_account_id !== ""
-                            ? Number(detail.tax_minus_account_id)
-                            : null,
-                    withholding_tax_rate:
-                        Number(detail.withholding_tax_rate ?? 0),
-                    withholding_tax_amount:
-                        Number(detail.withholding_tax_amount ?? detail.withholdingTaxAmount ?? 0),
-                    total_amount:
-                        Number(
-                            detail.total_amount
-                            ?? detail.totalAmount
-                            ?? (Number(detail.amount ?? detail.line_amount ?? (Number(detail.quantity ?? 1) * Number(detail.unit_price ?? 0)))
-                                + Number(detail.tax_input_amount ?? detail.taxInputAmount ?? 0)
-                                - Number(detail.withholding_tax_amount ?? detail.withholdingTaxAmount ?? 0))
-                        )
-                })
-            );
-
-        if (!detailRows.length) {
-            throw new Error(
-                "Invoice Detail tidak boleh kosong. Detail lama dipertahankan."
-            );
-        }
-
-        const invalidDetail = detailRows.find(
-            row =>
-                !Number.isInteger(row.account_id)
-                || row.account_id <= 0
-                || !Number.isFinite(row.amount)
-                || row.amount < 0
-        );
-
-        if (invalidDetail) {
-            throw new Error(
-                "Invoice Detail tidak valid (COA atau Amount). Detail lama tidak dihapus."
-            );
-        }
-
-        /*
-        ==================================================
-        BACKUP OLD DETAILS
-        Restore them if replacement insert fails.
-        ==================================================
-        */
-
-        const previousDetails =
-            Array.isArray(existingResult?.details)
-                ? existingResult.details.map(detail => ({
-                    id: detail.id,
-                    company_id: detail.company_id || existingInvoice.company_id,
-                    account_payable_id: id,
-                    line_no: detail.line_no,
-                    description: detail.description ?? null,
-                    account_id: Number(detail.account_id ?? detail.charge_account_id ?? 0),
-                    quantity: Number(detail.quantity ?? 1),
-                    unit_price: Number(detail.unit_price ?? 0),
-                    amount: Number(detail.amount ?? detail.line_amount ?? 0),
-                    tax_id: detail.tax_id ?? null
-                }))
-                : [];
-
-        /*
-        ==================================================
         DELETE OLD DETAILS
         ==================================================
         */
 
-        const { error: deleteError } = await supabase
-            .from(this.detailTable)
+        const {
+
+            error: deleteError
+
+        } = await supabase
+
+            .from(
+                this.detailTable
+            )
+
             .delete()
-            .eq("account_payable_id", id);
+
+            .eq(
+                "account_payable_id",
+                id
+            );
+
 
         if (deleteError) {
+
             throw deleteError;
+
         }
+
 
         /*
         ==================================================
@@ -3773,43 +3517,45 @@ async update(
         ==================================================
         */
 
-        const { error: insertError } = await supabase
-            .from(this.detailTable)
-            .insert(detailRows);
+        if (
+            calculatedDetails.length
+        ) {
 
-        if (insertError) {
-            console.error(
-                "AP UPDATE DETAIL INSERT ERROR; attempting detail restoration:",
-                insertError
-            );
+            const detailRows =
 
-            const { error: cleanupError } = await supabase
-                .from(this.detailTable)
-                .delete()
-                .eq("account_payable_id", id);
+                calculatedDetails.map(
+                    detail => ({
 
-            if (cleanupError) {
-                console.error("AP DETAIL RESTORE CLEANUP ERROR:", cleanupError);
-            }
+                        ...detail,
 
-            if (previousDetails.length) {
-                const { error: restoreError } = await supabase
-                    .from(this.detailTable)
-                    .insert(previousDetails);
+                        account_payable_id:
+                            id
 
-                if (restoreError) {
-                    console.error("AP DETAIL RESTORE FAILED:", restoreError);
-                    throw new Error(
-                        `Update detail gagal (${insertError.message}) dan pemulihan detail lama juga gagal (${restoreError.message}).`
-                    );
-                }
-
-                console.warn(
-                    `AP detail insert failed; restored ${previousDetails.length} previous detail row(s).`
+                    })
                 );
+
+
+            const {
+
+                error: insertError
+
+            } = await supabase
+
+                .from(
+                    this.detailTable
+                )
+
+                .insert(
+                    detailRows
+                );
+
+
+            if (insertError) {
+
+                throw insertError;
+
             }
 
-            throw insertError;
         }
 
 
@@ -3883,7 +3629,6 @@ async deletePaymentHistoryForAP(
             .select(`
                 id,
                 account_payable_id,
-                payment_batch_id,
                 gl_journal_id
             `)
 
@@ -3964,31 +3709,6 @@ async deletePaymentHistoryForAP(
                 payment?.gl_journal_id
                 || null;
 
-            const paymentBatchId =
-                payment?.payment_batch_id
-                || null;
-
-            /*
-            ==================================================
-            SAFETY GUARD FOR BULK PAYMENT ALLOCATIONS
-
-            A bulk payment journal belongs to the batch, not to an
-            individual AP invoice. Do not detach/delete its allocation
-            through invoice cleanup because the same batch journal may
-            cover other invoices. Use the batch/payment workflow instead.
-            ==================================================
-            */
-
-            if (paymentBatchId) {
-
-                const validationError = new Error(
-                    `Pembayaran AP ini terhubung ke bulk payment batch ${paymentBatchId}. Hapus atau void melalui proses Payment Batch agar alokasi invoice lain tidak ikut terdampak.`
-                );
-
-                validationError.name = "BusinessValidationError";
-                throw validationError;
-
-            }
 
             /*
             ==================================================
@@ -4147,9 +3867,19 @@ async deletePaymentHistoryForAP(
             */
 
             const isAPPaymentJournal =
-                String(journal.source_module || "").trim().toUpperCase() === "AP"
-                && String(journal.source_document_type || "").trim().toUpperCase() === "AP_PAYMENT"
-                && String(journal.source_document_id || "") === String(accountPayableId);
+                journal.source_module ===
+                    "AP"
+                &&
+                journal.source_document_type ===
+                    "AP_PAYMENT"
+                &&
+                String(
+                    journal.source_document_id
+                )
+                ===
+                String(
+                    accountPayableId
+                );
 
 
             if (

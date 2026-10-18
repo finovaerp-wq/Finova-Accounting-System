@@ -1,11 +1,3 @@
 {
-    "deno.enable": true,
-    "deno.enablePaths": [
-        "supabase/functions"
-    ],
-    "deno.disablePaths": [
-        "modules",
-        "service",
-        "assets"
-    ]
+    "deno.enable": true
 }

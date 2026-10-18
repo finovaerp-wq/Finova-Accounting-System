@@ -730,33 +730,6 @@ export class FixedAssetService {
                 ||
                 "Active",
 
-            /* Fiscal tax-depreciation attributes are persisted on the asset. */
-            fiscal_enabled:
-                payload.fiscal_enabled !== undefined
-                    ? Boolean(payload.fiscal_enabled)
-                    : true,
-
-            fiscal_classification:
-                String(payload.fiscal_classification || "NON_BUILDING"),
-
-            fiscal_group:
-                String(payload.fiscal_group || "3"),
-
-            fiscal_method:
-                String(payload.fiscal_method || "STRAIGHT_LINE"),
-
-            fiscal_start_date:
-                payload.fiscal_start_date || null,
-
-            fiscal_useful_life_months:
-                Number(payload.fiscal_useful_life_months || 0),
-
-            fiscal_rate:
-                Number(payload.fiscal_rate || 0),
-
-            fiscal_reference:
-                String(payload.fiscal_reference || "PMK 72/2023"),
-
             company_id:
                 companyId,
 
@@ -2032,22 +2005,7 @@ export class FixedAssetService {
 
         /* ==================================================
            CREATE GL JOURNAL
-
-           Use the same authenticated tenant context as Fixed Asset.
-           The GL journal RLS policy requires company_id to match
-           finova_effective_company_id().
         ================================================== */
-
-        const companyId =
-            await this.companyId();
-
-        if (!companyId) {
-
-            throw new Error(
-                "Company Context is required to create the depreciation journal."
-            );
-
-        }
 
         let journal;
 
@@ -2059,10 +2017,11 @@ export class FixedAssetService {
                     .create(
                     {
 
-                        company_id:
-                            companyId,
-
                         journal_date:
+                            depreciation
+                                .depreciation_date,
+
+                        accounting_date:
                             depreciation
                                 .depreciation_date,
 
