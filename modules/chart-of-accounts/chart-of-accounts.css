@@ -643,12 +643,26 @@ td .fw-semibold {
     user-select: none;
 }
 
-#coa-modal input,
-#coa-modal select,
+/* Text / input elements: I-beam */
+#coa-modal input:not([type="radio"]):not([type="checkbox"]),
 #coa-modal textarea,
-#coa-modal button,
-#coa-modal option,
-#coa-modal label {
-    cursor: default;
+#coa-modal [contenteditable="true"] {
+    cursor: text;
     user-select: text;
+}
+
+/* Interactive controls: pointer */
+#coa-modal select,
+#coa-modal button,
+#coa-modal input[type="radio"],
+#coa-modal input[type="checkbox"],
+#coa-modal a,
+#coa-modal label,
+#coa-modal [role="button"] {
+    cursor: pointer;
+}
+
+/* Native <option> keeps the browser/default cursor */
+#coa-modal option {
+    cursor: default;
 }

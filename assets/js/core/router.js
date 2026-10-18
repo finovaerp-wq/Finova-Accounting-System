@@ -249,8 +249,62 @@ INITIALIZE
 */
 
 this.initialize();
+        this.initializeTabScrollControls();
 
     }
+
+    initializeTabScrollControls() {
+        const tabs = document.getElementById("finova-workspace-tabs");
+        if (!tabs || tabs.dataset.scrollControlsReady === "true") return;
+        tabs.dataset.scrollControlsReady = "true";
+
+        const shell = document.createElement("div");
+        shell.className = "finova-workspace-tabs-shell";
+        tabs.parentNode.insertBefore(shell, tabs);
+        shell.appendChild(tabs);
+
+        const makeArrow = (direction, label, glyph) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = `finova-workspace-tabs-arrow ${direction}`;
+            button.setAttribute("aria-label", label);
+            button.title = label;
+            button.textContent = glyph;
+            button.addEventListener("click", () => {
+                const distance = Math.max(220, Math.floor(tabs.clientWidth * 0.7));
+                tabs.scrollBy({ left: direction === "left" ? -distance : distance, behavior: "smooth" });
+            });
+            shell.appendChild(button);
+            return button;
+        };
+
+        const left = makeArrow("left", "Lihat modul sebelumnya", "‹");
+        const right = makeArrow("right", "Lihat modul berikutnya", "›");
+
+        const update = () => {
+            const max = Math.max(0, tabs.scrollWidth - tabs.clientWidth);
+            const overflow = max > 2;
+            tabs.classList.toggle("has-overflow", overflow);
+            left.classList.toggle("visible", overflow);
+            right.classList.toggle("visible", overflow);
+            left.disabled = tabs.scrollLeft <= 2;
+            right.disabled = tabs.scrollLeft >= max - 2;
+        };
+
+        tabs.addEventListener("scroll", update, { passive: true });
+        window.addEventListener("resize", update);
+        if (typeof ResizeObserver !== "undefined") {
+            const resizeObserver = new ResizeObserver(update);
+            resizeObserver.observe(tabs);
+            resizeObserver.observe(shell);
+        }
+        if (typeof MutationObserver !== "undefined") {
+            const mutationObserver = new MutationObserver(() => requestAnimationFrame(update));
+            mutationObserver.observe(tabs, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
+        }
+        requestAnimationFrame(update);
+    }
+
     /*
 ==========================================================
 CREATE HOME TAB

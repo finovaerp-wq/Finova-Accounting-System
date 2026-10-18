@@ -2,33 +2,20 @@
 ==========================================================
 FINOVA ACCOUNTING SYSTEM
 COMPANY CONTEXT SERVICE
-Version : 1.0.0
+Version : 2.0.0
 ==========================================================
 
-PURPOSE
+NO SUPER ADMIN MODE
 ----------------------------------------------------------
-Mengelola selected company context untuk FINOVA Super Admin.
-
-TENANT USER
-----------------------------------------------------------
-Tetap menggunakan company membership existing.
-
-SUPER ADMIN
-----------------------------------------------------------
-Dapat memilih satu ACTIVE company sebagai accounting
-company context.
-
-IMPORTANT
-----------------------------------------------------------
-Service ini TIDAK mengubah membership company.
+All authenticated FINOVA users operate through their own
+company membership. There is no global Super Admin company
+selector or database-backed Super Admin context.
 ==========================================================
 */
-
 
 import {
     supabase
 } from "../assets/js/core/supabase.js";
-
 
 import {
     TenantContext
@@ -37,95 +24,34 @@ import {
 
 export class CompanyContextService {
 
-
-    /*
-    ======================================================
-    CHECK SUPER ADMIN
-    ======================================================
-    */
-
-    static async isSuperAdmin() {
-
-        const {
-            data,
-            error
-        } = await supabase.rpc(
-            "is_finova_super_admin"
-        );
-
-
-        if (
-            error
-        ) {
-
-            console.error(
-                "CompanyContextService.isSuperAdmin:",
-                error
-            );
-
-            throw error;
-
-        }
-
-
-        return (
-            data === true
-        );
-
-    }
-
-
     /*
     ======================================================
     GET AVAILABLE COMPANIES
     ======================================================
 
-    Hanya digunakan oleh FINOVA Super Admin.
-
-    Company yang dapat dipilih:
-    - status ACTIVE
-
+    In tenant mode the effective company comes from the
+    authenticated user's company membership. Return that
+    company only, so legacy callers remain safe without
+    exposing a global company selector.
     ======================================================
     */
 
     static async getAvailableCompanies() {
 
-        /*
-        ==================================================
-        SECURITY CHECK
-        ==================================================
-        */
+        const companyId =
+            await TenantContext.getCompanyId({
+                refresh: true
+            });
 
-        const isSuperAdmin =
-            await this.isSuperAdmin();
-
-
-        if (
-            !isSuperAdmin
-        ) {
-
-            throw new Error(
-                "FINOVA: Super Admin access required."
-            );
-
+        if (!companyId) {
+            return [];
         }
-
-
-        /*
-        ==================================================
-        GET ACTIVE COMPANIES
-        ==================================================
-        */
 
         const {
             data,
             error
         } = await supabase
-
-            .from(
-                "finova_companies"
-            )
-
+            .from("finova_companies")
             .select(`
                 id,
                 company_code,
@@ -133,39 +59,15 @@ export class CompanyContextService {
                 legal_name,
                 status
             `)
+            .eq("id", companyId)
+            .eq("status", "ACTIVE")
+            .maybeSingle();
 
-            .eq(
-                "status",
-                "ACTIVE"
-            )
-
-            .order(
-                "company_name",
-                {
-                    ascending: true
-                }
-            );
-
-
-        if (
-            error
-        ) {
-
-            console.error(
-                "CompanyContextService.getAvailableCompanies:",
-                error
-            );
-
+        if (error) {
             throw error;
-
         }
 
-
-        return (
-            data
-            ??
-            []
-        );
+        return data ? [data] : [];
 
     }
 
@@ -178,65 +80,9 @@ export class CompanyContextService {
 
     static async getSelectedCompanyId() {
 
-        const isSuperAdmin =
-            await this.isSuperAdmin();
-
-
-        /*
-        ==================================================
-        TENANT USER
-        ==================================================
-
-        Untuk tenant biasa, effective company berasal dari
-        company membership existing.
-
-        ==================================================
-        */
-
-        if (
-            !isSuperAdmin
-        ) {
-
-            return await TenantContext.getCompanyId({
-                refresh: true
-            });
-
-        }
-
-
-        /*
-        ==================================================
-        SUPER ADMIN
-        ==================================================
-        */
-
-        const {
-            data,
-            error
-        } = await supabase.rpc(
-            "finova_super_admin_company_context"
-        );
-
-
-        if (
-            error
-        ) {
-
-            console.error(
-                "CompanyContextService.getSelectedCompanyId:",
-                error
-            );
-
-            throw error;
-
-        }
-
-
-        return (
-            data
-            ??
-            null
-        );
+        return await TenantContext.getCompanyId({
+            refresh: true
+        });
 
     }
 
@@ -252,25 +98,15 @@ export class CompanyContextService {
         const companyId =
             await this.getSelectedCompanyId();
 
-
-        if (
-            !companyId
-        ) {
-
+        if (!companyId) {
             return null;
-
         }
-
 
         const {
             data,
             error
         } = await supabase
-
-            .from(
-                "finova_companies"
-            )
-
+            .from("finova_companies")
             .select(`
                 id,
                 company_code,
@@ -278,34 +114,14 @@ export class CompanyContextService {
                 legal_name,
                 status
             `)
-
-            .eq(
-                "id",
-                companyId
-            )
-
+            .eq("id", companyId)
             .maybeSingle();
 
-
-        if (
-            error
-        ) {
-
-            console.error(
-                "CompanyContextService.getSelectedCompany:",
-                error
-            );
-
+        if (error) {
             throw error;
-
         }
 
-
-        return (
-            data
-            ??
-            null
-        );
+        return data ?? null;
 
     }
 
@@ -314,133 +130,37 @@ export class CompanyContextService {
     ======================================================
     SELECT COMPANY
     ======================================================
+
+    Tenant users cannot switch to another company through
+    a global selector. The requested company must equal the
+    user's effective membership company.
+    ======================================================
     */
 
-    static async selectCompany(
-        companyId
-    ) {
+    static async selectCompany(companyId) {
 
-        /*
-        ==================================================
-        VALIDATE
-        ==================================================
-        */
-
-        if (
-            !companyId
-        ) {
-
+        if (!companyId) {
             throw new Error(
                 "FINOVA: Company ID is required."
             );
-
         }
-
-
-        /*
-        ==================================================
-        SECURITY CHECK
-        ==================================================
-        */
-
-        const isSuperAdmin =
-            await this.isSuperAdmin();
-
-
-        if (
-            !isSuperAdmin
-        ) {
-
-            throw new Error(
-                "FINOVA: Super Admin access required."
-            );
-
-        }
-
-
-        /*
-        ==================================================
-        SET DATABASE CONTEXT
-        ==================================================
-        */
-
-        const {
-            data,
-            error
-        } = await supabase.rpc(
-            "finova_super_admin_set_company_context",
-            {
-                p_company_id:
-                    companyId
-            }
-        );
-
-
-        if (
-            error
-        ) {
-
-            console.error(
-                "CompanyContextService.selectCompany:",
-                error
-            );
-
-            throw error;
-
-        }
-
-
-        /*
-        ==================================================
-        CLEAR TENANT CACHE
-        ==================================================
-
-        Sangat penting.
-
-        Jika sebelumnya Company A tersimpan dalam cache,
-        kemudian Super Admin pindah ke Company B,
-        aplikasi tidak boleh tetap memakai Company A.
-
-        ==================================================
-        */
-
-        TenantContext.clear();
-
-
-        /*
-        ==================================================
-        RELOAD EFFECTIVE COMPANY
-        ==================================================
-        */
 
         const effectiveCompanyId =
             await TenantContext.getCompanyId({
                 refresh: true
             });
 
-
-        /*
-        ==================================================
-        SECURITY VALIDATION
-        ==================================================
-        */
-
-        if (
-            effectiveCompanyId !== data
-        ) {
-
+        if (!effectiveCompanyId) {
             throw new Error(
-                "FINOVA: Company context validation failed."
+                "FINOVA: Company context is not assigned to this user."
             );
-
         }
 
-
-        console.log(
-            "FINOVA SUPER ADMIN COMPANY CONTEXT:",
-            effectiveCompanyId
-        );
-
+        if (effectiveCompanyId !== companyId) {
+            throw new Error(
+                "FINOVA: You can only access your assigned company."
+            );
+        }
 
         return effectiveCompanyId;
 
@@ -449,85 +169,20 @@ export class CompanyContextService {
 
     /*
     ======================================================
-    CLEAR COMPANY CONTEXT
+    CLEAR COMPANY
+    ======================================================
+
+    Clearing a tenant company context is not permitted at
+    database level. Only the local cache is cleared; the
+    membership remains authoritative.
     ======================================================
     */
 
     static async clearCompany() {
 
-        /*
-        ==================================================
-        SECURITY CHECK
-        ==================================================
-        */
-
-        const isSuperAdmin =
-            await this.isSuperAdmin();
-
-
-        if (
-            !isSuperAdmin
-        ) {
-
-            /*
-            ==================================================
-            Tenant user tidak mempunyai Super Admin context.
-            Cukup bersihkan local cache.
-            ==================================================
-            */
-
-            TenantContext.clear();
-
-            return true;
-
-        }
-
-
-        /*
-        ==================================================
-        CLEAR DATABASE CONTEXT
-        ==================================================
-        */
-
-        const {
-            data,
-            error
-        } = await supabase.rpc(
-            "finova_super_admin_clear_company_context"
-        );
-
-
-        if (
-            error
-        ) {
-
-            console.error(
-                "CompanyContextService.clearCompany:",
-                error
-            );
-
-            throw error;
-
-        }
-
-
-        /*
-        ==================================================
-        CLEAR LOCAL CACHE
-        ==================================================
-        */
-
         TenantContext.clear();
 
-
-        console.log(
-            "FINOVA SUPER ADMIN COMPANY CONTEXT: CLEARED"
-        );
-
-
-        return (
-            data === true
-        );
+        return true;
 
     }
 
