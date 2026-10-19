@@ -725,12 +725,12 @@ async refresh() {
 
 
         /* ==================================================
-           SHOW GLOBAL FINOVA LOADING
+           SHOW TABLE LOADING (same interaction as GL Journal)
         ================================================== */
 
-        window.App
-            ?.showLoading
-            ?.();
+        this.showTableLoading(
+            "Loading Fixed Asset..."
+        );
 
 
         /* ==================================================
@@ -846,12 +846,8 @@ async refresh() {
     finally {
 
         /* ==================================================
-           HIDE GLOBAL FINOVA LOADING
+           TABLE CONTENT IS RESTORED BY load()/render()
         ================================================== */
-
-        window.App
-            ?.hideLoading
-            ?.();
 
 
         this.isRefreshing =
@@ -1593,20 +1589,52 @@ async refresh() {
        LOAD DATA
     ====================================================== */
 
+    showTableLoading(
+        message = "Loading Fixed Asset..."
+    ) {
+
+        const body =
+            document.getElementById(
+                "fa-table-body"
+            );
+
+        if (!body) {
+            return;
+        }
+
+        this.body = body;
+
+        body.innerHTML = `
+            <tr>
+                <td colspan="10" class="text-center py-5">
+                    <div class="d-flex flex-column align-items-center justify-content-center gap-2">
+                        <div class="spinner-border spinner-border-sm text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <div class="text-muted small">
+                            ${message}
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        `;
+
+    }
+
+
+    /* ======================================================
+       LOAD DATA
+    ====================================================== */
+
     async load(
         showLoading = false
     ) {
 
-        if (
-            showLoading
-        ) {
-
-            window.App
-                ?.showLoading
-                ?.();
-
+        if (showLoading) {
+            this.showTableLoading(
+                "Loading Fixed Asset..."
+            );
         }
-
 
         try {
 
@@ -1628,76 +1656,58 @@ async refresh() {
                     ]
                 );
 
-
-            if (
-                this.destroyed
-            ) {
-
+            if (this.destroyed) {
                 return;
-
             }
 
-
             this.assets =
-                Array.isArray(
-                    assets
-                )
+                Array.isArray(assets)
                     ? assets
                     : [];
 
-
             this.categories =
-                Array.isArray(
-                    categories
-                )
+                Array.isArray(categories)
                     ? categories
                     : [];
 
-
             this.coa =
-                Array.isArray(
-                    coa
-                )
+                Array.isArray(coa)
                     ? coa
                     : [];
 
+            await this.calculateAssetValues();
 
-            await this
-                .calculateAssetValues();
-
-
-            if (
-                this.destroyed
-            ) {
-
+            if (this.destroyed) {
                 return;
-
             }
-
 
             this.filtered =
                 [
                     ...this.assets
                 ];
 
-
             this.render();
-
             this.fillOptions();
 
-        }
+        } catch (error) {
 
-        finally {
+            const body =
+                document.getElementById(
+                    "fa-table-body"
+                );
 
-            if (
-                showLoading
-            ) {
-
-                window.App
-                    ?.hideLoading
-                    ?.();
-
+            if (body) {
+                this.body = body;
+                body.innerHTML = `
+                    <tr>
+                        <td colspan="10" class="text-center text-danger py-5">
+                            Failed to load Fixed Asset data. Please try Refresh again.
+                        </td>
+                    </tr>
+                `;
             }
+
+            throw error;
 
         }
 
