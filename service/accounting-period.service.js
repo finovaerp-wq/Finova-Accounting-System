@@ -43,16 +43,13 @@ export class AccountingPeriodService {
 
                     .select(`
                         id,
-                        period,
-                        month,
-                        year,
-                        start_date,
-                        end_date,
+                        company_id,
+                        period_year,
+                        period_month,
+                        period_code,
                         status,
+                        opened_at,
                         closed_at,
-                        closed_by,
-                        reopened_at,
-                        reopened_by,
                         created_at,
                         updated_at
                     `)
@@ -66,14 +63,14 @@ export class AccountingPeriodService {
                     */
 
                     .order(
-                        "year",
+                        "period_year",
                         {
                             ascending: true
                         }
                     )
 
                     .order(
-                        "month",
+                        "period_month",
                         {
                             ascending: true
                         }
@@ -116,6 +113,80 @@ export class AccountingPeriodService {
 
     /*
     ======================================================
+    ADD ACCOUNTING PERIOD
+    MANAGER ONLY (UI + DATABASE RLS)
+    ======================================================
+    */
+
+    async addPeriod(
+        year,
+        month,
+        status = "OPEN"
+    ) {
+
+        const periodYear = Number(year);
+        const periodMonth = Number(month);
+
+        if (!Number.isInteger(periodYear) || periodYear < 2000 || periodYear > 2100) {
+            throw new Error("Year tidak valid.");
+        }
+
+        if (!Number.isInteger(periodMonth) || periodMonth < 1 || periodMonth > 12) {
+            throw new Error("Month tidak valid.");
+        }
+
+        const periodCode = `${periodYear}-${String(periodMonth).padStart(2, "0")}`;
+        const normalizedStatus = String(status || "OPEN").trim().toUpperCase();
+
+        if (!['OPEN', 'CLOSED'].includes(normalizedStatus)) {
+            throw new Error("Status Accounting Period tidak valid.");
+        }
+
+        const { data: existing, error: existingError } = await supabase
+            .from("mst_accounting_period")
+            .select("id")
+            .eq("period_year", periodYear)
+            .eq("period_month", periodMonth)
+            .maybeSingle();
+
+        if (existingError) throw existingError;
+
+        if (existing) {
+            throw new Error(`Accounting Period ${periodCode} sudah ada.`);
+        }
+
+        const payload = {
+            period_year: periodYear,
+            period_month: periodMonth,
+            period_code: periodCode,
+            status: normalizedStatus,
+            opened_at: normalizedStatus === "OPEN" ? new Date().toISOString() : null
+        };
+
+        const { data, error } = await supabase
+            .from("mst_accounting_period")
+            .insert(payload)
+            .select(`
+                id,
+                company_id,
+                period_year,
+                period_month,
+                period_code,
+                status,
+                opened_at,
+                closed_at,
+                created_at,
+                updated_at
+            `)
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+
+
+    /*
+    ======================================================
     GET ACCOUNTING PERIOD BY ID
     ======================================================
     */
@@ -149,16 +220,13 @@ export class AccountingPeriodService {
 
                     .select(`
                         id,
-                        period,
-                        month,
-                        year,
-                        start_date,
-                        end_date,
+                        company_id,
+                        period_year,
+                        period_month,
+                        period_code,
                         status,
+                        opened_at,
                         closed_at,
-                        closed_by,
-                        reopened_at,
-                        reopened_by,
                         created_at,
                         updated_at
                     `)

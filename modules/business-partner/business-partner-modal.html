@@ -72,7 +72,7 @@ Version : 4.0.0
                                 id="bp-name"
                                 class="form-control"
                                 maxlength="200"
-                                placeholder="Exp: PT.XXXX"
+                                placeholder="PT. XXXX"
                                 required>
 
                         </div>
@@ -93,9 +93,9 @@ Version : 4.0.0
                                 id="bp-type-form"
                                 class="form-select">
 
-                                <option value="Customer">Customer</option>
-                                <option value="Vendor">Vendor</option>
-                                <option value="Employee">Employee</option>
+                                <option value="Customer">CUSTOMER</option>
+                                <option value="Vendor">VENDOR</option>
+                                <option value="Employee">EMPLOYEE</option>
 
                             </select>
 
@@ -167,7 +167,7 @@ Version : 4.0.0
                             id="bp-phone"
                             class="form-control"
                             maxlength="50"
-                            placeholder="Exp: 08XXXXXXXXX">
+                            placeholder="08XXXXXXXXX">
 
                         </div>
 
@@ -188,7 +188,7 @@ Version : 4.0.0
                                 id="bp-email"
                                 class="form-control"
                                 maxlength="100"
-                                placeholder="Exp: Finovaerp@gmail.com">
+                                placeholder="Finovaerp@gmail.com"    autocapitalize="off"\n                                    autocorrect="off"\n                                    spellcheck="false"\n                                >
 
                         </div>
 
@@ -208,8 +208,11 @@ Version : 4.0.0
                                 type="text"
                                 id="bp-tax-number"
                                 class="form-control"
-                                maxlength="30"
-                                placeholder="Exp: XXXX XXXX XXXX XXXX">
+                                maxlength="16"
+                                pattern="[0-9]{0,16}"
+                                inputmode="numeric"
+                                autocomplete="off"
+                                placeholder="16 DIGIT NPWP / NIK">
 
                         </div>
 
@@ -229,7 +232,7 @@ Version : 4.0.0
                                 id="bp-address"
                                 class="form-control"
                                 rows="3"
-                                placeholder="Exp: JL. Raya Bekasi......."></textarea>
+                                placeholder="JL. RAYA BEKASI......."></textarea>
 
                         </div>
 
@@ -250,7 +253,7 @@ Version : 4.0.0
                                 id="bp-city"
                                 class="form-control"
                                 maxlength="100"
-                                placeholder="Exp: Kota Bekasi">
+                                placeholder="KOTA BEKASI">
 
                         </div>
 
@@ -270,7 +273,7 @@ Version : 4.0.0
                                 type="text"
                                 id="bp-country"
                                 class="form-control"
-                                value="Indonesia"
+                                value="INDONESIA"
                                 readonly>
 
                         </div>

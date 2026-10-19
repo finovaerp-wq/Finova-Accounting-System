@@ -3680,3 +3680,341 @@ td {
     width: 100%;
     z-index: 1085;
 }
+
+
+/* ==========================================================
+   FINOVA AP — CLEAN INVOICE DETAIL TABLE FIX
+   Built from the original stylesheet; does not include the
+   previous experimental table hotfixes.
+========================================================== */
+#accountPayableModal #ap-invoice-details-pane .ap-invoice-detail-table-wrapper {
+    display: block;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+#accountPayableModal #ap-invoice-details-pane table.ap-invoice-detail-table {
+    display: table;
+    width: 100%;
+    min-width: 985px;
+    max-width: none;
+    height: auto;
+    table-layout: fixed;
+    border-collapse: collapse;
+    margin-bottom: 0;
+}
+#accountPayableModal #ap-invoice-details-pane table.ap-invoice-detail-table > thead {
+    display: table-header-group;
+}
+#accountPayableModal #ap-invoice-details-pane table.ap-invoice-detail-table > tbody#ap-detail-body {
+    display: table-row-group;
+    height: auto;
+    min-height: 0;
+}
+#accountPayableModal #ap-invoice-details-pane table.ap-invoice-detail-table > tbody#ap-detail-body > tr {
+    display: table-row;
+    height: auto;
+    min-height: 0;
+}
+#accountPayableModal #ap-invoice-details-pane table.ap-invoice-detail-table > tbody#ap-detail-body > tr > td {
+    display: table-cell;
+    height: auto;
+    min-height: 0;
+    padding: 8px 8px;
+    vertical-align: middle;
+    line-height: 1.35;
+    white-space: normal;
+    overflow-wrap: normal;
+    word-break: normal;
+}
+#accountPayableModal #ap-invoice-details-pane table.ap-invoice-detail-table > thead > tr > th {
+    padding: 9px 8px;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+#accountPayableModal #ap-invoice-details-pane .ap-invoice-detail-table colgroup col:nth-child(1) { width: 50px !important; }
+#accountPayableModal #ap-invoice-details-pane .ap-invoice-detail-table colgroup col:nth-child(2) { width: 190px !important; }
+#accountPayableModal #ap-invoice-details-pane .ap-invoice-detail-table colgroup col:nth-child(3) { width: 240px !important; }
+#accountPayableModal #ap-invoice-details-pane .ap-invoice-detail-table colgroup col:nth-child(4) { width: 65px !important; }
+#accountPayableModal #ap-invoice-details-pane .ap-invoice-detail-table colgroup col:nth-child(5) { width: 145px !important; }
+#accountPayableModal #ap-invoice-details-pane .ap-invoice-detail-table colgroup col:nth-child(6) { width: 170px !important; }
+#accountPayableModal #ap-invoice-details-pane .ap-invoice-detail-table colgroup col:nth-child(7) { width: 100px !important; }
+#accountPayableModal #ap-invoice-details-pane .ap-invoice-detail-table th:nth-child(1),
+#accountPayableModal #ap-invoice-details-pane .ap-invoice-detail-table td:nth-child(1) { text-align: center; }
+#accountPayableModal #ap-invoice-details-pane .ap-invoice-detail-table th:nth-child(4),
+#accountPayableModal #ap-invoice-details-pane .ap-invoice-detail-table td:nth-child(4),
+#accountPayableModal #ap-invoice-details-pane .ap-invoice-detail-table th:nth-child(5),
+#accountPayableModal #ap-invoice-details-pane .ap-invoice-detail-table td:nth-child(5),
+#accountPayableModal #ap-invoice-details-pane .ap-invoice-detail-table th:nth-child(6),
+#accountPayableModal #ap-invoice-details-pane .ap-invoice-detail-table td:nth-child(6) {
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+#accountPayableModal #ap-invoice-details-pane .ap-invoice-detail-table th:nth-child(7),
+#accountPayableModal #ap-invoice-details-pane .ap-invoice-detail-table td:nth-child(7) {
+    text-align: center;
+    white-space: nowrap;
+    overflow: visible;
+}
+#accountPayableModal #ap-invoice-details-pane .ap-invoice-detail-table td:nth-child(7) .btn,
+#accountPayableModal #ap-invoice-details-pane .ap-invoice-detail-table td:nth-child(7) button {
+    display: inline-flex;
+    visibility: visible;
+    opacity: 1;
+    align-items: center;
+    justify-content: center;
+    margin: 0 1px;
+    padding: 4px 6px;
+}
+#accountPayableModal #ap-invoice-details-pane #ap-detail-body > tr > td[colspan="7"] {
+    height: auto;
+    text-align: center;
+}
+
+
+/* ==========================================================
+   AP MODAL: KEEP TOTAL SUMMARY VISIBLE WHILE DETAILS SCROLL
+========================================================== */
+#accountPayableModal .modal-content {
+    max-height: calc(100vh - 2rem);
+}
+#accountPayableModal .modal-body {
+    min-height: 0;
+}
+#accountPayableModal .ap-total-summary-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    flex: 0 0 auto;
+    background: #fff;
+    box-shadow: 0 -4px 12px rgba(15, 23, 42, 0.06);
+}
+
+/* ==========================================================
+   AP INVOICE DETAILS: SCROLL ONLY THE TRANSACTION ROWS
+   Keep modal title, tab navigation, detail heading and summary fixed.
+========================================================== */
+@supports selector(#accountPayableModal:has(.x)) {
+  #accountPayableModal:has(#ap-invoice-details-pane.active) .modal-dialog {
+    height: calc(100vh - 2rem);
+    max-height: calc(100vh - 2rem);
+  }
+
+  #accountPayableModal:has(#ap-invoice-details-pane.active) .modal-content {
+    height: 100%;
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  #accountPayableModal:has(#ap-invoice-details-pane.active) > .modal-dialog > .modal-content > .modal-body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden !important;
+  }
+
+  #accountPayableModal:has(#ap-invoice-details-pane.active) .ap-modern-tabs-wrapper {
+    flex: 0 0 auto;
+  }
+
+  #accountPayableModal:has(#ap-invoice-details-pane.active) #ap-modal-tab-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  #accountPayableModal:has(#ap-invoice-details-pane.active) #ap-invoice-details-pane.active {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  #accountPayableModal:has(#ap-invoice-details-pane.active) #ap-invoice-details-pane.active > .p-4 {
+    height: 100%;
+    min-height: 0;
+    padding: 1rem !important;
+    overflow: hidden;
+  }
+
+  #accountPayableModal:has(#ap-invoice-details-pane.active) #ap-invoice-details-pane .finova-card {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  #accountPayableModal:has(#ap-invoice-details-pane.active) #ap-invoice-details-pane .finova-card-body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  #accountPayableModal:has(#ap-invoice-details-pane.active) #ap-invoice-details-pane .finova-card-body > .d-flex.justify-content-between {
+    flex: 0 0 auto;
+  }
+
+  #accountPayableModal:has(#ap-invoice-details-pane.active) #ap-invoice-details-pane .ap-invoice-detail-table-wrapper {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none !important;
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+  }
+
+  #accountPayableModal:has(#ap-invoice-details-pane.active) #ap-invoice-details-pane .ap-invoice-detail-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #f8fafc;
+  }
+
+  #accountPayableModal:has(#ap-invoice-details-pane.active) .ap-total-summary-footer {
+    position: relative;
+    bottom: auto;
+    flex: 0 0 auto;
+  }
+}
+
+
+/* ==========================================================
+   FINOVA AP — DEFINITIVE INNER DETAIL SCROLL FIX
+   Only invoice rows scroll; modal header, tabs, detail heading,
+   column header and total summary stay in place.
+========================================================== */
+@supports selector(#accountPayableModal:has(#ap-invoice-details-pane.active)) {
+  #accountPayableModal:has(#ap-invoice-details-pane.active) {
+    overflow: hidden !important;
+  }
+
+  #accountPayableModal:has(#ap-invoice-details-pane.active) > .modal-dialog {
+    height: calc(100dvh - 2rem) !important;
+    max-height: calc(100dvh - 2rem) !important;
+    margin: 1rem auto !important;
+  }
+
+  #accountPayableModal:has(#ap-invoice-details-pane.active) > .modal-dialog > .modal-content {
+    height: 100% !important;
+    max-height: 100% !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  #accountPayableModal:has(#ap-invoice-details-pane.active) > .modal-dialog > .modal-content > .modal-header {
+    flex: 0 0 auto !important;
+  }
+
+  #accountPayableModal:has(#ap-invoice-details-pane.active) > .modal-dialog > .modal-content > .modal-body {
+    flex: 1 1 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  #accountPayableModal:has(#ap-invoice-details-pane.active) .ap-modern-tabs-wrapper {
+    flex: 0 0 auto !important;
+  }
+
+  #accountPayableModal:has(#ap-invoice-details-pane.active) #ap-modal-tab-content {
+    flex: 1 1 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  #accountPayableModal:has(#ap-invoice-details-pane.active) #ap-invoice-details-pane.active.show {
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  #accountPayableModal:has(#ap-invoice-details-pane.active) #ap-invoice-details-pane.active.show > .p-4 {
+    height: 100% !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  #accountPayableModal:has(#ap-invoice-details-pane.active) #ap-invoice-details-pane .finova-card {
+    flex: 1 1 auto !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  #accountPayableModal:has(#ap-invoice-details-pane.active) #ap-invoice-details-pane .finova-card-body {
+    flex: 1 1 auto !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  #accountPayableModal:has(#ap-invoice-details-pane.active) #ap-invoice-details-pane .finova-card-body > .d-flex.justify-content-between {
+    flex: 0 0 auto !important;
+  }
+
+  #accountPayableModal:has(#ap-invoice-details-pane.active) #ap-invoice-details-pane .ap-invoice-detail-table-wrapper {
+    display: block !important;
+    flex: 1 1 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: auto !important;
+    overscroll-behavior: contain;
+  }
+
+  #accountPayableModal:has(#ap-invoice-details-pane.active) #ap-invoice-details-pane .ap-invoice-detail-table {
+    height: auto !important;
+    margin-bottom: 0 !important;
+  }
+
+  #accountPayableModal:has(#ap-invoice-details-pane.active) #ap-invoice-details-pane .ap-invoice-detail-table > thead th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 5 !important;
+    background: #f8fafc !important;
+  }
+
+  #accountPayableModal:has(#ap-invoice-details-pane.active) .ap-total-summary-footer {
+    position: relative !important;
+    inset: auto !important;
+    flex: 0 0 auto !important;
+    z-index: 10 !important;
+    background: #fff !important;
+  }
+}
+
+
+
+
+/* PHASE III(10): Invoice Detail shows a compact initial view and scrolls long detail lists. */
+#ap-invoice-details-pane .table-responsive {
+    max-height: 290px;
+    overflow: auto;
+}
+
+#ap-invoice-details-pane .table-responsive thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--bs-body-bg, #fff);
+}

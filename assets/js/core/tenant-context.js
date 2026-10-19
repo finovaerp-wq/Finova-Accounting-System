@@ -136,28 +136,33 @@ export class TenantContext {
         }
 
 
+        // Resolve the active company with the existing tenant RPC,
+        // then read its display name from finova_companies.
+        // finova_current_company_name() is not installed in this database.
+        const companyId = await this.getCompanyId({ refresh });
+
+        if (!companyId) {
+            this.companyNameCache = null;
+            return null;
+        }
+
         const {
             data,
             error
-        } = await supabase.rpc(
-            "finova_current_company_name"
-        );
+        } = await supabase
+            .from("finova_companies")
+            .select("company_name, legal_name")
+            .eq("id", companyId)
+            .maybeSingle();
 
-
-        if (
-            error
-        ) {
-
+        if (error) {
             throw error;
-
         }
 
-
         this.companyNameCache =
-            data
-            ??
-            null;
-
+            data?.company_name
+            || data?.legal_name
+            || null;
 
         return this.companyNameCache;
 

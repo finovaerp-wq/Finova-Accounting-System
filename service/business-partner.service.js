@@ -127,7 +127,7 @@ export class BusinessPartnerService {
         if (status !== "") {
 
             query = query.eq(
-                "status",
+                "is_active",
                 status === "true"
             );
 

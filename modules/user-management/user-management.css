@@ -475,6 +475,21 @@ td .fw-semibold {
 }
 
 
+/* ==========================================================
+   ADMIN ROLE BADGE
+   ========================================================== */
+
+.user-role-admin {
+
+    background: #E8F0FF;
+
+    color: #1554C0;
+
+    border: 1px solid #C9DBFF;
+
+}
+
+
 .user-role-manager {
 
     background: #DBEAFE;
@@ -668,20 +683,28 @@ td .fw-semibold {
    Tidak ikut drag
 ========================================================== */
 
-#user-management-modal input,
-#user-management-modal select,
+/* Text / input elements: I-beam */
+#user-management-modal input:not([type="radio"]):not([type="checkbox"]),
 #user-management-modal textarea,
+#user-management-modal [contenteditable="true"] {
+    cursor: text;
+    user-select: text;
+}
+
+/* Interactive controls: pointer */
+#user-management-modal select,
 #user-management-modal button,
-#user-management-modal option,
+#user-management-modal input[type="radio"],
+#user-management-modal input[type="checkbox"],
 #user-management-modal a,
 #user-management-modal label,
-#user-management-modal [contenteditable="true"],
 #user-management-modal [role="button"] {
+    cursor: pointer;
+}
 
+/* Native <option> keeps the browser/default cursor */
+#user-management-modal option {
     cursor: default;
-
-    user-select: text;
-
 }
 
 
