@@ -180,10 +180,21 @@ export async function applyMasterViewOnlyForStaff(moduleName, addButtonIds = [])
     const { data: auth, error: authError } = await supabase.auth.getUser();
     if (authError) throw authError;
     if (auth?.user?.id) {
+      const { data: effectiveCompanyId, error: companyContextError } =
+        await supabase.rpc("finova_effective_company_id");
+      if (companyContextError) throw companyContextError;
+
+      const companyId = String(effectiveCompanyId ?? "").trim();
+      if (!companyId) throw new Error("Active company context was not found.");
+
       const { data: profile, error } = await supabase.from("mst_users")
-        .select("role,status,company_id").eq("user_uid", auth.user.id).maybeSingle();
+        .select("role,status,company_id")
+        .eq("user_uid", auth.user.id)
+        .eq("company_id", companyId)
+        .maybeSingle();
       if (error) throw error;
-      isManager = !!profile?.status && ["manager", "admin"].includes(String(profile?.role || "").toLowerCase());
+      isManager = profile?.status === true
+        && String(profile?.role ?? "").trim().toLowerCase() === "manager";
     }
   } catch (e) {
     console.error(`[${moduleName}] role check failed; master actions remain hidden`, e);

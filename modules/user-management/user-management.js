@@ -18,7 +18,19 @@ import {
 
 import { applyMasterViewOnlyForStaff } from "../../service/master-view-access.js";
 
+/**
+ * Normalize only supported tenant roles. Legacy/unknown values are
+ * intentionally not converted to Staff, because doing so can silently
+ * demote a Manager when an old profile is edited.
+ */
+function normalizeUserRole(value) {
+    const role = String(value ?? "").trim().toLowerCase();
 
+    if (role === "manager") return "Manager";
+    if (role === "staff") return "Staff";
+
+    return "Unknown";
+}
 
 export class UserManagement {
 
@@ -1397,13 +1409,11 @@ async loadAccess() {
         );
     }
 
-    const role = String(
-        this.currentProfile.role || ""
-    ).trim().toLowerCase();
+    const role = normalizeUserRole(this.currentProfile.role);
 
-    this.isManager = role === "manager";
+    this.isManager = role === "Manager";
 
-    if (!["manager", "staff"].includes(role)) {
+    if (!["Manager", "Staff"].includes(role)) {
         throw new Error(
             "FINOVA role must be Manager or Staff. Update the user's company role before continuing."
         );
@@ -1415,7 +1425,7 @@ async loadAccess() {
         {
             accessMode: "COMPANY USER",
             isManager: this.isManager,
-            role: this.currentProfile.role,
+            role,
             companyId: this.currentProfile.company_id,
             authUserId: this.currentAuthUser.id
         }
@@ -1471,8 +1481,7 @@ applyAccessUI() {
         .remove(
             "d-none",
             "manager",
-            "staff",
-            "super-admin"
+            "staff"
         );
 
 
@@ -1581,19 +1590,15 @@ applyAccessUI() {
         user
     ) {
 
-        const targetRole = String(
-            user?.role || ""
-        )
-            .trim()
-            .toLowerCase();
+        const targetRole = normalizeUserRole(user?.role);
 
         if (!this.isManager) {
             return false;
         }
 
         return [
-            "manager",
-            "staff"
+            "Manager",
+            "Staff"
         ].includes(targetRole);
 
     }
@@ -1796,16 +1801,8 @@ applyAccessUI() {
 
 
                     const matchRole =
-
-                        role
-                        ===
-                        "all"
-
-                        ||
-
-                        user.role
-                        ===
-                        role;
+                        role === "all"
+                        || normalizeUserRole(user.role) === role;
 
 
                     const active =
@@ -2021,10 +2018,7 @@ applyAccessUI() {
         rowNumber
     ) {
 
-        const role =
-            ["Manager", "Staff"].includes(user.role)
-                ? user.role
-                : "Unknown";
+        const role = normalizeUserRole(user.role);
 
 
         const active =
@@ -2196,6 +2190,7 @@ applyAccessUI() {
 
     if (
         !this.isManager
+        || !this.canManageTarget(user)
     ) {
 
         return `
@@ -2966,10 +2961,7 @@ applyAccessUI() {
             "";
 
 
-        this.inputRole.value =
-            ["Manager", "Staff"].includes(user.role)
-                ? user.role
-                : "Staff";
+        this.inputRole.value = normalizeUserRole(user.role);
 
 
         this.inputStatus.checked =

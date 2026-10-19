@@ -303,13 +303,12 @@ static isLogoutRunning =
         ==========================================
         */
 
-        const validRoles = [
-            "Admin",
-            "Manager",
-            "Staff"
-        ];
+        // FINOVA tenant roles are limited to Manager and Staff.
+        // Normalize casing for legacy data, but never accept Admin/Super Admin.
+        const normalizedRole = String(profile.role ?? "").trim().toLowerCase();
+        const validRoles = ["manager", "staff"];
 
-        if (!validRoles.includes(profile.role)) {
+        if (!validRoles.includes(normalizedRole)) {
 
             await supabase.auth.signOut();
 

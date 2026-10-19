@@ -475,21 +475,6 @@ td .fw-semibold {
 }
 
 
-/* ==========================================================
-   ADMIN ROLE BADGE
-   ========================================================== */
-
-.user-role-admin {
-
-    background: #E8F0FF;
-
-    color: #1554C0;
-
-    border: 1px solid #C9DBFF;
-
-}
-
-
 .user-role-manager {
 
     background: #DBEAFE;

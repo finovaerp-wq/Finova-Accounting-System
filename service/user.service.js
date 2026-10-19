@@ -240,80 +240,12 @@ export class UserService {
 
     static async syncProfile() {
 
-        /*
-        ==============================================
-        GET AUTH USER
-        ==============================================
-        */
-
-        const {
-
-            data,
-
-            error
-
-        } = await supabase.auth.getUser();
-
-        if (error) {
-
-            throw error;
-
-        }
-
-        if (!data.user) {
-
-            return null;
-
-        }
-
-        const user =
-
-            data.user;
-
-        /*
-        ==============================================
-        CHECK PROFILE
-        ==============================================
-        */
-
-        const exists =
-
-            await this.profileExists(
-
-                user.id
-
-            );
-
-        /*
-        ==============================================
-        CREATE PROFILE
-        ==============================================
-        */
-
-        if (!exists) {
-
-            await this.createProfile(
-
-                user
-
-            );
-
-        }
-
-        /*
-        ==============================================
-        RETURN PROFILE
-        ==============================================
-        */
-
-        return await this.getProfile(
-
-            user.id
-
-        );
+        // Legacy profile auto-creation is intentionally disabled.
+        // Tenant profiles and company memberships must be provisioned by
+        // the authorized User Management Edge Function, not by the browser.
+        return await this.getCurrentProfile();
 
     }
-
 }
 
 window.UserService = UserService;

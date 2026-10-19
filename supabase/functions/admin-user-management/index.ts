@@ -8,7 +8,7 @@ VERSION  : 4.0.0 MULTI COMPANY
 ==========================================================
 */
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 
 /*
@@ -69,9 +69,11 @@ NORMALIZE ROLE
 function normalizeRole(
     value: unknown
 ): "Manager" | "Staff" | "" {
-    // Reject unknown/legacy roles; never silently convert them to Staff.
-    if (value === "Manager") return "Manager";
-    if (value === "Staff") return "Staff";
+    // Accept casing differences from older clients, but always persist the
+    // canonical values required by the database constraint. Never accept Admin.
+    const role = String(value ?? "").trim().toLowerCase();
+    if (role === "manager") return "Manager";
+    if (role === "staff") return "Staff";
     return "";
 }
 
@@ -101,7 +103,7 @@ Prevent a company from losing its last active Manager through
 role changes, deactivation, or deletion.
 */
 async function countActiveCompanyManagers(
-    adminClient: any,
+    adminClient: SupabaseClient,
     companyId: string
 ): Promise<{ count: number; error: unknown }> {
     const { data, error } = await adminClient
@@ -1377,7 +1379,7 @@ if (
 
     The actor must be allowed to manage the target's
     EXISTING role, not only the new role being submitted.
-    This prevents a Manager from editing/demoting an Admin.
+    This prevents changes to unsupported or legacy role values.
     ======================================================
     */
 
