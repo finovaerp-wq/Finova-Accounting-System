@@ -83,7 +83,7 @@ function canAssignRole(
 ): boolean {
     const actor = String(actorRole ?? "").trim().toLowerCase();
     const target = String(targetRole ?? "").trim().toLowerCase();
-    return actor === "manager" && ["manager", "staff"].includes(target);
+    return ["manager", "super admin"].includes(actor) && ["manager", "staff"].includes(target);
 }
 
 function canManageTargetRole(
@@ -92,7 +92,7 @@ function canManageTargetRole(
 ): boolean {
     const actor = String(actorRole ?? "").trim().toLowerCase();
     const target = String(targetRole ?? "").trim().toLowerCase();
-    return actor === "manager" && ["manager", "staff"].includes(target);
+    return ["manager", "super admin"].includes(actor) && ["manager", "staff"].includes(target);
 }
 
 /*
@@ -397,12 +397,16 @@ async request => {
         - Full User Management access in own company.
         - May create/update/reset/delete Manager and Staff users.
 
+        SUPER ADMIN
+        - Has the same User Management permissions as Manager.
+        - Is never assignable through tenant User Management.
+
         STAFF
         - User Management is VIEW ONLY.
 
         LEGACY ROLES
         ------------
-        Only Manager and Staff are valid tenant roles.
+        Manager, Staff, and Super Admin are valid login/membership roles; only Manager and Staff are assignable through User Management.
         Existing legacy role values must be migrated before deployment.
 
         IMPORTANT
@@ -498,7 +502,7 @@ async request => {
             currentProfile.role ?? ""
         ).trim().toLowerCase();
 
-        if (!["manager", "staff"].includes(profileRole)) {
+        if (!["manager", "staff", "super admin"].includes(profileRole)) {
             return jsonResponse(
                 {
                     success: false,
@@ -552,7 +556,7 @@ async request => {
         if (
             !currentMembership
             || !membershipIsActive
-            || !["manager", "staff"].includes(membershipRole)
+            || !["manager", "staff", "super admin"].includes(membershipRole)
             || membershipRole !== profileRole
         ) {
             return jsonResponse(
@@ -566,7 +570,7 @@ async request => {
         }
 
         const currentCompanyId = effectiveCompanyId;
-        const isManager = profileRole === "manager";
+        const isManager = ["manager", "super admin"].includes(profileRole);
         const canManageUserManagement = isManager;
 
         /*
@@ -705,10 +709,17 @@ async request => {
             }
 
 
+            // Tenant Managers and Staff must never receive Super Admin rows.
+            // Super Admin retains Manager-equivalent visibility within this company.
+            const visibleUsers = (users ?? []).filter((user) => {
+                const targetRole = String(user.role ?? "").trim().toLowerCase();
+                return profileRole === "super admin" || targetRole !== "super admin";
+            });
+
             return jsonResponse(
                 {
                     success: true,
-                    users: users ?? []
+                    users: visibleUsers
                 }
             );
 

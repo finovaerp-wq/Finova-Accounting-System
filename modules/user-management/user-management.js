@@ -24,10 +24,11 @@ import { applyMasterViewOnlyForStaff } from "../../service/master-view-access.js
  * demote a Manager when an old profile is edited.
  */
 function normalizeUserRole(value) {
-    const role = String(value ?? "").trim().toLowerCase();
+    const role = String(value ?? "").trim().replace(/\s+/g, " ").toLowerCase();
 
     if (role === "manager") return "Manager";
     if (role === "staff") return "Staff";
+    if (role === "super admin") return "Super Admin";
 
     return "Unknown";
 }
@@ -1411,15 +1412,19 @@ async loadAccess() {
 
     const role = normalizeUserRole(this.currentProfile.role);
 
-    this.isManager = role === "Manager";
+    this.isManager = ["Manager", "Super Admin"].includes(role);
 
-    if (!["Manager", "Staff"].includes(role)) {
+    // Keep the UI permission tied to the active profile role even if a prior
+    // master-view helper changed a button class before access initialization.
+    this.isUserManagementManager = this.isManager;
+
+    if (!["Manager", "Staff", "Super Admin"].includes(role)) {
         throw new Error(
-            "FINOVA role must be Manager or Staff. Update the user's company role before continuing."
+            "FINOVA role must be Manager, Staff, or Super Admin. Update the user's company role before continuing."
         );
     }
 
-    // Role choices are strictly limited to Manager and Staff.
+    // Super Admin receives Manager-equivalent User Management permissions; only Manager/Staff are assignable target roles.
     console.log(
         "FINOVA USER MANAGEMENT ACCESS:",
         {
@@ -1447,12 +1452,16 @@ applyAccessUI() {
     ======================================================
     */
 
-    this.btnAddUser
-        ?.classList
-        .toggle(
-            "d-none",
-            !this.isManager
-        );
+    const activeRole = normalizeUserRole(this.currentProfile?.role);
+    const canManageUsers = ["Manager", "Super Admin"].includes(activeRole);
+    this.isManager = canManageUsers;
+    this.isUserManagementManager = canManageUsers;
+
+    if (this.btnAddUser) {
+        this.btnAddUser.classList.toggle("d-none", !canManageUsers);
+        this.btnAddUser.disabled = !canManageUsers;
+        this.btnAddUser.setAttribute("aria-hidden", String(!canManageUsers));
+    }
 
 
     /*
@@ -1512,7 +1521,7 @@ applyAccessUI() {
             </i>
 
             Logged in as
-            <strong>Manager</strong>.
+            <strong>${this.currentProfile?.role === "Super Admin" ? "Super Admin" : "Manager"}</strong>.
 
             You have full User Management access.
         `;
@@ -1590,16 +1599,23 @@ applyAccessUI() {
         user
     ) {
 
-        const targetRole = normalizeUserRole(user?.role);
+        // Service responses can expose the tenant role under different keys.
+        // Prefer the primary role, then fall back to known profile/membership aliases.
+        const rawTargetRole =
+            user?.role ||
+            user?.profile_role ||
+            user?.membership_role ||
+            user?.user_role ||
+            user?.company_role;
+        const targetRole = normalizeUserRole(rawTargetRole);
 
         if (!this.isManager) {
             return false;
         }
 
-        return [
-            "Manager",
-            "Staff"
-        ].includes(targetRole);
+        // Super Admin has Manager-equivalent management rights for Manager/Staff.
+        // A Super Admin target remains protected from ordinary User Management actions.
+        return ["Manager", "Staff"].includes(targetRole);
 
     }
 
@@ -2188,10 +2204,20 @@ applyAccessUI() {
     ======================================================
     */
 
-    if (
-        !this.isManager
-        || !this.canManageTarget(user)
-    ) {
+    const targetRole = normalizeUserRole(
+        user?.role ||
+        user?.profile_role ||
+        user?.membership_role ||
+        user?.user_role ||
+        user?.company_role
+    );
+
+    const signedInRole = normalizeUserRole(this.currentProfile?.role);
+    const canManageUsers = ["Manager", "Super Admin"].includes(signedInRole);
+    const canRenderManageActions =
+        canManageUsers && ["Manager", "Staff"].includes(targetRole);
+
+    if (!canRenderManageActions) {
 
         return `
 

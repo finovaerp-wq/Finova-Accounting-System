@@ -193,8 +193,9 @@ export async function applyMasterViewOnlyForStaff(moduleName, addButtonIds = [])
         .eq("company_id", companyId)
         .maybeSingle();
       if (error) throw error;
+      const normalizedRole = String(profile?.role ?? "").trim().replace(/\s+/g, " ").toLowerCase();
       isManager = profile?.status === true
-        && String(profile?.role ?? "").trim().toLowerCase() === "manager";
+        && ["manager", "super admin"].includes(normalizedRole);
     }
   } catch (e) {
     console.error(`[${moduleName}] role check failed; master actions remain hidden`, e);

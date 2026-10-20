@@ -492,6 +492,25 @@ td .fw-semibold {
 
 }
 
+.user-role-super-admin {
+
+    background: #F3E8FF;
+
+    color: #6B21A8;
+
+}
+
+/* Supports the current role renderer, which emits "user-role-super admin". */
+.user-role-super {
+
+    background: #F3E8FF;
+
+    color: #6B21A8;
+
+    border: 1px solid #D8B4FE;
+
+}
+
 
 /* ==========================================================
    STATUS BADGE

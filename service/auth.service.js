@@ -303,10 +303,9 @@ static isLogoutRunning =
         ==========================================
         */
 
-        // FINOVA tenant roles are limited to Manager and Staff.
-        // Normalize casing for legacy data, but never accept Admin/Super Admin.
+        // FINOVA roles supported for active login. Legacy Admin remains disallowed.
         const normalizedRole = String(profile.role ?? "").trim().toLowerCase();
-        const validRoles = ["manager", "staff"];
+        const validRoles = ["manager", "staff", "super admin"];
 
         if (!validRoles.includes(normalizedRole)) {
 

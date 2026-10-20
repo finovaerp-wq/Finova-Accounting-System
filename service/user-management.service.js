@@ -232,12 +232,13 @@ export class UserManagementService {
 
         const allowedRoles = [
             "Manager",
-            "Staff"
+            "Staff",
+            "Super Admin"
         ];
 
         if (!allowedRoles.includes(values?.role)) {
             throw new Error(
-                "Role must be Manager or Staff."
+                "Role must be Manager, Staff, or Super Admin."
             );
         }
 
@@ -319,12 +320,13 @@ export class UserManagementService {
 
         const allowedRoles = [
             "Manager",
-            "Staff"
+            "Staff",
+            "Super Admin"
         ];
 
         if (!allowedRoles.includes(payload?.role)) {
             throw new Error(
-                "Role must be Manager or Staff."
+                "Role must be Manager, Staff, or Super Admin."
             );
         }
 
