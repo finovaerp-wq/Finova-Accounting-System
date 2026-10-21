@@ -7,7 +7,7 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
   const style = document.createElement("style");
   style.id = STYLE_ID;
   style.textContent = `
-    body:not([data-finova-master-manager="true"]) #bp-btn-add,
+    body:not([data-finova-master-manager="true"]):not([data-finova-bp-full-access="true"]) .business-partner-page #bp-btn-add,
     body:not([data-finova-master-manager="true"]) #btn-add-account,
     body:not([data-finova-master-manager="true"]) #btn-add-tax,
     body:not([data-finova-master-manager="true"]) #btn-add-accounting-period,
@@ -15,17 +15,17 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
     body:not([data-finova-master-manager="true"]) [id*="btn-add-business-partner"],
     body:not([data-finova-master-manager="true"]) [id*="btn-add-tax"],
     body:not([data-finova-master-manager="true"]) [id*="btn-add-user"] { display:none !important; visibility:hidden !important; opacity:0 !important; }
-    body:not([data-finova-master-manager="true"]) .finova-table-action button:not(.finova-staff-view-only),
+    body:not([data-finova-master-manager="true"]) .finova-table-action button:not(.finova-staff-view-only):not(.bp-action-btn),
     body:not([data-finova-master-manager="true"]) .finova-table-action a,
-    body:not([data-finova-master-manager="true"]) .bp-action-group button:not(.finova-staff-view-only),
+    body:not([data-finova-master-manager="true"]):not([data-finova-bp-full-access="true"]) .business-partner-page .bp-action-group button:not(.finova-staff-view-only),
     body:not([data-finova-master-manager="true"]) .tax-action-group button:not(.finova-staff-view-only),
-    body:not([data-finova-master-manager="true"]) td:last-child [data-action]:not([data-action="view"]),
+    body:not([data-finova-master-manager="true"]) td:last-child [data-action]:not([data-action="view"]):not(.bp-action-btn),
     body:not([data-finova-master-manager="true"]) td:last-child [data-tax-action],
     body:not([data-finova-master-manager="true"]) td:last-child [data-period-action],
     body:not([data-finova-master-manager="true"]) td:last-child .user-action-btn:not(.user-action-view),
-    body:not([data-finova-master-manager="true"]) td:last-child button[title="Edit"],
-    body:not([data-finova-master-manager="true"]) td:last-child button[title="Delete"],
-    body:not([data-finova-master-manager="true"]) td:last-child button[title*="Status"],
+    body:not([data-finova-master-manager="true"]) td:last-child button[title="Edit"]:not(.bp-action-btn),
+    body:not([data-finova-master-manager="true"]) td:last-child button[title="Delete"]:not(.bp-action-btn),
+    body:not([data-finova-master-manager="true"]) td:last-child button[title*="Status"]:not(.bp-action-btn),
     body:not([data-finova-master-manager="true"]) td:last-child button[title*="Reset"] { display:none !important; visibility:hidden !important; }
     .finova-staff-view-only { display:inline-flex !important; visibility:visible !important; opacity:1 !important; }
   `;
@@ -85,6 +85,11 @@ if (typeof document !== "undefined" && !window.__FINOVA_STAFF_VIEW_MODAL_GUARD__
 const escapeHtml = (value) => String(value ?? "-").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
 
 function ensureViewButton(cell, moduleName) {
+  // Business Partner has its own module-scoped Staff=Manager policy.
+  // Never inject a global Staff View-only control into that module when its
+  // dedicated access marker is active.
+  if (document.body?.getAttribute("data-finova-bp-full-access") === "true"
+      && cell?.closest(".business-partner-page")) return;
   if (!cell || cell.querySelector(":scope > .finova-staff-view-only, .finova-staff-view-only")) return;
   const row = cell.closest("tr");
   if (!row) return;

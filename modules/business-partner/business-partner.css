@@ -1051,3 +1051,61 @@ WHATSAPP LINK
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
+
+/* Searchable Bank dropdown: keep the menu above the BP modal and clickable. */
+#businessPartnerModal .ts-wrapper,
+#businessPartnerModal .ts-control {
+    width: 100%;
+}
+#businessPartnerModal .ts-dropdown {
+    z-index: 2005 !important;
+    pointer-events: auto !important;
+}
+#businessPartnerModal .ts-dropdown .option {
+    cursor: pointer;
+    pointer-events: auto;
+}
+#businessPartnerModal .ts-control input {
+    min-width: 2rem;
+    cursor: text;
+}
+
+
+/* ==========================================================
+   BUSINESS PARTNER BANK ACCOUNT EDITOR MODAL
+========================================================== */
+#bpBankAccountModal { z-index: 1070; }
+#bpBankAccountModal .modal-content { cursor: default; user-select: text; }
+#bpBankAccountModal .modal-header,
+#bpBankAccountModal .modal-footer { position: relative; z-index: 1; }
+#bpBankAccountModal .ts-wrapper { width: 100%; position: relative; }
+/* Keep the menu anchored to the Bank field; it overlays Account Holder inside the modal. */
+#bpBankAccountModal .ts-wrapper.dropdown-active { z-index: 1082; }
+#bpBankAccountModal .ts-dropdown {
+    position: absolute !important;
+    top: 100% !important;
+    right: auto !important;
+    left: 0 !important;
+    z-index: 1085 !important;
+    width: max(100%, 360px) !important;
+    min-width: 360px;
+    max-width: min(420px, 90vw);
+    margin-top: 2px;
+}
+#bpBankAccountModal .ts-dropdown .option { white-space: nowrap; cursor: pointer; }
+#bpBankAccountModal .ts-control { cursor: pointer; }
+#bpBankAccountModal .ts-control input { cursor: text; }
+#businessPartnerModal #bp-bank-table td { vertical-align: middle; }
+#businessPartnerModal #bp-bank-table .bp-bank-name-cell { min-width: 170px; white-space: nowrap; }
+#businessPartnerModal #bp-bank-table .btn-sm { padding: .25rem .45rem; }
+
+
+/* Bank account editor: keep searchable bank menu inside the modal and avoid accidental overlay issues. */
+#bpBankAccountModal { z-index: 1070; }
+#bpBankAccountModal .modal-dialog { position: relative; }
+#bpBankAccountModal .modal-content { overflow: visible; }
+#bpBankAccountModal .modal-body { overflow: visible; }
+#bpBankAccountModal .ts-wrapper { width: 100%; }
+#bpBankAccountModal .ts-dropdown { z-index: 1085 !important; min-width: min(280px, 90vw); max-width: min(420px, 90vw); }
+#bpBankAccountModal .ts-dropdown .option { white-space: nowrap; }

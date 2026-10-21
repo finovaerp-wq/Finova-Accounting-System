@@ -18,15 +18,15 @@ import { BankGrid } from "./bank-grid.js";
 /*
 ==========================================================
 BUSINESS PARTNER ROLE ACCESS
-Staff receives Manager-equivalent actions in Business Partner only.
-This deliberately does not set the global manager flag for Staff.
+Staff receives the same actions as Manager in this module only.
+This does not grant Staff Manager access in other modules.
 ==========================================================
 */
 async function applyBusinessPartnerRoleAccess() {
     const body = document.body;
     if (!body) return false;
 
-    // Clear only this module's marker; never elevate Staff in other modules.
+    // Module-scoped access marker only; never change global role state.
     body.removeAttribute("data-finova-bp-full-access");
 
     try {
@@ -44,63 +44,49 @@ async function applyBusinessPartnerRoleAccess() {
 
         const role = String(profile?.role || "").trim().toLowerCase();
         const active = profile?.status === true || String(profile?.status || "").toLowerCase() === "active";
-        if (!active) return false;
+        if (!active || !["manager", "staff"].includes(role)) return false;
 
-        if (["manager", "admin"].includes(role)) {
-            body.removeAttribute("data-finova-bp-full-access");
-            const addButton = document.getElementById("bp-btn-add");
-            if (addButton) {
-                addButton.hidden = false;
-                addButton.style.removeProperty("display");
-                addButton.removeAttribute("aria-hidden");
-            }
-            return true;
+        // Use a Business Partner-only marker for both roles so the UI action
+        // visibility is identical without elevating Staff elsewhere.
+        body.setAttribute("data-finova-bp-full-access", "true");
+        const styleId = "finova-bp-manager-equivalent-actions";
+        if (!document.getElementById(styleId)) {
+            const style = document.createElement("style");
+            style.id = styleId;
+            style.textContent = `
+                body[data-finova-bp-full-access="true"] #bp-btn-add,
+                body[data-finova-bp-full-access="true"] #btn-add-bank-row,
+                body[data-finova-bp-full-access="true"] .bp-action-group button,
+                body[data-finova-bp-full-access="true"] .bp-action-group a,
+                body[data-finova-bp-full-access="true"] .bp-action-group [data-action],
+                body[data-finova-bp-full-access="true"] td:last-child .bp-action-btn,
+                body[data-finova-bp-full-access="true"] td:last-child .btn-action,
+                body[data-finova-bp-full-access="true"] td:last-child [data-action] {
+                    display: inline-flex !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                }
+                body[data-finova-bp-full-access="true"] #bp-btn-add[hidden],
+                body[data-finova-bp-full-access="true"] #btn-add-bank-row[hidden] {
+                    display: inline-flex !important;
+                }
+            `;
+            (document.head || document.documentElement).appendChild(style);
         }
 
-        if (role === "staff") {
-            body.setAttribute("data-finova-bp-full-access", "true");
-            const styleId = "finova-bp-staff-manager-actions";
-            if (!document.getElementById(styleId)) {
-                const style = document.createElement("style");
-                style.id = styleId;
-                style.textContent = `
-                    body[data-finova-bp-full-access="true"] #bp-btn-add,
-                    body[data-finova-bp-full-access="true"] #btn-add-bank-row,
-                    body[data-finova-bp-full-access="true"] .bp-action-group button,
-                    body[data-finova-bp-full-access="true"] .bp-action-group a,
-                    body[data-finova-bp-full-access="true"] .bp-action-group [data-action],
-                    body[data-finova-bp-full-access="true"] td:last-child .bp-action-btn,
-                    body[data-finova-bp-full-access="true"] td:last-child .btn-action-delete {
-                        display: inline-flex !important;
-                        visibility: visible !important;
-                        opacity: 1 !important;
-                    }
-                    body[data-finova-bp-full-access="true"] #bp-btn-add[hidden] {
-                        display: inline-flex !important;
-                    }
-                `;
-                (document.head || document.documentElement).appendChild(style);
-            }
-            const addButton = document.getElementById("bp-btn-add");
-            if (addButton) {
-                addButton.hidden = false;
-                addButton.style.removeProperty("display");
-                addButton.removeAttribute("aria-hidden");
-            }
-            // Staff may add bank-account rows in BP, while the per-row
-            // delete action remains hidden by bank-grid.js.
-            const addBankButton = document.getElementById("btn-add-bank-row");
-            if (addBankButton) {
-                addBankButton.hidden = false;
-                addBankButton.disabled = false;
-                addBankButton.style.setProperty("display", "inline-flex", "important");
-                addBankButton.style.removeProperty("visibility");
-                addBankButton.removeAttribute("aria-hidden");
-            }
-            return true;
+        // Explicitly clear hidden/disabled presentation on the two create actions.
+        for (const id of ["bp-btn-add", "btn-add-bank-row"]) {
+            const button = document.getElementById(id);
+            if (!button) continue;
+            button.hidden = false;
+            button.disabled = false;
+            button.style.removeProperty("display");
+            button.style.removeProperty("visibility");
+            button.style.removeProperty("opacity");
+            button.removeAttribute("aria-hidden");
         }
 
-        return false;
+        return true;
     } catch (error) {
         console.error("[Business Partner] Failed to resolve role permissions:", error);
         return false;
@@ -369,7 +355,12 @@ enableBusinessPartnerModalDrag(
         "option",
         "a",
         "[contenteditable='true']",
-        "[role='button']"
+        "[role='button']",
+        /* Tom Select is interactive: never capture its pointer events for modal dragging. */
+        ".ts-wrapper",
+        ".ts-control",
+        ".ts-dropdown",
+        ".ts-dropdown *"
 
     ].join(",");
 
