@@ -122,15 +122,11 @@ body {
 
     flex: 1;
 
-    min-width: 0;
-
     min-height: 0;
 
     padding: var(--space-lg);
 
-    /* The workspace shell must not create page-level scrollbars.
-       Scrollable content belongs to a module or modal body. */
-    overflow: hidden;
+    overflow: auto;
 
 }
 

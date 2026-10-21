@@ -241,14 +241,6 @@ Digunakan ketika tab aktif ditutup
 this.tabHistory =
     [];
 
-/*
-==========================================================
-WORKSPACE MODAL HISTORY
-==========================================================
-*/
-
-this.workspaceModalHistory = new Map();
-
 
 /*
 ==========================================================
@@ -310,19 +302,7 @@ this.initialize();
             const mutationObserver = new MutationObserver(() => requestAnimationFrame(update));
             mutationObserver.observe(tabs, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
         }
-        const updateModalTop = () => {
-            const topbar = document.getElementById("finova-topbar");
-            const tabBottom = shell.getBoundingClientRect().bottom;
-            const topbarBottom = topbar ? topbar.getBoundingClientRect().bottom : 0;
-            const top = Math.ceil(Math.max(tabBottom, topbarBottom));
-            document.documentElement.style.setProperty("--finova-modal-top", `${top}px`);
-        };
-
-        window.addEventListener("resize", updateModalTop, { passive: true });
-        requestAnimationFrame(() => {
-            update();
-            updateModalTop();
-        });
+        requestAnimationFrame(update);
     }
 
     /*
@@ -1034,10 +1014,6 @@ closeWorkspaceTab(
         moduleName
     );
 
-    if (this.workspaceModalHistory) {
-        this.workspaceModalHistory.delete(moduleName);
-    }
-
 
     /*
     ======================================================
@@ -1332,61 +1308,6 @@ CLEANUP WORKSPACE OVERLAY
 ==========================================================
 */
 
-captureWorkspaceModal(moduleName) {
-    if (!moduleName) return;
-
-    const panel = document.getElementById(`finova-panel-${moduleName}`);
-    const visible = Array.from(document.querySelectorAll(".modal.show")).filter(modal =>
-        (panel && panel.contains(modal)) ||
-        modal.parentElement === document.body ||
-        modal.dataset.finovaWorkspaceOwner === moduleName
-    );
-
-    if (!visible.length) {
-        // If the user closed the modal before leaving, don't resurrect it.
-        this.workspaceModalHistory.delete(moduleName);
-        return;
-    }
-
-    visible.forEach(modal => {
-        modal.dataset.finovaWorkspaceOwner = moduleName;
-    });
-
-    this.workspaceModalHistory.set(moduleName, visible.map(modal => ({
-        element: modal,
-        id: modal.id || null
-    })));
-}
-
-restoreWorkspaceModal(moduleName) {
-    const saved = this.workspaceModalHistory.get(moduleName);
-    if (!saved || !saved.length) return;
-
-    // Bootstrap hide/show transitions must not overlap across modules.
-    window.setTimeout(() => {
-        const otherVisible = Array.from(document.querySelectorAll(".modal.show"))
-            .filter(modal => !saved.some(entry => entry.element === modal));
-        if (otherVisible.length) return;
-
-        saved.forEach(entry => {
-            const modal = entry.element && entry.element.isConnected
-                ? entry.element
-                : (entry.id ? document.getElementById(entry.id) : null);
-
-            if (!modal) return;
-
-            try {
-                const BootstrapModal = globalThis.bootstrap && globalThis.bootstrap.Modal;
-                if (!BootstrapModal) return;
-                const instance = BootstrapModal.getOrCreateInstance(modal);
-                instance.show();
-            } catch (error) {
-                console.warn("FINOVA MODAL RESTORE:", error);
-            }
-        });
-    }, 350);
-}
-
 cleanupWorkspaceOverlay(
     moduleName = null
 ) {
@@ -1419,11 +1340,14 @@ cleanupWorkspaceOverlay(
     ======================================================
     */
 
-    const modalElements = Array.from(document.querySelectorAll(".modal.show")).filter(modal =>
-        !moduleName ||
-        (panel && panel.contains(modal)) ||
-        modal.dataset.finovaWorkspaceOwner === moduleName
-    );
+    const modalElements =
+        panel
+            ? panel.querySelectorAll(
+                ".modal.show"
+            )
+            : document.querySelectorAll(
+                ".modal.show"
+            );
 
 
     /*
@@ -1437,13 +1361,14 @@ cleanupWorkspaceOverlay(
 
             try {
 
-                const BootstrapModal =
-                    globalThis.bootstrap && globalThis.bootstrap.Modal;
-
-                if (BootstrapModal) {
+                if (
+                    window.bootstrap
+                    &&
+                    bootstrap.Modal
+                ) {
 
                     const modalInstance =
-                        BootstrapModal.getInstance(
+                        bootstrap.Modal.getInstance(
                             modalElement
                         );
 
@@ -1575,8 +1500,6 @@ activateWorkspace(
         this.currentModule !==
             moduleName
     ) {
-
-        this.captureWorkspaceModal(this.currentModule);
 
         this.cleanupWorkspaceOverlay(
             this.currentModule
@@ -1710,8 +1633,6 @@ activateWorkspace(
 
     this.currentModule =
         moduleName;
-
-    this.restoreWorkspaceModal(moduleName);
 
 
     /*
