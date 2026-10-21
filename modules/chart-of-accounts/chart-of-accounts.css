@@ -666,3 +666,9 @@ td .fw-semibold {
 #coa-modal option {
     cursor: default;
 }
+
+/* Hide COA mutation actions for Staff while preserving any explicit view-only action. */
+body:not([data-finova-master-manager="true"]) .coa-action-group .coa-action-btn:not([data-action="view"]):not(.finova-staff-view-only) {
+    display: none !important;
+    visibility: hidden !important;
+}

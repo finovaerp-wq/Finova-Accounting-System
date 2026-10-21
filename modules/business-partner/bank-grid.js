@@ -69,7 +69,9 @@ export class BankGrid {
     }
 
     loadBankOptions() {
-        if (this.bankOptionsLoaded) return;
+        // openEditor() always chains .then() on this method, so even when
+        // options are already loaded it must return a Promise.
+        if (this.bankOptionsLoaded) return Promise.resolve();
         if (this.bankOptionsPromise) return this.bankOptionsPromise;
         this.bankOptionsPromise = (async () => {
             const banks = await BankService.getAll();

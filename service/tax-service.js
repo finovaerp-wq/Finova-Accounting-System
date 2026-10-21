@@ -28,6 +28,66 @@ export class TaxService {
     }
 
 
+
+    /*
+    ==================================================
+    TAX USAGE CHECK
+    Prevent deactivation/deletion when a tax is referenced
+    by AP or AR invoice detail rows.
+    ==================================================
+    */
+
+    async assertTaxNotInUse(id) {
+
+        if (!id) {
+            throw new Error("Tax ID is required.");
+        }
+
+        const taxId = Number(id);
+        if (!Number.isInteger(taxId) || taxId <= 0) {
+            throw new Error("Invalid Tax ID.");
+        }
+
+        const references = [
+            {
+                table: "trx_account_payable_detail",
+                label: "Invoice AP"
+            },
+            {
+                table: "trx_account_receivable_detail",
+                label: "Invoice AR"
+            }
+        ];
+
+        for (const reference of references) {
+            for (const column of ["tax_plus_id", "tax_minus_id"]) {
+                const { data, error } = await supabase
+                    .from(reference.table)
+                    .select("id")
+                    .eq(column, taxId)
+                    .limit(1);
+
+                // Fail closed: if schema/table access cannot be checked,
+                // do not permit a destructive/status change silently.
+                if (error) {
+                    throw new Error(
+                        `Tidak dapat memeriksa penggunaan Tax pada ${reference.label} (${column}). ` +
+                        `Perubahan dibatalkan demi keamanan. Detail: ${error.message || "query gagal"}`
+                    );
+                }
+
+                if (Array.isArray(data) && data.length > 0) {
+                    throw new Error(
+                        `Tax tidak dapat dinonaktifkan atau dihapus karena sudah digunakan pada ${reference.label}.`
+                    );
+                }
+            }
+        }
+
+        return true;
+    }
+
+
     /*
     ==================================================
     GET ALL TAX
@@ -593,6 +653,32 @@ async update(
 
         /*
         ==============================================
+        PREVENT DEACTIVATION OF TAX ALREADY IN USE
+        ==============================================
+        */
+
+        if (payload.is_active === false) {
+            const { data: currentTax, error: currentTaxError } = await supabase
+                .from(this.table)
+                .select("id, is_active")
+                .eq("id", id)
+                .maybeSingle();
+
+            if (currentTaxError) {
+                throw currentTaxError;
+            }
+
+            if (!currentTax) {
+                throw new Error("Tax tidak ditemukan.");
+            }
+
+            if (currentTax.is_active === true) {
+                await this.assertTaxNotInUse(id);
+            }
+        }
+
+        /*
+        ==============================================
         UPDATE DATA
         ==============================================
         */
@@ -967,52 +1053,43 @@ async update(
         try {
 
             if (!id) {
-
-                throw new Error(
-                    "Tax ID is required."
-                );
-
+                throw new Error("Tax ID is required.");
             }
 
+            // Prevent deleting taxes that are used by AP/AR invoice details.
+            await this.assertTaxNotInUse(id);
 
             const {
+                data,
                 error
             } = await supabase
-
                 .from(this.table)
-
                 .delete()
-
-                .eq(
-                    "id",
-                    id
-                );
-
+                .eq("id", id)
+                .select("id");
 
             if (error) {
-
                 throw error;
-
             }
 
+            // Supabase can return no error when RLS filters the row out.
+            // Do not report success unless a row was actually deleted.
+            if (!Array.isArray(data) || data.length === 0) {
+                throw new Error(
+                    "Tax tidak terhapus. Data tidak ditemukan atau akses ditolak oleh kebijakan keamanan (RLS)."
+                );
+            }
 
             return true;
 
-        }
+        } catch (error) {
 
-        catch (error) {
-
-            console.error(
-                "TaxService.delete:",
-                error
-            );
-
+            console.error("TaxService.delete:", error);
             throw error;
 
         }
 
     }
-
 
     /*
     ==================================================

@@ -280,32 +280,50 @@ static async ensureCanManage() {
     const { data: authData, error: authError } =
         await supabase.auth.getUser();
 
-    if (authError) {
-        throw authError;
-    }
+    if (authError) throw authError;
 
     const userUid = authData?.user?.id;
-
     if (!userUid) {
         throw new Error("Authentication session was not found.");
     }
 
-    const { data: profile, error } =
-        await supabase
-            .from("mst_users")
-            .select("role, status")
-            .eq("user_uid", userUid)
-            .maybeSingle();
+    // Resolve the active tenant first. A user's role in another company must
+    // never grant write access to the current company's Chart of Accounts.
+    const { data: companyId, error: companyError } =
+        await supabase.rpc("finova_effective_company_id");
 
-    if (error) {
-        throw error;
+    if (companyError) throw companyError;
+    if (!companyId) {
+        throw new Error("Active company context was not found.");
     }
 
-    const role = String(profile?.role || "").trim().toLowerCase();
-    const active = profile?.status !== false;
+    const { data: profile, error } = await supabase
+        .from("mst_users")
+        .select("role, status, company_id")
+        .eq("user_uid", userUid)
+        .eq("company_id", companyId)
+        .maybeSingle();
 
-    if (!active || !["admin", "manager"].includes(role)) {
-        throw new Error("You have view-only access to Chart Of Accounts.");
+    if (error) throw error;
+
+    // Normalize legacy role spellings returned by different FINOVA screens/data.
+    // Accept "Super Admin", "super_admin", and "super-admin" as the same owner role.
+    const role = String(profile?.role ?? "")
+        .trim()
+        .toLowerCase()
+        .replace(/[._-]+/g, " ")
+        .replace(/\s+/g, " ");
+
+    // mst_users.status may be stored as a boolean or as a textual active status.
+    const rawStatus = profile?.status;
+    const active =
+        rawStatus === true ||
+        rawStatus === 1 ||
+        ["true", "1", "active", "aktif"].includes(String(rawStatus ?? "").trim().toLowerCase());
+
+    // Super Admin is the FINOVA owner and receives the same COA write permissions as Manager.
+    if (!active || !["manager", "super admin"].includes(role)) {
+        throw new Error("You have view-only access to Chart Of Accounts. Manager or Super Admin access is required.");
     }
 
     return true;
@@ -332,6 +350,26 @@ static getAccountTypeFromClass(accountClass) {
 
 }
 
+static validateAccountPayload(payload) {
+
+    if (!payload || typeof payload !== "object") {
+        throw new Error("Chart Of Account data is required.");
+    }
+
+    if (!String(payload.account_name ?? "").trim()) {
+        throw new Error("Account Name is required.");
+    }
+
+    const allowedClasses = new Set(["Asset", "Liability", "Equity", "Revenue", "Expense"]);
+    const accountClass = String(payload.account_class ?? "").trim();
+    if (!allowedClasses.has(accountClass)) {
+        throw new Error("Account Class must be Asset, Liability, Equity, Revenue, or Expense.");
+    }
+
+    return true;
+
+}
+
 static async insert(payload) {
 
         await this.ensureCanManage();
@@ -352,6 +390,7 @@ static async insert(payload) {
 
         }
 
+        this.validateAccountPayload(payload);
 
         /*
         ======================================================
@@ -588,6 +627,7 @@ static async insert(payload) {
 
         }
 
+        this.validateAccountPayload(payload);
 
         const accountCode =
             String(
@@ -666,28 +706,23 @@ static async insert(payload) {
         ======================================================
         */
 
+        // Explicit allowlist prevents the UI payload from overwriting IDs,
+        // ownership fields, or creation timestamps.
         const dataUpdate = {
-
-            ...payload,
-
-            account_code:
-                accountCode,
-
-            account_class:
-                payload.account_class ?? "",
-
-            account_type:
-                this.getAccountTypeFromClass(payload.account_class),
-
-            parent_id:
-                payload.parent_id || null,
-
-            level:
-                level,
-
-            updated_at:
-                now
-
+            account_code: accountCode,
+            account_name: String(payload.account_name ?? "").trim(),
+            account_class: String(payload.account_class).trim(),
+            account_type: this.getAccountTypeFromClass(payload.account_class),
+            parent_id: payload.parent_id || null,
+            currency: payload.currency ?? "IDR",
+            normal_balance: payload.normal_balance ?? "Debit",
+            posting_type: payload.posting_type ?? "Manual & Auto",
+            level,
+            is_header: payload.is_header ?? false,
+            allow_transaction: payload.allow_transaction ?? true,
+            status: payload.status ?? true,
+            description: payload.description ?? "",
+            updated_at: now
         };
 
 
@@ -1140,10 +1175,7 @@ static async isAccountCodeExists(
             { table: "trx_account_payable_detail", column: "credit_account_id" },
             { table: "trx_account_payable_detail", column: "tax_plus_account_id" },
             { table: "trx_account_payable_detail", column: "tax_minus_account_id" },
-            { table: "trx_account_receivable_detail", column: "account_id" },
-            { table: "trx_ap_payment", column: "bank_account_id" },
-            { table: "trx_ap_payment_batch", column: "bank_account_id" },
-            { table: "trx_ar_payment", column: "bank_account_id" }
+            { table: "trx_account_receivable_detail", column: "account_id" }
         ];
 
         for (const reference of accountReferences) {
@@ -1250,8 +1282,11 @@ static async setStatus(id, status) {
 
         }
 
-        const newStatus =
-            Boolean(status);
+        if (typeof status !== "boolean") {
+            throw new Error("Account status must be a boolean value.");
+        }
+
+        const newStatus = status;
 
 
         const {

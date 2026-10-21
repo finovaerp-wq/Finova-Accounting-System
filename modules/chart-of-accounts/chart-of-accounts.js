@@ -8,6 +8,7 @@ Version : 2.0.0
 
 import { applyMasterViewOnlyForStaff } from "../../service/master-view-access.js";
 import { ChartOfAccountsService } from "../../service/chart-of-accounts.service.js";
+import { supabase } from "../../assets/js/core/supabase.js";
 import { PreviewService } from "../../service/preview.service.js";
 import { ExcelExportService } from "../../service/excel-export.service.js";
 
@@ -56,6 +57,7 @@ constructor() {
     */
 
     this.modal = null;
+    this.canManage = false;
     this.deleteChartOfAccountId = null;
 
     this.coaDeleteModal = null;
@@ -105,6 +107,10 @@ async initialize() {
 
         await applyMasterViewOnlyForStaff("COA", ["btn-add-account"]);
 
+        // COA write access is Manager-only. The shared helper also supports
+        // legacy Super Admin, so enforce the current FINOVA role policy here.
+        await this.enforceManagerOrSuperAdminAccess();
+
         /*
         ======================================================
         REGISTER EVENTS
@@ -144,6 +150,109 @@ async initialize() {
     }
 
 }
+/*
+==========================================================
+COA ROLE GUARD
+==========================================================
+*/
+
+async enforceManagerOrSuperAdminAccess() {
+    const hideAddButton = () => {
+        const button = document.getElementById("btn-add-account");
+        if (button) {
+            button.hidden = true;
+            button.style.setProperty("display", "none", "important");
+            button.setAttribute("aria-hidden", "true");
+        }
+    };
+
+    try {
+        const { data: authData, error: authError } = await supabase.auth.getUser();
+        if (authError) throw authError;
+        if (!authData?.user?.id) throw new Error("Authentication session was not found.");
+
+        const { data: companyId, error: companyError } = await supabase.rpc("finova_effective_company_id");
+        if (companyError) throw companyError;
+        if (!companyId) throw new Error("Active company context was not found.");
+
+        const { data: profile, error } = await supabase.from("mst_users")
+            .select("role, status, company_id")
+            .eq("user_uid", authData.user.id)
+            .eq("company_id", companyId)
+            .maybeSingle();
+        if (error) throw error;
+
+        const normalizedRole = String(profile?.role ?? "").trim().replace(/\s+/g, " ").toLowerCase();
+        const canManage = profile?.status === true
+            && ["manager", "super admin"].includes(normalizedRole);
+
+        this.canManage = canManage;
+
+        if (canManage) {
+            document.body?.setAttribute("data-finova-master-manager", "true");
+            const button = document.getElementById("btn-add-account");
+            if (button) {
+                button.hidden = false;
+                button.style.removeProperty("display");
+                button.removeAttribute("aria-hidden");
+            }
+            return true;
+        }
+
+        this.canManage = false;
+        document.body?.removeAttribute("data-finova-master-manager");
+        hideAddButton();
+        return false;
+    } catch (error) {
+        this.canManage = false;
+        console.error("[COA] Manager/Super Admin access check failed; write controls remain hidden.", error);
+        document.body?.removeAttribute("data-finova-master-manager");
+        hideAddButton();
+        return false;
+    }
+}
+
+/*
+==========================================================
+COA MODAL LIFECYCLE GUARD
+Close and dispose COA modals when the router removes the COA page.
+==========================================================
+*/
+
+observeCoaModalLifecycle() {
+    if (typeof window === "undefined" || !document.body
+        || window.__FINOVA_COA_MODAL_LIFECYCLE_OBSERVER__) return;
+
+    const cleanup = () => {
+        if (document.querySelector(".coa-page")) return;
+
+        document.querySelectorAll("#modal-container #coa-modal, #modal-container #coaDeleteModal").forEach(modalElement => {
+            try {
+                const instance = window.bootstrap?.Modal?.getInstance(modalElement);
+                if (instance) {
+                    try { instance.hide(); } catch (_) { /* cleanup continues */ }
+                    try { instance.dispose(); } catch (_) { /* cleanup continues */ }
+                }
+            } catch (error) {
+                console.warn("[COA] Modal cleanup warning:", error);
+            }
+            modalElement.remove();
+        });
+
+        if (!document.querySelector(".modal.show")) {
+            document.querySelectorAll(".modal-backdrop").forEach(backdrop => backdrop.remove());
+            document.body.classList.remove("modal-open");
+            document.body.style.removeProperty("padding-right");
+        }
+    };
+
+    window.__FINOVA_COA_MODAL_LIFECYCLE_OBSERVER__ = new MutationObserver(cleanup);
+    window.__FINOVA_COA_MODAL_LIFECYCLE_OBSERVER__.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+}
+
 /*
 ==========================================================
 LOAD MODAL
@@ -250,6 +359,7 @@ this.enableCoaModalDrag(
     modalElement
 );
 
+        this.observeCoaModalLifecycle();
 
         /*
         ======================================================
