@@ -257,7 +257,7 @@ generateMenu() {
     ------------------------
     Menu Accounting tetap terlihat tetapi dikunci.
 
-    FINOVA ADMIN / Production tetap tersedia.
+    FINOVA ADMIN tetap tersedia.
     ======================================================
     */
 
@@ -557,9 +557,9 @@ this.menuItem(
 
 
                     ${this.menuItem(
-                        "Production",
-                        "fa-solid fa-shield-halved",
-                        "production"
+                        "Audit Log",
+                        "fa-solid fa-clock-rotate-left",
+                        "audit-log"
                     )}
 
                 `

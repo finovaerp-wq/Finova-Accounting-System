@@ -1,0 +1,64 @@
+.audit-log-page{display:flex;flex-direction:column;gap:16px;min-width:0;max-height:calc(100vh - 105px);overflow-y:auto;overflow-x:hidden;padding:0 4px 16px 0;color:var(--text-primary,#1f2937);overscroll-behavior:contain}
+.audit-log-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.audit-log-actions{display:flex;gap:8px;flex-wrap:wrap}
+.audit-log-security-note{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1px solid #c7d7f7;border-radius:10px;background:#f3f7ff;color:#244579;font-size:13px}
+.audit-log-security-note i{margin-top:2px}
+.audit-filter-card,.audit-table-card{background:var(--card-bg,#fff);border:1px solid var(--border-color,#e5e7eb);border-radius:12px;box-shadow:0 2px 8px rgba(15,23,42,.04);min-width:0}
+.audit-filter-card{padding:16px}
+.audit-filter-grid{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:14px}
+.audit-filter-grid label{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:600;color:var(--text-secondary,#4b5563);min-width:0}
+.audit-filter-grid input,.audit-filter-grid select{width:100%;min-width:0;min-height:38px;border:1px solid var(--border-color,#d1d5db);border-radius:7px;padding:7px 9px;background:var(--input-bg,#fff);color:var(--text-primary,#111827);font:inherit;font-weight:400}
+.audit-search-label{grid-column:span 2}
+.audit-filter-buttons{display:flex;align-items:flex-end;gap:8px}
+.audit-log-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--text-secondary,#6b7280);font-size:12px}
+.audit-table-card{overflow:hidden}
+.audit-table-wrap{overflow:auto;max-width:100%;max-height:calc(100vh - 360px);min-height:220px;overscroll-behavior:contain;scrollbar-gutter:stable}
+.audit-table{margin:0;width:100%;border-collapse:separate;border-spacing:0;font-size:12px}
+.audit-table th{position:sticky;top:0;z-index:1;background:var(--table-header-bg,#f8fafc);font-size:11px;text-transform:uppercase;letter-spacing:.025em;color:var(--text-secondary,#4b5563);white-space:nowrap}
+.audit-table td,.audit-table th{padding:11px 12px;border-bottom:1px solid var(--border-color,#e5e7eb);vertical-align:top}
+.audit-table td{max-width:240px;overflow-wrap:anywhere}
+.audit-table tbody tr:hover{background:var(--hover-bg,#f8fafc)}
+.audit-time{white-space:nowrap;min-width:145px}
+.audit-user{min-width:150px}
+.audit-company{min-width:160px;font-family:monospace;font-size:11px}
+.audit-reason{min-width:180px;max-width:260px}
+.audit-action-pill{display:inline-block;border-radius:999px;padding:4px 8px;font-size:10px;font-weight:700;background:#eef2ff;color:#3730a3;white-space:nowrap}
+.audit-action-pill.void{background:#fee2e2;color:#991b1b}
+.audit-action-pill.delete{background:#ffedd5;color:#9a3412}
+.audit-action-pill.create{background:#dcfce7;color:#166534}
+.audit-action-pill.post,.audit-action-pill.approve{background:#dbeafe;color:#1d4ed8}
+.audit-detail-btn{white-space:nowrap}
+.audit-empty{text-align:center;padding:28px!important;color:var(--text-secondary,#6b7280)}
+.audit-table-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px}
+.audit-table-footer>div{display:flex;gap:6px}
+.audit-detail-modal{position:fixed;inset:0;z-index:12000;display:flex;align-items:center;justify-content:center;padding:20px}
+.audit-detail-modal[hidden]{display:none}
+.audit-detail-backdrop{position:absolute;inset:0;background:rgba(15,23,42,.55)}
+.audit-detail-dialog{position:relative;width:min(980px,100%);max-height:88vh;overflow:auto;background:var(--card-bg,#fff);border-radius:12px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.audit-detail-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--border-color,#e5e7eb);padding-bottom:12px;margin-bottom:16px}
+.audit-detail-heading h2{font-size:18px;margin:0}
+.audit-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.audit-detail-block{min-width:0;border:1px solid var(--border-color,#e5e7eb);border-radius:8px;padding:12px}
+.audit-detail-block h3{font-size:13px;margin:0 0 8px}
+.audit-detail-block pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:380px;overflow:auto;font-size:11px;background:var(--surface-bg,#f8fafc);padding:10px;border-radius:6px;margin:0}
+.audit-detail-meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.audit-detail-meta div{font-size:12px;overflow-wrap:anywhere}
+.audit-detail-meta strong{display:block;color:var(--text-secondary,#6b7280);font-size:10px;text-transform:uppercase;margin-bottom:4px}
+@media(max-width:1000px){.audit-filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.audit-search-label{grid-column:span 2}}
+@media(max-width:600px){.audit-filter-grid,.audit-detail-grid,.audit-detail-meta{grid-template-columns:1fr}.audit-search-label{grid-column:auto}.audit-table-footer{align-items:flex-start;flex-direction:column}.audit-log-header{flex-direction:column}.audit-detail-modal{padding:8px}}
+
+/* Audit Log scroll usability: keep headers visible while scrolling long activity lists. */
+.audit-table thead th{position:sticky;top:0;z-index:2}
+.audit-log-page:focus{outline:none}
+@media(max-width:700px){.audit-log-page{max-height:calc(100vh - 80px)}.audit-table-wrap{max-height:calc(100vh - 320px);min-height:180px}}
+
+
+/* FIX: pagination must remain visible below the independently scrollable table. */
+.audit-table-card{display:flex!important;flex-direction:column!important;overflow:hidden!important;min-height:0!important}
+.audit-table-wrap{flex:1 1 auto;min-height:180px;max-height:calc(100vh - 390px);overflow:auto!important}
+.audit-pagination-wrapper{display:flex!important;align-items:center;justify-content:space-between;gap:12px;flex:0 0 auto!important;min-height:52px;padding:10px 14px;background:var(--card-bg,#fff);border-top:1px solid var(--border-color,#e5e7eb);box-sizing:border-box;visibility:visible!important;opacity:1!important}
+.audit-pagination-wrapper button:disabled{opacity:.45;cursor:not-allowed}
+.audit-pagination-wrapper .finova-pagination-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.audit-pagination-wrapper .finova-pagination-info{margin-left:auto;white-space:nowrap;font-size:12px;color:var(--text-secondary,#64748b)}
+.audit-pagination-wrapper .finova-pagination-input{width:40px;min-width:40px;text-align:center}
+@media(max-width:760px){.audit-pagination-wrapper{flex-wrap:wrap}.audit-pagination-wrapper .finova-pagination-info{width:100%;margin-left:0}}

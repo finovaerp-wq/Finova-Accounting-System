@@ -4490,7 +4490,13 @@ async voidInvoice(
             .update({
 
                 status:
-                    this.STATUS.VOID
+                    this.STATUS.VOID,
+
+                void_reason:
+                    String(reason).trim(),
+
+                void_at:
+                    new Date().toISOString()
 
             })
 

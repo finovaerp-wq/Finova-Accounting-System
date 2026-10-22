@@ -29,6 +29,10 @@ import {
 import {
     AuthService
 } from "../../../service/auth.service.js";
+
+import {
+    UserService
+} from "../../../service/user.service.js";
 import {
     CustomerConfig
 } from "./customer-config.js";
@@ -117,13 +121,22 @@ class FinovaApp {
         ==========================================
         ACCESS MODE
         ==========================================
-
-        FINOVA no longer has a Super Admin role.
-        Every authenticated user operates through
-        their own company membership/context.
+        Derive role from the authenticated FINOVA profile.
+        UI visibility is convenience only; database RLS/RPC
+        remains the enforcement boundary for Audit Log.
         */
 
-        this.isSuperAdmin = false;
+        let currentProfile = null;
+
+        try {
+            currentProfile = await UserService.getCurrentProfile();
+        } catch (profileError) {
+            console.error("FINOVA ROLE RESOLUTION ERROR:", profileError);
+        }
+
+        this.isSuperAdmin =
+            String(currentProfile?.role ?? "").trim().toLowerCase()
+            === "super admin";
 
 
         /*

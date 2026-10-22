@@ -19,6 +19,14 @@ export class FinovaRouter {
                 className: "Dashboard"
             },
 
+            "audit-log": {
+                title: "Audit Log",
+                html: "modules/audit-log/audit-log.html",
+                css: "modules/audit-log/audit-log.css",
+                js: "modules/audit-log/audit-log.js",
+                className: "AuditLog"
+            },
+
             "user-management": {
                 title: "User Management",
                 html: "modules/user-management/user-management.html",
@@ -2323,6 +2331,17 @@ async navigate(
 
     }
 
+    // Audit Log is a platform-wide administrative screen.
+    // Never allow non-Super-Admin users to open it by URL.
+    if (
+        moduleName === "audit-log"
+        && window.finovaIsSuperAdmin !== true
+    ) {
+        console.warn("FINOVA AUDIT LOG ACCESS DENIED.");
+        this.show404();
+        return;
+    }
+
 
     /*
     ======================================================
@@ -2364,7 +2383,8 @@ async navigate(
     */
 
     if (
-        !hasAccountingAccess
+        moduleName !== "audit-log"
+        && !hasAccountingAccess
     ) {
 
         console.warn(

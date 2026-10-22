@@ -1,0 +1,79 @@
+<div class="finova-page audit-log-page">
+  <div class="finova-page-header audit-log-header">
+    <div class="finova-page-header-left">
+      <h1 class="finova-page-title">Audit Log</h1>
+      <p class="finova-page-subtitle">FINOVA Admin / Jejak aktivitas pengguna lintas modul dan perusahaan</p>
+    </div>
+    <div class="audit-log-actions">
+      <button type="button" class="btn btn-outline-secondary" id="audit-refresh"><i class="fa-solid fa-rotate"></i> Refresh</button>
+      <button type="button" class="btn btn-outline-primary" id="audit-export"><i class="fa-solid fa-file-export"></i> Export CSV</button>
+    </div>
+  </div>
+
+  <div class="audit-log-security-note">
+    <i class="fa-solid fa-shield-halved"></i>
+    <span>Halaman khusus Super Admin. Riwayat menampilkan log yang sudah tersimpan; aktivitas yang belum dicatat oleh database tidak dapat muncul secara retroaktif.</span>
+  </div>
+
+  <section class="audit-filter-card">
+    <div class="audit-filter-grid">
+      <label>Mulai tanggal<input type="date" id="audit-from"></label>
+      <label>Sampai tanggal<input type="date" id="audit-to"></label>
+      <label>Pengguna<select id="audit-user"><option value="">Semua pengguna</option></select></label>
+<label>Modul<select id="audit-module"><option value="">Semua modul</option></select></label>
+      <label>Action<select id="audit-action"><option value="">Semua action</option></select></label>
+      <label class="audit-search-label">Cari dokumen / tabel / alasan
+        <input type="search" id="audit-search" placeholder="Nomor dokumen, tabel, record ID, alasan Void...">
+      </label>
+      <div class="audit-filter-buttons">
+        <button type="button" class="btn btn-primary" id="audit-apply"><i class="fa-solid fa-filter"></i> Terapkan</button>
+        <button type="button" class="btn btn-light" id="audit-reset">Reset</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="audit-log-summary" aria-live="polite">
+    <span id="audit-count">Memuat log...</span>
+    <span id="audit-loaded-at"></span>
+  </div>
+
+  <section class="audit-table-card">
+    <div class="audit-table-wrap">
+      <table class="table audit-table">
+        <thead>
+          <tr>
+            <th>Waktu</th><th>Pengguna</th><th>Perusahaan ID</th><th>Modul</th><th>Action</th>
+            <th>Nomor Dokumen</th><th>Tabel / Record</th><th>Alasan / Remarks</th><th>Detail</th>
+          </tr>
+        </thead>
+        <tbody id="audit-rows">
+          <tr><td colspan="9" class="audit-empty">Memuat Audit Log...</td></tr>
+        </tbody>
+      </table>
+    </div>
+<div class="finova-pagination-wrapper audit-pagination-wrapper">
+      <div class="finova-pagination-left">
+        <button type="button" id="audit-first" class="finova-pagination-btn" title="First Page" disabled><i class="fa-solid fa-angles-left"></i></button>
+        <button type="button" id="audit-prev" class="finova-pagination-btn" title="Previous Page" disabled><i class="fa-solid fa-angle-left"></i></button>
+        <span class="finova-pagination-label">Page</span>
+        <input type="number" id="audit-page-input" class="finova-pagination-input" value="1" min="1" step="1" autocomplete="off">
+        <span class="finova-pagination-label">of</span>
+        <span id="audit-page-total" class="finova-pagination-total">1</span>
+        <button type="button" id="audit-next" class="finova-pagination-btn" title="Next Page" disabled><i class="fa-solid fa-angle-right"></i></button>
+        <button type="button" id="audit-last" class="finova-pagination-btn" title="Last Page" disabled><i class="fa-solid fa-angles-right"></i></button>
+      </div>
+      <div id="audit-page-info" class="finova-pagination-info">Displaying Record 0 - 0 of 0</div>
+    </div>
+  </section>
+
+  <div class="audit-detail-modal" id="audit-detail-modal" hidden>
+    <div class="audit-detail-backdrop" data-audit-close></div>
+    <section class="audit-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="audit-detail-title">
+      <div class="audit-detail-heading">
+        <h2 id="audit-detail-title">Detail Aktivitas</h2>
+        <button type="button" class="btn btn-light" data-audit-close aria-label="Tutup">&times;</button>
+      </div>
+      <div id="audit-detail-content"></div>
+    </section>
+  </div>
+</div>
