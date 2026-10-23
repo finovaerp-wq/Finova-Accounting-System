@@ -1,11 +1,7 @@
 {
-    "deno.enable": true,
+    "liveServer.settings.port": 5502,
+    "deno.enable": false,
     "deno.enablePaths": [
-        "supabase/functions"
-    ],
-    "deno.disablePaths": [
-        "modules",
-        "service",
-        "assets"
+        "FINOVA-PRODUCTION PHASE IV/supabase/functions"
     ]
 }

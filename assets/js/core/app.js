@@ -41,9 +41,6 @@ import {
     TenantContext
 } from "./tenant-context.js";
 
-import {
-    supabase
-} from "./supabase.js";
 
 /*
 ==========================================================
