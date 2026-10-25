@@ -252,6 +252,15 @@ this.tabHistory =
 
 /*
 ==========================================================
+WORKSPACE MODAL LIFECYCLE
+==========================================================
+*/
+
+this.bindWorkspaceModalLifecycle();
+
+
+/*
+==========================================================
 INITIALIZE
 ==========================================================
 */
@@ -1312,6 +1321,124 @@ createWorkspacePanel(
 }
 /*
 ==========================================================
+WORKSPACE MODAL LIFECYCLE
+
+Modal state is preserved while switching workspace tabs.
+The modal stays owned by the module that opened it, even
+when a module moves the modal element to document.body.
+==========================================================
+*/
+
+bindWorkspaceModalLifecycle() {
+
+    if (document.documentElement.dataset.finovaModalLifecycleBound === "true") {
+        return;
+    }
+
+    document.documentElement.dataset.finovaModalLifecycleBound = "true";
+
+    const ownerFor = (modal) => {
+        if (!modal || !modal.matches || !modal.matches(".modal")) return null;
+
+        const panel = modal.closest(".finova-workspace-panel");
+        if (panel && panel.id && panel.id.startsWith("finova-panel-")) {
+            return panel.id.slice("finova-panel-".length);
+        }
+
+        return this.currentModule || null;
+    };
+
+    const positionModal = (modal) => {
+        modal.classList.add("finova-workspace-modal");
+        modal.style.setProperty("top", "140px", "important");
+        modal.style.setProperty("bottom", "0", "important");
+        modal.style.setProperty("height", "auto", "important");
+        modal.style.setProperty("overflow-y", "auto", "important");
+        modal.style.setProperty("overflow-x", "hidden", "important");
+    };
+
+    document.addEventListener("show.bs.modal", (event) => {
+        const modal = event.target;
+        const owner = ownerFor(modal);
+        if (!owner) return;
+
+        modal.dataset.finovaWorkspaceOwner = owner;
+        positionModal(modal);
+    }, true);
+
+    document.addEventListener("shown.bs.modal", (event) => {
+        const modal = event.target;
+        const owner = modal && modal.dataset
+            ? modal.dataset.finovaWorkspaceOwner || ownerFor(modal)
+            : null;
+        if (!owner) return;
+
+        if (modal.dataset) modal.dataset.finovaWorkspaceOwner = owner;
+        positionModal(modal);
+
+        // Bootstrap creates the backdrop during show(). Associate any
+        // newly-created backdrop with this modal's owning workspace.
+        document.querySelectorAll(".modal-backdrop:not([data-finova-workspace-owner])")
+            .forEach((backdrop) => {
+                backdrop.dataset.finovaWorkspaceOwner = owner;
+                backdrop.classList.add("finova-workspace-modal-backdrop");
+                backdrop.style.setProperty("top", "140px", "important");
+                backdrop.style.setProperty("bottom", "0", "important");
+            });
+    }, true);
+
+    document.addEventListener("hidden.bs.modal", (event) => {
+        const modal = event.target;
+        if (!modal || !modal.classList) return;
+        modal.classList.remove("finova-workspace-modal-suspended");
+        if (modal.dataset) delete modal.dataset.finovaWorkspaceOwner;
+    }, true);
+}
+
+suspendWorkspaceOverlay(moduleName) {
+    if (!moduleName) return;
+
+    document.querySelectorAll(".modal").forEach((modal) => {
+        const panel = modal.closest(".finova-workspace-panel");
+        const inferredOwner = panel && panel.id.startsWith("finova-panel-")
+            ? panel.id.slice("finova-panel-".length)
+            : null;
+        const owner = modal.dataset.finovaWorkspaceOwner || inferredOwner;
+
+        if (owner !== moduleName || !modal.classList.contains("show")) return;
+
+        modal.dataset.finovaWorkspaceOwner = moduleName;
+        modal.classList.add("finova-workspace-modal", "finova-workspace-modal-suspended");
+    });
+
+    document.querySelectorAll(".modal-backdrop").forEach((backdrop) => {
+        if (backdrop.dataset.finovaWorkspaceOwner === moduleName) {
+            backdrop.classList.add("finova-workspace-modal-suspended");
+        }
+    });
+}
+
+resumeWorkspaceOverlay(moduleName) {
+    if (!moduleName) return;
+
+    document.querySelectorAll(".modal").forEach((modal) => {
+        if (modal.dataset.finovaWorkspaceOwner !== moduleName) return;
+        modal.classList.remove("finova-workspace-modal-suspended");
+        if (modal.classList.contains("show")) {
+            modal.classList.add("finova-workspace-modal");
+        }
+    });
+
+    document.querySelectorAll(".modal-backdrop").forEach((backdrop) => {
+        if (backdrop.dataset.finovaWorkspaceOwner === moduleName) {
+            backdrop.classList.remove("finova-workspace-modal-suspended");
+        }
+    });
+}
+
+
+/*
+==========================================================
 CLEANUP WORKSPACE OVERLAY
 ==========================================================
 */
@@ -1348,14 +1475,16 @@ cleanupWorkspaceOverlay(
     ======================================================
     */
 
-    const modalElements =
-        panel
-            ? panel.querySelectorAll(
-                ".modal.show"
-            )
-            : document.querySelectorAll(
-                ".modal.show"
-            );
+    const modalElements = Array.from(
+        document.querySelectorAll(".modal.show")
+    ).filter((modalElement) => {
+        const owner = modalElement.dataset.finovaWorkspaceOwner;
+        const ownerFromPanel = modalElement.closest(".finova-workspace-panel");
+        const inferredOwner = ownerFromPanel && ownerFromPanel.id.startsWith("finova-panel-")
+            ? ownerFromPanel.id.slice("finova-panel-".length)
+            : null;
+        return !moduleName || owner === moduleName || inferredOwner === moduleName;
+    });
 
 
     /*
@@ -1414,17 +1543,14 @@ cleanupWorkspaceOverlay(
     ======================================================
     */
 
-    document
-        .querySelectorAll(
-            ".modal-backdrop"
-        )
-        .forEach(
-            backdrop => {
-
-                backdrop.remove();
-
-            }
-        );
+    document.querySelectorAll(".modal-backdrop").forEach((backdrop) => {
+        if (
+            !moduleName ||
+            backdrop.dataset.finovaWorkspaceOwner === moduleName
+        ) {
+            backdrop.remove();
+        }
+    });
 
 
     /*
@@ -1433,19 +1559,11 @@ cleanupWorkspaceOverlay(
     ======================================================
     */
 
-    document.body.classList.remove(
-        "modal-open"
-    );
-
-
-    document.body.style.removeProperty(
-        "overflow"
-    );
-
-
-    document.body.style.removeProperty(
-        "padding-right"
-    );
+    if (!document.querySelector(".modal.show")) {
+        document.body.classList.remove("modal-open");
+        document.body.style.removeProperty("overflow");
+        document.body.style.removeProperty("padding-right");
+    }
 
 }
 /*
@@ -1509,7 +1627,7 @@ activateWorkspace(
             moduleName
     ) {
 
-        this.cleanupWorkspaceOverlay(
+        this.suspendWorkspaceOverlay(
             this.currentModule
         );
 
@@ -1641,6 +1759,8 @@ activateWorkspace(
 
     this.currentModule =
         moduleName;
+
+    this.resumeWorkspaceOverlay(moduleName);
 
 
     /*

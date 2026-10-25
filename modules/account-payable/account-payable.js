@@ -15651,6 +15651,9 @@ renderInvoiceDetails() {
         ? this.invoiceDetails
         : [];
 
+    const apModal = document.getElementById("accountPayableModal");
+    apModal?.classList.add("ap-invoice-details-empty");
+
     if (details.length === 0) {
         tableBody.innerHTML = `
             <tr id="ap-detail-empty">
@@ -15663,6 +15666,8 @@ renderInvoiceDetails() {
         this.updateInvoiceSummary();
         return;
     }
+
+    apModal?.classList.remove("ap-invoice-details-empty");
 
     // Tabel memiliki 7 kolom:
     // No, Account, Description, Qty, Unit Price, Amount, Action.

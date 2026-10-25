@@ -4689,3 +4689,26 @@ tr.gl-journal-row[data-status="posted"]:hover
     background-color: #E9ECEF !important;
 
 }
+
+/* ==========================================================
+   EMPTY JOURNAL DETAIL COMPACT LAYOUT
+   Avoid a large blank table area before the first journal line.
+========================================================== */
+
+#glJournalModal .gl-journal-detail-card:has(#journal-empty-row) {
+    flex: 0 0 auto !important;
+    min-height: 0 !important;
+}
+
+#glJournalModal #journal-empty-row td {
+    padding-top: 18px !important;
+    padding-bottom: 18px !important;
+}
+
+#glJournalModal .gl-journal-detail-card:has(#journal-empty-row) .journal-detail-scroll {
+    flex: 0 0 auto !important;
+    height: auto !important;
+    max-height: 90px !important;
+    overflow-y: hidden !important;
+}
+

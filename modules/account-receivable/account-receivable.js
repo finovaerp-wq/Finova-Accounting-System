@@ -14491,6 +14491,9 @@ renderInvoiceDetails() {
     ==================================================
     */
 
+    const arModal = document.getElementById("accountReceivableModal");
+    arModal?.classList.add("ar-invoice-details-empty");
+
     if (
         !Array.isArray(
             this.invoiceDetails
@@ -14501,7 +14504,7 @@ renderInvoiceDetails() {
 
         tableBody.innerHTML = `
 
-            <tr>
+            <tr id="ar-detail-empty">
 
                 <td
                     colspan="7"
@@ -14533,6 +14536,8 @@ renderInvoiceDetails() {
     RENDER DETAIL
     ==================================================
     */
+
+    arModal?.classList.remove("ar-invoice-details-empty");
 
     tableBody.innerHTML =
         this.invoiceDetails

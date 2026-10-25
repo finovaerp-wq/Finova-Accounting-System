@@ -914,3 +914,30 @@ Modern Premium Workspace
     scrollbar-width: none;
 }
 #finova-workspace-tabs.has-overflow::-webkit-scrollbar { display: none; }
+
+
+/* ==========================================================
+   WORKSPACE-AWARE MODALS
+   Keep the application header and workspace tabs clickable.
+========================================================== */
+
+.modal.finova-workspace-modal {
+    top: 140px !important;
+    bottom: 0 !important;
+    height: auto !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    box-sizing: border-box;
+}
+
+.modal-backdrop.finova-workspace-modal-backdrop {
+    top: 140px !important;
+    bottom: 0 !important;
+}
+
+.modal.finova-workspace-modal-suspended,
+.modal-backdrop.finova-workspace-modal-suspended {
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+

@@ -6165,3 +6165,80 @@ td {
     z-index: 2;
     background: var(--bs-body-bg, #fff);
 }
+
+
+/* FIX 2026-10-24: compact AR modal when Invoice Details has no rows.
+   Remove inherited fixed/flex heights from every wrapper causing the blank area. */
+#accountReceivableModal:has(#ar-detail-body > #ar-detail-empty) .modal-dialog,
+#accountReceivableModal:has(#ar-detail-body > #ar-detail-empty) .modal-content,
+#accountReceivableModal:has(#ar-detail-body > #ar-detail-empty) .modal-body,
+#accountReceivableModal:has(#ar-detail-body > #ar-detail-empty) #ar-modal-tab-content,
+#accountReceivableModal:has(#ar-detail-body > #ar-detail-empty) #ar-invoice-details-pane,
+#accountReceivableModal:has(#ar-detail-body > #ar-detail-empty) #ar-invoice-details-pane > .p-4,
+#accountReceivableModal:has(#ar-detail-body > #ar-detail-empty) #ar-invoice-details-pane .finova-card,
+#accountReceivableModal:has(#ar-detail-body > #ar-detail-empty) #ar-invoice-details-pane .finova-card-body {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+}
+#accountReceivableModal:has(#ar-detail-body > #ar-detail-empty) .modal-body,
+#accountReceivableModal:has(#ar-detail-body > #ar-detail-empty) #ar-modal-tab-content,
+#accountReceivableModal:has(#ar-detail-body > #ar-detail-empty) #ar-invoice-details-pane,
+#accountReceivableModal:has(#ar-detail-body > #ar-detail-empty) #ar-invoice-details-pane > .p-4,
+#accountReceivableModal:has(#ar-detail-body > #ar-detail-empty) #ar-invoice-details-pane .finova-card,
+#accountReceivableModal:has(#ar-detail-body > #ar-detail-empty) #ar-invoice-details-pane .finova-card-body {
+  flex: 0 0 auto !important;
+  overflow: visible !important;
+}
+#accountReceivableModal:has(#ar-detail-body > #ar-detail-empty) #ar-invoice-details-pane .ar-invoice-detail-table-wrapper {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* Root-cause fix: the modal has explicit viewport-height/flex rules for the
+   detail tab. JS toggles this class based on the actual detail row count. */
+#accountReceivableModal.ar-invoice-details-empty .modal-dialog,
+#accountReceivableModal.ar-invoice-details-empty .modal-content {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+}
+#accountReceivableModal.ar-invoice-details-empty .modal-content {
+  display: flex !important;
+  flex-direction: column !important;
+}
+#accountReceivableModal.ar-invoice-details-empty > .modal-dialog > .modal-content > .modal-body {
+  display: block !important;
+  flex: 0 0 auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+#accountReceivableModal.ar-invoice-details-empty #ar-modal-tab-content,
+#accountReceivableModal.ar-invoice-details-empty #ar-invoice-details-pane,
+#accountReceivableModal.ar-invoice-details-empty #ar-invoice-details-pane.active,
+#accountReceivableModal.ar-invoice-details-empty #ar-invoice-details-pane.active.show,
+#accountReceivableModal.ar-invoice-details-empty #ar-invoice-details-pane > .p-4,
+#accountReceivableModal.ar-invoice-details-empty #ar-invoice-details-pane.active > .p-4,
+#accountReceivableModal.ar-invoice-details-empty #ar-invoice-details-pane .finova-card,
+#accountReceivableModal.ar-invoice-details-empty #ar-invoice-details-pane .finova-card-body,
+#accountReceivableModal.ar-invoice-details-empty #ar-invoice-details-pane .ar-invoice-detail-table-wrapper,
+#accountReceivableModal.ar-invoice-details-empty #ar-invoice-details-pane .table-responsive {
+  display: block !important;
+  flex: 0 0 auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+#accountReceivableModal.ar-invoice-details-empty #ar-invoice-details-pane .ar-invoice-detail-table {
+  height: auto !important;
+  margin-bottom: 0 !important;
+}
+#accountReceivableModal.ar-invoice-details-empty .ar-total-summary-footer,
+#accountReceivableModal.ar-invoice-details-empty .modal-footer {
+  flex: 0 0 auto !important;
+}

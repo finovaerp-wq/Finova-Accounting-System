@@ -4018,3 +4018,80 @@ td {
     z-index: 2;
     background: var(--bs-body-bg, #fff);
 }
+
+
+/* FIX 2026-10-24: compact AP modal when Invoice Details has no rows.
+   Remove inherited fixed/flex heights from every wrapper causing the blank area. */
+#accountPayableModal:has(#ap-detail-body > #ap-detail-empty) .modal-dialog,
+#accountPayableModal:has(#ap-detail-body > #ap-detail-empty) .modal-content,
+#accountPayableModal:has(#ap-detail-body > #ap-detail-empty) .modal-body,
+#accountPayableModal:has(#ap-detail-body > #ap-detail-empty) #ap-modal-tab-content,
+#accountPayableModal:has(#ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane,
+#accountPayableModal:has(#ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane > .p-4,
+#accountPayableModal:has(#ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane .finova-card,
+#accountPayableModal:has(#ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane .finova-card-body {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+}
+#accountPayableModal:has(#ap-detail-body > #ap-detail-empty) .modal-body,
+#accountPayableModal:has(#ap-detail-body > #ap-detail-empty) #ap-modal-tab-content,
+#accountPayableModal:has(#ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane,
+#accountPayableModal:has(#ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane > .p-4,
+#accountPayableModal:has(#ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane .finova-card,
+#accountPayableModal:has(#ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane .finova-card-body {
+  flex: 0 0 auto !important;
+  overflow: visible !important;
+}
+#accountPayableModal:has(#ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane .ap-invoice-detail-table-wrapper {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+/* Root-cause fix: the modal has explicit viewport-height/flex rules for the
+   detail tab. JS toggles this class based on the actual detail row count. */
+#accountPayableModal.ap-invoice-details-empty .modal-dialog,
+#accountPayableModal.ap-invoice-details-empty .modal-content {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+}
+#accountPayableModal.ap-invoice-details-empty .modal-content {
+  display: flex !important;
+  flex-direction: column !important;
+}
+#accountPayableModal.ap-invoice-details-empty > .modal-dialog > .modal-content > .modal-body {
+  display: block !important;
+  flex: 0 0 auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+#accountPayableModal.ap-invoice-details-empty #ap-modal-tab-content,
+#accountPayableModal.ap-invoice-details-empty #ap-invoice-details-pane,
+#accountPayableModal.ap-invoice-details-empty #ap-invoice-details-pane.active,
+#accountPayableModal.ap-invoice-details-empty #ap-invoice-details-pane.active.show,
+#accountPayableModal.ap-invoice-details-empty #ap-invoice-details-pane > .p-4,
+#accountPayableModal.ap-invoice-details-empty #ap-invoice-details-pane.active > .p-4,
+#accountPayableModal.ap-invoice-details-empty #ap-invoice-details-pane .finova-card,
+#accountPayableModal.ap-invoice-details-empty #ap-invoice-details-pane .finova-card-body,
+#accountPayableModal.ap-invoice-details-empty #ap-invoice-details-pane .ap-invoice-detail-table-wrapper,
+#accountPayableModal.ap-invoice-details-empty #ap-invoice-details-pane .table-responsive {
+  display: block !important;
+  flex: 0 0 auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+#accountPayableModal.ap-invoice-details-empty #ap-invoice-details-pane .ap-invoice-detail-table {
+  height: auto !important;
+  margin-bottom: 0 !important;
+}
+#accountPayableModal.ap-invoice-details-empty .ap-total-summary-footer,
+#accountPayableModal.ap-invoice-details-empty .modal-footer {
+  flex: 0 0 auto !important;
+}
