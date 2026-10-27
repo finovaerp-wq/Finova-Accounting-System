@@ -1360,10 +1360,8 @@ bindWorkspaceModalLifecycle() {
     document.addEventListener("show.bs.modal", (event) => {
         const modal = event.target;
         const owner = ownerFor(modal);
-        if (!owner) return;
-
-        modal.dataset.finovaWorkspaceOwner = owner;
-        positionModal(modal);
+        if (owner && modal.dataset) modal.dataset.finovaWorkspaceOwner = owner;
+        if (owner) positionModal(modal);
     }, true);
 
     document.addEventListener("shown.bs.modal", (event) => {
@@ -1382,7 +1380,7 @@ bindWorkspaceModalLifecycle() {
             .forEach((backdrop) => {
                 backdrop.dataset.finovaWorkspaceOwner = owner;
                 backdrop.classList.add("finova-workspace-modal-backdrop");
-                backdrop.style.setProperty("top", "140px", "important");
+                backdrop.style.setProperty("top", "0", "important");
                 backdrop.style.setProperty("bottom", "0", "important");
             });
     }, true);
@@ -1416,6 +1414,7 @@ suspendWorkspaceOverlay(moduleName) {
             backdrop.classList.add("finova-workspace-modal-suspended");
         }
     });
+
 }
 
 resumeWorkspaceOverlay(moduleName) {
@@ -1434,6 +1433,7 @@ resumeWorkspaceOverlay(moduleName) {
             backdrop.classList.remove("finova-workspace-modal-suspended");
         }
     });
+
 }
 
 

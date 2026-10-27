@@ -110,6 +110,12 @@ body {
 
 }
 
+/* Hide the global top bar while a module modal is open. The workspace tabs
+   remain available, and the top bar returns automatically after modal close. */
+html.finova-module-modal-open #finova-topbar {
+    display: none !important;
+}
+
 /* ===========================================
    CONTENT
 =========================================== */

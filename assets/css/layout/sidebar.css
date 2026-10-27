@@ -33,89 +33,35 @@ Version : 1.0.0
    SIDEBAR BRAND
 =========================================== */
 
-.finova-sidebar-logo{
-
-    display:flex;
-
-    align-items:center;
-
-    gap:10px;
-
-    height:70px;
-
-    padding:0 18px;
-
-    border-bottom:1px solid #E5E7EB;
-
-    background:#FFFFFF;
-
+/* ===========================================
+   SIDEBAR BRAND — supplied FINOVA lockup
+=========================================== */
+.finova-sidebar-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 70px;
+    padding: 4px 12px;
+    overflow: hidden;
+    box-sizing: border-box;
+    border-bottom: 1px solid #E5E7EB;
+    background: #FFFFFF;
 }
 
-
-/* ===========================================
-   LOGO IMAGE
-=========================================== */
-
-.finova-sidebar-logo-image{
-
-    width: 70px;
-
-    height: 80px;
-
+.finova-sidebar-logo-image {
+    display: block;
+    width: 100%;
+    max-width: 258px;
+    height: 62px;
     object-fit: contain;
-
-    flex-shrink: 0;
-
+    object-position: center;
+    flex: 0 1 auto;
 }
 
-/* ===========================================
-   BRAND
-=========================================== */
-
-.finova-sidebar-brand{
-
-    display:flex;
-
-    flex-direction:column;
-
-    justify-content:center;
-
-    min-width:0;
-
-}
-
-/* ===========================================
-   TITLE
-=========================================== */
-
-.finova-sidebar-title{
-
-    color:#0F172A;
-
-    font-size:22px;
-
-    font-weight:700;
-
-    line-height:1.1;
-
-}
-
-/* ===========================================
-   SUBTITLE
-=========================================== */
-
-.finova-sidebar-subtitle{
-
-    margin-top:2px;
-
-    color:#64748B;
-
-    font-size:12px;
-
-    font-weight:500;
-
-    letter-spacing:.5px;
-
+/* The supplied artwork already contains both the emblem and FINOVA text. */
+.finova-sidebar-brand {
+    display: none !important;
 }
 
 /* ===========================================
@@ -1494,4 +1440,38 @@ Version : 1.0.0
     font-family: 'Montserrat', 'Arial', sans-serif !important;
     font-weight: 600 !important;
     letter-spacing: 0.14em !important;
+}
+
+
+/* Keep the full lockup contained when the sidebar is collapsed. */
+.finova-sidebar.collapsed .finova-sidebar-logo {
+    padding: 4px;
+}
+.finova-sidebar.collapsed .finova-sidebar-logo-image {
+    width: 48px;
+    height: 52px;
+}
+
+
+/* ==========================================================
+   FINOVA LOGO SIZE FIX — full lockup must remain readable
+   Override earlier 62px icon-only sizing for the supplied
+   horizontal logo artwork.
+========================================================== */
+.finova-sidebar-logo {
+    justify-content: center !important;
+    padding: 4px 12px !important;
+}
+.finova-sidebar-logo-image {
+    width: min(100%, 230px) !important;
+    max-width: 230px !important;
+    height: 62px !important;
+    object-fit: contain !important;
+    object-position: center !important;
+    flex: 0 1 auto !important;
+}
+.finova-sidebar.collapsed .finova-sidebar-logo-image {
+    width: 48px !important;
+    height: 52px !important;
+    max-width: 48px !important;
 }

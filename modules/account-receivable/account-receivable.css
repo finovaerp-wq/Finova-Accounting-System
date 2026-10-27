@@ -6242,3 +6242,15 @@ td {
 #accountReceivableModal.ar-invoice-details-empty .modal-footer {
   flex: 0 0 auto !important;
 }
+
+/* FIX 2026-10-27: align AR modal to the top of the viewport */
+#accountReceivableModal.modal,
+#accountReceivableModal {
+  align-items: flex-start !important;
+}
+#accountReceivableModal > .modal-dialog,
+#accountReceivableModal.modal .modal-dialog,
+#accountReceivableModal .modal-dialog {
+  margin-top: 1rem !important;
+  margin-bottom: 1rem !important;
+}
