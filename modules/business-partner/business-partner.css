@@ -1125,7 +1125,8 @@ WHATSAPP LINK
 
 .business-partner-table-card .finova-table {
     width: 100%;
-    min-width: 1480px;
+    /* Total column widths = 1,564px; preserve space for all action buttons. */
+    min-width: 1564px;
     table-layout: fixed;
 }
 
@@ -1189,13 +1190,39 @@ WHATSAPP LINK
 }
 
 .business-partner-table-card .bp-col-action {
-    width: 100px;
-    min-width: 100px;
+    width: 150px !important;
+    min-width: 150px !important;
     white-space: nowrap;
+    text-align: center;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+}
+
+/* Apply the width to the body cells as well as the header. */
+.business-partner-table-card .finova-table-action {
+    width: 150px !important;
+    min-width: 150px !important;
+    white-space: nowrap;
+    text-align: center;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+}
+
+.business-partner-table-card .bp-action-group {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.business-partner-table-card .bp-action-btn {
+    flex: 0 0 32px;
 }
 
 @media (max-width: 768px) {
     .business-partner-table-card .finova-table {
-        min-width: 1480px;
+        min-width: 1564px;
     }
 }

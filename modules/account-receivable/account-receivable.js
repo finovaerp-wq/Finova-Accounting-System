@@ -19,6 +19,10 @@ import {
     supabase
 } from "../../assets/js/core/supabase.js";
 
+import {
+    CustomerConfig
+} from "../../assets/js/core/customer-config.js";
+
 
 import {
     AccountReceivableService
@@ -24418,702 +24422,237 @@ PRINT ACCOUNT RECEIVABLE INVOICE
 */
 
 async printInvoice(id) {
-
     try {
-
-        /*
-        ==================================================
-        VALIDATION
-        ==================================================
-        */
-
         if (!id) {
-
-            throw new Error(
-                "Account Receivable ID is required."
-            );
-
+            throw new Error("Account Receivable ID is required.");
         }
 
-
-        /*
-        ==================================================
-        LOAD DATA
-        ==================================================
-        */
-
-        const result =
-            await this.service.getById(
-                id
-            );
-
-
-        if (
-            !result
-            ||
-            !result.header
-        ) {
-
-            throw new Error(
-                "Account Receivable not found."
-            );
-
+        const result = await this.service.getById(id);
+        if (!result || !result.header) {
+            throw new Error("Account Receivable not found.");
         }
 
+        const header = result.header;
+        const details = Array.isArray(result.details) ? result.details : [];
 
-        const header =
-            result.header;
-
-
-        const details =
-            Array.isArray(
-                result.details
-            )
-                ? result.details
-                : [];
-
-
-        /*
-        ==================================================
-        CUSTOMER
-        ==================================================
-        */
-
-        const customerName =
-            header
-                .mst_business_partner
-                ?.bp_name
-            ||
-            "-";
-
-
-        /*
-        ==================================================
-        TOTALS
-        ==================================================
-        */
-
-        const subtotal =
-            details.reduce(
-                (
-                    total,
-                    item
-                ) =>
-                    total
-                    +
-                    Number(
-                        item.line_amount
-                        || 0
-                    ),
-                0
-            );
-
-
-        const taxPlus =
-            details.reduce(
-                (
-                    total,
-                    item
-                ) =>
-                    total
-                    +
-                    Number(
-                        item.tax_output_amount
-                        || 0
-                    ),
-                0
-            );
-
-
-        const taxMinus =
-            details.reduce(
-                (
-                    total,
-                    item
-                ) =>
-                    total
-                    +
-                    Number(
-                        item.withholding_tax_amount
-                        || 0
-                    ),
-                0
-            );
-
-
-        const totalReceivable =
-            subtotal
-            +
-            taxPlus
-            -
-            taxMinus;
-
-
-        /*
-        ==================================================
-        DETAIL ROWS
-        ==================================================
-        */
-
-        const detailRows =
-            details
-            .map(
-                (
-                    item,
-                    index
-                ) => {
-
-                    const accountCode =
-                        item
-                            .revenue_account
-                            ?.account_code
-                        || "";
-
-
-                    const accountName =
-                        item
-                            .revenue_account
-                            ?.account_name
-                        || "";
-
-
-                    return `
-
-                        <tr>
-
-                            <td class="center">
-                                ${index + 1}
-                            </td>
-
-
-                            <td>
-
-                                ${
-                                    accountCode
-                                        ? `${accountCode} - ${accountName}`
-                                        : accountName || "-"
-                                }
-
-                            </td>
-
-
-                            <td>
-
-                                ${item.description || "-"}
-
-                            </td>
-
-
-                            <td class="right">
-
-                                ${Number(
-                                    item.quantity
-                                    || 0
-                                ).toLocaleString(
-                                    "id-ID"
-                                )}
-
-                            </td>
-
-
-                            <td class="right">
-
-                                ${this.formatCurrency(
-                                    Number(
-                                        item.unit_price
-                                        || 0
-                                    )
-                                )}
-
-                            </td>
-
-
-                            <td class="right">
-
-                                ${this.formatCurrency(
-                                    Number(
-                                        item.line_amount
-                                        || 0
-                                    )
-                                )}
-
-                            </td>
-
-                        </tr>
-
-                    `;
-
-                }
-            )
-            .join("");
-
-
-        /*
-        ==================================================
-        OPEN WINDOW
-        ==================================================
-        */
-
-        const printWindow =
-            window.open(
-                "",
-                "_blank",
-                "width=1100,height=750"
-            );
-
-
-        if (!printWindow) {
-
-            throw new Error(
-                "Print window blocked by browser."
-            );
-
+        // Read the active company's branding and contact details from FINOVA settings.
+        let company = {
+            name: "",
+            legalName: "",
+            address: "",
+            phone: "",
+            email: "",
+            logoUrl: "",
+            primaryColor: "#0757B8"
+        };
+        try {
+            await CustomerConfig.initialize();
+            company = {
+                name: CustomerConfig.getCompanyName() || "",
+                legalName: CustomerConfig.getLegalName() || "",
+                address: CustomerConfig.getCompanyAddress() || "",
+                phone: CustomerConfig.getCompanyPhone() || "",
+                email: CustomerConfig.getCompanyEmail() || "",
+                logoUrl: CustomerConfig.getLogoUrl() || "",
+                primaryColor: CustomerConfig.getPrimaryColor() || "#0757B8"
+            };
+        } catch (configError) {
+            console.warn("AR print: company branding could not be loaded; using available company data.", configError);
         }
 
-
-        /*
-        ==================================================
-        DOCUMENT
-        ==================================================
-        */
-
-        printWindow.document.write(`
-
-            <!DOCTYPE html>
-
-            <html>
-
-            <head>
-
-                <meta charset="UTF-8">
-
-                <title>
-                    AR Invoice - ${header.invoice_no || ""}
-                </title>
-
-
-                <style>
-
-                    * {
-                        box-sizing: border-box;
-                    }
-
-
-                    body {
-
-                        margin: 0;
-
-                        padding: 30px;
-
-                        font-family:
-                            Arial,
-                            sans-serif;
-
-                        font-size: 12px;
-
-                        color: #111827;
-
-                    }
-
-
-                    h1 {
-
-                        margin: 0;
-
-                        text-align: center;
-
-                        font-size: 20px;
-
-                    }
-
-
-                    h2 {
-
-                        margin:
-                            4px
-                            0
-                            24px;
-
-                        text-align: center;
-
-                        font-size: 15px;
-
-                    }
-
-
-                    .info {
-
-                        width: 100%;
-
-                        margin-bottom: 20px;
-
-                        border-collapse: collapse;
-
-                    }
-
-
-                    .info td {
-
-                        padding: 4px 6px;
-
-                        vertical-align: top;
-
-                    }
-
-
-                    .label {
-
-                        width: 120px;
-
-                        font-weight: bold;
-
-                    }
-
-
-                    .detail {
-
-                        width: 100%;
-
-                        border-collapse: collapse;
-
-                    }
-
-
-                    .detail th,
-                    .detail td {
-
-                        padding: 8px;
-
-                        border: 1px solid #CBD5E1;
-
-                    }
-
-
-                    .detail th {
-
-                        background: #F8FAFC;
-
-                    }
-
-
-                    .center {
-
-                        text-align: center;
-
-                    }
-
-
-                    .right {
-
-                        text-align: right;
-
-                    }
-
-
-                    .summary {
-
-                        width: 340px;
-
-                        margin-top: 20px;
-
-                        margin-left: auto;
-
-                        border-collapse: collapse;
-
-                    }
-
-
-                    .summary td {
-
-                        padding: 6px 8px;
-
-                    }
-
-
-                    .summary-total td {
-
-                        padding-top: 10px;
-
-                        border-top: 1px solid #94A3B8;
-
-                        font-size: 14px;
-
-                        font-weight: bold;
-
-                    }
-
-
-                    @media print {
-
-                        body {
-                            padding: 0;
-                        }
-
-                    }
-
-                </style>
-
-            </head>
-
-
-            <body>
-
-
-                <h1>
-                    FINOVA ACCOUNTING SYSTEM
-                </h1>
-
-
-                <h2>
-                    ACCOUNT RECEIVABLE INVOICE
-                </h2>
-
-
-                <table class="info">
-
-
-                    <tr>
-
-                        <td class="label">
-                            Invoice No
-                        </td>
-
-                        <td>
-                            : ${header.invoice_no || "-"}
-                        </td>
-
-
-                        <td class="label">
-                            Invoice Date
-                        </td>
-
-                        <td>
-                            : ${header.invoice_date || "-"}
-                        </td>
-
-                    </tr>
-
-
-                    <tr>
-
-                        <td class="label">
-                            Customer
-                        </td>
-
-                        <td>
-                            : ${customerName}
-                        </td>
-
-
-                        <td class="label">
-                            Due Date
-                        </td>
-
-                        <td>
-                            : ${header.due_date || "-"}
-                        </td>
-
-                    </tr>
-
-
-                    <tr>
-
-                        <td class="label">
-                            PO No
-                        </td>
-
-                        <td>
-                            : ${header.po_no || "-"}
-                        </td>
-
-
-                        <td class="label">
-                            Status
-                        </td>
-
-                        <td>
-                            : ${header.status || "-"}
-                        </td>
-
-                    </tr>
-
-
-                    <tr>
-
-                        <td class="label">
-                            Description
-                        </td>
-
-                        <td colspan="3">
-                            : ${header.description || "-"}
-                        </td>
-
-                    </tr>
-
-
-                </table>
-
-
-                <table class="detail">
-
-
-                    <thead>
-
-                        <tr>
-
-                            <th style="width:45px">
-                                No
-                            </th>
-
-                            <th>
-                                Revenue Account
-                            </th>
-
-                            <th>
-                                Description
-                            </th>
-
-                            <th style="width:80px">
-                                Qty
-                            </th>
-
-                            <th style="width:130px">
-                                Unit Price
-                            </th>
-
-                            <th style="width:140px">
-                                Amount
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody>
-
-                        ${detailRows}
-
-                    </tbody>
-
-
-                </table>
-
-
-                <table class="summary">
-
-
-                    <tr>
-
-                        <td>
-                            Subtotal
-                        </td>
-
-                        <td class="right">
-
-                            ${this.formatCurrency(
-                                subtotal
-                            )}
-
-                        </td>
-
-                    </tr>
-
-
-                    <tr>
-
-                        <td>
-                            Tax (+)
-                        </td>
-
-                        <td class="right">
-
-                            ${this.formatCurrency(
-                                taxPlus
-                            )}
-
-                        </td>
-
-                    </tr>
-
-
-                    <tr>
-
-                        <td>
-                            Tax (-)
-                        </td>
-
-                        <td class="right">
-
-                            ${this.formatCurrency(
-                                taxMinus
-                            )}
-
-                        </td>
-
-                    </tr>
-
-
-                    <tr class="summary-total">
-
-                        <td>
-                            Total Receivable
-                        </td>
-
-                        <td class="right">
-
-                            ${this.formatCurrency(
-                                totalReceivable
-                            )}
-
-                        </td>
-
-                    </tr>
-
-
-                </table>
-
-
-                <script>
-
-                    window.onload = () => {
-
-                        window.focus();
-
-                        window.print();
-
-                    };
-
-                <\/script>
-
-
-            </body>
-
-            </html>
-
-        `);
-
-
+        const escapeHtml = value => String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+
+        const formatDate = value => {
+            if (!value) return "-";
+            const raw = String(value);
+            const date = new Date(`${raw.slice(0, 10)}T00:00:00`);
+            if (Number.isNaN(date.getTime())) return escapeHtml(raw);
+            return date.toLocaleDateString("en-GB", {
+                day: "2-digit", month: "short", year: "numeric"
+            });
+        };
+
+        const customer = header.mst_business_partner || {};
+        const customerName = customer.bp_name || "-";
+        const customerAddress = customer.address || customer.bp_address || customer.billing_address || "";
+        const customerPhone = customer.phone || customer.bp_phone || "";
+        const customerEmail = customer.email || customer.bp_email || "";
+
+        // Keep print amounts meaningful for legacy rows where line_amount/amount is zero or missing.
+        const normalizedDetails = details.map(item => {
+            const quantity = Number(item.quantity ?? item.qty ?? 0) || 0;
+            const unitPrice = Number(item.unit_price ?? item.price ?? 0) || 0;
+            let calculatedAmount = 0;
+            try {
+                const calculated = this.service.calculateDetailAmount(item);
+                calculatedAmount = Number(calculated?.line_amount) || 0;
+            } catch (_) {}
+            const storedAmount = Number(item.line_amount ?? item.amount ?? 0) || 0;
+            const amount = calculatedAmount > 0 ? calculatedAmount : (storedAmount > 0 ? storedAmount : quantity * unitPrice);
+            return { ...item, _printQuantity: quantity, _printUnitPrice: unitPrice, _printAmount: amount };
+        });
+
+        const subtotal = normalizedDetails.reduce((sum, item) => sum + item._printAmount, 0);
+        let totals = {};
+        try {
+            if (typeof this.service.calculateTotals === "function") totals = this.service.calculateTotals(details) || {};
+        } catch (_) {}
+        const headerTaxPlus = Number(header.tax_plus_amount ?? header.tax_output_amount ?? header.tax_amount ?? 0) || 0;
+        const headerTaxMinus = Number(header.tax_minus_amount ?? header.withholding_tax_amount ?? header.wht_amount ?? 0) || 0;
+        const detailTaxPlus = normalizedDetails.reduce((sum, item) => sum + (Number(item.tax_output_amount ?? item.tax_plus_amount ?? 0) || 0), 0);
+        const detailTaxMinus = normalizedDetails.reduce((sum, item) => sum + (Number(item.withholding_tax_amount ?? item.tax_minus_amount ?? item.wht_amount ?? 0) || 0), 0);
+        const taxPlus = headerTaxPlus || detailTaxPlus || (Number(totals.tax_output_amount) || 0);
+        const taxMinus = headerTaxMinus || detailTaxMinus || (Number(totals.withholding_tax_amount) || 0);
+        const totalReceivable = subtotal + taxPlus - taxMinus;
+
+        const detailRows = normalizedDetails.map((item, index) => `
+            <tr>
+                <td class="center number">${index + 1}</td>
+                <td class="description">${escapeHtml(item.description || item.revenue_account?.account_name || "-")}</td>
+                <td class="center number">${item._printQuantity.toLocaleString("id-ID")}</td>
+                <td class="money">${escapeHtml(this.formatCurrency(item._printUnitPrice))}</td>
+                <td class="money">${escapeHtml(this.formatCurrency(item._printAmount))}</td>
+            </tr>
+        `).join("");
+
+        const printWindow = window.open("", "_blank", "width=1100,height=800");
+        if (!printWindow) throw new Error("Print window blocked by browser.");
+
+        const companyName = company.legalName || company.name || "";
+        const companyContact = [company.address, company.phone, company.email].filter(Boolean);
+        const logoMarkup = company.logoUrl
+            ? `<img class="company-logo" src="${escapeHtml(company.logoUrl)}" alt="Company logo">`
+            : `<div class="logo-placeholder" aria-label="Company logo area"><span>LOGO</span></div>`;
+        const companyContactMarkup = companyContact.map(line => `<div>${escapeHtml(line)}</div>`).join("");
+        const accent = /^#[0-9a-fA-F]{6}$/.test(company.primaryColor) ? company.primaryColor : "#0757B8";
+
+        printWindow.document.write(`<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Invoice - ${escapeHtml(header.invoice_no || "")}</title>
+<style>
+:root{--brand:${accent};--navy:#102d52;--pale:#eef6ff;--line:#d5e2f1;--ink:#172b45;--muted:#5d7189}
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:var(--ink);font:12px/1.45 Arial,Helvetica,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.page{max-width:1100px;margin:0 auto;padding:30px 34px 28px;position:relative;overflow:hidden}
+.masthead{display:grid;grid-template-columns:105px minmax(0,1fr) auto;gap:18px;align-items:center;padding:0 0 20px;border-bottom:3px solid var(--brand);margin-bottom:22px}
+.company-logo{display:block;width:100px;height:82px;object-fit:contain;object-position:left center}
+.logo-placeholder{width:100px;height:82px;border:1.5px dashed #9ab8dd;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#7192b7;font-weight:bold;font-size:11px;background:linear-gradient(145deg,#f5faff,#e4f0ff)}
+.company-name{font-size:23px;font-weight:800;letter-spacing:.35px;color:var(--navy);margin-bottom:7px;overflow-wrap:anywhere}
+.company-contact{font-size:11px;line-height:1.55;color:var(--muted);overflow-wrap:anywhere}
+.invoice-title{font-size:34px;line-height:1;font-weight:800;letter-spacing:1.2px;color:var(--navy);text-align:right;white-space:nowrap}
+.invoice-title:after{content:"";display:block;width:65px;height:4px;background:var(--brand);margin:12px 0 0 auto;border-radius:4px}
+.info-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:18px;margin-bottom:20px;align-items:stretch}
+.panel{border:1px solid var(--line);border-radius:9px;overflow:hidden;background:linear-gradient(135deg,#fff 0%,#f4f8ff 100%);box-shadow:0 2px 7px rgba(20,64,112,.06)}
+.panel-heading{background:linear-gradient(100deg,var(--navy),var(--brand));color:#fff;padding:10px 14px;font-size:12px;font-weight:700;letter-spacing:.2px}
+.panel-body{padding:13px 15px;min-height:94px}
+.customer-name{font-size:15px;font-weight:800;color:var(--navy);margin-bottom:5px;overflow-wrap:anywhere}
+.customer-detail{color:#435b76;white-space:pre-line;overflow-wrap:anywhere}
+.meta{width:100%;border-collapse:collapse}
+.meta td{padding:3px 0;vertical-align:top}
+.meta td:first-child{width:110px;font-weight:700;color:#435b76}
+.meta td:nth-child(2){width:12px;color:#7890aa}
+.meta td:last-child{overflow-wrap:anywhere}
+.detail{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:14px}
+.detail th{background:var(--navy);color:#fff;font-weight:700;padding:10px 9px;text-align:center;border-right:1px solid rgba(255,255,255,.25)}
+.detail th:last-child{border-right:0}
+.detail td{padding:8px 9px;border-top:1px solid var(--line);border-right:1px solid var(--line);vertical-align:top}
+.detail td:last-child{border-right:0}
+.detail tbody tr:nth-child(even){background:#f1f6fc}
+.detail tbody tr:nth-child(odd){background:#fff}
+.center{text-align:center}.money{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}.description{overflow-wrap:anywhere}
+.bottom-grid{display:grid;grid-template-columns:1fr .82fr;gap:20px;align-items:start}
+.notes{border:1px solid var(--line);border-radius:8px;background:linear-gradient(135deg,#f4f9ff,#eaf3ff);padding:13px 15px;min-height:75px;color:#405873}
+.notes-title{font-weight:800;color:var(--navy);font-size:12px;margin-bottom:5px}.notes p{margin:0}
+.summary{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;font-variant-numeric:tabular-nums}
+.summary td{padding:8px 12px;border-bottom:1px solid var(--line)}.summary tr:last-child td{border-bottom:0}
+.summary td:first-child{font-weight:700;color:#405873}.summary td:last-child{text-align:right;white-space:nowrap}
+.summary tr:nth-child(odd){background:#f1f6fc}
+.summary .grand td{background:var(--brand);color:#fff;font-size:14px;font-weight:800;padding-top:11px;padding-bottom:11px}
+.payment{margin-top:14px;border:1px solid var(--line);border-radius:8px;padding:12px 15px;background:linear-gradient(135deg,#f7fbff,#e9f3ff)}
+.payment-title{font-weight:800;color:var(--navy);margin-bottom:5px}.payment-body{color:#405873;white-space:pre-line;overflow-wrap:anywhere}
+.signoff{text-align:right;margin:22px 10px 0 0;color:#435b76;min-height:72px}.sign-line{width:200px;margin:38px 0 0 auto;border-top:1px solid #7188a4;padding-top:5px;text-align:center}
+.footer-band{height:10px;margin:24px -34px -28px;background:linear-gradient(90deg,var(--navy),var(--brand),#9bcfff)}
+@page{size:A4;margin:10mm}
+@media print{body{background:#fff}.page{max-width:none;padding:0;overflow:visible}.panel,.notes,.payment{box-shadow:none}.footer-band{margin-left:0;margin-right:0;margin-bottom:0}.detail tr,.panel,.summary,.notes,.payment{break-inside:avoid}button{display:none}}
+@media screen and (max-width:700px){.page{padding:18px}.masthead{grid-template-columns:70px minmax(0,1fr);gap:12px}.company-logo,.logo-placeholder{width:68px;height:62px}.invoice-title{grid-column:1/-1;text-align:left;font-size:27px}.invoice-title:after{margin-left:0}.company-name{font-size:17px}.info-grid,.bottom-grid{grid-template-columns:1fr}.detail{font-size:10px}.detail th,.detail td{padding:6px 4px}}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="masthead">
+    ${logoMarkup}
+    <div>
+      <div class="company-name">${escapeHtml(companyName || "Company Name")}</div>
+      <div class="company-contact">${companyContactMarkup || ""}</div>
+    </div>
+    <div class="invoice-title">INVOICE</div>
+  </header>
+
+  <section class="info-grid">
+    <div class="panel">
+      <div class="panel-heading">Invoice To</div>
+      <div class="panel-body">
+        <div class="customer-name">${escapeHtml(customerName)}</div>
+        <div class="customer-detail">${escapeHtml(customerAddress)}${customerPhone ? `\n${escapeHtml(customerPhone)}` : ""}${customerEmail ? `\n${escapeHtml(customerEmail)}` : ""}</div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-heading">Invoice Information</div>
+      <div class="panel-body">
+        <table class="meta">
+          <tr><td>Invoice No</td><td>:</td><td>${escapeHtml(header.invoice_no || "-")}</td></tr>
+          <tr><td>Invoice Date</td><td>:</td><td>${formatDate(header.invoice_date)}</td></tr>
+          <tr><td>Due Date</td><td>:</td><td>${formatDate(header.due_date)}</td></tr>
+          <tr><td>PO No</td><td>:</td><td>${escapeHtml(header.po_no || "-")}</td></tr>
+          <tr><td>Status</td><td>:</td><td>${escapeHtml(header.status || "-")}</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <table class="detail">
+    <thead><tr><th style="width:48px">No</th><th>Description</th><th style="width:68px">Qty</th><th style="width:145px">Unit Price (IDR)</th><th style="width:155px">Amount (IDR)</th></tr></thead>
+    <tbody>${detailRows || '<tr><td colspan="5" class="center">No invoice details</td></tr>'}</tbody>
+  </table>
+
+  <section class="bottom-grid">
+    <div>
+      <div class="notes"><div class="notes-title">Notes</div><p>${escapeHtml(header.description || "Thank you for your business.")}</p></div>
+    </div>
+    <table class="summary">
+      <tr><td>Subtotal</td><td>${escapeHtml(this.formatCurrency(subtotal))}</td></tr>
+      <tr><td>Tax (+)</td><td>${escapeHtml(this.formatCurrency(taxPlus))}</td></tr>
+      <tr><td>Tax (-)</td><td>${escapeHtml(this.formatCurrency(taxMinus))}</td></tr>
+      <tr class="grand"><td>Total Receivable (IDR)</td><td>${escapeHtml(this.formatCurrency(totalReceivable))}</td></tr>
+    </table>
+  </section>
+  <div class="signoff">Date: ${formatDate(header.invoice_date)}<div class="sign-line">Authorized Signature</div></div>
+  <div class="footer-band"></div>
+</div>
+<script>
+window.addEventListener("load", () => {
+  const images = Array.from(document.images);
+  Promise.all(images.map(img => img.complete ? Promise.resolve() : new Promise(resolve => { img.onload = resolve; img.onerror = resolve; }))).then(() => {
+    window.focus();
+    setTimeout(() => window.print(), 150);
+  });
+});
+<\/script>
+</body>
+</html>`);
         printWindow.document.close();
-
+    } catch (error) {
+        console.error("AccountReceivable.printInvoice:", error);
+        this.showError(error.message || "Failed to print Account Receivable.");
     }
-
-    catch (error) {
-
-        console.error(
-            "AccountReceivable.printInvoice:",
-            error
-        );
-
-
-        this.showError(
-            error.message
-            ||
-            "Failed to print Account Receivable."
-        );
-
-    }
-
 }
     /*
     ======================================================
