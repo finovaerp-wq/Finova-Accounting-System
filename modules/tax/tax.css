@@ -800,3 +800,76 @@ textarea.form-control {
 
 }
 
+
+
+/* ==========================================================
+   TAX MASTER — ZOOM / RESPONSIVE TABLE FIX
+   Keep column widths stable when browser zoom reduces the
+   effective viewport. Horizontal scrolling stays inside the
+   table wrapper instead of squeezing all columns.
+========================================================== */
+.tax-table-card,
+.tax-table-card > .finova-card-body,
+.tax-table-card .finova-table-container {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.tax-table-card .finova-table-container > .table-responsive {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto !important;
+    overflow-y: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+.tax-table-card .finova-table {
+    width: 100%;
+    min-width: 1240px;
+    table-layout: auto;
+}
+
+.tax-table-card .finova-table thead th,
+.tax-table-card .finova-table tbody td {
+    box-sizing: border-box;
+    vertical-align: middle;
+}
+
+/* Keep short identifiers and numeric/status fields readable. */
+.tax-table-card .finova-table th:nth-child(1),
+.tax-table-card .finova-table td:nth-child(1) { min-width: 72px; width: 72px; }
+.tax-table-card .finova-table th:nth-child(2),
+.tax-table-card .finova-table td:nth-child(2) { min-width: 135px; }
+.tax-table-card .finova-table th:nth-child(3),
+.tax-table-card .finova-table td:nth-child(3) { min-width: 150px; }
+.tax-table-card .finova-table th:nth-child(4),
+.tax-table-card .finova-table td:nth-child(4) { min-width: 115px; }
+.tax-table-card .finova-table th:nth-child(5),
+.tax-table-card .finova-table td:nth-child(5) { min-width: 100px; white-space: nowrap; }
+.tax-table-card .finova-table th:nth-child(6),
+.tax-table-card .finova-table td:nth-child(6) { min-width: 170px; }
+.tax-table-card .finova-table th:nth-child(7),
+.tax-table-card .finova-table td:nth-child(7) { min-width: 170px; }
+.tax-table-card .finova-table th:nth-child(8),
+.tax-table-card .finova-table td:nth-child(8) { min-width: 125px; white-space: nowrap; }
+.tax-table-card .finova-table th:nth-child(9),
+.tax-table-card .finova-table td:nth-child(9) { min-width: 205px; white-space: nowrap; }
+
+/* Allow long account names to wrap naturally without collapsing
+   the other columns. */
+.tax-table-card .finova-table td:nth-child(3),
+.tax-table-card .finova-table td:nth-child(6),
+.tax-table-card .finova-table td:nth-child(7) {
+    overflow-wrap: anywhere;
+    word-break: normal;
+}
+
+.tax-table-card .finova-table td:nth-child(9) .tax-action-btn,
+.tax-table-card .finova-table td:nth-child(9) button {
+    flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+    .tax-table-card .finova-table { min-width: 1180px; }
+}

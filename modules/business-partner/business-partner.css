@@ -1109,3 +1109,93 @@ WHATSAPP LINK
 #bpBankAccountModal .ts-wrapper { width: 100%; }
 #bpBankAccountModal .ts-dropdown { z-index: 1085 !important; min-width: min(280px, 90vw); max-width: min(420px, 90vw); }
 #bpBankAccountModal .ts-dropdown .option { white-space: nowrap; }
+
+/* ==========================================================
+   BUSINESS PARTNER TABLE — ZOOM / RESPONSIVE ALIGNMENT FIX
+   Keep column widths stable when browser zoom changes.
+   Horizontal scrolling is preferred over squeezing columns.
+========================================================== */
+.business-partner-table-card .table-responsive {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto !important;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+.business-partner-table-card .finova-table {
+    width: 100%;
+    min-width: 1480px;
+    table-layout: fixed;
+}
+
+.business-partner-table-card .finova-table th,
+.business-partner-table-card .finova-table td {
+    box-sizing: border-box;
+    vertical-align: middle;
+}
+
+.business-partner-table-card .bp-col-no {
+    width: 64px;
+    min-width: 64px;
+}
+
+.business-partner-table-card .bp-col-code {
+    width: 160px;
+    min-width: 160px;
+}
+
+.business-partner-table-card .bp-col-name {
+    width: 230px;
+    min-width: 230px;
+    overflow-wrap: anywhere;
+    word-break: normal;
+}
+
+.business-partner-table-card .bp-col-type {
+    width: 180px;
+    min-width: 180px;
+    overflow-wrap: anywhere;
+    word-break: normal;
+}
+
+.business-partner-table-card .bp-col-phone,
+.business-partner-table-card .finova-table-phone {
+    width: 190px !important;
+    min-width: 190px !important;
+    white-space: nowrap;
+}
+
+.business-partner-table-card .bp-col-email,
+.business-partner-table-card .finova-table-email {
+    width: 280px !important;
+    min-width: 280px !important;
+    max-width: 280px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.business-partner-table-card .bp-col-tax {
+    width: 180px;
+    min-width: 180px;
+    overflow-wrap: anywhere;
+}
+
+.business-partner-table-card .bp-col-status {
+    width: 130px;
+    min-width: 130px;
+    white-space: nowrap;
+}
+
+.business-partner-table-card .bp-col-action {
+    width: 100px;
+    min-width: 100px;
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .business-partner-table-card .finova-table {
+        min-width: 1480px;
+    }
+}

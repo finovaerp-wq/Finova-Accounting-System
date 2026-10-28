@@ -4020,90 +4020,321 @@ td {
 }
 
 
-/* FIX 2026-10-24: compact AP modal when Invoice Details has no rows.
-   Remove inherited fixed/flex heights from every wrapper causing the blank area. */
-#accountPayableModal:has(#ap-detail-body > #ap-detail-empty) .modal-dialog,
-#accountPayableModal:has(#ap-detail-body > #ap-detail-empty) .modal-content,
-#accountPayableModal:has(#ap-detail-body > #ap-detail-empty) .modal-body,
-#accountPayableModal:has(#ap-detail-body > #ap-detail-empty) #ap-modal-tab-content,
-#accountPayableModal:has(#ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane,
-#accountPayableModal:has(#ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane > .p-4,
-#accountPayableModal:has(#ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane .finova-card,
-#accountPayableModal:has(#ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane .finova-card-body {
-  height: auto !important;
-  min-height: 0 !important;
-  max-height: none !important;
-}
-#accountPayableModal:has(#ap-detail-body > #ap-detail-empty) .modal-body,
-#accountPayableModal:has(#ap-detail-body > #ap-detail-empty) #ap-modal-tab-content,
-#accountPayableModal:has(#ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane,
-#accountPayableModal:has(#ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane > .p-4,
-#accountPayableModal:has(#ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane .finova-card,
-#accountPayableModal:has(#ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane .finova-card-body {
-  flex: 0 0 auto !important;
-  overflow: visible !important;
-}
-#accountPayableModal:has(#ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane .ap-invoice-detail-table-wrapper {
-  height: auto !important;
-  min-height: 0 !important;
-  max-height: none !important;
-  overflow: visible !important;
+/* ==========================================================
+   FINOVA AP — MATCH AR MODAL NATURAL HEIGHT / SPACING
+   The old AP detail-tab viewport sizing must not leak into
+   Header, Tax (+), Tax (-), or Accounting Preview tabs.
+========================================================== */
+#accountPayableModal.modal {
+    align-items: flex-start !important;
+    overflow-y: auto !important;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
 }
 
-/* Root-cause fix: the modal has explicit viewport-height/flex rules for the
-   detail tab. JS toggles this class based on the actual detail row count. */
-#accountPayableModal.ap-invoice-details-empty .modal-dialog,
-#accountPayableModal.ap-invoice-details-empty .modal-content {
-  height: auto !important;
-  min-height: 0 !important;
-  max-height: none !important;
-}
-#accountPayableModal.ap-invoice-details-empty .modal-content {
-  display: flex !important;
-  flex-direction: column !important;
-}
-#accountPayableModal.ap-invoice-details-empty > .modal-dialog > .modal-content > .modal-body {
-  display: block !important;
-  flex: 0 0 auto !important;
-  height: auto !important;
-  min-height: 0 !important;
-  max-height: none !important;
-  overflow: visible !important;
-}
-#accountPayableModal.ap-invoice-details-empty #ap-modal-tab-content,
-#accountPayableModal.ap-invoice-details-empty #ap-invoice-details-pane,
-#accountPayableModal.ap-invoice-details-empty #ap-invoice-details-pane.active,
-#accountPayableModal.ap-invoice-details-empty #ap-invoice-details-pane.active.show,
-#accountPayableModal.ap-invoice-details-empty #ap-invoice-details-pane > .p-4,
-#accountPayableModal.ap-invoice-details-empty #ap-invoice-details-pane.active > .p-4,
-#accountPayableModal.ap-invoice-details-empty #ap-invoice-details-pane .finova-card,
-#accountPayableModal.ap-invoice-details-empty #ap-invoice-details-pane .finova-card-body,
-#accountPayableModal.ap-invoice-details-empty #ap-invoice-details-pane .ap-invoice-detail-table-wrapper,
-#accountPayableModal.ap-invoice-details-empty #ap-invoice-details-pane .table-responsive {
-  display: block !important;
-  flex: 0 0 auto !important;
-  height: auto !important;
-  min-height: 0 !important;
-  max-height: none !important;
-  overflow: visible !important;
-}
-#accountPayableModal.ap-invoice-details-empty #ap-invoice-details-pane .ap-invoice-detail-table {
-  height: auto !important;
-  margin-bottom: 0 !important;
-}
-#accountPayableModal.ap-invoice-details-empty .ap-total-summary-footer,
-#accountPayableModal.ap-invoice-details-empty .modal-footer {
-  flex: 0 0 auto !important;
-}
-
-/* FIX 2026-10-27: align AP modal to the top of the viewport */
-#accountPayableModal.modal,
-#accountPayableModal {
-  align-items: flex-start !important;
-}
 #accountPayableModal > .modal-dialog,
 #accountPayableModal.modal .modal-dialog,
 #accountPayableModal .modal-dialog {
-  margin-top: 1rem !important;
-  margin-bottom: 1rem !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+/* Default AP dialog sizing follows the actual content, like AR. */
+#accountPayableModal > .modal-dialog > .modal-content,
+#accountPayableModal .modal-content {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+}
+
+#accountPayableModal .modal-header,
+#accountPayableModal .modal-footer {
+    position: relative !important;
+    flex: 0 0 auto !important;
+}
+
+/* On non-invoice tabs, remove the stretched flex area causing
+   the large white gap above Tax and Accounting Preview cards. */
+@supports selector(#accountPayableModal:has(#ap-tax-plus-pane.active)) {
+    #accountPayableModal:has(#ap-header-info-pane.active) > .modal-dialog,
+    #accountPayableModal:has(#ap-tax-plus-pane.active) > .modal-dialog,
+    #accountPayableModal:has(#ap-tax-minus-pane.active) > .modal-dialog,
+    #accountPayableModal:has(#ap-accounting-preview-pane.active) > .modal-dialog {
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+    }
+
+    #accountPayableModal:has(#ap-header-info-pane.active) > .modal-dialog > .modal-content,
+    #accountPayableModal:has(#ap-tax-plus-pane.active) > .modal-dialog > .modal-content,
+    #accountPayableModal:has(#ap-tax-minus-pane.active) > .modal-dialog > .modal-content,
+    #accountPayableModal:has(#ap-accounting-preview-pane.active) > .modal-dialog > .modal-content {
+        display: flex !important;
+        flex-direction: column !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+
+    #accountPayableModal:has(#ap-header-info-pane.active) > .modal-dialog > .modal-content > .modal-body,
+    #accountPayableModal:has(#ap-tax-plus-pane.active) > .modal-dialog > .modal-content > .modal-body,
+    #accountPayableModal:has(#ap-tax-minus-pane.active) > .modal-dialog > .modal-content > .modal-body,
+    #accountPayableModal:has(#ap-accounting-preview-pane.active) > .modal-dialog > .modal-content > .modal-body {
+        display: block !important;
+        flex: 0 0 auto !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+
+    #accountPayableModal:has(#ap-header-info-pane.active) #ap-modal-tab-content,
+    #accountPayableModal:has(#ap-tax-plus-pane.active) #ap-modal-tab-content,
+    #accountPayableModal:has(#ap-tax-minus-pane.active) #ap-modal-tab-content,
+    #accountPayableModal:has(#ap-accounting-preview-pane.active) #ap-modal-tab-content {
+        display: block !important;
+        flex: 0 0 auto !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+
+    #accountPayableModal:has(#ap-header-info-pane.active) #ap-header-info-pane,
+    #accountPayableModal:has(#ap-tax-plus-pane.active) #ap-tax-plus-pane,
+    #accountPayableModal:has(#ap-tax-minus-pane.active) #ap-tax-minus-pane,
+    #accountPayableModal:has(#ap-accounting-preview-pane.active) #ap-accounting-preview-pane {
+        position: relative !important;
+        inset: auto !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+    }
+
+    #accountPayableModal:has(#ap-header-info-pane.active) #ap-header-info-pane > .p-4,
+    #accountPayableModal:has(#ap-tax-plus-pane.active) #ap-tax-plus-pane > .p-4,
+    #accountPayableModal:has(#ap-tax-minus-pane.active) #ap-tax-minus-pane > .p-4,
+    #accountPayableModal:has(#ap-accounting-preview-pane.active) #ap-accounting-preview-pane > .p-4 {
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        margin: 0 !important;
+        padding: 20px !important;
+        overflow: visible !important;
+    }
+
+    #accountPayableModal:has(#ap-header-info-pane.active) .finova-card,
+    #accountPayableModal:has(#ap-tax-plus-pane.active) .finova-card,
+    #accountPayableModal:has(#ap-tax-minus-pane.active) .finova-card,
+    #accountPayableModal:has(#ap-accounting-preview-pane.active) .finova-card,
+    #accountPayableModal:has(#ap-header-info-pane.active) .finova-card-body,
+    #accountPayableModal:has(#ap-tax-plus-pane.active) .finova-card-body,
+    #accountPayableModal:has(#ap-tax-minus-pane.active) .finova-card-body,
+    #accountPayableModal:has(#ap-accounting-preview-pane.active) .finova-card-body {
+        flex: 0 0 auto !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        overflow: visible !important;
+    }
+}
+
+/* Preserve row scrolling when Invoice Details is selected. */
+
+
+/* ==========================================================
+   FINOVA MODAL ALIGNMENT PATCH — AP
+   Shared baseline with AR; preserve invoice-detail inner scroll.
+   ========================================================== */
+#accountPayableModal.modal {
+    align-items: flex-start !important;
+    overflow-y: auto !important;
+    padding: 8px 0 !important;
+}
+#accountPayableModal > .modal-dialog,
+#accountPayableModal.modal .modal-dialog {
+    width: calc(100% - 48px) !important;
+    max-width: 1140px !important;
+    margin: 0 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+}
+#accountPayableModal > .modal-dialog > .modal-content,
+#accountPayableModal .modal-content {
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - 16px) !important;
+    overflow: hidden !important;
+}
+#accountPayableModal > .modal-dialog > .modal-content > .modal-header,
+#accountPayableModal > .modal-dialog > .modal-content > .modal-footer {
+    flex: 0 0 auto !important;
+}
+/* Default/non-detail tabs scroll in the body only when needed. */
+#accountPayableModal > .modal-dialog > .modal-content > .modal-body {
+    min-height: 0 !important;
+    max-height: calc(100dvh - 120px) !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
+/* Invoice Details keeps its existing dedicated inner-scroll layout. */
+@supports selector(#accountPayableModal:has(#ap-invoice-details-pane.active)) {
+  #accountPayableModal:has(#ap-invoice-details-pane.active) > .modal-dialog > .modal-content > .modal-body {
+    overflow: hidden !important;
+    max-height: none !important;
+  }
+}
+
+
+/* FINOVA FIX 2026-10-28: compact AP Invoice Details when there are no rows.
+   The detail-tab flex/viewport layout must only constrain populated tables.
+   When the empty-state row is present, let the card and modal use natural height. */
+#accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) .modal-dialog,
+#accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) .modal-content,
+#accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) .modal-body,
+#accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) #ap-modal-tab-content,
+#accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane,
+#accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane > .p-4,
+#accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane .finova-card,
+#accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane .finova-card-body,
+#accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane .ap-invoice-detail-table-wrapper,
+#accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane .table-responsive {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+}
+#accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) .modal-content,
+#accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) .modal-body,
+#accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) #ap-modal-tab-content,
+#accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane,
+#accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane > .p-4,
+#accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane .finova-card,
+#accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane .finova-card-body,
+#accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane .ap-invoice-detail-table-wrapper,
+#accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane .table-responsive {
+    flex: 0 0 auto !important;
+    overflow: visible !important;
+}
+#accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) > .modal-dialog > .modal-content > .modal-body {
+    display: block !important;
+}
+#accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane .ap-invoice-detail-table {
+    height: auto !important;
+    margin-bottom: 0 !important;
+}
+
+
+/* FINOVA FIX 2026-10-28: AP empty Invoice Details should size to its content only while Invoice Details is active.
+   Scope the empty-state rules to the active pane so Tax (+), Tax (-), and Accounting Preview retain their own layout. */
+@supports selector(#accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty)) {
+  #accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) > .modal-dialog {
+    height: auto !important;
+    max-height: calc(100dvh - 16px) !important;
+    margin-top: 8px !important;
+    margin-bottom: 8px !important;
+  }
+  #accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) > .modal-dialog > .modal-content {
+    height: auto !important;
+    max-height: calc(100dvh - 16px) !important;
+    min-height: 0 !important;
+  }
+  #accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) > .modal-dialog > .modal-content > .modal-body {
+    display: block !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+  #accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) #ap-modal-tab-content,
+  #accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane,
+  #accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane > .p-4,
+  #accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane .finova-card,
+  #accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane .finova-card-body,
+  #accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) #ap-invoice-details-pane .ap-invoice-detail-table-wrapper {
+    display: block !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    flex: 0 0 auto !important;
+    overflow: visible !important;
+  }
+  #accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > #ap-detail-empty) #ap-detail-body > #ap-detail-empty > td {
+    height: auto !important;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+  }
+}
+
+
+/* ==========================================================
+   FINOVA AP/AR TAX (+) & TAX (-)
+   Wrap long invoice descriptions and scroll long tax lists.
+   Keep column headings visible while the tax rows scroll.
+========================================================== */
+
+/* Tax lists use an internal scrollbar, like Invoice Details. */
+#accountPayableModal #ap-tax-plus-pane .table-responsive,
+#accountPayableModal #ap-tax-minus-pane .table-responsive {
+    display: block !important;
+    width: 100% !important;
+    max-height: 290px !important;
+    min-height: 0 !important;
+    overflow: auto !important;
+    overscroll-behavior: contain;
+}
+
+#accountPayableModal #ap-tax-plus-pane .table-responsive thead th,
+#accountPayableModal #ap-tax-minus-pane .table-responsive thead th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 5 !important;
+    background: #f8fafc !important;
+}
+
+#accountPayableModal #ap-tax-plus-pane .table-responsive table,
+#accountPayableModal #ap-tax-minus-pane .table-responsive table {
+    width: 100% !important;
+    table-layout: fixed !important;
+    margin-bottom: 0 !important;
+}
+
+/* Description is allowed to wrap onto multiple lines instead of
+   running into the Tax Account column when the text is long. */
+#accountPayableModal #ap-tax-plus-pane .table-responsive th:nth-child(2),
+#accountPayableModal #ap-tax-plus-pane .table-responsive td:nth-child(2),
+#accountPayableModal #ap-tax-minus-pane .table-responsive th:nth-child(2),
+#accountPayableModal #ap-tax-minus-pane .table-responsive td:nth-child(2) {
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+    vertical-align: top !important;
+    line-height: 1.45;
+}
+
+#accountPayableModal #ap-tax-plus-pane .table-responsive td:not(:nth-child(2)),
+#accountPayableModal #ap-tax-minus-pane .table-responsive td:not(:nth-child(2)) {
+    vertical-align: top !important;
+}
+
+/* FINOVA FIX 2026-10-28: show an internal scrollbar from 5 tax rows onward. */
+#accountPayableModal #ap-tax-plus-pane .table-responsive,
+#accountPayableModal #ap-tax-minus-pane .table-responsive {
+    max-height: 160px !important;
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+}
+
+#accountPayableModal #ap-tax-plus-pane .table-responsive thead th,
+#accountPayableModal #ap-tax-minus-pane .table-responsive thead th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 5 !important;
+    background: #f8fafc !important;
 }

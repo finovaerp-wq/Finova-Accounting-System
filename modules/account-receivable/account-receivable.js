@@ -15192,6 +15192,8 @@ renderTaxPlus() {
                         */
 
                         const taxName =
+                            detail.description
+                            ||
                             detail.tax_plus_name
                             ||
                             taxMaster?.tax_name
@@ -15733,6 +15735,8 @@ renderTaxMinus() {
                         */
 
                         const taxName =
+                            detail.description
+                            ||
                             detail.tax_minus_name
                             ||
                             taxMaster?.tax_name

@@ -15651,9 +15651,6 @@ renderInvoiceDetails() {
         ? this.invoiceDetails
         : [];
 
-    const apModal = document.getElementById("accountPayableModal");
-    apModal?.classList.add("ap-invoice-details-empty");
-
     if (details.length === 0) {
         tableBody.innerHTML = `
             <tr id="ap-detail-empty">
@@ -15666,8 +15663,6 @@ renderInvoiceDetails() {
         this.updateInvoiceSummary();
         return;
     }
-
-    apModal?.classList.remove("ap-invoice-details-empty");
 
     // Tabel memiliki 7 kolom:
     // No, Account, Description, Qty, Unit Price, Amount, Action.
@@ -15917,11 +15912,9 @@ renderTaxPlus() {
 
 
                         const taxName =
-                            detail.tax_plus_name
+                            detail.description
                             ||
-                            taxMaster?.tax_name
-                            ||
-                            "Tax (+)";
+                            "-";
 
 
                         const taxAccountId =
@@ -16313,11 +16306,9 @@ renderTaxMinus() {
 
 
                         const taxName =
-                            detail.tax_minus_name
+                            detail.description
                             ||
-                            taxMaster?.tax_name
-                            ||
-                            "Tax (-)";
+                            "-";
 
 
                         const taxAccountId =
@@ -20503,19 +20494,11 @@ resetAddForm() {
     ) {
 
         this.apDetailBody.innerHTML = `
-
-            <tr>
-
-                <td
-                    colspan="9"
-                    class="text-center text-muted py-4">
-
+            <tr id="ap-detail-empty">
+                <td colspan="7" class="text-center text-muted py-2 ap-detail-empty-cell">
                     No detail added.
-
                 </td>
-
             </tr>
-
         `;
 
     }

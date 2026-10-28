@@ -6254,3 +6254,78 @@ td {
   margin-top: 1rem !important;
   margin-bottom: 1rem !important;
 }
+
+/* FINOVA FIX 2026-10-28: keep the complete AP/AR modal header visible at the top.
+   Remove the Bootstrap scrollable-dialog height cap that was clipping the top/header.
+   Long content scrolls inside the modal body instead of cutting off the modal header. */
+#accountReceivableModal.modal {
+    align-items: flex-start !important;
+    overflow-y: auto !important;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+}
+#accountReceivableModal > .modal-dialog,
+#accountReceivableModal.modal .modal-dialog,
+#accountReceivableModal .modal-dialog {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+}
+#accountReceivableModal > .modal-dialog > .modal-content,
+#accountReceivableModal .modal-content {
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+}
+#accountReceivableModal .modal-header {
+    position: relative !important;
+    flex: 0 0 auto !important;
+    overflow: visible !important;
+    z-index: 2 !important;
+}
+#accountReceivableModal .modal-body {
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+}
+#accountReceivableModal .modal-footer {
+    position: relative !important;
+    flex: 0 0 auto !important;
+}
+
+
+/* FINAL FIX 2026-10-28: keep the empty AR detail row visible after modal/tab layout.
+   Higher-specificity selectors override the active-tab wrapper's height:0/flex rules. */
+#accountReceivableModal.ar-invoice-details-empty:has(#ar-detail-body > #ar-detail-empty) #ar-invoice-details-pane .table-responsive,
+#accountReceivableModal.ar-invoice-details-empty:has(#ar-detail-body > #ar-detail-empty) #ar-invoice-details-pane .ar-invoice-detail-table-wrapper {
+    display: block !important;
+    position: relative !important;
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+}
+#accountReceivableModal.ar-invoice-details-empty:has(#ar-detail-body > #ar-detail-empty) #ar-invoice-details-pane .ar-invoice-detail-table {
+    display: table !important;
+    width: 100% !important;
+    height: auto !important;
+    visibility: visible !important;
+    margin-bottom: 0 !important;
+}
+#accountReceivableModal.ar-invoice-details-empty:has(#ar-detail-body > #ar-detail-empty) #ar-detail-body > #ar-detail-empty {
+    display: table-row !important;
+    visibility: visible !important;
+    height: auto !important;
+}
+#accountReceivableModal.ar-invoice-details-empty:has(#ar-detail-body > #ar-detail-empty) #ar-detail-body > #ar-detail-empty > td {
+    display: table-cell !important;
+    visibility: visible !important;
+    height: auto !important;
+    min-height: 48px !important;
+    padding: 1rem !important;
+    text-align: center !important;
+}
