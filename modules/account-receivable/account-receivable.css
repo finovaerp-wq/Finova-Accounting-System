@@ -6662,3 +6662,90 @@ td {
     background: #fff !important;
   }
 }
+
+
+/* ================================================================
+   FINOVA AR — ACCOUNTING PREVIEW FLOW FIX — 2026-11-03
+   Keep journal, balance status and receivable summary in document
+   flow. Only journal rows scroll after five entries.
+   ================================================================ */
+@supports selector(#accountReceivableModal:has(#ar-accounting-preview-pane.active)) {
+  #accountReceivableModal.modal:has(#ar-accounting-preview-pane.active) > .modal-dialog {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - 24px) !important;
+    margin: 12px auto !important;
+    overflow: visible !important;
+  }
+  #accountReceivableModal.modal:has(#ar-accounting-preview-pane.active) > .modal-dialog > .modal-content {
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - 24px) !important;
+    overflow: hidden !important;
+  }
+  #accountReceivableModal.modal:has(#ar-accounting-preview-pane.active) > .modal-dialog > .modal-content > .modal-body {
+    display: block !important;
+    flex: 0 1 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+  #accountReceivableModal.modal:has(#ar-accounting-preview-pane.active) #ar-modal-tab-content,
+  #accountReceivableModal.modal:has(#ar-accounting-preview-pane.active) #ar-accounting-preview-pane.active,
+  #accountReceivableModal.modal:has(#ar-accounting-preview-pane.active) #ar-accounting-preview-pane.active > .p-4,
+  #accountReceivableModal.modal:has(#ar-accounting-preview-pane.active) #ar-accounting-preview-pane .finova-card,
+  #accountReceivableModal.modal:has(#ar-accounting-preview-pane.active) #ar-accounting-preview-pane .finova-card-body {
+    position: static !important;
+    display: block !important;
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    transform: none !important;
+  }
+  #accountReceivableModal.modal:has(#ar-accounting-preview-pane.active) #ar-accounting-preview-pane .ar-accounting-preview-scroll {
+    position: relative !important;
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: 255px !important;
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+  }
+  #accountReceivableModal.modal:has(#ar-accounting-preview-pane.active) #ar-accounting-preview-pane .ar-accounting-preview-scroll + .row,
+  #accountReceivableModal.modal:has(#ar-accounting-preview-pane.active) #ar-accounting-preview-pane .row {
+    position: static !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin-top: 12px !important;
+    transform: none !important;
+  }
+  #accountReceivableModal.modal:has(#ar-accounting-preview-pane.active) #ar-accounting-preview-pane .alert,
+  #accountReceivableModal.modal:has(#ar-accounting-preview-pane.active) #ar-accounting-preview-pane [class*="balanced"] {
+    position: static !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin-top: 8px !important;
+    transform: none !important;
+  }
+  #accountReceivableModal.modal:has(#ar-accounting-preview-pane.active) #ar-modal-tab-content + .border-top,
+  #accountReceivableModal.modal:has(#ar-accounting-preview-pane.active) .ar-summary-section {
+    position: static !important;
+    clear: both !important;
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin-top: 0 !important;
+    transform: none !important;
+  }
+  #accountReceivableModal.modal:has(#ar-accounting-preview-pane.active) > .modal-dialog > .modal-content > .modal-footer {
+    flex: 0 0 auto !important;
+    position: relative !important;
+    margin-top: 0 !important;
+  }
+}
