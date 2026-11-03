@@ -108,7 +108,7 @@ export class AuditLog {
         }
         this.loading = true;
         const body = this.el('audit-rows');
-        if (!silent && body) body.innerHTML = '<tr><td colspan="8" class="audit-empty">Memuat Audit Log...</td></tr>';
+        if (!silent && body) body.innerHTML = '<tr><td colspan="7" class="audit-empty">Memuat Audit Log...</td></tr>';
         try {
             this.logs = await this.fetchLogs();
 
@@ -161,7 +161,7 @@ export class AuditLog {
             if (stamp) stamp.textContent = `Diperbarui ${new Date().toLocaleString("id-ID")}`;
         } catch (error) {
             console.error("FINOVA AUDIT LOG LOAD ERROR:", error);
-            if (body) body.innerHTML = `<tr><td colspan="8" class="audit-empty">Gagal memuat Audit Log: ${this.escape(error?.message || error)}. Periksa policy/RLS dan migrasi SQL Audit Log.</td></tr>`;
+            if (body) body.innerHTML = `<tr><td colspan="7" class="audit-empty">Gagal memuat Audit Log: ${this.escape(error?.message || error)}. Periksa policy/RLS dan migrasi SQL Audit Log.</td></tr>`;
             if (this.el("audit-count")) this.el("audit-count").textContent = "Gagal memuat data";
         } finally {
             this.loading = false;
@@ -216,6 +216,48 @@ export class AuditLog {
         this.renderRows();
     }
 
+    moduleLabel(row) {
+        const key = String(row.module || row.source_module || '').toLowerCase();
+        const table = String(row.table_name || '').toLowerCase();
+        if (key.includes('payable') || table.includes('payable')) return 'Account Payable';
+        if (key.includes('receivable') || table.includes('receivable')) return 'Account Receivable';
+        if (key.includes('journal') || table.includes('journal')) return 'GL Journal';
+        return String(row.module || row.source_module || 'Modul tidak dicatat').replace(/[_-]/g, ' ');
+    }
+
+    activityLabel(row) {
+        const action = String(row.action || '').toUpperCase();
+        const table = String(row.table_name || '').toLowerCase();
+        const detail = table.includes('detail') || String(row.module || '').toLowerCase().includes('detail');
+        const noun = detail ? 'detail' : 'data';
+        const labels = {INSERT: `Menambahkan ${noun}`, CREATE: `Menambahkan ${noun}`,
+            UPDATE: `Mengubah ${noun}`, DELETE: `Menghapus ${noun}`,
+            POST: 'Posting transaksi', VOID: 'Membatalkan transaksi',
+            REOPEN: 'Membuka kembali periode', CLOSE: 'Menutup periode'};
+        return labels[action] || (action ? `${action} ${noun}` : 'Aktivitas tercatat');
+    }
+
+    actionLabel(row) {
+        const action = String(row.action || '').toUpperCase();
+        return ({INSERT:'TAMBAH',CREATE:'TAMBAH',UPDATE:'EDIT',DELETE:'HAPUS',POST:'POST',VOID:'VOID'})[action] || action || 'LAINNYA';
+    }
+
+    changedFields(row) {
+        const before = row.old_data && typeof row.old_data === 'object' && !Array.isArray(row.old_data) ? row.old_data : {};
+        const after = row.new_data && typeof row.new_data === 'object' && !Array.isArray(row.new_data) ? row.new_data : {};
+        const ignored = new Set(['updated_at','created_at']);
+        return [...new Set([...Object.keys(before),...Object.keys(after)])]
+            .filter(k => !ignored.has(k) && JSON.stringify(before[k] ?? null) !== JSON.stringify(after[k] ?? null))
+            .map(k => ({name:k,before:before[k],after:after[k]}));
+    }
+
+    formatField(value) {
+        if (value == null || value === '') return '—';
+        if (typeof value === 'boolean') return value ? 'Ya' : 'Tidak';
+        if (typeof value === 'object') return JSON.stringify(value);
+        return String(value);
+    }
+
     renderRows() {
         const body = this.el("audit-rows");
         const total = this.filtered.length;
@@ -226,25 +268,24 @@ export class AuditLog {
 
         if (body) {
             body.innerHTML = visible.length ? visible.map((row, index) => {
-                const action = String(row.action || "UNKNOWN").toLowerCase();
-                const reason = row.remarks || row.new_data?.void_reason || row.old_data?.void_reason || "";
-                const user = this.userNames.get(row.user_uid) || row.user_uid || "Tidak diketahui";
-                const when = row.created_at ? new Date(row.created_at).toLocaleString("id-ID") : "—";
-                const target = [row.module, row.document_no || row.source_no, row.table_name, row.record_id].filter(Boolean).join(" / ") || "—";
-                const origin = [row.source_module, row.source_no || row.source_id].filter(Boolean).join(" / ") || "Database trigger / tidak dicatat";
-                // Existing audit table has no execution-status field. Do not infer success from a stored log.
-                const result = row.status ?? row.result ?? null;
+                const action = String(row.action || 'UNKNOWN').toLowerCase();
+                const user = this.userNames.get(row.user_uid) || row.user_uid || 'Tidak diketahui';
+                const when = row.created_at ? new Date(row.created_at).toLocaleString('id-ID', {dateStyle:'medium',timeStyle:'medium'}) : '—';
+                const doc = row.document_no || row.source_no || 'Nomor dokumen tidak dicatat';
+                const company = this.companyNames.get(row.company_id) || row.company_id || '—';
+                const changes = this.changedFields(row);
+                const summary = String(row.action || '').toUpperCase() === 'UPDATE'
+                    ? `${changes.length} field berubah` : this.activityLabel(row);
                 return `<tr>
                     <td class="audit-no">${start + index + 1}</td>
                     <td class="audit-time">${this.escape(when)}</td>
-                    <td class="audit-user">${this.escape(user)}<div class="text-muted">${this.escape(row.user_uid || "")}</div></td>
-                    <td><span class="audit-action-pill ${this.escape(action)}">${this.escape(row.action || "—")}</span></td>
-                    <td class="audit-target">${this.escape(target)}<div class="text-muted">Company: ${this.escape(this.companyNames.get(row.company_id) || row.company_id || "—")}</div></td>
-                    <td class="audit-source">${this.escape(origin)}</td>
-                    <td class="audit-result">${result == null ? '<span class="text-muted">Tidak dicatat</span>' : this.escape(result)}</td>
-                    <td><button type="button" class="btn btn-sm btn-outline-primary audit-detail-btn" data-audit-id="${this.escape(row.id)}">Lihat Perubahan</button></td>
+                    <td class="audit-user">${this.escape(user)}</td>
+                    <td>${this.escape(this.moduleLabel(row))}</td>
+                    <td class="audit-activity"><span class="audit-action-pill ${this.escape(action)}">${this.escape(this.actionLabel(row))}</span><div class="audit-activity-description">${this.escape(this.activityLabel(row))} · ${this.escape(summary)}</div></td>
+                    <td class="audit-document"><strong>${this.escape(doc)}</strong><div class="text-muted">${this.escape(company)}</div></td>
+                    <td><button type="button" class="btn btn-sm btn-outline-primary audit-detail-btn" data-audit-id="${this.escape(row.id)}">Lihat Detail</button></td>
                 </tr>`;
-            }).join("") : '<tr><td colspan="8" class="audit-empty">Tidak ada log yang sesuai filter.</td></tr>';
+            }).join('') : '<tr><td colspan="7" class="audit-empty">Tidak ada log yang sesuai filter.</td></tr>';
         }
         if (this.el("audit-count")) this.el("audit-count").textContent = `${total.toLocaleString("id-ID")} aktivitas ditemukan`;
         if (this.el("audit-page-info")) this.el("audit-page-info").textContent = `Halaman ${this.page} dari ${pages} · hingga ${this.maxRows.toLocaleString("id-ID")} log terbaru dimuat`;
@@ -266,27 +307,42 @@ export class AuditLog {
     showDetail(id) {
         const row = this.logs.find(item => item.id === id);
         if (!row) return;
-        const modal = this.el("audit-detail-modal");
-        const content = this.el("audit-detail-content");
+        const modal = this.el('audit-detail-modal');
+        const content = this.el('audit-detail-content');
         if (!modal || !content) return;
+        const doc = row.document_no || row.source_no || '—';
         const meta = [
-            ["Waktu", row.created_at ? new Date(row.created_at).toLocaleString("id-ID") : "—"],
-            ["Pengguna", this.userNames.get(row.user_uid) || row.user_uid || "—"],
-            ["Perusahaan", this.companyNames.get(row.company_id) || row.company_id || "—"],
-            ["Modul / tabel", `${row.module || "—"} / ${row.table_name || "—"}`],
-            ["Action", row.action || "—"],
-            ["Status / Result", row.status ?? row.result ?? "Tidak dicatat"],
-            ["Nomor dokumen", row.document_no || "—"],
-            ["Source", [row.source_module, row.source_no, row.source_id].filter(Boolean).join(" / ") || "—"],
-            ["Alasan / Remarks", row.remarks || row.new_data?.void_reason || row.old_data?.void_reason || "Tidak dicatat"]
+            ['Aktivitas', this.activityLabel(row)],
+            ['Waktu', row.created_at ? new Date(row.created_at).toLocaleString('id-ID') : '—'],
+            ['Pengguna', this.userNames.get(row.user_uid) || row.user_uid || '—'],
+            ['Perusahaan', this.companyNames.get(row.company_id) || row.company_id || '—'],
+            ['Modul', this.moduleLabel(row)],
+            ['Nomor dokumen', doc]
         ];
+        const changes = this.changedFields(row);
+        const action = String(row.action || '').toUpperCase();
+        const isUpdate = action === 'UPDATE';
+        const table = changes.length ? `<div class="audit-change-wrap"><table class="audit-change-table"><thead><tr><th>Field</th><th>Sebelum</th><th>Sesudah</th></tr></thead><tbody>${changes.map(f => `<tr><td>${this.escape(f.name.replace(/_/g,' '))}</td><td>${this.escape(this.formatField(f.before))}</td><td>${this.escape(this.formatField(f.after))}</td></tr>`).join('')}</tbody></table></div>`
+            : '<p class="text-muted">Tidak ada perbedaan field yang tersedia dalam catatan ini.</p>';
         const pretty = value => this.escape(JSON.stringify(value ?? null, null, 2));
+        const technical = [
+            ['Audit ID',row.id],['User UID',row.user_uid],['Company ID',row.company_id],
+            ['Nama tabel',row.table_name],['Record ID',row.record_id],
+            ['Action database',row.action],['Source module',row.source_module],
+            ['Source ID',row.source_id],['Source no',row.source_no],['Remarks',row.remarks]
+        ];
         content.innerHTML = `
-            <div class="audit-detail-meta">${meta.map(([label, value]) => `<div><strong>${this.escape(label)}</strong>${this.escape(value)}</div>`).join("")}</div>
-            <div class="audit-detail-grid">
-                <div class="audit-detail-block"><h3>Data Sebelum (old_data)</h3><pre>${pretty(row.old_data)}</pre></div>
-                <div class="audit-detail-block"><h3>Data Sesudah (new_data)</h3><pre>${pretty(row.new_data)}</pre></div>
-            </div>`;
+            <div class="audit-detail-meta">${meta.map(([label,value]) => `<div><strong>${this.escape(label)}</strong>${this.escape(value)}</div>`).join('')}</div>
+            <h3 class="audit-change-title">${isUpdate ? 'Field yang berubah' : 'Data yang tercatat'}</h3>
+            ${table}
+            <p class="audit-detail-hint">Ini adalah satu catatan perubahan database. Beberapa catatan belum tentu berasal dari satu kali Save karena belum ada ID aktivitas bersama.</p>
+            <details class="audit-technical"><summary>Detail teknis dan data mentah (untuk tracing)</summary>
+                <div class="audit-detail-meta">${technical.map(([label,value]) => `<div><strong>${this.escape(label)}</strong>${this.escape(value || '—')}</div>`).join('')}</div>
+                <div class="audit-detail-grid">
+                    <div class="audit-detail-block"><h3>Data Sebelum (old_data)</h3><pre>${pretty(row.old_data)}</pre></div>
+                    <div class="audit-detail-block"><h3>Data Sesudah (new_data)</h3><pre>${pretty(row.new_data)}</pre></div>
+                </div>
+            </details>`;
         modal.hidden = false;
     }
 

@@ -11345,7 +11345,7 @@ CONFIRM DELETE DETAIL
 
 const btnConfirmDelete =
     document.getElementById(
-        "btn-confirm-ap-delete"
+        "btn-confirm-ap-delete-detail"
     );
 
 
@@ -21909,6 +21909,7 @@ async saveEdit() {
 
 
                     return {
+                        id: item.id || null,
 
                         /*
                         ======================================

@@ -3557,261 +3557,54 @@ async update(
 
         /*
         ==================================================
-        UPDATE HEADER
+        ATOMIC, INCREMENTAL AP UPDATE
+        Database function performs header/detail changes
+        in one transaction, retaining unchanged detail IDs.
         ==================================================
         */
-
-        const {
-
-            data: invoice,
-
-            error: invoiceError
-
-        } = await supabase
-
-            .from(
-                this.table
-            )
-
-            .update({
-
-                vendor_id:
-                    header.vendor_id,
-
-                po_no:
-                    header.po_no || null,
-
-                invoice_no:
-                    header.invoice_no,
-
-                invoice_date:
-                    header.invoice_date,
-
-                date_received:
-                    header.date_received,
-
-                due_date:
-                    header.due_date || null,
-
-                description:
-                    header.description || null,
-
-                dpp_amount:
-                    Number(totals.subtotal || 0),
-
-                tax_input_amount:
-                    Number(totals.tax_input_amount || 0),
-
-                withholding_tax_amount:
-                    Number(totals.withholding_tax_amount || 0),
-
-                total_amount:
-                    Number(totals.total_amount || 0),
-
-                status:
-                    header.status || this.STATUS.DRAFT,
-
-                gl_journal_id:
-                    header.gl_journal_id || null
-
-            })
-
-            .eq(
-                "id",
-                id
-            )
-
-            .select()
-
-            .single();
-
-
-        if (invoiceError) {
-
-            throw invoiceError;
-
+        const detailRows = calculatedDetails.map((detail, index) => ({
+            id: detail.id || null,
+            line_no: index + 1,
+            description: detail.description || null,
+            account_id: Number(detail.account_id ?? detail.charge_account_id ?? 0),
+            quantity: Number(detail.quantity ?? 1),
+            unit_price: Number(detail.unit_price ?? 0),
+            amount: Number(detail.amount ?? detail.line_amount ?? 0),
+            credit_account_id: detail.credit_account_id || null,
+            tax_id: detail.tax_id || null,
+            tax_plus_id: detail.tax_plus_id || null,
+            tax_plus_account_id: detail.tax_plus_account_id || null,
+            tax_input_rate: Number(detail.tax_input_rate ?? 0),
+            tax_input_amount: Number(detail.tax_input_amount ?? detail.taxInputAmount ?? 0),
+            tax_minus_id: detail.tax_minus_id || null,
+            tax_minus_account_id: detail.tax_minus_account_id || null,
+            withholding_tax_rate: Number(detail.withholding_tax_rate ?? 0),
+            withholding_tax_amount: Number(detail.withholding_tax_amount ?? detail.withholdingTaxAmount ?? 0),
+            total_amount: Number(detail.total_amount ?? detail.totalAmount ?? 0)
+        }));
+        if (!detailRows.length || detailRows.some(row => !Number.isInteger(row.account_id) || row.account_id <= 0)) {
+            throw new Error("Invoice Detail tidak valid atau kosong.");
         }
-
-
-        /*
-        ==================================================
-        PREPARE + VALIDATE NEW DETAILS BEFORE DELETE
-        ==================================================
-        */
-
-        const detailRows =
-            calculatedDetails.map(
-                (detail, index) => ({
-                    company_id:
-                        existingInvoice.company_id,
-                    account_payable_id:
-                        id,
-                    line_no:
-                        index + 1,
-                    description:
-                        detail.description || null,
-                    account_id:
-                        Number(
-                            detail.account_id
-                            ?? detail.charge_account_id
-                            ?? 0
-                        ),
-                    quantity:
-                        Number(detail.quantity ?? 1),
-                    unit_price:
-                        Number(detail.unit_price ?? 0),
-                    amount:
-                        Number(
-                            detail.amount
-                            ?? detail.line_amount
-                            ?? (Number(detail.quantity ?? 1) * Number(detail.unit_price ?? 0))
-                        ),
-                    credit_account_id:
-                        detail.credit_account_id != null && detail.credit_account_id !== ""
-                            ? Number(detail.credit_account_id)
-                            : null,
-                    tax_id:
-                        detail.tax_id != null && detail.tax_id !== ""
-                            ? Number(detail.tax_id)
-                            : null,
-                    tax_plus_id:
-                        detail.tax_plus_id != null && detail.tax_plus_id !== ""
-                            ? Number(detail.tax_plus_id)
-                            : null,
-                    tax_plus_account_id:
-                        detail.tax_plus_account_id != null && detail.tax_plus_account_id !== ""
-                            ? Number(detail.tax_plus_account_id)
-                            : null,
-                    tax_input_rate:
-                        Number(detail.tax_input_rate ?? 0),
-                    tax_input_amount:
-                        Number(detail.tax_input_amount ?? detail.taxInputAmount ?? 0),
-                    tax_minus_id:
-                        detail.tax_minus_id != null && detail.tax_minus_id !== ""
-                            ? Number(detail.tax_minus_id)
-                            : null,
-                    tax_minus_account_id:
-                        detail.tax_minus_account_id != null && detail.tax_minus_account_id !== ""
-                            ? Number(detail.tax_minus_account_id)
-                            : null,
-                    withholding_tax_rate:
-                        Number(detail.withholding_tax_rate ?? 0),
-                    withholding_tax_amount:
-                        Number(detail.withholding_tax_amount ?? detail.withholdingTaxAmount ?? 0),
-                    total_amount:
-                        Number(
-                            detail.total_amount
-                            ?? detail.totalAmount
-                            ?? (Number(detail.amount ?? detail.line_amount ?? (Number(detail.quantity ?? 1) * Number(detail.unit_price ?? 0)))
-                                + Number(detail.tax_input_amount ?? detail.taxInputAmount ?? 0)
-                                - Number(detail.withholding_tax_amount ?? detail.withholdingTaxAmount ?? 0))
-                        )
-                })
-            );
-
-        if (!detailRows.length) {
-            throw new Error(
-                "Invoice Detail tidak boleh kosong. Detail lama dipertahankan."
-            );
-        }
-
-        const invalidDetail = detailRows.find(
-            row =>
-                !Number.isInteger(row.account_id)
-                || row.account_id <= 0
-                || !Number.isFinite(row.amount)
-                || row.amount < 0
-        );
-
-        if (invalidDetail) {
-            throw new Error(
-                "Invoice Detail tidak valid (COA atau Amount). Detail lama tidak dihapus."
-            );
-        }
-
-        /*
-        ==================================================
-        BACKUP OLD DETAILS
-        Restore them if replacement insert fails.
-        ==================================================
-        */
-
-        const previousDetails =
-            Array.isArray(existingResult?.details)
-                ? existingResult.details.map(detail => ({
-                    id: detail.id,
-                    company_id: detail.company_id || existingInvoice.company_id,
-                    account_payable_id: id,
-                    line_no: detail.line_no,
-                    description: detail.description ?? null,
-                    account_id: Number(detail.account_id ?? detail.charge_account_id ?? 0),
-                    quantity: Number(detail.quantity ?? 1),
-                    unit_price: Number(detail.unit_price ?? 0),
-                    amount: Number(detail.amount ?? detail.line_amount ?? 0),
-                    tax_id: detail.tax_id ?? null
-                }))
-                : [];
-
-        /*
-        ==================================================
-        DELETE OLD DETAILS
-        ==================================================
-        */
-
-        const { error: deleteError } = await supabase
-            .from(this.detailTable)
-            .delete()
-            .eq("account_payable_id", id);
-
-        if (deleteError) {
-            throw deleteError;
-        }
-
-        /*
-        ==================================================
-        INSERT NEW DETAILS
-        ==================================================
-        */
-
-        const { error: insertError } = await supabase
-            .from(this.detailTable)
-            .insert(detailRows);
-
-        if (insertError) {
-            console.error(
-                "AP UPDATE DETAIL INSERT ERROR; attempting detail restoration:",
-                insertError
-            );
-
-            const { error: cleanupError } = await supabase
-                .from(this.detailTable)
-                .delete()
-                .eq("account_payable_id", id);
-
-            if (cleanupError) {
-                console.error("AP DETAIL RESTORE CLEANUP ERROR:", cleanupError);
-            }
-
-            if (previousDetails.length) {
-                const { error: restoreError } = await supabase
-                    .from(this.detailTable)
-                    .insert(previousDetails);
-
-                if (restoreError) {
-                    console.error("AP DETAIL RESTORE FAILED:", restoreError);
-                    throw new Error(
-                        `Update detail gagal (${insertError.message}) dan pemulihan detail lama juga gagal (${restoreError.message}).`
-                    );
-                }
-
-                console.warn(
-                    `AP detail insert failed; restored ${previousDetails.length} previous detail row(s).`
-                );
-            }
-
-            throw insertError;
-        }
-
+        const { error: atomicError } = await supabase.rpc("finova_update_ap_incremental", {
+            p_ap_id: id,
+            p_header: {
+                vendor_id: header.vendor_id,
+                po_no: header.po_no || null,
+                invoice_no: header.invoice_no,
+                invoice_date: header.invoice_date,
+                date_received: header.date_received,
+                due_date: header.due_date || null,
+                description: header.description || null,
+                dpp_amount: Number(totals.subtotal || 0),
+                tax_input_amount: Number(totals.tax_input_amount || 0),
+                withholding_tax_amount: Number(totals.withholding_tax_amount || 0),
+                total_amount: Number(totals.total_amount || 0),
+                status: header.status || this.STATUS.DRAFT,
+                gl_journal_id: header.gl_journal_id || null
+            },
+            p_details: detailRows
+        });
+        if (atomicError) throw atomicError;
 
         /*
         ==================================================

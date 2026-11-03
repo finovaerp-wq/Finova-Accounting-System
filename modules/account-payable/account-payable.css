@@ -4338,3 +4338,217 @@ td {
     z-index: 5 !important;
     background: #f8fafc !important;
 }
+
+/* FINOVA AP - safe correction: stable outer modal without hiding tab contents.
+   Replaces the previous fixed-height/height:0 patch. */
+#accountPayableModal.modal > .modal-dialog {
+    height: auto !important;
+    max-height: calc(100dvh - 16px) !important;
+}
+#accountPayableModal.modal > .modal-dialog > .modal-content {
+    height: auto !important;
+    min-height: min(650px, calc(100dvh - 16px)) !important;
+    max-height: calc(100dvh - 16px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+}
+#accountPayableModal.modal > .modal-dialog > .modal-content > .modal-body {
+    display: block !important;
+    flex: 1 1 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
+#accountPayableModal.modal #ap-modal-tab-content {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+}
+#accountPayableModal.modal .ap-modern-tabs-wrapper {
+    display: block !important;
+    height: auto !important;
+    flex: none !important;
+}
+#accountPayableModal.modal > .modal-dialog > .modal-content > .modal-footer {
+    flex: 0 0 auto !important;
+}
+/* Preserve the existing Invoice Details table scrollbar. */
+#accountPayableModal.modal #ap-invoice-details-pane .ap-invoice-detail-table-wrapper {
+    max-height: min(340px, 40dvh) !important;
+    overflow-y: auto !important;
+}
+@media (max-height: 550px) {
+    #accountPayableModal.modal > .modal-dialog > .modal-content {
+        min-height: 0 !important;
+    }
+}
+
+
+/* ================================================================
+   FINOVA AP — CONTENT-SIZED INVOICE DETAILS (2026-11-03)
+   The summary follows the actual transaction rows; at five rows,
+   scroll inside the table instead of growing the modal indefinitely.
+   Only applies to the active Invoice Details tab.
+   ================================================================ */
+@supports selector(#accountPayableModal:has(#ap-invoice-details-pane.active)) {
+  #accountPayableModal:has(#ap-invoice-details-pane.active) > .modal-dialog > .modal-content {
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: calc(100dvh - 16px) !important;
+  }
+  #accountPayableModal:has(#ap-invoice-details-pane.active) > .modal-dialog > .modal-content > .modal-body {
+    display: block !important;
+    flex: 0 1 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - 135px) !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+  #accountPayableModal:has(#ap-invoice-details-pane.active) #ap-modal-tab-content,
+  #accountPayableModal:has(#ap-invoice-details-pane.active) #ap-invoice-details-pane,
+  #accountPayableModal:has(#ap-invoice-details-pane.active) #ap-invoice-details-pane > .p-4,
+  #accountPayableModal:has(#ap-invoice-details-pane.active) #ap-invoice-details-pane .finova-card,
+  #accountPayableModal:has(#ap-invoice-details-pane.active) #ap-invoice-details-pane .finova-card-body {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    flex: 0 0 auto !important;
+  }
+  #accountPayableModal:has(#ap-invoice-details-pane.active) #ap-modal-tab-content {
+    display: block !important;
+    overflow: visible !important;
+  }
+  #accountPayableModal:has(#ap-invoice-details-pane.active) #ap-invoice-details-pane .ap-invoice-detail-table-wrapper {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    flex: 0 0 auto !important;
+  }
+  /* Five real detail rows trigger the inner scrollbar (not the empty-state row). */
+  #accountPayableModal:has(#ap-invoice-details-pane.active #ap-detail-body > tr:nth-child(5):not(#ap-detail-empty))
+    #ap-invoice-details-pane .ap-invoice-detail-table-wrapper {
+    max-height: clamp(180px, 34dvh, 310px) !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+  }
+  #accountPayableModal:has(#ap-invoice-details-pane.active) #ap-invoice-details-pane .ap-invoice-detail-table thead th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 3 !important;
+    background: #f8fafc !important;
+  }
+  #accountPayableModal:has(#ap-invoice-details-pane.active) .ap-total-summary-footer {
+    position: static !important;
+    inset: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin-top: 0 !important;
+    flex: 0 0 auto !important;
+    box-shadow: none !important;
+  }
+}
+
+
+/* ================================================================
+   FINOVA AP - CONSISTENT MODAL SIZE ACROSS ALL FIVE TABS
+   2026-11-03. Keep the outer dialog fixed; let only body scroll.
+   Preserve the 5-row inner scrollbar and the existing summary.
+   ================================================================ */
+#accountPayableModal.modal > .modal-dialog {
+    width: min(1120px, calc(100vw - 24px)) !important;
+    max-width: min(1120px, calc(100vw - 24px)) !important;
+    height: min(730px, calc(100dvh - 24px)) !important;
+    max-height: calc(100dvh - 24px) !important;
+    margin: 12px auto !important;
+}
+#accountPayableModal.modal > .modal-dialog > .modal-content,
+#accountPayableModal.modal:has(#ap-invoice-details-pane.active) > .modal-dialog > .modal-content {
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+}
+#accountPayableModal.modal > .modal-dialog > .modal-content > .modal-header {
+    flex: 0 0 auto !important;
+}
+#accountPayableModal.modal > .modal-dialog > .modal-content > .modal-body,
+#accountPayableModal.modal:has(#ap-invoice-details-pane.active) > .modal-dialog > .modal-content > .modal-body {
+    flex: 1 1 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
+#accountPayableModal.modal > .modal-dialog > .modal-content > .modal-footer {
+    flex: 0 0 auto !important;
+}
+@media (max-height: 550px) {
+    #accountPayableModal.modal > .modal-dialog {
+        height: calc(100dvh - 12px) !important;
+        margin: 6px auto !important;
+    }
+}
+
+/* FINOVA AP — keep Save/Cancel within comfortable reach at browser zoom.
+   All five tabs retain one consistent modal height; detail table scrolls after 5 rows. */
+#accountPayableModal.modal > .modal-dialog {
+  height: min(660px, calc(100dvh - 32px)) !important;
+  max-height: calc(100dvh - 32px) !important;
+  margin: 16px auto !important;
+}
+#accountPayableModal.modal > .modal-dialog > .modal-content {
+  height: 100% !important;
+  max-height: 100% !important;
+}
+#accountPayableModal.modal > .modal-dialog > .modal-content > .modal-footer {
+  flex-shrink: 0 !important;
+  position: relative !important;
+  z-index: 5 !important;
+}
+@media (max-height: 550px) {
+  #accountPayableModal.modal > .modal-dialog {
+    height: calc(100dvh - 12px) !important;
+    margin: 6px auto !important;
+  }
+}
+
+
+/* FINOVA AP — Invoice Details: keep Save directly after the Summary.
+   Override the previous forced 660px dialog height only on this tab. */
+@supports selector(#accountPayableModal:has(#ap-invoice-details-pane.active)) {
+  #accountPayableModal.modal:has(#ap-invoice-details-pane.active) > .modal-dialog {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - 24px) !important;
+    margin: 12px auto !important;
+  }
+  #accountPayableModal.modal:has(#ap-invoice-details-pane.active) > .modal-dialog > .modal-content {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - 24px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  #accountPayableModal.modal:has(#ap-invoice-details-pane.active) > .modal-dialog > .modal-content > .modal-body {
+    flex: 0 1 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - 145px) !important;
+    overflow-y: auto !important;
+  }
+  #accountPayableModal.modal:has(#ap-invoice-details-pane.active) > .modal-dialog > .modal-content > .modal-footer {
+    flex: 0 0 auto !important;
+    margin-top: 0 !important;
+  }
+}

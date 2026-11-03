@@ -2,7 +2,7 @@
   <div class="finova-page-header audit-log-header">
     <div class="finova-page-header-left">
       <h1 class="finova-page-title">Audit Log</h1>
-      <p class="finova-page-subtitle">FINOVA Admin / Jejak aktivitas pengguna lintas modul dan perusahaan</p>
+      <p class="finova-page-subtitle">FINOVA Admin / Riwayat perubahan transaksi dan aktivitas pengguna</p>
     </div>
     <div class="audit-log-actions">
       <button type="button" class="btn btn-outline-secondary" id="audit-refresh"><i class="fa-solid fa-rotate"></i> Refresh</button>
@@ -22,8 +22,8 @@
       <label>Pengguna<select id="audit-user"><option value="">Semua pengguna</option></select></label>
 <label>Modul<select id="audit-module"><option value="">Semua modul</option></select></label>
       <label>Action<select id="audit-action"><option value="">Semua action</option></select></label>
-      <label class="audit-search-label">Cari dokumen / tabel / alasan
-        <input type="search" id="audit-search" placeholder="Nomor dokumen, tabel, record ID, alasan Void...">
+      <label class="audit-search-label">Cari dokumen / record ID / pengguna
+        <input type="search" id="audit-search" placeholder="Nomor dokumen, record ID, atau pengguna...">
       </label>
       <div class="audit-filter-buttons">
         <button type="button" class="btn btn-primary" id="audit-apply"><i class="fa-solid fa-filter"></i> Terapkan</button>
@@ -44,11 +44,11 @@
       <table class="table audit-table">
         <thead>
           <tr>
-            <th class="audit-no">No.</th><th>Timestamp</th><th>Actor / User</th><th>Action</th><th>Target / Resource</th><th>Source / Origin</th><th>Status / Result</th><th>Before / After Value</th>
+            <th class="audit-no">No.</th><th>Waktu</th><th>Pengguna</th><th>Modul</th><th>Aktivitas</th><th>Dokumen</th><th>Detail</th>
           </tr>
         </thead>
         <tbody id="audit-rows">
-          <tr><td colspan="8" class="audit-empty">Memuat Audit Log...</td></tr>
+          <tr><td colspan="7" class="audit-empty">Memuat Audit Log...</td></tr>
         </tbody>
       </table>
     </div>

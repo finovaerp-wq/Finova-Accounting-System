@@ -6329,3 +6329,336 @@ td {
     padding: 1rem !important;
     text-align: center !important;
 }
+
+
+/* ================================================================
+   FINOVA AR - CONSISTENT MODAL SIZE ACROSS ALL FIVE TABS
+   2026-11-03. Keep the outer dialog fixed; let only body scroll.
+   Preserve the 5-row inner scrollbar and the existing summary.
+   ================================================================ */
+#accountReceivableModal.modal > .modal-dialog {
+    width: min(1120px, calc(100vw - 24px)) !important;
+    max-width: min(1120px, calc(100vw - 24px)) !important;
+    height: min(730px, calc(100dvh - 24px)) !important;
+    max-height: calc(100dvh - 24px) !important;
+    margin: 12px auto !important;
+}
+#accountReceivableModal.modal > .modal-dialog > .modal-content,
+#accountReceivableModal.modal:has(#ar-invoice-details-pane.active) > .modal-dialog > .modal-content {
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+}
+#accountReceivableModal.modal > .modal-dialog > .modal-content > .modal-header {
+    flex: 0 0 auto !important;
+}
+#accountReceivableModal.modal > .modal-dialog > .modal-content > .modal-body,
+#accountReceivableModal.modal:has(#ar-invoice-details-pane.active) > .modal-dialog > .modal-content > .modal-body {
+    flex: 1 1 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
+#accountReceivableModal.modal > .modal-dialog > .modal-content > .modal-footer {
+    flex: 0 0 auto !important;
+}
+@media (max-height: 550px) {
+    #accountReceivableModal.modal > .modal-dialog {
+        height: calc(100dvh - 12px) !important;
+        margin: 6px auto !important;
+    }
+}
+
+/* FINOVA AR — keep Save/Cancel within comfortable reach at browser zoom.
+   All five tabs retain one consistent modal height; detail table scrolls after 5 rows. */
+#accountReceivableModal.modal > .modal-dialog {
+  height: min(660px, calc(100dvh - 32px)) !important;
+  max-height: calc(100dvh - 32px) !important;
+  margin: 16px auto !important;
+}
+#accountReceivableModal.modal > .modal-dialog > .modal-content {
+  height: 100% !important;
+  max-height: 100% !important;
+}
+#accountReceivableModal.modal > .modal-dialog > .modal-content > .modal-footer {
+  flex-shrink: 0 !important;
+  position: relative !important;
+  z-index: 5 !important;
+}
+@media (max-height: 550px) {
+  #accountReceivableModal.modal > .modal-dialog {
+    height: calc(100dvh - 12px) !important;
+    margin: 6px auto !important;
+  }
+}
+
+
+/* FINOVA AR — Invoice Details: keep Save directly after the Summary.
+   Override the previous forced 660px dialog height only on this tab. */
+@supports selector(#accountReceivableModal:has(#ar-invoice-details-pane.active)) {
+  #accountReceivableModal.modal:has(#ar-invoice-details-pane.active) > .modal-dialog {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - 24px) !important;
+    margin: 12px auto !important;
+  }
+  #accountReceivableModal.modal:has(#ar-invoice-details-pane.active) > .modal-dialog > .modal-content {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - 24px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  #accountReceivableModal.modal:has(#ar-invoice-details-pane.active) > .modal-dialog > .modal-content > .modal-body {
+    flex: 0 1 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - 145px) !important;
+    overflow-y: auto !important;
+  }
+  #accountReceivableModal.modal:has(#ar-invoice-details-pane.active) > .modal-dialog > .modal-content > .modal-footer {
+    flex: 0 0 auto !important;
+    margin-top: 0 !important;
+  }
+}
+
+
+/* FINOVA AR — compact Invoice Details and Summary, consistent with approved AP layout. */
+@supports selector(#accountReceivableModal:has(#ar-invoice-details-pane.active)) {
+  #accountReceivableModal:has(#ar-invoice-details-pane.active) #ar-modal-tab-content,
+  #accountReceivableModal:has(#ar-invoice-details-pane.active) #ar-invoice-details-pane,
+  #accountReceivableModal:has(#ar-invoice-details-pane.active) #ar-invoice-details-pane .finova-card,
+  #accountReceivableModal:has(#ar-invoice-details-pane.active) #ar-invoice-details-pane .finova-card-body {
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    flex: 0 0 auto !important;
+  }
+  #accountReceivableModal:has(#ar-invoice-details-pane.active) #ar-modal-tab-content {
+    overflow: visible !important;
+  }
+  #accountReceivableModal:has(#ar-invoice-details-pane.active) #ar-invoice-details-pane .ar-invoice-detail-table-wrapper {
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+  }
+  #accountReceivableModal:has(#ar-invoice-details-pane.active #ar-detail-body > tr:nth-child(5):not(#ar-detail-empty))
+    #ar-invoice-details-pane .ar-invoice-detail-table-wrapper {
+    max-height: clamp(180px, 34dvh, 310px) !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+  }
+  #accountReceivableModal:has(#ar-invoice-details-pane.active) #ar-invoice-details-pane .ar-invoice-detail-table thead th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 3 !important;
+    background: #f8fafc !important;
+  }
+  #accountReceivableModal:has(#ar-invoice-details-pane.active) .border-top.p-4:has(#ar-form-total) {
+    position: static !important;
+    flex: 0 0 auto !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin-top: 0 !important;
+  }
+}
+
+
+/* FINOVA AR 2026-11-03 — restore Invoice Details table visibility.
+   Earlier active-pane flex rules set tab content and table wrapper to height:0.
+   Keep the approved content-sized AP behavior, without affecting AP or JS. */
+@supports selector(#accountReceivableModal:has(#ar-invoice-details-pane.active)) {
+  #accountReceivableModal.modal:has(#ar-invoice-details-pane.active) #ar-modal-tab-content,
+  #accountReceivableModal.modal:has(#ar-invoice-details-pane.active) #ar-invoice-details-pane.active,
+  #accountReceivableModal.modal:has(#ar-invoice-details-pane.active) #ar-invoice-details-pane.active.show,
+  #accountReceivableModal.modal:has(#ar-invoice-details-pane.active) #ar-invoice-details-pane.active > .p-4,
+  #accountReceivableModal.modal:has(#ar-invoice-details-pane.active) #ar-invoice-details-pane.active.show > .p-4,
+  #accountReceivableModal.modal:has(#ar-invoice-details-pane.active) #ar-invoice-details-pane .finova-card,
+  #accountReceivableModal.modal:has(#ar-invoice-details-pane.active) #ar-invoice-details-pane .finova-card-body {
+    display: block !important;
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  #accountReceivableModal.modal:has(#ar-invoice-details-pane.active) #ar-invoice-details-pane .ar-invoice-detail-table-wrapper {
+    display: block !important;
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+  }
+  #accountReceivableModal.modal:has(#ar-invoice-details-pane.active) #ar-invoice-details-pane .ar-invoice-detail-table {
+    display: table !important;
+    width: 100% !important;
+    height: auto !important;
+    visibility: visible !important;
+  }
+  #accountReceivableModal.modal:has(#ar-invoice-details-pane.active #ar-detail-body > tr:nth-child(5):not(#ar-detail-empty))
+    #ar-invoice-details-pane .ar-invoice-detail-table-wrapper {
+    max-height: clamp(180px, 34dvh, 310px) !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+  }
+}
+
+
+/* FINOVA 2026-11-03 — AR Header Info: restore Description visibility.
+   Previous fixed-height modal constrained the form and its summary together.
+   Allow the header form to grow, with vertical scrolling on smaller screens.
+   Scope strictly to Header Info so Invoice Details / Tax tabs are unchanged. */
+@supports selector(#accountReceivableModal:has(#ar-header-info-pane.active)) {
+  #accountReceivableModal.modal:has(#ar-header-info-pane.active) > .modal-dialog {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - 24px) !important;
+    margin: 12px auto !important;
+  }
+  #accountReceivableModal.modal:has(#ar-header-info-pane.active) > .modal-dialog > .modal-content {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - 24px) !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  #accountReceivableModal.modal:has(#ar-header-info-pane.active) > .modal-dialog > .modal-content > .modal-body {
+    display: block !important;
+    flex: 0 1 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+  #accountReceivableModal.modal:has(#ar-header-info-pane.active) #ar-modal-tab-content,
+  #accountReceivableModal.modal:has(#ar-header-info-pane.active) #ar-header-info-pane.active,
+  #accountReceivableModal.modal:has(#ar-header-info-pane.active) #ar-header-info-pane.active > .p-4,
+  #accountReceivableModal.modal:has(#ar-header-info-pane.active) #ar-header-info-pane .finova-card,
+  #accountReceivableModal.modal:has(#ar-header-info-pane.active) #ar-header-info-pane .finova-card-body {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    flex: 0 0 auto !important;
+    overflow: visible !important;
+  }
+  #accountReceivableModal.modal:has(#ar-header-info-pane.active) #ar-form-description {
+    display: block !important;
+    visibility: visible !important;
+    height: auto !important;
+    min-height: 62px !important;
+    resize: vertical;
+  }
+  #accountReceivableModal.modal:has(#ar-header-info-pane.active) #ar-modal-tab-content + .border-top {
+    margin-top: 0 !important;
+    flex: 0 0 auto !important;
+  }
+}
+
+
+/* ==============================================================
+   FINOVA AR — TAX (+/-) MODAL FLOW REPAIR — 2026-11-03
+   Tax table and journal preview remain in normal document flow.
+   Summary and Save follow the tax content, not a forced 660px box.
+   Limited to Tax (+) / Tax (-); AP and other AR tabs untouched.
+   ============================================================== */
+@supports selector(#accountReceivableModal:has(#ar-tax-plus-pane.active)) {
+  #accountReceivableModal.modal:has(#ar-tax-plus-pane.active) > .modal-dialog,
+  #accountReceivableModal.modal:has(#ar-tax-minus-pane.active) > .modal-dialog {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - 24px) !important;
+    margin: 12px auto !important;
+  }
+  #accountReceivableModal.modal:has(#ar-tax-plus-pane.active) > .modal-dialog > .modal-content,
+  #accountReceivableModal.modal:has(#ar-tax-minus-pane.active) > .modal-dialog > .modal-content {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - 24px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+  #accountReceivableModal.modal:has(#ar-tax-plus-pane.active) > .modal-dialog > .modal-content > .modal-body,
+  #accountReceivableModal.modal:has(#ar-tax-minus-pane.active) > .modal-dialog > .modal-content > .modal-body {
+    display: block !important;
+    flex: 0 1 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - 145px) !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+  #accountReceivableModal.modal:has(#ar-tax-plus-pane.active) #ar-modal-tab-content,
+  #accountReceivableModal.modal:has(#ar-tax-minus-pane.active) #ar-modal-tab-content,
+  #accountReceivableModal.modal:has(#ar-tax-plus-pane.active) #ar-tax-plus-pane.active,
+  #accountReceivableModal.modal:has(#ar-tax-minus-pane.active) #ar-tax-minus-pane.active {
+    display: block !important;
+    position: static !important;
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  #accountReceivableModal.modal:has(#ar-tax-plus-pane.active) #ar-tax-plus-pane .finova-card,
+  #accountReceivableModal.modal:has(#ar-tax-minus-pane.active) #ar-tax-minus-pane .finova-card,
+  #accountReceivableModal.modal:has(#ar-tax-plus-pane.active) #ar-tax-plus-pane .finova-card-body,
+  #accountReceivableModal.modal:has(#ar-tax-minus-pane.active) #ar-tax-minus-pane .finova-card-body {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  #accountReceivableModal.modal:has(#ar-tax-plus-pane.active) #ar-tax-plus-pane .table-responsive,
+  #accountReceivableModal.modal:has(#ar-tax-minus-pane.active) #ar-tax-minus-pane .table-responsive {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+  }
+  #accountReceivableModal.modal:has(#ar-tax-plus-pane.active) #ar-modal-tab-content + .border-top,
+  #accountReceivableModal.modal:has(#ar-tax-minus-pane.active) #ar-modal-tab-content + .border-top,
+  #accountReceivableModal.modal:has(#ar-tax-plus-pane.active) .ar-summary-section,
+  #accountReceivableModal.modal:has(#ar-tax-minus-pane.active) .ar-summary-section {
+    position: static !important;
+    clear: both !important;
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin-top: 0 !important;
+    transform: none !important;
+  }
+  #accountReceivableModal.modal:has(#ar-tax-plus-pane.active) > .modal-dialog > .modal-content > .modal-footer,
+  #accountReceivableModal.modal:has(#ar-tax-minus-pane.active) > .modal-dialog > .modal-content > .modal-footer {
+    flex: 0 0 auto !important;
+    position: relative !important;
+    margin-top: 0 !important;
+  }
+  /* Start internal scrolling when the tax table reaches five rows. */
+  #accountReceivableModal:has(#ar-tax-plus-pane.active #ar-tax-plus-pane tbody tr:nth-child(5)) #ar-tax-plus-pane .table-responsive,
+  #accountReceivableModal:has(#ar-tax-minus-pane.active #ar-tax-minus-pane tbody tr:nth-child(5)) #ar-tax-minus-pane .table-responsive {
+    max-height: clamp(170px, 32dvh, 300px) !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+  }
+  #accountReceivableModal:has(#ar-tax-plus-pane.active) #ar-tax-plus-pane thead th,
+  #accountReceivableModal:has(#ar-tax-minus-pane.active) #ar-tax-minus-pane thead th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 2 !important;
+    background: #fff !important;
+  }
+}
