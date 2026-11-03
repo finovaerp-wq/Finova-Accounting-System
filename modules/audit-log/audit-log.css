@@ -72,3 +72,31 @@
 
 /* Nomor urut mengikuti hasil filter dan halaman aktif. */
 .audit-table th.audit-no,.audit-table td.audit-no{width:52px;min-width:52px;max-width:52px;text-align:center;white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* Keep Audit Log pagination anchored to the bottom of its module panel,
+   including when filters return zero or only a few records. */
+.audit-log-page{
+  height:calc(100vh - 105px);
+  height:calc(100dvh - 105px);
+  max-height:calc(100vh - 105px);
+  max-height:calc(100dvh - 105px);
+  min-height:0;
+  box-sizing:border-box;
+}
+.audit-log-page > .audit-table-card{
+  flex:1 1 0!important;
+  min-height:0!important;
+}
+.audit-log-page > .audit-table-card > .audit-table-wrap{
+  flex:1 1 0;
+  min-height:0;
+  max-height:none;
+  overflow:auto!important;
+}
+.audit-log-page > .audit-table-card > .audit-pagination-wrapper{
+  margin-top:auto;
+  flex-shrink:0!important;
+}
+@media(max-width:700px){
+  .audit-log-page{height:calc(100dvh - 80px);max-height:calc(100dvh - 80px)}
+}
