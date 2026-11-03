@@ -4740,3 +4740,58 @@ tr.gl-journal-row[data-status="posted"]:hover
         max-height: 220px;
     }
 }
+
+/* FINOVA — GL Journal modal: white header, retain UUID controls */
+#glJournalModal .modal-header {
+    background: #ffffff !important;
+    background-image: none !important;
+    color: #172b4d !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+#glJournalModal .modal-header .modal-title,
+#glJournalModal .modal-header .modal-title i {
+    color: #172b4d !important;
+}
+#glJournalModal .modal-header #gl-record-id-container .text-white-50 {
+    color: #64748b !important;
+}
+#glJournalModal .modal-header #gl-record-id-display {
+    color: #172b4d !important;
+}
+#glJournalModal .modal-header #gl-record-id-copy {
+    color: #0d6efd !important;
+    background: #ffffff !important;
+    border-color: #0d6efd !important;
+}
+#glJournalModal .modal-header #gl-record-id-copy:hover,
+#glJournalModal .modal-header #gl-record-id-copy:focus-visible {
+    color: #ffffff !important;
+    background: #0d6efd !important;
+}
+#glJournalModal .modal-header .btn-close.btn-close-white {
+    filter: none !important;
+    opacity: .65;
+}
+#glJournalModal .modal-header .btn-close.btn-close-white:hover {
+    opacity: 1;
+}
+
+/* FINOVA — place GL Record ID immediately beside the Close (X) button */
+#glJournalModal .modal-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+}
+#glJournalModal .modal-header .modal-title {
+    margin-right: auto !important;
+}
+#glJournalModal .modal-header #gl-record-id-container:not(.d-none) {
+    margin-left: auto !important;
+    margin-right: 8px !important;
+    flex: 0 1 auto !important;
+    max-width: min(45%, 270px) !important;
+}
+#glJournalModal .modal-header > .btn-close {
+    margin: 0 !important;
+    flex: 0 0 auto !important;
+}

@@ -13350,6 +13350,9 @@ RESET FORM
 
 resetForm() {
 
+    const auditReference = document.getElementById("ar-audit-reference");
+    if (auditReference) auditReference.hidden = true;
+
     /*
     ==================================================
     ID
@@ -18338,6 +18341,9 @@ async editInvoice(id) {
         this.currentMode =
             "edit";
 
+        const auditReference = document.getElementById("ar-audit-reference");
+        if (auditReference) auditReference.hidden = true;
+
 
         /*
         ==================================================
@@ -19520,6 +19526,52 @@ async viewInvoice(id) {
 
         this.currentMode =
             "view";
+
+        // Display the persisted invoice ID only in View mode.
+        const auditReference = document.getElementById("ar-audit-reference");
+        const auditRecordInput = document.getElementById("ar-audit-record-id");
+        const auditCopyButton = document.getElementById("ar-audit-copy-id");
+        const auditTrailButton = document.getElementById("ar-view-audit-trail");
+        if (auditTrailButton) {
+            auditTrailButton.hidden = window.finovaIsSuperAdmin !== true;
+            auditTrailButton.onclick = async () => {
+                if (window.finovaIsSuperAdmin !== true || !auditRecordInput?.value) return;
+                const router = window.finovaRouter;
+                if (!router?.navigate) {
+                    console.warn("FINOVA: router Audit Log tidak tersedia.");
+                    return;
+                }
+                // The Audit Log module consumes this once; do not place identifiers in a URL.
+                sessionStorage.setItem("finova-audit-trail-target", JSON.stringify({
+                    module: "account-receivable", recordId: auditRecordInput.value
+                }));
+                const modal = auditTrailButton.closest(".modal");
+                if (modal && window.bootstrap?.Modal) {
+                    window.bootstrap.Modal.getInstance(modal)?.hide();
+                }
+                await router.navigate("audit-log");
+            };
+        }
+
+        if (auditReference && auditRecordInput && this.currentInvoiceId) {
+            auditRecordInput.value = String(this.currentInvoiceId);
+            auditReference.hidden = false;
+            if (auditCopyButton) {
+                auditCopyButton.onclick = async () => {
+                    const value = auditRecordInput.value;
+                    if (!value) return;
+                    try {
+                        await navigator.clipboard.writeText(value);
+                        auditCopyButton.textContent = "Copied";
+                        setTimeout(() => { auditCopyButton.textContent = "Copy ID"; }, 1500);
+                    } catch (_) {
+                        auditRecordInput.focus();
+                        auditRecordInput.select();
+                        document.execCommand("copy");
+                    }
+                };
+            }
+        }
 
 
         /*

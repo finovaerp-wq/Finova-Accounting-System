@@ -5206,7 +5206,7 @@ async insert() {
             }
         }
 
-        await ChartOfAccountsService.insert(
+        const savedAccount = await ChartOfAccountsService.insert(
             payload
         );
 
@@ -5218,9 +5218,8 @@ async insert() {
 
         await this.loadParentAccounts();
 
-        this.showSuccess(
-            "Chart Of Account successfully created."
-        );
+        this.showSuccess("Chart Of Account successfully created.");
+        coaRecordIdDisplay("coa-id", "coa-bootstrap-success-alert", savedAccount?.id);
 
     }
 
@@ -5266,11 +5265,8 @@ async update(id) {
 
         await this.loadParentAccounts();
 
-        this.showSuccess(
-
-            "Chart Of Account successfully updated."
-
-        );
+        this.showSuccess("Chart Of Account successfully updated.");
+        coaRecordIdDisplay("coa-id", "coa-bootstrap-success-alert", id);
 
     }
 
@@ -6903,3 +6899,65 @@ showError(
 
 
 }
+
+
+/* FINOVA: show the persisted primary key, never generate a client-side ID. */
+function coaRecordIdDisplay(hiddenId, alertId, savedId = null) {
+    const hidden = document.getElementById(hiddenId);
+    const input = document.getElementById(hiddenId + '-record-display');
+    const section = document.getElementById(hiddenId + '-record-section');
+    const value = String(savedId ?? hidden?.value ?? '').trim();
+    if (input) input.value = value;
+    if (section) section.hidden = !value;
+    if (savedId == null || !value) return;
+    const alert = document.getElementById(alertId);
+    if (!alert) return;
+    const old = alert.querySelector('.finova-saved-record-id');
+    old?.remove();
+    const row = document.createElement('div');
+    row.className = 'finova-saved-record-id d-flex align-items-center flex-wrap gap-2 mt-2';
+    const label = document.createElement('span');
+    label.className = 'small fw-semibold';
+    label.textContent = 'Record ID: ' + value;
+    label.style.overflowWrap = 'anywhere';
+    const copy = document.createElement('button');
+    copy.type = 'button';
+    copy.className = 'btn btn-sm btn-outline-success';
+    copy.textContent = 'Copy ID';
+    copy.addEventListener('click', () => coaCopyPersistedId(value));
+    row.append(label, copy);
+    alert.append(row);
+}
+async function coaCopyPersistedId(value) {
+    if (!value) return;
+    try { await navigator.clipboard.writeText(value); }
+    catch (_) {
+        const el = document.createElement('textarea');
+        el.value = value;
+        el.style.position = 'fixed';
+        el.style.opacity = '0';
+        document.body.append(el);
+        el.select();
+        document.execCommand('copy');
+        el.remove();
+    }
+}
+function coaWireRecordId(hiddenId, alertId) {
+    const hidden = document.getElementById(hiddenId);
+    const section = document.getElementById(hiddenId + '-record-section');
+    if (!hidden || !section || section.dataset.recordWired) return;
+    section.dataset.recordWired = '1';
+    const copy = document.getElementById(hiddenId + '-record-copy');
+    copy?.addEventListener('click', () => coaCopyPersistedId(hidden.value));
+    const sync = () => coaRecordIdDisplay(hiddenId, alertId);
+    // Existing form code sets hidden.value programmatically, so sync on modal open.
+    const modal = hidden.closest('.modal');
+    modal?.addEventListener('shown.bs.modal', sync);
+    modal?.addEventListener('show.bs.modal', () => setTimeout(sync, 0));
+    sync();
+}
+
+// The modal is inserted dynamically in some workspaces; wire on first opening.
+document.addEventListener('show.bs.modal', event => {
+    if (event.target?.querySelector('#coa-id')) coaWireRecordId('coa-id', 'coa-bootstrap-success-alert');
+});

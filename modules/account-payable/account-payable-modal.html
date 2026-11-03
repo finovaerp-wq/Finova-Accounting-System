@@ -28,7 +28,7 @@
                  MODAL HEADER
             =================================================== -->
 
-            <div class="modal-header">
+            <div class="modal-header" style="position:relative;">
 
                 <div>
 
@@ -54,6 +54,24 @@
 
                 </div>
 
+
+                <!-- Record ID shown only in View mode; full value available via Copy ID -->
+                <div class="d-flex align-items-center gap-2" style="position:absolute; top:8px; right:52px; min-width:0; z-index:1;">
+                    <div id="ap-audit-reference" hidden>
+                        <div class="d-flex align-items-center gap-2" style="min-width:0;">
+                            <span class="text-muted small text-nowrap">Record ID</span>
+                            <input id="ap-audit-record-id" type="text" readonly
+                                   class="form-control form-control-sm font-monospace"
+                                   style="width:132px; min-width:0; text-overflow:ellipsis;"
+                                   title="Transaction Record ID"
+                                   aria-label="Account Payable record ID">
+                            <button id="ap-audit-copy-id" type="button"
+                                    class="btn btn-sm btn-outline-primary text-nowrap"
+                                    title="Copy full transaction record ID">Copy ID</button>
+                            <button id="ap-view-audit-trail" type="button" class="btn btn-sm btn-outline-secondary text-nowrap" hidden title="Lihat jejak audit transaksi">View Audit Trail</button>
+                        </div>
+                    </div>
+                </div>
 
                 <button
                     type="button"
@@ -303,24 +321,12 @@
 
 
                                         <!-- INVOICE NO -->
-
                                         <div class="col-md-6">
-
-                                            <label
-                                                for="ap-form-invoice-no"
-                                                class="form-label">
-
-                                                Invoice No
-                                                <span class="text-danger">*</span>
-
+                                            <label for="ap-form-invoice-no" class="form-label">
+                                                Invoice No <span class="text-danger">*</span>
                                             </label>
-
-                                            <input
-                                                type="text"
-                                                id="ap-form-invoice-no"
-                                                class="form-control"
-                                                placeholder="Enter invoice number">
-
+                                            <input type="text" id="ap-form-invoice-no" class="form-control"
+                                                   placeholder="Enter invoice number">
                                         </div>
 
 

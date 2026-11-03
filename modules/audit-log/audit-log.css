@@ -62,3 +62,13 @@
 .audit-pagination-wrapper .finova-pagination-info{margin-left:auto;white-space:nowrap;font-size:12px;color:var(--text-secondary,#64748b)}
 .audit-pagination-wrapper .finova-pagination-input{width:40px;min-width:40px;text-align:center}
 @media(max-width:760px){.audit-pagination-wrapper{flex-wrap:wrap}.audit-pagination-wrapper .finova-pagination-info{width:100%;margin-left:0}}
+
+/* Seven-column audit layout */
+.audit-table{min-width:1150px}
+.audit-target{min-width:245px;max-width:340px}
+.audit-source{min-width:175px;max-width:260px}
+.audit-result{min-width:120px}
+.audit-table td:last-child{white-space:nowrap}
+
+/* Nomor urut mengikuti hasil filter dan halaman aktif. */
+.audit-table th.audit-no,.audit-table td.audit-no{width:52px;min-width:52px;max-width:52px;text-align:center;white-space:nowrap;font-variant-numeric:tabular-nums}

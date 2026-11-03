@@ -6861,6 +6861,7 @@ async openAddJournal() {
         ======================================================
         */
 
+        this.syncRecordIdDisplay();
         this.modal.show();
 
     }
@@ -7769,6 +7770,7 @@ async openEditJournal(
         ======================================================
         */
 
+        this.syncRecordIdDisplay();
         this.modal.show();
 
     }
@@ -11874,6 +11876,61 @@ SAME STYLE AS ACCOUNT PAYABLE
 ==========================================================
 */
 
+syncRecordIdDisplay() {
+    const wrap = document.getElementById("gl-record-id-container");
+    const label = document.getElementById("gl-record-id-display");
+    const copy = document.getElementById("gl-record-id-copy");
+    const id = this.currentMode !== "add" ? String(this.currentJournal?.id || "") : "";
+    const formId = document.getElementById("journal-record-id");
+    const formCopy = document.getElementById("journal-record-id-copy");
+    if (formId) formId.value = id;
+    if (formCopy) {
+        formCopy.disabled = !id;
+        formCopy.onclick = async () => {
+            if (!id) return;
+            try { await navigator.clipboard.writeText(id); }
+            catch (_) {
+                const temp = document.createElement("textarea");
+                temp.value = id;
+                document.body.appendChild(temp);
+                temp.select();
+                document.execCommand("copy");
+                temp.remove();
+            }
+        };
+    }
+
+}
+
+showSavedRecordIdNotification(message, id) {
+    this.showSuccess(message, true);
+    const alert = document.getElementById("gl-bootstrap-success-alert");
+    if (!alert || !id) return;
+    const block = document.createElement("div");
+    block.className = "small mt-1 d-flex align-items-center gap-2 flex-wrap";
+    const text = document.createElement("span");
+    text.textContent = `Record ID: ${id}`;
+    text.style.overflowWrap = "anywhere";
+    const copy = document.createElement("button");
+    copy.type = "button";
+    copy.className = "btn btn-sm btn-outline-success";
+    copy.textContent = "Copy ID";
+    copy.onclick = async () => {
+        try { await navigator.clipboard.writeText(String(id)); }
+        catch (error) {
+            const input = document.createElement("textarea");
+            input.value = String(id);
+            document.body.appendChild(input);
+            input.select();
+            document.execCommand("copy");
+            input.remove();
+        }
+    };
+    block.append(text, copy);
+    const body = alert.querySelector(".flex-grow-1") || alert;
+    body.appendChild(block);
+}
+
 showSuccess(
     message,
     forcePageLevel = false
@@ -13958,6 +14015,7 @@ async openViewJournal(id) {
         */
 
         this.currentMode = "view";
+        this.syncRecordIdDisplay();
 
         /*
         ======================================================
@@ -17938,15 +17996,11 @@ if (
         ======================================================
         */
 
-        this.showSuccess(
-
-            status ===
-                "Posted"
-
+        this.showSavedRecordIdNotification(
+            normalizedRequestedStatus === "POSTED"
                 ? "Journal posted successfully."
-
-                : "Journal saved successfully."
-
+                : "Journal saved successfully.",
+            savedJournalId
         );
 
     }

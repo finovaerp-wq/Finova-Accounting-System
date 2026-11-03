@@ -30,7 +30,6 @@ FINAL
 
                 </h5>
 
-
                 <button
                     type="button"
                     class="btn-close btn-close-white"
@@ -217,26 +216,15 @@ FINAL
                             </div>
 
 
-                            <!-- REFERENCE -->
-
+                            <!-- DATABASE RECORD ID: READ ONLY -->
                             <div class="col-md-4">
-
-                                <label
-                                    for="journal-reference-no"
-                                    class="form-label fw-semibold"
-                                >
-
-                                    Reference No
-
-                                </label>
-
-                                <input
-                                    type="text"
-                                    id="journal-reference-no"
-                                    class="form-control"
-                                    placeholder="Optional"
-                                >
-
+                                <label for="journal-record-id" class="form-label fw-semibold">Record ID</label>
+                                <div class="input-group">
+                                    <input type="text" id="journal-record-id" class="form-control bg-light" readonly placeholder="Auto Generated" aria-label="GL Journal Record ID">
+                                    <button type="button" id="journal-record-id-copy" class="btn btn-outline-secondary" title="Copy full Record ID" aria-label="Copy full Record ID" disabled><i class="fa-regular fa-copy"></i></button>
+                                </div>
+                                <!-- Retain legacy reference control for JS/database compatibility, never visible -->
+                                <input type="hidden" id="journal-reference-no" value="">
                             </div>
 
 

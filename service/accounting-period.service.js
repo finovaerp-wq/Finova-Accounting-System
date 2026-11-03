@@ -303,13 +303,12 @@ export class AccountingPeriodService {
                     .select(`
                         id,
                         accounting_period_id,
-                        period,
                         action,
-                        previous_status,
+                        previous_status:old_status,
                         new_status,
-                        reason,
-                        action_by,
-                        action_at
+                        reason:remarks,
+                        action_by:changed_by,
+                        action_at:changed_at
                     `)
 
                     .eq(
@@ -318,7 +317,7 @@ export class AccountingPeriodService {
                     )
 
                     .order(
-                        "action_at",
+                        "changed_at",
                         {
                             ascending: false
                         }

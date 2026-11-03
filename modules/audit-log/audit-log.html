@@ -32,6 +32,8 @@
     </div>
   </section>
 
+  <div id="audit-trail-context" class="alert alert-info py-2 small" hidden></div>
+
   <div class="audit-log-summary" aria-live="polite">
     <span id="audit-count">Memuat log...</span>
     <span id="audit-loaded-at"></span>
@@ -42,12 +44,11 @@
       <table class="table audit-table">
         <thead>
           <tr>
-            <th>Waktu</th><th>Pengguna</th><th>Perusahaan ID</th><th>Modul</th><th>Action</th>
-            <th>Nomor Dokumen</th><th>Tabel / Record</th><th>Alasan / Remarks</th><th>Detail</th>
+            <th class="audit-no">No.</th><th>Timestamp</th><th>Actor / User</th><th>Action</th><th>Target / Resource</th><th>Source / Origin</th><th>Status / Result</th><th>Before / After Value</th>
           </tr>
         </thead>
         <tbody id="audit-rows">
-          <tr><td colspan="9" class="audit-empty">Memuat Audit Log...</td></tr>
+          <tr><td colspan="8" class="audit-empty">Memuat Audit Log...</td></tr>
         </tbody>
       </table>
     </div>

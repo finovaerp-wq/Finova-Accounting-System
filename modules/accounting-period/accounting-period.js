@@ -292,19 +292,15 @@ async loadCurrentUserAccess() {
     ======================================================
     */
 
-    this.isManager =
-        profile.status === true
-        &&
-        String(
-            profile.role
-            ||
-            ""
-        )
+    // Manager dan Super Admin memiliki hak kelola Accounting Period yang sama.
+    // Tetap wajib berstatus aktif; pemeriksaan RPC/RLS tetap berlaku di database.
+    const normalizedPeriodRole = String(profile.role || "")
         .trim()
-        .toLowerCase()
-        ===
-        "manager";
+        .replace(/\s+/g, " ")
+        .toLowerCase();
 
+    this.isManager = profile.status === true &&
+        ["manager", "super admin"].includes(normalizedPeriodRole);
 
     console.log(
         "Accounting Period Access:",
@@ -670,7 +666,7 @@ async loadCurrentUserAccess() {
                     setText("accounting-period-view-start", this.formatDate(period._start_date));
                     setText("accounting-period-view-end", this.formatDate(period._end_date));
                     setText("accounting-period-view-status", period.status || (period.is_open ? "Open" : "Closed"));
-                    setText("accounting-period-view-closed", this.formatDateTime(period.closed_at));
+                    setText("accounting-period-view-closed", this.formatDateTime(period._last_closed_at || period.closed_at));
                     setText("accounting-period-view-reopened", this.formatDateTime(period._reopened_at));
                     this.viewModal?.show();
                     return;
@@ -884,6 +880,7 @@ async loadCurrentUserAccess() {
                     ...item,
                     _start_date: startDate,
                     _end_date: endDate,
+                    _last_closed_at: item.closed_at || null,
                     _reopened_at: null
                 };
             });
@@ -896,6 +893,29 @@ async loadCurrentUserAccess() {
             */
 
             this.periodHistoryCache.clear();
+
+            /*
+            ==================================================
+            LAST CLOSE / REOPEN: SOURCE OF TRUTH IS HISTORY
+            closed_at in master is cleared after reopening.
+            ==================================================
+            */
+            await Promise.all(this.data.map(async (period) => {
+                try {
+                    const history = await this.getPeriodHistory(period.id);
+                    const lastActionAt = (action) => history
+                        .filter(entry => String(entry.action || "").toUpperCase() === action)
+                        .map(entry => entry.action_at || entry.changed_at)
+                        .filter(Boolean)
+                        .sort((left, right) => new Date(right) - new Date(left))[0] || null;
+
+                    period._last_closed_at = lastActionAt("CLOSE") || period.closed_at || null;
+                    period._reopened_at = lastActionAt("REOPEN");
+                } catch (error) {
+                    // Keep the period list available if history cannot be read.
+                    console.warn("AccountingPeriod: unable to load period history dates", period.id, error);
+                }
+            }));
 
 
             /*
@@ -1663,7 +1683,7 @@ else {
                 <td class="finova-table-date">
 
                     ${this.formatDateTime(
-                        item.closed_at
+                        item._last_closed_at
                     )}
 
                 </td>
@@ -2655,11 +2675,7 @@ else {
             ==================================================
             */
 
-            this.periodHistoryCache.delete(
-                Number(
-                    period.id
-                )
-            );
+            this.periodHistoryCache.delete(period.id);
 
 
             /*

@@ -19805,6 +19805,9 @@ async addInvoice() {
         this.currentMode =
             "add";
 
+        const auditReference = document.getElementById("ap-audit-reference");
+        if (auditReference) auditReference.hidden = true;
+
         this.currentDetailId =
             null;
 
@@ -22154,6 +22157,9 @@ async saveEdit() {
         this.currentMode =
             "add";
 
+        const auditReference = document.getElementById("ap-audit-reference");
+        if (auditReference) auditReference.hidden = true;
+
         this.currentDetailId =
             null;
 
@@ -23602,6 +23608,54 @@ async viewInvoice(id) {
         this.currentInvoiceId =
             id;
 
+        // Show the persisted primary key only after the AP record was loaded.
+        // Do not generate a replacement UUID: audit matching must use the real ID.
+        const auditReference = document.getElementById("ap-audit-reference");
+        const auditRecordInput = document.getElementById("ap-audit-record-id");
+        const auditCopyButton = document.getElementById("ap-audit-copy-id");
+        const auditTrailButton = document.getElementById("ap-view-audit-trail");
+        if (auditTrailButton) {
+            auditTrailButton.hidden = window.finovaIsSuperAdmin !== true;
+            auditTrailButton.onclick = async () => {
+                if (window.finovaIsSuperAdmin !== true || !auditRecordInput?.value) return;
+                const router = window.finovaRouter;
+                if (!router?.navigate) {
+                    console.warn("FINOVA: router Audit Log tidak tersedia.");
+                    return;
+                }
+                // The Audit Log module consumes this once; do not place identifiers in a URL.
+                sessionStorage.setItem("finova-audit-trail-target", JSON.stringify({
+                    module: "account-payable", recordId: auditRecordInput.value
+                }));
+                const modal = auditTrailButton.closest(".modal");
+                if (modal && window.bootstrap?.Modal) {
+                    window.bootstrap.Modal.getInstance(modal)?.hide();
+                }
+                await router.navigate("audit-log");
+            };
+        }
+
+        if (auditReference && auditRecordInput) {
+            auditRecordInput.value = String(header.id ?? id);
+            auditReference.hidden = false;
+            if (auditCopyButton) {
+                auditCopyButton.onclick = async () => {
+                    const value = auditRecordInput.value;
+                    if (!value) return;
+                    try {
+                        await navigator.clipboard.writeText(value);
+                        auditCopyButton.textContent = "Copied";
+                        setTimeout(() => { auditCopyButton.textContent = "Copy ID"; }, 1500);
+                    } catch (_) {
+                        auditRecordInput.focus();
+                        auditRecordInput.select();
+                        document.execCommand("copy");
+                        auditCopyButton.textContent = "Copy ID";
+                    }
+                };
+            }
+        }
+
 
         /*
         ==================================================
@@ -24780,6 +24834,9 @@ if (
 
         this.currentMode =
             "edit";
+
+        const auditReference = document.getElementById("ap-audit-reference");
+        if (auditReference) auditReference.hidden = true;
 
 
         this.currentDetailId =
