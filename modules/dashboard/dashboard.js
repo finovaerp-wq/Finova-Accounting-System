@@ -118,6 +118,20 @@ constructor() {
 
     this.loadSystemInformation();
 
+    // Refresh formatted dates immediately when the language selector changes.
+    this.dashboardLanguageHandler = () => {
+        this.loadSystemInformation();
+        const timeNode = document.getElementById("dashboard-current-time");
+        if (timeNode) {
+            timeNode.textContent = new Date().toLocaleTimeString(this.getDashboardLocale(), {
+                hour: "2-digit", minute: "2-digit", second: "2-digit",
+                hour12: this.getDashboardLocale() === "en-US"
+            });
+        }
+    };
+    window.addEventListener("finova:language-changed", this.dashboardLanguageHandler);
+    window.addEventListener("storage", this.dashboardLanguageHandler);
+
 
     /*
     ======================================================
@@ -3092,18 +3106,28 @@ buildRecentActivities(
     /* ========================================================
        SYSTEM INFORMATION
     ======================================================== */
+    getDashboardLocale() {
+        try {
+            return localStorage.getItem("finova-ui-language") === "en" ? "en-US" : "id-ID";
+        } catch (_) {
+            return "id-ID";
+        }
+    }
+
     loadSystemInformation() {
 
         const now = new Date();
 
-        const period = now.toLocaleDateString("en-US", {
+        const locale = this.getDashboardLocale();
+
+        const period = now.toLocaleDateString(locale, {
             month: "long",
             year: "numeric"
         });
 
-        const headerDate = now.toLocaleDateString("en-US", {
+        const headerDate = now.toLocaleDateString(locale, {
             weekday: "long",
-            day: "2-digit",
+            day: "numeric",
             month: "long",
             year: "numeric"
         });
@@ -3121,11 +3145,12 @@ buildRecentActivities(
 
         const update = () => {
             const now = new Date();
-            const value = now.toLocaleTimeString("en-US", {
+            const locale = this.getDashboardLocale();
+            const value = now.toLocaleTimeString(locale, {
                 hour: "2-digit",
                 minute: "2-digit",
                 second: "2-digit",
-                hour12: true
+                hour12: locale === "en-US"
             });
 
             this.setText("dashboard-current-time", value);
@@ -3141,6 +3166,12 @@ buildRecentActivities(
     }
 
     destroy() {
+
+    if (this.dashboardLanguageHandler) {
+        window.removeEventListener("finova:language-changed", this.dashboardLanguageHandler);
+        window.removeEventListener("storage", this.dashboardLanguageHandler);
+        this.dashboardLanguageHandler = null;
+    }
 
     /*
     ======================================================
@@ -3252,7 +3283,7 @@ buildRecentActivities(
         const date = new Date(value);
         if (Number.isNaN(date.getTime())) return String(value);
 
-        return date.toLocaleDateString("en-GB", {
+        return date.toLocaleDateString(this.getDashboardLocale(), {
             day: "2-digit",
             month: "short",
             year: "numeric"

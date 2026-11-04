@@ -65,7 +65,7 @@ IMPORTANT:
                             "
                         ></i>
 
-                        AR Payment
+                        Pembayaran Invoice AR
 
                     </h5>
 
@@ -78,8 +78,7 @@ IMPORTANT:
                         "
                     >
 
-                        Create one payment for multiple outstanding
-                        Account Receivable invoices
+                        Buat satu penerimaan untuk beberapa Invoice AR yang belum lunas
 
                     </div>
 
@@ -176,7 +175,7 @@ IMPORTANT:
 
                             <div class="ar-bulk-payment-section-title">
 
-                                Payment Information
+                                Informasi Pembayaran
 
                             </div>
 
@@ -200,7 +199,7 @@ IMPORTANT:
                             id="ar-payment-batch-status"
                         >
 
-                            Draft
+                            Draf
 
                         </span>
 
@@ -221,7 +220,7 @@ IMPORTANT:
                                 class="form-label"
                             >
 
-                                Payment No
+                                Nomor Pembayaran
 
                             </label>
 
@@ -248,7 +247,7 @@ IMPORTANT:
                                 class="form-label"
                             >
 
-                                Payment Date
+                                Tanggal Pembayaran
 
                                 <span class="text-danger">
                                     *
@@ -277,7 +276,7 @@ IMPORTANT:
                                 class="form-label"
                             >
 
-                                Customer
+                                Pelanggan
 
                                 <span class="text-danger">
                                     *
@@ -313,7 +312,7 @@ IMPORTANT:
                                 class="form-label"
                             >
 
-                                Bank Account
+                                Rekening Bank
 
                                 <span class="text-danger">
                                     *
@@ -327,14 +326,14 @@ IMPORTANT:
                                             type="text"
                                             id="ar-payment-account-search"
                                             class="form-control"
-                                            placeholder="Type account code or bank account name"
+                                            placeholder="Ketik kode akun atau nama rekening bank"
                                             autocomplete="off">
 
                                         <select
                                             id="ar-payment-account"
                                             class="form-select d-none">
                                             <option value="">
-                                                Select Bank Account
+                                                Pilih Rekening Bank
                                             </option>
                                         </select>
 
@@ -359,7 +358,7 @@ IMPORTANT:
                                 class="form-label"
                             >
 
-                                Reference No
+                                Nomor Referensi
 
                             </label>
 
@@ -368,7 +367,7 @@ IMPORTANT:
                                 type="text"
                                 id="ar-payment-reference-no"
                                 class="form-control"
-                                placeholder="Transfer / bank reference"
+                                placeholder="Referensi transfer / bank"
                                 autocomplete="off"
                             >
 
@@ -386,7 +385,7 @@ IMPORTANT:
                                 class="form-label"
                             >
 
-                                Description
+                                Deskripsi
 
                             </label>
 
@@ -398,7 +397,7 @@ IMPORTANT:
                                     ar-payment-description
                                 "
                                 rows="2"
-                                placeholder="Payment description"
+                                placeholder="Deskripsi penerimaan"
                             ></textarea>
 
                         </div>
@@ -425,15 +424,14 @@ IMPORTANT:
 
                             <div class="ar-bulk-payment-section-title">
 
-                                Outstanding Invoices
+                                Invoice Belum Lunas
 
                             </div>
 
 
                             <div class="ar-bulk-payment-section-subtitle">
 
-                                Select one or more invoices to allocate
-                                this payment
+                                Pilih satu atau beberapa invoice untuk alokasi penerimaan ini
 
                             </div>
 
@@ -467,7 +465,7 @@ IMPORTANT:
                                 for="ar-payment-select-all"
                             >
 
-                                Select All
+                                Pilih Semua
 
                             </label>
 
@@ -499,7 +497,7 @@ IMPORTANT:
 
                         <div class="fw-semibold">
 
-                            Select Customer
+                            Pilih Pelanggan
 
                         </div>
 
@@ -512,8 +510,7 @@ IMPORTANT:
                             "
                         >
 
-                            Outstanding invoices will appear here
-                            after a customer is selected.
+                            Invoice belum lunas akan tampil setelah pelanggan dipilih.
 
                         </div>
 
@@ -545,7 +542,7 @@ IMPORTANT:
 
                         <div class="small text-muted">
 
-                            Loading outstanding invoices...
+                            Memuat invoice belum lunas...
 
                         </div>
 
@@ -603,12 +600,12 @@ IMPORTANT:
 
 
                                         <th>
-                                            Invoice Date
+                                            Tanggal Invoice
                                         </th>
 
 
                                         <th>
-                                            Due Date
+                                            Tanggal Jatuh Tempo
                                         </th>
 
 
@@ -618,17 +615,17 @@ IMPORTANT:
 
 
                                         <th class="text-end">
-                                            Paid
+                                            Lunas
                                         </th>
 
 
                                         <th class="text-end">
-                                            Outstanding
+                                            Belum Dibayar
                                         </th>
 
 
                                         <th class="text-end">
-                                            Payment Amount
+                                            Jumlah Penerimaan
                                         </th>
 
                                     </tr>
@@ -675,14 +672,14 @@ IMPORTANT:
 
                             <div class="ar-bulk-payment-section-title">
 
-                                Payment Summary
+                                Ringkasan Penerimaan
 
                             </div>
 
 
                             <div class="ar-bulk-payment-section-subtitle">
 
-                                Summary of selected invoice allocations
+                                Ringkasan alokasi invoice yang dipilih
 
                             </div>
 
@@ -704,7 +701,7 @@ IMPORTANT:
 
                                 <div class="ar-bulk-summary-label">
 
-                                    Selected Invoices
+                                    Invoice Terpilih
 
                                 </div>
 
@@ -733,7 +730,7 @@ IMPORTANT:
 
                                 <div class="ar-bulk-summary-label">
 
-                                    Selected Outstanding
+                                    Tagihan Terpilih
 
                                 </div>
 
@@ -767,7 +764,7 @@ IMPORTANT:
 
                                 <div class="ar-bulk-summary-label">
 
-                                    Total Payment
+                                    Total Penerimaan
 
                                 </div>
 
@@ -838,7 +835,7 @@ IMPORTANT:
 
                         <div class="fw-semibold">
 
-                            Journal Preview
+                            Pratinjau Jurnal
 
                         </div>
 
@@ -847,8 +844,7 @@ IMPORTANT:
 
                     <div class="small text-muted">
 
-                        One GL Journal will be generated for this
-                        payment batch.
+                        Satu Jurnal GL akan dibuat untuk kelompok penerimaan ini.
 
                     </div>
 
@@ -890,7 +886,7 @@ IMPORTANT:
 
                         <span>
 
-                            Credit
+                            Kredit
 
                         </span>
 
@@ -922,9 +918,7 @@ IMPORTANT:
                         "
                     >
 
-                        Detailed DPP / Tax (+) / Tax (-) journal
-                        allocation will continue to follow FINOVA AP
-                        Payment accounting logic.
+                        Alokasi jurnal DPP / Pajak (+) / Pajak (-) tetap mengikuti logika akuntansi pembayaran FINOVA yang berlaku.
 
                     </div>
 
@@ -956,7 +950,7 @@ IMPORTANT:
                         "
                     ></i>
 
-                    One bank transaction can settle multiple invoices.
+                    Satu transaksi bank dapat melunasi beberapa invoice.
 
                 </div>
 
@@ -967,7 +961,7 @@ IMPORTANT:
                     data-bs-dismiss="modal"
                 >
 
-                    Cancel
+                    Batal
 
                 </button>
 
@@ -994,7 +988,7 @@ IMPORTANT:
                         "
                     ></i>
 
-                    Save Payment
+                    Simpan Penerimaan
 
                 </button>
 

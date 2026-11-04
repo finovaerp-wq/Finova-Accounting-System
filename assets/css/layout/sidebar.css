@@ -1475,3 +1475,24 @@ Version : 1.0.0
     height: 52px !important;
     max-width: 48px !important;
 }
+
+/* FINOVA bilingual: keep long sidebar labels readable without changing sidebar width. */
+.finova-sidebar .finova-submenu-item {
+    height:auto;
+    min-height:39px;
+    padding-top:8px;
+    padding-bottom:8px;
+    align-items:center;
+}
+.finova-sidebar .finova-submenu-item span {
+    min-width:0;
+    white-space:normal;
+    overflow:visible;
+    text-overflow:clip;
+    overflow-wrap:break-word;
+    word-break:normal;
+    line-height:1.45;
+}
+.finova-sidebar .finova-submenu-item > i {
+    flex-shrink:0;
+}

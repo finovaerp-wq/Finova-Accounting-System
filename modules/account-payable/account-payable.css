@@ -4552,3 +4552,39 @@ td {
     margin-top: 0 !important;
   }
 }
+
+/* FINOVA AP: keep translated date and amount labels from colliding with values.
+   Scoped to the two summary cells; no changes to transaction logic or other tables. */
+.account-payable-table-card .ap-cell-date-info .ap-info-line,
+.account-payable-table-card .ap-cell-amount-status .ap-info-line {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 9px minmax(0, 1.12fr);
+    column-gap: 5px;
+    align-items: start;
+    width: 100%;
+    min-width: 0;
+}
+.account-payable-table-card .ap-cell-date-info .ap-info-label,
+.account-payable-table-card .ap-cell-amount-status .ap-info-label {
+    min-width: 0;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: normal;
+    line-height: 1.4;
+}
+.account-payable-table-card .ap-cell-date-info .ap-info-separator,
+.account-payable-table-card .ap-cell-amount-status .ap-info-separator {
+    width: 9px;
+    text-align: center;
+}
+.account-payable-table-card .ap-cell-date-info .ap-info-value,
+.account-payable-table-card .ap-cell-amount-status .ap-info-value {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    white-space: normal;
+    line-height: 1.4;
+}
+.account-payable-table-card .ap-cell-amount-status .ap-amount-value {
+    text-align: left;
+}
