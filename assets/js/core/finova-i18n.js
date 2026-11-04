@@ -5,7 +5,7 @@ const dashboardDictionary={"FINANCIAL OVERVIEW":"RINGKASAN KEUANGAN","Executive 
 Object.assign(dictionary,dashboardDictionary);
 const userManagementDictionary={"Master Data / User Management":"Data Master / Manajemen Pengguna","Add User":"Tambah Pengguna","Edit User":"Ubah Pengguna","View User":"Lihat Pengguna","User Information":"Informasi Pengguna","All Role":"Semua Peran","All Status":"Semua Status","Last Updated":"Terakhir Diperbarui","Search Full Name or Email...":"Cari nama lengkap atau email...","Logged in as":"Masuk sebagai","You have full User Management access.":"Anda memiliki akses penuh ke Manajemen Pengguna.","User Management is view only.":"Manajemen Pengguna hanya dapat dilihat.","Loading User Management...":"Memuat Manajemen Pengguna...","Displaying Record 0 - 0 of 0":"Menampilkan data 0 - 0 dari 0","Confirm Delete User":"Konfirmasi Hapus Pengguna","Are you sure you want to delete this user?":"Apakah Anda yakin ingin menghapus pengguna ini?","This will remove both the FINOVA profile and Supabase Auth account.":"Tindakan ini akan menghapus profil FINOVA dan akun Supabase Auth.","Minimum 8 characters. Used only when creating a new user.":"Minimal 8 karakter. Hanya digunakan saat membuat pengguna baru.","Temporary Password":"Kata Sandi Sementara","Reset Password":"Atur Ulang Kata Sandi","Show Password":"Tampilkan Kata Sandi","Hide Password":"Sembunyikan Kata Sandi","Re-enter new password":"Masukkan kembali kata sandi baru","New Password is required.":"Kata sandi baru wajib diisi.","Confirm Password is required.":"Konfirmasi kata sandi wajib diisi.","New Password and Confirm Password do not match.":"Kata sandi baru dan konfirmasi tidak cocok.","New Password must contain at least 8 characters.":"Kata sandi baru minimal 8 karakter.","Full Name is required.":"Nama lengkap wajib diisi.","Email is required.":"Email wajib diisi.","Role must be Manager or Staff.":"Peran harus Manager atau Staff.","User created successfully.":"Pengguna berhasil ditambahkan.","User updated successfully.":"Pengguna berhasil diperbarui.","User deleted successfully.":"Pengguna berhasil dihapus.","User password reset successfully.":"Kata sandi pengguna berhasil diatur ulang.","Failed to load users.":"Gagal memuat pengguna.","Failed to save user.":"Gagal menyimpan pengguna.","Failed to delete user.":"Gagal menghapus pengguna.","Failed to reset user password.":"Gagal mengatur ulang kata sandi pengguna.","Failed to initialize User Management.":"Gagal memulai Manajemen Pengguna.","User not found.":"Pengguna tidak ditemukan.","User UID was not found.":"ID pengguna tidak ditemukan.","Authentication session was not found.":"Sesi autentikasi tidak ditemukan.","FINOVA user profile was not found.":"Profil pengguna FINOVA tidak ditemukan.","An unexpected error occurred.":"Terjadi kesalahan yang tidak terduga.","Operation completed successfully.":"Proses berhasil diselesaikan.","You cannot delete your own login account.":"Anda tidak dapat menghapus akun login sendiri.","You cannot deactivate your own FINOVA account.":"Anda tidak dapat menonaktifkan akun FINOVA sendiri.","Only Manager can modify User Management.":"Hanya Manager yang dapat mengubah Manajemen Pengguna.","Only Manager can edit users with a valid Manager or Staff role.":"Hanya Manager yang dapat mengubah pengguna dengan peran Manager atau Staff yang valid.","Only Manager can delete users with a valid Manager or Staff role.":"Hanya Manager yang dapat menghapus pengguna dengan peran Manager atau Staff yang valid.","Only Manager can reset passwords for users with a valid Manager or Staff role.":"Hanya Manager yang dapat mengatur ulang kata sandi pengguna dengan peran Manager atau Staff yang valid.","Action":"Tindakan","Name:":"Nama:","Email:":"Email:","Displaying Record":"Menampilkan data","of":"dari"};
 Object.assign(dictionary,userManagementDictionary);
-const allModulesDictionary={"No.":"No.","No. Journal":"Nomor Jurnal","No. Invoice":"Nomor Invoice","PO No":"Nomor PO","Payment No":"Nomor Pembayaran","Reference No":"Nomor Referensi","Document No":"Nomor Dokumen","Journal No.":"Nomor Jurnal","Invoice No.":"Nomor Invoice","Find":"Cari","Find By":"Cari Berdasarkan","Keyword":"Kata Kunci","Download Excel":"Unduh Excel","Preview HTML":"Pratinjau HTML","Journal Preview":"Pratinjau Jurnal","Accounting Preview":"Pratinjau Akuntansi","Tax Account":"Akun Pajak","Tax Base":"Dasar Pengenaan Pajak","Tax (+)":"Pajak (+)","Tax (-)":"Pajak (-)","No Tax":"Tanpa Pajak","No Tax (+) found from Invoice Details.":"Tidak ditemukan Pajak (+) dari Rincian Invoice.","No Tax (-) found from Invoice Details.":"Tidak ditemukan Pajak (-) dari Rincian Invoice.","No accounting preview available.":"Pratinjau akuntansi belum tersedia.","No forecast generated.":"Belum ada proyeksi yang dibuat.","No detail added.":"Belum ada rincian ditambahkan.","No data":"Tidak ada data","No records found":"Data tidak ditemukan","No records available":"Belum ada data","No transactions found":"Transaksi tidak ditemukan","No account found":"Akun tidak ditemukan","No journal found":"Jurnal tidak ditemukan","Record ID":"ID Data","Copy ID":"Salin ID","All Status":"Semua Status","All Role":"Semua Peran","All Roles":"Semua Peran","All Type":"Semua Jenis","All Types":"Semua Jenis","All Category":"Semua Kategori","All Period":"Semua Periode","All Data":"Semua Data","Show All Data":"Tampilkan Semua Data","Show All Outstanding":"Tampilkan Semua Tagihan Belum Lunas","Show":"Tampilkan","Select All":"Pilih Semua","Select Vendor":"Pilih Pemasok","Select Customer":"Pilih Pelanggan","Select Bank Account":"Pilih Rekening Bank","Select Account":"Pilih Akun","Select Period":"Pilih Periode","Select Role":"Pilih Peran","Select Type":"Pilih Jenis","Select Category":"Pilih Kategori","Select Invoice":"Pilih Invoice","Select Payment":"Pilih Pembayaran","Add User":"Tambah Pengguna","Edit User":"Ubah Pengguna","Delete User":"Hapus Pengguna","Add Business Partner":"Tambah Mitra Bisnis","Add Accounting Period":"Tambah Periode Akuntansi","Add Invoice Detail":"Tambah Rincian Invoice","Add Detail":"Tambah Rincian","Save Detail":"Simpan Rincian","Save Draft":"Simpan Draf","Save Payment":"Simpan Pembayaran","Add Tax":"Tambah Pajak","Add Invoice":"Tambah Invoice","Add Account":"Tambah Akun","Add Journal":"Tambah Jurnal","Add Asset":"Tambah Aset","Add Bank":"Tambah Bank","Header Info":"Informasi Header","Date Information":"Informasi Tanggal","Payment Information":"Informasi Pembayaran","Payment Summary":"Ringkasan Pembayaran","Outstanding Invoices":"Invoice Belum Lunas","Selected Invoices":"Invoice Terpilih","Selected Outstanding":"Tagihan Terpilih","Total Payment":"Total Pembayaran","Bank transaction information for this payment batch":"Informasi transaksi bank untuk kelompok pembayaran ini","Select one or more invoices to allocate this payment":"Pilih satu atau beberapa invoice untuk alokasi pembayaran ini","Summary of selected invoice allocations":"Ringkasan alokasi invoice yang dipilih","One GL Journal will be generated for this payment batch.":"Satu Jurnal GL akan dibuat untuk kelompok pembayaran ini.","One bank transaction can settle multiple invoices.":"Satu transaksi bank dapat melunasi beberapa invoice.","Loading outstanding invoices...":"Memuat invoice yang belum lunas...","Automatically generated from Invoice Details":"Dibuat otomatis dari Rincian Invoice","Preview journal entries based on Invoice Details, Tax (+), and Tax (-)":"Pratinjau jurnal berdasarkan Rincian Invoice, Pajak (+), dan Pajak (-)","Waiting for Transaction":"Menunggu Transaksi","Add Invoice Detail to generate the accounting preview.":"Tambahkan Rincian Invoice untuk membuat pratinjau akuntansi.","Remove Invoice Detail":"Hapus Rincian Invoice","Remove this invoice detail?":"Hapus rincian invoice ini?","You are about to remove:":"Anda akan menghapus:","This action cannot be undone.":"Tindakan ini tidak dapat dibatalkan.","Confirm Delete Chart Of Account":"Konfirmasi Hapus Bagan Akun","View Audit Trail":"Lihat Riwayat Audit","Total Debit":"Total Debit","Total Credit":"Total Kredit","Debit Account":"Akun Debit","Credit Account":"Akun Kredit","Debit:":"Debit:","Credit:":"Kredit:","Account Holder":"Pemilik Rekening","Parent Account":"Akun Induk","Line Amount":"Jumlah Baris","Qty":"Kuantitas","Rate":"Tarif","Difference":"Selisih","Complete":"Selesai","Current":"Saat Ini","Fiscal Year":"Tahun Fiskal","Year":"Tahun","Branch":"Cabang","Click":"Klik","Page":"Halaman","of":"dari","Displaying Record":"Menampilkan Data","Last Closed":"Terakhir Ditutup","Last Reopened":"Terakhir Dibuka Kembali","Invoice Date From":"Tanggal Invoice Dari","Invoice Date To":"Tanggal Invoice Sampai","Amount / Status":"Jumlah / Status","Bank Account No":"Nomor Rekening Bank","Bank Account Number":"Nomor Rekening Bank","Tax Code":"Kode Pajak","Tax Type":"Jenis Pajak","Tax Description":"Deskripsi Pajak","Journal Detail":"Rincian Jurnal","Journal Details":"Rincian Jurnal","Journal Entry":"Entri Jurnal","Journal Entries":"Entri Jurnal","Transaction Date":"Tanggal Transaksi","Transaction No":"Nomor Transaksi","Transaction Type":"Jenis Transaksi","Transaction Detail":"Rincian Transaksi","Transaction Details":"Rincian Transaksi","Document":"Dokumen","Document Date":"Tanggal Dokumen","Document Type":"Jenis Dokumen","Reference Date":"Tanggal Referensi","Bank Details":"Rincian Bank","Bank Information":"Informasi Bank","Bank Account Name":"Nama Rekening Bank","Payment Details":"Rincian Pembayaran","Payment History":"Riwayat Pembayaran","Payment Reference":"Referensi Pembayaran","Payment Allocation":"Alokasi Pembayaran","Allocated Amount":"Jumlah Dialokasikan","Remaining Amount":"Sisa Jumlah","Remaining Balance":"Sisa Saldo","Outstanding Balance":"Saldo Belum Lunas","Total Outstanding":"Total Belum Lunas","Invoice Amount":"Jumlah Invoice","Invoice Status":"Status Invoice","Invoice Type":"Jenis Invoice","Invoice Description":"Deskripsi Invoice","Invoice Information":"Informasi Invoice","Invoice Summary":"Ringkasan Invoice","Invoice List":"Daftar Invoice","Invoice Number":"Nomor Invoice","Vendor Name":"Nama Pemasok","Customer Name":"Nama Pelanggan","Business Partner Name":"Nama Mitra Bisnis","Business Partner Type":"Jenis Mitra Bisnis","Business Partner Code":"Kode Mitra Bisnis","Business Partner Details":"Rincian Mitra Bisnis","Contact Person":"Narahubung","Phone Number":"Nomor Telepon","Phone":"Telepon","Address":"Alamat","City":"Kota","Province":"Provinsi","Country":"Negara","Postal Code":"Kode Pos","Website":"Situs Web","Tax ID":"ID Pajak","NPWP Number":"Nomor NPWP","Default Bank":"Bank Utama","Default Account":"Akun Utama","Account Details":"Rincian Akun","Account Group":"Kelompok Akun","Account Class":"Kelas Akun","Account Category":"Kategori Akun","Account Balance":"Saldo Akun","Opening Date":"Tanggal Pembukaan","Closing Date":"Tanggal Penutupan","Period Status":"Status Periode","Period Name":"Nama Periode","Fiscal Period":"Periode Fiskal","Accounting Year":"Tahun Akuntansi","Start Period":"Periode Awal","End Period":"Periode Akhir","Journal Status":"Status Jurnal","Journal Type":"Jenis Jurnal","Journal Description":"Deskripsi Jurnal","Journal Reference":"Referensi Jurnal","Journal Lines":"Baris Jurnal","Posting Period":"Periode Posting","Posting Status":"Status Posting","Posting Date":"Tanggal Posting","Posting Reference":"Referensi Posting","Posted By":"Diposting Oleh","Void Reason":"Alasan Pembatalan","Reason":"Alasan","Remarks":"Keterangan","Memo":"Memo","Attachments":"Lampiran","Attachment":"Lampiran","Choose File":"Pilih Berkas","Upload File":"Unggah Berkas","View File":"Lihat Berkas","Delete File":"Hapus Berkas","Total Records":"Total Data","Total Transactions":"Total Transaksi","Total Invoices":"Total Invoice","Total Payments":"Total Pembayaran","Total Revenue":"Total Pendapatan","Total Expense":"Total Beban","Total Expenses":"Total Beban","Total Profit":"Total Laba","Net Income":"Laba Bersih","Gross Margin":"Margin Kotor","Net Margin":"Margin Bersih","Profit Margin":"Margin Laba","Financial Position":"Posisi Keuangan","Financial Performance":"Kinerja Keuangan","Financial Summary":"Ringkasan Keuangan","Financial Overview":"Ikhtisar Keuangan","Financial Statements":"Laporan Keuangan","Income Statement":"Laporan Laba Rugi","Statement of Financial Position":"Laporan Posisi Keuangan","Cash Flow Statement":"Laporan Arus Kas","Cash Flow Forecast":"Proyeksi Arus Kas","Trial Balance Report":"Laporan Neraca Saldo","General Ledger Report":"Laporan Buku Besar","Balance Sheet Report":"Laporan Neraca","Profit Loss Report":"Laporan Laba Rugi","Report Period":"Periode Laporan","Report Date":"Tanggal Laporan","As of Date":"Per Tanggal","From Date":"Dari Tanggal","To Date":"Sampai Tanggal","Date Range":"Rentang Tanggal","Apply":"Terapkan","Clear":"Bersihkan","Reset":"Atur Ulang","Generate":"Buat","Generate Report":"Buat Laporan","Run Report":"Jalankan Laporan","Preview":"Pratinjau","Print Preview":"Pratinjau Cetak","Export to Excel":"Ekspor ke Excel","Export to PDF":"Ekspor ke PDF","Download PDF":"Unduh PDF","Download CSV":"Unduh CSV","Download Report":"Unduh Laporan","Print Report":"Cetak Laporan","Refresh Data":"Muat Ulang Data","Reload":"Muat Ulang","Loading data...":"Memuat data...","Please select":"Silakan pilih","Please select an option":"Silakan pilih opsi","Required field":"Kolom wajib diisi","This field is required":"Kolom ini wajib diisi","Invalid date":"Tanggal tidak valid","Invalid amount":"Jumlah tidak valid","Invalid email":"Email tidak valid","Saved successfully":"Berhasil disimpan","Deleted successfully":"Berhasil dihapus","Updated successfully":"Berhasil diperbarui","Created successfully":"Berhasil dibuat","Failed to load data":"Gagal memuat data","Failed to save":"Gagal menyimpan","Failed to delete":"Gagal menghapus","Are you sure you want to delete?":"Apakah Anda yakin ingin menghapus?","Are you sure you want to continue?":"Apakah Anda yakin ingin melanjutkan?","Confirm Action":"Konfirmasi Tindakan","Confirm Delete":"Konfirmasi Penghapusan","Confirm Save":"Konfirmasi Penyimpanan","Confirm Posting":"Konfirmasi Posting","Confirm Void":"Konfirmasi Pembatalan","Yes, Delete":"Ya, Hapus","Yes, Continue":"Ya, Lanjutkan","Yes, Save":"Ya, Simpan","Yes, Post":"Ya, Posting","Yes, Void":"Ya, Batalkan","January":"Januari","February":"Februari","March":"Maret","April":"April","May":"Mei","June":"Juni","July":"Juli","August":"Agustus","September":"September","October":"Oktober","November":"November","December":"Desember","Monday":"Senin","Tuesday":"Selasa","Wednesday":"Rabu","Thursday":"Kamis","Friday":"Jumat","Saturday":"Sabtu","Sunday":"Minggu","Jan":"Jan","Feb":"Feb","Mar":"Mar","Apr":"Apr","Jun":"Jun","Jul":"Jul","Aug":"Agu","Sep":"Sep","Oct":"Okt","Nov":"Nov","Dec":"Des","User Name":"Nama Pengguna","User Role":"Peran Pengguna","User Status":"Status Pengguna","User Details":"Rincian Pengguna","User Information":"Informasi Pengguna","User List":"Daftar Pengguna","User Access":"Akses Pengguna","Access Level":"Tingkat Akses","Access Rights":"Hak Akses","Permission":"Izin Akses","Permissions":"Hak Akses","Last Login":"Login Terakhir","Last Updated":"Terakhir Diperbarui","Last Modified":"Terakhir Diubah","Created Date":"Tanggal Dibuat","Updated Date":"Tanggal Diperbarui","Search User":"Cari Pengguna","Search Users":"Cari Pengguna","Search by Name":"Cari Berdasarkan Nama","Search Full Name or Email...":"Cari nama lengkap atau email...","Logged in as":"Masuk sebagai","You have full User Management access.":"Anda memiliki akses penuh ke Manajemen Pengguna.","Master Data / User Management":"Data Master / Manajemen Pengguna","Asset Details":"Rincian Aset","Asset Information":"Informasi Aset","Asset Category":"Kategori Aset","Asset Type":"Jenis Aset","Asset Status":"Status Aset","Asset Location":"Lokasi Aset","Acquisition Date":"Tanggal Perolehan","Acquisition Cost":"Biaya Perolehan","Depreciation Method":"Metode Penyusutan","Accumulated Depreciation":"Akumulasi Penyusutan","Depreciation Expense":"Beban Penyusutan","Residual Value":"Nilai Residu","Salvage Value":"Nilai Sisa","Disposal Date":"Tanggal Pelepasan","Disposal Value":"Nilai Pelepasan","Book Value":"Nilai Buku","Asset Register":"Daftar Aset","Asset List":"Daftar Aset","Audit Trail":"Riwayat Audit","Audit Log Details":"Rincian Log Audit","Activity Log":"Log Aktivitas","Activity Date":"Tanggal Aktivitas","Performed By":"Dilakukan Oleh","Old Value":"Nilai Lama","New Value":"Nilai Baru","Changes":"Perubahan","Before":"Sebelum","After":"Sesudah","Filter By":"Filter Berdasarkan","Sort By":"Urutkan Berdasarkan","Ascending":"Menaik","Descending":"Menurun","All":"Semua","None":"Tidak Ada","Other":"Lainnya","Others":"Lainnya","Default":"Bawaan","Enabled":"Diaktifkan","Disabled":"Dinonaktifkan","Pending":"Menunggu","Approved":"Disetujui","Rejected":"Ditolak","Completed":"Selesai","Cancelled":"Dibatalkan","Processing":"Diproses","Available":"Tersedia","Unavailable":"Tidak Tersedia","Yes":"Ya"};
+const allModulesDictionary={"No.":"No.","No. Journal":"Nomor Jurnal","No. Invoice":"Nomor Invoice","PO No":"Nomor PO","Payment No":"Nomor Pembayaran","Reference No":"Nomor Referensi","Document No":"Nomor Dokumen","Journal No.":"Nomor Jurnal","Invoice No.":"Nomor Invoice","Find":"Cari","Find By":"Cari Berdasarkan","Keyword":"Kata Kunci","Download Excel":"Unduh Excel","Preview HTML":"Pratinjau HTML","Journal Preview":"Pratinjau Jurnal","Accounting Preview":"Pratinjau Akuntansi","Tax Account":"Akun Pajak","Tax Base":"DPP","Tax (+)":"Pajak (+)","Tax (-)":"Pajak (-)","No Tax":"Tanpa Pajak","No Tax (+) found from Invoice Details.":"Tidak ditemukan Pajak (+) dari Rincian Invoice.","No Tax (-) found from Invoice Details.":"Tidak ditemukan Pajak (-) dari Rincian Invoice.","No accounting preview available.":"Pratinjau akuntansi belum tersedia.","No forecast generated.":"Belum ada proyeksi yang dibuat.","No detail added.":"Belum ada rincian ditambahkan.","No data":"Tidak ada data","No records found":"Data tidak ditemukan","No records available":"Belum ada data","No transactions found":"Transaksi tidak ditemukan","No account found":"Akun tidak ditemukan","No journal found":"Jurnal tidak ditemukan","Record ID":"ID Data","Copy ID":"Salin ID","All Status":"Semua Status","All Role":"Semua Peran","All Roles":"Semua Peran","All Type":"Semua Jenis","All Types":"Semua Jenis","All Category":"Semua Kategori","All Period":"Semua Periode","All Data":"Semua Data","Show All Data":"Tampilkan Semua Data","Show All Outstanding":"Tampilkan Semua Tagihan Belum Lunas","Show":"Tampilkan","Select All":"Pilih Semua","Select Vendor":"Pilih Pemasok","Select Customer":"Pilih Pelanggan","Select Bank Account":"Pilih Rekening Bank","Select Account":"Pilih Akun","Select Period":"Pilih Periode","Select Role":"Pilih Peran","Select Type":"Pilih Jenis","Select Category":"Pilih Kategori","Select Invoice":"Pilih Invoice","Select Payment":"Pilih Pembayaran","Add User":"Tambah Pengguna","Edit User":"Ubah Pengguna","Delete User":"Hapus Pengguna","Add Business Partner":"Tambah Mitra Bisnis","Add Accounting Period":"Tambah Periode Akuntansi","Add Invoice Detail":"Tambah Rincian Invoice","Add Detail":"Tambah Rincian","Save Detail":"Simpan Rincian","Save Draft":"Simpan Draf","Save Payment":"Simpan Pembayaran","Add Tax":"Tambah Pajak","Add Invoice":"Tambah Invoice","Add Account":"Tambah Akun","Add Journal":"Tambah Jurnal","Add Asset":"Tambah Aset","Add Bank":"Tambah Bank","Header Info":"Informasi Header","Date Information":"Informasi Tanggal","Payment Information":"Informasi Pembayaran","Payment Summary":"Ringkasan Pembayaran","Outstanding Invoices":"Invoice Belum Lunas","Selected Invoices":"Invoice Terpilih","Selected Outstanding":"Tagihan Terpilih","Total Payment":"Total Pembayaran","Bank transaction information for this payment batch":"Informasi transaksi bank untuk kelompok pembayaran ini","Select one or more invoices to allocate this payment":"Pilih satu atau beberapa invoice untuk alokasi pembayaran ini","Summary of selected invoice allocations":"Ringkasan alokasi invoice yang dipilih","One GL Journal will be generated for this payment batch.":"Satu Jurnal GL akan dibuat untuk kelompok pembayaran ini.","One bank transaction can settle multiple invoices.":"Satu transaksi bank dapat melunasi beberapa invoice.","Loading outstanding invoices...":"Memuat invoice yang belum lunas...","Automatically generated from Invoice Details":"Dibuat otomatis dari Rincian Invoice","Preview journal entries based on Invoice Details, Tax (+), and Tax (-)":"Pratinjau jurnal berdasarkan Rincian Invoice, Pajak (+), dan Pajak (-)","Waiting for Transaction":"Menunggu Transaksi","Add Invoice Detail to generate the accounting preview.":"Tambahkan Rincian Invoice untuk membuat pratinjau akuntansi.","Remove Invoice Detail":"Hapus Rincian Invoice","Remove this invoice detail?":"Hapus rincian invoice ini?","You are about to remove:":"Anda akan menghapus:","This action cannot be undone.":"Tindakan ini tidak dapat dibatalkan.","Confirm Delete Chart Of Account":"Konfirmasi Hapus Bagan Akun","View Audit Trail":"Lihat Riwayat Audit","Total Debit":"Total Debit","Total Credit":"Total Kredit","Debit Account":"Akun Debit","Credit Account":"Akun Kredit","Debit:":"Debit:","Credit:":"Kredit:","Account Holder":"Pemilik Rekening","Parent Account":"Akun Induk","Line Amount":"Jumlah Baris","Qty":"Kuantitas","Rate":"Tarif","Difference":"Selisih","Complete":"Selesai","Current":"Saat Ini","Fiscal Year":"Tahun Fiskal","Year":"Tahun","Branch":"Cabang","Click":"Klik","Page":"Halaman","of":"dari","Displaying Record":"Menampilkan Data","Last Closed":"Terakhir Ditutup","Last Reopened":"Terakhir Dibuka Kembali","Invoice Date From":"Tanggal Invoice Dari","Invoice Date To":"Tanggal Invoice Sampai","Amount / Status":"Jumlah / Status","Bank Account No":"Nomor Rekening Bank","Bank Account Number":"Nomor Rekening Bank","Tax Code":"Kode Pajak","Tax Type":"Jenis Pajak","Tax Description":"Deskripsi Pajak","Journal Detail":"Rincian Jurnal","Journal Details":"Rincian Jurnal","Journal Entry":"Entri Jurnal","Journal Entries":"Entri Jurnal","Transaction Date":"Tanggal Transaksi","Transaction No":"Nomor Transaksi","Transaction Type":"Jenis Transaksi","Transaction Detail":"Rincian Transaksi","Transaction Details":"Rincian Transaksi","Document":"Dokumen","Document Date":"Tanggal Dokumen","Document Type":"Jenis Dokumen","Reference Date":"Tanggal Referensi","Bank Details":"Rincian Bank","Bank Information":"Informasi Bank","Bank Account Name":"Nama Rekening Bank","Payment Details":"Rincian Pembayaran","Payment History":"Riwayat Pembayaran","Payment Reference":"Referensi Pembayaran","Payment Allocation":"Alokasi Pembayaran","Allocated Amount":"Jumlah Dialokasikan","Remaining Amount":"Sisa Jumlah","Remaining Balance":"Sisa Saldo","Outstanding Balance":"Saldo Belum Lunas","Total Outstanding":"Total Belum Lunas","Invoice Amount":"Jumlah Invoice","Invoice Status":"Status Invoice","Invoice Type":"Jenis Invoice","Invoice Description":"Deskripsi Invoice","Invoice Information":"Informasi Invoice","Invoice Summary":"Ringkasan Invoice","Invoice List":"Daftar Invoice","Invoice Number":"Nomor Invoice","Vendor Name":"Nama Pemasok","Customer Name":"Nama Pelanggan","Business Partner Name":"Nama Mitra Bisnis","Business Partner Type":"Jenis Mitra Bisnis","Business Partner Code":"Kode Mitra Bisnis","Business Partner Details":"Rincian Mitra Bisnis","Contact Person":"Narahubung","Phone Number":"Nomor Telepon","Phone":"Telepon","Address":"Alamat","City":"Kota","Province":"Provinsi","Country":"Negara","Postal Code":"Kode Pos","Website":"Situs Web","Tax ID":"ID Pajak","NPWP Number":"Nomor NPWP","Default Bank":"Bank Utama","Default Account":"Akun Utama","Account Details":"Rincian Akun","Account Group":"Kelompok Akun","Account Class":"Kelas Akun","Account Category":"Kategori Akun","Account Balance":"Saldo Akun","Opening Date":"Tanggal Pembukaan","Closing Date":"Tanggal Penutupan","Period Status":"Status Periode","Period Name":"Nama Periode","Fiscal Period":"Periode Fiskal","Accounting Year":"Tahun Akuntansi","Start Period":"Periode Awal","End Period":"Periode Akhir","Journal Status":"Status Jurnal","Journal Type":"Jenis Jurnal","Journal Description":"Deskripsi Jurnal","Journal Reference":"Referensi Jurnal","Journal Lines":"Baris Jurnal","Posting Period":"Periode Posting","Posting Status":"Status Posting","Posting Date":"Tanggal Posting","Posting Reference":"Referensi Posting","Posted By":"Diposting Oleh","Void Reason":"Alasan Pembatalan","Reason":"Alasan","Remarks":"Keterangan","Memo":"Memo","Attachments":"Lampiran","Attachment":"Lampiran","Choose File":"Pilih Berkas","Upload File":"Unggah Berkas","View File":"Lihat Berkas","Delete File":"Hapus Berkas","Total Records":"Total Data","Total Transactions":"Total Transaksi","Total Invoices":"Total Invoice","Total Payments":"Total Pembayaran","Total Revenue":"Total Pendapatan","Total Expense":"Total Beban","Total Expenses":"Total Beban","Total Profit":"Total Laba","Net Income":"Laba Bersih","Gross Margin":"Margin Kotor","Net Margin":"Margin Bersih","Profit Margin":"Margin Laba","Financial Position":"Posisi Keuangan","Financial Performance":"Kinerja Keuangan","Financial Summary":"Ringkasan Keuangan","Financial Overview":"Ikhtisar Keuangan","Financial Statements":"Laporan Keuangan","Income Statement":"Laporan Laba Rugi","Statement of Financial Position":"Laporan Posisi Keuangan","Cash Flow Statement":"Laporan Arus Kas","Cash Flow Forecast":"Proyeksi Arus Kas","Trial Balance Report":"Laporan Neraca Saldo","General Ledger Report":"Laporan Buku Besar","Balance Sheet Report":"Laporan Neraca","Profit Loss Report":"Laporan Laba Rugi","Report Period":"Periode Laporan","Report Date":"Tanggal Laporan","As of Date":"Per Tanggal","From Date":"Dari Tanggal","To Date":"Sampai Tanggal","Date Range":"Rentang Tanggal","Apply":"Terapkan","Clear":"Bersihkan","Reset":"Atur Ulang","Generate":"Buat","Generate Report":"Buat Laporan","Run Report":"Jalankan Laporan","Preview":"Pratinjau","Print Preview":"Pratinjau Cetak","Export to Excel":"Ekspor ke Excel","Export to PDF":"Ekspor ke PDF","Download PDF":"Unduh PDF","Download CSV":"Unduh CSV","Download Report":"Unduh Laporan","Print Report":"Cetak Laporan","Refresh Data":"Muat Ulang Data","Reload":"Muat Ulang","Loading data...":"Memuat data...","Please select":"Silakan pilih","Please select an option":"Silakan pilih opsi","Required field":"Kolom wajib diisi","This field is required":"Kolom ini wajib diisi","Invalid date":"Tanggal tidak valid","Invalid amount":"Jumlah tidak valid","Invalid email":"Email tidak valid","Saved successfully":"Berhasil disimpan","Deleted successfully":"Berhasil dihapus","Updated successfully":"Berhasil diperbarui","Created successfully":"Berhasil dibuat","Failed to load data":"Gagal memuat data","Failed to save":"Gagal menyimpan","Failed to delete":"Gagal menghapus","Are you sure you want to delete?":"Apakah Anda yakin ingin menghapus?","Are you sure you want to continue?":"Apakah Anda yakin ingin melanjutkan?","Confirm Action":"Konfirmasi Tindakan","Confirm Delete":"Konfirmasi Penghapusan","Confirm Save":"Konfirmasi Penyimpanan","Confirm Posting":"Konfirmasi Posting","Confirm Void":"Konfirmasi Pembatalan","Yes, Delete":"Ya, Hapus","Yes, Continue":"Ya, Lanjutkan","Yes, Save":"Ya, Simpan","Yes, Post":"Ya, Posting","Yes, Void":"Ya, Batalkan","January":"Januari","February":"Februari","March":"Maret","April":"April","May":"Mei","June":"Juni","July":"Juli","August":"Agustus","September":"September","October":"Oktober","November":"November","December":"Desember","Monday":"Senin","Tuesday":"Selasa","Wednesday":"Rabu","Thursday":"Kamis","Friday":"Jumat","Saturday":"Sabtu","Sunday":"Minggu","Jan":"Jan","Feb":"Feb","Mar":"Mar","Apr":"Apr","Jun":"Jun","Jul":"Jul","Aug":"Agu","Sep":"Sep","Oct":"Okt","Nov":"Nov","Dec":"Des","User Name":"Nama Pengguna","User Role":"Peran Pengguna","User Status":"Status Pengguna","User Details":"Rincian Pengguna","User Information":"Informasi Pengguna","User List":"Daftar Pengguna","User Access":"Akses Pengguna","Access Level":"Tingkat Akses","Access Rights":"Hak Akses","Permission":"Izin Akses","Permissions":"Hak Akses","Last Login":"Login Terakhir","Last Updated":"Terakhir Diperbarui","Last Modified":"Terakhir Diubah","Created Date":"Tanggal Dibuat","Updated Date":"Tanggal Diperbarui","Search User":"Cari Pengguna","Search Users":"Cari Pengguna","Search by Name":"Cari Berdasarkan Nama","Search Full Name or Email...":"Cari nama lengkap atau email...","Logged in as":"Masuk sebagai","You have full User Management access.":"Anda memiliki akses penuh ke Manajemen Pengguna.","Master Data / User Management":"Data Master / Manajemen Pengguna","Asset Details":"Rincian Aset","Asset Information":"Informasi Aset","Asset Category":"Kategori Aset","Asset Type":"Jenis Aset","Asset Status":"Status Aset","Asset Location":"Lokasi Aset","Acquisition Date":"Tanggal Perolehan","Acquisition Cost":"Biaya Perolehan","Depreciation Method":"Metode Penyusutan","Accumulated Depreciation":"Akumulasi Penyusutan","Depreciation Expense":"Beban Penyusutan","Residual Value":"Nilai Residu","Salvage Value":"Nilai Sisa","Disposal Date":"Tanggal Pelepasan","Disposal Value":"Nilai Pelepasan","Book Value":"Nilai Buku","Asset Register":"Daftar Aset","Asset List":"Daftar Aset","Audit Trail":"Riwayat Audit","Audit Log Details":"Rincian Log Audit","Activity Log":"Log Aktivitas","Activity Date":"Tanggal Aktivitas","Performed By":"Dilakukan Oleh","Old Value":"Nilai Lama","New Value":"Nilai Baru","Changes":"Perubahan","Before":"Sebelum","After":"Sesudah","Filter By":"Filter Berdasarkan","Sort By":"Urutkan Berdasarkan","Ascending":"Menaik","Descending":"Menurun","All":"Semua","None":"Tidak Ada","Other":"Lainnya","Others":"Lainnya","Default":"Bawaan","Enabled":"Diaktifkan","Disabled":"Dinonaktifkan","Pending":"Menunggu","Approved":"Disetujui","Rejected":"Ditolak","Completed":"Selesai","Cancelled":"Dibatalkan","Processing":"Diproses","Available":"Tersedia","Unavailable":"Tidak Tersedia","Yes":"Ya"};
 Object.assign(dictionary,allModulesDictionary);
 // Additional visible Business Partner labels; stored values remain untouched.
 const businessPartnerDictionary={
@@ -261,7 +261,7 @@ const invoiceAPDictionary = {
   "No Invoice": "No. Invoice",
   "Invoice No.": "No. Invoice",
   "Payment Amount": "Jumlah Pembayaran",
-  "Tax Base": "Dasar Pengenaan Pajak",
+  "Tax Base": "DPP",
   "Tax Amount": "Jumlah Pajak",
   "Tax Account": "Akun Pajak",
   "Rate": "Tarif",
@@ -454,7 +454,7 @@ Object.assign(reverse, {
   "Lihat": "View",
   "Cetak": "Print",
   "Jumlah Pembayaran": "Payment Amount",
-  "Dasar Pengenaan Pajak": "Tax Base",
+  "DPP": "Tax Base",
   "Jumlah Pajak": "Tax Amount",
   "Akun Pajak": "Tax Account",
   "Tarif": "Rate",
@@ -577,6 +577,340 @@ Object.assign(reverse, {
 
 // Invoice AR: terjemahan tambahan untuk label dinamis.
 Object.assign(dictionary,{"Inv Date": "Tanggal Invoice", "Due Date": "Tanggal Jatuh Tempo", "AR Payment": "Pembayaran Invoice AR", "Create one payment for multiple outstanding Account Receivable invoices": "Buat satu penerimaan untuk beberapa Invoice AR yang belum lunas", "Type account code or bank account name": "Ketik kode akun atau nama rekening bank", "Transfer / bank reference": "Referensi transfer / bank", "Payment description": "Deskripsi penerimaan", "Detailed DPP / Tax (+) / Tax (-) journal allocation will continue to follow FINOVA AP Payment accounting logic.": "Alokasi jurnal DPP / Pajak (+) / Pajak (-) tetap mengikuti logika akuntansi pembayaran FINOVA yang berlaku.", "Journal POSTED": "Jurnal SUDAH DIPOSTING", "RECEIVABLE": "PIUTANG AR", "Total Receivable": "Total Piutang AR"});
+// DPP label in Invoice AP/AR tax (+/-) tables, without changing tax calculations.
+Object.assign(dictionary, {
+  'Tax Base':'DPP',
+  'Dasar Pengenaan Pajak':'DPP',
+  'Dasar Pengenaan P':'DPP',
+  'DPP':'DPP'
+});
+Object.assign(reverse, {'DPP':'Tax Base'});
+
+// GL Journal UI-only translations (preserve data and status values).
+Object.assign(dictionary,{"General Journal": "Jurnal Umum", "Accounting / General Journal": "Akuntansi / Jurnal Umum", "Accounting Date From": "Tanggal Akuntansi Dari", "Accounting Date To": "Tanggal Akuntansi Sampai", "Journal Status": "Status Jurnal", "Show Draft Only": "Hanya Draf", "Show Posted Only": "Hanya Sudah Diposting", "Show Void Only": "Hanya Dibatalkan", "Search Journal No or Description...": "Cari nomor jurnal atau deskripsi...", "Journal Information": "Informasi Jurnal", "Journal Information Header": "Header Informasi Jurnal", "General Journal Header": "Informasi Utama Jurnal", "Journal transaction detail": "Rincian transaksi jurnal", "Journal transaction summary": "Ringkasan transaksi jurnal", "Accounting Date": "Tanggal Akuntansi", "Posting Period": "Periode Posting", "Record ID": "ID Data", "Add Journal": "Tambah Jurnal", "Add Line": "Tambah Baris", "Add Journal Detail": "Tambah Rincian Jurnal", "Add debit and credit transaction line": "Tambah baris transaksi debit dan kredit", "Select Chart of Account": "Pilih Akun", "-- Optional --": "-- Opsional --", "Save Line": "Simpan Baris", "Save & Post": "Simpan dan Posting", "No journal detail available.": "Belum ada rincian jurnal.", "Click Add Line to add journal detail.": "Klik Tambah Baris untuk menambahkan rincian jurnal.", "Journal will be saved as": "Jurnal akan disimpan sebagai", "until it is posted.": "hingga diposting.", "Items": "Baris", "Inv No": "No. Invoice", "PO No": "No. PO", "Desc": "Deskripsi", "Debits": "Debit", "Credits": "Kredit", "Created": "Dibuat", "Source": "Sumber", "AR Invoice": "Invoice AR", "AP Invoice": "Invoice AP", "Input journal description...": "Masukkan deskripsi jurnal...", "Enter journal description...": "Masukkan deskripsi jurnal...", "Total Line": "Total Baris", "Total Amount": "Jumlah Total", "No. Journal": "No. Jurnal", "Journal Summary": "Ringkasan Jurnal", "Draft": "Draf", "Posted": "Sudah Diposting", "Void": "Dibatalkan", "Save Draft": "Simpan Draf", "Journal Detail": "Rincian Jurnal"});
+Object.assign(reverse,{"Jurnal Umum": "General Journal", "Akuntansi / Jurnal Umum": "Accounting / General Journal", "Tanggal Akuntansi Dari": "Accounting Date From", "Tanggal Akuntansi Sampai": "Accounting Date To", "Status Jurnal": "Journal Status", "Hanya Draf": "Show Draft Only", "Hanya Sudah Diposting": "Show Posted Only", "Hanya Dibatalkan": "Show Void Only", "Cari nomor jurnal atau deskripsi...": "Search Journal No or Description...", "Informasi Jurnal": "Journal Information", "Header Informasi Jurnal": "Journal Information Header", "Informasi Utama Jurnal": "General Journal Header", "Rincian transaksi jurnal": "Journal transaction detail", "Ringkasan transaksi jurnal": "Journal transaction summary", "Tanggal Akuntansi": "Accounting Date", "Periode Posting": "Posting Period", "ID Data": "Record ID", "Tambah Jurnal": "Add Journal", "Tambah Baris": "Add Line", "Tambah Rincian Jurnal": "Add Journal Detail", "Tambah baris transaksi debit dan kredit": "Add debit and credit transaction line", "Pilih Akun": "Select Chart of Account", "-- Opsional --": "-- Optional --", "Simpan Baris": "Save Line", "Simpan dan Posting": "Save & Post", "Belum ada rincian jurnal.": "No journal detail available.", "Klik Tambah Baris untuk menambahkan rincian jurnal.": "Click Add Line to add journal detail.", "Jurnal akan disimpan sebagai": "Journal will be saved as", "hingga diposting.": "until it is posted.", "Baris": "Items", "No. Invoice": "Inv No", "No. PO": "PO No", "Deskripsi": "Desc", "Debit": "Debits", "Kredit": "Credits", "Dibuat": "Created", "Sumber": "Source", "Invoice AR": "AR Invoice", "Invoice AP": "AP Invoice", "Masukkan deskripsi jurnal...": "Enter journal description...", "Total Baris": "Total Line", "Jumlah Total": "Total Amount", "No. Jurnal": "No. Journal", "Ringkasan Jurnal": "Journal Summary", "Draf": "Draft", "Sudah Diposting": "Posted", "Dibatalkan": "Void", "Simpan Draf": "Save Draft", "Rincian Jurnal": "Journal Detail"});
+
+// Asset Management: UI-only bilingual labels. Preserve asset codes, enum values and accounting behavior.
+const fixedAssetDictionary={
+  "Fixed Daftar Aset": "Daftar Aset Tetap",
+  "Fixed Asset Register": "Daftar Aset Tetap",
+  "Accounting / Fixed Daftar Aset & Penyusutan": "Akuntansi / Daftar Aset Tetap & Penyusutan",
+  "Accounting / Fixed Asset & Depreciation": "Akuntansi / Aset Tetap & Penyusutan",
+  "Accounting / Fixed Asset Register & Depreciation": "Akuntansi / Daftar Aset Tetap & Penyusutan",
+  "New Fixed Asset": "Tambah Aset Tetap",
+  "Save Fixed Asset": "Simpan Aset Tetap",
+  "Edit Fixed Asset": "Ubah Aset Tetap",
+  "Delete Fixed Asset": "Hapus Aset Tetap",
+  "Dispose Fixed Asset": "Pelepasan Aset Tetap",
+  "Fixed Kategori Aset": "Kategori Aset Tetap",
+  "Fixed Asset Category": "Kategori Aset Tetap",
+  "Save Category": "Simpan Kategori",
+  "Category Name": "Nama Kategori",
+  "Useful Life (Months)": "Masa Manfaat (Bulan)",
+  "Useful Life (Months) *": "Masa Manfaat (Bulan) *",
+  "Useful Life (Months)*": "Masa Manfaat (Bulan)*",
+  "Asset Account": "Akun Aset",
+  "Accum. Dep.": "Akum. Penyusutan",
+  "Accumulated Dep.": "Akumulasi Penyusutan",
+  "Accumulated": "Akumulasi",
+  "Accum. Depreciation": "Akumulasi Penyusutan",
+  "Gain on Disposal": "Laba Pelepasan Aset",
+  "Loss on Disposal": "Rugi Pelepasan Aset",
+  "Asset No": "No. Aset",
+  "Asset No.": "No. Aset",
+  "Asset Name": "Nama Aset",
+  "Asset No, Asset Name, Category or Location...": "No. Aset, Nama Aset, Kategori, atau Lokasi...",
+  "Asset No, Asset Name, Category or Location": "No. Aset, Nama Aset, Kategori, atau Lokasi",
+  "Acquisition": "Perolehan",
+  "Acquisition Date": "Tanggal Perolehan",
+  "Cost": "Biaya Perolehan",
+  "Commercial Accum.": "Akumulasi Komersial",
+  "Fiscal Accum.": "Akumulasi Fiskal",
+  "Fiscal NBV": "Nilai Buku Fiskal",
+  "Fiscal Group": "Kelompok Fiskal",
+  "Fiscal Method": "Metode Fiskal",
+  "Method": "Metode",
+  "Life": "Masa Manfaat",
+  "Location": "Lokasi",
+  "Fiscal Register": "Daftar Fiskal",
+  "Fiscal Fixed Daftar Aset": "Daftar Fiskal Aset Tetap",
+  "Fiscal Fixed Asset Register": "Daftar Fiskal Aset Tetap",
+  "Commercial vs Fiscal Penyusutan - Indonesia": "Penyusutan Komersial vs Fiskal - Indonesia",
+  "Commercial vs Fiscal Depreciation - Indonesia": "Penyusutan Komersial vs Fiskal - Indonesia",
+  "Fiscal values are maintained as a tax subledger and do not post depreciation journals to the Buku Besar.": "Nilai fiskal dicatat dalam buku pembantu pajak dan tidak membentuk jurnal penyusutan pada Buku Besar.",
+  "Fiscal values are maintained as a tax subledger and do not post depreciation journals to the General Ledger.": "Nilai fiskal dicatat dalam buku pembantu pajak dan tidak membentuk jurnal penyusutan pada Buku Besar.",
+  "Fiscal Penyusutan (Indonesia)": "Penyusutan Fiskal (Indonesia)",
+  "Fiscal Depreciation (Indonesia)": "Penyusutan Fiskal (Indonesia)",
+  "Fiscal Penyusutan": "Penyusutan Fiskal",
+  "Fiscal Depreciation": "Penyusutan Fiskal",
+  "Tax subledger only. Fiscal depreciation does not create or replace the commercial GL journal.": "Hanya untuk buku pembantu pajak. Penyusutan fiskal tidak membuat atau menggantikan jurnal GL komersial.",
+  "Important: commercial depreciation remains the source of the GL journal. Fiscal depreciation is calculated separately for tax reconciliation.": "Penting: penyusutan komersial tetap menjadi dasar jurnal GL. Penyusutan fiskal dihitung terpisah untuk rekonsiliasi pajak.",
+  "Important:": "Penting:",
+  "Fiscal Classification": "Klasifikasi Fiskal",
+  "Non-Building": "Bukan Bangunan",
+  "Building": "Bangunan",
+  "Fiscal Start": "Mulai Penyusutan Fiskal",
+  "Fiscal Life (Months)": "Masa Manfaat Fiskal (Bulan)",
+  "Fiscal Rate / Year (%)": "Tarif Fiskal per Tahun (%)",
+  "Tax Reference": "Referensi Pajak",
+  "Group 1 - 4 Years": "Kelompok 1 - 4 Tahun",
+  "Group 2 - 8 Years": "Kelompok 2 - 8 Tahun",
+  "Group 3 - 16 Years": "Kelompok 3 - 16 Tahun",
+  "Group 4 - 20 Years": "Kelompok 4 - 20 Tahun",
+  "Straight Line": "Garis Lurus",
+  "Declining Balance": "Saldo Menurun",
+  "Depreciation Start": "Mulai Penyusutan",
+  "Proceeds / Selling Price": "Hasil Penjualan / Harga Jual",
+  "Cash / Bank / Disposal Proceeds Account": "Akun Kas / Bank / Hasil Pelepasan",
+  "Current Book Value:": "Nilai Buku Saat Ini:",
+  "Current Book Value": "Nilai Buku Saat Ini",
+  "Monthly depreciation:": "Penyusutan bulanan:",
+  "Monthly depreciation": "Penyusutan Bulanan",
+  "Book value:": "Nilai buku:",
+  "Create Draft Penyusutan": "Buat Draf Penyusutan",
+  "Create Draft Depreciation": "Buat Draf Penyusutan",
+  "Create New Draft": "Buat Draf Baru",
+  "Create New Draft Depreciation": "Buat Draf Penyusutan Baru",
+  "Create New Draft Penyusutan": "Buat Draf Penyusutan Baru",
+  "Depreciation Date": "Tanggal Penyusutan",
+  "Penyusutan Date": "Tanggal Penyusutan",
+  "Dispose & Create Journal": "Lepas Aset & Buat Jurnal",
+  "Delete this Fixed Asset?": "Hapus aset tetap ini?",
+  "Are you sure you want to delete this Fixed Asset?": "Apakah Anda yakin ingin menghapus aset tetap ini?",
+  "Are you sure you want to delete this fixed asset?": "Apakah Anda yakin ingin menghapus aset tetap ini?",
+  "Are you sure you want to delete this Fixed Aset?": "Apakah Anda yakin ingin menghapus aset tetap ini?",
+  "Are you sure you want to delete this Aset Tetap?": "Apakah Anda yakin ingin menghapus aset tetap ini?",
+  "Type COA code or account name...": "Ketik kode COA atau nama akun...",
+  "Select Category": "Pilih Kategori",
+  "Select Account": "Pilih Akun",
+  "Search Asset": "Cari Aset",
+  "Download Excel": "Unduh Excel",
+  "Fiscal": "Fiskal",
+  "Commercial": "Komersial",
+  "Selisih": "Selisih",
+  "Disposal": "Pelepasan",
+  "Depreciation": "Penyusutan",
+  "Fiscal Group 2": "Kelompok Fiskal 2",
+  "Fiscal Group 3": "Kelompok Fiskal 3",
+  "Asset No *": "No. Aset *",
+  "Asset Name *": "Nama Aset *",
+  "Category *": "Kategori *",
+  "Code *": "Kode *",
+  "Asset No*": "No. Aset*",
+  "Asset Name*": "Nama Aset*",
+  "Category*": "Kategori*",
+  "Code*": "Kode*",
+  "Asset No:": "No. Aset:",
+  "Asset Name:": "Nama Aset:",
+  "Category:": "Kategori:",
+  "months": "bulan",
+  "month": "bulan",
+  "Important: commercial depreciation remains the source of the GL journal. Fiscal depreciation is calculated separately for tax reconciliation.": "Penting: penyusutan komersial tetap menjadi dasar jurnal GL. Penyusutan fiskal dihitung secara terpisah untuk rekonsiliasi pajak.",
+  "commercial depreciation remains the source of the GL journal. Fiscal depreciation is calculated separately for tax reconciliation.": "penyusutan komersial tetap menjadi dasar jurnal GL. Penyusutan fiskal dihitung secara terpisah untuk rekonsiliasi pajak.",
+  "Commercial depreciation remains the source of the GL journal. Fiscal depreciation is calculated separately for tax reconciliation.": "Penyusutan komersial tetap menjadi dasar jurnal GL. Penyusutan fiskal dihitung secara terpisah untuk rekonsiliasi pajak.",
+  "Commercial depreciation remains the source of the GL Journal. Fiscal depreciation is calculated separately for tax reconciliation.": "Penyusutan komersial tetap menjadi dasar jurnal GL. Penyusutan fiskal dihitung secara terpisah untuk rekonsiliasi pajak.",
+  "96 months": "96 bulan"
+};
+Object.assign(dictionary,fixedAssetDictionary);
+Object.assign(reverse,Object.fromEntries(Object.entries(fixedAssetDictionary).map(([en,id])=>[id,en])));
+Object.assign(reverse,{"Penyusutan":"Depreciation","Kategori Aset Tetap":"Fixed Asset Category","Daftar Aset Tetap":"Fixed Asset Register","No. Aset":"Asset No","Masa Manfaat (Bulan)":"Useful Life (Months)"});
+// Preserve canonical English labels for the fixed-asset forms when switching back to EN.
+Object.assign(reverse, {
+  "No. Aset *":"Asset No *",
+  "Nama Aset *":"Asset Name *",
+  "Kategori *":"Category *",
+  "Kode *":"Code *",
+  "No. Aset*":"Asset No*",
+  "Nama Aset*":"Asset Name*",
+  "Kategori*":"Category*",
+  "Kode*":"Code*",
+  "96 bulan":"96 months",
+  "Penting: penyusutan komersial tetap menjadi dasar jurnal GL. Penyusutan fiskal dihitung secara terpisah untuk rekonsiliasi pajak.":"Important: commercial depreciation remains the source of the GL journal. Fiscal depreciation is calculated separately for tax reconciliation."
+});
+
+// Report modules: UI text only. Never alter source account codes, report figures or stored select values.
+const reportModuleDictionary={
+  "Accounting / Buku Besar": "Akuntansi / Buku Besar",
+  "Accounting / Neraca": "Akuntansi / Neraca",
+  "Accounting / Laba Rugi": "Akuntansi / Laba Rugi",
+  "Accounting / Neraca Saldo Year": "Akuntansi / Neraca Saldo Tahunan",
+  "Finance / Weekly Proyeksi Arus Kas": "Keuangan / Proyeksi Arus Kas Mingguan",
+  "Select COA": "Pilih COA",
+  "Type Account Code or Account Name...": "Ketik kode akun atau nama akun...",
+  "Search GL Journal Description...": "Cari deskripsi jurnal GL...",
+  "Search Account Code or Account Name...": "Cari kode akun atau nama akun...",
+  "Show All Accounts": "Tampilkan Semua Akun",
+  "Show All Neraca Accounts": "Tampilkan Semua Akun Neraca",
+  "Show All P&L Accounts": "Tampilkan Semua Akun Laba Rugi",
+  "Beginning Year": "Saldo Awal Tahun",
+  "ASSETS": "ASET",
+  "REVENUE": "PENDAPATAN",
+  "LIABILITIES": "LIABILITAS",
+  "EXPENSES": "BEBAN",
+  "EQUITY": "EKUITAS",
+  "Jan-26": "Jan-26",
+  "Aug-26": "Agu-26",
+  "Oct-26": "Okt-26",
+  "Dec-26": "Des-26",
+  "Neraca Saldo Year": "Neraca Saldo Tahunan",
+  "Trial Balance Year": "Neraca Saldo Tahunan",
+  "Financial Statement": "Laporan Keuangan",
+  "Generate complete financial reports for the selected reporting period.": "Buat laporan keuangan lengkap untuk periode pelaporan yang dipilih.",
+  "Report Configuration": "Pengaturan Laporan",
+  "Select the reporting period and comparative period for the financial statement.": "Pilih periode pelaporan dan periode pembanding untuk laporan keuangan.",
+  "Reporting Period": "Periode Pelaporan",
+  "Main financial statement period.": "Periode utama laporan keuangan.",
+  "Comparative Period": "Periode Pembanding",
+  "Period used for financial comparison.": "Periode yang digunakan untuk perbandingan keuangan.",
+  "Statement Selection": "Pilihan Laporan Keuangan",
+  "Select the financial reports to include in this financial statement.": "Pilih laporan yang akan disertakan dalam laporan keuangan ini.",
+  "Statement of Changes in Equity": "Laporan Perubahan Ekuitas",
+  "Assets, liabilities and equity as of the reporting period.": "Aset, liabilitas, dan ekuitas pada periode pelaporan.",
+  "Revenue, expenses and profit for the reporting period.": "Pendapatan, beban, dan laba untuk periode pelaporan.",
+  "Reconciliation of opening and closing equity.": "Rekonsiliasi ekuitas awal dan akhir.",
+  "Cash and cash equivalents reconciliation.": "Rekonsiliasi kas dan setara kas.",
+  "Notes to Laporan Keuangan": "Catatan atas Laporan Keuangan",
+  "Notes to Financial Statements": "Catatan atas Laporan Keuangan",
+  "Basis of preparation, policies and disclosures.": "Dasar penyusunan, kebijakan akuntansi, dan pengungkapan.",
+  "Financial statements will be generated using posted accounting transactions only.": "Laporan keuangan hanya dibuat berdasarkan transaksi akuntansi yang sudah diposting.",
+  "Weekly Proyeksi Arus Kas": "Proyeksi Arus Kas Mingguan",
+  "Manual Forecast": "Proyeksi Manual",
+  "New Manual Cash Forecast": "Tambah Proyeksi Kas Manual",
+  "Start Week": "Minggu Mulai",
+  "Number of Weeks": "Jumlah Minggu",
+  "13 Weeks": "13 Minggu",
+  "Generate Forecast": "Buat Proyeksi",
+  "Auto: Aging AR/AP • Manual: Planning • Opening: Posted GL": "Otomatis: Umur AR/AP • Manual: Perencanaan • Saldo Awal: GL Terposting",
+  "Treasury Forecast Control": "Pengaturan Proyeksi Kas",
+  "Scenario, realization assumptions, minimum cash buffer, and available credit facility.": "Skenario, asumsi realisasi, batas minimum kas, dan fasilitas kredit yang tersedia.",
+  "13-Week Treasury Ready": "Proyeksi Kas 13 Minggu Siap",
+  "Scenario": "Skenario",
+  "Base": "Dasar",
+  "Optimistic": "Optimistis",
+  "Pessimistic": "Pesimistis",
+  "AR Realization (%)": "Realisasi AR (%)",
+  "AP Payment (%)": "Pembayaran AP (%)",
+  "Minimum Cash Buffer": "Batas Minimum Kas",
+  "Available Credit Facility": "Fasilitas Kredit Tersedia",
+  "Base + 100% AR/AP + zero buffer/facility keeps the original FINOVA forecast calculation unchanged.": "Skenario dasar + 100% AR/AP + tanpa batas minimum kas/fasilitas mempertahankan perhitungan proyeksi FINOVA semula.",
+  "MINIMUM PROJECTED CASH": "KAS PROYEKSI MINIMUM",
+  "LIQUIDITY HEADROOM": "RUANG LIKUIDITAS",
+  "LOWEST HEADROOM": "RUANG LIKUIDITAS TERENDAH",
+  "LIQUIDITY STATUS": "STATUS LIKUIDITAS",
+  "SAFE": "AMAN",
+  "No shortfall projected": "Tidak diproyeksikan terjadi kekurangan kas",
+  "Ending cash + facility - minimum buffer": "Kas akhir + fasilitas - batas minimum kas",
+  "OPENING CASH": "SALDO KAS AWAL",
+  "EXPECTED CASH IN": "PERKIRAAN KAS MASUK",
+  "EXPECTED CASH OUT": "PERKIRAAN KAS KELUAR",
+  "ENDING CASH": "SALDO KAS AKHIR",
+  "Posted GL Cash & Bank": "Kas dan Bank dari GL Terposting",
+  "Aging AR + Manual Cash In": "Umur AR + Kas Masuk Manual",
+  "Aging AP + Manual Cash Out": "Umur AP + Kas Keluar Manual",
+  "After forecast period": "Setelah periode proyeksi",
+  "Weekly Cash Position": "Posisi Kas Mingguan",
+  "Generate forecast to view weekly cash position.": "Buat proyeksi untuk melihat posisi kas mingguan.",
+  "AR = Auto Cash In   AP = Auto Cash Out   Manual = Planning": "AR = Kas Masuk Otomatis   AP = Kas Keluar Otomatis   Manual = Perencanaan",
+  "AR = Auto Cash In": "AR = Kas Masuk Otomatis",
+  "AP = Auto Cash Out": "AP = Kas Keluar Otomatis",
+  "Manual = Planning": "Manual = Perencanaan",
+  "Cash Position Trend": "Tren Posisi Kas",
+  "Projected ending cash by week.": "Proyeksi saldo kas akhir per minggu.",
+  "Liquidity Watch": "Pemantauan Likuiditas",
+  "Weeks with projected negative ending cash.": "Minggu dengan proyeksi saldo kas akhir negatif.",
+  "Forecast Detail": "Rincian Proyeksi",
+  "Click a weekly forecast amount to inspect detail.": "Klik jumlah proyeksi mingguan untuk melihat rinciannya.",
+  "Reference / Description": "Referensi / Deskripsi",
+  "Forecast / Due Date": "Tanggal Proyeksi / Jatuh Tempo",
+  "Select a week to view detail.": "Pilih minggu untuk melihat rincian.",
+  "Planned Cash In and Cash Out entered manually. Records remain visible even when outside the selected weekly forecast period.": "Kas masuk dan kas keluar yang direncanakan dan diinput secara manual. Data tetap terlihat meskipun di luar periode proyeksi mingguan yang dipilih.",
+  "Cash In:": "Kas Masuk:",
+  "Cash Out:": "Kas Keluar:",
+  "Forecast Date": "Tanggal Proyeksi",
+  "No manual forecast.": "Belum ada proyeksi manual.",
+  "No manual forecast": "Belum ada proyeksi manual",
+  "Example: Payroll, Tax, Rent": "Contoh: Gaji, Pajak, Sewa",
+  "Forecast description": "Deskripsi proyeksi",
+  "Optional notes": "Catatan opsional",
+  "Cash In": "Kas Masuk",
+  "Cash Out": "Kas Keluar",
+  "Manual Cash Forecast": "Proyeksi Kas Manual",
+  "Forecast": "Proyeksi",
+  "Reference / Deskripsi": "Referensi / Deskripsi",
+  "Mitra Bisnis / Category": "Mitra Bisnis / Kategori",
+  "4 Weeks": "4 Minggu",
+  "8 Weeks": "8 Minggu",
+  "26 Weeks": "26 Minggu",
+  "52 Weeks": "52 Minggu",
+  "Financial Statement / Report Configuration": "Laporan Keuangan / Pengaturan Laporan",
+  "Accounting": "Akuntansi",
+  "Finance": "Keuangan",
+  "Select a week to view details.": "Pilih minggu untuk melihat rincian.",
+  "Generate forecast to view weekly cash position": "Buat proyeksi untuk melihat posisi kas mingguan"
+};
+Object.assign(dictionary,reportModuleDictionary);
+// Variasi kapitalisasi label kartu proyeksi; hanya teks tampilan, bukan nilai transaksi.
+const cashCardLabels={
+ 'Minimum Projected Cash':'KAS PROYEKSI MINIMUM',
+ 'Liquidity Headroom':'RUANG LIKUIDITAS',
+ 'Lowest Headroom':'RUANG LIKUIDITAS TERENDAH',
+ 'Liquidity Status':'STATUS LIKUIDITAS',
+ 'Opening Cash':'SALDO KAS AWAL',
+ 'Expected Cash In':'PERKIRAAN KAS MASUK',
+ 'Expected Cash Out':'PERKIRAAN KAS KELUAR',
+ 'Ending Cash':'SALDO KAS AKHIR'
+};
+Object.assign(dictionary,cashCardLabels);
+
+Object.assign(reverse,Object.fromEntries(Object.entries(reportModuleDictionary).map(([en,id])=>[id,en])));
+// Canonical English labels for bilingual switching where translations overlap.
+Object.assign(reverse,{"Laporan Keuangan":"Financial Statement","Proyeksi Manual":"Manual Forecast","Kas Masuk":"Cash In","Kas Keluar":"Cash Out","Neraca Saldo Tahunan":"Trial Balance Year","Catatan atas Laporan Keuangan":"Notes to Financial Statements"});
+// Sidebar FINOVA: terjemahan label navigasi saja, tanpa mengubah route atau izin akses.
+Object.assign(dictionary, {
+  'Dashboard':'Dasbor',
+  'Master Data':'Data Induk',
+  'Data Master':'Data Induk',
+  'Finance':'Keuangan',
+  'Accounting':'Akuntansi',
+  'Report':'Laporan',
+  'Reports':'Laporan',
+  'Financial Reports':'Laporan Keuangan',
+  'User Management':'Manajemen Pengguna',
+  'Business Partner':'Mitra Bisnis',
+  'Chart of Accounts':'Bagan Akun',
+  'Chart Of Accounts':'Bagan Akun',
+  'Tax Master':'Master Pajak',
+  'Accounting Period':'Periode Akuntansi',
+  'Account Payable':'Invoice AP',
+  'Account Receivable':'Invoice AR',
+  'Aging Payable':'Umur Utang AP',
+  'Aging Receivable':'Umur Piutang AR',
+  'GL Journal':'Jurnal GL',
+  'Fixed Asset':'Aset Tetap',
+  'General Ledger':'Buku Besar',
+  'Trial Balance':'Neraca Saldo'
+});
+Object.assign(reverse, {
+  'Dasbor':'Dashboard',
+  'Data Induk':'Master Data',
+  'Keuangan':'Finance',
+  'Akuntansi':'Accounting',
+  'Laporan':'Report',
+  'Laporan Keuangan':'Financial Reports',
+  'Manajemen Pengguna':'User Management',
+  'Mitra Bisnis':'Business Partner',
+  'Bagan Akun':'Chart of Accounts',
+  'Master Pajak':'Tax Master',
+  'Periode Akuntansi':'Accounting Period',
+  'Invoice AP':'Account Payable',
+  'Invoice AR':'Account Receivable',
+  'Umur Utang AP':'Aging Payable',
+  'Umur Piutang AR':'Aging Receivable',
+  'Jurnal GL':'GL Journal',
+  'Aset Tetap':'Fixed Asset',
+  'Buku Besar':'General Ledger',
+  'Neraca Saldo':'Trial Balance'
+});
 const storageKey='finova-ui-language';
 let lang='id';try{lang=localStorage.getItem(storageKey)==='en'?'en':'id'}catch(_){ }
 const originals=new WeakMap();const originalAttrs=new WeakMap();
@@ -612,8 +946,19 @@ function translateDashboardDynamic(original){
 }
 function translateOriginal(original){
  const dynamic=translateDashboardDynamic(original);if(dynamic!==null)return dynamic;
+ const monthMatch=original.match(/^(\s*)(\d+)\s+(months?|bulan)(\s*)$/i);
+ if(monthMatch){return monthMatch[1]+monthMatch[2]+(lang==='id'?' bulan':(Number(monthMatch[2])===1?' month':' months'))+monthMatch[4];}
  const key=normalized(original);
- const exact=lang==='id'?dictionary[key]:(englishLabels[key]||reverse[key]);
+ // Category table renders useful life as "96 months"; translate the visible unit only.
+ // Restrict this to fixed-asset category table cells, never input values or stored data.
+ let exact=lang==='id'?dictionary[key]:(englishLabels[key]||reverse[key]);
+ // Cash cards can be rendered with mixed casing by different module templates.
+ // Limit case-insensitive matching to the eight known cash-card headings.
+ if(exact===undefined){
+  const cardKey=key.toUpperCase();
+  const cashCards=['MINIMUM PROJECTED CASH','LIQUIDITY HEADROOM','LOWEST HEADROOM','LIQUIDITY STATUS','OPENING CASH','EXPECTED CASH IN','EXPECTED CASH OUT','ENDING CASH'];
+  if(cashCards.includes(cardKey))exact=lang==='id'?dictionary[cardKey]:undefined;
+ }
  if(exact!==undefined){const leading=original.match(/^\s*/)[0],trailing=original.match(/\s*$/)[0];return leading+exact+trailing}
  if(lang==='id'){
   const pagination=key.match(/^Displaying Record (\d+) - (\d+) of (\d+)$/);
@@ -694,11 +1039,50 @@ const trigger=wrap.querySelector('.fl-trigger');const options=[...wrap.querySele
 function render(){wrap.querySelector('.fl-trigger .fl-flag').textContent=lang==='id'?'🇮🇩':'🇬🇧';wrap.querySelector('.fl-name').textContent=lang==='id'?'Indonesia':'English';wrap.querySelector('.fl-code').textContent=lang.toUpperCase();for(const option of options){const selected=option.dataset.lang===lang;option.setAttribute('aria-selected',String(selected));option.querySelector('.fl-check').textContent=selected?'✓':'';}}
 function close(){wrap.classList.remove('fl-open');trigger.setAttribute('aria-expanded','false')}
 trigger.addEventListener('click',()=>{const opening=!wrap.classList.contains('fl-open');wrap.classList.toggle('fl-open',opening);trigger.setAttribute('aria-expanded',String(opening));});
-for(const option of options)option.addEventListener('click',()=>{lang=option.dataset.lang;try{localStorage.setItem(storageKey,lang)}catch(_){}document.documentElement.lang=lang;render();close();translateTree(document.body);window.dispatchEvent(new CustomEvent("finova:language-changed",{detail:{language:lang}}));trigger.focus()});
+for(const option of options)option.addEventListener('click',()=>{lang=option.dataset.lang;try{localStorage.setItem(storageKey,lang)}catch(_){}document.documentElement.lang=lang;render();close();translateAll();window.dispatchEvent(new CustomEvent("finova:language-changed",{detail:{language:lang}}));trigger.focus()});
 document.addEventListener('pointerdown',event=>{if(!wrap.contains(event.target))close()});document.addEventListener('keydown',event=>{if(event.key==='Escape')close()});
 render();host.prepend(wrap);
 }
-let scheduled=false;const observer=new MutationObserver(()=>{if(scheduled)return;scheduled=true;queueMicrotask(()=>{scheduled=false;attachSwitcher();translateTree(document.body)})});
-function init(){document.documentElement.lang=lang;attachSwitcher();translateTree(document.body);observer.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['placeholder','title','aria-label']});}
+// Performance: translate only nodes changed by the application, not the whole document.
+// Disconnect during our own text/attribute writes to prevent recursive observer work.
+const observerOptions={subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['placeholder','title','aria-label']};
+const pendingRoots=new Set();
+let scheduled=false;
+function translateAll(){
+ observer.disconnect();
+ try{attachSwitcher();translateTree(document.body)}
+ finally{observer.observe(document.body,observerOptions)}
+}
+function flushTranslations(){
+ scheduled=false;
+ if(!pendingRoots.size)return;
+ const roots=Array.from(pendingRoots);pendingRoots.clear();
+ observer.disconnect();
+ try{
+  if(!document.getElementById('finova-language-switcher'))attachSwitcher();
+  for(const root of roots){
+   if(root!==document.body && !root.isConnected)continue;
+   if(root.nodeType===1 && root.closest('#finova-language-switcher'))continue;
+   // Skip a child when its ancestor is already being translated.
+   if(roots.some(other=>other!==root && other.nodeType===1 && other.contains(root)))continue;
+   translateTree(root);
+  }
+ }finally{observer.observe(document.body,observerOptions)}
+}
+const observer=new MutationObserver(records=>{
+ for(const record of records){
+  if(record.type==='childList'){
+   for(const node of record.addedNodes){
+    if(node.nodeType===1||node.nodeType===3)pendingRoots.add(node);
+   }
+  }else if(record.type==='characterData'){
+   pendingRoots.add(record.target);
+  }else if(record.type==='attributes'){
+   pendingRoots.add(record.target);
+  }
+ }
+ if(pendingRoots.size && !scheduled){scheduled=true;requestAnimationFrame(flushTranslations)}
+});
+function init(){document.documentElement.lang=lang;attachSwitcher();translateTree(document.body);observer.observe(document.body,observerOptions);}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
