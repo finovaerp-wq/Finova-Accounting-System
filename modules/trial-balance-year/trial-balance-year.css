@@ -1019,3 +1019,11 @@ th {
     color: transparent;
 
 }
+/* FINOVA searchable COA selector: scoped, visible, theme-aware */
+#trial-balance-account + .ts-wrapper,
+.ts-wrapper:has(> #trial-balance-account) { width: 100%; min-width: 0; }
+
+.ts-wrapper.single .ts-control { min-height: 42px; cursor: text; }
+.ts-wrapper.single .ts-control input { min-width: 4rem; }
+html[data-finova-theme="dark"] .ts-wrapper .ts-control { background: #101e32; color: #f3f7ff; border-color: #405772; }
+html[data-finova-theme="dark"] .ts-wrapper .ts-control :is(.item,input) { color: #f3f7ff; }

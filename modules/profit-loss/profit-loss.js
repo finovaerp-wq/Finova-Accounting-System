@@ -123,6 +123,7 @@ export class ProfitLoss {
         this.accounts = (Array.isArray(data) ? data : []).map(a => this.normalizeAccount(a));
         this.accounts.sort((a,b) => this.compareAccountCode(a.account_code,b.account_code));
         this.populateAccountFilter();
+        this.initializeAccountTomSelect();
     }
 
     normalizeAccount(account) {
@@ -183,9 +184,14 @@ export class ProfitLoss {
     }
 
     populateAccountFilter() {
+        if (this.filterAccount?.tomselect) {
+            try { this.filterAccount.tomselect.destroy(); } catch (error) { console.warn("FINOVA COA refresh:", error); }
+            this.accountTomSelect = null;
+        }
+
         if (!this.filterAccount) return;
         const previous = this.filterAccount.value || "";
-        this.filterAccount.innerHTML = `<option value="">Show All P&L Accounts</option>`;
+        this.filterAccount.innerHTML = `<option value="">Tampilkan Semua Akun Laba Rugi</option>`;
         this.accounts.filter(a => this.classifyAccount(a)).forEach(account => {
             const option = document.createElement("option");
             option.value = String(account.id);
@@ -193,6 +199,49 @@ export class ProfitLoss {
             this.filterAccount.appendChild(option);
         });
         if (previous) this.filterAccount.value = previous;
+    }
+
+
+    /* FINOVA: COA search, consistent with Buku Besar. UI only. */
+    initializeAccountTomSelect() {
+        const select = this.filterAccount;
+        if (!select || !select.isConnected) return;
+        const previous = select.value || "";
+        const existing = select.tomselect || this.accountTomSelect;
+        if (existing) {
+            try { existing.destroy(); } catch (error) { console.warn("FINOVA COA Tom Select cleanup:", error); }
+            this.accountTomSelect = null;
+        }
+        // The native select remains usable if the CDN script is unavailable.
+        select.style.removeProperty("display");
+        if (typeof window.TomSelect !== "function") {
+            console.warn("FINOVA COA: Tom Select not loaded; native select retained.");
+            return;
+        }
+        try {
+            this.accountTomSelect = new window.TomSelect(select, {
+                create: false,
+                maxItems: 1,
+                maxOptions: 10000,
+                allowEmptyOption: true,
+                closeAfterSelect: true,
+                hideSelected: false,
+                placeholder: "Ketik kode atau nama akun...",
+                searchField: ["text"],
+                sortField: [{field: "$order"}],
+                dropdownParent: "body"
+            });
+            if (previous && this.accountTomSelect.options[previous]) {
+                this.accountTomSelect.setValue(previous, true);
+            } else {
+                // Tampilkan placeholder pencarian, bukan pilihan "semua akun".
+                // Opsi kosong tetap tersedia untuk menghapus filter akun.
+                this.accountTomSelect.clear(true);
+            }
+        } catch (error) {
+            console.error("FINOVA COA selector failed:", error);
+            select.style.removeProperty("display");
+        }
     }
 
     async loadData(showLoading = true) {
