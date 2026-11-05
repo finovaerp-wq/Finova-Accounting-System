@@ -98,9 +98,38 @@ export class CompanyProfile {
     }catch(e){this.logoStatus((this.isEnglish()?"Delete failed: ":"Gagal menghapus: ")+e.message,true);}
     finally{this._deletingLogo=false;btn.disabled=false;this.applyLanguage();}
   }
+  renderAccountingSettings(){
+    const container=this.el("cp-accounting");if(!container)return;
+    const settings=this.data?.settings||{};
+    const en=this.isEnglish();
+    const currency=String(settings.base_currency||"-");
+    const fiscal=Number(settings.fiscal_year_start_month);
+    const month=(Number.isInteger(fiscal)&&fiscal>=1&&fiscal<=12)
+      ? new Intl.DateTimeFormat(en?"en-US":"id-ID",{month:"long",timeZone:"UTC"}).format(new Date(Date.UTC(2024,fiscal-1,1))) : "-";
+    const timezone=String(settings.timezone||"-");
+    const items=[
+      {icon:"fa-wallet",label:en?"Base Currency":"Mata Uang Dasar",value:currency},
+      {icon:"fa-calendar-days",label:en?"Fiscal Year Starts":"Awal Tahun Fiskal",value:month},
+      {icon:"fa-clock",label:en?"Time Zone":"Zona Waktu",value:timezone}
+    ];
+    const grid=document.createElement("div");grid.className="row g-3";
+    for(const item of items){
+      const col=document.createElement("div");col.className="col-12 col-md-4";
+      const tile=document.createElement("div");tile.className="cp-accounting-tile h-100";
+      const heading=document.createElement("div");heading.className="cp-accounting-label";
+      const icon=document.createElement("i");icon.className=`fa-solid ${item.icon} me-2`;icon.setAttribute("aria-hidden","true");
+      heading.append(icon,document.createTextNode(item.label));
+      const value=document.createElement("div");value.className="cp-accounting-value";value.textContent=item.value;
+      tile.append(heading,value);col.append(tile);grid.append(col);
+    }
+    container.replaceChildren(grid);
+    const title=this.el("cp-accounting-title");if(title)title.textContent=en?"Accounting Settings":"Pengaturan Akuntansi";
+    const readonly=this.el("cp-accounting-readonly");if(readonly)readonly.textContent=en?"Read Only":"Baca Saja";
+  }
   applyLanguage(){
     if(!this.root?.isConnected)return;
     const en=this.isEnglish();
+    this.renderAccountingSettings();
     const labels={
       "cp-logo-label":["Logo Perusahaan","Company Logo"],
       "cp-logo-empty":["Belum ada logo","No logo uploaded"],
@@ -127,7 +156,6 @@ export class CompanyProfile {
       ["Simpan Profil","Save Profile"],["Identitas dan Kontak","Identity and Contact"],["Kode Perusahaan","Company Code"],["Nama Perusahaan","Company Name"],["Nama Legal","Legal Name"],["Telepon","Phone"],["Alamat Perusahaan","Company Address"],
       ["Legalitas dan Informasi Tambahan","Legal and Additional Information"],["Bidang Usaha","Business Sector"],["Kota","City"],["Provinsi","Province"],["Kode Pos","Postal Code"],["Negara","Country"],["Alamat Legal","Legal Address"],["Alamat Operasional","Operational Address"],["Pengusaha Kena Pajak (PKP)","Taxable Entrepreneur (PKP)"],
       ["Branding Dokumen","Document Branding"],["Kop / Header Dokumen","Document Header"],["Footer Dokumen","Document Footer"],["Penandatangan Invoice AR (Manual)","AR Invoice Signatory (Manual)"],["Pengguna Aktif","Active User"],["Jabatan pada Invoice","Position on Invoice"],
-      ["Cetakan Invoice AR menyediakan ruang kosong untuk tanda tangan manual. Tidak menggunakan gambar tanda tangan.","AR invoice prints include a blank space for a handwritten signature. No signature image is used."],
       ["Rekening Bank Perusahaan","Company Bank Accounts"],["Tambah Rekening","Add Bank Account"],["Hanya satu rekening aktif dapat ditetapkan sebagai rekening utama.","Only one active bank account can be set as primary."],["Pengaturan Akuntansi (Baca Saja)","Accounting Settings (Read Only)"],
       ["PNG, JPG, WebP · Maks. 2 MB","PNG, JPG, WebP · Max. 2 MB"]
     ];
@@ -142,7 +170,7 @@ export class CompanyProfile {
     this.el("cp-pkp").checked=!!p?.is_pkp;
     this.renderLogo(s?.logo_url||null);this.el("cp-logo-upload").disabled=!this.data.canEdit;this.el("cp-logo-delete").disabled=!this.data.canEdit;this.el("cp-logo-file").disabled=!this.data.canEdit;
     const select=this.el("cp-signer");select.replaceChildren(new Option("— Pilih penandatangan —",""));users.forEach(u=>select.add(new Option(u.full_name,u.user_uid)));this.set("cp-signer",p?.signer_user_uid||"");
-    this.el("cp-accounting").textContent=`Mata uang: ${s?.base_currency||"-"} | Tahun fiskal mulai bulan: ${s?.fiscal_year_start_month||"-"} | Zona waktu: ${s?.timezone||"-"}`;
+    this.renderAccountingSettings();
     if(!this.data.canEdit){this.root.querySelectorAll("input:not([disabled]),textarea,select,button:not(#cp-refresh)").forEach(e=>e.disabled=true);this.notice("Akses baca saja: hanya Manager atau Super Admin yang berwenang dapat mengubah profil.");}
     this.renderBanks();this.applyLanguage();this.bankModalLanguage();
   }

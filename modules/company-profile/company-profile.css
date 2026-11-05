@@ -24,3 +24,8 @@
   box-shadow:0 8px 20px rgba(0,0,0,.12);
 }
 #finova-company-profile .cp-bank-options .list-group-item {text-align:left;}
+
+/* Accounting settings: informational only, scoped to Company Profile. */
+#finova-company-profile .cp-accounting-tile{background:var(--bs-tertiary-bg,#f7f9fc);border:1px solid var(--bs-border-color,#dee2e6);border-radius:10px;padding:15px 17px;min-height:94px}
+#finova-company-profile .cp-accounting-label{color:var(--bs-secondary-color,#6c757d);font-size:12px;margin-bottom:9px}
+#finova-company-profile .cp-accounting-value{color:var(--bs-body-color,#182b45);font-weight:700;font-size:16px;overflow-wrap:anywhere}
