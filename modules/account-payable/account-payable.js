@@ -11681,6 +11681,18 @@ detailBody?.addEventListener(
     );
 
 
+    /* Filter realtime: tidak mengubah proses simpan/posting transaksi. */
+    const runAPLiveFilter = () => {
+        clearTimeout(this.apLiveFilterTimer);
+        this.apLiveFilterTimer = setTimeout(() => this.search(), 180);
+    };
+    this.dateFrom?.addEventListener("input", runAPLiveFilter);
+    this.dateFrom?.addEventListener("change", runAPLiveFilter);
+    this.dateTo?.addEventListener("input", runAPLiveFilter);
+    this.dateTo?.addEventListener("change", runAPLiveFilter);
+    this.statusFilter?.addEventListener("change", runAPLiveFilter);
+    this.keyword?.addEventListener("input", runAPLiveFilter);
+
     /*
     ==================================================
     ENTER KEYWORD
@@ -28525,7 +28537,7 @@ async search() {
         const findBy =
             String(
                 this.findBy?.value
-                || "invoice_no"
+                || "all"
             )
             .trim();
 
@@ -29225,8 +29237,8 @@ createTableRow(
 
     const journalStatusText =
         isJournalPosted
-            ? "Journal POSTED"
-            : "Journal NOT POSTED";
+            ? "JURNAL SUDAH DIPOSTING"
+            : "JURNAL BELUM DIPOSTING";
 
 
     /*

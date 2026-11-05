@@ -115,195 +115,35 @@ VERSION : 2.0.0
     </div>
 
 
-    <!-- ==================================================
-         FILTER CARD
-    =================================================== -->
-
+    <!-- FILTER: same four-column layout as Invoice AP -->
     <div class="finova-card account-receivable-filter-card mb-1">
-
         <div class="finova-card-body">
-
-
-            <div class="row g-3 align-items-end">
-
-
-                <!-- ======================================
-                     INVOICE DATE FROM
-                ======================================= -->
-
-                <div class="col-lg-2 col-md-6">
-
-                    <label
-                        for="ar-date-from"
-                        class="form-label">
-
-                        Invoice Date From
-
-                    </label>
-
-
-                    <input
-                        type="date"
-                        id="ar-date-from"
-                        class="form-control finova-control">
-
+            <div class="row align-items-end g-3">
+                <div class="col-md-3">
+                    <label for="ar-date-from" class="form-label">Tanggal Invoice Dari</label>
+                    <input type="date" id="ar-date-from" class="form-control finova-control">
                 </div>
-
-
-                <!-- ======================================
-                     INVOICE DATE TO
-                ======================================= -->
-
-                <div class="col-lg-2 col-md-6">
-
-                    <label
-                        for="ar-date-to"
-                        class="form-label">
-
-                        Invoice Date To
-
-                    </label>
-
-
-                    <input
-                        type="date"
-                        id="ar-date-to"
-                        class="form-control finova-control">
-
+                <div class="col-md-3">
+                    <label for="ar-date-to" class="form-label">Tanggal Invoice Sampai</label>
+                    <input type="date" id="ar-date-to" class="form-control finova-control">
                 </div>
-
-
-                <!-- ======================================
-                     STATUS
-                ======================================= -->
-
-                <div class="col-lg-2 col-md-6">
-
-                    <label
-                        for="ar-status"
-                        class="form-label">
-
-                        Status
-
-                    </label>
-
-
-                    <select
-                        id="ar-status"
-                        class="form-select finova-control">
-
-                        <option value="">
-                            All Status
-                        </option>
-
-                        <option value="Draft">
-                            Draft
-                        </option>
-
-                        <option value="Unpaid">
-                            Unpaid
-                        </option>
-
-                        <option value="Paid">
-                            Paid
-                        </option>
-
-                        <option value="Void">
-                            Void
-                        </option>
-
+                <div class="col-md-3">
+                    <label for="ar-status" class="form-label">Status</label>
+                    <select id="ar-status" class="form-select finova-control">
+                        <option value="all">Semua Status</option>
+                        <option value="paid">Lunas</option>
+                        <option value="unpaid">Belum Lunas</option>
+                        <option value="partial_paid">Dibayar Sebagian</option>
                     </select>
-
                 </div>
-
-
-                <!-- ======================================
-                     FIND BY
-                ======================================= -->
-
-                <div class="col-lg-2 col-md-6">
-
-                    <label
-                        for="ar-find-by"
-                        class="form-label">
-
-                        Find By
-
-                    </label>
-
-
-                    <select
-                        id="ar-find-by"
-                        class="form-select finova-control">
-
-                        <option value="invoice_no">
-                            Invoice No
-                        </option>
-
-                        <option value="customer">
-                            Customer
-                        </option>
-
-                        <option value="po_no">
-                            PO No
-                        </option>
-
-                        <option value="description">
-                            Description
-                        </option>
-
-                    </select>
-
+                <div class="col-md-3">
+                    <label for="ar-keyword" class="form-label">Kata Kunci</label>
+                    <input type="hidden" id="ar-find-by" value="all">
+                    <input type="text" id="ar-keyword" class="form-control finova-control" placeholder="Cari pelanggan, invoice, jurnal, PO, deskripsi..." autocomplete="off">
                 </div>
-
-
-                <!-- ======================================
-                     KEYWORD
-                ======================================= -->
-
-                <div class="col-lg-4 col-md-12">
-
-                    <label
-                        for="ar-keyword"
-                        class="form-label">
-
-                        Keyword
-
-                    </label>
-
-
-                    <div class="input-group">
-
-                        <input
-                            type="text"
-                            id="ar-keyword"
-                            class="form-control finova-control"
-                            placeholder="Search Account Receivable"
-                            autocomplete="off">
-
-
-                        <button
-                            type="button"
-                            id="btn-ar-find"
-                            class="btn btn-primary">
-
-                            <i class="fa-solid fa-magnifying-glass"></i>
-
-                            Find
-
-                        </button>
-
-                    </div>
-
-                </div>
-
-
             </div>
-
         </div>
-
     </div>
-
 
     <!-- ==================================================
          TABLE CARD

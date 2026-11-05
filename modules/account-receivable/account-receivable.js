@@ -9059,7 +9059,7 @@ createTableRow(
                         "
                     >
 
-                        Journal POSTED
+                        JURNAL SUDAH DIPOSTING
 
                     </div>
 
@@ -9076,7 +9076,7 @@ createTableRow(
                         "
                     >
 
-                        Journal NOT POSTED
+                        JURNAL BELUM DIPOSTING
 
                     </div>
 
@@ -20752,6 +20752,18 @@ BIND EVENTS
 */
 
 bindEvents() {
+
+    // Filter otomatis seperti Invoice AP; tetap menggunakan search service yang ada.
+    this.arRealtimeFilterTimer = null;
+    const triggerARFilter = () => {
+        clearTimeout(this.arRealtimeFilterTimer);
+        this.arRealtimeFilterTimer = setTimeout(() => this.search(), 250);
+    };
+    this.dateFrom?.addEventListener("change", triggerARFilter);
+    this.dateTo?.addEventListener("change", triggerARFilter);
+    this.statusFilter?.addEventListener("change", triggerARFilter);
+    this.keyword?.addEventListener("input", triggerARFilter);
+
 
     /*
     ==================================================

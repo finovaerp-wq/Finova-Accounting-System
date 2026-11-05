@@ -1259,6 +1259,7 @@ async search(
             status
             &&
             status.toLowerCase() !== "all"
+            && !["paid", "unpaid", "partial_paid"].includes(status.toLowerCase())
         ) {
 
             const normalizedStatus =
@@ -1407,6 +1408,24 @@ async search(
                 ? data
                 : [];
 
+
+        /* Payment status filter: derive from outstanding amount,
+           matching the AR screen's existing payment status calculation.
+           Keep database invoice status unchanged. */
+        if (["paid", "unpaid", "partial_paid"].includes(status.toLowerCase())) {
+            result = result.filter(invoice => {
+                const total = Number(invoice?.total_amount || 0);
+                const outstanding = Number(invoice?.outstanding_amount ?? total);
+                const paymentStatus = total <= 0 || outstanding >= total
+                    ? "unpaid"
+                    : outstanding === 0
+                        ? "paid"
+                        : outstanding > 0 && outstanding < total
+                            ? "partial_paid"
+                            : "other";
+                return paymentStatus === status.toLowerCase();
+            });
+        }
 
         /*
         ==================================================

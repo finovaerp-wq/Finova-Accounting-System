@@ -7777,3 +7777,22 @@ td {
   border-color: #405875 !important;
   opacity: 1 !important;
 }
+
+/* FINOVA: filter Invoice AR mengikuti tata letak Invoice AP */
+.account-receivable-filter-card #ar-keyword {
+    width: 100% !important;
+    min-width: 0 !important;
+    border-radius: 7px !important;
+}
+.account-receivable-filter-card .row > [class*="col-"] { min-width: 0; }
+
+/* FINOVA: AR journal posting indicator matches Invoice AP */
+.ar-journal-status {
+    margin-top: 5px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 1.4 !important;
+    font-family: inherit !important;
+}
+.ar-journal-status.text-success { color: #198754 !important; }
+.ar-journal-status.text-danger { color: #DC3545 !important; }

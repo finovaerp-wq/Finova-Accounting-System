@@ -1572,7 +1572,7 @@ async search(
         const findBy =
             String(
                 filters?.findBy
-                || "invoice_no"
+                || "all"
             )
             .trim()
             .toLowerCase();
@@ -1700,7 +1700,21 @@ async search(
             ==============================================
             */
 
-            if (
+            if (status === "paid") {
+                query = query.eq("status", this.STATUS.PAID);
+            }
+            else if (status === "partial_paid") {
+                query = query.eq("status", this.STATUS.PARTIAL_PAID);
+            }
+            else if (status === "unpaid") {
+                // Unpaid invoices: no payment has been applied; exclude voided invoices.
+                query = query.in("status", [
+                    this.STATUS.DRAFT,
+                    this.STATUS.COMPLETE,
+                    this.STATUS.POSTED
+                ].filter(Boolean));
+            }
+            else if (
                 status ===
                 "not_completed"
             ) {
@@ -1887,6 +1901,10 @@ async search(
                             .toLowerCase();
 
 
+                        const journalNo = String(
+                            invoice?.trx_gl_journal?.journal_no || ""
+                        ).trim().toLowerCase();
+
                         /*
                         ======================================
                         FIND BY
@@ -1955,6 +1973,8 @@ async search(
                                     description.includes(
                                         keyword
                                     )
+                                    ||
+                                    journalNo.includes(keyword)
                                 );
 
                         }
