@@ -708,6 +708,9 @@ WHEN WORKSPACE IS CLOSED / REOPENED
 destroy() {
 
     try {
+        this.arViewFooterObserver?.disconnect();
+        this.arViewFooterObserver = null;
+
 
         /*
         ==================================================
@@ -13143,6 +13146,7 @@ async addInvoice() {
 
         this.currentMode =
             "add";
+        this.syncArInvoiceViewFooter();
 
 
         this.invoiceDetails =
@@ -14711,15 +14715,8 @@ renderInvoiceDetails() {
 
                                         ? `
 
-                                            <span
-                                                class="
-                                                    text-muted
-                                                    small
-                                                ">
+                                            <button type="button" class="btn btn-sm btn-outline-info" data-detail-action="view" data-detail-id="${detail.id}" title="Lihat Rincian" aria-label="Lihat Rincian"><i class="fa-solid fa-eye"></i></button>
 
-                                                -
-
-                                            </span>
 
                                         `
 
@@ -14804,7 +14801,8 @@ renderInvoiceDetails() {
     ======================================================
     */
 
-    async editInvoiceDetail(id) {
+    async editInvoiceDetail(id, viewOnly = false) {
+        if (this.currentMode === "view" && !viewOnly) return;
 
         const detail =
             this.invoiceDetails.find(
@@ -14916,6 +14914,21 @@ renderInvoiceDetails() {
 
         }
 
+
+        // View detail is genuinely read-only, including TomSelect and Save.
+        const detailModal = this.accountReceivableDetailModal;
+        if (detailModal) {
+            detailModal.querySelectorAll('input, textarea, select').forEach(field => {
+                if (field.type !== 'hidden') field.disabled = viewOnly;
+            });
+            if (this.arDetailCOASelect) {
+                if (viewOnly) this.arDetailCOASelect.disable();
+                else this.arDetailCOASelect.enable();
+            }
+            const save = detailModal.querySelector('#btn-save-ar-detail');
+            if (save) { save.hidden = viewOnly; save.classList.toggle('d-none', viewOnly); save.disabled = viewOnly; }
+            if (viewOnly && title) title.textContent = 'Lihat Rincian Invoice AR';
+        }
 
         bootstrap.Modal
             .getOrCreateInstance(
@@ -18340,6 +18353,7 @@ async editInvoice(id) {
 
         this.currentMode =
             "edit";
+        this.syncArInvoiceViewFooter();
 
         const auditReference = document.getElementById("ar-audit-reference");
         if (auditReference) auditReference.hidden = true;
@@ -19503,6 +19517,28 @@ READ ONLY
 ======================================================
 */
 
+
+    // FINOVA: keep the main invoice footer strictly read-only in View mode.
+    syncArInvoiceViewFooter() {
+        const modal = this.accountReceivableModal ||
+            document.getElementById("accountReceivableModal");
+        if (!modal) return;
+
+        const isView = this.currentMode === "view";
+        // A modal-level marker is authoritative for CSS, including when other
+        // scripts reset inline button styles or translate the button label.
+        modal.classList.toggle("finova-ar-view-only", isView);
+        modal.dataset.finovaArMode = isView ? "view" : this.currentMode;
+
+        const saveButton = modal.querySelector("#btn-save-ar-draft");
+        if (saveButton) {
+            saveButton.disabled = isView;
+            saveButton.hidden = isView;
+            saveButton.classList.toggle("d-none", isView);
+            saveButton.style.setProperty("display", isView ? "none" : "", isView ? "important" : "");
+        }
+    }
+
 async viewInvoice(id) {
 
     try {
@@ -19526,6 +19562,7 @@ async viewInvoice(id) {
 
         this.currentMode =
             "view";
+        this.syncArInvoiceViewFooter();
 
         // Display the persisted invoice ID only in View mode.
         const auditReference = document.getElementById("ar-audit-reference");
@@ -19721,6 +19758,8 @@ if (
         DEBUG
         ==================================================
         */
+
+        this.syncArInvoiceViewFooter();
 
         console.log(
             "ACCOUNT RECEIVABLE VIEW MODE:",
@@ -21020,6 +21059,9 @@ bindEvents() {
     this.btnSaveDraft?.addEventListener(
         "click",
         async () => {
+            // View is never allowed to save, even if another script reveals the button.
+            if (this.currentMode === "view") return;
+
 
             if (
                 this.currentMode === "edit"
@@ -21212,6 +21254,13 @@ bindEvents() {
                 EDIT DETAIL
                 ==========================================
                 */
+
+                if (action === "view" && this.currentMode === "view") {
+                    this.editInvoiceDetail(id, true);
+                    return;
+                }
+
+                if (this.currentMode === "view") return;
 
                 if (
                     action === "edit"

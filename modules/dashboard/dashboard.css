@@ -6721,3 +6721,93 @@ VISUAL ONLY
     }
 
 }
+
+/* FINOVA THEME-AWARE DASHBOARD CARDS — 2026-11-05
+   The theme controller sets html[data-finova-theme].
+   Light mode preserves the module's original light styles.
+   Dark mode has dark cards and isolated white hover per card. */
+html[data-finova-theme="dark"] .dashboard-page :is(
+  .dashboard-kpi-card, .dashboard-mini-card,
+  .dashboard-insight-modern-item, .dashboard-insight-item,
+  .dashboard-summary-modern-row, .dashboard-profit-highlight,
+  .dashboard-position-summary, .dashboard-position-insight,
+  .dashboard-system-modern-item
+) {
+  background-color:#1b2d45 !important;
+  background-image:none !important;
+  border-color:#39516e !important;
+  color:#f3f7ff !important;
+  transition:background-color .18s ease,color .18s ease,border-color .18s ease !important;
+}
+html[data-finova-theme="dark"] .dashboard-page :is(
+  .dashboard-kpi-card, .dashboard-mini-card,
+  .dashboard-insight-modern-item, .dashboard-insight-item,
+  .dashboard-summary-modern-row, .dashboard-profit-highlight,
+  .dashboard-position-summary, .dashboard-position-insight,
+  .dashboard-system-modern-item
+):not(:hover) :is(h1,h2,h3,h4,h5,h6,p,span,small,strong,b,label) {
+  color:#f3f7ff !important;
+  -webkit-text-fill-color:#f3f7ff !important;
+  opacity:1 !important;
+}
+html[data-finova-theme="dark"] .dashboard-page :is(
+  .dashboard-kpi-card, .dashboard-mini-card,
+  .dashboard-insight-modern-item, .dashboard-insight-item,
+  .dashboard-summary-modern-row, .dashboard-profit-highlight,
+  .dashboard-position-summary, .dashboard-position-insight,
+  .dashboard-system-modern-item
+):hover {
+  background-color:#fff !important;
+  background-image:none !important;
+  border-color:#cbd5e1 !important;
+  color:#111827 !important;
+}
+html[data-finova-theme="dark"] .dashboard-page :is(
+  .dashboard-kpi-card, .dashboard-mini-card,
+  .dashboard-insight-modern-item, .dashboard-insight-item,
+  .dashboard-summary-modern-row, .dashboard-profit-highlight,
+  .dashboard-position-summary, .dashboard-position-insight,
+  .dashboard-system-modern-item
+):hover :is(h1,h2,h3,h4,h5,h6,p,span,small,strong,b,label) {
+  color:#111827 !important;
+  -webkit-text-fill-color:#111827 !important;
+  opacity:1 !important;
+}
+/* Preserve green positive insight card in dark mode until hovered. */
+html[data-finova-theme="dark"] .dashboard-page .dashboard-insight-list .dashboard-insight-item.is-success:not(:hover) {
+  background-color:#183b36 !important;
+  border-color:#365b64 !important;
+}
+/* Dark panel headers remain dark; never force dark backgrounds in light mode. */
+
+/* FINOVA KPI: nilai Rp dan persentase selalu terbaca saat kartu di-hover.
+   Khusus lima kartu KPI; tidak memengaruhi logika maupun kartu induk. */
+html[data-finova-theme="dark"] .dashboard-page .dashboard-kpi-card:hover .dashboard-kpi-value,
+html[data-finova-theme="dark"] .dashboard-page .dashboard-kpi-card:hover .dashboard-kpi-value *,
+html[data-finova-theme="light"] .dashboard-page .dashboard-kpi-card:hover .dashboard-kpi-value,
+html[data-finova-theme="light"] .dashboard-page .dashboard-kpi-card:hover .dashboard-kpi-value * {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  opacity: 1 !important;
+}
+html[data-finova-theme="dark"] .dashboard-page .dashboard-kpi-card:not(:hover) .dashboard-kpi-value,
+html[data-finova-theme="dark"] .dashboard-page .dashboard-kpi-card:not(:hover) .dashboard-kpi-value * {
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  opacity: 1 !important;
+}
+
+/* FINOVA — Operational summary: all text turns black on the hovered card only.
+   Scoped to the individual mini card, not its parent grid. */
+html[data-finova-theme="dark"] .dashboard-page .dashboard-operational-grid .dashboard-mini-card:hover,
+html[data-finova-theme="light"] .dashboard-page .dashboard-operational-grid .dashboard-mini-card:hover {
+  background: #ffffff !important;
+  background-image: none !important;
+  color: #111827 !important;
+}
+html[data-finova-theme="dark"] .dashboard-page .dashboard-operational-grid .dashboard-mini-card:hover :is(.dashboard-mini-label,.dashboard-mini-content,.dashboard-mini-content strong,.dashboard-mini-meta,.dashboard-mini-meta small),
+html[data-finova-theme="light"] .dashboard-page .dashboard-operational-grid .dashboard-mini-card:hover :is(.dashboard-mini-label,.dashboard-mini-content,.dashboard-mini-content strong,.dashboard-mini-meta,.dashboard-mini-meta small) {
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  opacity: 1 !important;
+}

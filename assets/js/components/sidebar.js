@@ -194,7 +194,12 @@ export class FinovaSidebar {
                     <img
                         src="assets/images/brand/sidebar-logo.png"
                         alt="FINOVA"
-                        class="finova-sidebar-logo-image">
+                        class="finova-sidebar-logo-image finova-logo-light">
+
+                    <img
+                        src="assets/images/brand/sidebar-logo-dark.png"
+                        alt="FINOVA"
+                        class="finova-sidebar-logo-image finova-logo-dark">
 
                     <div class="finova-sidebar-brand">
 

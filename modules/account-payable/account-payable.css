@@ -4588,3 +4588,235 @@ td {
 .account-payable-table-card .ap-cell-amount-status .ap-amount-value {
     text-align: left;
 }
+
+
+/* FINOVA DARK MODE — AP Invoice Detail: final override against module CSS.
+   The module's :has() sticky header and summary styles override the earlier
+   generic theme sheet. Only color/contrast is changed here. */
+html[data-finova-theme="dark"] body #accountPayableModal.modal:has(#ap-invoice-details-pane.active)
+  #ap-invoice-details-pane .ap-invoice-detail-table > thead > tr > th,
+html[data-finova-theme="dark"] body #accountPayableModal.modal:has(#ap-invoice-details-pane.active)
+  #ap-invoice-details-pane .ap-invoice-detail-table thead th,
+html[data-finova-theme="dark"] body #accountPayableModal.modal
+  #ap-invoice-details-pane .table-responsive thead th {
+  background:#253b57!important;
+  background-color:#253b57!important;
+  background-image:none!important;
+  color:#edf4ff!important;
+  -webkit-text-fill-color:#edf4ff!important;
+  border-color:#435b78!important;
+}
+html[data-finova-theme="dark"] body #accountPayableModal.modal
+  #ap-invoice-details-pane .ap-invoice-detail-table thead th :is(span,div,i,strong,small) {
+  color:#edf4ff!important;
+  -webkit-text-fill-color:#edf4ff!important;
+}
+html[data-finova-theme="dark"] body #accountPayableModal.modal
+  #ap-invoice-details-pane .ap-invoice-detail-table > tbody > tr > td {
+  background:#1b2e46!important;
+  background-color:#1b2e46!important;
+  color:#edf4ff!important;
+  border-color:#354b68!important;
+  --bs-table-bg:#1b2e46!important;
+  --bs-table-color:#edf4ff!important;
+  --bs-table-accent-bg:transparent!important;
+}
+html[data-finova-theme="dark"] body #accountPayableModal.modal
+  #ap-invoice-details-pane .ap-invoice-detail-table > tbody > tr > td :is(span,div,small,strong) {
+  color:inherit!important;
+}
+html[data-finova-theme="dark"] body #accountPayableModal.modal
+  .ap-total-summary-footer,
+html[data-finova-theme="dark"] body #accountPayableModal.modal
+  .ap-total-summary-footer > .d-flex,
+html[data-finova-theme="dark"] body #accountPayableModal.modal
+  .ap-total-summary-footer .finova-card,
+html[data-finova-theme="dark"] body #accountPayableModal.modal
+  .ap-total-summary-footer .finova-card-body {
+  background:#18283e!important;
+  background-color:#18283e!important;
+  background-image:none!important;
+  color:#edf4ff!important;
+  border-color:#354b68!important;
+}
+html[data-finova-theme="dark"] body #accountPayableModal.modal
+  .ap-total-summary-footer :is(span,strong,small,p) {
+  color:#edf4ff!important;
+  -webkit-text-fill-color:#edf4ff!important;
+}
+
+/* FINOVA 3.0 — AP summary: enforce dark surface even when theme attribute
+   is applied to body or absent. Visual styles only. */
+#accountPayableModal .ap-total-summary-footer,
+#accountPayableModal .ap-total-summary-footer.border-top,
+#accountPayableModal .ap-total-summary-footer.p-4 {
+  background: #192b43 !important;
+  background-color: #192b43 !important;
+  background-image: none !important;
+  border-top: 1px solid #354b68 !important;
+  color: #edf4ff !important;
+}
+#accountPayableModal .ap-total-summary-footer > .d-flex {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+#accountPayableModal .ap-total-summary-footer .finova-card,
+#accountPayableModal .ap-total-summary-footer .finova-card-body {
+  background: #16263c !important;
+  background-color: #16263c !important;
+  background-image: none !important;
+  border-color: #354b68 !important;
+  color: #edf4ff !important;
+}
+#accountPayableModal .ap-total-summary-footer :is(span,strong,small,p,div) {
+  color: #edf4ff !important;
+  -webkit-text-fill-color: #edf4ff !important;
+}
+#accountPayableModal .ap-total-summary-footer hr {
+  border-color: #526781 !important;
+  opacity: .7 !important;
+}
+
+
+/* FINOVA 3.0 | Invoice AP summary — override detail-pane white !important
+   and keep the complete footer surface dark (presentation only). */
+#accountPayableModal.modal .modal-content .modal-body .ap-total-summary-footer,
+#accountPayableModal.modal:has(#ap-invoice-details-pane.active) .modal-content .ap-total-summary-footer,
+#accountPayableModal.modal:has(#ap-invoice-details-pane.active) .ap-total-summary-footer,
+#accountPayableModal.modal .ap-total-summary-footer.border-top.p-4 {
+  background: #192b43 !important;
+  background-color: #192b43 !important;
+  background-image: none !important;
+  border-top: 1px solid #354b68 !important;
+  box-shadow: none !important;
+  color: #edf4ff !important;
+}
+#accountPayableModal.modal .ap-total-summary-footer > .d-flex {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+#accountPayableModal.modal .ap-total-summary-footer .finova-card,
+#accountPayableModal.modal .ap-total-summary-footer .finova-card-body {
+  background: #16263c !important;
+  background-color: #16263c !important;
+  background-image: none !important;
+  color: #edf4ff !important;
+}
+#accountPayableModal.modal .ap-total-summary-footer :is(span,strong,small,p) {
+  color: #edf4ff !important;
+  -webkit-text-fill-color: #edf4ff !important;
+}
+
+/* FINOVA 3.0 | Invoice AP vendor field dark, including read-only view */
+#accountPayableModal #ap-form-vendor,
+#accountPayableModal #ap-form-vendor:disabled,
+#accountPayableModal #ap-form-vendor[readonly],
+#accountPayableModal #ap-form-vendor.form-select {
+  background-color: #101e32 !important;
+  background-image: none !important;
+  color: #f3f7ff !important;
+  -webkit-text-fill-color: #f3f7ff !important;
+  border: 1px solid #49617e !important;
+  opacity: 1 !important;
+  box-shadow: none !important;
+}
+#accountPayableModal #ap-form-vendor option {
+  background-color: #101e32 !important;
+  color: #f3f7ff !important;
+}
+#accountPayableModal #ap-form-vendor:focus {
+  border-color: #4d94ff !important;
+  box-shadow: 0 0 0 2px rgba(77,148,255,.18) !important;
+}
+
+/* FINOVA | Actual rendered TomSelect vendor control, all AP modal modes */
+#accountPayableModal .ts-wrapper:has(#ap-form-vendor),
+#accountPayableModal .ts-wrapper:has(select#ap-form-vendor),
+#accountPayableModal #ap-form-vendor-ts-control,
+#accountPayableModal .ts-wrapper:has(#ap-form-vendor) .ts-control,
+#accountPayableModal .ts-wrapper:has(select#ap-form-vendor) .ts-control,
+#accountPayableModal .ts-wrapper:has(#ap-form-vendor) .ts-control input,
+#accountPayableModal .ts-wrapper:has(select#ap-form-vendor) .ts-control input {
+  background: #101e32 !important;
+  background-color: #101e32 !important;
+  background-image: none !important;
+  color: #f3f7ff !important;
+  -webkit-text-fill-color: #f3f7ff !important;
+  border-color: #49617e !important;
+  opacity: 1 !important;
+}
+#accountPayableModal .ts-wrapper:has(#ap-form-vendor) .ts-control .item,
+#accountPayableModal .ts-wrapper:has(select#ap-form-vendor) .ts-control .item,
+#accountPayableModal .ts-wrapper:has(#ap-form-vendor) .ts-control > div,
+#accountPayableModal .ts-wrapper:has(select#ap-form-vendor) .ts-control > div {
+  color: #f3f7ff !important;
+  -webkit-text-fill-color: #f3f7ff !important;
+}
+#accountPayableModal .ts-wrapper:has(#ap-form-vendor) .ts-control input::placeholder,
+#accountPayableModal .ts-wrapper:has(select#ap-form-vendor) .ts-control input::placeholder {
+  color: #91acd0 !important;
+  -webkit-text-fill-color: #91acd0 !important;
+}
+#accountPayableModal .ts-wrapper:has(#ap-form-vendor) .ts-dropdown,
+#accountPayableModal .ts-wrapper:has(select#ap-form-vendor) .ts-dropdown {
+  background: #14253d !important;
+  color: #f3f7ff !important;
+  border-color: #49617e !important;
+}
+#accountPayableModal .ts-wrapper:has(#ap-form-vendor) .ts-dropdown .option,
+#accountPayableModal .ts-wrapper:has(select#ap-form-vendor) .ts-dropdown .option {
+  color: #f3f7ff !important;
+}
+#accountPayableModal .ts-wrapper:has(#ap-form-vendor) .ts-dropdown .active,
+#accountPayableModal .ts-wrapper:has(select#ap-form-vendor) .ts-dropdown .active {
+  background: #24518b !important;
+}
+
+/* FINOVA 3.0 — AP Payment Pemasok follows the active app theme.
+   Default/light is white. Dark only when FINOVA explicitly sets dark theme.
+   No changes to disabled/read-only behavior or payment logic. */
+#accountPayablePaymentModal #ap-payment-bulk-vendor,
+#accountPayablePaymentModal #ap-payment-bulk-vendor:disabled,
+#accountPayablePaymentModal #ap-payment-bulk-vendor[readonly],
+#accountPayablePaymentModal #ap-payment-bulk-vendor:read-only,
+#accountPayablePaymentModal #ap-payment-bulk-vendor + .ts-wrapper .ts-control,
+#accountPayablePaymentModal .ts-wrapper:has(#ap-payment-bulk-vendor) .ts-control,
+#accountPayablePaymentModal .ts-wrapper:has(#ap-payment-bulk-vendor) .ts-control input {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color: #14243b !important;
+  -webkit-text-fill-color: #14243b !important;
+  border-color: #cbd5e1 !important;
+  opacity: 1 !important;
+  box-shadow: none !important;
+}
+#accountPayablePaymentModal #ap-payment-bulk-vendor option {
+  background: #ffffff !important;
+  color: #14243b !important;
+}
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"])
+  #accountPayablePaymentModal #ap-payment-bulk-vendor,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"])
+  #accountPayablePaymentModal #ap-payment-bulk-vendor:disabled,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"])
+  #accountPayablePaymentModal #ap-payment-bulk-vendor[readonly],
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"])
+  #accountPayablePaymentModal #ap-payment-bulk-vendor:read-only,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"])
+  #accountPayablePaymentModal #ap-payment-bulk-vendor + .ts-wrapper .ts-control,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"])
+  #accountPayablePaymentModal .ts-wrapper:has(#ap-payment-bulk-vendor) .ts-control,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"])
+  #accountPayablePaymentModal .ts-wrapper:has(#ap-payment-bulk-vendor) .ts-control input {
+  background: #101e32 !important;
+  background-color: #101e32 !important;
+  color: #f5f9ff !important;
+  -webkit-text-fill-color: #f5f9ff !important;
+  border-color: #48617f !important;
+}
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"])
+  #accountPayablePaymentModal #ap-payment-bulk-vendor option {
+  background: #101e32 !important;
+  color: #f5f9ff !important;
+}

@@ -1,0 +1,1198 @@
+/* FINOVA DARK MODE — scoped to html[data-finova-theme="dark"].
+   No global zoom, geometry or business logic modifications. */
+html[data-finova-theme="dark"] {color-scheme:dark;
+ --body-bg:#0b1423;--content-bg:#0b1423;--card-bg:#142238;
+ --topbar-bg:#111e32;--topbar-border:#2b3c55;
+ --text-primary:#e8effa;--text-secondary:#afc0d8;--text-muted:#899bb6;
+ --border-color:#304159;--sidebar-bg:#09152a;--sidebar-hover:#1a3153;
+ --primary:#4b8cff;--primary-hover:#3477ed;
+ --bs-body-bg:#0b1423;--bs-body-color:#e8effa;
+ --bs-border-color:#304159;--bs-secondary-bg:#17263b;
+ --bs-tertiary-bg:#1c2c43;--bs-emphasis-color:#f1f6ff;
+ --bs-secondary-color:#aebed5;--bs-heading-color:#e8effa;
+}
+html[data-finova-theme="dark"] body,
+html[data-finova-theme="dark"] #finova-content,
+html[data-finova-theme="dark"] .finova-main,
+html[data-finova-theme="dark"] .finova-content,
+html[data-finova-theme="dark"] .main-content {background-color:#0b1423;color:#e8effa}
+html[data-finova-theme="dark"] :is(.card,.modal-content,.dropdown-menu,.offcanvas,.toast,.popover,.finova-card,.finova-topbar,.workspace-tab-content,.tab-content,.swal2-popup){background-color:#142238;color:#e8effa;border-color:#304159}
+html[data-finova-theme="dark"] :is(.modal-header,.modal-footer,.card-header,.card-footer,.dropdown-divider){border-color:#304159}
+html[data-finova-theme="dark"] :is(.table,.table-responsive,table){--bs-table-bg:#142238;--bs-table-color:#e8effa;--bs-table-border-color:#304159;--bs-table-striped-bg:#1b2d45;--bs-table-striped-color:#e8effa;--bs-table-hover-bg:#223953;--bs-table-hover-color:#fff;color:#e8effa;border-color:#304159}
+html[data-finova-theme="dark"] :is(table thead,table thead tr,table thead th,table tfoot,table tfoot td){background-color:#1b2b42!important;color:#edf4ff!important;border-color:#304159!important}
+html[data-finova-theme="dark"] :is(table tbody tr,table tbody td){background-color:#142238;color:#e8effa;border-color:#304159}
+html[data-finova-theme="dark"] :is(table tbody tr:hover,table tbody tr:hover td){background-color:#1c3049}
+html[data-finova-theme="dark"] :is(.form-control,.form-select,.input-group-text,.form-check-input,select,textarea,input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),.ts-control,.ts-dropdown){background-color:#0e1b2e;color:#e8effa;border-color:#38506b}
+html[data-finova-theme="dark"] :is(input,textarea)::placeholder{color:#92a5bf;opacity:1}
+html[data-finova-theme="dark"] :is(.form-control,.form-select,select,textarea,input):focus{border-color:#659aff;box-shadow:0 0 0 .15rem rgba(75,140,255,.15)}
+html[data-finova-theme="dark"] :is(label,.form-label,.modal-title,.card-title,h1,h2,h3,h4,h5,h6){color:#e8effa}
+html[data-finova-theme="dark"] :is(.text-muted,.text-secondary,.small,small){color:#afc0d8!important}
+html[data-finova-theme="dark"] :is(.bg-white,.bg-light,.bg-body,.bg-body-tertiary){background-color:#142238!important;color:#e8effa!important}
+html[data-finova-theme="dark"] :is(.border,.border-bottom,.border-top,.border-start,.border-end){border-color:#304159!important}
+html[data-finova-theme="dark"] :is(.btn-light,.btn-outline-secondary){background:#20334e;color:#e8effa;border-color:#45607e}
+html[data-finova-theme="dark"] .btn-close{filter:invert(1) grayscale(1)}
+html[data-finova-theme="dark"] :is(.alert-info,.alert-secondary){background:#20344d;color:#d9e9ff;border-color:#3a5777}
+html[data-finova-theme="dark"] :is(.finova-company-context-selector,.finova-company-context-dropdown){background:#142238;color:#e8effa;border-color:#304159}
+html[data-finova-theme="dark"] :is(.ts-dropdown .option,.ts-dropdown .active){color:#e8effa}
+html[data-finova-theme="dark"] :is(.ts-dropdown .active,.ts-dropdown .option:hover){background:#253d5b}
+html[data-finova-theme="dark"] .finova-theme-toggle{color:#dbe9ff;border:1px solid #395271;border-radius:10px;background:#1a2b43;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:0 11px;min-height:36px;cursor:pointer;white-space:nowrap;font-size:12px;font-weight:600}
+html:not([data-finova-theme="dark"]) .finova-theme-toggle{color:#234066;border:1px solid #d3dce8;border-radius:10px;background:#fff;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:0 11px;min-height:36px;cursor:pointer;white-space:nowrap;font-size:12px;font-weight:600}
+.finova-theme-toggle:hover{border-color:#4b8cff!important}
+@media(max-width:640px){.finova-theme-toggle .finova-theme-label{display:none}.finova-theme-toggle{padding:0 10px!important}}
+
+html[data-finova-theme="dark"] :is(.dashboard-card,.summary-card,.stat-card,.report-card,.filter-card,.filter-panel,.table-container,.table-wrapper,.modal-body,.modal-dialog .modal-content,.finova-workspace,.workspace-content,.content-card,.financial-statement-card,.cashflow-card){background-color:#142238;color:#e8effa;border-color:#304159}
+html[data-finova-theme="dark"] :is(.badge.bg-light,.badge.text-bg-light){background:#253b56!important;color:#e8effa!important}
+
+/* V2: dashboard-specific surfaces. Preserve original layout and KPI accent colors. */
+html[data-finova-theme="dark"] .dashboard-page{background:#101b2d!important;color:#e6eefb!important}
+html[data-finova-theme="dark"] .dashboard-hero{background:linear-gradient(120deg,#1a3152 0%,#203e66 55%,#263d64 100%)!important;border:1px solid #395475!important;box-shadow:none!important}
+html[data-finova-theme="dark"] .dashboard-hero-copy h1{color:#f6f9ff!important}
+html[data-finova-theme="dark"] .dashboard-hero-copy p{color:#c5d5ed!important}
+html[data-finova-theme="dark"] .dashboard-hero-eyebrow{color:#85b8ff!important}
+html[data-finova-theme="dark"] .dashboard-hero-period{background:#182b46!important;border:1px solid #486487!important}
+html[data-finova-theme="dark"] .dashboard-hero-period :is(span,strong,small){color:#e5efff!important}
+html[data-finova-theme="dark"] :is(.dashboard-kpi-card,.dashboard-panel,.dashboard-mini-card,.dashboard-activity-panel,.dashboard-insight-panel){background:#1a2940!important;border-color:#324965!important;color:#e7effc!important;box-shadow:0 6px 22px rgba(2,8,22,.15)!important}
+html[data-finova-theme="dark"] :is(.dashboard-panel-header,.dashboard-modern-panel-header,.dashboard-panel-body,.dashboard-chart-body,.dashboard-chart-area,.dashboard-donut-center){background:#1a2940!important;border-color:#324965!important}
+html[data-finova-theme="dark"] :is(.dashboard-kpi-label,.dashboard-kpi-value,.dashboard-panel-header h5,.dashboard-mini-card strong,.dashboard-insight-modern-content strong,.dashboard-donut-center strong){color:#f2f6ff!important}
+html[data-finova-theme="dark"] :is(.dashboard-kpi-meta small,.dashboard-panel-header p,.dashboard-insight-modern-content span,.dashboard-donut-center span,.dashboard-chart-legend span,.dashboard-chart-label,.dashboard-kpi-status.is-neutral){color:#aebfda!important}
+html[data-finova-theme="dark"] :is(.dashboard-year-chip,.dashboard-panel-menu,.dashboard-activity-header-badge){background:#253a58!important;color:#cfe0fa!important;border-color:#3a5477!important}
+html[data-finova-theme="dark"] :is(.dashboard-insight-modern-item,.dashboard-insight-item,.dashboard-empty-state,.dashboard-empty-visual){background:#213550!important;border-color:#3b5573!important}
+html[data-finova-theme="dark"] :is(.dashboard-insight-modern-item.is-success,.dashboard-insight-item.is-success){background:#163b35!important}
+html[data-finova-theme="dark"] :is(.dashboard-insight-modern-item.is-danger,.dashboard-insight-item.is-danger){background:#432b38!important}
+html[data-finova-theme="dark"] :is(.dashboard-insight-modern-item.is-warning,.dashboard-insight-item.is-warning){background:#423727!important}
+html[data-finova-theme="dark"] .dashboard-chart-grid{stroke:#34475f!important}
+html[data-finova-theme="dark"] .dashboard-activity-table :is(th,td){background:#1a2940!important;color:#dbe7fa!important;border-color:#34485f!important}
+html[data-finova-theme="dark"] .dashboard-activity-table tbody tr:hover td{background:#253b58!important}
+html[data-finova-theme="dark"] .dashboard-donut::after{background:#1a2940!important}
+html[data-finova-theme="dark"] .dashboard-hero-decoration{opacity:.18!important}
+/* Keep status indicators readable without overriding their semantic colors. */
+html[data-finova-theme="dark"] .dashboard-kpi-status.is-negative{color:#ff9aa9!important}
+html[data-finova-theme="dark"] .dashboard-kpi-status:not(.is-neutral):not(.is-negative){color:#6ee7b7}
+
+/* V3 — module-wide contrast and coherent dark surfaces.
+   CSS only; does not modify sizing, layout, data, actions, or semantic badges. */
+html[data-finova-theme="dark"] {
+  --finova-dark-surface:#18283e;
+  --finova-dark-surface-alt:#1d304a;
+  --finova-dark-text:#edf4ff;
+  --finova-dark-muted:#b5c6dc;
+}
+html[data-finova-theme="dark"] :is(.finova-page,.finova-card,.finova-card-body,.finova-table-card,.finova-table-container,.table-responsive,.finova-pagination-wrapper,.user-management-page,.user-management-table-card,.user-management-filter-card) {
+  background-color:var(--finova-dark-surface)!important;
+  color:var(--finova-dark-text)!important;
+  border-color:#354b68!important;
+}
+html[data-finova-theme="dark"] :is(.finova-page-header,.finova-page-header-left,.finova-page-header-right) {color:var(--finova-dark-text)!important}
+html[data-finova-theme="dark"] :is(.finova-page-title,.finova-page-subtitle,.user-access-info,.finova-card-title) {color:var(--finova-dark-text)!important}
+html[data-finova-theme="dark"] :is(.finova-page-subtitle,.finova-card-subtitle) {color:var(--finova-dark-muted)!important}
+/* Explicit cell-level contrast overrides legacy hardcoded dark colors. */
+html[data-finova-theme="dark"] .finova-table {--bs-table-bg:#18283e!important;--bs-table-color:#edf4ff!important;--bs-table-border-color:#354b68!important;background:#18283e!important;color:#edf4ff!important}
+html[data-finova-theme="dark"] .finova-table :is(thead,thead tr,thead th) {background:#223752!important;color:#f2f7ff!important;border-color:#354b68!important}
+html[data-finova-theme="dark"] .finova-table :is(tbody,tbody tr,tbody td) {background:#18283e!important;color:#e6f0ff!important;border-color:#354b68!important}
+html[data-finova-theme="dark"] .finova-table tbody tr:hover td {background:#243a55!important}
+html[data-finova-theme="dark"] .finova-table tbody td :is(span,div,a,small,strong,p) {color:inherit!important}
+html[data-finova-theme="dark"] .finova-table tbody td :is(.text-muted,.text-secondary,small) {color:#b5c6dc!important}
+/* Badges keep their semantic backgrounds and dark-on-light contrast. */
+html[data-finova-theme="dark"] .finova-table tbody td :is(.badge,[class*="role-badge"],[class*="status-badge"],[class*="um-badge"]) {color:initial!important}
+html[data-finova-theme="dark"] .finova-table tbody td :is(.badge,[class*="role-badge"],[class*="status-badge"],[class*="um-badge"]) :is(span,strong) {color:inherit!important}
+html[data-finova-theme="dark"] :is(.finova-control,.form-control,.form-select,.finova-filter-input) {background:#101e31!important;color:#f0f5ff!important;border-color:#435c7a!important}
+html[data-finova-theme="dark"] :is(.form-label,.finova-card label,.finova-page label) {color:#e8f1ff!important}
+html[data-finova-theme="dark"] :is(.finova-pagination-wrapper,.finova-pagination-left,.finova-pagination-right) {background:#18283e!important;color:#e8f1ff!important}
+html[data-finova-theme="dark"] .finova-pagination-wrapper :is(span,div,label) {color:#e8f1ff!important}
+html[data-finova-theme="dark"] :is(.finova-pagination-btn,.finova-pagination-wrapper button) {background:#253b57;color:#edf4ff;border-color:#45617f}
+html[data-finova-theme="dark"] :is(.finova-table-card,.finova-card) > :is(.finova-card-body,.card-body) {background:#18283e!important}
+/* Neutral workspace surfaces, including empty space below short tables. */
+html[data-finova-theme="dark"] :is(.workspace-content,.finova-workspace,.finova-page,.finova-table-container) {background-color:#18283e!important}
+/* Common financial report tables and modal text. */
+html[data-finova-theme="dark"] :is(.modal-content,.modal-body,.modal-header,.modal-footer) {background-color:#18283e!important;color:#edf4ff!important;border-color:#354b68!important}
+html[data-finova-theme="dark"] :is(.modal-title,.modal-content label,.modal-content p,.modal-content h5,.modal-content h6) {color:#edf4ff!important}
+html[data-finova-theme="dark"] :is(.table:not(.finova-table) tbody td,.table:not(.finova-table) tbody th) {color:#edf4ff!important}
+/* Do not recolor colored action buttons, badges or chart series. */
+
+
+/* V4 — Scoped contrast repair based on production module styles.
+   Preserve all sizing, layout, calculations and semantic action colors. */
+html[data-finova-theme="dark"] {
+ --text-primary:#eef4ff; --text-secondary:#b9c9df; --text-muted:#91a8c6;
+ --finova-dark-bg:#0e1828; --finova-dark-panel:#18283e;
+ --finova-dark-row:#1a2b42; --finova-dark-heading:#233750;
+}
+/* Legacy module styles use #fff !important on status rows. Override with ID specificity. */
+html[data-finova-theme="dark"] #account-receivable-table-body,
+html[data-finova-theme="dark"] #ap-table-body {background:#1a2b42!important;color:#edf4ff!important}
+html[data-finova-theme="dark"] #account-receivable-table-body > tr,
+html[data-finova-theme="dark"] #account-receivable-table-body > tr > td,
+html[data-finova-theme="dark"] #ap-table-body > tr,
+html[data-finova-theme="dark"] #ap-table-body > tr > td {background:#1a2b42!important;background-color:#1a2b42!important;color:#edf4ff!important;border-color:#344962!important;opacity:1!important}
+html[data-finova-theme="dark"] #account-receivable-table-body > tr:is([data-status],.ar-row-draft,.ar-row-unpaid,.ar-row-paid,.ar-row-void) > td,
+html[data-finova-theme="dark"] #ap-table-body > tr:is([data-status],.ap-row-draft,.ap-row-unpaid,.ap-row-paid,.ap-row-void) > td {background:#1a2b42!important;background-color:#1a2b42!important;color:#edf4ff!important}
+html[data-finova-theme="dark"] #account-receivable-table-body > tr:hover > td,
+html[data-finova-theme="dark"] #ap-table-body > tr:hover > td {background:#243b56!important;background-color:#243b56!important}
+/* Invoice metadata labels and values are explicitly styled by the modules. */
+html[data-finova-theme="dark"] #account-receivable-table-body :is(.ar-info-label,.ar-info-separator),
+html[data-finova-theme="dark"] #ap-table-body :is(.ap-info-label,.ap-info-separator) {color:#b5c7df!important}
+html[data-finova-theme="dark"] #account-receivable-table-body :is(.ar-info-value,.ar-cell-document,.ar-cell-customer,.ar-cell-date-info,.ar-cell-amount-status),
+html[data-finova-theme="dark"] #ap-table-body :is(.ap-info-value,.ap-cell-document,.ap-cell-vendor,.ap-cell-date-info,.ap-cell-amount-status) {color:#eef4ff!important}
+html[data-finova-theme="dark"] #account-receivable-table-body :is(.ar-info-value,.ar-info-label,.ar-info-separator) :is(a,span,strong),
+html[data-finova-theme="dark"] #ap-table-body :is(.ap-info-value,.ap-info-label,.ap-info-separator) :is(a,span,strong) {color:inherit}
+/* Standardized financial table surfaces, without overriding colored badges/buttons. */
+html[data-finova-theme="dark"] :is(.account-receivable-table-card,.account-payable-table-card,.user-management-table-card,.finova-table-card,.finova-table-container,.table-responsive) {background:#18283e!important;border-color:#344962!important}
+html[data-finova-theme="dark"] :is(.account-receivable-table-card,.account-payable-table-card,.user-management-table-card,.finova-table-card) :is(.finova-card-body,.card-body) {background:#18283e!important}
+html[data-finova-theme="dark"] :is(.account-receivable-table-card,.account-payable-table-card,.user-management-table-card) .finova-table thead th {background:#233750!important;color:#f2f7ff!important;border-color:#344962!important}
+html[data-finova-theme="dark"] :is(.account-receivable-table-card,.account-payable-table-card,.user-management-table-card) .finova-table tbody td {color:#edf4ff!important;border-color:#344962!important}
+/* User Management and GL Journal use bespoke cell text rules. */
+html[data-finova-theme="dark"] :is(.user-management-table-card,#gl-journal-table) tbody td:not(.badge) {color:#e9f1ff!important}
+html[data-finova-theme="dark"] :is(.user-management-table-card,#gl-journal-table) tbody td :is(.gl-journal-info-label,.gl-journal-info-separator,.text-muted) {color:#b9c9df!important}
+html[data-finova-theme="dark"] #gl-journal-table :is(.gl-journal-info-value,.gl-journal-summary-value) {color:#edf4ff!important}
+/* Keep pagination and whitespace consistent with dark panel. */
+html[data-finova-theme="dark"] :is(.account-receivable-page,.account-payable-page,.user-management-page,.finova-page,.finova-table-card,.finova-table-container,.finova-pagination-wrapper) {background-color:#18283e!important}
+/* Modal and form surfaces; do not change button or badge foreground colors. */
+html[data-finova-theme="dark"] :is(.modal-content,.modal-body,.modal-header,.modal-footer,.finova-filter-card,.account-receivable-filter-card,.account-payable-filter-card) {background-color:#18283e!important;border-color:#344962!important}
+html[data-finova-theme="dark"] :is(.modal-content,.finova-filter-card,.account-receivable-filter-card,.account-payable-filter-card) :is(label,.form-label,h1,h2,h3,h4,h5,h6) {color:#eef4ff!important}
+html[data-finova-theme="dark"] :is(.modal-content,.finova-filter-card,.account-receivable-filter-card,.account-payable-filter-card) :is(input:not([type=checkbox]):not([type=radio]),select,textarea,.form-control,.form-select) {background-color:#101e31!important;color:#f1f6ff!important;border-color:#435b78!important}
+html[data-finova-theme="dark"] :is(.modal-content,.finova-filter-card,.account-receivable-filter-card,.account-payable-filter-card) :is(input,textarea)::placeholder {color:#9db1cd!important;opacity:1}
+/* Report cells frequently use hardcoded light backgrounds. */
+html[data-finova-theme="dark"] :is(.general-ledger-page,.balance-sheet-page,.profit-loss-page,.trial-balance-year-page,.financial-statement-page,.cash-flow-forecast-page) :is(.table tbody td,.table tbody th) {background-color:#1a2b42!important;color:#eaf2ff!important;border-color:#344962!important}
+/* Dashboard surfaces from V2 remain intact. */
+
+/* V5 — Dashboard text contrast, scoped to dashboard only.
+   No layout, dimensions, or accounting behavior modified. */
+html[data-finova-theme="dark"] .dashboard-page {
+  --dashboard-text:#f1f6ff;
+  --dashboard-text-secondary:#c0d0e5;
+  --dashboard-text-muted:#9eb2cf;
+  --dashboard-line:#344b67;
+}
+html[data-finova-theme="dark"] .dashboard-page :is(
+  .dashboard-position-name span,
+  .dashboard-summary-modern-label span,
+  .dashboard-mini-label,
+  .dashboard-system-copy span,
+  .dashboard-insight-modern-content strong
+) { color:var(--dashboard-text)!important; }
+html[data-finova-theme="dark"] .dashboard-page :is(
+  .dashboard-position-item > strong,
+  .dashboard-summary-modern-row > strong,
+  .dashboard-summary-modern-total strong,
+  .dashboard-mini-content strong,
+  .dashboard-position-summary strong
+) { color:var(--dashboard-text)!important; }
+html[data-finova-theme="dark"] .dashboard-page :is(
+  .dashboard-summary-modern-label small,
+  .dashboard-position-insight span,
+  .dashboard-mini-meta,
+  .dashboard-system-copy small,
+  .dashboard-insight-modern-content span
+) { color:var(--dashboard-text-muted)!important; }
+html[data-finova-theme="dark"] .dashboard-page :is(
+  .dashboard-position-item,
+  .dashboard-summary-modern-row,
+  .dashboard-system-modern-item
+) { border-bottom-color:var(--dashboard-line)!important; }
+html[data-finova-theme="dark"] .dashboard-page .dashboard-position-insight {
+  background:#243a57!important;
+  border-color:#3e5a7a!important;
+}
+html[data-finova-theme="dark"] .dashboard-page .dashboard-position-insight strong {
+  color:#e6f0ff!important;
+}
+html[data-finova-theme="dark"] .dashboard-page .dashboard-position-insight > .fa-chevron-right {
+  color:#85b8ff!important;
+}
+html[data-finova-theme="dark"] .dashboard-page .dashboard-summary-modern-total {
+  background:linear-gradient(90deg,#203a5b,#253b58)!important;
+  border-color:#426185!important;
+}
+html[data-finova-theme="dark"] .dashboard-page .dashboard-summary-modern-total span {
+  color:#d7e8ff!important;
+}
+html[data-finova-theme="dark"] .dashboard-page .dashboard-summary-modern-total small {
+  color:#a7bedc!important;
+}
+html[data-finova-theme="dark"] .dashboard-page :is(
+  .dashboard-position-panel,.dashboard-summary-card,.dashboard-trend-panel,
+  .dashboard-system-panel,.dashboard-insight-panel,.dashboard-mini-card
+) :is(h2,h3,h4,h5,h6) { color:#f1f6ff!important; }
+/* Keep light icon tiles readable without whitening their glyphs. */
+html[data-finova-theme="dark"] .dashboard-page :is(
+  .dashboard-summary-row-icon,.dashboard-position-insight-icon,
+  .dashboard-kpi-icon,.dashboard-panel-icon,.dashboard-mini-icon
+) { color:inherit; }
+
+/* V6 — Premium dark workspace navigation, scoped to dark mode only.
+   Retains the original workspace geometry, router and click behavior. */
+html[data-finova-theme="dark"] .finova-workspace-tabs {
+  background:linear-gradient(180deg,#0b182b 0%,#0d1c30 100%)!important;
+  border-top-color:#243952!important;
+  border-bottom:1px solid #29415d!important;
+  box-shadow:inset 0 1px 0 rgba(123,170,234,.06)!important;
+  scrollbar-color:#3d5777 transparent;
+}
+html[data-finova-theme="dark"] .finova-workspace-tabs::-webkit-scrollbar-thumb {background:#3d5777!important;}
+html[data-finova-theme="dark"] .finova-workspace-tab {
+  background:linear-gradient(180deg,#1b2f49 0%,#16283e 100%)!important;
+  color:#dbe7f8!important;
+  border-color:#354e6b!important;
+  border-bottom-color:#29415d!important;
+  box-shadow:inset 0 1px 0 rgba(198,222,255,.04)!important;
+}
+html[data-finova-theme="dark"] .finova-workspace-tab:hover {
+  background:linear-gradient(180deg,#243d5c,#1b3350)!important;
+  color:#fff!important;
+  border-color:#52739b!important;
+}
+html[data-finova-theme="dark"] .finova-workspace-tab.active,
+html[data-finova-theme="dark"] .finova-workspace-tab[aria-selected="true"] {
+  background:linear-gradient(180deg,#173965,#102a4f)!important;
+  color:#fff!important;
+  border-color:#3474c6!important;
+  border-bottom-color:#102a4f!important;
+  box-shadow:0 -2px 12px rgba(37,99,235,.12),inset 0 1px 0 rgba(190,216,255,.12)!important;
+}
+html[data-finova-theme="dark"] .finova-workspace-tab.active::before,
+html[data-finova-theme="dark"] .finova-workspace-tab[aria-selected="true"]::before {
+  background:linear-gradient(90deg,#2374ff,#4da3ff)!important;
+}
+html[data-finova-theme="dark"] .finova-workspace-tab-title {color:inherit!important;}
+html[data-finova-theme="dark"] .finova-workspace-tab-icon,
+html[data-finova-theme="dark"] .finova-workspace-tab.home .finova-workspace-tab-icon {
+  background:#294361!important;color:#b7d3fa!important;
+}
+html[data-finova-theme="dark"] .finova-workspace-tab.active .finova-workspace-tab-icon,
+html[data-finova-theme="dark"] .finova-workspace-tab.home.active .finova-workspace-tab-icon,
+html[data-finova-theme="dark"] .finova-workspace-tab[aria-selected="true"] .finova-workspace-tab-icon {
+  background:linear-gradient(145deg,#2779ed,#1856b8)!important;
+  color:#fff!important;
+  box-shadow:0 2px 7px rgba(0,0,0,.18)!important;
+}
+html[data-finova-theme="dark"] .finova-workspace-tab-close,
+html[data-finova-theme="dark"] .finova-workspace-tab.active .finova-workspace-tab-close {
+  color:#a7bdd8!important;
+}
+html[data-finova-theme="dark"] .finova-workspace-tab-close:hover,
+html[data-finova-theme="dark"] .finova-workspace-tab.active .finova-workspace-tab-close:hover {
+  background:#36516e!important;color:#fff!important;
+}
+html[data-finova-theme="dark"] .finova-workspace-tab:focus-visible {
+  outline:2px solid #6aa7ff!important;outline-offset:-2px!important;
+}
+/* Header uses the same palette as the workspace, preserving the logo asset. */
+html[data-finova-theme="dark"] .finova-topbar {
+  background:#12223a!important;
+  border-bottom-color:#2b4260!important;
+}
+html[data-finova-theme="dark"] .finova-topbar :is(.finova-user-name,.finova-company-name) {color:#f1f6ff!important;}
+html[data-finova-theme="dark"] .finova-topbar :is(.finova-user-role,.finova-company-code) {color:#b8cae2!important;}
+
+
+/* V7 — Dashboard icon contrast: remove washed-out glyphs on pale icon tiles.
+   Color-only changes; preserve icon sizes, positions, actions and chart colors. */
+html[data-finova-theme="dark"] .dashboard-page :is(
+ .dashboard-kpi-icon,.dashboard-panel-icon,.dashboard-summary-row-icon,
+ .dashboard-mini-icon,.dashboard-position-insight-icon,.dashboard-insight-modern-icon,
+ .dashboard-insight-icon,.dashboard-system-icon,.dashboard-profit-highlight-icon,
+ .dashboard-period-icon,.dashboard-empty-icon
+) { opacity:1!important;filter:none!important; }
+/* The earlier generic 'color:inherit' rule is deliberately overridden. */
+html[data-finova-theme="dark"] .dashboard-page .dashboard-kpi-icon {
+ background:var(--kpi-soft,#eaf2ff)!important;
+ color:var(--kpi-accent,#2563eb)!important;
+}
+html[data-finova-theme="dark"] .dashboard-page .dashboard-kpi-icon :is(i,svg,.fa,.fas,.far,.fab) {color:inherit!important;opacity:1!important;filter:none!important;}
+html[data-finova-theme="dark"] .dashboard-page .dashboard-panel-icon {background:#e9f0fb!important;color:#35557c!important;}
+html[data-finova-theme="dark"] .dashboard-page .dashboard-panel-icon.is-blue {background:#dceaff!important;color:#165ad7!important;}
+html[data-finova-theme="dark"] .dashboard-page .dashboard-panel-icon.is-purple {background:#eee4ff!important;color:#7130ce!important;}
+html[data-finova-theme="dark"] .dashboard-page .dashboard-summary-row-icon.is-blue,
+html[data-finova-theme="dark"] .dashboard-page .dashboard-system-icon.is-blue {background:#dceaff!important;color:#165ad7!important;}
+html[data-finova-theme="dark"] .dashboard-page .dashboard-summary-row-icon.is-red {background:#ffe0e5!important;color:#cb344b!important;}
+html[data-finova-theme="dark"] .dashboard-page .dashboard-summary-row-icon.is-purple,
+html[data-finova-theme="dark"] .dashboard-page .dashboard-system-icon.is-purple {background:#eee4ff!important;color:#7130ce!important;}
+html[data-finova-theme="dark"] .dashboard-page .dashboard-summary-row-icon.is-green,
+html[data-finova-theme="dark"] .dashboard-page .dashboard-system-icon.is-green {background:#d8f6e7!important;color:#087a4c!important;}
+html[data-finova-theme="dark"] .dashboard-page .dashboard-summary-row-icon.is-orange,
+html[data-finova-theme="dark"] .dashboard-page .dashboard-system-icon.is-orange {background:#ffedd5!important;color:#a85c08!important;}
+html[data-finova-theme="dark"] .dashboard-page :is(.dashboard-summary-row-icon,.dashboard-mini-icon,.dashboard-position-insight-icon,.dashboard-insight-modern-icon,.dashboard-insight-icon,.dashboard-system-icon,.dashboard-profit-highlight-icon,.dashboard-period-icon,.dashboard-empty-icon):not([class*="is-"]) {background:#dceaff!important;color:#165ad7!important;}
+html[data-finova-theme="dark"] .dashboard-page :is(.dashboard-panel-icon,.dashboard-summary-row-icon,.dashboard-mini-icon,.dashboard-position-insight-icon,.dashboard-insight-modern-icon,.dashboard-insight-icon,.dashboard-system-icon,.dashboard-profit-highlight-icon,.dashboard-period-icon,.dashboard-empty-icon) :is(i,svg,.fa,.fas,.far,.fab) {color:inherit!important;opacity:1!important;filter:none!important;}
+html[data-finova-theme="dark"] .dashboard-page :is(.dashboard-kpi-icon,.dashboard-panel-icon,.dashboard-summary-row-icon,.dashboard-mini-icon,.dashboard-position-insight-icon,.dashboard-insight-modern-icon,.dashboard-insight-icon,.dashboard-system-icon,.dashboard-profit-highlight-icon,.dashboard-period-icon,.dashboard-empty-icon) svg {stroke:currentColor!important;}
+
+/* V8 — Data Induk: readable semantic badges and action icons.
+   Scoped to dark mode; color-only changes, no changes to layout or behavior. */
+html[data-finova-theme="dark"] :is(.finova-table,.user-management-table-card,.finova-table-card) tbody td :is(.badge,[class*="role-badge"],[class*="status-badge"],[class*="um-badge"]) {
+  opacity:1!important;
+  filter:none!important;
+  text-shadow:none!important;
+}
+/* Neutral role badges — pale tile with dark legible text. */
+html[data-finova-theme="dark"] :is(.finova-table,.user-management-table-card,.finova-table-card) tbody td :is(.badge,[class*="role-badge"],[class*="um-badge"]):is(.bg-light,.text-bg-light,.bg-secondary,.badge-staff,.badge-manager,.role-staff,.role-manager) {
+  background:#dbe8f8!important;color:#193556!important;
+}
+/* Semantic status: use accessible dark text on existing pastel pills. */
+html[data-finova-theme="dark"] :is(.finova-table,.user-management-table-card,.finova-table-card) tbody td :is(.badge,[class*="status-badge"],[class*="um-badge"]):is(.bg-success,.text-bg-success,.status-active,.badge-active,.active,.is-active) {
+  background:#c9f4df!important;color:#08613f!important;
+}
+html[data-finova-theme="dark"] :is(.finova-table,.user-management-table-card,.finova-table-card) tbody td :is(.badge,[class*="status-badge"],[class*="um-badge"]):is(.bg-danger,.text-bg-danger,.status-inactive,.badge-inactive,.inactive,.is-inactive) {
+  background:#ffe0e4!important;color:#a21e35!important;
+}
+html[data-finova-theme="dark"] :is(.finova-table,.user-management-table-card,.finova-table-card) tbody td :is(.badge,[class*="role-badge"],[class*="um-badge"]):is(.badge-super-admin,.role-super-admin,.super-admin,.is-super-admin) {
+  background:#ebdcff!important;color:#6520a8!important;
+}
+/* Avoid the V3 table rule forcing nested badge text to white. */
+html[data-finova-theme="dark"] :is(.finova-table,.user-management-table-card,.finova-table-card) tbody td :is(.badge,[class*="role-badge"],[class*="status-badge"],[class*="um-badge"]) :is(span,strong,small,i,svg,.fa,.fas,.far) {
+  color:inherit!important;opacity:1!important;filter:none!important;
+}
+/* Fallback: semantic background utilities, only when inside table badges. */
+html[data-finova-theme="dark"] .finova-table tbody td .badge.bg-success {background:#c9f4df!important;color:#08613f!important}
+html[data-finova-theme="dark"] .finova-table tbody td .badge.bg-danger {background:#ffe0e4!important;color:#a21e35!important}
+html[data-finova-theme="dark"] .finova-table tbody td .badge.bg-info {background:#d8eaff!important;color:#124c9c!important}
+html[data-finova-theme="dark"] .finova-table tbody td .badge.bg-warning {background:#ffe9b0!important;color:#815006!important}
+/* Colored outline actions: icons and labels must remain visible on dark panels. */
+html[data-finova-theme="dark"] :is(.finova-page,.finova-table-card,.user-management-page) :is(.btn-outline-primary,.btn-outline-info) {color:#69a6ff!important;border-color:#3b83e5!important}
+html[data-finova-theme="dark"] :is(.finova-page,.finova-table-card,.user-management-page) .btn-outline-success {color:#4bd6a2!important;border-color:#168b65!important}
+html[data-finova-theme="dark"] :is(.finova-page,.finova-table-card,.user-management-page) .btn-outline-warning {color:#ffd176!important;border-color:#b78325!important}
+html[data-finova-theme="dark"] :is(.finova-page,.finova-table-card,.user-management-page) .btn-outline-danger {color:#ff8796!important;border-color:#d14b60!important}
+html[data-finova-theme="dark"] :is(.finova-page,.finova-table-card,.user-management-page) :is(.btn-outline-primary,.btn-outline-info,.btn-outline-success,.btn-outline-warning,.btn-outline-danger) :is(i,svg,.fa,.fas,.far) {color:inherit!important;opacity:1!important;filter:none!important}
+/* Keep pale icon-only action tiles legible regardless of inherited table color. */
+html[data-finova-theme="dark"] .finova-table tbody td :is(.btn-light,.btn-outline-light) {background:#e7f0ff!important;color:#1657b8!important;border-color:#bad0f2!important}
+html[data-finova-theme="dark"] .finova-table tbody td :is(.btn-light,.btn-outline-light) :is(i,svg,.fa,.fas,.far) {color:inherit!important;opacity:1!important}
+
+
+/* V9 — Exact module badge selectors. Previous V8 generic selectors did not
+   match the actual user/bp/coa/tax badge class names. Dark mode only. */
+html[data-finova-theme="dark"] :is(.user-status-badge,.bp-status-badge,.coa-status-badge,.tax-status-badge) {
+  opacity:1!important;filter:none!important;text-shadow:none!important;
+}
+html[data-finova-theme="dark"] :is(.user-status-active,.bp-status-active,.coa-status-active,.tax-status-active) {
+  background:#c9f4df!important;color:#075e3c!important;
+}
+html[data-finova-theme="dark"] :is(.user-status-inactive,.bp-status-inactive,.coa-status-inactive,.tax-status-inactive) {
+  background:#ffe0e4!important;color:#a21e35!important;
+}
+html[data-finova-theme="dark"] :is(.user-status-badge,.bp-status-badge,.coa-status-badge,.tax-status-badge) :is(i,svg,span,.fa,.fas,.far,.fa-solid) {
+  color:inherit!important;opacity:1!important;visibility:visible!important;filter:none!important;
+}
+html[data-finova-theme="dark"] :is(.user-role-badge,.user-role-staff) {
+  background:#e3edf9!important;color:#23415f!important;
+}
+html[data-finova-theme="dark"] .user-role-manager {
+  background:#dceaff!important;color:#174fb3!important;
+}
+html[data-finova-theme="dark"] :is(.user-role-super,.user-role-super-admin) {
+  background:#ebdcff!important;color:#6420a8!important;border-color:#c4a1f4!important;
+}
+html[data-finova-theme="dark"] .user-role-badge :is(i,svg,span) {
+  color:inherit!important;opacity:1!important;filter:none!important;
+}
+/* Actual action button icon glyphs; do not recolor pale button surfaces. */
+html[data-finova-theme="dark"] :is(.user-action-group,.bp-action-group,.coa-action-group,.tax-action-group) button :is(i,svg,.fa,.fas,.far,.fa-solid) {
+  color:inherit!important;opacity:1!important;visibility:visible!important;filter:none!important;
+}
+
+/* V10 — Fix actual specificity conflict: generic table span rules override badge colors.
+   Only semantic badge text/icons are recolored; table cells remain unchanged. */
+html[data-finova-theme="dark"] .finova-table tbody td .user-role-badge.user-role-staff,
+html[data-finova-theme="dark"] .finova-table tbody td .user-role-badge.user-role-staff :is(span,strong,small,i,svg),
+html[data-finova-theme="dark"] .user-management-table-card tbody td .user-role-badge.user-role-staff,
+html[data-finova-theme="dark"] .user-management-table-card tbody td .user-role-badge.user-role-staff :is(span,strong,small,i,svg) {
+  background-color:#e3edf9!important;color:#23415f!important;-webkit-text-fill-color:#23415f!important;opacity:1!important;
+}
+html[data-finova-theme="dark"] .finova-table tbody td .user-role-badge.user-role-manager,
+html[data-finova-theme="dark"] .finova-table tbody td .user-role-badge.user-role-manager :is(span,strong,small,i,svg),
+html[data-finova-theme="dark"] .user-management-table-card tbody td .user-role-badge.user-role-manager,
+html[data-finova-theme="dark"] .user-management-table-card tbody td .user-role-badge.user-role-manager :is(span,strong,small,i,svg) {
+  color:#174fb3!important;-webkit-text-fill-color:#174fb3!important;opacity:1!important;
+}
+html[data-finova-theme="dark"] .finova-table tbody td .user-role-badge.user-role-manager,
+html[data-finova-theme="dark"] .user-management-table-card tbody td .user-role-badge.user-role-manager {background:#dceaff!important}
+html[data-finova-theme="dark"] .finova-table tbody td .user-role-badge.user-role-super,
+html[data-finova-theme="dark"] .finova-table tbody td .user-role-badge.user-role-super-admin,
+html[data-finova-theme="dark"] .user-management-table-card tbody td .user-role-badge.user-role-super,
+html[data-finova-theme="dark"] .user-management-table-card tbody td .user-role-badge.user-role-super-admin {
+  background:#ebdcff!important;color:#6420a8!important;-webkit-text-fill-color:#6420a8!important;
+}
+html[data-finova-theme="dark"] .finova-table tbody td .user-role-badge:is(.user-role-super,.user-role-super-admin) :is(span,strong,small,i,svg),
+html[data-finova-theme="dark"] .user-management-table-card tbody td .user-role-badge:is(.user-role-super,.user-role-super-admin) :is(span,strong,small,i,svg) {
+  color:#6420a8!important;-webkit-text-fill-color:#6420a8!important;opacity:1!important;
+}
+html[data-finova-theme="dark"] .finova-table tbody td .user-status-badge.user-status-active,
+html[data-finova-theme="dark"] .user-management-table-card tbody td .user-status-badge.user-status-active {
+  background:#c9f4df!important;color:#075e3c!important;-webkit-text-fill-color:#075e3c!important;
+}
+html[data-finova-theme="dark"] .finova-table tbody td .user-status-badge.user-status-inactive,
+html[data-finova-theme="dark"] .user-management-table-card tbody td .user-status-badge.user-status-inactive {
+  background:#ffe0e4!important;color:#a21e35!important;-webkit-text-fill-color:#a21e35!important;
+}
+html[data-finova-theme="dark"] .finova-table tbody td .user-status-badge.user-status-active :is(span,strong,small,i,svg),
+html[data-finova-theme="dark"] .user-management-table-card tbody td .user-status-badge.user-status-active :is(span,strong,small,i,svg) {
+  color:#075e3c!important;-webkit-text-fill-color:#075e3c!important;opacity:1!important;
+}
+html[data-finova-theme="dark"] .finova-table tbody td .user-status-badge.user-status-inactive :is(span,strong,small,i,svg),
+html[data-finova-theme="dark"] .user-management-table-card tbody td .user-status-badge.user-status-inactive :is(span,strong,small,i,svg) {
+  color:#a21e35!important;-webkit-text-fill-color:#a21e35!important;opacity:1!important;
+}
+/* Other Data Induk modules: semantic badges and their nested glyphs. */
+html[data-finova-theme="dark"] .finova-table tbody td :is(.bp-status-active,.coa-status-active,.tax-status-active),
+html[data-finova-theme="dark"] .finova-table tbody td :is(.bp-status-active,.coa-status-active,.tax-status-active) :is(span,strong,small,i,svg) {
+  color:#075e3c!important;-webkit-text-fill-color:#075e3c!important;
+}
+html[data-finova-theme="dark"] .finova-table tbody td :is(.bp-status-inactive,.coa-status-inactive,.tax-status-inactive),
+html[data-finova-theme="dark"] .finova-table tbody td :is(.bp-status-inactive,.coa-status-inactive,.tax-status-inactive) :is(span,strong,small,i,svg) {
+  color:#a21e35!important;-webkit-text-fill-color:#a21e35!important;
+}
+
+/* V11 — Brand/logo panel follows dark header palette.
+   Visual only: original FINOVA logo artwork is never recolored or filtered. */
+html[data-finova-theme="dark"] :is(
+  .sidebar-logo,.sidebar-logo-container,.sidebar-brand,.sidebar-brand-container,
+  .sidebar-header,.finova-sidebar-header,.finova-sidebar-brand,
+  .finova-logo-container,.finova-brand,.brand-container,.logo-container,
+  .topbar-logo,.topbar-brand,.finova-topbar-logo,.finova-logo-wrapper
+) {
+  background:#101f35!important;
+  background-color:#101f35!important;
+  border-color:#2b4260!important;
+}
+html[data-finova-theme="dark"] :is(
+  .sidebar-logo,.sidebar-logo-container,.sidebar-brand,.sidebar-brand-container,
+  .sidebar-header,.finova-sidebar-header,.finova-sidebar-brand,
+  .finova-logo-container,.finova-brand,.brand-container,.logo-container,
+  .topbar-logo,.topbar-brand,.finova-topbar-logo,.finova-logo-wrapper
+) :is(img,svg) {
+  filter:none!important;
+  opacity:1!important;
+}
+
+/* V12 — actual FINOVA sidebar logo container (verified against sidebar.js).
+   Theme-only background; preserve original transparent PNG and logo colors. */
+html[data-finova-theme="dark"] .finova-sidebar .finova-sidebar-logo,
+html[data-finova-theme="dark"] .finova-sidebar-logo,
+html[data-finova-theme="dark"] .finova-sidebar.collapsed .finova-sidebar-logo {
+  background:#101f35!important;
+  background-color:#101f35!important;
+  border-color:#2b4260!important;
+}
+@media(max-width:991.98px){
+  html[data-finova-theme="dark"] .finova-sidebar-logo {background:#101f35!important;}
+}
+html[data-finova-theme="dark"] .finova-sidebar-logo-image {
+  background:transparent!important;
+  filter:drop-shadow(0 2px 5px rgba(0,0,0,.12))!important;
+}
+
+/* V13 — dual logo assets, matching the actual FINOVA theme attribute.
+   The original light logo is never modified. */
+.finova-sidebar-logo .finova-logo-light { display:block !important; }
+.finova-sidebar-logo .finova-logo-dark { display:none !important; }
+html[data-finova-theme="dark"] .finova-sidebar-logo .finova-logo-light { display:none !important; }
+html[data-finova-theme="dark"] .finova-sidebar-logo .finova-logo-dark {
+  display:block !important;
+  width:100%; max-width:258px; height:62px;
+  object-fit:contain; object-position:center;
+  filter:none !important; opacity:1 !important;
+}
+
+
+/* V14 — Invoice AP/AR action icon visibility and semantic color contrast.
+   Dark mode only. Preserve button disabled states, layout and behavior. */
+html[data-finova-theme="dark"] :is(#ap-table-body,#account-receivable-table-body)
+  :is(button,a.btn,[role="button"]) {
+  --bs-btn-disabled-opacity:.55;
+  text-shadow:none!important;
+}
+/* View actions: bright blue glyph against a dark-blue button. */
+html[data-finova-theme="dark"] :is(#ap-table-body,#account-receivable-table-body)
+  :is(.btn-outline-primary,.btn-outline-info,[title*="View"],[title*="Lihat"],[aria-label*="View"],[aria-label*="Lihat"]) {
+  color:#a8d2ff!important;
+  border-color:#5486b7!important;
+  background-color:#203b59!important;
+}
+/* Print actions: do not leave dark glyphs on a dark background. */
+html[data-finova-theme="dark"] :is(#ap-table-body,#account-receivable-table-body)
+  :is(.btn-outline-dark,.btn-outline-secondary,[title*="Print"],[title*="Cetak"],[aria-label*="Print"],[aria-label*="Cetak"]) {
+  color:#eaf3ff!important;
+  border-color:#7189a7!important;
+  background-color:#2b405b!important;
+}
+/* Payment actions: readable green icon and border. */
+html[data-finova-theme="dark"] :is(#ap-table-body,#account-receivable-table-body)
+  :is(.btn-outline-success,[title*="Payment"],[title*="Pembayaran"],[aria-label*="Payment"],[aria-label*="Pembayaran"]) {
+  color:#65e7b4!important;
+  border-color:#259b75!important;
+  background-color:#153d38!important;
+}
+html[data-finova-theme="dark"] :is(#ap-table-body,#account-receivable-table-body)
+  :is(button,a.btn,[role="button"]):not(:disabled):not(.disabled)
+  :is(i,.fa,.fas,.far,.fa-solid,svg) {
+  color:inherit!important;
+  opacity:1!important;
+  visibility:visible!important;
+  filter:none!important;
+  -webkit-text-fill-color:currentColor!important;
+}
+html[data-finova-theme="dark"] :is(#ap-table-body,#account-receivable-table-body)
+  :is(button,a.btn,[role="button"]):not(:disabled):not(.disabled) svg {
+  stroke:currentColor!important;
+}
+/* Preserve intentionally disabled action buttons. */
+html[data-finova-theme="dark"] :is(#ap-table-body,#account-receivable-table-body)
+  :is(button:disabled,button.disabled,a.btn.disabled,[aria-disabled="true"]) {
+  opacity:.45!important;
+  cursor:not-allowed;
+}
+/* Invoice header icons: match button text, including Font Awesome and SVG. */
+html[data-finova-theme="dark"] :is(.account-payable-page,.account-receivable-page,
+  .account-payable-table-card,.account-receivable-table-card)
+  :is(.btn-outline-primary,.btn-outline-info,.btn-outline-success,.btn-outline-secondary)
+  :is(i,.fa,.fas,.far,.fa-solid,svg) {
+  color:inherit!important;
+  opacity:1!important;
+  filter:none!important;
+}
+/* Icon-only action controls remain visible when their parent uses custom styling. */
+html[data-finova-theme="dark"] :is(#ap-table-body,#account-receivable-table-body)
+  :is(.ap-action-btn,.ar-action-btn,.action-btn,.btn-action) {
+  border-color:#537393!important;
+}
+
+/* V15 — AP/AR document badges: readable labels in dark mode.
+   The generic .finova-table tbody td span rule previously forced inherited
+   light text onto the badges' light backgrounds. Only presentation changes. */
+html[data-finova-theme="dark"] #ap-table-body .ap-document-badges .ap-document-badge.ap-document-badge-payable,
+html[data-finova-theme="dark"] #account-receivable-table-body .ar-document-badges .ar-document-badge.ar-document-badge-receivable {
+  background-color:#dbeafe!important;
+  border-color:#93c5fd!important;
+  color:#164a91!important;
+  -webkit-text-fill-color:#164a91!important;
+  opacity:1!important;
+}
+html[data-finova-theme="dark"] #ap-table-body .ap-document-badges .ap-document-badge.ap-document-badge-invoice,
+html[data-finova-theme="dark"] #account-receivable-table-body .ar-document-badges .ar-document-badge.ar-document-badge-invoice {
+  background-color:#e2e8f0!important;
+  border-color:#aab9cd!important;
+  color:#334155!important;
+  -webkit-text-fill-color:#334155!important;
+  opacity:1!important;
+}
+
+
+/* V16 — Jurnal GL: perbaikan kontras tabel dan ikon tindakan (dark mode saja).
+   Tidak mengubah logika, layout, maupun status disabled. */
+html[data-finova-theme="dark"] #gl-journal-table,
+html[data-finova-theme="dark"] #gl-journal-table tbody,
+html[data-finova-theme="dark"] #gl-journal-table #gl-journal-tbody {
+  background-color:#18283e!important;color:#edf4ff!important;
+}
+html[data-finova-theme="dark"] #gl-journal-table thead th {
+  background:#233750!important;color:#f2f7ff!important;
+  -webkit-text-fill-color:#f2f7ff!important;border-color:#354b68!important;
+}
+html[data-finova-theme="dark"] #gl-journal-table #gl-journal-tbody > tr,
+html[data-finova-theme="dark"] #gl-journal-table #gl-journal-tbody > tr > td {
+  background:#18283e!important;background-color:#18283e!important;
+  color:#edf4ff!important;border-color:#354b68!important;
+  opacity:1!important;
+}
+html[data-finova-theme="dark"] #gl-journal-table #gl-journal-tbody > tr:nth-child(even),
+html[data-finova-theme="dark"] #gl-journal-table #gl-journal-tbody > tr:nth-child(even) > td {
+  background:#1d3048!important;background-color:#1d3048!important;
+}
+html[data-finova-theme="dark"] #gl-journal-table #gl-journal-tbody > tr:hover > td {
+  background:#263e59!important;background-color:#263e59!important;
+}
+html[data-finova-theme="dark"] #gl-journal-table #gl-journal-tbody :is(
+  .gl-journal-info-value,.gl-journal-summary-value,.gl-journal-created-cell,
+  .gl-journal-amount-cell,.gl-journal-info-cell,.gl-journal-date-cell
+) {color:#edf4ff!important;-webkit-text-fill-color:#edf4ff!important;opacity:1!important;}
+html[data-finova-theme="dark"] #gl-journal-table #gl-journal-tbody :is(
+  .gl-journal-info-label,.gl-journal-info-separator,.gl-journal-summary-label,
+  .gl-journal-summary-separator
+) {color:#adc3df!important;-webkit-text-fill-color:#adc3df!important;opacity:1!important;}
+/* Sumber jurnal: pastel tetap terang, huruf dibuat gelap dan terbaca. */
+html[data-finova-theme="dark"] #gl-journal-table #gl-journal-tbody .gl-journal-source-badge {
+  color:#153e60!important;-webkit-text-fill-color:#153e60!important;
+  opacity:1!important;filter:none!important;
+}
+html[data-finova-theme="dark"] #gl-journal-table #gl-journal-tbody .gl-journal-source-badge :is(span,i,svg,strong) {
+  color:inherit!important;-webkit-text-fill-color:currentColor!important;opacity:1!important;
+}
+/* Status: pertahankan warna latar semantik dan pastikan teks tidak pudar. */
+html[data-finova-theme="dark"] #gl-journal-table #gl-journal-tbody .gl-journal-status-cell .badge {
+  opacity:1!important;filter:none!important;text-shadow:none!important;
+}
+html[data-finova-theme="dark"] #gl-journal-table #gl-journal-tbody .gl-journal-status-cell .badge :is(i,span,strong,svg) {
+  color:inherit!important;opacity:1!important;filter:none!important;
+}
+/* Roda gigi/action: warna biru terang pada latar biru gelap. */
+html[data-finova-theme="dark"] #gl-journal-table #gl-journal-tbody .gl-action-trigger:not(:disabled):not(.disabled) {
+  background:#203c5c!important;border:1px solid #52769d!important;
+  color:#b8dcff!important;-webkit-text-fill-color:#b8dcff!important;
+  opacity:1!important;filter:none!important;
+}
+html[data-finova-theme="dark"] #gl-journal-table #gl-journal-tbody .gl-action-trigger:not(:disabled):not(.disabled) :is(i,svg,.fa,.fas,.fa-solid) {
+  color:#b8dcff!important;-webkit-text-fill-color:#b8dcff!important;
+  opacity:1!important;visibility:visible!important;filter:none!important;
+}
+html[data-finova-theme="dark"] #gl-journal-table #gl-journal-tbody .gl-action-trigger:not(:disabled):hover {
+  background:#2b527b!important;border-color:#78b1ee!important;color:#fff!important;
+}
+html[data-finova-theme="dark"] #gl-journal-table #gl-journal-tbody .gl-action-trigger:not(:disabled):hover i {
+  color:#fff!important;-webkit-text-fill-color:#fff!important;
+}
+html[data-finova-theme="dark"] #gl-journal-table .gl-action-menu {
+  background:#192b43!important;border-color:#425d7d!important;color:#edf4ff!important;
+}
+html[data-finova-theme="dark"] #gl-journal-table .gl-action-menu .dropdown-item {
+  color:#e8f2ff!important;
+}
+html[data-finova-theme="dark"] #gl-journal-table .gl-action-menu .dropdown-item:hover,
+html[data-finova-theme="dark"] #gl-journal-table .gl-action-menu .dropdown-item:focus {
+  background:#294462!important;color:#fff!important;
+}
+
+
+/* V17 — Jurnal GL: override spesifik untuk warna status baris bawaan
+   gl-journal.css yang memakai selector data-status + !important. */
+html[data-finova-theme="dark"] body #gl-journal-table #gl-journal-tbody > tr.gl-journal-row[data-status] > td,
+html[data-finova-theme="dark"] body #gl-journal-table #gl-journal-tbody > tr.gl-journal-row[data-status="draft"] > td,
+html[data-finova-theme="dark"] body #gl-journal-table #gl-journal-tbody > tr.gl-journal-row[data-status="posted"] > td,
+html[data-finova-theme="dark"] body #gl-journal-table #gl-journal-tbody > tr.gl-journal-row[data-status="void"] > td {
+  background:#1d3048!important;
+  background-color:#1d3048!important;
+  color:#edf4ff!important;
+  --bs-table-bg:#1d3048!important;
+  --bs-table-color:#edf4ff!important;
+  --bs-table-accent-bg:transparent!important;
+  --bs-table-striped-bg:#1d3048!important;
+  --bs-table-hover-bg:#263e59!important;
+}
+html[data-finova-theme="dark"] body #gl-journal-table #gl-journal-tbody > tr.gl-journal-row[data-status]:hover > td {
+  background:#263e59!important;background-color:#263e59!important;
+}
+html[data-finova-theme="dark"] body #gl-journal-table #gl-journal-tbody > tr.gl-journal-row[data-status] > td :is(
+ .gl-journal-date,.gl-journal-info-label,.gl-journal-info-separator,
+ .gl-journal-info-value,.gl-journal-number,.gl-journal-summary-label,
+ .gl-journal-summary-separator,.gl-journal-summary-value,
+ .gl-journal-created-cell,.gl-journal-amount-cell,.gl-journal-info-cell,
+ .gl-journal-summary-line,.gl-journal-info-line
+) {color:#e5efff!important;-webkit-text-fill-color:#e5efff!important;opacity:1!important;}
+html[data-finova-theme="dark"] body #gl-journal-table #gl-journal-tbody > tr.gl-journal-row[data-status] > td :is(
+ .gl-journal-info-label,.gl-journal-info-separator,.gl-journal-summary-label,.gl-journal-summary-separator
+) {color:#b5c9e4!important;-webkit-text-fill-color:#b5c9e4!important;}
+/* Pertahankan badge semantik dan tombol aksi di atas warna teks sel. */
+html[data-finova-theme="dark"] body #gl-journal-table #gl-journal-tbody > tr.gl-journal-row[data-status] > td :is(.badge,.gl-journal-source-badge) {
+ opacity:1!important;filter:none!important;
+}
+
+
+/* V18 — Jurnal GL modal: dark header, summary and footer.
+   Color/contrast only. No dimensions, positioning or accounting logic changes. */
+html[data-finova-theme="dark"] body #glJournalModal .gl-journal-modal-content,
+html[data-finova-theme="dark"] body #glJournalModal .gl-journal-modal-body {
+  background-color:#18283e!important;color:#edf4ff!important;
+}
+html[data-finova-theme="dark"] body #glJournalModal .modal-header {
+  background:#18283e!important;background-image:none!important;
+  color:#edf4ff!important;border-bottom-color:#354b68!important;
+}
+html[data-finova-theme="dark"] body #glJournalModal .modal-header .modal-title,
+html[data-finova-theme="dark"] body #glJournalModal .modal-header .modal-title i {
+  color:#f1f6ff!important;-webkit-text-fill-color:#f1f6ff!important;
+}
+html[data-finova-theme="dark"] body #glJournalModal .modal-header #gl-record-id-container .text-white-50 {
+  color:#b5c9e4!important;-webkit-text-fill-color:#b5c9e4!important;
+}
+html[data-finova-theme="dark"] body #glJournalModal .modal-header .btn-close {
+  filter:invert(1) grayscale(1)!important;opacity:.85!important;
+}
+html[data-finova-theme="dark"] body #glJournalModal .journal-summary-sticky {
+  background:#1d3048!important;background-color:#1d3048!important;
+  border-top-color:#354b68!important;color:#edf4ff!important;
+  box-shadow:0 -4px 12px rgba(0,0,0,.12)!important;
+}
+html[data-finova-theme="dark"] body #glJournalModal .journal-summary-title,
+html[data-finova-theme="dark"] body #glJournalModal .journal-summary-title strong {
+  color:#f1f6ff!important;-webkit-text-fill-color:#f1f6ff!important;
+}
+html[data-finova-theme="dark"] body #glJournalModal .journal-summary-title small,
+html[data-finova-theme="dark"] body #glJournalModal .journal-summary-label {
+  color:#b5c9e4!important;-webkit-text-fill-color:#b5c9e4!important;
+}
+html[data-finova-theme="dark"] body #glJournalModal .journal-summary-value,
+html[data-finova-theme="dark"] body #glJournalModal #summary-total-line,
+html[data-finova-theme="dark"] body #glJournalModal #summary-total-amount {
+  color:#f1f6ff!important;-webkit-text-fill-color:#f1f6ff!important;
+}
+html[data-finova-theme="dark"] body #glJournalModal .journal-summary-item {
+  border-color:#354b68!important;
+}
+html[data-finova-theme="dark"] body #glJournalModal .modal-footer.gl-journal-footer {
+  background:#18283e!important;background-color:#18283e!important;
+  color:#edf4ff!important;border-top-color:#354b68!important;
+}
+html[data-finova-theme="dark"] body #glJournalModal .gl-journal-footer .text-muted {
+  color:#b5c9e4!important;-webkit-text-fill-color:#b5c9e4!important;
+}
+html[data-finova-theme="dark"] body #glJournalModal .gl-journal-footer .text-muted strong {
+  color:#edf4ff!important;-webkit-text-fill-color:#edf4ff!important;
+}
+
+/* V19 — Tambah Rincian Jurnal: Tom Select COA mengikuti mode gelap.
+   Hanya warna/kontras; ukuran, pencarian, pemilihan akun dan logika tetap. */
+html[data-finova-theme="dark"] body #journalDetailModal .ts-wrapper .ts-control {
+  background:#101e31!important;background-color:#101e31!important;
+  border-color:#435b78!important;color:#f1f6ff!important;
+  -webkit-text-fill-color:#f1f6ff!important;
+}
+html[data-finova-theme="dark"] body #journalDetailModal .ts-wrapper .ts-control :is(.item,input) {
+  color:#f1f6ff!important;-webkit-text-fill-color:#f1f6ff!important;
+  background:transparent!important;
+}
+html[data-finova-theme="dark"] body #journalDetailModal .ts-wrapper .ts-control input::placeholder {
+  color:#9db1cd!important;-webkit-text-fill-color:#9db1cd!important;opacity:1!important;
+}
+html[data-finova-theme="dark"] body #journalDetailModal .ts-wrapper.focus .ts-control {
+  border-color:#659aff!important;box-shadow:0 0 0 3px rgba(75,140,255,.15)!important;
+}
+html[data-finova-theme="dark"] body #journalDetailModal .ts-wrapper .ts-dropdown,
+html[data-finova-theme="dark"] body #journalDetailModal .ts-dropdown {
+  background:#18283e!important;background-color:#18283e!important;
+  border-color:#435b78!important;color:#edf4ff!important;
+}
+html[data-finova-theme="dark"] body #journalDetailModal .ts-dropdown :is(.option,.create,.no-results) {
+  background:#18283e!important;color:#edf4ff!important;
+}
+html[data-finova-theme="dark"] body #journalDetailModal .ts-dropdown :is(.option.active,.option:hover,.selected) {
+  background:#294462!important;color:#fff!important;
+}
+
+/* V20 — Kontras Aset Tetap, Laporan Keuangan dan Proyeksi Arus Kas.
+   Khusus dark mode; hanya warna, tanpa mengubah geometri atau logika. */
+html[data-finova-theme="dark"] :is(
+  .asset-management-page,.fixed-asset-page,.fixed-assets-page,.asset-page,
+  .financial-statement-page,.financial-report-page,.financial-reports-page,
+  .cash-flow-forecast-page,.cashflow-forecast-page,.cash-flow-page
+) {--finova-module-ink:#eef5ff;--finova-module-muted:#b9cbe3;color:#eef5ff!important}
+
+/* Aset tetap: header, isi tabel, dan rincian aset tidak boleh memakai tinta gelap. */
+html[data-finova-theme="dark"] :is(
+  .asset-management-page,.fixed-asset-page,.fixed-assets-page,.asset-page,
+  #asset-management-table,#fixed-assets-table,#asset-table
+) :is(thead th,tbody td,tbody th) {color:#eaf2ff!important;-webkit-text-fill-color:#eaf2ff!important;border-color:#38506b!important}
+html[data-finova-theme="dark"] :is(
+  .asset-management-page,.fixed-asset-page,.fixed-assets-page,.asset-page,
+  #asset-management-table,#fixed-assets-table,#asset-table
+) :is(tbody td,tbody th) :is(a,span,strong,small,p,div):not(.badge):not([class*="badge"]):not([class*="status"]):not(.btn):not([class*="action"]) {color:#eaf2ff!important;-webkit-text-fill-color:#eaf2ff!important}
+html[data-finova-theme="dark"] :is(
+  .asset-management-page,.fixed-asset-page,.fixed-assets-page,.asset-page
+) :is(.text-muted,.text-secondary,small) {color:#b9cbe3!important;-webkit-text-fill-color:#b9cbe3!important}
+/* Also cover asset tables rendered without a module page wrapper. */
+html[data-finova-theme="dark"] :is(#asset-management-table,#fixed-assets-table,#asset-table) thead th {background:#233750!important}
+html[data-finova-theme="dark"] :is(#asset-management-table,#fixed-assets-table,#asset-table) tbody td {background:#18283e!important}
+
+/* Laporan keuangan: ubah kartu putih menjadi permukaan gelap, dengan teks terang. */
+html[data-finova-theme="dark"] :is(
+  .financial-statement-page,.financial-report-page,.financial-reports-page,
+  #financial-statement-page,#financial-report-page,#financial-reports-page
+) :is(.card,.report-option,.report-option-card,.report-selection-card,.report-period-card,
+  .period-card,.period-selection-card,.financial-report-card,.financial-statement-card,
+  .report-type-card,.report-checkbox-card,.report-setting-card,.report-settings-card,
+  .bg-white,.bg-light,.bg-body,.bg-body-tertiary) {
+  background:#20334d!important;background-color:#20334d!important;
+  color:#edf4ff!important;border-color:#425b7a!important;
+}
+html[data-finova-theme="dark"] :is(
+  .financial-statement-page,.financial-report-page,.financial-reports-page,
+  #financial-statement-page,#financial-report-page,#financial-reports-page
+) :is(.card,.report-option,.report-option-card,.report-selection-card,.report-period-card,
+  .period-card,.period-selection-card,.financial-report-card,.financial-statement-card,
+  .report-type-card,.report-checkbox-card,.report-setting-card,.report-settings-card)
+  :is(h1,h2,h3,h4,h5,h6,label,p,span,strong,small):not(.badge):not([class*="badge"]) {
+  color:#edf4ff!important;-webkit-text-fill-color:#edf4ff!important;
+}
+html[data-finova-theme="dark"] :is(
+  .financial-statement-page,.financial-report-page,.financial-reports-page,
+  #financial-statement-page,#financial-report-page,#financial-reports-page
+) :is(.text-muted,.text-secondary,.form-text,.card-subtitle) {
+  color:#b9cbe3!important;-webkit-text-fill-color:#b9cbe3!important;
+}
+html[data-finova-theme="dark"] :is(
+  .financial-statement-page,.financial-report-page,.financial-reports-page,
+  #financial-statement-page,#financial-report-page,#financial-reports-page
+) :is(.form-check-input,input[type="checkbox"]) {accent-color:#3b82f6}
+
+/* Proyeksi kas: angka KPI, judul kartu, status dan penjelasan terlihat. */
+html[data-finova-theme="dark"] :is(
+  .cash-flow-forecast-page,.cashflow-forecast-page,.cash-flow-page,
+  #cash-flow-forecast-page,#cashflow-forecast-page
+) :is(.kpi-card,.stat-card,.summary-card,.metric-card,.cashflow-card,
+  .forecast-card,.forecast-kpi-card,.forecast-summary-card,.liquidity-card,
+  .cashflow-summary-card,.cashflow-stat-card,.cashflow-kpi-card) {
+  background:#1c2e46!important;color:#edf4ff!important;border-color:#405a7b!important;
+}
+html[data-finova-theme="dark"] :is(
+  .cash-flow-forecast-page,.cashflow-forecast-page,.cash-flow-page,
+  #cash-flow-forecast-page,#cashflow-forecast-page
+) :is(.kpi-card,.stat-card,.summary-card,.metric-card,.cashflow-card,
+  .forecast-card,.forecast-kpi-card,.forecast-summary-card,.liquidity-card,
+  .cashflow-summary-card,.cashflow-stat-card,.cashflow-kpi-card)
+  :is(h1,h2,h3,h4,h5,h6,strong,b,.value,.amount,.metric-value,.kpi-value,
+  .stat-value,.forecast-value,.cashflow-value,.summary-value) {
+  color:#f1f6ff!important;-webkit-text-fill-color:#f1f6ff!important;
+}
+html[data-finova-theme="dark"] :is(
+  .cash-flow-forecast-page,.cashflow-forecast-page,.cash-flow-page,
+  #cash-flow-forecast-page,#cashflow-forecast-page
+) :is(.kpi-card,.stat-card,.summary-card,.metric-card,.cashflow-card,
+  .forecast-card,.forecast-kpi-card,.forecast-summary-card,.liquidity-card,
+  .cashflow-summary-card,.cashflow-stat-card,.cashflow-kpi-card)
+  :is(small,p,.label,.metric-label,.kpi-label,.stat-label,.forecast-label,
+  .cashflow-label,.summary-label,.text-muted,.text-secondary) {
+  color:#b9cbe3!important;-webkit-text-fill-color:#b9cbe3!important;
+}
+/* Summary cards may use a bespoke class instead of the standard card naming. */
+html[data-finova-theme="dark"] :is(
+  .cash-flow-forecast-page,.cashflow-forecast-page,#cash-flow-forecast-page
+) :is([class*="liquidity"],[class*="cash-summary"],[class*="forecast-summary"])
+  :is(strong,b,[class*="value"],[class*="amount"]) {
+  color:#f1f6ff!important;-webkit-text-fill-color:#f1f6ff!important;
+}
+
+
+/* V21 — Laporan Keuangan: kontras kartu periode dan pilihan laporan.
+   Warna saja, khusus mode gelap; tidak mengubah fungsi atau tata letak. */
+html[data-finova-theme="dark"] :is(
+ [class*="financial-statement"],[class*="financial-report"],[class*="financial_statement"],
+ [class*="financial_report"],[class*="laporan-keuangan"],[id*="financial-statement"],
+ [id*="financial-report"],[id*="financial_statement"],[id*="financial_report"],
+ [id*="laporan-keuangan"]
+) :is(
+ [class*="period-card"],[class*="period-option"],[class*="period-panel"],
+ [class*="report-option"],[class*="report-card"],[class*="report-item"],
+ [class*="report-selection"],[class*="report-type"],[class*="report-choice"],
+ [class*="report-period"],[class*="option-card"],[class*="selection-card"],
+ [class*="period-selection"],[class*="checkbox-card"],.bg-white,.bg-light,.card
+) {
+ background:#20334d!important;background-color:#20334d!important;
+ border-color:#425b7a!important;color:#edf4ff!important;
+}
+html[data-finova-theme="dark"] :is(
+ [class*="financial-statement"],[class*="financial-report"],[class*="financial_statement"],
+ [class*="financial_report"],[class*="laporan-keuangan"],[id*="financial-statement"],
+ [id*="financial-report"],[id*="financial_statement"],[id*="financial_report"],
+ [id*="laporan-keuangan"]
+) :is(
+ [class*="period-card"],[class*="period-option"],[class*="period-panel"],
+ [class*="report-option"],[class*="report-card"],[class*="report-item"],
+ [class*="report-selection"],[class*="report-type"],[class*="report-choice"],
+ [class*="report-period"],[class*="option-card"],[class*="selection-card"],
+ [class*="period-selection"],[class*="checkbox-card"],.bg-white,.bg-light,.card
+) :is(h1,h2,h3,h4,h5,h6,label,strong,b,p,span,small):not(.badge):not([class*="badge"]):not(.btn):not([class*="icon"]) {
+ color:#edf4ff!important;-webkit-text-fill-color:#edf4ff!important;
+}
+html[data-finova-theme="dark"] :is(
+ [class*="financial-statement"],[class*="financial-report"],[class*="financial_statement"],
+ [class*="financial_report"],[class*="laporan-keuangan"],[id*="financial-statement"],
+ [id*="financial-report"],[id*="financial_statement"],[id*="financial_report"],
+ [id*="laporan-keuangan"]
+) :is(.form-label,[class*="field-label"],[class*="period-label"],[class*="report-label"]) {
+ color:#d7e6fa!important;-webkit-text-fill-color:#d7e6fa!important;
+}
+html[data-finova-theme="dark"] :is(
+ [class*="financial-statement"],[class*="financial-report"],[class*="financial_statement"],
+ [class*="financial_report"],[class*="laporan-keuangan"],[id*="financial-statement"],
+ [id*="financial-report"],[id*="financial_statement"],[id*="financial_report"],
+ [id*="laporan-keuangan"]
+) :is(.form-text,.text-muted,.text-secondary,[class*="description"],[class*="subtitle"]) {
+ color:#b9cbe3!important;-webkit-text-fill-color:#b9cbe3!important;
+}
+
+
+/* V22 — Laporan Keuangan: kartu periode dan opsi laporan pada dark mode.
+   Menjangkau kartu custom yang tidak menggunakan class Bootstrap .card.
+   Hanya warna; tidak mengubah ukuran, posisi, interaksi, atau data. */
+html[data-finova-theme="dark"] :is(
+ .financial-statement-page,.financial-report-page,.financial-reports-page,
+ #financial-statement-page,#financial-report-page,#financial-reports-page,
+ [class*="laporan-keuangan"],[id*="laporan-keuangan"],
+ [class*="financial-statement"],[id*="financial-statement"]
+) :is(
+ [class*="period"],[class*="report-option"],[class*="report-item"],
+ [class*="report-choice"],[class*="report-selection"],
+ [class*="statement-option"],[class*="statement-card"],
+ [class*="option-tile"],[class*="option-item"],
+ [class*="selection-tile"],.card,.bg-white,.bg-light
+):is(div,section,article,label) {
+ background-color:#20334d!important;
+ background-image:none!important;
+ border-color:#425b7a!important;
+ color:#edf4ff!important;
+}
+html[data-finova-theme="dark"] :is(
+ .financial-statement-page,.financial-report-page,.financial-reports-page,
+ #financial-statement-page,#financial-report-page,#financial-reports-page,
+ [class*="laporan-keuangan"],[id*="laporan-keuangan"],
+ [class*="financial-statement"],[id*="financial-statement"]
+) :is(div,section,article,label):has(> input[type="checkbox"]),
+html[data-finova-theme="dark"] :is(
+ .financial-statement-page,.financial-report-page,.financial-reports-page,
+ #financial-statement-page,#financial-report-page,#financial-reports-page,
+ [class*="laporan-keuangan"],[id*="laporan-keuangan"],
+ [class*="financial-statement"],[id*="financial-statement"]
+) :is(div,section,article):has(> .form-check > input[type="checkbox"]) {
+ background-color:#20334d!important;
+ border-color:#425b7a!important;
+ color:#edf4ff!important;
+}
+html[data-finova-theme="dark"] :is(
+ .financial-statement-page,.financial-report-page,.financial-reports-page,
+ #financial-statement-page,#financial-report-page,#financial-reports-page,
+ [class*="laporan-keuangan"],[id*="laporan-keuangan"],
+ [class*="financial-statement"],[id*="financial-statement"]
+) :is([class*="period"],[class*="report-option"],[class*="report-item"],[class*="statement-option"],[class*="option-tile"],[class*="selection-tile"],.card)
+ :is(h1,h2,h3,h4,h5,h6,label,p,span,small,strong,b) {
+ color:#edf4ff!important;
+ -webkit-text-fill-color:#edf4ff!important;
+}
+html[data-finova-theme="dark"] :is(
+ .financial-statement-page,.financial-report-page,.financial-reports-page,
+ #financial-statement-page,#financial-report-page,#financial-reports-page,
+ [class*="laporan-keuangan"],[id*="laporan-keuangan"],
+ [class*="financial-statement"],[id*="financial-statement"]
+) :is([class*="period"],[class*="report-option"],[class*="report-item"],[class*="statement-option"],[class*="option-tile"],[class*="selection-tile"],.card)
+ :is(.text-muted,.text-secondary,.form-text,[class*="subtitle"],[class*="description"],[class*="hint"]) {
+ color:#b9cbe3!important;
+ -webkit-text-fill-color:#b9cbe3!important;
+}
+
+/* V23 — Invoice AP/AR dan modal pembayaran: permukaan gelap dan teks terbaca.
+   Hanya tema gelap; tanpa mengubah ukuran, struktur, perhitungan atau aksi. */
+html[data-finova-theme="dark"] .modal :is(
+ .modal-content,.modal-body,.modal-header,.modal-footer,
+ .card,.card-body,.card-header,.card-footer,
+ .bg-white,.bg-light,.bg-body,.bg-body-tertiary,
+ .tab-content,.tab-pane,.nav-tabs,.table-responsive
+) {background-color:#18283e!important;background-image:none!important;color:#edf4ff!important;border-color:#354b68!important;}
+/* Panel berwarna putih custom pada form/modal invoice dan pembayaran. */
+html[data-finova-theme="dark"] .modal :is(
+ [class*="payment-info"],[class*="payment-section"],[class*="payment-card"],
+ [class*="invoice-section"],[class*="invoice-card"],
+ [class*="allocation-card"],[class*="outstanding-card"],
+ [class*="summary-card"],[class*="summary-panel"],
+ [class*="form-section"],[class*="form-card"],
+ [class*="info-panel"],[class*="info-card"],
+ [class*="modal-section"],[class*="modal-card"],
+ [class*="tab-panel"],[class*="tabs-container"]
+) {background-color:#1c2e46!important;background-image:none!important;color:#edf4ff!important;border-color:#3b5370!important;}
+/* Tangani elemen dengan latar putih inline tanpa menyentuh input, tombol atau badge. */
+html[data-finova-theme="dark"] .modal :is(div,section,article,fieldset)[style*="background: white"],
+html[data-finova-theme="dark"] .modal :is(div,section,article,fieldset)[style*="background: #fff"],
+html[data-finova-theme="dark"] .modal :is(div,section,article,fieldset)[style*="background-color: white"],
+html[data-finova-theme="dark"] .modal :is(div,section,article,fieldset)[style*="background-color: rgb(255, 255, 255)"],
+html[data-finova-theme="dark"] .modal :is(div,section,article,fieldset)[style*="background-color: #fff"] {
+ background:#1c2e46!important;color:#edf4ff!important;border-color:#3b5370!important;
+}
+/* Tab invoice: area navigasi dan tab nonaktif tidak lagi putih. */
+html[data-finova-theme="dark"] .modal :is(.nav,.nav-tabs,.nav-pills,[role="tablist"]) {background-color:#17263b!important;border-color:#354b68!important;}
+html[data-finova-theme="dark"] .modal :is(.nav-link,[role="tab"]) {background-color:#20344e!important;color:#cbdaf0!important;border-color:#3b5370!important;}
+html[data-finova-theme="dark"] .modal :is(.nav-link.active,[role="tab"][aria-selected="true"]) {background-color:#294a71!important;color:#f6f9ff!important;border-color:#5384bd!important;}
+/* Kartu dan tabel rincian pembayaran: sel dan label terlihat jelas. */
+html[data-finova-theme="dark"] .modal :is(table,.table) {--bs-table-bg:#18283e!important;--bs-table-color:#edf4ff!important;--bs-table-border-color:#354b68!important;}
+html[data-finova-theme="dark"] .modal :is(table,.table) tbody :is(tr,td,th) {background-color:#1c2e46!important;color:#edf4ff!important;border-color:#354b68!important;}
+html[data-finova-theme="dark"] .modal :is(table,.table) tbody tr:hover :is(td,th) {background-color:#28415f!important;}
+html[data-finova-theme="dark"] .modal :is(.form-label,label,.card-title,.modal-title,h1,h2,h3,h4,h5,h6) {color:#f0f5ff!important;}
+html[data-finova-theme="dark"] .modal :is(.form-text,.text-muted,.text-secondary,small,[class*="subtitle"],[class*="description"]) {color:#b7c9e2!important;}
+html[data-finova-theme="dark"] .modal :is(.form-control,.form-select,textarea,select,input:not([type="checkbox"]):not([type="radio"]):not([type="range"])) {background-color:#101e31!important;color:#f1f6ff!important;border-color:#435b78!important;}
+html[data-finova-theme="dark"] .modal :is(input,textarea)::placeholder {color:#9eb4d0!important;opacity:1!important;}
+/* Jangan menimpa warna semantik tombol aksi, badge, dan kotak centang. */
+
+
+/* V24: Dark surfaces for AP/AR invoice and payment preview cards. CSS only. */
+html[data-finova-theme="dark"] .modal :is([class*="preview"],[class*="Preview"],[class*="journal"],[class*="Journal"],[class*="summary"],[class*="Summary"],[class*="payment"],[class*="Payment"],[class*="receipt"],[class*="Receipt"],[class*="invoice"],[class*="Invoice"],[class*="allocation"],[class*="outstanding"],[class*="tabs"],[class*="Tabs"]):is(div,section,article,aside,fieldset,header,footer,nav) {background-color:#1b2d45!important;background-image:none!important;color:#edf4ff!important;border-color:#3b5370!important}
+html[data-finova-theme="dark"] .modal :is([class*="journal-preview"],[class*="preview-journal"],[class*="journal-card"],[class*="preview-card"],[class*="payment-summary"],[class*="receipt-summary"],[class*="invoice-summary"],[class*="summary-wrapper"],[class*="total-wrapper"],[class*="invoice-tabs"],[class*="invoice-footer"]) {background:#20334d!important;background-image:none!important;border-color:#425b7a!important;color:#edf4ff!important}
+html[data-finova-theme="dark"] .modal .modal-body > :is(div,section):has(> [class*="summary"]),html[data-finova-theme="dark"] .modal .modal-body > :is(div,section):has(> [class*="preview"]),html[data-finova-theme="dark"] .modal .modal-content > :is(div,section,nav):has(> [role="tablist"]) {background-color:#18283e!important;border-color:#3b5370!important;color:#edf4ff!important}
+html[data-finova-theme="dark"] .modal :is(div,section,article,aside,fieldset,footer,nav)[style*="#ffffff" i],html[data-finova-theme="dark"] .modal :is(div,section,article,aside,fieldset,footer,nav)[style*="background-color:#fff" i] {background:#20334d!important;color:#edf4ff!important;border-color:#425b7a!important}
+html[data-finova-theme="dark"] .modal :is([class*="preview"],[class*="journal-preview"],[class*="payment-summary"],[class*="receipt-summary"],[class*="invoice-summary"]) :is(h1,h2,h3,h4,h5,h6,p,span,small,strong,b,label,td,th):not(.badge):not([class*="badge"]) {color:#e7f0ff!important;-webkit-text-fill-color:#e7f0ff!important}
+html[data-finova-theme="dark"] .modal :is(.modal-footer,.modal-body,.tab-content,.tab-pane,.nav-tabs,.nav-pills,[role="tablist"]) {background-color:#18283e!important;border-color:#3b5370!important}
+html[data-finova-theme="dark"] .modal :is(.nav-link,[role="tab"]):not(.active):not([aria-selected="true"]) {background:#20334d!important;color:#d3e2f8!important}
+html[data-finova-theme="dark"] .modal :is(.nav-link.active,[role="tab"][aria-selected="true"]) {background:#284c78!important;color:#fff!important}
+
+
+/* V25 — Tab Invoice AP / Invoice AR: navigasi dark premium.
+   Visual saja; tidak mengubah tab switching, form, transaksi atau ukuran. */
+html[data-finova-theme="dark"] body .modal :is(.nav-tabs,.nav-pills,[role="tablist"],.invoice-tabs,.ap-tabs,.ar-tabs) {
+  background:#192b43!important;background-color:#192b43!important;
+  background-image:none!important;border-color:#3e5a7a!important;
+}
+html[data-finova-theme="dark"] body .modal :is(.nav-tabs,.nav-pills,[role="tablist"],.invoice-tabs,.ap-tabs,.ar-tabs)
+  :is(.nav-link,[role="tab"],button):not(.active):not([aria-selected="true"]) {
+  background:transparent!important;background-image:none!important;
+  color:#e0eaf8!important;-webkit-text-fill-color:#e0eaf8!important;
+  border-color:transparent!important;opacity:1!important;
+}
+html[data-finova-theme="dark"] body .modal :is(.nav-tabs,.nav-pills,[role="tablist"],.invoice-tabs,.ap-tabs,.ar-tabs)
+  :is(.nav-link,[role="tab"],button):is(.active,[aria-selected="true"]) {
+  background:linear-gradient(180deg,#1675f7,#075de3)!important;
+  color:#fff!important;-webkit-text-fill-color:#fff!important;
+  border-color:#2e82ff!important;opacity:1!important;
+  box-shadow:0 2px 8px rgba(0,0,0,.16)!important;
+}
+html[data-finova-theme="dark"] body .modal :is(.nav-tabs,.nav-pills,[role="tablist"],.invoice-tabs,.ap-tabs,.ar-tabs)
+  :is(.nav-link,[role="tab"],button):not(.active):not([aria-selected="true"]):hover {
+  background:#263d59!important;color:#fff!important;-webkit-text-fill-color:#fff!important;
+}
+html[data-finova-theme="dark"] body .modal :is(.nav-tabs,.nav-pills,[role="tablist"],.invoice-tabs,.ap-tabs,.ar-tabs)
+  :is(.nav-link,[role="tab"],button) :is(span,i,svg,strong,small) {
+  color:inherit!important;-webkit-text-fill-color:currentColor!important;opacity:1!important;
+}
+
+
+/* V26 — Invoice AP/AR: hilangkan tab aktif putih/kosong.
+   Scoped to modal tabs in dark theme. Pure CSS; preserve interactions and geometry. */
+html[data-finova-theme="dark"] body .modal :is(
+ .nav-tabs,.nav-pills,[role="tablist"],.invoice-tabs,.ap-tabs,.ar-tabs,
+ [class*="invoice-tab-nav"],[class*="invoice-tab-header"],
+ [class*="ap-tab-nav"],[class*="ar-tab-nav"]
+) :is(.nav-item,.nav-link,[role="tab"],button,[class*="tab-button"],[class*="tab-btn"]) {
+ color:#dceaff!important;-webkit-text-fill-color:#dceaff!important;
+ border-color:#3b5370!important;
+}
+html[data-finova-theme="dark"] body .modal :is(
+ .nav-tabs,.nav-pills,[role="tablist"],.invoice-tabs,.ap-tabs,.ar-tabs,
+ [class*="invoice-tab-nav"],[class*="invoice-tab-header"],
+ [class*="ap-tab-nav"],[class*="ar-tab-nav"]
+) :is(.nav-link,[role="tab"],button,[class*="tab-button"],[class*="tab-btn"]):is(
+ .active,.show,.selected,.is-active,[aria-selected="true"],[data-state="active"]
+) {
+ background:#245b9c!important;background-color:#245b9c!important;
+ background-image:none!important;color:#fff!important;
+ -webkit-text-fill-color:#fff!important;border-color:#4389df!important;
+ box-shadow:inset 0 0 0 1px rgba(170,211,255,.15)!important;
+ opacity:1!important;
+}
+/* The tab label can be a nested span, which may inherit white-on-white from legacy CSS. */
+html[data-finova-theme="dark"] body .modal :is(
+ .nav-tabs,.nav-pills,[role="tablist"],.invoice-tabs,.ap-tabs,.ar-tabs,
+ [class*="invoice-tab-nav"],[class*="invoice-tab-header"],
+ [class*="ap-tab-nav"],[class*="ar-tab-nav"]
+) :is(.nav-link,[role="tab"],button,[class*="tab-button"],[class*="tab-btn"]):is(
+ .active,.show,.selected,.is-active,[aria-selected="true"],[data-state="active"]
+) :is(span,strong,small,i,svg) {
+ color:#fff!important;-webkit-text-fill-color:#fff!important;opacity:1!important;
+}
+/* Support tab implementations that mark the LI as active rather than its button. */
+html[data-finova-theme="dark"] body .modal :is(.nav-tabs,.nav-pills,[role="tablist"],.invoice-tabs,.ap-tabs,.ar-tabs)
+ :is(.nav-item.active,.nav-item.selected,.nav-item.is-active) > :is(.nav-link,button,[role="tab"]) {
+ background:#245b9c!important;background-image:none!important;
+ color:#fff!important;-webkit-text-fill-color:#fff!important;
+ border-color:#4389df!important;
+}
+/* Keep tab strip dark, including custom pseudo-element highlights. */
+html[data-finova-theme="dark"] body .modal :is(.nav-tabs,.nav-pills,[role="tablist"],.invoice-tabs,.ap-tabs,.ar-tabs)
+ :is(.nav-link,[role="tab"],button).active::before {
+ background-color:#4389df!important;
+}
+
+
+/* V27 — Modal Invoice AP: dark header, tabs, table headings and summary.
+   Override visual backgrounds only. No layout or business logic changes. */
+html[data-finova-theme="dark"] body .modal .modal-content,
+html[data-finova-theme="dark"] body .modal .modal-header,
+html[data-finova-theme="dark"] body .modal .modal-body,
+html[data-finova-theme="dark"] body .modal .modal-footer {
+  background:#18283e!important;background-image:none!important;
+  color:#edf4ff!important;border-color:#354b68!important;
+}
+/* Some invoice implementations use a div/button rather than Bootstrap nav-link. */
+html[data-finova-theme="dark"] body .modal :is(.nav-tabs,.nav-pills,[role="tablist"],[class*="tabs-nav"],[class*="tab-navigation"],[class*="tabs-header"],[class*="tab-header"]) {
+  background:#1b2e46!important;background-image:none!important;border-color:#354b68!important;
+}
+html[data-finova-theme="dark"] body .modal :is(.nav-tabs,.nav-pills,[role="tablist"],[class*="tabs-nav"],[class*="tab-navigation"],[class*="tabs-header"],[class*="tab-header"])
+ :is(.nav-link,[role="tab"],button,[class*="tab-btn"],[class*="tab-button"],[class*="tab-item"]):not(.active):not(.selected):not(.is-active):not([aria-selected="true"]) {
+  background:transparent!important;background-image:none!important;
+  color:#dce8fa!important;-webkit-text-fill-color:#dce8fa!important;
+}
+html[data-finova-theme="dark"] body .modal :is(.nav-tabs,.nav-pills,[role="tablist"],[class*="tabs-nav"],[class*="tab-navigation"],[class*="tabs-header"],[class*="tab-header"])
+ :is(.nav-link,[role="tab"],button,[class*="tab-btn"],[class*="tab-button"],[class*="tab-item"]):is(.active,.selected,.is-active,[aria-selected="true"]),
+html[data-finova-theme="dark"] body .modal :is(.nav-tabs,.nav-pills,[role="tablist"])
+ :is(.active,.selected,.is-active) > :is(button,.nav-link,[role="tab"]) {
+  background:#245b9c!important;background-color:#245b9c!important;background-image:none!important;
+  color:#fff!important;-webkit-text-fill-color:#fff!important;border-color:#4389df!important;
+}
+html[data-finova-theme="dark"] body .modal :is(.nav-tabs,.nav-pills,[role="tablist"],[class*="tabs-nav"],[class*="tab-navigation"],[class*="tabs-header"],[class*="tab-header"])
+ :is(.active,.selected,.is-active,[aria-selected="true"]) :is(span,strong,small,i,svg) {
+  color:#fff!important;-webkit-text-fill-color:#fff!important;
+}
+/* Invoice detail and tax table headings must never render as white bars. */
+html[data-finova-theme="dark"] body .modal :is(.table,table) :is(thead,thead tr,thead th,thead td),
+html[data-finova-theme="dark"] body .modal :is(.table,table) thead :is(span,strong,small) {
+  background:#253b57!important;background-color:#253b57!important;background-image:none!important;
+  color:#edf4ff!important;-webkit-text-fill-color:#edf4ff!important;border-color:#3d5675!important;
+}
+/* Blank invoice subtotal/footer regions sometimes carry legacy white utilities. */
+html[data-finova-theme="dark"] body .modal :is(.bg-white,.bg-light,.bg-body,.bg-body-tertiary),
+html[data-finova-theme="dark"] body .modal :is([class*="invoice-summary"],[class*="invoice-total"],[class*="invoice-footer"],[class*="summary-container"],[class*="summary-section"],[class*="total-section"]),
+html[data-finova-theme="dark"] body .modal :is(.modal-body,.modal-content) > :is(div,section,footer)[style*="background"]:not(.btn):not(.badge) {
+  background:#18283e!important;background-color:#18283e!important;background-image:none!important;
+  color:#edf4ff!important;border-color:#354b68!important;
+}
+html[data-finova-theme="dark"] body .modal :is([class*="journal-preview"],[class*="preview-journal"],[class*="preview-box"]) {
+  background:#253449!important;background-image:none!important;color:#edf4ff!important;border-color:#425671!important;
+}
+
+/* V28: exact selectors verified against current AP modal HTML */
+html[data-finova-theme="dark"] body #accountPayableModal.modal .ap-modern-tabs-wrapper,
+html[data-finova-theme="dark"] body #accountPayableModal.modal #ap-modal-tabs {background:#1b2e46!important;border-color:#354b68!important}
+html[data-finova-theme="dark"] body #accountPayableModal.modal #ap-modal-tabs .nav-item .nav-link {background:#1b2e46!important;background-image:none!important;color:#e7effc!important;-webkit-text-fill-color:#e7effc!important;border-color:transparent!important;box-shadow:none!important}
+html[data-finova-theme="dark"] body #accountPayableModal.modal #ap-modal-tabs .nav-item .nav-link.active,
+html[data-finova-theme="dark"] body #accountPayableModal.modal #ap-modal-tabs .nav-item .nav-link[aria-selected="true"] {background:#245b9c!important;background-image:none!important;color:#fff!important;-webkit-text-fill-color:#fff!important;border:1px solid #4389df!important;box-shadow:none!important}
+html[data-finova-theme="dark"] body #accountPayableModal.modal .ap-total-summary-footer,
+html[data-finova-theme="dark"] body #accountPayableModal.modal .ap-total-summary-footer > div {background:#18283e!important;background-image:none!important;color:#edf4ff!important;border-color:#354b68!important}
+html[data-finova-theme="dark"] body #accountPayableModal.modal .ap-total-summary-footer .finova-card,
+html[data-finova-theme="dark"] body #accountPayableModal.modal .ap-total-summary-footer .finova-card-body {background:#15243a!important;background-image:none!important;color:#edf4ff!important}
+html[data-finova-theme="dark"] body #accountPayableModal.modal .ap-invoice-detail-table thead th,
+html[data-finova-theme="dark"] body #accountPayableModal.modal #ap-tax-plus-pane table thead th,
+html[data-finova-theme="dark"] body #accountPayableModal.modal #ap-tax-minus-pane table thead th {background:#253b57!important;color:#edf4ff!important;-webkit-text-fill-color:#edf4ff!important;border-color:#3d5675!important}
+html[data-finova-theme="dark"] body #accountPayableModal.modal .ap-invoice-detail-table thead th *,
+html[data-finova-theme="dark"] body #accountPayableModal.modal #ap-tax-plus-pane table thead th *,
+html[data-finova-theme="dark"] body #accountPayableModal.modal #ap-tax-minus-pane table thead th * {color:#edf4ff!important;-webkit-text-fill-color:#edf4ff!important}
+html[data-finova-theme="dark"] body #accountPayableModal.modal :is(.modal-header,.modal-body,.modal-footer,#ap-modal-tab-content) {background:#18283e!important;color:#edf4ff!important}
+
+
+/* V29 — Invoice AP > Rincian Invoice and Tambah/Ubah Rincian modal.
+   Strictly visual, only in dark theme. */
+html[data-finova-theme="dark"] body #accountPayableModal #ap-invoice-details-pane,
+html[data-finova-theme="dark"] body #accountPayableModal #ap-invoice-details-pane > .p-4,
+html[data-finova-theme="dark"] body #accountPayableModal #ap-invoice-details-pane .finova-card,
+html[data-finova-theme="dark"] body #accountPayableModal #ap-invoice-details-pane .finova-card-body,
+html[data-finova-theme="dark"] body #accountPayableModal #ap-invoice-details-pane .ap-invoice-detail-table-wrapper {
+ background:#18283e!important;background-color:#18283e!important;background-image:none!important;
+ color:#edf4ff!important;border-color:#354b68!important;
+}
+html[data-finova-theme="dark"] body #accountPayableModal #ap-invoice-details-pane :is(.fw-semibold,.finova-card-title,h4,h5,h6,label) {color:#edf4ff!important}
+html[data-finova-theme="dark"] body #accountPayableModal #ap-invoice-details-pane :is(.text-muted,.small,small) {color:#b5c6dc!important}
+html[data-finova-theme="dark"] body #accountPayableModal #ap-invoice-details-pane .ap-invoice-detail-table {
+ --bs-table-bg:#18283e!important;--bs-table-color:#edf4ff!important;
+ --bs-table-border-color:#354b68!important;--bs-table-hover-bg:#243b56!important;
+ background:#18283e!important;color:#edf4ff!important;border-color:#354b68!important;
+}
+html[data-finova-theme="dark"] body #accountPayableModal #ap-invoice-details-pane .ap-invoice-detail-table thead :is(tr,th,td) {
+ background:#253b57!important;background-color:#253b57!important;
+ color:#edf4ff!important;-webkit-text-fill-color:#edf4ff!important;border-color:#425a79!important;
+}
+html[data-finova-theme="dark"] body #accountPayableModal #ap-invoice-details-pane .ap-invoice-detail-table tbody :is(tr,td,th) {
+ background:#1b2e46!important;background-color:#1b2e46!important;
+ color:#e8f1ff!important;border-color:#354b68!important;
+}
+html[data-finova-theme="dark"] body #accountPayableModal #ap-invoice-details-pane .ap-invoice-detail-table tbody tr:hover :is(td,th) {background:#263f5d!important}
+html[data-finova-theme="dark"] body #accountPayableModal #ap-invoice-details-pane .ap-invoice-detail-table tbody :is(.text-muted,.text-secondary,small) {color:#b5c6dc!important}
+html[data-finova-theme="dark"] body #accountPayableDetailModal :is(.modal-content,.modal-header,.modal-body,.modal-footer,.finova-card,.finova-card-body) {
+ background:#18283e!important;background-color:#18283e!important;background-image:none!important;
+ color:#edf4ff!important;border-color:#354b68!important;
+}
+html[data-finova-theme="dark"] body #accountPayableDetailModal :is(label,.form-label,.modal-title,h4,h5,h6,strong) {color:#edf4ff!important}
+html[data-finova-theme="dark"] body #accountPayableDetailModal :is(.text-muted,small,.small) {color:#b5c6dc!important}
+html[data-finova-theme="dark"] body #accountPayableDetailModal :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea,.form-control,.form-select,.input-group-text,.ts-control,.ts-dropdown) {
+ background:#101e31!important;background-color:#101e31!important;color:#edf4ff!important;border-color:#435b78!important;
+}
+html[data-finova-theme="dark"] body #accountPayableDetailModal :is(input,textarea)::placeholder {color:#9eb1cb!important;opacity:1!important}
+html[data-finova-theme="dark"] body #accountPayableDetailModal .ts-dropdown :is(.option,.item) {color:#edf4ff!important}
+html[data-finova-theme="dark"] body #accountPayableDetailModal .ts-dropdown :is(.active,.option:hover) {background:#294562!important}

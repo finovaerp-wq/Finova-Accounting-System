@@ -6781,3 +6781,999 @@ td {
  .ar-cell-date-info .ar-info-separator,
  .ar-cell-amount-status .ar-info-separator { display: none; }
 }
+
+
+/* FINOVA AR 3.0 — adaptive dark theme, scoped to AR modals only.
+   Light mode retains original CSS. No transaction or layout logic changed. */
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .modal-content,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .modal-header,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .modal-body,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .modal-footer,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ap-modern-tabs-wrapper,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-modern-tabs-wrapper,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal #ar-modal-tab-content,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .tab-content,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .tab-pane,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-summary-section,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-total-summary-footer,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-total-summary-footer > .d-flex,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .modal-content,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .modal-header,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .modal-body,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .modal-footer,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ap-modern-tabs-wrapper,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-modern-tabs-wrapper,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal #ar-modal-tab-content,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .tab-content,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .tab-pane,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-summary-section,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-total-summary-footer,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-total-summary-footer > .d-flex,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .modal-content,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .modal-header,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .modal-body,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .modal-footer,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ap-modern-tabs-wrapper,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-modern-tabs-wrapper,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal #ar-modal-tab-content,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .tab-content,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .tab-pane,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-summary-section,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-total-summary-footer,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-total-summary-footer > .d-flex,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .modal-content,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .modal-header,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .modal-body,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .modal-footer,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ap-modern-tabs-wrapper,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-modern-tabs-wrapper,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal #ar-modal-tab-content,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .tab-content,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .tab-pane,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-summary-section,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-total-summary-footer,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-total-summary-footer > .d-flex,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .modal-content,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .modal-header,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .modal-body,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .modal-footer,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ap-modern-tabs-wrapper,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-modern-tabs-wrapper,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal #ar-modal-tab-content,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .tab-content,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .tab-pane,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-summary-section,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-total-summary-footer,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-total-summary-footer > .d-flex,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .modal-content,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .modal-header,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .modal-body,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .modal-footer,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ap-modern-tabs-wrapper,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-modern-tabs-wrapper,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal #ar-modal-tab-content,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .tab-content,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .tab-pane,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-summary-section,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-total-summary-footer,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-total-summary-footer > .d-flex,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .modal-content,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .modal-header,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .modal-body,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .modal-footer,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ap-modern-tabs-wrapper,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-modern-tabs-wrapper,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal #ar-modal-tab-content,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .tab-content,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .tab-pane,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-summary-section,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-total-summary-footer,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-total-summary-footer > .d-flex {
+  background-color: #192b43 !important;
+  background-image: none !important;
+  color: #edf4ff !important;
+  border-color: #354b68 !important;
+}
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .finova-card,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .finova-card-body,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .card,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .card-body,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-bulk-payment-section,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-bulk-summary-card,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-payment-summary,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-payment-journal-preview,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-bulk-journal-line,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-bulk-payment-empty,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .bg-white,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .bg-light,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .alert-light,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .alert-secondary,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .border.rounded,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-summary-section > div,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .finova-card,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .finova-card-body,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .card,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .card-body,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-bulk-payment-section,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-bulk-summary-card,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-payment-summary,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-payment-journal-preview,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-bulk-journal-line,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-bulk-payment-empty,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .bg-white,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .bg-light,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .alert-light,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .alert-secondary,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .border.rounded,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-summary-section > div,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .finova-card,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .finova-card-body,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .card,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .card-body,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-bulk-payment-section,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-bulk-summary-card,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-payment-summary,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-payment-journal-preview,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-bulk-journal-line,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-bulk-payment-empty,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .bg-white,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .bg-light,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .alert-light,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .alert-secondary,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .border.rounded,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-summary-section > div,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .finova-card,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .finova-card-body,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .card,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .card-body,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-bulk-payment-section,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-bulk-summary-card,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-payment-summary,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-payment-journal-preview,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-bulk-journal-line,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-bulk-payment-empty,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .bg-white,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .bg-light,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .alert-light,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .alert-secondary,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .border.rounded,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-summary-section > div,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .finova-card,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .finova-card-body,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .card,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .card-body,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-bulk-payment-section,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-bulk-summary-card,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-payment-summary,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-payment-journal-preview,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-bulk-journal-line,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-bulk-payment-empty,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .bg-white,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .bg-light,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .alert-light,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .alert-secondary,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .border.rounded,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-summary-section > div,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .finova-card,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .finova-card-body,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .card,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .card-body,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-bulk-payment-section,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-bulk-summary-card,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-payment-summary,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-payment-journal-preview,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-bulk-journal-line,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-bulk-payment-empty,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .bg-white,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .bg-light,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .alert-light,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .alert-secondary,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .border.rounded,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-summary-section > div,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .finova-card,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .finova-card-body,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .card,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .card-body,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-bulk-payment-section,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-bulk-summary-card,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-payment-summary,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-payment-journal-preview,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-bulk-journal-line,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-bulk-payment-empty,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .bg-white,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .bg-light,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .alert-light,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .alert-secondary,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .border.rounded,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-summary-section > div {
+  background-color: #1b2e46 !important;
+  background-image: none !important;
+  color: #edf4ff !important;
+  border-color: #405875 !important;
+}
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .form-control,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .form-select,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal textarea,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal select,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .form-control:disabled,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .form-control[readonly],
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .form-select:disabled,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .form-select[readonly],
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .form-control,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .form-select,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal textarea,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal select,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .form-control:disabled,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .form-control[readonly],
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .form-select:disabled,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .form-select[readonly],
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .form-control,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .form-select,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal textarea,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal select,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .form-control:disabled,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .form-control[readonly],
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .form-select:disabled,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .form-select[readonly],
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .form-control,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .form-select,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal textarea,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal select,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .form-control:disabled,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .form-control[readonly],
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .form-select:disabled,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .form-select[readonly],
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .form-control,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .form-select,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal textarea,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal select,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .form-control:disabled,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .form-control[readonly],
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .form-select:disabled,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .form-select[readonly],
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .form-control,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .form-select,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal textarea,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal select,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .form-control:disabled,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .form-control[readonly],
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .form-select:disabled,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .form-select[readonly],
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .form-control,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .form-select,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal textarea,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal select,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .form-control:disabled,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .form-control[readonly],
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .form-select:disabled,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .form-select[readonly] {
+  background-color: #101e32 !important;
+  background-image: none !important;
+  color: #f3f7ff !important;
+  -webkit-text-fill-color: #f3f7ff !important;
+  border-color: #49617e !important;
+  opacity: 1 !important;
+}
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .form-control::placeholder,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal textarea::placeholder,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal input::placeholder,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .form-control::placeholder,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal textarea::placeholder,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal input::placeholder,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .form-control::placeholder,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal textarea::placeholder,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal input::placeholder,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .form-control::placeholder,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal textarea::placeholder,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal input::placeholder,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .form-control::placeholder,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal textarea::placeholder,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal input::placeholder,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .form-control::placeholder,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal textarea::placeholder,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal input::placeholder,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .form-control::placeholder,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal textarea::placeholder,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal input::placeholder {
+  color: #91acd0 !important;
+  -webkit-text-fill-color: #91acd0 !important;
+  opacity: 1 !important;
+}
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .form-label,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .card-title,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-bulk-payment-section-title,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-bulk-payment-section-subtitle,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-payment-summary-label,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-payment-summary-value,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-bulk-summary-value,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .text-muted,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .text-secondary,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .text-dark,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .fw-semibold,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .fw-bold,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal label:not(.btn),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal small:not(.badge),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal p:not(.badge),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .form-label,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .card-title,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-bulk-payment-section-title,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-bulk-payment-section-subtitle,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-payment-summary-label,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-payment-summary-value,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-bulk-summary-value,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .text-muted,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .text-secondary,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .text-dark,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .fw-semibold,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .fw-bold,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal label:not(.btn),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal small:not(.badge),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal p:not(.badge),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .form-label,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .card-title,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-bulk-payment-section-title,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-bulk-payment-section-subtitle,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-payment-summary-label,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-payment-summary-value,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-bulk-summary-value,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .text-muted,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .text-secondary,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .text-dark,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .fw-semibold,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .fw-bold,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal label:not(.btn),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal small:not(.badge),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal p:not(.badge),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .form-label,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .card-title,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-bulk-payment-section-title,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-bulk-payment-section-subtitle,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-payment-summary-label,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-payment-summary-value,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-bulk-summary-value,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .text-muted,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .text-secondary,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .text-dark,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .fw-semibold,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .fw-bold,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal label:not(.btn),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal small:not(.badge),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal p:not(.badge),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .form-label,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .card-title,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-bulk-payment-section-title,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-bulk-payment-section-subtitle,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-payment-summary-label,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-payment-summary-value,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-bulk-summary-value,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .text-muted,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .text-secondary,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .text-dark,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .fw-semibold,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .fw-bold,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal label:not(.btn),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal small:not(.badge),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal p:not(.badge),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .form-label,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .card-title,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-bulk-payment-section-title,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-bulk-payment-section-subtitle,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-payment-summary-label,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-payment-summary-value,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-bulk-summary-value,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .text-muted,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .text-secondary,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .text-dark,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .fw-semibold,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .fw-bold,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal label:not(.btn),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal small:not(.badge),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal p:not(.badge),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .form-label,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .card-title,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-bulk-payment-section-title,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-bulk-payment-section-subtitle,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-payment-summary-label,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-payment-summary-value,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-bulk-summary-value,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .text-muted,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .text-secondary,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .text-dark,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .fw-semibold,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .fw-bold,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal label:not(.btn),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal small:not(.badge),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal p:not(.badge) {
+  color: #edf4ff !important;
+}
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .table,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .table-responsive,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-invoice-detail-table,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-bulk-invoice-table,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-accounting-preview-scroll,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .table,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .table-responsive,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-invoice-detail-table,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-bulk-invoice-table,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-accounting-preview-scroll,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .table,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .table-responsive,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-invoice-detail-table,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-bulk-invoice-table,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-accounting-preview-scroll,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .table,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .table-responsive,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-invoice-detail-table,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-bulk-invoice-table,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-accounting-preview-scroll,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .table,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .table-responsive,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-invoice-detail-table,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-bulk-invoice-table,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-accounting-preview-scroll,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .table,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .table-responsive,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-invoice-detail-table,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-bulk-invoice-table,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-accounting-preview-scroll,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .table,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .table-responsive,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-invoice-detail-table,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-bulk-invoice-table,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-accounting-preview-scroll {
+  --bs-table-bg: #1b2e46 !important;
+  --bs-table-color: #edf4ff !important;
+  --bs-table-border-color: #405875 !important;
+  background-color: #1b2e46 !important;
+  color: #edf4ff !important;
+  border-color: #405875 !important;
+}
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal table thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal table thead td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .table thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-invoice-detail-table thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-bulk-invoice-table thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal #ar-accounting-preview-pane thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal #ar-tax-plus-pane thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal #ar-tax-minus-pane thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal table thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal table thead td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .table thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-invoice-detail-table thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-bulk-invoice-table thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal #ar-accounting-preview-pane thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal #ar-tax-plus-pane thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal #ar-tax-minus-pane thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal table thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal table thead td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .table thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-invoice-detail-table thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-bulk-invoice-table thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal #ar-accounting-preview-pane thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal #ar-tax-plus-pane thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal #ar-tax-minus-pane thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal table thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal table thead td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .table thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-invoice-detail-table thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-bulk-invoice-table thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal #ar-accounting-preview-pane thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal #ar-tax-plus-pane thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal #ar-tax-minus-pane thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal table thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal table thead td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .table thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-invoice-detail-table thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-bulk-invoice-table thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal #ar-accounting-preview-pane thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal #ar-tax-plus-pane thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal #ar-tax-minus-pane thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal table thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal table thead td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .table thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-invoice-detail-table thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-bulk-invoice-table thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal #ar-accounting-preview-pane thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal #ar-tax-plus-pane thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal #ar-tax-minus-pane thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal table thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal table thead td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .table thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-invoice-detail-table thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-bulk-invoice-table thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal #ar-accounting-preview-pane thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal #ar-tax-plus-pane thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal #ar-tax-minus-pane thead th {
+  background: #253b57 !important;
+  color: #edf4ff !important;
+  -webkit-text-fill-color: #edf4ff !important;
+  border-color: #435b78 !important;
+  --bs-table-bg: #253b57 !important;
+  --bs-table-color: #edf4ff !important;
+}
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal table tbody td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal table tfoot td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .table tbody td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-invoice-detail-table tbody td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-bulk-invoice-table tbody td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal #ar-accounting-preview-pane tfoot td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal table tbody td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal table tfoot td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .table tbody td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-invoice-detail-table tbody td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-bulk-invoice-table tbody td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal #ar-accounting-preview-pane tfoot td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal table tbody td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal table tfoot td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .table tbody td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-invoice-detail-table tbody td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-bulk-invoice-table tbody td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal #ar-accounting-preview-pane tfoot td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal table tbody td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal table tfoot td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .table tbody td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-invoice-detail-table tbody td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-bulk-invoice-table tbody td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal #ar-accounting-preview-pane tfoot td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal table tbody td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal table tfoot td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .table tbody td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-invoice-detail-table tbody td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-bulk-invoice-table tbody td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal #ar-accounting-preview-pane tfoot td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal table tbody td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal table tfoot td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .table tbody td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-invoice-detail-table tbody td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-bulk-invoice-table tbody td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal #ar-accounting-preview-pane tfoot td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal table tbody td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal table tfoot td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .table tbody td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-invoice-detail-table tbody td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-bulk-invoice-table tbody td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal #ar-accounting-preview-pane tfoot td {
+  background-color: #1b2e46 !important;
+  color: #edf4ff !important;
+  border-color: #405875 !important;
+  --bs-table-bg: #1b2e46 !important;
+  --bs-table-color: #edf4ff !important;
+  --bs-table-accent-bg: transparent !important;
+}
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-bulk-invoice-table tbody tr:hover td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-invoice-detail-table tbody tr:hover td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .table-hover tbody tr:hover td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-bulk-invoice-table tbody tr:hover td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-invoice-detail-table tbody tr:hover td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .table-hover tbody tr:hover td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-bulk-invoice-table tbody tr:hover td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-invoice-detail-table tbody tr:hover td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .table-hover tbody tr:hover td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-bulk-invoice-table tbody tr:hover td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-invoice-detail-table tbody tr:hover td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .table-hover tbody tr:hover td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-bulk-invoice-table tbody tr:hover td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-invoice-detail-table tbody tr:hover td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .table-hover tbody tr:hover td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-bulk-invoice-table tbody tr:hover td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-invoice-detail-table tbody tr:hover td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .table-hover tbody tr:hover td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-bulk-invoice-table tbody tr:hover td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-invoice-detail-table tbody tr:hover td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .table-hover tbody tr:hover td {
+  background-color: #253b57 !important;
+  --bs-table-accent-bg: #253b57 !important;
+}
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ts-wrapper .ts-control,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ts-wrapper .ts-control input,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ts-wrapper .ts-dropdown,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ts-wrapper .ts-dropdown .option,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ts-wrapper .ts-control,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ts-wrapper .ts-control input,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ts-wrapper .ts-dropdown,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ts-wrapper .ts-dropdown .option,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ts-wrapper .ts-control,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ts-wrapper .ts-control input,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ts-wrapper .ts-dropdown,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ts-wrapper .ts-dropdown .option,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ts-wrapper .ts-control,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ts-wrapper .ts-control input,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ts-wrapper .ts-dropdown,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ts-wrapper .ts-dropdown .option,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ts-wrapper .ts-control,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ts-wrapper .ts-control input,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ts-wrapper .ts-dropdown,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ts-wrapper .ts-dropdown .option,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ts-wrapper .ts-control,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ts-wrapper .ts-control input,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ts-wrapper .ts-dropdown,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ts-wrapper .ts-dropdown .option,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ts-wrapper .ts-control,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ts-wrapper .ts-control input,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ts-wrapper .ts-dropdown,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ts-wrapper .ts-dropdown .option {
+  background-color: #101e32 !important;
+  color: #f3f7ff !important;
+  -webkit-text-fill-color: #f3f7ff !important;
+  border-color: #49617e !important;
+}
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ts-wrapper .ts-control .item,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ts-wrapper .ts-control > div,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ts-wrapper .ts-control .item,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ts-wrapper .ts-control > div,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ts-wrapper .ts-control .item,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ts-wrapper .ts-control > div,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ts-wrapper .ts-control .item,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ts-wrapper .ts-control > div,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ts-wrapper .ts-control .item,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ts-wrapper .ts-control > div,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ts-wrapper .ts-control .item,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ts-wrapper .ts-control > div,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ts-wrapper .ts-control .item,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ts-wrapper .ts-control > div {
+  color: #f3f7ff !important;
+  -webkit-text-fill-color: #f3f7ff !important;
+}
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ts-wrapper .ts-dropdown .active,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ts-wrapper .ts-dropdown .active,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ts-wrapper .ts-dropdown .active,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ts-wrapper .ts-dropdown .active,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ts-wrapper .ts-dropdown .active,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ts-wrapper .ts-dropdown .active,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ts-wrapper .ts-dropdown .active {
+  background-color: #24518b !important;
+  color: #fff !important;
+}
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .nav-tabs,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-modern-tabs-wrapper,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal #ar-modal-tabs,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .nav-tabs,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-modern-tabs-wrapper,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal #ar-modal-tabs,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .nav-tabs,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-modern-tabs-wrapper,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal #ar-modal-tabs,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .nav-tabs,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-modern-tabs-wrapper,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal #ar-modal-tabs,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .nav-tabs,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-modern-tabs-wrapper,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal #ar-modal-tabs,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .nav-tabs,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-modern-tabs-wrapper,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal #ar-modal-tabs,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .nav-tabs,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-modern-tabs-wrapper,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal #ar-modal-tabs {
+  background-color: #1d314b !important;
+  border-color: #405875 !important;
+}
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal #ar-modal-tabs .nav-link,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal #ar-modal-tabs .ar-tab-title,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal #ar-modal-tabs .nav-link,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal #ar-modal-tabs .ar-tab-title,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal #ar-modal-tabs .nav-link,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal #ar-modal-tabs .ar-tab-title,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal #ar-modal-tabs .nav-link,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal #ar-modal-tabs .ar-tab-title,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal #ar-modal-tabs .nav-link,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal #ar-modal-tabs .ar-tab-title,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal #ar-modal-tabs .nav-link,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal #ar-modal-tabs .ar-tab-title,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal #ar-modal-tabs .nav-link,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal #ar-modal-tabs .ar-tab-title {
+  background-color: transparent !important;
+  color: #e4edfb !important;
+  border-color: transparent !important;
+}
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal #ar-modal-tabs .nav-link.active,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal #ar-modal-tabs .nav-link.active,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal #ar-modal-tabs .nav-link.active,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal #ar-modal-tabs .nav-link.active,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal #ar-modal-tabs .nav-link.active,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal #ar-modal-tabs .nav-link.active,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal #ar-modal-tabs .nav-link.active {
+  background-color: #275a98 !important;
+  color: #fff !important;
+  border-color: #4889d7 !important;
+}
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal #ar-modal-tabs .nav-link.active .ar-tab-title,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal #ar-modal-tabs .nav-link.active .ar-tab-title,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal #ar-modal-tabs .nav-link.active .ar-tab-title,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal #ar-modal-tabs .nav-link.active .ar-tab-title,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal #ar-modal-tabs .nav-link.active .ar-tab-title,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal #ar-modal-tabs .nav-link.active .ar-tab-title,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal #ar-modal-tabs .nav-link.active .ar-tab-title {
+  color: #fff !important;
+}
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-bulk-journal-line,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-payment-journal-preview,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-bulk-payment-message,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-accounting-preview-status,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .alert:not(.alert-danger):not(.alert-success),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-bulk-journal-line,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-payment-journal-preview,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-bulk-payment-message,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-accounting-preview-status,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .alert:not(.alert-danger):not(.alert-success),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-bulk-journal-line,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-payment-journal-preview,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-bulk-payment-message,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-accounting-preview-status,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .alert:not(.alert-danger):not(.alert-success),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-bulk-journal-line,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-payment-journal-preview,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-bulk-payment-message,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-accounting-preview-status,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .alert:not(.alert-danger):not(.alert-success),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-bulk-journal-line,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-payment-journal-preview,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-bulk-payment-message,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-accounting-preview-status,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .alert:not(.alert-danger):not(.alert-success),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-bulk-journal-line,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-payment-journal-preview,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-bulk-payment-message,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-accounting-preview-status,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .alert:not(.alert-danger):not(.alert-success),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-bulk-journal-line,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-payment-journal-preview,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-bulk-payment-message,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-accounting-preview-status,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .alert:not(.alert-danger):not(.alert-success) {
+  background-color: #1b2e46 !important;
+  color: #edf4ff !important;
+  border-color: #405875 !important;
+}
+
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal #ar-payment-customer-display,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal #ar-payment-customer,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal #ar-form-customer,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal #ar-form-customer:disabled,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal #ar-form-customer[readonly] {
+  background: #101e32 !important;
+  color: #f3f7ff !important;
+  -webkit-text-fill-color: #f3f7ff !important;
+  border-color: #49617e !important;
+  opacity: 1 !important;
+}
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-summary-section :is(span,strong,small,p),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-total-summary-footer :is(span,strong,small,p),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-payment-summary :is(span,strong,small,p),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableModal .ar-bulk-summary-card :is(span,strong,small,p),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-summary-section :is(span,strong,small,p),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-total-summary-footer :is(span,strong,small,p),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-payment-summary :is(span,strong,small,p),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableDetailModal .ar-bulk-summary-card :is(span,strong,small,p),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-summary-section :is(span,strong,small,p),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-total-summary-footer :is(span,strong,small,p),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-payment-summary :is(span,strong,small,p),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivablePaymentModal .ar-bulk-summary-card :is(span,strong,small,p),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-summary-section :is(span,strong,small,p),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-total-summary-footer :is(span,strong,small,p),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-payment-summary :is(span,strong,small,p),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteDetailModal .ar-bulk-summary-card :is(span,strong,small,p),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-summary-section :is(span,strong,small,p),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-total-summary-footer :is(span,strong,small,p),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-payment-summary :is(span,strong,small,p),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #arDeleteInvoiceModal .ar-bulk-summary-card :is(span,strong,small,p),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-summary-section :is(span,strong,small,p),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-total-summary-footer :is(span,strong,small,p),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-payment-summary :is(span,strong,small,p),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #ar-void-confirm-modal .ar-bulk-summary-card :is(span,strong,small,p),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-summary-section :is(span,strong,small,p),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-total-summary-footer :is(span,strong,small,p),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-payment-summary :is(span,strong,small,p),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"]) #accountReceivableCompleteModal .ar-bulk-summary-card :is(span,strong,small,p) {
+  color: #edf4ff !important;
+}
+
+
+/* FINOVA AR 3.0 - final dark modal surface and invoice tables override.
+   Scoped to dark theme; light theme remains unchanged. */
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-content,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-header,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-body,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-footer,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal #ar-modal-tab-content,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal #ar-modal-tab-content > .tab-pane,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .tab-content,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .ar-summary-section,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .ar-total-summary-footer,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-body > .border-top,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-body > div.border-top,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal #ar-modal-tab-content + .border-top,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal #ar-modal-tab-content ~ .border-top,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-body > .d-flex,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-body > .bg-white,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-body > .bg-light {
+  background: #192b43 !important; background-color: #192b43 !important; background-image: none !important; color: #eef4ff !important; border-color: #354b68 !important;
+}
+
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .ar-summary-section,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .ar-summary-section > div,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .ar-summary-section .ar-summary-card,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .ar-total-summary-footer,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .ar-total-summary-footer > div,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal #ar-modal-tab-content + .border-top,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal #ar-modal-tab-content ~ .border-top,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-body > .border-top,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-body > .border-top > div,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-body > .border-top > div > div,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-body > .border-top .ar-summary-card {
+  background: #192b43 !important; background-color: #192b43 !important; background-image: none !important; color: #eef4ff !important; border-color: #354b68 !important;
+}
+
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal #ar-modal-tab-content .table thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal #ar-modal-tab-content table thead th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal #ar-modal-tab-content .table > :not(caption) > * > th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal #ar-modal-tab-content .table > :not(caption) > * > td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal #ar-modal-tab-content table tbody td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal #ar-modal-tab-content table tfoot td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal #ar-modal-tab-content table tfoot th {
+  background: #263e5b !important; background-color: #263e5b !important; color: #f5f8ff !important; border-color: #405875 !important; --bs-table-bg: #263e5b !important; --bs-table-color: #f5f8ff !important;
+}
+
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal #ar-modal-tab-content table tbody td,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal #ar-modal-tab-content .table > tbody > tr > td {
+  background: #1d314b !important; background-color: #1d314b !important; --bs-table-bg: #1d314b !important;
+}
+
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .ar-summary-section :is(span,strong,div,p,small),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .ar-summary-card :is(span,strong,div,p,small),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-footer :is(span,strong,p,small),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal #ar-modal-tab-content table :is(th,td) {
+  color: #f0f5ff !important;
+}
+
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-body .bg-white,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-body .bg-light,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-body .bg-body,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-body .bg-body-tertiary,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-body .card,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-body .card-body,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-body .finova-card,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-body .finova-card-body {
+  background-color: #1d314b !important; color: #eef4ff !important; border-color: #405875 !important;
+}
+
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-body .form-control,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-body .form-select,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-body input[readonly],
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-body input:disabled,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-body textarea {
+  background-color: #101e32 !important; color: #f3f7ff !important; border-color: #49617e !important; opacity: 1 !important;
+}
+
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-body .form-control::placeholder,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-body textarea::placeholder {
+  color: #90a9c9 !important; opacity: 1 !important;
+}
+
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-body .form-label,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-title,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal .modal-body .text-muted {
+  color: #edf4ff !important;
+}
+
+
+
+/* =============================================================
+   FINOVA AR - VIEW / EDIT MODAL DARK REFINEMENT (2026-11-05)
+   UI-only; light theme and application logic are untouched.
+   ============================================================= */
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal {
+  --bs-body-bg: #192b43;
+  --bs-body-color: #edf4ff;
+  --bs-table-bg: #1d314b;
+  --bs-table-color: #edf4ff;
+  --bs-table-border-color: #405875;
+}
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal :is(.modal-footer, .modal-footer.bg-white, .modal-content > .modal-footer, .modal-body ~ .modal-footer) {
+  background: #192b43 !important;
+  background-color: #192b43 !important;
+  background-image: none !important;
+  color: #edf4ff !important;
+  border-top: 1px solid #405875 !important;
+}
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal #ar-modal-tab-content :is(table, .table) {
+  --bs-table-bg: #1d314b !important;
+  --bs-table-color: #edf4ff !important;
+  --bs-table-border-color: #405875 !important;
+  --bs-table-striped-bg: #213853 !important;
+  --bs-table-hover-bg: #294361 !important;
+  background-color: #1d314b !important;
+  color: #edf4ff !important;
+}
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal #ar-modal-tab-content :is(table, .table) > :is(thead, tbody, tfoot) > tr > :is(th, td),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal #ar-modal-tab-content :is(table, .table) > :not(caption) > * > * {
+  background-image: none !important;
+  box-shadow: none !important;
+  border-color: #405875 !important;
+  color: #edf4ff !important;
+}
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal #ar-modal-tab-content :is(table, .table) > thead > tr > :is(th, td),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal #ar-modal-tab-content :is(table, .table) > :not(caption) > thead > * {
+  background: #2a4261 !important;
+  background-color: #2a4261 !important;
+  color: #f5f8ff !important;
+  font-weight: 700 !important;
+  text-shadow: none !important;
+}
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal #ar-modal-tab-content :is(table, .table) > tbody > tr > :is(th, td) {
+  background: #1d314b !important;
+  background-color: #1d314b !important;
+  color: #edf4ff !important;
+}
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body) #accountReceivableModal #ar-modal-tab-content :is(table, .table) > tbody > tr:hover > :is(th, td) {
+  background: #263f5e !important;
+  background-color: #263f5e !important;
+}
+
+
+/* FINOVA AR - FIX HEADER RINCIAN INVOICE PADA MODE DARK */
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body)
+#accountReceivableModal:has(#ar-invoice-details-pane.active)
+#ar-invoice-details-pane .ar-invoice-detail-table > thead > tr > th,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body)
+#accountReceivableModal #ar-invoice-details-pane .table-responsive table > thead > tr > th {
+  --bs-table-bg: #263e5b !important;
+  --bs-table-color: #f5f8ff !important;
+  --bs-table-border-color: #405875 !important;
+  --bs-table-accent-bg: transparent !important;
+  background: #263e5b !important;
+  background-color: #263e5b !important;
+  background-image: none !important;
+  color: #f5f8ff !important;
+  border-color: #405875 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+
+/* FINOVA AR: HEADER PAJAK (+) DAN PAJAK (-) — DARK MODE SAJA */
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body)
+#accountReceivableModal :is(#ar-tax-plus-pane, #ar-tax-minus-pane) :is(table, .table) > thead > tr > :is(th, td),
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body)
+#accountReceivableModal :is(#ar-tax-plus-pane, #ar-tax-minus-pane) :is(table, .table) > :not(caption) > thead > * > * {
+  --bs-table-bg: #263e5b !important;
+  --bs-table-color: #f5f8ff !important;
+  --bs-table-border-color: #405875 !important;
+  --bs-table-accent-bg: transparent !important;
+  background: #263e5b !important;
+  background-color: #263e5b !important;
+  background-image: none !important;
+  color: #f5f8ff !important;
+  border-color: #405875 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+
+/* AR TAX HEADER — HIGH SPECIFICITY DARK MODE FIX (05 NOV 2026)
+   Targets actual modal and tab pane IDs; prevents Bootstrap's
+   --bs-table-bg / inset box shadow from rendering white header cells. */
+:is(html[data-finova-theme="dark"], html[data-theme="dark"], html[data-bs-theme="dark"], body[data-finova-theme="dark"], body[data-theme="dark"], body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark) #accountReceivableModal #ar-modal-tab-content #ar-tax-plus-pane .table-responsive > table.table > thead > tr > th,
+:is(html[data-finova-theme="dark"], html[data-theme="dark"], html[data-bs-theme="dark"], body[data-finova-theme="dark"], body[data-theme="dark"], body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark) #accountReceivableModal #ar-modal-tab-content #ar-tax-minus-pane .table-responsive > table.table > thead > tr > th {
+  --bs-table-bg: #263e5b !important;
+  --bs-table-color: #f5f8ff !important;
+  --bs-table-border-color: #405875 !important;
+  --bs-table-accent-bg: transparent !important;
+  --bs-table-bg-type: transparent !important;
+  --bs-table-bg-state: transparent !important;
+  background: #263e5b !important;
+  background-color: #263e5b !important;
+  background-image: none !important;
+  color: #f5f8ff !important;
+  -webkit-text-fill-color: #f5f8ff !important;
+  box-shadow: none !important;
+  border-color: #405875 !important;
+  opacity: 1 !important;
+}

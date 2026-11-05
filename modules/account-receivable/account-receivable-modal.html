@@ -1,3 +1,12 @@
+<!-- FINOVA AR: view-only footer, resistant to Bootstrap and theme overrides -->
+<style>
+#accountReceivableModal.finova-ar-view-only #btn-save-ar-draft,
+#accountReceivableModal[data-finova-ar-mode="view"] #btn-save-ar-draft {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+</style>
 <!-- ==========================================================
      FINOVA ACCOUNTING SYSTEM
      MODULE : ACCOUNT RECEIVABLE

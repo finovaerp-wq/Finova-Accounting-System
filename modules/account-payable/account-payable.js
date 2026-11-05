@@ -11617,6 +11617,15 @@ detailBody?.addEventListener(
         }
 
 
+        if (action === "view") {
+            this.viewInvoiceDetail(id);
+            return;
+        }
+
+        if (this.currentMode === "view") {
+            return;
+        }
+
         if (
             action === "edit"
         ) {
@@ -14945,6 +14954,8 @@ SAVE INVOICE DETAIL
 
 saveInvoiceDetail() {
 
+    if (this.accountPayableDetailModal?.dataset.apDetailReadOnly === "true" || this.currentMode === "view") return;
+
     try {
 
         /*
@@ -15712,6 +15723,12 @@ renderInvoiceDetails() {
 
                 <td class="text-center align-middle text-nowrap">
                     <div class="btn-group btn-group-sm" role="group">
+                        ${this.currentMode === "view" ? `
+                        <button type="button" class="btn btn-outline-info"
+                            title="Lihat Rincian Transaksi" aria-label="Lihat Rincian Transaksi"
+                            data-detail-action="view" data-detail-id="${detailId}">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>` : `
                         <button
                             type="button"
                             class="btn btn-outline-primary"
@@ -15730,7 +15747,7 @@ renderInvoiceDetails() {
                             data-detail-action="delete"
                             data-detail-id="${detailId}">
                             <i class="fa-solid fa-trash"></i>
-                        </button>
+                        </button>`}
                     </div>
                 </td>
             </tr>
@@ -15738,6 +15755,42 @@ renderInvoiceDetails() {
     }).join("");
 
     this.updateInvoiceSummary();
+}
+
+/* Tampilan detail baca-saja saat header Invoice AP dalam mode Lihat. */
+async viewInvoiceDetail(id) {
+    if (this.currentMode !== "view") return;
+    await this.editInvoiceDetail(id);
+    const modal = this.accountPayableDetailModal;
+    if (!modal || !modal.classList.contains("show")) return;
+
+    modal.dataset.apDetailReadOnly = "true";
+    const title = modal.querySelector("#accountPayableDetailModalLabel");
+    if (title) title.innerHTML = '<i class="fa-solid fa-eye me-2"></i>Lihat Rincian Transaksi AP';
+
+    modal.querySelectorAll("input, textarea, select").forEach(field => {
+        if (field.type === "hidden") return;
+        field.disabled = true;
+    });
+    this.apDetailCOASelect?.disable?.();
+    if (this.btnSaveAPDetail) this.btnSaveAPDetail.style.display = "none";
+    const cancel = modal.querySelector('.modal-footer [data-bs-dismiss="modal"]');
+    if (cancel) cancel.innerHTML = '<i class="fa-solid fa-xmark me-1"></i>Tutup';
+
+    if (!modal.dataset.apDetailViewCleanupBound) {
+        modal.dataset.apDetailViewCleanupBound = "true";
+        modal.addEventListener("hidden.bs.modal", () => {
+            if (modal.dataset.apDetailReadOnly !== "true") return;
+            delete modal.dataset.apDetailReadOnly;
+            modal.querySelectorAll("input, textarea, select").forEach(field => {
+                if (field.type !== "hidden") field.disabled = false;
+            });
+            this.apDetailCOASelect?.enable?.();
+            if (this.btnSaveAPDetail) this.btnSaveAPDetail.style.display = "";
+            if (cancel) cancel.innerHTML = '<i class="fa-solid fa-xmark me-1"></i>Batal';
+            this.currentDetailId = null;
+        });
+    }
 }
 /*
 ======================================================
@@ -24385,8 +24438,7 @@ async viewInvoice(id) {
             .forEach(
                 button => {
 
-                    button.disabled =
-                        true;
+                    button.disabled = button.dataset.detailAction !== "view";
 
                 }
             );
