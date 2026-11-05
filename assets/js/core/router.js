@@ -27,6 +27,14 @@ export class FinovaRouter {
                 className: "AuditLog"
             },
 
+            "company-profile": {
+                title: "Profil Perusahaan",
+                html: "modules/company-profile/company-profile.html",
+                css: "modules/company-profile/company-profile.css",
+                js: "modules/company-profile/company-profile.js",
+                className: "CompanyProfile"
+            },
+
             "user-management": {
                 title: "User Management",
                 html: "modules/user-management/user-management.html",

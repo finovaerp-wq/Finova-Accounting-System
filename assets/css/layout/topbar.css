@@ -783,3 +783,25 @@ Version : 1.1.0
     }
 
 }
+/* FINOVA: tampilkan nama perusahaan lengkap tanpa ellipsis. */
+.finova-topbar-right { min-width: 0; }
+.finova-company-identity {
+    flex: 0 1 auto;
+    width: auto;
+    max-width: none;
+    min-width: 0;
+    text-align: right;
+}
+.finova-company-name {
+    display: block;
+    width: auto;
+    max-width: none;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    line-height: 1.35;
+    text-align: right;
+}
+.finova-company-code { flex-shrink: 0; }

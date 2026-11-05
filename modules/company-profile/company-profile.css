@@ -1,0 +1,17 @@
+/* Scoped scroll: preserve global workspace/modal behavior. */
+#finova-company-profile {
+  display: block;
+  flex: 1 1 auto;
+  height: 100%;
+  min-height: 0;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2rem !important;
+}
+#finova-company-profile .card { min-width: 0; }
+#finova-company-profile .table-responsive { max-width: 100%; }
+#finova-company-profile #cp-alert:empty { display: none; }

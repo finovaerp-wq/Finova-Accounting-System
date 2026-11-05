@@ -583,6 +583,12 @@ this.menuItem(
 
 
         ${this.menuItem(
+            "Profil Perusahaan",
+            "fa-solid fa-building",
+            "company-profile"
+        )}
+
+        ${this.menuItem(
             "Change Password",
             "fa-solid fa-key",
             "change-password"

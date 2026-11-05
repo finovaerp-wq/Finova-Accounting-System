@@ -5,18 +5,28 @@
   const doc=document.documentElement;
   let selected='light';
   try {selected=localStorage.getItem(KEY)==='dark'?'dark':'light';}catch(_e){}
+  function currentLanguage(){
+    try { return localStorage.getItem('finova-ui-language') === 'en' ? 'en' : 'id'; }
+    catch (_e) { return document.documentElement.lang === 'en' ? 'en' : 'id'; }
+  }
+  function updateToggleLabels(){
+    const dark=selected==='dark';
+    const english=currentLanguage()==='en';
+    const label=english ? (dark?'Light Mode':'Dark Mode') : (dark?'Mode Terang':'Mode Gelap');
+    const action=english ? (dark?'Enable Light Mode':'Enable Dark Mode') : (dark?'Aktifkan Mode Terang':'Aktifkan Mode Gelap');
+    document.querySelectorAll('.finova-theme-toggle').forEach(function(button){
+      button.setAttribute('aria-pressed',String(dark));
+      button.setAttribute('title',action);
+      button.setAttribute('aria-label',action);
+      button.innerHTML='<i class="fa-solid '+(dark?'fa-sun':'fa-moon')+'" aria-hidden="true"></i><span class="finova-theme-label">'+label+'</span>';
+    });
+  }
   function apply(theme){
     selected=theme==='dark'?'dark':'light';
     doc.setAttribute('data-finova-theme',selected);
     doc.setAttribute('data-bs-theme',selected);
     try{localStorage.setItem(KEY,selected);}catch(_e){}
-    document.querySelectorAll('.finova-theme-toggle').forEach(function(button){
-      const dark=selected==='dark';
-      button.setAttribute('aria-pressed',String(dark));
-      button.setAttribute('title',dark?'Aktifkan Mode Terang':'Aktifkan Mode Gelap');
-      button.setAttribute('aria-label',dark?'Aktifkan Mode Terang':'Aktifkan Mode Gelap');
-      button.innerHTML='<i class="fa-solid '+(dark?'fa-sun':'fa-moon')+'" aria-hidden="true"></i><span class="finova-theme-label">'+(dark?'Mode Terang':'Mode Gelap')+'</span>';
-    });
+    updateToggleLabels();
   }
   function ensureToggle(){
     const host=document.querySelector('.finova-topbar-right');
@@ -28,6 +38,7 @@
     apply(selected);
   }
   apply(selected);
+  window.addEventListener('finova:language-changed',updateToggleLabels);
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ensureToggle,{once:true});
   else ensureToggle();
   // The application may create #finova-topbar after DOMContentLoaded.

@@ -38,6 +38,21 @@ export class FinovaTopbar {
         this.render();
 
         this.bindEvents();
+        // Synchronize company identity after Company Profile is saved.
+        this._onCompanyProfileSaved = (event) => {
+            const detail = event.detail || {};
+            if (!detail.companyName || !CustomerConfig.isInitialized()) return;
+            const currentCode = CustomerConfig.getCompanyCode();
+            if (detail.companyCode !== currentCode) return;
+            // Keep the existing synchronous customer configuration consistent.
+            if (CustomerConfig._config?.company) {
+                CustomerConfig._config.company.name = detail.companyName;
+            }
+            this.loadCompanyIdentity();
+            const contextName = document.getElementById("finova-company-context-name");
+            if (contextName) contextName.textContent = detail.companyName;
+        };
+        document.addEventListener("finova:company-profile-saved", this._onCompanyProfileSaved);
         this.loadCompanyIdentity();
 
         this.loadProfile();

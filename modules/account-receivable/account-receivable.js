@@ -24573,6 +24573,33 @@ async printInvoice(id) {
             console.warn("AR print: company branding could not be loaded; using available company data.", configError);
         }
 
+        // Optional company profile: only enriches printed document, never transaction values.
+        let printProfile = null;
+        let printBank = null;
+        let printSigner = null;
+        try {
+            const { CompanyProfileService } = await import("../../service/company-profile.service.js");
+            const cp = await CompanyProfileService.load();
+            // Use the current tenant's company identity from Supabase for each print.
+            // CustomerConfig.initialize() may return a previously cached snapshot.
+            // Keep all invoice amounts, tax calculations, and document data unchanged.
+            if (cp.company) {
+                company.name = cp.company.company_name || company.name;
+                company.legalName = cp.company.legal_name || company.legalName;
+                company.address = cp.company.address || company.address;
+                company.phone = cp.company.phone || company.phone;
+                company.email = cp.company.email || company.email;
+            }
+            // Always use the latest logo_url from the active tenant's settings on each print.
+            // Avoid stale CustomerConfig branding after a logo upload.
+            company.logoUrl = cp.settings?.logo_url || "";
+            printProfile = cp.profile;
+            printBank = cp.banks.filter(b => b.is_active).sort((a,b) => Number(!!b.is_default)-Number(!!a.is_default)).slice(0,3).map(b => ({ ...b, bank_name: cp.bankMaster.find(x => String(x.id) === String(b.bank_id))?.bank_name || "" }));
+            printSigner = cp.users.find(u => u.user_uid === printProfile?.signer_user_uid) || null;
+        } catch (profileError) {
+            console.warn("AR print: company profile data unavailable", profileError);
+        }
+
         const escapeHtml = value => String(value ?? "")
             .replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
@@ -24636,12 +24663,16 @@ async printInvoice(id) {
         const printWindow = window.open("", "_blank", "width=1100,height=800");
         if (!printWindow) throw new Error("Print window blocked by browser.");
 
-        const companyName = company.legalName || company.name || "";
+        // The Company Profile's "Nama Perusahaan" is the print heading source.
+        const companyName = company.name || company.legalName || "";
         const companyContact = [company.address, company.phone, company.email].filter(Boolean);
         const logoMarkup = company.logoUrl
             ? `<img class="company-logo" src="${escapeHtml(company.logoUrl)}" alt="Company logo">`
             : `<div class="logo-placeholder" aria-label="Company logo area"><span>LOGO</span></div>`;
         const companyContactMarkup = companyContact.map(line => `<div>${escapeHtml(line)}</div>`).join("");
+        const paymentMarkup = Array.isArray(printBank) && printBank.length ? `<div class="payment"><div class="payment-title">Bank Account Information</div><div class="payment-body">${printBank.map(b => `${escapeHtml(b.bank_name)} — ${escapeHtml(b.account_number)}<br>Account Name: ${escapeHtml(b.account_name)}`).join("<br><br>")}</div></div>` : "";
+        const signerMarkup = printSigner ? `<div class="sign-line">${escapeHtml(printSigner.full_name)}<br>${escapeHtml(printProfile?.signer_position || "")}</div>` : `<div class="sign-line">Authorized Signature</div>`;
+        const npwpMarkup = printProfile?.npwp ? `<div>NPWP: ${escapeHtml(printProfile.npwp)}</div>` : "";
         const accent = /^#[0-9a-fA-F]{6}$/.test(company.primaryColor) ? company.primaryColor : "#0757B8";
 
         printWindow.document.write(`<!DOCTYPE html>
@@ -24704,7 +24735,7 @@ body{margin:0;background:#fff;color:var(--ink);font:12px/1.45 Arial,Helvetica,sa
     ${logoMarkup}
     <div>
       <div class="company-name">${escapeHtml(companyName || "Company Name")}</div>
-      <div class="company-contact">${companyContactMarkup || ""}</div>
+      <div class="company-contact">${companyContactMarkup || ""}${npwpMarkup}</div>
     </div>
     <div class="invoice-title">INVOICE</div>
   </header>
@@ -24747,7 +24778,8 @@ body{margin:0;background:#fff;color:var(--ink);font:12px/1.45 Arial,Helvetica,sa
       <tr class="grand"><td>Total Receivable (IDR)</td><td>${escapeHtml(this.formatCurrency(totalReceivable))}</td></tr>
     </table>
   </section>
-  <div class="signoff">Date: ${formatDate(header.invoice_date)}<div class="sign-line">Authorized Signature</div></div>
+  ${paymentMarkup}
+  <div class="signoff">Date: ${formatDate(header.invoice_date)}${signerMarkup}</div>
   <div class="footer-band"></div>
 </div>
 <script>
