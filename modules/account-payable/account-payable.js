@@ -1138,6 +1138,12 @@ async init() {
         ==============================================
         */
 
+        // Perbarui teks pagination ketika pengguna mengganti bahasa.
+        if (!this._apPaginationLanguageHandler) {
+            this._apPaginationLanguageHandler = () => this.renderPagination();
+            window.addEventListener("finova:language-changed", this._apPaginationLanguageHandler);
+        }
+
         this.bindEvents();
 
 
@@ -29057,12 +29063,22 @@ renderTable() {
         }
 
 
+        // Label pagination mengikuti bahasa UI FINOVA, tanpa mengubah data atau paging.
+        const paginationLanguage = (() => {
+            try {
+                return localStorage.getItem("finova-ui-language") === "en" ? "en" : "id";
+            } catch (_) {
+                return document.documentElement.lang === "en" ? "en" : "id";
+            }
+        })();
+
         if (this.recordInfo) {
 
             if (!totalRecords) {
 
-                this.recordInfo.textContent =
-                    "Records 0 - 0 of 0";
+                this.recordInfo.textContent = paginationLanguage === "id"
+                    ? "Menampilkan data 0 - 0 dari 0"
+                    : "Displaying Record 0 - 0 of 0";
 
             }
 
@@ -29084,7 +29100,9 @@ renderTable() {
 
 
                 this.recordInfo.textContent =
-                    `Records ${start} - ${end} of ${totalRecords}`;
+                    paginationLanguage === "id"
+                        ? `Menampilkan data ${start} - ${end} dari ${totalRecords}`
+                        : `Displaying Record ${start} - ${end} of ${totalRecords}`;
 
             }
 
