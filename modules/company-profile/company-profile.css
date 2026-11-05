@@ -15,3 +15,12 @@
 #finova-company-profile .card { min-width: 0; }
 #finova-company-profile .table-responsive { max-width: 100%; }
 #finova-company-profile #cp-alert:empty { display: none; }
+
+/* Searchable bank selector: dropdown opens only from its own input. */
+#finova-company-profile .cp-bank-options {
+  position:absolute;top:calc(100% + 3px);left:0;right:0;z-index:1065;
+  max-height:220px;overflow-y:auto;background:var(--bs-body-bg,#fff);
+  border:1px solid var(--bs-border-color,#dee2e6);border-radius:6px;
+  box-shadow:0 8px 20px rgba(0,0,0,.12);
+}
+#finova-company-profile .cp-bank-options .list-group-item {text-align:left;}

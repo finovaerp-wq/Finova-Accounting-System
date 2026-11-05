@@ -46,7 +46,7 @@ export class CompanyProfile {
       else alert.remove();
     },4000);
   }
-  async initialize(){try{this.el("cp-refresh")?.addEventListener("click",()=>this.refresh({manual:true}));await this.refresh();this.el("cp-logo-upload")?.addEventListener("click",()=>this.uploadLogo());this.el("cp-logo-delete")?.addEventListener("click",()=>this.deleteLogo());this.el("cp-logo-file")?.addEventListener("change",e=>{const file=e.target.files?.[0];if(file){if(this._previewUrl)URL.revokeObjectURL(this._previewUrl);this._previewUrl=URL.createObjectURL(file);this.renderLogo(this._previewUrl);}});this.el("cp-save").addEventListener("click",()=>this.save());this.el("cp-add-bank").addEventListener("click",()=>this.addBank());this.el("cp-bank-form")?.addEventListener("submit",e=>{e.preventDefault();this.submitBank();});this.el("cp-delete-logo-confirm")?.addEventListener("click",()=>this.confirmDeleteLogo());window.addEventListener("finova:language-changed",()=>queueMicrotask(()=>this.applyLanguage()));this.applyLanguage();}catch(e){this.notice(e.message,true);}}
+  async initialize(){try{this.el("cp-refresh")?.addEventListener("click",()=>this.refresh({manual:true}));await this.refresh();this.el("cp-logo-upload")?.addEventListener("click",()=>this.uploadLogo());this.el("cp-logo-delete")?.addEventListener("click",()=>this.deleteLogo());this.el("cp-logo-file")?.addEventListener("change",e=>{const file=e.target.files?.[0];if(file){if(this._previewUrl)URL.revokeObjectURL(this._previewUrl);this._previewUrl=URL.createObjectURL(file);this.renderLogo(this._previewUrl);}});this.el("cp-save").addEventListener("click",()=>this.save());this.el("cp-add-bank").addEventListener("click",()=>this.addBank());this.el("cp-bank-form")?.addEventListener("submit",e=>{e.preventDefault();this.submitBank();});this.setupBankSearch();this.el("cp-delete-logo-confirm")?.addEventListener("click",()=>this.confirmDeleteLogo());window.addEventListener("finova:language-changed",()=>queueMicrotask(()=>this.applyLanguage()));this.applyLanguage();}catch(e){this.notice(e.message,true);}}
   isEnglish(){return String(document.documentElement.lang||"").toLowerCase().startsWith("en") || String(localStorage.getItem("finova-ui-language")||"").toLowerCase()==="en";}
   setRefreshLoading(loading){
     const button=this.el("cp-refresh");const indicator=this.el("cp-refresh-loading");
@@ -162,9 +162,41 @@ export class CompanyProfile {
       const actions=document.createElement("td");if(this.data.canEdit){if(!b.is_default&&b.is_active){const btn=document.createElement("button");btn.className="btn btn-sm btn-outline-primary me-1";btn.textContent=en?"Set as Primary":"Jadikan Utama";btn.onclick=()=>this.makeDefault(b.id);actions.append(btn);}const del=document.createElement("button");del.className="btn btn-sm btn-outline-danger";del.textContent=en?"Delete":"Hapus";del.onclick=()=>this.deleteBank(b.id);actions.append(del);}tr.append(actions);tbody.append(tr);
     }table.append(tbody);root.append(table);
   }
-  bankModalLanguage(){const en=this.isEnglish();const labels={"cp-bank-title":["Tambah Rekening Bank","Add Bank Account"],"cp-bank-select-label":["Nama Bank","Bank Name"],"cp-bank-number-label":["Nomor Rekening","Account Number"],"cp-bank-holder-label":["Atas Nama","Account Holder"],"cp-bank-currency-label":["Mata Uang","Currency"],"cp-bank-default-label":["Rekening Utama","Primary Account"],"cp-bank-cancel":["Batal","Cancel"],"cp-bank-submit":["Simpan Rekening","Save Account"]};for(const [id,pair] of Object.entries(labels)){const el=this.el(id);if(el)el.textContent=pair[en?1:0];}}
-  addBank(){if(!this.data?.canEdit)return;const en=this.isEnglish(),select=this.el("cp-bank-select");select.replaceChildren(new Option(en?"— Select bank —":"— Pilih bank —",""));for(const bank of this.data.bankMaster)select.add(new Option(bank.bank_name,String(bank.id)));this.el("cp-bank-form").reset();this.el("cp-bank-error").textContent="";this.el("cp-bank-default").checked=!this.data.banks.some(b=>b.is_default);this.bankModalLanguage();if(!window.bootstrap?.Modal){this.notice(en?"Bootstrap modal is unavailable.":"Bootstrap modal tidak tersedia.",true);return;}window.bootstrap.Modal.getOrCreateInstance(this.el("cp-bank-modal")).show();}
-  async submitBank(){if(!this.data?.canEdit)return;const en=this.isEnglish(),select=this.el("cp-bank-select"),bank=this.data.bankMaster.find(b=>String(b.id)===select.value),number=this.val("cp-bank-number"),holder=this.val("cp-bank-holder"),currency=this.val("cp-bank-currency"),primary=this.el("cp-bank-default").checked,submit=this.el("cp-bank-submit"),error=this.el("cp-bank-error");error.textContent="";if(!bank||!number||!holder){error.textContent=en?"Complete all required fields.":"Lengkapi semua kolom wajib.";return;}
+  bankModalLanguage(){
+    const en=this.isEnglish();const labels={"cp-bank-title":["Tambah Rekening Bank","Add Bank Account"],"cp-bank-select-label":["Nama Bank","Bank Name"],"cp-bank-number-label":["Nomor Rekening","Account Number"],"cp-bank-holder-label":["Atas Nama","Account Holder"],"cp-bank-currency-label":["Mata Uang","Currency"],"cp-bank-default-label":["Rekening Utama","Primary Account"],"cp-bank-cancel":["Batal","Cancel"],"cp-bank-submit":["Simpan Rekening","Save Account"]};
+    for(const [id,pair] of Object.entries(labels)){const el=this.el(id);if(el)el.textContent=pair[en?1:0];}
+    const search=this.el("cp-bank-search");if(search)search.placeholder=en?"Type a bank name...":"Ketik nama bank...";
+  }
+  setupBankSearch(){
+    const search=this.el("cp-bank-search"),options=this.el("cp-bank-options"),combobox=this.el("cp-bank-combobox");
+    if(!search||!options||!combobox)return;
+    const close=()=>{options.classList.add("d-none");search.setAttribute("aria-expanded","false");};
+    const show=()=>{options.classList.remove("d-none");search.setAttribute("aria-expanded","true");};
+    this.closeBankSearch=close;
+    const render=()=>{
+      const en=this.isEnglish(),term=search.value.trim().toLocaleLowerCase();
+      const matches=(this.data?.bankMaster||[]).filter(b=>String(b.bank_name||"").toLocaleLowerCase().includes(term));
+      options.replaceChildren();
+      if(!matches.length){const empty=document.createElement("div");empty.className="list-group-item small text-muted";empty.textContent=en?"No banks found":"Bank tidak ditemukan";options.append(empty);}
+      for(const bank of matches){const option=document.createElement("button");option.type="button";option.className="list-group-item list-group-item-action small";option.setAttribute("role","option");option.textContent=bank.bank_name;option.addEventListener("mousedown",e=>e.preventDefault());option.addEventListener("click",()=>{search.value=bank.bank_name;this.el("cp-bank-select").value=String(bank.id);search.setCustomValidity("");close();});options.append(option);}
+      show();
+    };
+    search.addEventListener("focus",render);
+    search.addEventListener("input",()=>{this.el("cp-bank-select").value="";search.setCustomValidity("");render();});
+    search.addEventListener("keydown",e=>{if(e.key==="Escape"){close();return;}if(e.key==="ArrowDown"&&!options.classList.contains("d-none")){e.preventDefault();options.querySelector("button")?.focus();}if(e.key==="Enter"&&!options.classList.contains("d-none")){const first=options.querySelector("button");if(first){e.preventDefault();first.click();}}});
+    options.addEventListener("keydown",e=>{if(e.key==="Escape"){close();search.focus();}else if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();const buttons=[...options.querySelectorAll("button")];const i=buttons.indexOf(document.activeElement),next=e.key==="ArrowDown"?Math.min(i+1,buttons.length-1):Math.max(i-1,0);buttons[next]?.focus();}});
+    document.addEventListener("pointerdown",e=>{if(!combobox.contains(e.target))close();});
+    this.el("cp-bank-modal")?.addEventListener("hidden.bs.modal",close);
+  }
+  addBank(){
+    if(!this.data?.canEdit)return;
+    const en=this.isEnglish();this.el("cp-bank-form").reset();this.el("cp-bank-select").value="";
+    this.el("cp-bank-search").value="";this.el("cp-bank-search").setCustomValidity("");this.closeBankSearch?.();
+    this.el("cp-bank-error").textContent="";this.el("cp-bank-default").checked=!this.data.banks.some(b=>b.is_default);
+    this.bankModalLanguage();if(!window.bootstrap?.Modal){this.notice(en?"Bootstrap modal is unavailable.":"Bootstrap modal tidak tersedia.",true);return;}
+    window.bootstrap.Modal.getOrCreateInstance(this.el("cp-bank-modal")).show();
+  }
+  async submitBank(){if(!this.data?.canEdit)return;const en=this.isEnglish(),select=this.el("cp-bank-select"),bank=this.data.bankMaster.find(b=>String(b.id)===select.value),number=this.val("cp-bank-number"),holder=this.val("cp-bank-holder"),currency=this.val("cp-bank-currency"),primary=this.el("cp-bank-default").checked,submit=this.el("cp-bank-submit"),error=this.el("cp-bank-error");error.textContent="";if(!bank){this.el("cp-bank-search").setCustomValidity(en?"Select a bank from the list.":"Pilih bank dari daftar.");this.el("cp-bank-search").reportValidity();return;}if(!number||!holder){error.textContent=en?"Complete all required fields.":"Lengkapi semua kolom wajib.";return;}
     submit.disabled=true;try{
       // Add non-primary first; promote only after successful insertion.
       await Service.addBank(this.data.id,{bank_id:bank.id,account_number:number,account_name:holder,currency,is_active:true,is_default:false});

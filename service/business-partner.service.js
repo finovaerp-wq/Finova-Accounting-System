@@ -69,10 +69,13 @@ export class BusinessPartnerService {
 
             .eq("id", id)
 
-            .single();
+            .maybeSingle();
 
         if (error) throw error;
 
+        if (!data) {
+            throw new Error(`Business Partner (ID: ${id}) tidak ditemukan atau tidak dapat diakses pada perusahaan aktif. Periksa company_id dan kebijakan RLS SELECT.`);
+        }
         return data;
 
     }
@@ -247,7 +250,7 @@ static async update(id, payload) {
 
         .select()
 
-        .single();
+        .maybeSingle();
 
     if (error) {
 
@@ -255,6 +258,9 @@ static async update(id, payload) {
 
     }
 
+    if (!data) {
+        throw new Error(`Perubahan Business Partner (ID: ${id}) tidak tersimpan: UPDATE tidak mengembalikan data. Periksa kecocokan ID, company_id, serta kebijakan RLS UPDATE/SELECT. Tidak ada konfirmasi sukses yang diberikan.`);
+    }
     return data;
 
 }

@@ -14,10 +14,14 @@
   <div class="card mb-3"><div class="card-header d-flex justify-content-between align-items-center"><strong>Rekening Bank Perusahaan</strong><button id="cp-add-bank" type="button" class="btn btn-outline-primary btn-sm">Tambah Rekening</button></div><div class="card-body"><div id="cp-banks" class="table-responsive"></div><div class="small text-muted mt-2">Hanya satu rekening aktif dapat ditetapkan sebagai rekening utama.</div></div></div>
   <div class="card"><div class="card-header fw-bold">Pengaturan Akuntansi (Baca Saja)</div><div id="cp-accounting" class="card-body small text-muted">Memuat pengaturan...</div></div>
 
-  <div class="modal fade" id="cp-bank-modal" tabindex="-1" aria-labelledby="cp-bank-title" aria-hidden="true">
+  <div class="modal fade" id="cp-bank-modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="cp-bank-title" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered"><form class="modal-content" id="cp-bank-form">
       <div class="modal-header"><h5 class="modal-title" id="cp-bank-title">Tambah Rekening Bank</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
-      <div class="modal-body"><div class="mb-3"><label class="form-label" for="cp-bank-select" id="cp-bank-select-label">Nama Bank</label><select class="form-select" id="cp-bank-select" required></select></div>
+      <div class="modal-body"><div class="mb-3"><label class="form-label" for="cp-bank-select" id="cp-bank-select-label">Nama Bank</label><div class="cp-bank-combobox position-relative" id="cp-bank-combobox">
+        <input type="text" class="form-control" id="cp-bank-search" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="cp-bank-options" placeholder="Ketik nama bank..." required>
+        <input type="hidden" id="cp-bank-select">
+        <div class="cp-bank-options list-group d-none" id="cp-bank-options" role="listbox"></div>
+      </div></div>
       <div class="mb-3"><label class="form-label" for="cp-bank-number" id="cp-bank-number-label">Nomor Rekening</label><input class="form-control" id="cp-bank-number" maxlength="80" required autocomplete="off"></div>
       <div class="mb-3"><label class="form-label" for="cp-bank-holder" id="cp-bank-holder-label">Atas Nama</label><input class="form-control" id="cp-bank-holder" maxlength="160" required></div>
       <div class="row g-2"><div class="col-6"><label class="form-label" for="cp-bank-currency" id="cp-bank-currency-label">Mata Uang</label><select class="form-select" id="cp-bank-currency"><option value="IDR">IDR</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="SGD">SGD</option></select></div><div class="col-6 d-flex align-items-end"><label class="form-check mb-2"><input type="checkbox" class="form-check-input" id="cp-bank-default"><span class="form-check-label" id="cp-bank-default-label">Rekening Utama</span></label></div></div>
