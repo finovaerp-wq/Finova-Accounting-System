@@ -27,6 +27,14 @@ export class FinovaRouter {
                 className: "AuditLog"
             },
 
+            "backup-restore": {
+                title: "Backup & Pemulihan",
+                html: "modules/backup-restore/backup-restore.html",
+                css: "modules/backup-restore/backup-restore.css",
+                js: "modules/backup-restore/backup-restore.js",
+                className: "BackupRestore"
+            },
+
             "company-profile": {
                 title: "Profil Perusahaan",
                 html: "modules/company-profile/company-profile.html",
@@ -2462,7 +2470,7 @@ async navigate(
     // Audit Log is a platform-wide administrative screen.
     // Never allow non-Super-Admin users to open it by URL.
     if (
-        moduleName === "audit-log"
+        (moduleName === "audit-log" || moduleName === "backup-restore")
         && window.finovaIsSuperAdmin !== true
     ) {
         console.warn("FINOVA AUDIT LOG ACCESS DENIED.");

@@ -1,0 +1,69 @@
+#finova-backup .card{border-radius:12px}#finova-backup .card-header{background:transparent;padding:1rem 1.2rem}#finova-backup .card-body{padding:1.2rem}#fb-preview{overflow-wrap:anywhere}
+#finova-backup #fb-rows{max-height:520px;overflow:auto}#finova-backup #fb-rows table{font-size:12px;white-space:nowrap}#finova-backup #fb-rows th{position:sticky;top:0;background:var(--bs-tertiary-bg,#f5f7fa);z-index:1}#finova-backup #fb-rows td{max-width:340px;overflow:hidden;text-overflow:ellipsis}
+
+#finova-backup #fb-rows .fb-row-detail{white-space:nowrap}#finova-backup #fb-detail-modal[hidden]{display:none!important}#finova-backup .fb-detail-overlay{position:fixed;inset:0;z-index:2100;background:rgba(10,22,38,.62);display:flex;align-items:center;justify-content:center;padding:20px}#finova-backup .fb-detail-dialog{width:min(850px,100%);max-height:calc(100vh - 40px);background:var(--bs-body-bg,#fff);color:var(--bs-body-color,#212529);border-radius:12px;display:flex;flex-direction:column;box-shadow:0 16px 60px rgba(0,0,0,.3)}#finova-backup .fb-detail-header,#finova-backup .fb-detail-footer{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bs-border-color,#ddd)}#finova-backup .fb-detail-footer{justify-content:flex-end;border-bottom:0;border-top:1px solid var(--bs-border-color,#ddd)}#finova-backup .fb-detail-body{padding:16px 18px;overflow:auto;min-height:0}#finova-backup .fb-detail-item{display:grid;grid-template-columns:minmax(140px,30%) minmax(0,1fr);gap:12px;border-bottom:1px solid var(--bs-border-color,#eee);padding:9px 0}#finova-backup .fb-detail-key{font-weight:600;overflow-wrap:anywhere}#finova-backup .fb-detail-value{white-space:pre-wrap;overflow-wrap:anywhere;user-select:text}#finova-backup #fb-pager button:disabled{opacity:.45}@media(max-width:560px){#finova-backup .fb-detail-item{grid-template-columns:1fr;gap:3px}}
+
+/* Keep pagination visible beneath the internally scrolling backup table. */
+#finova-backup #fb-rows{
+  max-height:clamp(180px, 34vh, 320px);
+  min-height:0;
+  overflow:auto;
+  overscroll-behavior:contain;
+}
+#finova-backup #fb-pager{
+  position:sticky;
+  bottom:0;
+  z-index:3;
+  min-height:46px;
+  padding:9px 2px 4px;
+  margin-top:8px!important;
+  background:var(--bs-body-bg,#fff);
+  border-top:1px solid var(--bs-border-color,#dee2e6);
+  flex-wrap:wrap;
+}
+#finova-backup #fb-pager button{flex-shrink:0}
+
+/* Restore preflight: keep the long comparison table inside its own scroll area.
+   Scoped to Backup & Pemulihan; does not change global workspace scrolling. */
+#finova-backup #fb-preflight-results:not(:empty) {
+  max-height: clamp(220px, 42vh, 460px);
+  overflow-y: auto;
+  overflow-x: auto;
+  min-height: 0;
+  overscroll-behavior: auto;
+  scrollbar-width: thin;
+}
+#finova-backup #fb-preflight-results table {
+  width: 100%;
+  margin-bottom: 0;
+}
+#finova-backup #fb-preflight-results table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--bs-tertiary-bg, #f5f7fa);
+}
+
+/* FINOVA Backup: the workspace panel normally hides overflow. Give this
+   module its own vertical scroll so the viewer and footer remain reachable. */
+.finova-workspace-panel.active:has(#finova-backup) {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior-y: auto;
+  min-height: 0;
+}
+.finova-workspace-panel.active:has(#finova-backup) > #finova-backup,
+.finova-workspace-panel.active:has(#finova-backup) > .finova-page:has(#finova-backup) {
+  height: auto !important;
+  min-height: 100%;
+  max-height: none !important;
+  overflow: visible !important;
+  flex: 0 0 auto;
+}
+#finova-backup {
+  height: auto !important;
+  min-height: 100%;
+  max-height: none !important;
+  overflow: visible !important;
+  padding-bottom: 28px;
+}

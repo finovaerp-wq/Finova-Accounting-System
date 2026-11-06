@@ -588,6 +588,12 @@ this.menuItem(
             "company-profile"
         )}
 
+        ${this.isSuperAdmin ? this.menuItem(
+            "Backup & Pemulihan",
+            "fa-solid fa-database",
+            "backup-restore"
+        ) : ""}
+
         ${this.menuItem(
             "Change Password",
             "fa-solid fa-key",
