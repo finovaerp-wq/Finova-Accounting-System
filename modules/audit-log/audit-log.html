@@ -6,7 +6,7 @@
     </div>
     <div class="audit-log-actions">
       <button type="button" class="btn btn-outline-secondary" id="audit-refresh"><i class="fa-solid fa-rotate"></i> Refresh</button>
-      <button type="button" class="btn btn-outline-primary" id="audit-export"><i class="fa-solid fa-file-export"></i> Export CSV</button>
+      <button type="button" class="btn btn-outline-primary" id="audit-export"><i class="fa-solid fa-file-export"></i> Ekspor CSV</button>
     </div>
   </div>
 
@@ -21,7 +21,7 @@
       <label>Sampai tanggal<input type="date" id="audit-to"></label>
       <label>Pengguna<select id="audit-user"><option value="">Semua pengguna</option></select></label>
 <label>Modul<select id="audit-module"><option value="">Semua modul</option></select></label>
-      <label>Action<select id="audit-action"><option value="">Semua action</option></select></label>
+      <label>Aksi<select id="audit-action"><option value="">Semua aksi</option></select></label>
       <label class="audit-search-label">Cari dokumen / record ID / pengguna
         <input type="search" id="audit-search" placeholder="Nomor dokumen, record ID, atau pengguna...">
       </label>
@@ -54,14 +54,14 @@
     </div>
 <div class="finova-pagination-wrapper audit-pagination-wrapper">
       <div class="finova-pagination-left">
-        <button type="button" id="audit-first" class="finova-pagination-btn" title="First Page" disabled><i class="fa-solid fa-angles-left"></i></button>
-        <button type="button" id="audit-prev" class="finova-pagination-btn" title="Previous Page" disabled><i class="fa-solid fa-angle-left"></i></button>
-        <span class="finova-pagination-label">Page</span>
+        <button type="button" id="audit-first" class="finova-pagination-btn" title="Halaman pertama" disabled><i class="fa-solid fa-angles-left"></i></button>
+        <button type="button" id="audit-prev" class="finova-pagination-btn" title="Halaman sebelumnya" disabled><i class="fa-solid fa-angle-left"></i></button>
+        <span class="finova-pagination-label">Halaman</span>
         <input type="number" id="audit-page-input" class="finova-pagination-input" value="1" min="1" step="1" autocomplete="off">
-        <span class="finova-pagination-label">of</span>
+        <span class="finova-pagination-label">dari</span>
         <span id="audit-page-total" class="finova-pagination-total">1</span>
-        <button type="button" id="audit-next" class="finova-pagination-btn" title="Next Page" disabled><i class="fa-solid fa-angle-right"></i></button>
-        <button type="button" id="audit-last" class="finova-pagination-btn" title="Last Page" disabled><i class="fa-solid fa-angles-right"></i></button>
+        <button type="button" id="audit-next" class="finova-pagination-btn" title="Halaman berikutnya" disabled><i class="fa-solid fa-angle-right"></i></button>
+        <button type="button" id="audit-last" class="finova-pagination-btn" title="Halaman terakhir" disabled><i class="fa-solid fa-angles-right"></i></button>
       </div>
       <div id="audit-page-info" class="finova-pagination-info">Displaying Record 0 - 0 of 0</div>
     </div>

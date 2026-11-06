@@ -4820,3 +4820,513 @@ html[data-finova-theme="dark"] body #accountPayableModal.modal
   background: #101e32 !important;
   color: #f5f9ff !important;
 }
+
+/* FINOVA AP modal stability — 2026-11-06. Presentation only. */
+#accountPayableModal.modal > .modal-dialog {
+  height: min(780px, calc(100dvh - 24px)) !important;
+  min-height: 0 !important;
+  max-height: calc(100dvh - 24px) !important;
+  display: flex !important;
+  align-items: stretch !important;
+}
+#accountPayableModal.modal > .modal-dialog > .modal-content {
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+#accountPayableModal.modal > .modal-dialog > .modal-content > .modal-body,
+#accountPayableModal.modal:has(#ap-invoice-details-pane.active) > .modal-dialog > .modal-content > .modal-body {
+  flex: 1 1 auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  scrollbar-gutter: stable;
+}
+#accountPayableModal #ap-modal-tab-content {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+#accountPayableModal #ap-modal-tab-content > .tab-pane {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+#accountPayableModal #ap-modal-tab-content .table-responsive {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+}
+#accountPayableModal #ap-modal-tab-content table {
+  width: 100% !important;
+  margin-bottom: 0;
+}
+/* Keep all AP tab surfaces in the selected theme, including read-only view. */
+#accountPayableModal .modal-content,
+#accountPayableModal .modal-body,
+#accountPayableModal #ap-modal-tab-content,
+#accountPayableModal #ap-modal-tab-content > .tab-pane {
+  background-color: var(--bs-body-bg, #fff) !important;
+  color: var(--bs-body-color, #212529) !important;
+}
+:is(html[data-finova-theme="dark"], body[data-finova-theme="dark"], html[data-theme="dark"], body[data-theme="dark"], html[data-bs-theme="dark"], body[data-bs-theme="dark"], body.dark-mode, body.dark-theme) #accountPayableModal .modal-content,
+:is(html[data-finova-theme="dark"], body[data-finova-theme="dark"], html[data-theme="dark"], body[data-theme="dark"], html[data-bs-theme="dark"], body[data-bs-theme="dark"], body.dark-mode, body.dark-theme) #accountPayableModal .modal-body,
+:is(html[data-finova-theme="dark"], body[data-finova-theme="dark"], html[data-theme="dark"], body[data-theme="dark"], html[data-bs-theme="dark"], body[data-bs-theme="dark"], body.dark-mode, body.dark-theme) #accountPayableModal #ap-modal-tab-content,
+:is(html[data-finova-theme="dark"], body[data-finova-theme="dark"], html[data-theme="dark"], body[data-theme="dark"], html[data-bs-theme="dark"], body[data-bs-theme="dark"], body.dark-mode, body.dark-theme) #accountPayableModal #ap-modal-tab-content > .tab-pane {
+  background-color: #14253d !important;
+  color: #f3f7ff !important;
+}
+@media (max-width: 767px) {
+  #accountPayableModal.modal > .modal-dialog {
+    width: calc(100% - 16px) !important;
+    height: calc(100dvh - 16px) !important;
+  }
+}
+
+/* FINOVA AP FIX V2 — single geometry for Add/Edit/View and all tabs */
+#accountPayableModal.modal > .modal-dialog,
+#accountPayableModal.modal:has(#ap-invoice-details-pane.active) > .modal-dialog {
+  width: min(1120px, calc(100vw - 24px)) !important;
+  max-width: min(1120px, calc(100vw - 24px)) !important;
+  height: min(690px, calc(100dvh - 24px)) !important;
+  min-height: 0 !important;
+  max-height: calc(100dvh - 24px) !important;
+  margin: 12px auto !important;
+  display: flex !important;
+}
+#accountPayableModal.modal > .modal-dialog > .modal-content,
+#accountPayableModal.modal:has(#ap-invoice-details-pane.active) > .modal-dialog > .modal-content {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+#accountPayableModal.modal > .modal-dialog > .modal-content > .modal-body,
+#accountPayableModal.modal:has(#ap-invoice-details-pane.active) > .modal-dialog > .modal-content > .modal-body {
+  flex: 1 1 0% !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-y: scroll !important;
+  overflow-x: hidden !important;
+  scrollbar-gutter: stable !important;
+}
+#accountPayableModal.modal > .modal-dialog > .modal-content > :is(.modal-header,.modal-footer) { flex: 0 0 auto !important; }
+#accountPayableModal #ap-modal-tab-content,
+#accountPayableModal #ap-modal-tab-content > .tab-pane { box-sizing: border-box !important; width: 100% !important; min-width: 0 !important; }
+#accountPayableModal #ap-modal-tab-content .table-responsive { max-width: 100% !important; overflow-x: auto !important; }
+/* Light mode: no hard-coded dark summary background */
+#accountPayableModal.modal .modal-content .modal-body .ap-total-summary-footer,
+#accountPayableModal.modal:has(#ap-invoice-details-pane.active) .modal-content .ap-total-summary-footer,
+#accountPayableModal.modal:has(#ap-invoice-details-pane.active) .ap-total-summary-footer,
+#accountPayableModal.modal .ap-total-summary-footer.border-top.p-4 {
+  background: #f2f6fc !important; background-color: #f2f6fc !important;
+  border-color: #dbe4f0 !important; color: #20334e !important;
+}
+#accountPayableModal.modal .ap-total-summary-footer .finova-card,
+#accountPayableModal.modal .ap-total-summary-footer .finova-card-body {
+  background: #ffffff !important; background-color: #ffffff !important;
+  border-color: #dbe4f0 !important; color: #20334e !important;
+}
+#accountPayableModal.modal .ap-total-summary-footer :is(span,strong,small,p,div) {
+  color: #20334e !important; -webkit-text-fill-color: #20334e !important;
+}
+#accountPayableModal.modal .ap-total-summary-footer hr { border-color: #dbe4f0 !important; }
+/* Dark theme, matching FINOVA's existing selectors */
+:is(html[data-finova-theme="dark"], body[data-finova-theme="dark"], html[data-theme="dark"], body[data-theme="dark"], html[data-bs-theme="dark"], body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark) #accountPayableModal.modal .modal-content .modal-body .ap-total-summary-footer,
+:is(html[data-finova-theme="dark"], body[data-finova-theme="dark"], html[data-theme="dark"], body[data-theme="dark"], html[data-bs-theme="dark"], body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark) #accountPayableModal.modal .ap-total-summary-footer.border-top.p-4 {
+  background: #192b43 !important; background-color: #192b43 !important;
+  border-color: #354b68 !important; color: #edf4ff !important;
+}
+:is(html[data-finova-theme="dark"], body[data-finova-theme="dark"], html[data-theme="dark"], body[data-theme="dark"], html[data-bs-theme="dark"], body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark) #accountPayableModal.modal .ap-total-summary-footer :is(.finova-card,.finova-card-body) {
+  background: #16263c !important; background-color: #16263c !important; color: #edf4ff !important;
+}
+:is(html[data-finova-theme="dark"], body[data-finova-theme="dark"], html[data-theme="dark"], body[data-theme="dark"], html[data-bs-theme="dark"], body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark) #accountPayableModal.modal .ap-total-summary-footer :is(span,strong,small,p,div) {
+  color: #edf4ff !important; -webkit-text-fill-color: #edf4ff !important;
+}
+@media (max-height: 550px) {
+  #accountPayableModal.modal > .modal-dialog,
+  #accountPayableModal.modal:has(#ap-invoice-details-pane.active) > .modal-dialog {
+    height: calc(100dvh - 12px) !important; margin: 6px auto !important;
+  }
+}
+
+
+/* FINOVA 2026-11-06 — AP dialog stable across Header/Details/Tax/Preview.
+   Explicitly overrides legacy :has(active details) auto-height rules.
+   Scoped to invoice AP only; no JavaScript or transaction changes. */
+#accountPayableModal.modal > .modal-dialog,
+#accountPayableModal.modal:has(#ap-invoice-details-pane.active) > .modal-dialog {
+  width: min(1120px, calc(100vw - 24px)) !important;
+  max-width: min(1120px, calc(100vw - 24px)) !important;
+  height: min(790px, calc(100dvh - 32px)) !important;
+  min-height: 0 !important;
+  max-height: calc(100dvh - 32px) !important;
+  margin: 16px auto !important;
+}
+#accountPayableModal.modal > .modal-dialog > .modal-content,
+#accountPayableModal.modal:has(#ap-invoice-details-pane.active) > .modal-dialog > .modal-content {
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+#accountPayableModal.modal > .modal-dialog > .modal-content > .modal-body,
+#accountPayableModal.modal:has(#ap-invoice-details-pane.active) > .modal-dialog > .modal-content > .modal-body {
+  flex: 1 1 auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+#accountPayableModal.modal > .modal-dialog > .modal-content > .modal-footer,
+#accountPayableModal.modal:has(#ap-invoice-details-pane.active) > .modal-dialog > .modal-content > .modal-footer {
+  flex: 0 0 auto !important;
+  margin-top: 0 !important;
+}
+/* AR-like light summary card rather than forced navy footer. */
+#accountPayableModal.modal .ap-total-summary-footer,
+#accountPayableModal.modal:has(#ap-invoice-details-pane.active) .ap-total-summary-footer,
+#accountPayableModal.modal .modal-content .modal-body .ap-total-summary-footer,
+#accountPayableModal.modal .ap-total-summary-footer.border-top.p-4 {
+  background: #fff !important;
+  background-color: #fff !important;
+  color: #1c3554 !important;
+  border-color: #dce3ed !important;
+}
+#accountPayableModal.modal .ap-total-summary-footer .finova-card,
+#accountPayableModal.modal .ap-total-summary-footer .finova-card-body {
+  background: #fff !important;
+  background-color: #fff !important;
+  color: #1c3554 !important;
+  border-radius: 14px !important;
+}
+#accountPayableModal.modal .ap-total-summary-footer :is(span,strong,small,p,div) {
+  color: #1c3554 !important;
+  -webkit-text-fill-color: #1c3554 !important;
+}
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body)
+  #accountPayableModal.modal .ap-total-summary-footer,
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body)
+  #accountPayableModal.modal .ap-total-summary-footer :is(.finova-card,.finova-card-body) {
+  background: #192b43 !important;
+  background-color: #192b43 !important;
+  color: #edf4ff !important;
+  border-color: #354b68 !important;
+}
+:is(html[data-finova-theme="dark"] body, body[data-finova-theme="dark"], html[data-theme="dark"] body, body[data-theme="dark"], html[data-bs-theme="dark"] body, body[data-bs-theme="dark"], body.dark-mode, body.dark-theme, html.dark body)
+  #accountPayableModal.modal .ap-total-summary-footer :is(span,strong,small,p,div) {
+  color: #edf4ff !important;
+  -webkit-text-fill-color: #edf4ff !important;
+}
+@media(max-height:550px) {
+ #accountPayableModal.modal > .modal-dialog,
+ #accountPayableModal.modal:has(#ap-invoice-details-pane.active) > .modal-dialog {
+   height: calc(100dvh - 12px) !important;
+   max-height: calc(100dvh - 12px) !important;
+   margin: 6px auto !important;
+ }
+}
+
+
+/* FINOVA AP — final visual override: fixed modal geometry and theme-aware vendor.
+   Appended after legacy rules intentionally; AP only. */
+#accountPayableModal.modal > .modal-dialog,
+#accountPayableModal.modal:has(#ap-invoice-details-pane.active) > .modal-dialog {
+  width: min(1120px, calc(100vw - 32px)) !important;
+  max-width: min(1120px, calc(100vw - 32px)) !important;
+  height: min(790px, calc(100dvh - 40px)) !important;
+  max-height: calc(100dvh - 40px) !important;
+  min-height: 0 !important;
+  margin: 20px auto !important;
+  transform: none !important;
+}
+#accountPayableModal.modal > .modal-dialog > .modal-content,
+#accountPayableModal.modal:has(#ap-invoice-details-pane.active) > .modal-dialog > .modal-content {
+  display: flex !important; flex-direction: column !important;
+  height: 100% !important; min-height: 0 !important; max-height: 100% !important;
+  overflow: hidden !important;
+}
+#accountPayableModal.modal > .modal-dialog > .modal-content > .modal-body,
+#accountPayableModal.modal:has(#ap-invoice-details-pane.active) > .modal-dialog > .modal-content > .modal-body {
+  display: flex !important; flex-direction: column !important;
+  flex: 1 1 0 !important; height: 0 !important; min-height: 0 !important;
+  max-height: none !important; overflow-y: auto !important; overflow-x: hidden !important;
+  scrollbar-gutter: stable !important;
+}
+#accountPayableModal .ap-modern-tabs-wrapper { flex: 0 0 auto !important; }
+#accountPayableModal #ap-modal-tab-content { flex: 0 0 auto !important; min-height: 0 !important; }
+#accountPayableModal .ap-total-summary-footer { flex: 0 0 auto !important; margin-top: auto !important; }
+#accountPayableModal.modal > .modal-dialog > .modal-content > .modal-footer {
+  flex: 0 0 auto !important; margin-top: 0 !important;
+}
+/* Default / light theme: neutralize legacy forced dark TomSelect vendor styles. */
+#accountPayableModal #ap-form-vendor,
+#accountPayableModal #ap-form-vendor option,
+#accountPayableModal #ap-form-vendor-ts-control,
+#accountPayableModal .ts-wrapper:has(#ap-form-vendor),
+#accountPayableModal .ts-wrapper:has(#ap-form-vendor) .ts-control,
+#accountPayableModal .ts-wrapper:has(#ap-form-vendor) .ts-control input,
+#accountPayableModal .ts-wrapper:has(#ap-form-vendor) .ts-control .item,
+#accountPayableModal .ts-wrapper:has(#ap-form-vendor) .ts-control > div,
+#accountPayableModal .ts-wrapper:has(#ap-form-vendor) .ts-dropdown,
+#accountPayableModal .ts-wrapper:has(#ap-form-vendor) .ts-dropdown .option {
+  background: #fff !important; background-color: #fff !important;
+  color: #20334e !important; -webkit-text-fill-color: #20334e !important;
+  border-color: #d6dee9 !important; opacity: 1 !important;
+}
+#accountPayableModal .ts-wrapper:has(#ap-form-vendor) .ts-control input::placeholder {
+  color: #64748b !important; -webkit-text-fill-color: #64748b !important;
+}
+#accountPayableModal .ts-wrapper:has(#ap-form-vendor) .ts-dropdown .active,
+#accountPayableModal .ts-wrapper:has(#ap-form-vendor) .ts-dropdown .selected {
+  background: #eaf2ff !important; background-color: #eaf2ff !important;
+  color: #153c78 !important; -webkit-text-fill-color: #153c78 !important;
+}
+/* Explicit dark theme only. */
+:is(html[data-theme="dark"],html[data-finova-theme="dark"],html[data-bs-theme="dark"],html.dark,body[data-theme="dark"],body[data-finova-theme="dark"],body[data-bs-theme="dark"],body.dark-mode,body.dark-theme) #accountPayableModal #ap-form-vendor,
+:is(html[data-theme="dark"],html[data-finova-theme="dark"],html[data-bs-theme="dark"],html.dark,body[data-theme="dark"],body[data-finova-theme="dark"],body[data-bs-theme="dark"],body.dark-mode,body.dark-theme) #accountPayableModal #ap-form-vendor option,
+:is(html[data-theme="dark"],html[data-finova-theme="dark"],html[data-bs-theme="dark"],html.dark,body[data-theme="dark"],body[data-finova-theme="dark"],body[data-bs-theme="dark"],body.dark-mode,body.dark-theme) #accountPayableModal #ap-form-vendor-ts-control,
+:is(html[data-theme="dark"],html[data-finova-theme="dark"],html[data-bs-theme="dark"],html.dark,body[data-theme="dark"],body[data-finova-theme="dark"],body[data-bs-theme="dark"],body.dark-mode,body.dark-theme) #accountPayableModal .ts-wrapper:has(#ap-form-vendor) .ts-control,
+:is(html[data-theme="dark"],html[data-finova-theme="dark"],html[data-bs-theme="dark"],html.dark,body[data-theme="dark"],body[data-finova-theme="dark"],body[data-bs-theme="dark"],body.dark-mode,body.dark-theme) #accountPayableModal .ts-wrapper:has(#ap-form-vendor) .ts-control input,
+:is(html[data-theme="dark"],html[data-finova-theme="dark"],html[data-bs-theme="dark"],html.dark,body[data-theme="dark"],body[data-finova-theme="dark"],body[data-bs-theme="dark"],body.dark-mode,body.dark-theme) #accountPayableModal .ts-wrapper:has(#ap-form-vendor) .ts-control .item,
+:is(html[data-theme="dark"],html[data-finova-theme="dark"],html[data-bs-theme="dark"],html.dark,body[data-theme="dark"],body[data-finova-theme="dark"],body[data-bs-theme="dark"],body.dark-mode,body.dark-theme) #accountPayableModal .ts-wrapper:has(#ap-form-vendor) .ts-dropdown,
+:is(html[data-theme="dark"],html[data-finova-theme="dark"],html[data-bs-theme="dark"],html.dark,body[data-theme="dark"],body[data-finova-theme="dark"],body[data-bs-theme="dark"],body.dark-mode,body.dark-theme) #accountPayableModal .ts-wrapper:has(#ap-form-vendor) .ts-dropdown .option {
+  background: #15243a !important; background-color: #15243a !important;
+  color: #edf4ff !important; -webkit-text-fill-color: #edf4ff !important;
+  border-color: #405672 !important;
+}
+
+
+/* FINOVA AP 2026-11-06 — consistent AR-sized shell, scrollable tabs, themed summary.
+   Scoped to the main AP modal; no transaction or form behavior changed. */
+#accountPayableModal.modal > .modal-dialog {
+  width: min(1120px, calc(100vw - 32px)) !important;
+  max-width: min(1120px, calc(100vw - 32px)) !important;
+  height: min(790px, calc(100dvh - 32px)) !important;
+  max-height: calc(100dvh - 32px) !important;
+  margin: 16px auto !important;
+}
+#accountPayableModal.modal > .modal-dialog > .modal-content {
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+#accountPayableModal.modal > .modal-dialog > .modal-content > .modal-body {
+  display: flex !important;
+  flex: 1 1 0 !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+  height: auto !important;
+  overflow: hidden !important;
+}
+#accountPayableModal .ap-modern-tabs-wrapper { flex: 0 0 auto !important; }
+#accountPayableModal #ap-modal-tab-content {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  scrollbar-gutter: stable !important;
+}
+#accountPayableModal .ap-total-summary-footer {
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+  padding: 16px 20px !important;
+}
+#accountPayableModal .ap-total-summary-footer .finova-card { margin: 0 !important; }
+#accountPayableModal.modal > .modal-dialog > .modal-content > .modal-footer {
+  flex: 0 0 auto !important;
+  margin-top: 0 !important;
+}
+/* Theme values are local to AP; light is the default. */
+#accountPayableModal {
+  --ap-summary-bg: #ffffff;
+  --ap-summary-card: #ffffff;
+  --ap-summary-text: #19324e;
+  --ap-summary-border: #dce4ef;
+}
+:is(html[data-finova-theme="dark"],html[data-theme="dark"],html[data-bs-theme="dark"],html.dark,body[data-finova-theme="dark"],body[data-theme="dark"],body[data-bs-theme="dark"],body.dark-mode,body.dark-theme) #accountPayableModal {
+  --ap-summary-bg: #192a40;
+  --ap-summary-card: #142338;
+  --ap-summary-text: #f2f6ff;
+  --ap-summary-border: #3b526e;
+}
+#accountPayableModal.modal .ap-total-summary-footer,
+#accountPayableModal.modal .ap-total-summary-footer.border-top.p-4,
+#accountPayableModal.modal .modal-content .modal-body .ap-total-summary-footer {
+  background: var(--ap-summary-bg) !important;
+  background-color: var(--ap-summary-bg) !important;
+  border-color: var(--ap-summary-border) !important;
+  color: var(--ap-summary-text) !important;
+}
+#accountPayableModal.modal .ap-total-summary-footer .finova-card,
+#accountPayableModal.modal .ap-total-summary-footer .finova-card-body {
+  background: var(--ap-summary-card) !important;
+  background-color: var(--ap-summary-card) !important;
+  color: var(--ap-summary-text) !important;
+  border-color: var(--ap-summary-border) !important;
+}
+#accountPayableModal.modal .ap-total-summary-footer :is(span,strong,small,p,div) {
+  color: var(--ap-summary-text) !important;
+  -webkit-text-fill-color: var(--ap-summary-text) !important;
+}
+#accountPayableModal.modal .ap-total-summary-footer hr { border-color: var(--ap-summary-border) !important; }
+@media(max-height: 550px) {
+  #accountPayableModal.modal > .modal-dialog { height: calc(100dvh - 12px) !important; margin: 6px auto !important; }
+}
+
+/* AP modal definitive shell: overrides legacy :has(tab.active) height rules. */
+#accountPayableModal.modal:has(#ap-modal-tab-content) > .modal-dialog,
+#accountPayableModal.modal:has(#ap-invoice-details-pane.active) > .modal-dialog {
+  width: min(1120px, calc(100vw - 32px)) !important;
+  max-width: min(1120px, calc(100vw - 32px)) !important;
+  height: min(790px, calc(100dvh - 32px)) !important;
+  min-height: 0 !important;
+  max-height: calc(100dvh - 32px) !important;
+  margin: 16px auto !important;
+  transform: none !important;
+}
+#accountPayableModal.modal:has(#ap-modal-tab-content) > .modal-dialog > .modal-content,
+#accountPayableModal.modal:has(#ap-invoice-details-pane.active) > .modal-dialog > .modal-content {
+  height: 100% !important; min-height: 0 !important; max-height: 100% !important;
+  display: flex !important; flex-direction: column !important; overflow: hidden !important;
+}
+#accountPayableModal.modal:has(#ap-modal-tab-content) > .modal-dialog > .modal-content > .modal-body,
+#accountPayableModal.modal:has(#ap-invoice-details-pane.active) > .modal-dialog > .modal-content > .modal-body {
+  flex: 1 1 0 !important; height: auto !important; min-height: 0 !important;
+  display: flex !important; flex-direction: column !important; overflow: hidden !important;
+}
+#accountPayableModal.modal:has(#ap-modal-tab-content) #ap-modal-tab-content {
+  flex: 1 1 0 !important; height: auto !important; min-height: 0 !important;
+  overflow-y: auto !important; overflow-x: hidden !important;
+}
+#accountPayableModal.modal:has(#ap-modal-tab-content) .ap-total-summary-footer {
+  flex: 0 0 auto !important; margin-top: 0 !important;
+}
+/* The theme is on html; override older light-specific summary rules. */
+html[data-finova-theme="dark"] body #accountPayableModal.modal .modal-body > .ap-total-summary-footer,
+html[data-theme="dark"] body #accountPayableModal.modal .modal-body > .ap-total-summary-footer,
+html[data-bs-theme="dark"] body #accountPayableModal.modal .modal-body > .ap-total-summary-footer,
+html.dark body #accountPayableModal.modal .modal-body > .ap-total-summary-footer,
+body[data-finova-theme="dark"] #accountPayableModal.modal .modal-body > .ap-total-summary-footer,
+body.dark-mode #accountPayableModal.modal .modal-body > .ap-total-summary-footer {
+  background: #192a40 !important; background-color: #192a40 !important;
+  border-color: #3b526e !important; color: #f2f6ff !important;
+}
+html[data-finova-theme="dark"] body #accountPayableModal.modal .ap-total-summary-footer :is(.finova-card,.finova-card-body),
+html[data-theme="dark"] body #accountPayableModal.modal .ap-total-summary-footer :is(.finova-card,.finova-card-body),
+html[data-bs-theme="dark"] body #accountPayableModal.modal .ap-total-summary-footer :is(.finova-card,.finova-card-body),
+body.dark-mode #accountPayableModal.modal .ap-total-summary-footer :is(.finova-card,.finova-card-body) {
+  background: #142338 !important; background-color: #142338 !important;
+  color: #f2f6ff !important; border-color: #3b526e !important;
+}
+@media (max-height: 550px) {
+  #accountPayableModal.modal:has(#ap-modal-tab-content) > .modal-dialog {height: calc(100dvh - 12px) !important; margin: 6px auto !important;}
+}
+
+
+/* FINOVA 2026-11-06 — Invoice AP: light-mode white canvas matching Invoice AR.
+   Presentation only; do not modify dark mode or transaction behavior. */
+html:not([data-finova-theme="dark"]):not([data-theme="dark"]):not([data-bs-theme="dark"]):not(.dark)
+body:not([data-finova-theme="dark"]):not([data-theme="dark"]):not([data-bs-theme="dark"]):not(.dark-mode):not(.dark-theme)
+#accountPayableModal.modal .modal-content > .modal-body,
+html:not([data-finova-theme="dark"]):not([data-theme="dark"]):not([data-bs-theme="dark"]):not(.dark)
+body:not([data-finova-theme="dark"]):not([data-theme="dark"]):not([data-bs-theme="dark"]):not(.dark-mode):not(.dark-theme)
+#accountPayableModal.modal #ap-modal-tab-content,
+html:not([data-finova-theme="dark"]):not([data-theme="dark"]):not([data-bs-theme="dark"]):not(.dark)
+body:not([data-finova-theme="dark"]):not([data-theme="dark"]):not([data-bs-theme="dark"]):not(.dark-mode):not(.dark-theme)
+#accountPayableModal.modal #ap-invoice-details-pane,
+html:not([data-finova-theme="dark"]):not([data-theme="dark"]):not([data-bs-theme="dark"]):not(.dark)
+body:not([data-finova-theme="dark"]):not([data-theme="dark"]):not([data-bs-theme="dark"]):not(.dark-mode):not(.dark-theme)
+#accountPayableModal.modal #ap-invoice-details-pane > .p-4,
+html:not([data-finova-theme="dark"]):not([data-theme="dark"]):not([data-bs-theme="dark"]):not(.dark)
+body:not([data-finova-theme="dark"]):not([data-theme="dark"]):not([data-bs-theme="dark"]):not(.dark-mode):not(.dark-theme)
+#accountPayableModal.modal .ap-total-summary-footer {
+  background: #fff !important;
+  background-color: #fff !important;
+  background-image: none !important;
+}
+
+
+/* FINOVA 2026-11-06 — AP summary light canvas and card: match AR. */
+html:not([data-finova-theme="dark"]):not([data-theme="dark"]):not([data-bs-theme="dark"]):not(.dark) body:not(.dark-mode):not(.dark-theme) #accountPayableModal.modal .modal-body .ap-total-summary-footer,
+html:not([data-finova-theme="dark"]):not([data-theme="dark"]):not([data-bs-theme="dark"]):not(.dark) body:not(.dark-mode):not(.dark-theme) #accountPayableModal.modal .modal-body .ap-total-summary-footer.border-top.p-4 {
+  background: #fff !important; background-color: #fff !important; background-image: none !important;
+  border-color: #e5eaf1 !important; color: #243b58 !important;
+}
+html:not([data-finova-theme="dark"]):not([data-theme="dark"]):not([data-bs-theme="dark"]):not(.dark) body:not(.dark-mode):not(.dark-theme) #accountPayableModal.modal .ap-total-summary-footer .finova-card,
+html:not([data-finova-theme="dark"]):not([data-theme="dark"]):not([data-bs-theme="dark"]):not(.dark) body:not(.dark-mode):not(.dark-theme) #accountPayableModal.modal .ap-total-summary-footer .finova-card-body {
+  background: #fff !important; background-color: #fff !important; background-image: none !important;
+  color: #243b58 !important; border-color: #e5eaf1 !important;
+}
+html:not([data-finova-theme="dark"]):not([data-theme="dark"]):not([data-bs-theme="dark"]):not(.dark) body:not(.dark-mode):not(.dark-theme) #accountPayableModal.modal .ap-total-summary-footer :is(span,strong,small,p,div) {
+  color: #243b58 !important; -webkit-text-fill-color: #243b58 !important;
+}
+html:not([data-finova-theme="dark"]):not([data-theme="dark"]):not([data-bs-theme="dark"]):not(.dark) body:not(.dark-mode):not(.dark-theme) #accountPayableModal.modal .ap-total-summary-footer hr {border-color:#e5eaf1 !important;}
+
+/* FINOVA AP — Invoice Details light theme aligned with Invoice AR.
+   Scoped to AP Invoice Details only; preserves all behavior and dark theme. */
+html:not([data-finova-theme="dark"]):not([data-theme="dark"]):not([data-bs-theme="dark"]):not(.dark)
+body:not([data-finova-theme="dark"]):not([data-theme="dark"]):not([data-bs-theme="dark"]):not(.dark-mode):not(.dark-theme)
+#accountPayableModal.modal:has(#ap-invoice-details-pane.active) .modal-content .modal-body .ap-total-summary-footer.border-top.p-4 {
+  background: #fff !important;
+  background-color: #fff !important;
+  background-image: none !important;
+  border-top: 1px solid #dee2e6 !important;
+  color: #1f3a5f !important;
+  box-shadow: none !important;
+  padding: 16px 20px !important;
+}
+html:not([data-finova-theme="dark"]):not([data-theme="dark"]):not([data-bs-theme="dark"]):not(.dark)
+body:not([data-finova-theme="dark"]):not([data-theme="dark"]):not([data-bs-theme="dark"]):not(.dark-mode):not(.dark-theme)
+#accountPayableModal.modal:has(#ap-invoice-details-pane.active) .ap-total-summary-footer .finova-card,
+html:not([data-finova-theme="dark"]):not([data-theme="dark"]):not([data-bs-theme="dark"]):not(.dark)
+body:not([data-finova-theme="dark"]):not([data-theme="dark"]):not([data-bs-theme="dark"]):not(.dark-mode):not(.dark-theme)
+#accountPayableModal.modal:has(#ap-invoice-details-pane.active) .ap-total-summary-footer .finova-card-body {
+  background: #fff !important;
+  background-color: #fff !important;
+  background-image: none !important;
+  border-color: #eef0f3 !important;
+  color: #1f3a5f !important;
+}
+html:not([data-finova-theme="dark"]):not([data-theme="dark"]):not([data-bs-theme="dark"]):not(.dark)
+body:not([data-finova-theme="dark"]):not([data-theme="dark"]):not([data-bs-theme="dark"]):not(.dark-mode):not(.dark-theme)
+#accountPayableModal.modal:has(#ap-invoice-details-pane.active) .ap-total-summary-footer .finova-card {
+  width: 360px !important;
+  max-width: 100% !important;
+  border: 1px solid #eef0f3 !important;
+  border-radius: 14px !important;
+  box-shadow: 0 3px 10px rgba(15,23,42,.05) !important;
+}
+html:not([data-finova-theme="dark"]):not([data-theme="dark"]):not([data-bs-theme="dark"]):not(.dark)
+body:not([data-finova-theme="dark"]):not([data-theme="dark"]):not([data-bs-theme="dark"]):not(.dark-mode):not(.dark-theme)
+#accountPayableModal.modal:has(#ap-invoice-details-pane.active) .ap-total-summary-footer :is(span,strong,small,p,div) {
+  color: #1f3a5f !important;
+  -webkit-text-fill-color: #1f3a5f !important;
+}
+
+
+/* FINOVA AP Invoice Details — explicit automatic light/dark theme.
+   CSS only: no changes to business logic or JavaScript. */
+:is(html[data-finova-theme="dark"],html[data-theme="dark"],html[data-bs-theme="dark"],html.dark) body #accountPayableModal.modal:has(#ap-invoice-details-pane.active) :is(#ap-invoice-details-pane,.ap-total-summary-footer),
+html body:is([data-finova-theme="dark"],[data-theme="dark"],[data-bs-theme="dark"],.dark-mode,.dark-theme) #accountPayableModal.modal:has(#ap-invoice-details-pane.active) :is(#ap-invoice-details-pane,.ap-total-summary-footer) {
+  background: #192a40 !important; background-color: #192a40 !important; color: #f2f6ff !important; border-color: #3b526e !important;
+}
+:is(html[data-finova-theme="dark"],html[data-theme="dark"],html[data-bs-theme="dark"],html.dark) body #accountPayableModal.modal:has(#ap-invoice-details-pane.active) .ap-total-summary-footer :is(.finova-card,.finova-card-body),
+html body:is([data-finova-theme="dark"],[data-theme="dark"],[data-bs-theme="dark"],.dark-mode,.dark-theme) #accountPayableModal.modal:has(#ap-invoice-details-pane.active) .ap-total-summary-footer :is(.finova-card,.finova-card-body) {
+  background: #142338 !important; background-color: #142338 !important; color: #f2f6ff !important; border-color: #3b526e !important;
+}
+:is(html[data-finova-theme="dark"],html[data-theme="dark"],html[data-bs-theme="dark"],html.dark) body #accountPayableModal.modal:has(#ap-invoice-details-pane.active) .ap-total-summary-footer :is(span,strong,small,p,div),
+html body:is([data-finova-theme="dark"],[data-theme="dark"],[data-bs-theme="dark"],.dark-mode,.dark-theme) #accountPayableModal.modal:has(#ap-invoice-details-pane.active) .ap-total-summary-footer :is(span,strong,small,p,div) {
+  color: #f2f6ff !important; -webkit-text-fill-color: #f2f6ff !important;
+}
