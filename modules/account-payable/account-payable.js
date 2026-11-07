@@ -31060,12 +31060,15 @@ renderViewPayment(
     invoice
 ) {
     const paymentLabel = (() => {
+        const htmlLang = document.documentElement.lang?.toLowerCase();
+        if (htmlLang === "id" || htmlLang === "en") {
+            return htmlLang === "en" ? "View Payment" : "Lihat Pembayaran";
+        }
         try {
             return localStorage.getItem("finova-ui-language") === "en"
                 ? "View Payment" : "Lihat Pembayaran";
         } catch (_) {
-            return document.documentElement.lang?.toLowerCase().startsWith("en")
-                ? "View Payment" : "Lihat Pembayaran";
+            return "Lihat Pembayaran";
         }
     })();
 
@@ -32633,14 +32636,7 @@ openPaymentHistoryModal(
                                 small
                             ">
 
-                            ${
-                                activePayments.length
-                            }
-                            payment transaction${
-                                activePayments.length > 1
-                                    ? "s"
-                                    : ""
-                            }
+                            ${paymentUiLanguage === 'en' ? `${activePayments.length} payment transaction${activePayments.length === 1 ? '' : 's'}` : `${activePayments.length} transaksi pembayaran`}
 
                         </div>
 

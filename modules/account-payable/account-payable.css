@@ -5342,3 +5342,33 @@ html body:is([data-finova-theme="dark"],[data-theme="dark"],[data-bs-theme="dark
     max-width: none;
     vertical-align: middle;
 }
+
+/* FINOVA AP — payment link fits in the Amount / Status column (AR parity). */
+.account-payable-table-card .ap-col-amount-status {
+    width: 280px !important;
+    min-width: 280px !important;
+}
+.account-payable-table-card .ap-cell-amount-status {
+    min-width: 280px !important;
+}
+.account-payable-table-card .ap-cell-amount-status .ap-info-value:has(.ap-view-payment) {
+    overflow: visible !important;
+    overflow-wrap: normal !important;
+    white-space: nowrap !important;
+}
+.account-payable-table-card .ap-cell-amount-status .ap-view-payment {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    flex-wrap: nowrap !important;
+    gap: 4px !important;
+    width: max-content !important;
+    max-width: none !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+}
+.account-payable-table-card .ap-cell-amount-status .ap-view-payment i {
+    flex-shrink: 0;
+    margin-right: 0 !important;
+}

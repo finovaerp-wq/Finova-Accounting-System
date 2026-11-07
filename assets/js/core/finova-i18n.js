@@ -1155,3 +1155,21 @@ const observer=new MutationObserver(records=>{
 function init(){document.documentElement.lang=lang;attachSwitcher();translateTree(document.body);observer.observe(document.body,observerOptions);}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
+
+/* FINOVA: synchronize AP/AR payment labels after language changes. */
+(function () {
+  if (window.__finovaPaymentLabelSyncInstalled) return;
+  window.__finovaPaymentLabelSyncInstalled = true;
+  function syncPaymentLabels() {
+    const lang = document.documentElement.lang?.toLowerCase() === 'en' ? 'en' : 'id';
+    const label = lang === 'en' ? 'View Payment' : 'Lihat Pembayaran';
+    document.querySelectorAll('button.ap-view-payment[data-action="view-payment"], button.ar-view-payment[data-action="view-payment"]').forEach(function (button) {
+      button.title = label;
+      Array.from(button.childNodes).forEach(function (node) {
+        if (node.nodeType === 3 && node.textContent.trim()) node.textContent = ' ' + label + ' ';
+      });
+    });
+  }
+  window.addEventListener('finova:language-changed', syncPaymentLabels);
+  document.addEventListener('DOMContentLoaded', syncPaymentLabels);
+})();

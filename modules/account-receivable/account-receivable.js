@@ -9906,7 +9906,7 @@ renderViewPayment(
             "
             data-action="view-payment"
             data-id="${id}"
-            title="View Payment"
+            title="${paymentText('Lihat Pembayaran', 'View Payment')}"
         >
 
             <i
@@ -9918,7 +9918,7 @@ renderViewPayment(
             >
             </i>
 
-            View Payment
+            ${paymentText('Lihat Pembayaran', 'View Payment')}
 
         </button>
 
@@ -12088,13 +12088,7 @@ openPaymentHistoryModal(
                             "
                         >
 
-                            ${historyPaymentCount}
-
-                            payment transaction${
-                                historyPaymentCount > 1
-                                    ? "s"
-                                    : ""
-                            }
+                            ${paymentUiLanguage === 'en' ? `${historyPaymentCount} payment transaction${historyPaymentCount === 1 ? '' : 's'}` : `${historyPaymentCount} transaksi pembayaran`}
 
                         </div>
 
@@ -12290,13 +12284,13 @@ RULE :
 renderViewPayment(
     invoice
 ) {
-    // Resolve the selected FINOVA UI language for this payment button.
+    // Use the active FINOVA language when rendering the payment button.
     const paymentUiLanguage = (() => {
+        const htmlLang = document.documentElement.lang?.toLowerCase();
+        if (htmlLang === "id" || htmlLang === "en") return htmlLang;
         try {
-            const saved = localStorage.getItem("finova-ui-language");
-            if (saved === "en" || saved === "id") return saved;
-        } catch (_) {}
-        return document.documentElement.lang?.toLowerCase().startsWith("en") ? "en" : "id";
+            return localStorage.getItem("finova-ui-language") === "en" ? "en" : "id";
+        } catch (_) { return "id"; }
     })();
     const paymentText = (id, en) => paymentUiLanguage === "en" ? en : id;
 
@@ -12433,7 +12427,7 @@ renderViewPayment(
             "
             data-action="view-payment"
             data-id="${id}"
-            title="View Payment"
+            title="${paymentText('Lihat Pembayaran', 'View Payment')}"
         >
 
             <i
