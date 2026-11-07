@@ -6006,7 +6006,7 @@ async confirmDeleteChartOfAccount() {
 
 
             this.showError(
-                "Chart Of Account cannot be deleted because it is still being used."
+                (window.FinovaErrorI18n?.translate("Chart Of Account cannot be deleted because it is still being used.") || "Chart Of Account cannot be deleted because it is still being used.")
             );
 
             return;

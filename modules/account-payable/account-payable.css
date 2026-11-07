@@ -5330,3 +5330,15 @@ html body:is([data-finova-theme="dark"],[data-theme="dark"],[data-bs-theme="dark
 html body:is([data-finova-theme="dark"],[data-theme="dark"],[data-bs-theme="dark"],.dark-mode,.dark-theme) #accountPayableModal.modal:has(#ap-invoice-details-pane.active) .ap-total-summary-footer :is(span,strong,small,p,div) {
   color: #f2f6ff !important; -webkit-text-fill-color: #f2f6ff !important;
 }
+/* Invoice AP - Lihat Pembayaran satu baris */
+.ap-view-payment,
+.ap-view-payment a {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px;
+    white-space: nowrap !important;
+    flex-wrap: nowrap !important;
+    width: max-content;
+    max-width: none;
+    vertical-align: middle;
+}

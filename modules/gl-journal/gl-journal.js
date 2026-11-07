@@ -13829,10 +13829,10 @@ async loadBusinessPartners() {
                     id,
                     bp_code,
                     bp_name,
-                    status
+                    is_active
                 `)
 
-                .eq("status", true)
+                .eq("is_active", true)
 
                 .order("bp_name");
 

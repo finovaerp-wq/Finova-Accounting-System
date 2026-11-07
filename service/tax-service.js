@@ -78,7 +78,9 @@ export class TaxService {
 
                 if (Array.isArray(data) && data.length > 0) {
                     throw new Error(
-                        `Tax tidak dapat dinonaktifkan atau dihapus karena sudah digunakan pada ${reference.label}.`
+                        (typeof localStorage !== "undefined" && localStorage.getItem("finova-ui-language") === "en")
+                            ? "Tax cannot be deactivated or deleted because it is already used in transactions."
+                            : "Pajak tidak dapat dinonaktifkan atau dihapus karena sudah digunakan pada transaksi."
                     );
                 }
             }

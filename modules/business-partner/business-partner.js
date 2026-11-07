@@ -5492,10 +5492,23 @@ showError(
     ==================================================
     */
 
-    const errorMessage =
-        message
-        ||
-        "An unexpected error occurred.";
+    // Follow the FINOVA language selector; never expose raw database constraints.
+    const language = (() => {
+        try { return localStorage.getItem("finova-ui-language") === "en" ? "en" : "id"; }
+        catch (_) { return document.documentElement.lang === "en" ? "en" : "id"; }
+    })();
+    const rawMessage = String(message || "");
+    const isForeignKeyError = /23503|foreign key constraint|violates foreign key/i.test(rawMessage);
+    const isGlJournalReference = /trx_gl_journal_detail_business_partner_id_fkey|trx_gl_journal_detail/i.test(rawMessage);
+    const errorMessage = isForeignKeyError
+        ? (isGlJournalReference
+            ? (language === "en"
+                ? "Business Partner cannot be deleted or modified because it is used in GL Journal transactions."
+                : "Mitra Bisnis tidak dapat dihapus atau diubah karena masih digunakan pada transaksi Jurnal GL.")
+            : (language === "en"
+                ? "Business Partner cannot be deleted or modified because it is still used in another transaction."
+                : "Mitra Bisnis tidak dapat dihapus atau diubah karena masih digunakan pada transaksi lain."))
+        : (rawMessage || (language === "en" ? "An unexpected error occurred." : "Terjadi kesalahan yang tidak terduga."));
 
 
     /*

@@ -2150,6 +2150,8 @@ else {
         ==================================================
         */
 
+        this.localizePeriodActionFields();
+
         this.actionModal.show();
 
 
@@ -2174,6 +2176,45 @@ else {
     ======================================================
     */
 
+
+    // Use the same persisted UI language selected in FINOVA.
+    periodUiLanguage() {
+        const stored = window.localStorage?.getItem("finova-ui-language") || "";
+        const lang = stored || document.documentElement.getAttribute("lang") || "id";
+        return /^(en|english)/i.test(lang) ? "en" : "id";
+    }
+
+    periodText(indonesian, english) {
+        return this.periodUiLanguage() === "en" ? english : indonesian;
+    }
+
+    localizePeriodActionFields() {
+        const modal = this.actionModalLabel?.closest(".modal") ||
+            document.getElementById("accounting-period-action-modal");
+        if (!modal) return;
+        const translate = {
+            "Period": "Periode",
+            "Start Date": "Tanggal Mulai",
+            "End Date": "Tanggal Akhir",
+            "Current Status": "Status Saat Ini",
+            "Reason": "Alasan",
+            "Cancel": "Batal"
+        };
+        modal.querySelectorAll("span, label, button").forEach(el => {
+            if (el.children.length && ![...el.children].every(c => c.tagName === "SPAN" && c.classList.contains("text-danger"))) return;
+            const original = (el.dataset.periodOriginalText || el.textContent || "").trim();
+            if (!el.dataset.periodOriginalText && (translate[original] || Object.values(translate).includes(original))) {
+                el.dataset.periodOriginalText = Object.keys(translate).find(k => translate[k] === original) || original;
+            }
+            if (el.dataset.periodOriginalText) {
+                const value = this.periodText(translate[el.dataset.periodOriginalText] || el.dataset.periodOriginalText, el.dataset.periodOriginalText);
+                const textNode = [...el.childNodes].find(n => n.nodeType === 3 && n.textContent.trim());
+                if (textNode) textNode.textContent = value + " ";
+            }
+        });
+        if (this.actionReason) this.actionReason.placeholder = this.periodText("Masukkan alasan", "Enter reason");
+    }
+
     configureOpenModal() {
 
         const period =
@@ -2183,7 +2224,7 @@ else {
 
 
         this.actionModalLabel.textContent =
-            "Confirm Open Accounting Period";
+            this.periodText("Konfirmasi Buka Periode Akuntansi", "Confirm Open Accounting Period");
 
 
         this.actionIcon.innerHTML = `
@@ -2200,11 +2241,11 @@ else {
 
 
         this.actionTitle.textContent =
-            `Open Accounting Period ${period}?`;
+            this.periodText(`Buka Periode Akuntansi ${period}?`, `Open Accounting Period ${period}?`);
 
 
         this.actionMessage.textContent =
-            "Accounting transactions will be allowed for this period.";
+            this.periodText("Transaksi akuntansi dapat dilakukan pada periode ini.", "Accounting transactions will be allowed for this period.");
 
 
         this.reasonRequired
@@ -2219,7 +2260,7 @@ else {
         ) {
 
             this.reasonHelp.textContent =
-                "Reason is required to open this Accounting Period.";
+                this.periodText("Alasan pembukaan periode wajib diisi.", "Reason is required to open this Accounting Period.");
 
         }
 
@@ -2249,7 +2290,7 @@ else {
         ) {
 
             this.confirmText.textContent =
-                "Open Period";
+                this.periodText("Buka Periode", "Open Period");
 
         }
 
@@ -2271,7 +2312,7 @@ else {
 
 
         this.actionModalLabel.textContent =
-            "Confirm Close Accounting Period";
+            this.periodText("Konfirmasi Tutup Periode Akuntansi", "Confirm Close Accounting Period");
 
 
         this.actionIcon.innerHTML = `
@@ -2288,11 +2329,11 @@ else {
 
 
         this.actionTitle.textContent =
-            `Close Accounting Period ${period}?`;
+            this.periodText(`Tutup Periode Akuntansi ${period}?`, `Close Accounting Period ${period}?`);
 
 
         this.actionMessage.textContent =
-            "Accounting transactions cannot be entered or posted to this period after it is closed.";
+            this.periodText("Transaksi akuntansi tidak dapat dibuat atau diposting setelah periode ditutup.", "Accounting transactions cannot be entered or posted to this period after it is closed.");
 
 
         this.reasonRequired
@@ -2307,7 +2348,7 @@ else {
         ) {
 
             this.reasonHelp.textContent =
-                "Reason is optional for closing this Accounting Period.";
+                this.periodText("Alasan penutupan periode bersifat opsional.", "Reason is optional for closing this Accounting Period.");
 
         }
 
@@ -2337,7 +2378,7 @@ else {
         ) {
 
             this.confirmText.textContent =
-                "Close Period";
+                this.periodText("Tutup Periode", "Close Period");
 
         }
 
@@ -2359,7 +2400,7 @@ else {
 
 
         this.actionModalLabel.textContent =
-            "Confirm Reopen Accounting Period";
+            this.periodText("Konfirmasi Buka Kembali Periode Akuntansi", "Confirm Reopen Accounting Period");
 
 
         this.actionIcon.innerHTML = `
@@ -2376,11 +2417,11 @@ else {
 
 
         this.actionTitle.textContent =
-            `Reopen Accounting Period ${period}?`;
+            this.periodText(`Buka Kembali Periode Akuntansi ${period}?`, `Reopen Accounting Period ${period}?`);
 
 
         this.actionMessage.textContent =
-            "Accounting transactions will be allowed again for this previously closed period.";
+            this.periodText("Transaksi akuntansi dapat dilakukan kembali pada periode yang dibuka kembali.", "Accounting transactions will be allowed again for this previously closed period.");
 
 
         this.reasonRequired
@@ -2395,7 +2436,7 @@ else {
         ) {
 
             this.reasonHelp.textContent =
-                "Reason is required to reopen this Accounting Period.";
+                this.periodText("Alasan pembukaan kembali periode wajib diisi.", "Reason is required to reopen this Accounting Period.");
 
         }
 
@@ -2425,7 +2466,7 @@ else {
         ) {
 
             this.confirmText.textContent =
-                "Reopen Period";
+                this.periodText("Buka Kembali Periode", "Reopen Period");
 
         }
 

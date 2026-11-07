@@ -9778,6 +9778,15 @@ RULE :
 renderViewPayment(
     invoice
 ) {
+    const paymentUiLanguage = (() => {
+        try {
+            const saved = localStorage.getItem("finova-ui-language");
+            if (saved === "en" || saved === "id") return saved;
+        } catch (_) {}
+        return document.documentElement.lang?.toLowerCase().startsWith("en") ? "en" : "id";
+    })();
+    const paymentText = (id, en) => paymentUiLanguage === "en" ? en : id;
+
 
     /*
     ==================================================
@@ -10855,6 +10864,15 @@ openPaymentHistoryModal(
     invoice,
     payments = []
 ) {
+    const paymentUiLanguage = (() => {
+        try {
+            const saved = localStorage.getItem("finova-ui-language");
+            if (saved === "en" || saved === "id") return saved;
+        } catch (_) {}
+        return document.documentElement.lang?.toLowerCase().startsWith("en") ? "en" : "id";
+    })();
+    const paymentText = (id, en) => paymentUiLanguage === "en" ? en : id;
+
 
     /*
     ==================================================
@@ -11618,7 +11636,7 @@ openPaymentHistoryModal(
                                             ar-payment-description-label
                                         "
                                     >
-                                        Description
+                                        ${paymentText('Deskripsi', 'Description')}
                                     </span>
 
 
@@ -11719,7 +11737,7 @@ openPaymentHistoryModal(
                                 >
                                 </i>
 
-                                View Payment
+                                ${paymentText('Lihat Pembayaran', 'View Payment')}
 
                             </h5>
 
@@ -11732,7 +11750,7 @@ openPaymentHistoryModal(
                                 "
                             >
 
-                                Account Receivable Payment History
+                                ${paymentText('Riwayat Pembayaran Invoice AR', 'Account Receivable Payment History')}
 
                             </div>
 
@@ -11790,7 +11808,7 @@ openPaymentHistoryModal(
                                     "
                                 >
 
-                                    Invoice No
+                                    ${paymentText('No. Invoice', 'Invoice No')}
 
                                 </label>
 
@@ -11821,7 +11839,7 @@ openPaymentHistoryModal(
                                     "
                                 >
 
-                                    Customer
+                                    ${paymentText('Pelanggan', 'Customer')}
 
                                 </label>
 
@@ -11852,7 +11870,7 @@ openPaymentHistoryModal(
                                     "
                                 >
 
-                                    Total Paid
+                                    ${paymentText('Total Dibayar', 'Total Paid')}
 
                                 </label>
 
@@ -11960,12 +11978,12 @@ openPaymentHistoryModal(
                                                 text-center
                                             "
                                         >
-                                            Payment Date
+                                            ${paymentText('Tanggal Pembayaran', 'Payment Date')}
                                         </th>
 
 
                                         <th>
-                                            Bank / Payment Account
+                                            ${paymentText('Bank / Akun Pembayaran', 'Bank / Payment Account')}
                                         </th>
 
 
@@ -11974,7 +11992,7 @@ openPaymentHistoryModal(
                                                 text-end
                                             "
                                         >
-                                            Amount
+                                            ${paymentText('Jumlah', 'Amount')}
                                         </th>
 
 
@@ -11983,7 +12001,7 @@ openPaymentHistoryModal(
                                                 text-center
                                             "
                                         >
-                                            Journal
+                                            ${paymentText('Jurnal', 'Journal')}
                                         </th>
 
                                     </tr>
@@ -12017,7 +12035,7 @@ openPaymentHistoryModal(
                                             "
                                         >
 
-                                            Total Paid
+                                            ${paymentText('Total Dibayar', 'Total Paid')}
 
                                         </th>
 
@@ -12090,7 +12108,7 @@ openPaymentHistoryModal(
                             data-bs-dismiss="modal"
                         >
 
-                            Close
+                            ${paymentText('Tutup', 'Close')}
 
                         </button>
 
@@ -12272,6 +12290,16 @@ RULE :
 renderViewPayment(
     invoice
 ) {
+    // Resolve the selected FINOVA UI language for this payment button.
+    const paymentUiLanguage = (() => {
+        try {
+            const saved = localStorage.getItem("finova-ui-language");
+            if (saved === "en" || saved === "id") return saved;
+        } catch (_) {}
+        return document.documentElement.lang?.toLowerCase().startsWith("en") ? "en" : "id";
+    })();
+    const paymentText = (id, en) => paymentUiLanguage === "en" ? en : id;
+
 
     /*
     ==================================================
@@ -12417,7 +12445,7 @@ renderViewPayment(
             >
             </i>
 
-            View Payment
+            ${paymentText('Lihat Pembayaran', 'View Payment')}
 
         </button>
 

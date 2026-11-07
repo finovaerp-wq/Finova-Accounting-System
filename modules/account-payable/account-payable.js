@@ -31059,6 +31059,15 @@ FINAL
 renderViewPayment(
     invoice
 ) {
+    const paymentLabel = (() => {
+        try {
+            return localStorage.getItem("finova-ui-language") === "en"
+                ? "View Payment" : "Lihat Pembayaran";
+        } catch (_) {
+            return document.documentElement.lang?.toLowerCase().startsWith("en")
+                ? "View Payment" : "Lihat Pembayaran";
+        }
+    })();
 
     /*
     ==================================================
@@ -31193,7 +31202,7 @@ renderViewPayment(
             "
             data-action="view-payment"
             data-id="${id}"
-            title="View Payment">
+            title="${paymentLabel}">
 
             <i
                 class="
@@ -31203,7 +31212,7 @@ renderViewPayment(
                 ">
             </i>
 
-            View Payment
+            ${paymentLabel}
 
         </button>
 
@@ -31652,6 +31661,15 @@ openPaymentHistoryModal(
     invoice,
     payments = []
 ) {
+    const paymentUiLanguage = (() => {
+        try {
+            const saved = localStorage.getItem("finova-ui-language");
+            if (saved === "en" || saved === "id") return saved;
+        } catch (_) {}
+        return document.documentElement.lang?.toLowerCase().startsWith("en") ? "en" : "id";
+    })();
+    const paymentText = (id, en) => paymentUiLanguage === "en" ? en : id;
+
 
     /*
     ==================================================
@@ -32201,7 +32219,7 @@ openPaymentHistoryModal(
                                             ap-payment-description-label
                                         ">
 
-                                        Description
+                                        ${paymentText('Deskripsi', 'Description')}
 
                                     </span>
 
@@ -32286,7 +32304,7 @@ openPaymentHistoryModal(
                                     ">
                                 </i>
 
-                                View Payment
+                                ${paymentText('Lihat Pembayaran', 'View Payment')}
 
                             </h5>
 
@@ -32298,7 +32316,7 @@ openPaymentHistoryModal(
                                     mt-1
                                 ">
 
-                                Account Payable Payment History
+                                ${paymentText('Riwayat Pembayaran Invoice AP', 'Account Payable Payment History')}
 
                             </div>
 
@@ -32335,7 +32353,7 @@ openPaymentHistoryModal(
 
                                 <label class="form-label">
 
-                                    Invoice No
+                                    ${paymentText('No. Invoice', 'Invoice No')}
 
                                 </label>
 
@@ -32359,7 +32377,7 @@ openPaymentHistoryModal(
 
                                 <label class="form-label">
 
-                                    Vendor
+                                    ${paymentText('Pemasok', 'Vendor')}
 
                                 </label>
 
@@ -32379,7 +32397,7 @@ openPaymentHistoryModal(
 
                                 <label class="form-label">
 
-                                    Total Paid
+                                    ${paymentText('Total Dibayar', 'Total Paid')}
 
                                 </label>
 
@@ -32496,14 +32514,14 @@ openPaymentHistoryModal(
                                                 text-center
                                             ">
 
-                                            Payment Date
+                                            ${paymentText('Tanggal Pembayaran', 'Payment Date')}
 
                                         </th>
 
 
                                         <th>
 
-                                            Bank / Payment Account
+                                            ${paymentText('Bank / Akun Pembayaran', 'Bank / Payment Account')}
 
                                         </th>
 
@@ -32513,7 +32531,7 @@ openPaymentHistoryModal(
                                                 text-end
                                             ">
 
-                                            Amount
+                                            ${paymentText('Jumlah', 'Amount')}
 
                                         </th>
 
@@ -32523,7 +32541,7 @@ openPaymentHistoryModal(
                                                 text-center
                                             ">
 
-                                            Journal
+                                            ${paymentText('Jurnal', 'Journal')}
 
                                         </th>
 
@@ -32562,7 +32580,7 @@ openPaymentHistoryModal(
                                                 fw-semibold
                                             ">
 
-                                            Total Paid
+                                            ${paymentText('Total Dibayar', 'Total Paid')}
 
                                         </td>
 
@@ -32635,7 +32653,7 @@ openPaymentHistoryModal(
                             "
                             data-bs-dismiss="modal">
 
-                            Close
+                            ${paymentText('Tutup', 'Close')}
 
                         </button>
 
